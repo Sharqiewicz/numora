@@ -1,10 +1,6 @@
-import {
-  alreadyHasDecimal,
-  replaceCommasWithDots,
-  sanitizeNumericInput,
-} from '@/utils/sanitization';
+import { sanitizeNumericInput } from '@/utils/sanitization';
 
-import { trimToMaxDecimals } from '@/utils/trimToMaxDecimals';
+import { trimToMaxDecimals, alreadyHasDecimal, replaceCommasWithDots } from '@/utils/decimals';
 
 /**
  * Handles the input change event to ensure the value does not exceed the maximum number of decimal places,
@@ -22,7 +18,9 @@ export function handleOnChangeNumericInput(e: Event, maxDecimals: number): void 
 }
 
 /**
- * Handles keydown events for numeric input
+ * Handles the keydown event to prevent the user from entering a second decimal point.
+ *
+ * @param e - The keyboard event triggered by the input.
  */
 export function handleOnKeyDownNumericInput(e: KeyboardEvent): void {
   if (alreadyHasDecimal(e)) {
