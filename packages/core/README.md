@@ -1,5 +1,7 @@
 # numora
 
+[![npm version](https://img.shields.io/npm/v/numora.svg)](https://www.npmjs.com/package/numora)
+
 A lightweight, framework-agnostic numeric input library for handling currency and decimal inputs in **financial/DeFi** applications. Built with TypeScript with **zero-dependencies**.
 
 ## Features
