@@ -10,17 +10,11 @@ export default defineConfig({
   build: {
     lib: {
       entry: 'src/index.ts',
-      name: 'Numora',
+      name: 'numora/core',
       fileName: 'index',
       formats: ['es'],
     },
     outDir: 'dist',
-    rollupOptions: {
-      external: ['bignumber.js'],
-      output: {
-        globals: { 'bignumber.js': 'BigNumber' },
-      },
-    },
   },
   test: {
     environment: 'jsdom',

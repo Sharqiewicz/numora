@@ -1,0 +1,10 @@
+src/
+*.test.ts
+*.spec.ts
+tsconfig.json
+.gitignore
+.npmignore
+.prettierrc
+.prettierignore
+pnpm-lock.yaml
+node_modules

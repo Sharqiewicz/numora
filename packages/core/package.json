@@ -1,24 +1,59 @@
 {
-  "name": "numora",
-  "version": "0.0.0",
+  "name": "numora-core",
+  "version": "0.0.1",
   "description": "Framework-agnostic headless finance input library",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "vite build",
     "test": "vitest run",
     "dev": "vite build --watch"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "numeric input",
+    "currency input",
+    "input",
+    "form",
+    "form input",
+    "form currency input",
+    "form numeric input",
+    "input library",
+    "input component",
+    "input field",
+    "input form",
+    "input form field",
+    "input form field currency",
+    "input form field numeric",
+    "financial input",
+    "financial input component",
+    "financial input field",
+    "financial input form",
+    "financial input form field",
+    "financial input form field currency",
+    "financial input form field numeric"
+  ],
+  "authors": [
+    {
+      "name": "Kacper Szarkiewicz",
+      "email": "contact@sharqiewicz.com",
+      "url": "https://sharqiewicz.com"
+    }
+  ],
+  "license": "MIT",
   "devDependencies": {
+    "@types/node": "^22.13.11",
     "jsdom": "^26.0.0",
     "typescript": "^5.8.2",
     "vite": "^6.2.2",
-    "vitest": "^3.0.9",
-    "@types/node": "^22.13.11"
-  },
-  "dependencies": {
-    "bignumber.js": "^9.1.2"
+    "vitest": "^3.0.9"
   }
 }
