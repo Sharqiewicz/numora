@@ -1,5 +1,5 @@
 {
-  "name": "numora-core",
+  "name": "numora",
   "version": "0.0.2",
   "description": "Framework-agnostic headless finance input library",
   "main": "dist/index.js",

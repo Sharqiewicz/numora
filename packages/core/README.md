@@ -1,4 +1,4 @@
-# numora/core
+# numora
 
 A lightweight, framework-agnostic numeric input library for handling currency and decimal inputs in **financial/DeFi** applications. Built with TypeScript with **zero-dependencies**.
 
@@ -15,17 +15,17 @@ A lightweight, framework-agnostic numeric input library for handling currency an
 ## Installation
 
 ```bash
-npm install numora/core
+npm install numora
 # or
-yarn add numora/core
+yarn add numora
 # or
-pnpm add numora/core
+pnpm add numora
 ```
 
 ## Usage
 
 ```typescript
-import { NumericInput } from 'numora-core';
+import { NumericInput } from 'numora';
 
 // Get the container element where you want to mount the input
 const container = document.querySelector('#my-input-container');

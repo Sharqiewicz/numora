@@ -10,7 +10,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: 'src/index.ts',
-      name: 'numora/core',
+      name: 'numora',
       fileName: 'index',
       formats: ['es'],
     },
