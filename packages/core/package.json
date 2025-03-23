@@ -1,0 +1,22 @@
+{
+  "name": "numora",
+  "version": "0.0.0",
+  "description": "Framework-agnostic headless finance input library",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "dev": "vite build --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.8.2",
+    "vite": "^6.2.2",
+    "vitest": "^3.0.9"
+  },
+  "dependencies": {
+    "bignumber.js": "^9.1.2"
+  }
+}
