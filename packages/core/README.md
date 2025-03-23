@@ -25,7 +25,7 @@ pnpm add numora/core
 ## Usage
 
 ```typescript
-import { NumericInput } from 'numora/core';
+import { NumericInput } from 'numora-core';
 
 // Get the container element where you want to mount the input
 const container = document.querySelector('#my-input-container');
@@ -54,9 +54,9 @@ The NumericInput constructor accepts the following options:
 
 Numora is also available for popular frameworks:
 
-- React: `@numora/react`
-- Vue: `@numora/vue`
-- Svelte: `@numora/svelte`
+- React: `numora-react`
+- Vue: `numora-vue`
+- Svelte: `numora-svelte`
 
 ## License
 
