@@ -1,5 +1,8 @@
-import { handleOnChangeNumericInput, handleOnKeyDownNumericInput, handleOnPasteNumericInput } from './sanitization';
-
+import {
+  handleOnChangeNumericInput,
+  handleOnKeyDownNumericInput,
+  handleOnPasteNumericInput,
+} from '@/utils/event-handlers';
 
 const DEFAULT_MAX_DECIMALS = 2;
 
@@ -14,16 +17,12 @@ export class NumericInput {
 
   constructor(
     container: HTMLElement,
-    {
-      maxDecimals = DEFAULT_MAX_DECIMALS,
-      onChange,
-      ...rest
-    }: NumericInputOptions
+    { maxDecimals = DEFAULT_MAX_DECIMALS, onChange, ...rest }: NumericInputOptions
   ) {
     this.options = {
       maxDecimals,
       onChange,
-      ...rest
+      ...rest,
     };
 
     this.createInputElement(container);
@@ -38,7 +37,6 @@ export class NumericInput {
     this.element.setAttribute('spellcheck', 'false');
     this.element.setAttribute('type', 'text');
     this.element.setAttribute('inputmode', 'decimal');
-
 
     const { maxDecimals, onChange, ...rest } = this.options;
     Object.assign(this.element, rest);
