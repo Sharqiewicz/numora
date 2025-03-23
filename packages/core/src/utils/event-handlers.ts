@@ -40,10 +40,10 @@ export function handleOnPasteNumericInput(e: ClipboardEvent, maxDecimals: number
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
 
-  const clipboardData = sanitizeNumericInput(e.clipboardData?.getData('text/plain') || '');
+  const sanitizedClipboardData = sanitizeNumericInput(e.clipboardData?.getData('text/plain') || '');
 
   const combinedValue =
-    value.slice(0, selectionStart || 0) + clipboardData + value.slice(selectionEnd || 0);
+    value.slice(0, selectionStart || 0) + sanitizedClipboardData + value.slice(selectionEnd || 0);
 
   const [integerPart, ...decimalParts] = combinedValue.split('.');
   const sanitizedValue = integerPart + (decimalParts.length > 0 ? '.' + decimalParts.join('') : '');
@@ -52,7 +52,9 @@ export function handleOnPasteNumericInput(e: ClipboardEvent, maxDecimals: number
   inputElement.value = trimToMaxDecimals(sanitizedValue, maxDecimals);
 
   const newCursorPosition =
-    (selectionStart || 0) + clipboardData.length - (combinedValue.length - sanitizedValue.length);
+    (selectionStart || 0) +
+    sanitizedClipboardData.length -
+    (combinedValue.length - sanitizedValue.length);
   inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
 
   return trimToMaxDecimals(sanitizedValue, maxDecimals);
