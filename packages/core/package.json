@@ -18,7 +18,7 @@
     "url": "https://github.com/Sharqiewicz/numora/tree/main/packages/core"
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && tsc --emitDeclarationOnly",
     "test": "vitest run",
     "dev": "vite build --watch"
   },
