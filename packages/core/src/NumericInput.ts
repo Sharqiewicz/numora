@@ -6,8 +6,8 @@ import {
 
 const DEFAULT_MAX_DECIMALS = 2;
 
-interface NumericInputOptions extends HTMLInputElement {
-  maxDecimals: number;
+interface NumericInputOptions extends Partial<HTMLInputElement> {
+  maxDecimals?: number;
   onChange?: (value: string) => void;
 }
 
@@ -51,7 +51,7 @@ export class NumericInput {
   }
 
   private handleChange(e: Event): void {
-    handleOnChangeNumericInput(e, this.options.maxDecimals);
+    handleOnChangeNumericInput(e, this.options.maxDecimals || DEFAULT_MAX_DECIMALS);
     if (this.options.onChange) {
       this.options.onChange((e.target as HTMLInputElement).value);
     }

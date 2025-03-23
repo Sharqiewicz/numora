@@ -12,9 +12,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "jsdom": "^26.0.0",
     "typescript": "^5.8.2",
     "vite": "^6.2.2",
-    "vitest": "^3.0.9"
+    "vitest": "^3.0.9",
+    "@types/node": "^22.13.11"
   },
   "dependencies": {
     "bignumber.js": "^9.1.2"
