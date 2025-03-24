@@ -12,7 +12,7 @@ export default defineConfig({
       entry: 'src/index.ts',
       name: 'numora',
       fileName: 'index',
-      formats: ['es'],
+      formats: ['es', 'cjs'],
     },
     outDir: 'dist',
   },

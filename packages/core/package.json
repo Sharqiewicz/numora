@@ -1,6 +1,6 @@
 {
   "name": "numora",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Framework-agnostic headless finance input library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -9,7 +9,8 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
   },
