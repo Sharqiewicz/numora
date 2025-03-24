@@ -1,6 +1,6 @@
 {
   "name": "numora",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Framework-agnostic headless finance input library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Sharqiewicz/numora/tree/main/packages/core"
+    "url": "https://github.com/Sharqiewicz/numora"
   },
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly",
