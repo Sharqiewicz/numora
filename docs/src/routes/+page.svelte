@@ -16,22 +16,21 @@
 	});
 
 	function createNumoraInput() {
-		// Clear container if input already exists
 		if (numoraContainer) {
 			numoraContainer.innerHTML = '';
 		}
 
-		// Create new instance with current settings
 		numoraInput = new NumericInput(numoraContainer!, {
 			maxDecimals,
 			defaultValue: currentValue,
 			readOnly,
+			className:
+				'rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500',
 			onChange: (value: string) => {
 				currentValue = value;
 			}
 		});
 
-		// Apply disabled state if needed
 		if (isDisabled) {
 			numoraInput.disable();
 		}
