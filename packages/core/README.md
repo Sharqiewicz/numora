@@ -2,7 +2,16 @@
 
 [![npm version](https://img.shields.io/npm/v/numora.svg)](https://www.npmjs.com/package/numora)
 
-A lightweight, framework-agnostic numeric input library for handling currency and decimal inputs in **financial/DeFi** applications. Built with TypeScript with **zero-dependencies**.
+A lightweight, framework-agnostic numeric input library for handling currency and decimal inputs in **financial/DeFi** applications. Built with TypeScript and designed for modern web applications with:
+
+- **Zero dependencies** - minimal footprint for your bundle
+- **Type safety** - fully typed API for better developer experience
+- **Framework agnostic** - use with any framework or vanilla JavaScript
+- **Customizable** - extensive options to fit your specific needs
+
+## Demo
+
+Check out the [live demo](https://numora.netlify.app/) to see Numora in action.
 
 ## Features
 
@@ -56,8 +65,8 @@ The NumericInput constructor accepts the following options:
 
 Numora is also available for popular frameworks:
 
-- React: `numora-react`
-- Vue: `numora-vue`
+- React: `numora-react` (in progress)
+- Vue: `numora-vue` (in progress)
 - Svelte: `numora`
 
 ## License

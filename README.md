@@ -9,6 +9,10 @@ A lightweight, framework-agnostic numeric input library for handling currency an
 - **Framework agnostic** - use with any framework or vanilla JavaScript
 - **Customizable** - extensive options to fit your specific needs
 
+## Demo
+
+Check out the [live demo](https://numora.netlify.app/) to see Numora in action.
+
 ## Features
 
 - Validates and sanitizes numeric input
