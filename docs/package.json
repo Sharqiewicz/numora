@@ -38,5 +38,8 @@
 		"onlyBuiltDependencies": [
 			"esbuild"
 		]
+	},
+	"dependencies": {
+		"numora": "^1.0.2"
 	}
 }
