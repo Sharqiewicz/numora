@@ -3,96 +3,81 @@
   import { NumericInput } from 'numora';
 
   let basicContainer;
-  let currencyContainer;
-  let cryptoContainer;
-  let customContainer;
-
   let basicValue = '0';
-  let currencyValue = '0';
-  let cryptoValue = '0';
-  let customValue = '0';
+
+  // Configuration values
+  let maxDecimalsValue = '2';
+  let placeholderValue = 'Enter a number';
+  let consoleMessage = 'Value:';
+
+  let numericInputInstance;
 
   onMount(() => {
-    // Basic example
-    new NumericInput(basicContainer, {
-      maxDecimals: 2,
-      placeholder: 'Enter a number',
+    createNumericInput();
+  });
+
+  function createNumericInput() {
+    // Cleanup previous instance if exists
+    if (numericInputInstance) {
+      basicContainer.innerHTML = '';
+    }
+
+    numericInputInstance = new NumericInput(basicContainer, {
+      maxDecimals: parseInt(maxDecimalsValue, 10),
+      placeholder: placeholderValue,
       onChange: (value) => {
         basicValue = value;
+        console.log(`${consoleMessage} ${value}`);
       },
     });
-
-    // Currency example
-    new NumericInput(currencyContainer, {
-      maxDecimals: 2,
-      placeholder: '0.00',
-      onChange: (value) => {
-        currencyValue = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-        }).format(value);
-      },
-    });
-
-    // Crypto example
-    new NumericInput(cryptoContainer, {
-      maxDecimals: 8,
-      placeholder: '0.00000000',
-      onChange: (value) => {
-        cryptoValue = value;
-      },
-    });
-
-    // Custom validation example
-    new NumericInput(customContainer, {
-      maxDecimals: 2,
-      placeholder: 'Enter amount (max 1000)',
-      onChange: (value) => {
-        const numValue = Number(value);
-        customValue = value;
-
-        if (numValue > 1000) {
-          customContainer.classList.add('error');
-        } else {
-          customContainer.classList.remove('error');
-        }
-      },
-    });
-  });
+  }
 </script>
 
 <div class="demo-container">
   <h2>Numora Live Examples</h2>
+
+  <div class="config-section">
+    <h3>Configuration</h3>
+    <div class="config-inputs">
+      <div class="config-input">
+        <label for="maxDecimals">Max Decimals:</label>
+        <input
+          type="number"
+          id="maxDecimals"
+          min="0"
+          max="20"
+          bind:value={maxDecimalsValue}
+          on:change={createNumericInput}
+        />
+      </div>
+
+      <div class="config-input">
+        <label for="placeholder">Placeholder:</label>
+        <input
+          type="text"
+          id="placeholder"
+          bind:value={placeholderValue}
+          on:change={createNumericInput}
+        />
+      </div>
+
+      <div class="config-input">
+        <label for="consoleMessage">Console Message:</label>
+        <input
+          type="text"
+          id="consoleMessage"
+          bind:value={consoleMessage}
+          on:change={createNumericInput}
+        />
+      </div>
+    </div>
+  </div>
 
   <div class="example-block">
     <h3>Basic Number Input</h3>
     <div class="input-container">
       <div bind:this={basicContainer}></div>
       <div class="value-display">Value: {basicValue}</div>
-    </div>
-  </div>
-
-  <div class="example-block">
-    <h3>Currency Input</h3>
-    <div class="input-container">
-      <div bind:this={currencyContainer}></div>
-      <div class="value-display">Value: {currencyValue}</div>
-    </div>
-  </div>
-
-  <div class="example-block">
-    <h3>Cryptocurrency Input</h3>
-    <div class="input-container">
-      <div bind:this={cryptoContainer}></div>
-      <div class="value-display">Value: {cryptoValue} BTC</div>
-    </div>
-  </div>
-
-  <div class="example-block">
-    <h3>Custom Validation (Max 1000)</h3>
-    <div class="input-container">
-      <div bind:this={customContainer}></div>
-      <div class="value-display">Value: {customValue}</div>
     </div>
   </div>
 </div>
@@ -105,6 +90,39 @@
     background: #ffffff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .config-section {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border: 1px solid #eaeaea;
+    border-radius: 4px;
+    background: #f8f9fa;
+  }
+
+  .config-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .config-input {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .config-input label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+  }
+
+  .config-input input {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
   }
 
   .example-block {

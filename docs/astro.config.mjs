@@ -10,5 +10,16 @@ export default defineConfig({
         social: {
             github: 'https://github.com/Sharqiewicz/numora',
         },
+		sidebar: [
+            {
+                label: 'Guides',
+                items: [
+
+                    { label: 'Getting Started', link: '/guides/getting-started/' },
+                    { label: 'Examples', link: '/guides/example/' },
+                    { label: 'Svelte/Pure JS Demo', link: '/guides/svelte/' },
+                ],
+            },
+		]
         }), svelte(), react(), vue()],
 });
