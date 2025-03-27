@@ -3,12 +3,12 @@ title: Numora Documentation
 description: A lightweight, framework-agnostic numeric input library for financial applications
 template: splash
 hero:
-  tagline: Handle currency and decimal inputs with precision in financial/DeFi applications
+  tagline: Handle decimal inputs with precision in financial/DeFi applications
   image:
     file: ../../assets/numora_logo.png
   actions:
     - text: Get Started
-      link: /guides/getting-started/
+      link: /guides/example/
       icon: right-arrow
     - text: View on GitHub
       link: https://github.com/Sharqiewicz/numora
@@ -22,32 +22,60 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 <CardGrid stagger>
 	<Card title="Zero Dependencies" icon="rocket">
-		Minimal footprint for your bundle with no external dependencies.
+		Minimal footprint for your bundle with no external dependencies, keeping your application lightweight.
 	</Card>
 	<Card title="Type Safety" icon="approve-check">
-		Fully typed API for better developer experience with TypeScript support.
+		Built with TypeScript for enhanced developer experience and robust type checking.
 	</Card>
 	<Card title="Framework Agnostic" icon="puzzle">
-		Use with any framework or vanilla JavaScript - adaptable to your stack.
+		Use with any framework or vanilla JavaScript - works seamlessly with React (`numora-react`), Vue (`numora-vue`), Svelte (`numora`), or plain JS(`numora`).
 	</Card>
-	<Card title="Financial Focus" icon="document">
-		Built specifically for handling currency and decimal inputs in financial applications.
+	<Card title="Financial/DeFi Focus" icon="document">
+		Specifically designed for handling currency and decimal inputs in financial/DeFi applications.
 	</Card>
 </CardGrid>
 
-## Next steps
 
-<CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
+## Installation
+
+```bash
+npm install numora
+# or
+yarn add numora
+# or
+pnpm add numora
+```
+
+
+## Quick Start
+
+```typescript
+import { NumericInput } from 'numora';
+
+// Get your container element
+const container = document.querySelector('#my-input');
+
+// Create a numeric input
+const numericInput = new NumericInput(container, {
+  maxDecimals: 2,
+  onChange: (value) => console.log('Value:', value)
+});
+```
+
+
+## Framework Support
+
+<CardGrid>
+	<Card title="React" icon="seti:react">
+		React adapter in progress - `numora-react`
 	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
+	<Card title="Vue" icon="seti:vue">
+		Vue adapter in progress - `numora-vue`
 	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
+	<Card title="Svelte" icon="svelte">
+		Native Svelte support - `numora`
 	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
+	<Card title="Vanilla JS" icon="javascript">
+		Use directly with any JavaScript project
 	</Card>
 </CardGrid>
