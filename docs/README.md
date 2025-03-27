@@ -1,54 +1,74 @@
-# Starlight Starter Kit: Basics
+# numora
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+[![npm version](https://img.shields.io/npm/v/numora.svg)](https://www.npmjs.com/package/numora)
 
+A lightweight, framework-agnostic numeric input library for handling currency and decimal inputs in **financial/DeFi** applications. Built with TypeScript and designed for modern web applications with:
+
+- **Zero dependencies** - minimal footprint for your bundle
+- **Type safety** - fully typed API for better developer experience
+- **Framework agnostic** - use with any framework or vanilla JavaScript
+- **Customizable** - extensive options to fit your specific needs
+
+## Demo
+
+Check out the [live demo](https://numora.netlify.app/) to see Numora in action.
+
+## Features
+
+- Validates and sanitizes numeric input
+- Limits decimal places
+- Handles paste events
+- Converts commas to dots
+- Prevents multiple decimal points
+- Customizable with various options
+- Framework-agnostic core with adapters for popular frameworks
+
+## Installation
+
+```bash
+npm install numora
+# or
+yarn add numora
+# or
+pnpm add numora
 ```
-pnpm create astro@latest -- --template starlight
+
+## Usage
+
+```typescript
+import { NumericInput } from 'numora';
+
+// Get the container element where you want to mount the input
+const container = document.querySelector('#my-input-container');
+
+// Create a new NumericInput instance
+const numericInput = new NumericInput(container, {
+  maxDecimals: 2,
+  onChange: (value) => {
+    console.log('Value changed:', value);
+    // Do something with the value
+  },
+  // ... all other input properties you want
+});
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/starlight/tree/main/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/starlight/tree/main/examples/basics)
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/withastro/starlight&create_from_path=examples/basics)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fwithastro%2Fstarlight%2Ftree%2Fmain%2Fexamples%2Fbasics&project-name=my-starlight-docs&repository-name=my-starlight-docs)
+## Options
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+The NumericInput constructor accepts the following options:
+| Option | Type | Default | Description |
+| --------------- | -------- | --------- | -------------------------------------------------------- |
+| maxDecimals | number | 2 | Maximum number of decimal places allowed |
+| onChange | function | undefined | Callback function that runs when the input value changes |
+| supports all input properties | - | - | - |
 
-## 🚀 Project Structure
+## Framework Adapters
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+Numora is also available for popular frameworks:
 
-```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   ├── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
-```
+- React: `numora-react` (in progress)
+- Vue: `numora-vue` (in progress)
+- Svelte: `numora`
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+## License
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
-
-Static assets, like favicons, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+MIT

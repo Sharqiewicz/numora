@@ -1,9 +1,8 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-
 import react from '@astrojs/react';
-
 import vue from '@astrojs/vue';
+import svelte from '@astrojs/svelte';
 
 export default defineConfig({
     integrations: [starlight({
@@ -11,17 +10,5 @@ export default defineConfig({
         social: {
             github: 'https://github.com/Sharqiewicz/numora',
         },
-        sidebar: [
-            {
-                label: 'Guides',
-                items: [
-                    { label: 'Example Guide', slug: 'guides/example' },
-                ],
-            },
-            {
-                label: 'Reference',
-                autogenerate: { directory: 'reference' },
-            },
-        ],
-        }), react(), vue()],
+        }), svelte(), react(), vue()],
 });
