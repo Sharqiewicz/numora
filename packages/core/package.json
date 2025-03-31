@@ -1,6 +1,6 @@
 {
   "name": "numora",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Framework-agnostic headless finance input library",
   "homepage": "https://numora.netlify.app/",
   "main": "dist/index.js",
@@ -10,9 +10,9 @@
   ],
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     }
   },
   "repository": {
