@@ -3,8 +3,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import babel from '@rollup/plugin-babel';
 import typescript from '@rollup/plugin-typescript';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
-
-const packageJson = require('../../package.json');
+import packageJson from './package.json' assert { type: 'json' };
 
 export default {
   input: 'src/index.tsx',
@@ -27,8 +26,13 @@ export default {
     typescript({ tsconfig: './tsconfig.json' }),
     babel({
       exclude: 'node_modules/**',
-      presets: ['@babel/preset-env', '@babel/preset-react'],
+      extensions: ['.js', '.jsx', '.ts', '.tsx'],
       babelHelpers: 'bundled',
+      presets: [
+        ['@babel/preset-env', { targets: 'defaults' }],
+        ['@babel/preset-react', { runtime: 'automatic' }],
+      ],
     }),
   ],
+  external: ['react', 'react-dom', 'numora'],
 };
