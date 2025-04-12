@@ -5,8 +5,18 @@ import vue from '@astrojs/vue';
 import svelte from '@astrojs/svelte';
 
 export default defineConfig({
+    vite: {
+        ssr: {
+            noExternal: ['numora-react']
+        },
+        build: {
+            commonjsOptions: {
+                include: [/numora-react/, /node_modules/]
+            }
+        }
+    },
     integrations: [starlight({
-        title: 'Numora Docs',
+        title: 'Numora lib',
         social: {
             github: 'https://github.com/Sharqiewicz/numora',
         },
@@ -14,7 +24,7 @@ export default defineConfig({
             {
                 label: 'Guides',
                 items: [
-
+                    { label: 'Swap', link: '/guides/swap/' },
                     { label: 'Getting Started', link: '/guides/getting-started/' },
                     { label: 'Examples', link: '/guides/example/' },
                     { label: 'Svelte/Pure JS Demo', link: '/guides/svelte/' },

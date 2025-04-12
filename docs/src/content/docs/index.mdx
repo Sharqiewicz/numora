@@ -1,14 +1,14 @@
 ---
-title: Numora Documentation
-description: A lightweight, framework-agnostic numeric input library for financial applications
+title: Numora
+description: A lightweight, framework-agnostic numeric input library for financial apps
 template: splash
 hero:
-  tagline: Handle decimal inputs with precision in financial/DeFi applications
+  tagline: Handle decimal inputs with precision in financial/DeFi apps
   image:
     file: ../../assets/numora_logo.png
   actions:
     - text: Get Started
-      link: /guides/example/
+      link: /guides/swap/
       icon: right-arrow
     - text: View on GitHub
       link: https://github.com/Sharqiewicz/numora
@@ -37,6 +37,9 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 
 ## Installation
+---
+
+### Svelte/Pure JS
 
 ```bash
 npm install numora
@@ -46,8 +49,20 @@ yarn add numora
 pnpm add numora
 ```
 
+### React
 
-## Quick Start
+```bash
+npm install numora-react
+# or
+yarn add numora-react
+# or
+pnpm add numora-react
+```
+
+# Quick Start
+---
+
+### Svelte/Pure JS
 
 ```typescript
 import { NumericInput } from 'numora';
@@ -62,20 +77,40 @@ const numericInput = new NumericInput(container, {
 });
 ```
 
+### React example
+
+```jsx
+import { NumericInput } from 'numora-react';
+
+<NumericInput
+    {...props}
+    maxDecimals={CURRENCY_DECIMALS}
+    onChange={onChange}
+    data-slot="input"
+    className={cn(
+    'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+    'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+    'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
+    className,
+    )}
+/>
+
+```
+
 
 ## Framework Support
 
 <CardGrid>
+    <Card title="Vanilla JS" icon="seti:javascript">
+		Native JS support - `numora`
+	</Card>
 	<Card title="React" icon="seti:react">
-		React adapter in progress - `numora-react`
+		React adapter - `numora-react`
 	</Card>
 	<Card title="Vue" icon="seti:vue">
 		Vue adapter in progress - `numora-vue`
 	</Card>
-	<Card title="Svelte" icon="svelte">
+    <Card title="Svelte" icon="seti:svelte">
 		Native Svelte support - `numora`
-	</Card>
-	<Card title="Vanilla JS" icon="javascript">
-		Use directly with any JavaScript project
 	</Card>
 </CardGrid>

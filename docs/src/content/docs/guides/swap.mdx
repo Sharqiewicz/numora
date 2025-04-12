@@ -1,0 +1,55 @@
+---
+title: DeFi Token Swap
+description: Interactive example of numora-react in a DeFi swap interface
+---
+
+import '../../../styles.css'
+import DefiSwap from '../../../components/DefiSwap.tsx';
+
+This example demonstrates how to use Numora in a DeFi token swap interface. The component uses `numora-react` for handling numeric inputs with precision, which is essential for cryptocurrency transactions.
+
+## Live Demo
+
+Try out this interactive token swap interface which uses Numora to handle the input of token amounts with proper decimal precision:
+
+<DefiSwap client:load />
+
+## Component Implementation
+
+The swap interface uses the `NumericInput` component from `numora-react` to ensure accurate numeric input handling. Here's how the key parts work:
+
+### Token Amount Input
+
+```jsx
+<NumericInput
+  maxDecimals={tokens[fromToken].decimals}
+  onChange={setFromAmount}
+  value={fromAmount}
+  placeholder="0.0"
+  className="numeric-input"
+/>
+```
+
+This component provides:
+
+- **Precision control**: Different tokens have different decimal places (e.g., BTC: 8, ETH: 18, USDC: 6)
+- **Input validation**: Prevents invalid numeric input
+- **Format handling**: Properly handles decimals and commas
+
+### Key Features
+
+1. **Token Selection**: Choose from different tokens to swap
+2. **Dynamic Exchange Rate**: Exchange rate adjusts based on selected tokens
+3. **Slippage Control**: Set your preferred slippage tolerance with numeric validation
+4. **Input Validation**: Prevents invalid inputs for important financial transactions
+
+## Why Use Numora for DeFi Applications?
+
+DeFi applications require precise handling of numeric inputs, as even small errors can result in significant financial implications. Numora provides:
+
+- **Precision**: Handles token-specific decimal places correctly
+- **Validation**: Prevents users from entering invalid amounts
+- **Consistency**: Ensures consistent number formatting across the application
+- **Framework Integration**: Works seamlessly with React components
+
+For more examples and documentation, check out the [Getting Started](/guides/getting-started/) guide.

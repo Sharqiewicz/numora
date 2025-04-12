@@ -5,10 +5,15 @@
     "**/*"
   ],
   "exclude": [
-    "dist"
+    "dist",
+    "node_modules"
   ],
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
     "jsx": "preserve",
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "esModuleInterop": true,
+    "allowJs": true
   }
 }
