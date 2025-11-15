@@ -1,22 +1,21 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import react from '@astrojs/react';
-import vue from '@astrojs/vue';
 import svelte from '@astrojs/svelte';
 
 export default defineConfig({
     vite: {
         ssr: {
-            noExternal: ['numora-react']
+            noExternal: ['numora', 'numora-react', '@reown/appkit', '@reown/appkit-adapter-wagmi']
         },
         build: {
             commonjsOptions: {
-                include: [/numora-react/, /node_modules/]
+                include: [/numora-react/, /@reown\/appkit/, /@reown\/appkit-adapter-wagmi/, /node_modules/]
             }
         }
     },
     integrations: [starlight({
-        title: 'Numora lib',
+        title: 'Numora',
+        favicon: '/favicon.png',
         social: {
             github: 'https://github.com/Sharqiewicz/numora',
         },
@@ -30,6 +29,6 @@ export default defineConfig({
                     { label: 'Svelte/Pure JS Demo', link: '/guides/svelte/' },
                 ],
             },
-		]
-        }), svelte(), react(), vue()],
+		],
+        }), svelte()],
 });

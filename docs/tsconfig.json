@@ -12,8 +12,14 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "jsx": "preserve",
-    "jsxImportSource": "react",
+    "jsxImportSource": "svelte",
     "esModuleInterop": true,
-    "allowJs": true
+    "allowJs": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "bundler"
   }
 }

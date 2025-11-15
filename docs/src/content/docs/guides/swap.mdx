@@ -1,47 +1,56 @@
 ---
 title: DeFi Token Swap
-description: Interactive example of numora-react in a DeFi swap interface
+description: Interactive example of numora in a DeFi swap interface
 ---
 
-import '../../../styles.css'
-import DefiSwap from '../../../components/DefiSwap.tsx';
+This example demonstrates how to use Numora in a DeFi token swap interface with real-time Chainlink price feeds.
 
-This example demonstrates how to use Numora in a DeFi token swap interface. The component uses `numora-react` for handling numeric inputs with precision, which is essential for cryptocurrency transactions.
+## Overview
 
-## Live Demo
+The component uses the `numora` core library for handling numeric inputs with precision, which is essential for cryptocurrency transactions. The example showcases:
 
-Try out this interactive token swap interface which uses Numora to handle the input of token amounts with proper decimal precision:
-
-<DefiSwap client:load />
+- **Precision Control**: Different tokens have different decimal places (e.g., cbBTC: 8, ETH: 18, USDC: 6)
+- **Input Validation**: Prevents invalid numeric input
+- **Real-time Pricing**: Fetches live prices from Chainlink oracles
+- **Clean Architecture**: Follows SOLID principles with separated concerns
 
 ## Component Implementation
 
-The swap interface uses the `NumericInput` component from `numora-react` to ensure accurate numeric input handling. Here's how the key parts work:
+The swap interface uses the `handleOnChangeNumericInput` and `handleOnPasteNumericInput` functions from `numora` core library:
 
 ### Token Amount Input
 
-```jsx
-<NumericInput
-  maxDecimals={tokens[fromToken].decimals}
-  onChange={setFromAmount}
-  value={fromAmount}
+```svelte
+<input
+  type="text"
+  inputmode="decimal"
   placeholder="0.0"
-  className="numeric-input"
+  value={fromAmount}
+  oninput={handleFromInputChange}
+  onpaste={handleFromInputPaste}
 />
 ```
 
-This component provides:
+### Input Handler Functions
 
-- **Precision control**: Different tokens have different decimal places (e.g., BTC: 8, ETH: 18, USDC: 6)
-- **Input validation**: Prevents invalid numeric input
-- **Format handling**: Properly handles decimals and commas
+```typescript
+function handleFromInputChange(e: Event) {
+  handleOnChangeNumericInput(e, fromToken.decimals);
+  fromAmount = (e.target as HTMLInputElement).value;
+}
+
+function handleFromInputPaste(e: ClipboardEvent) {
+  handleOnPasteNumericInput(e, fromToken.decimals);
+  fromAmount = (e.target as HTMLInputElement).value;
+}
+```
 
 ### Key Features
 
-1. **Token Selection**: Choose from different tokens to swap
-2. **Dynamic Exchange Rate**: Exchange rate adjusts based on selected tokens
-3. **Slippage Control**: Set your preferred slippage tolerance with numeric validation
-4. **Input Validation**: Prevents invalid inputs for important financial transactions
+1. **Token Selection**: Choose from 7 different tokens (ETH, WETH, USDC, DAI, cbBTC, wstETH, EURC)
+2. **Real-time Exchange Rates**: Powered by Chainlink Price Feeds
+3. **Automatic Calculations**: Output amount calculated automatically based on current prices
+4. **Input Validation**: Prevents invalid inputs for financial transactions
 
 ## Why Use Numora for DeFi Applications?
 
@@ -50,6 +59,6 @@ DeFi applications require precise handling of numeric inputs, as even small erro
 - **Precision**: Handles token-specific decimal places correctly
 - **Validation**: Prevents users from entering invalid amounts
 - **Consistency**: Ensures consistent number formatting across the application
-- **Framework Integration**: Works seamlessly with React components
+- **Framework Agnostic**: Works seamlessly with any framework (Svelte, React, Vue, etc.)
 
 For more examples and documentation, check out the [Getting Started](/guides/getting-started/) guide.

@@ -1,0 +1,50 @@
+/**
+ * Global styles for Numora documentation
+ * Only global and Starlight overrides - component styles are scoped
+ */
+
+/* Hide back to top link */
+#_top {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Custom search component styles */
+:global(site-search button[data-open-modal]) {
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  padding: 0.5rem 1rem !important;
+  background-color: #ffffff !important;
+  color: #6b7280 !important;
+  transition: all 0.2s;
+}
+
+:global(site-search button[data-open-modal]:hover) {
+  border-color: #d1d5db !important;
+  background-color: #f9fafb !important;
+}
+
+:global(site-search button[data-open-modal]:focus) {
+  outline: none !important;
+  border-color: #5b2ff5 !important;
+  box-shadow: 0 0 0 3px rgba(91, 47, 245, 0.1) !important;
+}
+
+:global(site-search button[data-open-modal] > kbd) {
+  background-color: #f3f4f6 !important;
+  border: 1px solid #e5e7eb !important;
+  color: #6b7280 !important;
+  border-radius: 4px !important;
+}
+
+/* Starlight layout customization */
+:global(.sl-container) {
+  max-width: 1400px;
+}
+
+:global(.sl-markdown-content) {
+  padding: 2rem;
+}
