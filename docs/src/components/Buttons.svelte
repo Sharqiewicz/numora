@@ -1,17 +1,17 @@
 <script lang="ts">
     import Button from './Button.svelte';
     import ButtonAccent from './ButtonAccent.svelte';
-    import GithubButton from './GithubButton.svelte';
 </script>
 
 <div class="buttons-container">
-  <Button text="Get Started" />
-  <ButtonAccent text="Learn more" />
+  <a class="buttons-link" href="/guides/getting-started/">
+    <Button text="Get Started" />
+  </a>
+  <a class="buttons-link" href="/guides/getting-started/">
+    <ButtonAccent text="Learn more" />
+  </a>
 </div>
-<div class="github-button-container">
-    <GithubButton /> <div class="github-button-star">⭐️</div>
-</div>
-<div class="audited-projects">Numora's core logic is derived from audited, battle-tested implementations used in the following projects:</div>
+<div class="audited-projects"><span class="righteous-font">Numora</span>'s core logic is derived from audited, battle-tested implementations used in the following projects:</div>
 <div class="audited-project-images">
 <a href='https://uniswap.org/' target='_blank'><img src='uniswap.png' alt='Uniswap' class="audited-project-image"/></a>
 <a href='https://sushi.com/' target='_blank'><img src='sushiswap.png' alt='SushiSwap' class="audited-project-image"/></a>
@@ -20,14 +20,19 @@
 <a href='https://portal.pendulumchain.org/' target='_blank'><img src='pendulum.png' alt='Pendulum' class="audited-project-image"/></a>
 </div>
 
-<footer class="">
+<footer class="footer">
     Made with <span class="">❤</span> by Kacper Szarkiewicz
 </footer>
 
 <style>
+
+    .footer{
+        text-align: center;
+        margin-top: 2rem;
+    }
   .github-button-star {
     position: absolute;
-    right: 10px;
+    right: 14px;
     top: -15px;
   }
 
@@ -50,7 +55,7 @@
     text-align: center;
   }
   .audited-project-image {
-    width: 144px;
+    width: 94px;
     transition: transform 0.2s;
   }
   .audited-project-image:hover {
@@ -61,8 +66,12 @@
   .buttons-container {
     display: flex;
     gap: 1rem;
-    margin-top: 5rem;
+    margin: 2rem 0;
     height: 3.5rem;
     justify-content: center;
+  }
+
+  .buttons-link {
+    text-decoration: none;
   }
 </style>
