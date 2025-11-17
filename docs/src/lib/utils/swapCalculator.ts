@@ -43,6 +43,42 @@ export function calculateSwapAmount(
 }
 
 /**
+ * Calculate the input amount needed for a desired output amount (reverse calculation)
+ * @param toAmount - Desired output amount as string
+ * @param fromToken - Source token symbol
+ * @param toToken - Destination token symbol
+ * @param prices - Current token prices
+ * @param fromDecimals - Decimal places for input token
+ * @returns Calculated input amount as string
+ */
+export function calculateReverseSwapAmount(
+  toAmount: string,
+  fromToken: TokenSymbol,
+  toToken: TokenSymbol,
+  prices: PriceData,
+  fromDecimals: number
+): string {
+  if (!toAmount || Number(toAmount) <= 0) {
+    return '';
+  }
+
+  const fromPrice = prices[fromToken] || 0;
+  const toPrice = prices[toToken] || 1;
+
+  if (fromPrice <= 0 || toPrice <= 0) {
+    return '';
+  }
+
+  // Calculate USD value of desired output amount
+  const toValueUSD = parseFloat(toAmount) * toPrice;
+
+  // Convert to input token
+  const fromTokenAmount = toValueUSD / fromPrice;
+
+  return fromTokenAmount.toFixed(fromDecimals);
+}
+
+/**
  * Calculate exchange rate between two tokens
  * @param fromToken - Source token symbol
  * @param toToken - Destination token symbol
