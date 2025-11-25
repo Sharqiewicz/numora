@@ -182,20 +182,22 @@
   }
 </script>
 
-<div class="app-container">
+<p class="text-3xl font-[var(--font-heading)]">Numora</p>
 
-    <div class="swap-form-container">
-      <div class="slippage-wrapper">
-        <button class="slippage-button" aria-label="Slippage settings">
+<div class="flex items-center justify-center">
+
+    <div class="relative p-4 rounded-xl border dark:bg-[#181a1b] dark:border-[#23272b] bg-[#f9fafb] border-gray-200">
+      <div class="w-full flex justify-end">
+        <button class="px-3 py-1 rounded-xl mb-2 cursor-pointer transition-transform duration-200 border active:scale-105 dark:bg-[#181a1b] dark:border-[#23272b] dark:hover:bg-[#23272b] bg-[#f1f1f1] border-gray-200 hover:bg-gray-200" aria-label="Slippage settings">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M11.0195 3.55153C11.6283 3.20907 12.3717 3.20907 12.9805 3.55153L18.9805 6.92649C19.6103 7.28073 20 7.9471 20 8.66965V15.3302C20 16.0528 19.6103 16.7192 18.9805 17.0734L12.9805 20.4484C12.3717 20.7908 11.6283 20.7908 11.0195 20.4484L5.01954 17.0737C4.38975 16.7195 4 16.0531 4 15.3305L4 8.66963C4 7.94707 4.38973 7.2807 5.01949 6.92647L11.0195 3.55153Z" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"></path><path d="M15 12C15 13.6569 13.6569 15 12 15C10.3432 15 9.00003 13.6569 9.00003 12C9.00003 10.3431 10.3432 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"></path></svg>
         </button>
       </div>
 
 
-      <div class="swap-input-container">
+      <div class="!mt-0 flex items-center gap-2 p-2 border border-b-0 rounded-t-xl dark:bg-[#23272b] dark:border-[#363b3f] dark:hover:bg-[#23272b] bg-[#f1f1f1] border-gray-200 hover:bg-gray-200">
 
         <input
-          class="swap-input"
+          class="flex flex-grow bg-transparent border-none text-2xl my-3 focus:outline-none dark:text-white placeholder-[#a0a3c4] dark:placeholder-[#a0a3c4] placeholder-gray-400"
           placeholder={effectiveFromPlaceholder}
           type="text"
           inputmode="decimal"
@@ -213,16 +215,16 @@
 
         </div>
 
-      <div class="flip-button-container">
-        <button class="flip-button" onclick={flipTokens} type="button" aria-label="Swap tokens">
+      <div class="absolute left-1/2 top-[37%] -translate-x-1/2 -translate-y-1/2 flex justify-center my-2">
+        <button class="p-2 rounded-full border cursor-pointer transition-transform duration-200 dark:bg-[#181a1b] dark:border-[#23272b] dark:text-[#a0a3c4] dark:hover:bg-[#30363b] dark:hover:border-[#484e54] bg-white border-gray-200 text-gray-500 hover:bg-[#f9fafb] hover:border-gray-300 hover:rotate-180" onclick={flipTokens} type="button" aria-label="Swap tokens">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 25" fill="none"><path d="M18 14.5L12 20.5L6 14.5M12 19.5V4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </button>
       </div>
 
 
-      <div class="swap-input-container-to">
+      <div class="!mt-0 flex items-center gap-2 p-2 border border-t-0 rounded-b-xl dark:bg-[#23272b] dark:border-[#363b3f] dark:hover:bg-[#23272b] bg-[#f1f1f1] border-gray-200 hover:bg-gray-200">
         <input
-          class="swap-input"
+          class="flex flex-grow bg-transparent border-none text-2xl my-3 focus:outline-none dark:text-white placeholder-[#a0a3c4] dark:placeholder-[#a0a3c4] placeholder-gray-400"
           placeholder={effectiveToPlaceholder}
           type="text"
           inputmode="decimal"
@@ -239,272 +241,10 @@
       />
       </div>
 
-      <div class="price-info">{priceInfo}</div>
-      <button class="swap-button" disabled={!parseFloat(fromAmount) || $loading} onclick={handleSwap}>
+      <div class="mt-2 text-sm text-center text-[#a0a3c4] dark:text-[#a0a3c4] text-gray-500">{priceInfo}</div>
+      <button class="mt-6 w-full py-3 font-bold rounded-xl text-base text-white border-none cursor-pointer transition-transform duration-200 active:scale-105 bg-[#5b2ff5] hover:bg-[#4c1fd4] disabled:bg-[#c4b5fd] disabled:opacity-60 disabled:cursor-not-allowed dark:bg-[#5b2ff5] dark:hover:bg-[#4520b4] dark:disabled:bg-[#3b1f7a] dark:disabled:text-white dark:disabled:opacity-100" disabled={!parseFloat(fromAmount) || $loading} onclick={handleSwap}>
         {$loading ? 'Loading...' : 'Swap'}
       </button>
     </div>
 </div>
-<p class="powered-by-text">Input fields powered by <strong class="powered-by-text-strong righteous-font>">Numora</strong></p>
-
-<style>
-
-  .slippage-button{
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.75rem;
-    margin-bottom: 0.5rem;
-    cursor:pointer;
-    transition: transform 0.2s;
-    background-color: #181a1b;
-    border: 1px solid #23272b;
-  }
-
-
-  .slippage-wrapper{
-    width: 100%;
-    display: flex;
-    justify-items: end;
-  }
-
-  .powered-by-text-strong{
-    color: #5b2ff5;
-  }
-  .powered-by-text{
-    width: 100%;
-    text-align: center;
-    font-size: 0.875rem;
-  }
-
-  .swap-input-container,
-  .swap-input-container-to {
-    margin-top: 0 !important;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background-color: #f1f1f1;
-    padding: 0.5rem;
-    border: 1px solid #e5e7eb;
-  }
-
-  .slippage-button:active, .swap-button:active{
-    transform: scale(1.05);
-  }
-
-  .swap-input-container:hover,
-  .swap-input-container-to:hover,
-  .slippage-button:hover{
-    background-color: #23272b;
-  }
-
-  :global(html[data-theme="light"]) .slippage-button:hover,
-  :global(html[data-theme="light"]) .swap-input-container:hover,
-  :global(html[data-theme="light"]) .swap-input-container-to:hover,
-  :global(html:not([data-theme="dark"])) .swap-input-container:hover,
-  :global(html:not([data-theme="dark"])) .swap-input-container-to:hover,
-  :global(html:not([data-theme="dark"])) .slippage-button:hover {
-    background-color: #e5e7eb
-  }
-
-
-  .swap-input-container {
-    border-radius: 0.75rem 0.75rem 0 0;
-    border-bottom: none;
-  }
-
-  .swap-input-container-to {
-    border-radius: 0 0 0.75rem 0.75rem;
-  }
-
-
-
-  .swap-form-container {
-    position: relative;
-    padding: 1rem;
-    border-radius: 0.75rem;
-  }
-
-  .swap-input {
-    display: flex;
-    flex-grow: 1;
-    background-color: transparent;
-    border: none;
-    font-size: 1.5rem;
-    margin-top: 0.75rem;
-    margin-bottom: 0.75rem;
-  }
-
-
-  .swap-input:focus {
-    outline: none;
-  }
-
-  .swap-input::placeholder {
-    color: #a0a3c4;
-  }
-
-  .flip-button-container {
-    position: absolute;
-    left: 50%;
-    top: 37%;
-    transform: translateX(-50%) translateY(-50%);
-    display: flex;
-    justify-content: center;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-
-  .flip-button {
-    padding: 0.5rem;
-    border-radius: 9999px;
-    background-color: #181a1b;
-    border: 1px solid #23272b;
-    color: #a0a3c4;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  .flip-button:hover {
-    background-color: #23272b;
-    transform: rotate(180deg);
-  }
-
-  .price-info {
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    color: #a0a3c4;
-    text-align: center;
-  }
-
-  .swap-button {
-    margin-top: 1.5rem;
-    width: 100%;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-    background-color: #5b2ff5;
-    font-weight: 700;
-    border-radius: 0.75rem;
-    font-size: 1rem;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  .swap-button:hover {
-    background-color: #4520b4;
-  }
-
-  .swap-button:disabled {
-    background-color: #3b1f7a;
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-
-  .app-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  :global(html[data-theme="light"]) .swap-form-container,
-  :global(html:not([data-theme="dark"])) .swap-form-container {
-    background-color: #f9fafb;
-    border: 1px solid #e5e7eb;
-  }
-
-  :global(html[data-theme="light"]) .slippage-button,
-  :global(html:not([data-theme="dark"])) .slippage-button {
-    background: #f1f1f1;
-    border: 1px solid #e5e7eb;
-  }
-
-
-  :global(html[data-theme="light"]) .swap-input::placeholder,
-  :global(html:not([data-theme="dark"])) .swap-input::placeholder {
-    color: #9ca3af;
-  }
-
-  :global(html[data-theme="light"]) .flip-button,
-  :global(html:not([data-theme="dark"])) .flip-button {
-    background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    color: #6b7280;
-  }
-
-  :global(html[data-theme="light"]) .flip-button:hover,
-  :global(html:not([data-theme="dark"])) .flip-button:hover {
-    background-color: #f9fafb;
-    border-color: #d1d5db;
-  }
-
-  :global(html[data-theme="light"]) .price-info,
-  :global(html:not([data-theme="dark"])) .price-info {
-    color: #6b7280;
-  }
-
-  :global(html[data-theme="light"]) .swap-button,
-  :global(html:not([data-theme="dark"])) .swap-button {
-    background-color: #5b2ff5;
-  }
-
-  :global(html[data-theme="light"]) .swap-button:hover,
-  :global(html:not([data-theme="dark"])) .swap-button:hover {
-    background-color: #4c1fd4;
-  }
-
-  :global(html[data-theme="light"]) .swap-button:disabled,
-  :global(html:not([data-theme="dark"])) .swap-button:disabled {
-    background-color: #c4b5fd;
-    color: #ffffff;
-    opacity: 0.6;
-  }
-
-  :global(html[data-theme="dark"]) .swap-form-container {
-    background-color: #181a1b;
-    border: 1px solid #23272b;
-  }
-
-  :global(html[data-theme="dark"]) .swap-input-container,
-  :global(html[data-theme="dark"]) .swap-input-container-to {
-    background-color: #23272b;
-    border: 1px solid #363b3f;
-  }
-
-  :global(html[data-theme="dark"]) .swap-input {
-    color: #ffffff;
-  }
-
-  :global(html[data-theme="dark"]) .swap-input::placeholder {
-    color: #a0a3c4;
-  }
-
-  :global(html[data-theme="dark"]) .flip-button {
-    background-color: #23272b;
-    border: 1px solid #363b3f;
-    color: #a0a3c4;
-  }
-
-  :global(html[data-theme="dark"]) .flip-button:hover {
-    background-color: #30363b;
-    border-color: #484e54;
-  }
-
-  :global(html[data-theme="dark"]) .price-info {
-    color: #a0a3c4;
-  }
-
-  :global(html[data-theme="dark"]) .swap-button {
-    background-color: #5b2ff5;
-    color: #ffffff;
-  }
-
-  :global(html[data-theme="dark"]) .swap-button:hover {
-    background-color: #4520b4;
-  }
-
-  :global(html[data-theme="dark"]) .swap-button:disabled {
-    background-color: #3b1f7a;
-    color: #ffffff;
-  }
-
-</style>
+<p class="w-full text-center text-sm mt-4">Input fields powered by <strong class="text-[#5b2ff5] font-[var(--font-heading)]">Numora</strong></p>

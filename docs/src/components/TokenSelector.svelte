@@ -23,211 +23,40 @@
   }
 </script>
 
-<div class="token-selector-container">
+<div class="relative w-full">
   <button
     type="button"
-    class="token-selector-button"
-    class:open={isOpen}
+    class="flex w-36 items-center rounded-[10px] p-1.5 cursor-pointer focus:outline-none relative z-20 dark:bg-black dark:hover:bg-[#23272b] bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 focus:border-[#5b2ff5] focus:shadow-[0_0_0_3px_rgba(91,47,245,0.1)] {isOpen ? 'border-b-0' : ''}"
     onclick={() => (isOpen = !isOpen)}
   >
-    <img src={selectedToken.logoURI} alt={selectedToken.symbol} class="token-icon" />
-    <span class="token-symbol">{selectedToken.symbol}</span>
-    <svg width="20" height="20" fill="none" class="token-dropdown-icon">
+    <img src={selectedToken.logoURI} alt={selectedToken.symbol} class="w-7 h-7 rounded-full mr-3" />
+    <span class="font-semibold text-base text-white mr-1 dark:text-white text-gray-900">{selectedToken.symbol}</span>
+    <svg width="20" height="20" fill="none" class="ml-auto text-[#a0a3c4] transition-transform duration-300 dark:text-[#a0a3c4] text-gray-500 {isOpen ? 'rotate-180' : ''}">
       <path d="M7 8l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
     </svg>
   </button>
-  <div class="token-dropdown-menu" class:open={isOpen}>
+  <div class="!mt-0 absolute left-0 right-0 top-full rounded-xl shadow-lg overflow-hidden z-30 transition-all duration-300 ease-out border-t-0 dark:bg-[#181a1b] bg-white border border-gray-200 {isOpen ? 'max-h-64 opacity-100 translate-y-0 overflow-y-auto' : 'max-h-0 opacity-0 transform translate-y-0'}">
     <div
-      class="token-dropdown-item"
-      class:selected={true}
+      class="!mt-0 flex items-center px-3 py-2 cursor-pointer transition-colors duration-200 dark:hover:bg-[#23272b] hover:bg-gray-50 bg-[#23272b] dark:bg-[#23272b] bg-gray-50"
       onclick={() => handleTokenSelect(selectedToken)}
       onkeydown={(e) => handleKeyDown(e, selectedToken)}
       role="button"
       tabindex="0"
     >
-      <img src={selectedToken.logoURI} alt={selectedToken.symbol} class="token-small-icon" />
-      <span class="token-symbol">{selectedToken.symbol}</span>
+      <img src={selectedToken.logoURI} alt={selectedToken.symbol} class="w-5 h-5 rounded-full mr-2" />
+      <span class="font-semibold text-base text-white mr-1 dark:text-white text-gray-900">{selectedToken.symbol}</span>
     </div>
     {#each TOKENS.filter(t => t.symbol !== selectedToken.symbol) as token}
       <div
-        class="token-dropdown-item"
-        class:disabled={disabledToken && token.symbol === disabledToken.symbol}
+        class="!mt-0 flex items-center px-3 py-2 cursor-pointer transition-colors duration-200 dark:hover:bg-[#23272b] hover:bg-gray-50 {disabledToken && token.symbol === disabledToken.symbol ? 'opacity-50 cursor-not-allowed' : ''}"
         onclick={() => handleTokenSelect(token)}
         onkeydown={(e) => handleKeyDown(e, token)}
         role="button"
         tabindex="0"
       >
-        <img src={token.logoURI} alt={token.symbol} class="token-small-icon" />
-        <span class="token-symbol">{token.symbol}</span>
+        <img src={token.logoURI} alt={token.symbol} class="w-5 h-5 rounded-full mr-2" />
+        <span class="font-semibold text-base text-white mr-1 dark:text-white text-gray-900">{token.symbol}</span>
       </div>
     {/each}
   </div>
 </div>
-
-<style>
-
-  .token-selector-container {
-    position: relative;
-    width: 100%;
-  }
-
-  .token-selector-button {
-    display: flex;
-    width: 144px;
-    align-items: center;
-    border-radius: 10px;
-    padding: 0.35rem;
-    cursor: pointer;
-    background: black;
-    position: relative;
-    z-index: 2;
-    border: none;
-  }
-
-
-
-  .token-selector-button:hover{
-    background-color: #23272b;
-  }
-
-  .token-selector-button:focus {
-    outline: none;
-  }
-
-  .token-icon {
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 9999px;
-    margin-right: 0.75rem;
-  }
-
-  .token-symbol {
-    font-weight: 600;
-    font-size: 1rem;
-    color: white;
-    margin-right: 0.25rem;
-  }
-
-  .token-name {
-    font-size: 0.75rem;
-    color: #a0a3c4;
-  }
-
-  .token-dropdown-icon {
-    margin-left: auto;
-    color: #a0a3c4;
-    transition: transform 0.3s ease;
-  }
-
-  .token-selector-button.open .token-dropdown-icon {
-    transform: rotate(180deg);
-  }
-
-  .token-dropdown-menu {
-    margin-top: 0 !important;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%;
-    background-color: #181a1b;
-    border-top: none;
-    border-radius: 0.75rem;
-    box-shadow:
-      0 10px 15px -3px rgba(0, 0, 0, 0.1),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-    z-index: 3;
-    max-height: 0;
-    transform: translateY(0px);
-    transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
-    scrollbar-width: none;
-  }
-
-  .token-dropdown-menu.open {
-    max-height: 16rem;
-    transform: translateY(0);
-    overflow-y: auto;
-  }
-
-  .token-dropdown-menu::-webkit-scrollbar {
-    display: none;
-  }
-
-  .token-dropdown-item {
-    margin-top: 0 !important;
-    display: flex;
-    align-items: center;
-    padding: 0.5rem 0.75rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
-
-  .token-dropdown-item:hover {
-    background-color: #23272b;
-  }
-
-  .token-dropdown-item.selected {
-    background-color: #23272b;
-  }
-
-  .token-dropdown-item.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .token-small-icon {
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 9999px;
-    margin-right: 0.5rem;
-  }
-
-  @media (prefers-color-scheme: light) {
-
-
-    .token-selector-button {
-      background-color: #ffffff;
-      border: 1px solid #e5e7eb;
-    }
-
-    .token-selector-button.open {
-      border-bottom: none;
-    }
-
-    .token-selector-button:hover {
-      background-color: #f9fafb;
-      border-color: #d1d5db;
-    }
-
-    .token-selector-button:focus {
-      border-color: #5b2ff5;
-      box-shadow: 0 0 0 3px rgba(91, 47, 245, 0.1);
-    }
-
-    .token-symbol {
-      color: #111827;
-    }
-
-    .token-name {
-      color: #6b7280;
-    }
-
-    .token-dropdown-menu {
-      background-color: #ffffff;
-      border: 1px solid #e5e7eb;
-      border-top: none;
-    }
-
-    .token-dropdown-item.selected {
-      background-color: #f9fafb;
-    }
-
-    .token-dropdown-item:hover {
-      background-color: #f9fafb;
-    }
-
-    .token-dropdown-icon {
-      color: #6b7280;
-    }
-  }
-</style>

@@ -2,24 +2,29 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import svelte from '@astrojs/svelte';
 
+import tailwindcss from '@tailwindcss/vite';
+
 export default defineConfig({
     vite: {
-        ssr: {
-            noExternal: ['numora', 'numora-react', '@reown/appkit', '@reown/appkit-adapter-wagmi']
-        },
-        build: {
-            commonjsOptions: {
-                include: [/numora-react/, /@reown\/appkit/, /@reown\/appkit-adapter-wagmi/, /node_modules/]
-            }
-        }
+      ssr: {
+          noExternal: ['numora', 'numora-react', '@reown/appkit', '@reown/appkit-adapter-wagmi']
+      },
+
+      build: {
+          commonjsOptions: {
+              include: [/numora-react/, /@reown\/appkit/, /@reown\/appkit-adapter-wagmi/, /node_modules/]
+          }
+      },
+
+      plugins: [tailwindcss()],
     },
     integrations: [starlight({
         title: 'Numora',
         favicon: '/favicon.png',
-        social: {
-            github: 'https://github.com/Sharqiewicz/numora',
-        },
-		sidebar: [
+        social: [
+           { icon: 'github', href: 'https://github.com/Sharqiewicz/numora', label: 'GitHub'}
+        ],
+        sidebar: [
             {
                 label: 'Guides',
                 items: [
@@ -29,6 +34,6 @@ export default defineConfig({
                     { label: 'Svelte/Pure JS Demo', link: '/guides/svelte/' },
                 ],
             },
-		],
+        ],
         }), svelte()],
 });

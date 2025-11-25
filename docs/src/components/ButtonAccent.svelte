@@ -8,23 +8,6 @@ interface Props {
 let { text }: Props = $props();
 </script>
 
-<button class="read-the-docs-button">
+<button class="cursor-pointer bg-[#5b2ff5] text-white px-5 py-2.5 rounded transition-transform duration-200 border-none !mt-0 active:scale-105">
 {text}
 </button>
-
-<style>
-.read-the-docs-button {
-    cursor: pointer;
-    background-color: #5b2ff5;
-    color: #fff;
-    padding: 10px 20px;
-    border-radius: 5px;
-    transition: transform 0.2s;
-    border: none;
-    margin-top: 0 !important;
-}
-
-.read-the-docs-button:active{
-    transform: scale(1.05);
-}
-</style>
