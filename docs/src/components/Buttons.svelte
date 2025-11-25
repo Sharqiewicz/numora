@@ -4,10 +4,10 @@
 </script>
 
 <div class="flex gap-4 my-8 h-14 justify-center">
-  <a class="no-underline" href="/guides/getting-started/">
+  <a class="no-underline" href="/general/getting-started/">
     <Button text="Get Started" />
   </a>
-  <a class="no-underline" href="/guides/getting-started/">
+  <a class="no-underline" href="/general/getting-started/">
     <ButtonAccent text="Learn more" />
   </a>
 </div>

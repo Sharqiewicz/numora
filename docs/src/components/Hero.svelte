@@ -2,6 +2,7 @@
   import numoraLogo from '../assets/numora_logo.svg';
   import Button from './Button.svelte';
   import ButtonAccent from './ButtonAccent.svelte';
+  import StatsRow from './StatsRow.svelte';
 </script>
 
 <div class="flex flex-col lg:flex-row items-center justify-between gap-12 py-12 sm:py-20">
@@ -14,8 +15,11 @@
     <p class="text-lg text-gray-600 dark:text-[#a0a3c4] max-w-2xl mx-auto lg:mx-0">
       Stop reinventing the wheel. Numora is a lightweight, framework-agnostic library designed specifically for 18-decimal precision, currency formatting, and error-free financial inputs.
     </p>
+
+    <StatsRow />
+
     <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-      <a href="/guides/getting-started/" class="no-underline">
+      <a href="/general/getting-started/" class="no-underline">
         <ButtonAccent text="Get Started" />
       </a>
       <a href="https://github.com/Sharqiewicz/numora" target="_blank" class="no-underline">

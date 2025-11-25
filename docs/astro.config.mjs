@@ -26,13 +26,28 @@ export default defineConfig({
         ],
         sidebar: [
             {
-                label: 'Guides',
-                items: [
-                    { label: 'Swap', link: '/guides/swap/' },
-                    { label: 'Getting Started', link: '/guides/getting-started/' },
-                    { label: 'Examples', link: '/guides/example/' },
-                    { label: 'Svelte/Pure JS Demo', link: '/guides/svelte/' },
-                ],
+                label: 'General',
+                autogenerate: { directory: 'general' },
+            },
+            {
+                label: 'React',
+                badge: { text: 'React', variant: 'note' },
+                autogenerate: { directory: 'react' },
+            },
+            {
+                label: 'Vue',
+                badge: { text: 'Vue', variant: 'success' },
+                autogenerate: { directory: 'vue' },
+            },
+            {
+                label: 'Svelte',
+                badge: { text: 'Svelte', variant: 'caution' },
+                autogenerate: { directory: 'svelte' },
+            },
+            {
+                label: 'Vanilla',
+                badge: { text: 'Vanilla', variant: 'tip' },
+                autogenerate: { directory: 'vanilla' },
             },
         ],
         }), svelte()],
