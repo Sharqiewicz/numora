@@ -4,8 +4,8 @@
 
 <div class="py-16 relative overflow-hidden">
     <div class="text-center mb-12 max-w-3xl mx-auto">
-        <h2 class="text-3xl font-bold text-white mb-4">Built for the <span class="text-[#5b2ff5]">Swap Interface</span>.</h2>
-        <p class="text-[#a0a3c4] text-lg">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Built for the <span class="text-[#5b2ff5]">Swap Interface</span>.</h2>
+        <p class="text-gray-600 dark:text-[#a0a3c4] text-lg">
             Handling numeric state in DeFi is deceptively hard. You need to manage focus states, sanitize "bad" keystrokes, handle scientific notation, and respect user locale—all while keeping the underlying value pristine for the blockchain.
         </p>
         <p class="mt-4 text-sm text-gray-500">
@@ -17,7 +17,7 @@
         <!-- Tooltip 1: Left side (Auto-formats) -->
         <div class="hidden lg:block absolute -left-48 top-20 w-40 text-right animate-bounce" style="animation-duration: 3s;">
             <div class="text-[#5b2ff5] font-bold text-sm mb-1">Real-time Formatting</div>
-            <div class="text-xs text-gray-400">Auto-formats with commas as you type.</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Auto-formats with commas as you type.</div>
             <div class="absolute -right-6 top-1/2 w-6 h-[1px] bg-[#5b2ff5]"></div>
         </div>
 
@@ -25,14 +25,14 @@
         <div class="hidden lg:block absolute -right-48 top-32 w-40 text-left animate-bounce" style="animation-duration: 4s;">
              <div class="absolute -left-6 top-1/2 w-6 h-[1px] bg-[#5b2ff5]"></div>
             <div class="text-[#5b2ff5] font-bold text-sm mb-1">Precision Control</div>
-            <div class="text-xs text-gray-400">Prevents >18 decimals automatically.</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Prevents >18 decimals automatically.</div>
         </div>
 
         <!-- Tooltip 3: Bottom (Paste) -->
          <div class="hidden lg:block absolute -right-40 bottom-20 w-40 text-left animate-bounce" style="animation-duration: 5s;">
              <div class="absolute -left-10 top-1/2 w-10 h-[1px] bg-[#5b2ff5]"></div>
             <div class="text-[#5b2ff5] font-bold text-sm mb-1">Sanitization</div>
-            <div class="text-xs text-gray-400">Pastes are sanitized instantly.</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">Pastes are sanitized instantly.</div>
         </div>
 
         <!-- The Swap Component -->
@@ -41,6 +41,6 @@
         </div>
 
         <!-- Glow behind -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[#5b2ff5]/5 blur-3xl -z-0 rounded-full"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[#5b2ff5]/10 dark:bg-[#5b2ff5]/5 blur-3xl -z-0 rounded-full"></div>
     </div>
 </div>

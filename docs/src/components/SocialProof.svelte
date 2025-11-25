@@ -11,10 +11,10 @@
     ];
 </script>
 
-<div class="py-16 border-y border-[#23272b] bg-[#181a1b]/50">
+<div class="py-16 border-y border-gray-200 dark:border-[#23272b] bg-gray-50 dark:bg-[#181a1b]/50">
     <div class="text-center max-w-3xl mx-auto mb-10 px-4">
-        <h2 class="text-2xl font-bold text-white mb-4">Battle-Tested Foundations.</h2>
-        <p class="text-[#a0a3c4]">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Battle-Tested Foundations.</h2>
+        <p class="text-gray-600 dark:text-[#a0a3c4]">
             We didn't guess how to handle money—we analyzed the industry leaders. Numora’s core logic is a unification of the audited, hardened implementations used in the most trusted protocols in DeFi. We extracted the logic, removed the framework dependencies, and standardized the API.
         </p>
     </div>

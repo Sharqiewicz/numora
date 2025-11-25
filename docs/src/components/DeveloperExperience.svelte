@@ -23,18 +23,18 @@ return <input {...props} className="your-custom-styles" />;`);
 
         <!-- Text Content -->
         <div class="flex-1 lg:order-2">
-            <h2 class="text-3xl font-bold text-white mb-6">Less Code. <span class="text-[#5b2ff5]">More Safety</span>.</h2>
-            <p class="text-[#a0a3c4] text-lg mb-6">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">Less Code. <span class="text-[#5b2ff5]">More Safety</span>.</h2>
+            <p class="text-gray-600 dark:text-[#a0a3c4] text-lg mb-6">
                 Replace 100 lines of regex and parseFloat with a single hook.
             </p>
-            <p class="text-[#a0a3c4]">
+            <p class="text-gray-600 dark:text-[#a0a3c4]">
                 Numora abstracts the complexity of numeric handling so you can focus on your dApp's unique value.
             </p>
         </div>
 
         <!-- Code Block -->
         <div class="flex-1 w-full lg:order-1">
-             <div class="relative bg-[#181a1b] border border-[#23272b] rounded-xl overflow-hidden shadow-2xl">
+             <div class="relative bg-[#181a1b] border border-gray-200 dark:border-[#23272b] rounded-xl overflow-hidden shadow-2xl">
                 <div class="flex items-center justify-between px-4 py-3 bg-[#23272b]/50 border-b border-[#23272b]">
                     <div class="flex gap-2">
                         <div class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
