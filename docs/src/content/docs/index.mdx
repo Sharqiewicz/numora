@@ -4,10 +4,20 @@ template: splash
 ---
 
 import "../../styles/global.css"
-import Swap from '../../components/Swap.svelte';
-import NumoraConfig from '../../components/NumoraConfig.svelte';
-import Buttons from '../../components/Buttons.svelte';
+import Hero from '../../components/Hero.svelte';
+import Battlefield from '../../components/Battlefield.svelte';
+import SocialProof from '../../components/SocialProof.svelte';
+import ComparisonTable from '../../components/ComparisonTable.svelte';
+import CoreFeatures from '../../components/CoreFeatures.svelte';
+import DeveloperExperience from '../../components/DeveloperExperience.svelte';
+import Footer from '../../components/Footer.svelte';
 
-<Swap client:load />
-{/* <NumoraConfig client:load /> */}
-<Buttons client:load />
+<div class="overflow-x-hidden">
+    <Hero client:load />
+    <Battlefield client:load />
+    <SocialProof client:load />
+    <ComparisonTable client:load />
+    <CoreFeatures client:load />
+    <DeveloperExperience client:load />
+    <Footer client:load />
+</div>
