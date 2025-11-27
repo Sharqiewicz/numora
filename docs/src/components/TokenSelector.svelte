@@ -26,7 +26,7 @@
 <div class="relative w-full">
   <button
     type="button"
-    class="flex w-36 items-center rounded-[10px] p-1.5 cursor-pointer focus:outline-none relative z-20 dark:bg-black dark:hover:bg-[#23272b] bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 focus:border-[#5b2ff5] focus:shadow-[0_0_0_3px_rgba(91,47,245,0.1)] {isOpen ? 'border-b-0' : ''}"
+    class="flex w-32 items-center rounded-lg p-1.5 cursor-pointer focus:outline-none relative z-20 dark:bg-black dark:hover:bg-[#23272b] bg-white border border-gray-700 hover:bg-gray-50 hover:border-gray-500 focus:border-[#5b2ff5] focus:shadow-[0_0_0_3px_rgba(91,47,245,0.1)] {isOpen ? 'border-b-0' : ''}"
     onclick={() => (isOpen = !isOpen)}
   >
     <img src={selectedToken.logoURI} alt={selectedToken.symbol} class="w-7 h-7 rounded-full mr-3" />
