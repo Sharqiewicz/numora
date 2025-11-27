@@ -15,29 +15,29 @@
 
     <div class="relative max-w-md mx-auto">
         <!-- Tooltip 1: Left side (Auto-formats) -->
-        <div class="hidden lg:block absolute -left-48 top-20 w-40 text-right animate-bounce" style="animation-duration: 3s;">
+        <div class="hidden md:block absolute -left-48 top-20 w-40 text-right animate-bounce" style="animation-duration: 3s;">
+            <div class="absolute -right-6 top-1/5 w-5 h-[1px] bg-[#5b2ff5]"></div>
             <div class="text-[#5b2ff5] font-bold text-sm mb-1">Real-time Formatting</div>
             <div class="text-xs text-gray-500 dark:text-gray-400">Auto-formats with commas as you type.</div>
-            <div class="absolute -right-6 top-1/2 w-6 h-[1px] bg-[#5b2ff5]"></div>
         </div>
 
         <!-- Tooltip 2: Right side (Decimals) -->
-        <div class="hidden lg:block absolute -right-48 top-32 w-40 text-left animate-bounce" style="animation-duration: 4s;">
-             <div class="absolute -left-6 top-1/2 w-6 h-[1px] bg-[#5b2ff5]"></div>
+        <div class="hidden md:block absolute -right-48 top-32 w-40 text-left animate-bounce" style="animation-duration: 4s;">
+             <div class="absolute -left-6 top-1/5 w-5 h-[1px] bg-[#5b2ff5]"></div>
             <div class="text-[#5b2ff5] font-bold text-sm mb-1">Precision Control</div>
             <div class="text-xs text-gray-500 dark:text-gray-400">Prevents >18 decimals automatically.</div>
         </div>
 
         <!-- Tooltip 3: Bottom (Paste) -->
-         <div class="hidden lg:block absolute -right-40 bottom-20 w-40 text-left animate-bounce" style="animation-duration: 5s;">
-             <div class="absolute -left-10 top-1/2 w-10 h-[1px] bg-[#5b2ff5]"></div>
+         <div class="hidden md:block absolute -right-52 bottom-20 w-40 text-left animate-bounce" style="animation-duration: 5s;">
+             <div class="absolute -left-10 top-1/5 w-8 h-[1px] bg-[#5b2ff5]"></div>
             <div class="text-[#5b2ff5] font-bold text-sm mb-1">Sanitization</div>
             <div class="text-xs text-gray-500 dark:text-gray-400">Pastes are sanitized instantly.</div>
         </div>
 
         <!-- The Swap Component -->
         <div class="relative z-10 transform transition-transform hover:scale-[1.01]">
-            <Swap client:load />
+            <Swap client:load/>
         </div>
 
         <!-- Glow behind -->
