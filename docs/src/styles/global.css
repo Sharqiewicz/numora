@@ -1,10 +1,11 @@
 @layer base, starlight, theme, components, utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
+
 @import '@astrojs/starlight-tailwind';
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
-@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
 
 /**
  * ============================================================================
@@ -80,11 +81,17 @@
   /* Overlays */
   --noise-opacity: 0.015;
   --vignette-color: rgba(0, 0, 0, 0.02);
+
+  --sl-content-gap-y: none;
+
+  --font-heading: 'Righteous';
+  --font-righteous: 'Righteous';
 }
 
 /* ===== DARK THEME OVERRIDES ===== */
 :root[data-theme='dark'],
 .dark {
+
   /* Base Colors */
   --base-bg: #0a0a0f;
   --text-primary: #ffffff;
@@ -139,17 +146,15 @@
    TYPOGRAPHY SYSTEM
    ============================================================================ */
 
-:root {
-  --font-heading: 'Righteous', system-ui, sans-serif;
-}
-
-.site-title,
-.righteous-font {
-  font-family: var(--font-heading);
-}
-
 .site-title {
   color: #5b2ff5 !important;
+  font-weight: 700;
+  font-family: var(--font-righteous);
+}
+
+.font-numora {
+  font-family: var(--font-righteous);
+  font-weight: 700;
 }
 
 /* ============================================================================
@@ -402,13 +407,20 @@ body {
   padding: 2rem;
 }
 
+
 /* ============================================================================
-   SPACING SYSTEM (8px base unit)
-   ============================================================================
-   XS: 8px
-   S: 16px
-   M: 24px
-   L: 32px
-   XL: 48px
-   XXL: 64px
+   NAVBAR CUSTOMIZATION (Transparent & Blurred)
    ============================================================================ */
+
+:root {
+  --sl-color-bg-nav: rgba(255, 255, 255, 0.6) !important;
+}
+
+:root[data-theme='dark'] {
+  --sl-color-bg-nav: rgba(10, 10, 15, 0.6) !important;
+}
+
+header.header {
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}

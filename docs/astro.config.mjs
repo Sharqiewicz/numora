@@ -19,7 +19,8 @@ export default defineConfig({
       plugins: [tailwindcss()],
     },
     integrations: [starlight({
-        title: 'Numora',
+        title: 'numora',
+        customCss: ['./src/styles/global.css'],
         favicon: '/favicon.png',
         social: [
            { icon: 'github', href: 'https://github.com/Sharqiewicz/numora', label: 'GitHub'}
