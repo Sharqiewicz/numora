@@ -5,15 +5,15 @@
   import StatsRow from './StatsRow.svelte';
 </script>
 
-<div class="flex flex-col lg:flex-row items-center justify-between gap-12 py-12 sm:py-20">
+<div class="container mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 py-12 sm:py-20 px-8">
   <!-- Left Column: Text -->
   <div class="flex-1 space-y-8 text-center lg:text-left">
     <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
       The Standard for <br/>
-      <span class="text-[#5b2ff5] font-[var(--font-heading)]">DeFi Numeric Inputs.</span>
+      <span class="text-[#5b2ff5]">DeFi Numeric Inputs.</span>
     </h1>
     <p class="text-lg text-gray-600 dark:text-[#a0a3c4] max-w-2xl mx-auto lg:mx-0">
-      Stop reinventing the wheel. Numora is a lightweight, framework-agnostic library designed specifically for 18-decimal precision, currency formatting, and error-free financial inputs.
+      Stop reinventing the wheel. <span class="font-numora">Numora</span> is a lightweight, framework-agnostic library designed specifically for 18-decimal precision, currency formatting, and error-free financial inputs.
     </p>
 
     <StatsRow />
@@ -23,15 +23,14 @@
         <ButtonAccent text="Get Started" />
       </a>
       <a href="https://github.com/Sharqiewicz/numora" target="_blank" class="no-underline">
-        <Button text="View on Github" />
+        <Button text="View on Github" icon="github" />
       </a>
     </div>
   </div>
 
   <!-- Right Column: Visual -->
-  <div class="flex-1 w-full max-w-lg lg:max-w-xl relative">
-    <div class="relative z-10 bg-white dark:bg-[#181a1b] border border-gray-200 dark:border-[#23272b] rounded-2xl p-8 shadow-2xl transform rotate-2 transition-transform hover:rotate-0 duration-500">
-        <div class="absolute -top-6 -left-6 w-20 h-20 bg-[#5b2ff5] rounded-full blur-3xl opacity-20"></div>
+  <div class="flex-1 w-full max-w-lg">
+    <div class="drop-shadow-[0_0_15px_rgba(91,47,245,0.5)] relative z-10 bg-white dark:bg-[#181a1b] border border-gray-200 dark:border-[#23272b] rounded-2xl px-4 py-6 shadow-2xl transform rotate-2 transition-transform hover:rotate-0 duration-500">
 
         <!-- Floating Error Representation -->
         <div class="mb-6 p-4 bg-gray-50 dark:bg-[#000] rounded-lg border border-red-500/30 text-sm font-mono relative overflow-hidden group">
@@ -46,15 +45,16 @@
 
         <!-- Numora Solution -->
         <div class="p-4 bg-gray-50 dark:bg-[#000] rounded-lg border border-[#5b2ff5]/30 text-sm font-mono">
-            <div class="text-gray-500 dark:text-gray-400 mb-1">// Numora Input</div>
+            <div class="text-gray-500 dark:text-gray-400 mb-1">// <span class="font-numora">Numora</span> Input</div>
              <div class="text-gray-900 dark:text-white flex items-center gap-2">
                 0.1 + 0.2 = <span class="text-[#5b2ff5]">0.3</span>
-                <span class="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-[#5b2ff5]/10 dark:bg-[#5b2ff5]/20 text-[#5b2ff5] uppercase tracking-wider">BigInt Safe</span>
+                <span class="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-[#5b2ff5]/20 dark:bg-[#5b2ff5]/80 text-[#5b2ff5] dark:text-white uppercase tracking-wider">BigInt Safe</span>
              </div>
         </div>
 
-        <div class="mt-8 flex justify-center">
-            <img src={numoraLogo.src} alt="Numora Logo" class="h-16 drop-shadow-[0_0_15px_rgba(91,47,245,0.5)] animate-pulse" />
+        <div class="mt-4 flex justify-center items-center gap-2">
+            <img src={numoraLogo.src} alt="Numora Logo" class="h-16 drop-shadow-[0_0_15px_rgba(91,47,245,0.5)]" />
+            <span class="font-numora">Numora</span>
         </div>
     </div>
 
