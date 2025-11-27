@@ -11,7 +11,7 @@
     <ButtonAccent text="Learn more" />
   </a>
 </div>
-<div class="text-[1.2rem] text-center"><span class="font-[var(--font-heading)]">Numora</span>'s core logic is derived from audited, battle-tested implementations used in the following projects:</div>
+<div class="text-[1.2rem] text-center"><span class="font-numora">Numora</span>'s core logic is derived from audited, battle-tested implementations used in the following projects:</div>
 <div class="flex justify-between">
 <a href='https://uniswap.org/' target='_blank'><img src='uniswap.png' alt='Uniswap' class="w-[94px] transition-transform duration-200 hover:scale-105 cursor-pointer"/></a>
 <a href='https://sushi.com/' target='_blank'><img src='sushiswap.png' alt='SushiSwap' class="w-[94px] transition-transform duration-200 hover:scale-105 cursor-pointer"/></a>
