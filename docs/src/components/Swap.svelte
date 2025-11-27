@@ -182,11 +182,9 @@
   }
 </script>
 
-<p class="text-3xl font-[var(--font-heading)]">Numora</p>
 
-<div class="flex items-center justify-center">
-
-    <div class="relative p-4 rounded-xl border dark:bg-[#181a1b] dark:border-[#23272b] bg-[#f9fafb] border-gray-200">
+<div class="flex items-center justify-center w-[460px]">
+    <div class="relative p-4 rounded-xl border dark:bg-[#181a1b] dark:border-[#23272b] bg-[#f9fafb] border-gray-200 w-full">
       <div class="w-full flex justify-end">
         <button class="px-3 py-1 rounded-xl mb-2 cursor-pointer transition-transform duration-200 border active:scale-105 dark:bg-[#181a1b] dark:border-[#23272b] dark:hover:bg-[#23272b] bg-[#f1f1f1] border-gray-200 hover:bg-gray-200" aria-label="Slippage settings">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M11.0195 3.55153C11.6283 3.20907 12.3717 3.20907 12.9805 3.55153L18.9805 6.92649C19.6103 7.28073 20 7.9471 20 8.66965V15.3302C20 16.0528 19.6103 16.7192 18.9805 17.0734L12.9805 20.4484C12.3717 20.7908 11.6283 20.7908 11.0195 20.4484L5.01954 17.0737C4.38975 16.7195 4 16.0531 4 15.3305L4 8.66963C4 7.94707 4.38973 7.2807 5.01949 6.92647L11.0195 3.55153Z" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"></path><path d="M15 12C15 13.6569 13.6569 15 12 15C10.3432 15 9.00003 13.6569 9.00003 12C9.00003 10.3431 10.3432 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"></path></svg>
@@ -197,7 +195,7 @@
       <div class="!mt-0 flex items-center gap-2 p-2 border border-b-0 rounded-t-xl dark:bg-[#23272b] dark:border-[#363b3f] dark:hover:bg-[#23272b] bg-[#f1f1f1] border-gray-200 hover:bg-gray-200">
 
         <input
-          class="flex flex-grow bg-transparent border-none text-2xl my-3 focus:outline-none dark:text-white placeholder-[#a0a3c4] dark:placeholder-[#a0a3c4] placeholder-gray-400"
+          class="flex bg-transparent text-2xl my-3 focus:outline-none dark:text-white placeholder-[#a0a3c4] dark:placeholder-[#a0a3c4] placeholder-gray-400"
           placeholder={effectiveFromPlaceholder}
           type="text"
           inputmode="decimal"
@@ -224,7 +222,7 @@
 
       <div class="!mt-0 flex items-center gap-2 p-2 border border-t-0 rounded-b-xl dark:bg-[#23272b] dark:border-[#363b3f] dark:hover:bg-[#23272b] bg-[#f1f1f1] border-gray-200 hover:bg-gray-200">
         <input
-          class="flex flex-grow bg-transparent border-none text-2xl my-3 focus:outline-none dark:text-white placeholder-[#a0a3c4] dark:placeholder-[#a0a3c4] placeholder-gray-400"
+          class="flex bg-transparent border-none text-2xl my-3 focus:outline-none dark:text-white placeholder-[#a0a3c4] dark:placeholder-[#a0a3c4] placeholder-gray-400"
           placeholder={effectiveToPlaceholder}
           type="text"
           inputmode="decimal"
@@ -247,4 +245,4 @@
       </button>
     </div>
 </div>
-<p class="w-full text-center text-sm mt-4">Input fields powered by <strong class="text-[#5b2ff5] font-[var(--font-heading)]">Numora</strong></p>
+<p class="w-full text-center text-sm mt-4">Input fields powered by <strong class="text-[#5b2ff5] font-heading">Numora</strong></p>
