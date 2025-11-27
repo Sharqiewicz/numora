@@ -28,7 +28,7 @@ return <input {...props} className="your-custom-styles" />;`);
                 Replace 100 lines of regex and parseFloat with a single hook.
             </p>
             <p class="text-gray-600 dark:text-[#a0a3c4]">
-                Numora abstracts the complexity of numeric handling so you can focus on your dApp's unique value.
+                <span class="font-numora">Numora</span> abstracts the complexity of numeric handling so you can focus on your dApp's unique value.
             </p>
         </div>
 
