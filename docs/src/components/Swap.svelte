@@ -16,12 +16,13 @@
   const error = writable<string | null>(null);
   const lastUpdated = writable<Date | null>(null);
 
-  let fromToken: TokenInfo = $state(TOKENS[0]);
-  let toToken: TokenInfo = $state(TOKENS[2]);
-  let fromAmount = $state('1');
-  let toAmount = $state('');
-  let lastEdited: 'from' | 'to' | null = $state(null);
-  let pollInterval: ReturnType<typeof setInterval> | null = null;
+let fromToken: TokenInfo = $state(TOKENS[0]);
+let toToken: TokenInfo = $state(TOKENS[2]);
+let fromAmount = $state('1');
+let toAmount = $state('');
+let lastEdited: 'from' | 'to' | null = $state(null);
+let pollInterval: ReturnType<typeof setInterval> | null = null;
+let openSelector: 'from' | 'to' | null = $state(null);
 
   // Fetch prices on mount and set up polling
   onMount(() => {
@@ -180,6 +181,17 @@
     // Swap implementation would go here
     console.log('Swapping', fromAmount, fromToken.symbol, 'to', toToken.symbol);
   }
+
+function toggleSelector(selector: 'from' | 'to', next: boolean) {
+  if (next) {
+    openSelector = selector;
+    return;
+  }
+
+  if (openSelector === selector) {
+    openSelector = null;
+  }
+}
 </script>
 
 
@@ -208,10 +220,12 @@
           selectedToken={fromToken}
           onSelect={(token) => (fromToken = token)}
           disabledToken={toToken}
+          isOpen={openSelector === 'from'}
+          onToggle={(next) => toggleSelector('from', next)}
         />
 
 
-        </div>
+      </div>
 
       <div class="absolute left-1/2 top-[37%] -translate-x-1/2 -translate-y-1/2 flex justify-center my-2">
         <button class="p-2 rounded-full border cursor-pointer transition-transform duration-200 dark:bg-[#181a1b] dark:border-[#23272b] dark:text-[#a0a3c4] dark:hover:bg-[#30363b] dark:hover:border-[#484e54] bg-white border-gray-200 text-gray-500 hover:bg-[#f9fafb] hover:border-gray-300 hover:rotate-180" onclick={flipTokens} type="button" aria-label="Swap tokens">
@@ -236,6 +250,8 @@
         selectedToken={toToken}
         onSelect={(token) => (toToken = token)}
         disabledToken={fromToken}
+        isOpen={openSelector === 'to'}
+        onToggle={(next) => toggleSelector('to', next)}
       />
       </div>
 
