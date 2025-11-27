@@ -19,7 +19,7 @@
             </div>
             <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Headless & Agnostic</h3>
             <p class="text-gray-600 dark:text-[#a0a3c4] text-sm leading-relaxed">
-                Bring your own UI. Numora works with React, Vue, Svelte, or Vanilla JS. It manages the logic/state; you manage the CSS.
+                Bring your own UI. <span class="font-numora">Numora</span> works with React, Vue, Svelte, or Vanilla JS. It manages the logic/state; you manage the CSS.
             </p>
         </div>
 
