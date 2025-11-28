@@ -2,14 +2,14 @@
     import Swap from './Swap.svelte';
 </script>
 
-<div class="py-16 relative overflow-hidden">
+<div class="py-16 relative">
     <div class="text-center mb-12 max-w-3xl mx-auto">
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Built for the <span class="text-[#5b2ff5]">Swap Interface</span>.</h2>
         <p class="text-gray-600 dark:text-[#a0a3c4] text-lg">
             Handling numeric state in DeFi is deceptively hard. You need to manage focus states, sanitize "bad" keystrokes, handle scientific notation, and respect user locale—all while keeping the underlying value pristine for the blockchain.
         </p>
-        <p class="mt-4 text-sm text-gray-500">
-            Try the input below. Type 1000, paste a messy number, or try to break the decimal precision.
+        <p class="mt-8 text-lg">
+            Try the input below. Type, paste a messy number, or try to break the decimal precision.
         </p>
     </div>
 

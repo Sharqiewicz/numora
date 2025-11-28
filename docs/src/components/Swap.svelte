@@ -204,7 +204,7 @@ function toggleSelector(selector: 'from' | 'to', next: boolean) {
       </div>
 
 
-      <div class="!mt-0 flex items-center gap-2 p-2 border border-b-0 rounded-t-xl dark:bg-[#23272b] dark:border-[#363b3f] dark:hover:bg-[#23272b] bg-[#f1f1f1] border-gray-200 hover:bg-gray-200">
+      <div class="!mt-0 flex items-center gap-2 p-2 border rounded-t-xl dark:bg-[#23272b] dark:border-[#363b3f] dark:hover:bg-[#34383b] bg-[#f1f1f1] border-gray-200 hover:bg-gray-200">
 
         <input
           class="flex bg-transparent text-2xl my-3 focus:outline-none dark:text-white placeholder-[#a0a3c4] dark:placeholder-[#a0a3c4] placeholder-gray-400"
@@ -227,14 +227,14 @@ function toggleSelector(selector: 'from' | 'to', next: boolean) {
 
       </div>
 
-      <div class="absolute left-1/2 top-[37%] -translate-x-1/2 -translate-y-1/2 flex justify-center my-2">
+      <div class="absolute border rounded-full border-gray-200 dark:border-[#363b3f] left-1/2 top-[37%] -translate-x-1/2 -translate-y-1/2 flex justify-center my-2">
         <button class="p-2 rounded-full border cursor-pointer transition-transform duration-200 dark:bg-[#181a1b] dark:border-[#23272b] dark:text-[#a0a3c4] dark:hover:bg-[#30363b] dark:hover:border-[#484e54] bg-white border-gray-200 text-gray-500 hover:bg-[#f9fafb] hover:border-gray-300 hover:rotate-180" onclick={flipTokens} type="button" aria-label="Swap tokens">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 25" fill="none"><path d="M18 14.5L12 20.5L6 14.5M12 19.5V4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </button>
       </div>
 
 
-      <div class="!mt-0 flex items-center gap-2 p-2 border border-t-0 rounded-b-xl dark:bg-[#23272b] dark:border-[#363b3f] dark:hover:bg-[#23272b] bg-[#f1f1f1] border-gray-200 hover:bg-gray-200">
+      <div class="!mt-0 flex items-center gap-2 p-2 border border-t-0 rounded-b-xl dark:bg-[#23272b] dark:border-[#363b3f] dark:hover:bg-[#34383b] bg-[#f1f1f1] border-gray-200 hover:bg-gray-200">
         <input
           class="flex bg-transparent border-none text-2xl my-3 focus:outline-none dark:text-white placeholder-[#a0a3c4] dark:placeholder-[#a0a3c4] placeholder-gray-400"
           placeholder={effectiveToPlaceholder}

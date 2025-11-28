@@ -53,8 +53,7 @@
         </div>
 
         <div class="mt-4 flex justify-center items-center gap-2">
-            <img src={numoraLogo.src} alt="Numora Logo" class="h-16 drop-shadow-[0_0_15px_rgba(91,47,245,0.5)]" />
-            <span class="font-numora">Numora</span>
+            <span class="font-numora">numora</span>
         </div>
     </div>
 
