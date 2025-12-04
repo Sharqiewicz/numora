@@ -25,26 +25,30 @@ export function formatWithSeparators(
   groupStyle: ThousandsGroupStyle = 'thousand'
 ): string {
   // Handle edge cases: empty, zero, or just decimal point
-  if (!value || value === '0' || value === '.') {
+  if (!value || value === '0' || value === '.' || value === '-' || value === '-.') {
     return value;
   }
 
   const hasDecimalPoint = value.includes('.');
-  const [integerPart, decimalPart] = value.split('.');
+  const isNegative = value.startsWith('-');
+  const absoluteValue = isNegative ? value.slice(1) : value;
+  const [integerPart, decimalPart] = absoluteValue.split('.');
 
   // Handle edge case: value starts with decimal point (e.g., ".5")
   if (!integerPart) {
-    return decimalPart ? `.${decimalPart}` : value;
+    const result = decimalPart ? `.${decimalPart}` : absoluteValue;
+    return isNegative ? `-${result}` : result;
   }
 
   const formattedInteger = formatIntegerPart(integerPart, separator, groupStyle);
+  const prefix = isNegative ? '-' : '';
 
   // Preserve decimal point even if no decimal digits
   if (hasDecimalPoint) {
-    return decimalPart ? `${formattedInteger}.${decimalPart}` : `${formattedInteger}.`;
+    return decimalPart ? `${prefix}${formattedInteger}.${decimalPart}` : `${prefix}${formattedInteger}.`;
   }
 
-  return formattedInteger;
+  return `${prefix}${formattedInteger}`;
 }
 
 /**

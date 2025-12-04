@@ -108,14 +108,14 @@ describe('NumericInput Component', () => {
     expect(inputElement.value).toBe('007');
   });
 
-  it('should not allow negative numbers', () => {
+  it('should not allow negative numbers by default', () => {
     createInputWithPlaceholder();
     const inputElement = getInputElement();
 
-    const event = new KeyboardEvent('keydown', { key: '-' });
-    inputElement.dispatchEvent(event);
+    inputElement.value = '-123';
+    inputElement.dispatchEvent(new Event('input'));
 
-    expect(inputElement.value).toBe('');
+    expect(inputElement.value).toBe('123');
   });
 
   it('should not allow more decimals than maxDecimals', () => {
@@ -255,6 +255,288 @@ describe('NumericInput edge cases', () => {
     inputElement.dispatchEvent(arrowEvent);
 
     expect(preventDefaultSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('Negative Number Support', () => {
+  let container: HTMLElement;
+  let onChangeMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    onChangeMock = vi.fn();
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  function createInputWithNegatives(options = {}) {
+    const input = new NumericInput(container, {
+      allowNegative: true,
+      onChange: onChangeMock,
+      ...options,
+    });
+    return input;
+  }
+
+  function getInputElement() {
+    return container.querySelector('input') as HTMLInputElement;
+  }
+
+  describe('Basic negative number input', () => {
+    it('should allow negative numbers when allowNegative is true', () => {
+      createInputWithNegatives();
+      const inputElement = getInputElement();
+
+      inputElement.value = '-123';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-123');
+      expect(onChangeMock).toHaveBeenCalledWith('-123');
+    });
+
+    it('should allow negative decimal numbers', () => {
+      createInputWithNegatives({ maxDecimals: 2 });
+      const inputElement = getInputElement();
+
+      inputElement.value = '-123.45';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-123.45');
+    });
+
+    it('should allow typing minus sign at the start', () => {
+      createInputWithNegatives();
+      const inputElement = getInputElement();
+
+      inputElement.value = '-';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-');
+    });
+
+    it('should allow negative zero', () => {
+      createInputWithNegatives();
+      const inputElement = getInputElement();
+
+      inputElement.value = '-0';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-0');
+    });
+  });
+
+  describe('Minus sign position and multiple minus signs', () => {
+    it('should only allow minus sign at the start', () => {
+      createInputWithNegatives();
+      const inputElement = getInputElement();
+
+      inputElement.value = '123-45';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('12345');
+    });
+
+    it('should prevent multiple minus signs', () => {
+      createInputWithNegatives();
+      const inputElement = getInputElement();
+
+      inputElement.value = '--123';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-123');
+    });
+
+    it('should handle minus sign in the middle by removing it', () => {
+      createInputWithNegatives();
+      const inputElement = getInputElement();
+
+      inputElement.value = '12-34';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('1234');
+    });
+
+    it('should preserve minus sign when typing after it', () => {
+      createInputWithNegatives();
+      const inputElement = getInputElement();
+
+      inputElement.value = '-';
+      inputElement.dispatchEvent(new Event('input'));
+      inputElement.value = '-1';
+      inputElement.dispatchEvent(new Event('input'));
+      inputElement.value = '-12';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-12');
+    });
+  });
+
+  describe('Sanitization with negative numbers', () => {
+    it('should preserve minus sign during sanitization', () => {
+      createInputWithNegatives();
+      const inputElement = getInputElement();
+
+      inputElement.value = '-abc123def';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-123');
+    });
+
+    it('should remove minus sign if no digits follow', () => {
+      createInputWithNegatives();
+      const inputElement = getInputElement();
+
+      inputElement.value = '-abc';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('');
+    });
+
+    it('should handle negative numbers with commas', () => {
+      createInputWithNegatives({
+        formatOn: 'change',
+        thousandsSeparator: ',',
+      });
+      const inputElement = getInputElement();
+
+      inputElement.value = '-1,234.56';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-1,234.56');
+    });
+  });
+
+  describe('Paste events with negative numbers', () => {
+    it('should handle pasting negative numbers', () => {
+      createInputWithNegatives({ maxDecimals: 2 });
+      const inputElement = getInputElement();
+
+      const mockEvent = {
+        target: inputElement,
+        preventDefault: vi.fn(),
+        clipboardData: {
+          getData: vi.fn().mockReturnValue('-123.45'),
+        },
+      } as unknown as ClipboardEvent;
+
+      inputElement.value = '';
+      handleOnPasteNumericInput(mockEvent, 2, false, true);
+
+      expect(inputElement.value).toBe('-123.45');
+    });
+
+    it('should handle pasting negative numbers with invalid characters', () => {
+      createInputWithNegatives({ maxDecimals: 2 });
+      const inputElement = getInputElement();
+
+      const mockEvent = {
+        target: inputElement,
+        preventDefault: vi.fn(),
+        clipboardData: {
+          getData: vi.fn().mockReturnValue('-abc123.45def'),
+        },
+      } as unknown as ClipboardEvent;
+
+      inputElement.value = '';
+      handleOnPasteNumericInput(mockEvent, 2, false, true);
+
+      expect(inputElement.value).toBe('-123.45');
+    });
+  });
+
+  describe('Formatting with negative numbers', () => {
+    it('should format negative numbers with thousands separators', () => {
+      createInputWithNegatives({
+        formatOn: 'change',
+        thousandsSeparator: ',',
+        thousandsGroupStyle: 'thousand',
+      });
+      const inputElement = getInputElement();
+
+      inputElement.value = '-1234567';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-1,234,567');
+    });
+
+    it('should format negative decimal numbers with separators', () => {
+      createInputWithNegatives({
+        formatOn: 'change',
+        thousandsSeparator: ',',
+        thousandsGroupStyle: 'thousand',
+        maxDecimals: 2,
+      });
+      const inputElement = getInputElement();
+
+      inputElement.value = '-1234567.89';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-1,234,567.89');
+    });
+
+    it('should handle negative numbers in blur mode', () => {
+      createInputWithNegatives({
+        formatOn: 'blur',
+        thousandsSeparator: ',',
+        thousandsGroupStyle: 'thousand',
+      });
+      const inputElement = getInputElement();
+
+      inputElement.value = '-1234567';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-1234567');
+
+      inputElement.dispatchEvent(new Event('blur'));
+
+      expect(inputElement.value).toBe('-1,234,567');
+    });
+  });
+
+  describe('Edge cases', () => {
+    it('should handle just minus sign', () => {
+      createInputWithNegatives();
+      const inputElement = getInputElement();
+
+      inputElement.value = '-';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-');
+    });
+
+    it('should handle minus sign with decimal point', () => {
+      createInputWithNegatives();
+      const inputElement = getInputElement();
+
+      inputElement.value = '-.';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-.');
+    });
+
+    it('should handle negative number with leading zeros', () => {
+      createInputWithNegatives();
+      const inputElement = getInputElement();
+
+      inputElement.value = '-007';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-007');
+    });
+
+    it('should respect maxDecimals for negative numbers', () => {
+      createInputWithNegatives({ maxDecimals: 2 });
+      const inputElement = getInputElement();
+
+      inputElement.value = '-123.456';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-123.45');
+    });
   });
 });
 

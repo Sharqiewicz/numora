@@ -20,6 +20,7 @@ export interface NumericInputOptions extends Partial<HTMLInputElement> {
 
   // Parsing options
   shorthandParsing?: boolean;  // Default: false
+  allowNegative?: boolean;  // Default: false
 }
 
 export class NumericInput {
@@ -40,6 +41,7 @@ export class NumericInput {
       thousandsSeparator = ',',
       thousandsGroupStyle = 'thousand',
       shorthandParsing = false,
+      allowNegative = false,
       ...rest
     }: NumericInputOptions
   ) {
@@ -50,6 +52,7 @@ export class NumericInput {
       thousandsSeparator,
       thousandsGroupStyle,
       shorthandParsing,
+      allowNegative,
       ...rest,
     };
 
@@ -61,7 +64,10 @@ export class NumericInput {
     this.element = document.createElement('input');
 
     this.element.setAttribute('minlength', '1');
-    this.element.setAttribute('pattern', '^[0-9]*[.,]?[0-9]*$');
+    const pattern = this.options.allowNegative 
+      ? '^-?[0-9]*[.,]?[0-9]*$' 
+      : '^[0-9]*[.,]?[0-9]*$';
+    this.element.setAttribute('pattern', pattern);
     this.element.setAttribute('spellcheck', 'false');
     this.element.setAttribute('type', 'text');
     this.element.setAttribute('inputmode', 'decimal');
@@ -94,6 +100,7 @@ export class NumericInput {
         thousandsSeparator: this.options.thousandsSeparator,
         thousandsGroupStyle: this.options.thousandsGroupStyle,
         shorthandParsing: this.options.shorthandParsing,
+        allowNegative: this.options.allowNegative,
       }
     );
     this.caretPositionBeforeChange = undefined;
@@ -130,7 +137,8 @@ export class NumericInput {
     handleOnPasteNumericInput(
       e,
       this.options.maxDecimals || DEFAULT_MAX_DECIMALS,
-      this.options.shorthandParsing
+      this.options.shorthandParsing,
+      this.options.allowNegative
     );
     if (this.options.onChange) {
       this.options.onChange((e.target as HTMLInputElement).value);

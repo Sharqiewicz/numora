@@ -5,6 +5,7 @@ import { expandShorthand } from './shorthand';
 
 export interface SanitizationOptions {
   shorthandParsing?: boolean;
+  allowNegative?: boolean;
 }
 
 /**
@@ -32,7 +33,7 @@ export const sanitizeNumericInput = (
   sanitized = expandScientificNotation(sanitized);
 
   // Step 3: Remove non-numeric characters
-  sanitized = removeNonNumericCharacters(sanitized);
+  sanitized = removeNonNumericCharacters(sanitized, options?.allowNegative);
 
   // Step 4: Remove extra dots
   return removeExtraDots(sanitized);

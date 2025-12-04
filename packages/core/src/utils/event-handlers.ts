@@ -13,6 +13,7 @@ export interface FormattingOptions {
   thousandsSeparator?: string;
   thousandsGroupStyle?: ThousandsGroupStyle;
   shorthandParsing?: boolean;
+  allowNegative?: boolean;
 }
 
 
@@ -48,7 +49,8 @@ export function handleOnChangeNumericInput(
   }
 
   target.value = sanitizeNumericInput(target.value, {
-    shorthandParsing: formattingOptions?.shorthandParsing
+    shorthandParsing: formattingOptions?.shorthandParsing,
+    allowNegative: formattingOptions?.allowNegative
   });
   target.value = trimToMaxDecimals(target.value, maxDecimals);
 
@@ -214,21 +216,29 @@ export function handleOnKeyDownNumericInput(
 export function handleOnPasteNumericInput(
   e: ClipboardEvent,
   maxDecimals: number,
-  shorthandParsing?: boolean
+  shorthandParsing?: boolean,
+  allowNegative?: boolean
 ): string {
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
 
   const sanitizedClipboardData = sanitizeNumericInput(
     e.clipboardData?.getData('text/plain') || '',
-    { shorthandParsing }
+    { shorthandParsing, allowNegative }
   );
 
   const combinedValue =
     value.slice(0, selectionStart || 0) + sanitizedClipboardData + value.slice(selectionEnd || 0);
 
-  const [integerPart, ...decimalParts] = combinedValue.split('.');
-  const sanitizedValue = integerPart + (decimalParts.length > 0 ? '.' + decimalParts.join('') : '');
+  const sanitizedCombined = sanitizeNumericInput(combinedValue, {
+    shorthandParsing,
+    allowNegative
+  });
+
+  const isNegative = sanitizedCombined.startsWith('-');
+  const absoluteValue = isNegative ? sanitizedCombined.slice(1) : sanitizedCombined;
+  const [integerPart, ...decimalParts] = absoluteValue.split('.');
+  const sanitizedValue = (isNegative ? '-' : '') + integerPart + (decimalParts.length > 0 ? '.' + decimalParts.join('') : '');
 
   e.preventDefault();
   inputElement.value = trimToMaxDecimals(sanitizedValue, maxDecimals);

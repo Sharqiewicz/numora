@@ -80,6 +80,30 @@ describe('formatWithSeparators', () => {
     it('should handle very large numbers', () => {
       expect(formatWithSeparators('123456789012345', ',', 'thousand')).toBe('123,456,789,012,345');
     });
+
+    it('should format negative numbers', () => {
+      expect(formatWithSeparators('-1234567', ',', 'thousand')).toBe('-1,234,567');
+    });
+
+    it('should format negative decimal numbers', () => {
+      expect(formatWithSeparators('-1234567.89', ',', 'thousand')).toBe('-1,234,567.89');
+    });
+
+    it('should handle negative zero', () => {
+      expect(formatWithSeparators('-0', ',', 'thousand')).toBe('-0');
+    });
+
+    it('should handle just minus sign', () => {
+      expect(formatWithSeparators('-', ',', 'thousand')).toBe('-');
+    });
+
+    it('should handle minus with decimal point', () => {
+      expect(formatWithSeparators('-.', ',', 'thousand')).toBe('-.');
+    });
+
+    it('should handle negative numbers starting with decimal', () => {
+      expect(formatWithSeparators('-.89', ',', 'thousand')).toBe('-.89');
+    });
   });
 
   describe('lakh style (Indian numbering)', () => {
