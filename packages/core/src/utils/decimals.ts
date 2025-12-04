@@ -25,3 +25,6 @@ export const trimToMaxDecimals = (value: string, maxDecimals: number): string =>
   const [integer, decimal] = value.split('.');
   return decimal ? `${integer}.${decimal.slice(0, maxDecimals)}` : value;
 };
+
+
+export const removeExtraDots = (value: string): string => value.replace(/(\..*?)\./g, '$1');
