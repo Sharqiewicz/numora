@@ -257,3 +257,221 @@ describe('NumericInput edge cases', () => {
     expect(preventDefaultSpy).not.toHaveBeenCalled();
   });
 });
+
+describe('Scientific Notation Expansion', () => {
+  let container: HTMLElement;
+  let numericInput: NumericInput;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  describe('Negative exponents (small numbers)', () => {
+    it('should expand 1.5e-7 to 0.00000015', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 8 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '1.5e-7';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0.00000015');
+    });
+
+    it('should expand 1.5e-1 to 0.15', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 2 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '1.5e-1';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0.15');
+    });
+
+    it('should expand 1.23e-4 to 0.000123', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 6 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '1.23e-4';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0.000123');
+    });
+
+    it('should expand 2e-3 to 0.002', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 3 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '2e-3';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0.002');
+    });
+
+    it('should expand 0.5e-2 to 0.005', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 3 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '0.5e-2';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0.005');
+    });
+
+    it('should expand 1e-10 to 0.0000000001', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 10 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '1e-10';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0.0000000001');
+    });
+
+    it('should expand 123.456e-2 to 1.23456', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 5 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '123.456e-2';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('1.23456');
+    });
+  });
+
+  describe('Positive exponents (large numbers)', () => {
+    it('should expand 2e+5 to 200000', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 0 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '2e+5';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('200000');
+    });
+
+    it('should expand 1.5e+2 to 150', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 0 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '1.5e+2';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('150');
+    });
+
+    it('should expand 1.5e+1 to 15', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 0 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '1.5e+1';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('15');
+    });
+
+    it('should expand 12.34e+1 to 123.4', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 1 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '12.34e+1';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('123.4');
+    });
+
+    it('should expand 12.34e+2 to 1234', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 0 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '12.34e+2';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('1234');
+    });
+
+    it('should expand 1e+3 to 1000', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 0 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '1e+3';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('1000');
+    });
+  });
+
+  describe('Edge cases', () => {
+    it('should handle exponent of 0', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 2 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '1.5e0';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('1.5');
+    });
+
+    it('should handle uppercase E', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 8 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '1.5E-7';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0.00000015');
+    });
+
+    it('should handle integer base without decimal point', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 3 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '5e-3';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0.005');
+    });
+
+    it('should respect maxDecimals when expanding', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 2 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '1.234567e-2';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0.01');
+    });
+
+    it('should not expand non-scientific notation', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 2 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      inputElement.value = '123.45';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('123.45');
+    });
+
+    it('should handle paste events with scientific notation', () => {
+      numericInput = new NumericInput(container, { maxDecimals: 8 });
+      const inputElement = container.querySelector('input') as HTMLInputElement;
+
+      const mockEvent = {
+        target: inputElement,
+        preventDefault: vi.fn(),
+        clipboardData: {
+          getData: vi.fn().mockReturnValue('1.5e-7'),
+        },
+      } as unknown as ClipboardEvent;
+
+      inputElement.value = '';
+      handleOnPasteNumericInput(mockEvent, 8);
+
+      expect(inputElement.value).toBe('0.00000015');
+    });
+  });
+});
