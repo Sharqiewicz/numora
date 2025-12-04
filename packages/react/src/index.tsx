@@ -16,6 +16,9 @@ interface NumericInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
   formatOn?: FormatOn;  // Default: 'blur'
   thousandsSeparator?: string;  // Default: ','
   thousandsGroupStyle?: ThousandsGroupStyle;  // Default: 'thousand'
+
+  // Parsing options
+  shorthandParsing?: boolean;  // Default: false
 }
 
 const DEFAULT_PROPS = {
@@ -36,6 +39,7 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
     formatOn = 'blur',
     thousandsSeparator = ',',
     thousandsGroupStyle = 'thousand',
+    shorthandParsing = false,
     ...props
   }: NumericInputProps, ref) => {
     const [caretPositionBeforeChange, setCaretPositionBeforeChange] =
@@ -73,6 +77,7 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
           formatOn,
           thousandsSeparator,
           thousandsGroupStyle,
+          shorthandParsing,
         }
       );
       setCaretPositionBeforeChange(undefined);
@@ -80,7 +85,7 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
     }
 
     function handleOnPaste(e: ClipboardEvent<HTMLInputElement>): void {
-      handleOnPasteNumericInput(e.nativeEvent, maxDecimals);
+      handleOnPasteNumericInput(e.nativeEvent, maxDecimals, shorthandParsing);
       if (onChange) onChange(e);
     }
 
