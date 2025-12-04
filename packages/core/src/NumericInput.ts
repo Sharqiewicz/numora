@@ -17,6 +17,9 @@ export interface NumericInputOptions extends Partial<HTMLInputElement> {
   formatOn?: FormatOn;  // Default: 'blur'
   thousandsSeparator?: string;  // Default: ','
   thousandsGroupStyle?: ThousandsGroupStyle;  // Default: 'thousand'
+
+  // Parsing options
+  shorthandParsing?: boolean;  // Default: false
 }
 
 export class NumericInput {
@@ -36,6 +39,7 @@ export class NumericInput {
       formatOn = 'blur',
       thousandsSeparator = ',',
       thousandsGroupStyle = 'thousand',
+      shorthandParsing = false,
       ...rest
     }: NumericInputOptions
   ) {
@@ -45,6 +49,7 @@ export class NumericInput {
       formatOn,
       thousandsSeparator,
       thousandsGroupStyle,
+      shorthandParsing,
       ...rest,
     };
 
@@ -88,6 +93,7 @@ export class NumericInput {
         formatOn: this.options.formatOn,
         thousandsSeparator: this.options.thousandsSeparator,
         thousandsGroupStyle: this.options.thousandsGroupStyle,
+        shorthandParsing: this.options.shorthandParsing,
       }
     );
     this.caretPositionBeforeChange = undefined;
@@ -121,7 +127,11 @@ export class NumericInput {
   }
 
   private handlePaste(e: ClipboardEvent): void {
-    handleOnPasteNumericInput(e, this.options.maxDecimals || DEFAULT_MAX_DECIMALS);
+    handleOnPasteNumericInput(
+      e,
+      this.options.maxDecimals || DEFAULT_MAX_DECIMALS,
+      this.options.shorthandParsing
+    );
     if (this.options.onChange) {
       this.options.onChange((e.target as HTMLInputElement).value);
     }
@@ -129,8 +139,8 @@ export class NumericInput {
 
   private handleFocus(e: FocusEvent): void {
     const target = e.target as HTMLInputElement;
-    // Remove separators for easier editing in 'blur' mode
-    if (this.options.thousandsSeparator) {
+    // Remove separators for easier editing in 'blur' mode only
+    if (this.options.formatOn === 'blur' && this.options.thousandsSeparator) {
       target.value = target.value.replace(
         new RegExp(this.options.thousandsSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
         ''

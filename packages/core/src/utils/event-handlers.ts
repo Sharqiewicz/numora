@@ -12,6 +12,7 @@ export interface FormattingOptions {
   formatOn?: 'blur' | 'change';
   thousandsSeparator?: string;
   thousandsGroupStyle?: ThousandsGroupStyle;
+  shorthandParsing?: boolean;
 }
 
 
@@ -46,7 +47,9 @@ export function handleOnChangeNumericInput(
     target.value = replaceCommasWithDots(target.value);
   }
 
-  target.value = sanitizeNumericInput(target.value);
+  target.value = sanitizeNumericInput(target.value, {
+    shorthandParsing: formattingOptions?.shorthandParsing
+  });
   target.value = trimToMaxDecimals(target.value, maxDecimals);
 
   const sanitizedValue = target.value;
@@ -205,13 +208,21 @@ export function handleOnKeyDownNumericInput(
  *
  * @param e - The clipboard event triggered by the input.
  * @param maxDecimals - The maximum number of decimal places allowed.
+ * @param shorthandParsing - Optional flag to enable shorthand expansion (1k → 1000)
  * @returns The sanitized value after the paste event.
  */
-export function handleOnPasteNumericInput(e: ClipboardEvent, maxDecimals: number): string {
+export function handleOnPasteNumericInput(
+  e: ClipboardEvent,
+  maxDecimals: number,
+  shorthandParsing?: boolean
+): string {
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
 
-  const sanitizedClipboardData = sanitizeNumericInput(e.clipboardData?.getData('text/plain') || '');
+  const sanitizedClipboardData = sanitizeNumericInput(
+    e.clipboardData?.getData('text/plain') || '',
+    { shorthandParsing }
+  );
 
   const combinedValue =
     value.slice(0, selectionStart || 0) + sanitizedClipboardData + value.slice(selectionEnd || 0);
