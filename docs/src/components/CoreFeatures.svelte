@@ -1,4 +1,4 @@
-<div class="py-20 px-4 bg-gray-50 dark:bg-[#181a1b]/30 border-y border-gray-200 dark:border-[#23272b]/50">
+<section class="py-20 px-4 my-16 bg-gray-50 dark:bg-[#181a1b]/30 border-y border-gray-200 dark:border-[#23272b]/50">
     <div class="text-center max-w-3xl mx-auto mb-16">
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">A New Primitive for <span class="text-[#5b2ff5]">Finance</span>.</h2>
         <p class="text-gray-600 dark:text-[#a0a3c4] text-lg">
@@ -66,4 +66,4 @@
         </div>
 
     </div>
-</div>
+</section>

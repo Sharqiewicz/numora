@@ -18,7 +18,7 @@ return <input {...props} className="your-custom-styles" />;`);
     }
 </script>
 
-<div class="py-16 px-4">
+<section class="py-16 px-4">
     <div class="flex flex-col lg:flex-row gap-12 items-center max-w-6xl mx-auto">
 
         <!-- Text Content -->
@@ -68,4 +68,4 @@ return <input {...props} className="your-custom-styles" />;`);
              </div>
         </div>
     </div>
-</div>
+</section>

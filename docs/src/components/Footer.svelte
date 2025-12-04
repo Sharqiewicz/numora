@@ -1,4 +1,4 @@
-<div class="py-20 text-center border-t border-gray-200 dark:border-[#23272b] bg-gray-50 dark:bg-[#181a1b]/30">
+<div class="py-20 mt-16 text-center border-t border-gray-200 dark:border-[#23272b] bg-gray-50 dark:bg-[#181a1b]/30">
     <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Ready to standardize your dApp?</h2>
     <div class="flex flex-col sm:flex-row gap-6 justify-center text-gray-600 dark:text-[#a0a3c4]">
         <a href="/general/getting-started/" class="hover:text-[#5b2ff5] transition-colors underline underline-offset-4">Installation Guide</a>

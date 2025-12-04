@@ -13,7 +13,7 @@
     ];
 </script>
 
-<div class="py-16 border rounded-xl border-gray-200 dark:border-[#23272b] bg-gray-50 dark:bg-[#181a1b]/50 hover:scale-[1.02] transition-transform duration-300">
+<section class="py-16 my-16 border rounded-xl border-gray-200 dark:border-[#23272b] bg-gray-50 dark:bg-[#181a1b]/50 hover:scale-[1.02] transition-transform duration-300">
     <div class="text-center max-w-3xl mx-auto mb-10 px-4">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">We analyzed the industry leaders.</h2>
         <p class="text-gray-600 dark:text-[#a0a3c4]">
@@ -32,7 +32,7 @@
             </a>
         {/each}
     </div>
-</div>
+</section>
 
 <style>
   .social-logo {
