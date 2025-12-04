@@ -1,6 +1,21 @@
-const removeNonNumericCharacters = (value: string): string => value.replace(/[^0-9.]/g, '');
+import { removeExtraDots } from './decimals';
+import { removeNonNumericCharacters } from './nonNumericCharacters';
+import { expandScientificNotation } from './scientific-notation';
 
-const removeExtraDots = (value: string): string => value.replace(/(\..*?)\./g, '$1');
 
-export const sanitizeNumericInput = (value: string): string =>
-  removeExtraDots(removeNonNumericCharacters(value));
+
+
+/**
+ * Sanitizes numeric input by:
+ * 1. Expanding scientific notation (e.g., 1.5e-7 → 0.00000015)
+ * 2. Removing non-numeric characters
+ * 3. Removing extra decimal points
+ *
+ * @param value - The string value to sanitize
+ * @returns The sanitized numeric string
+ */
+export const sanitizeNumericInput = (value: string): string => {
+  const expanded = expandScientificNotation(value);
+  const cleaned = removeNonNumericCharacters(expanded);
+  return removeExtraDots(cleaned);
+};
