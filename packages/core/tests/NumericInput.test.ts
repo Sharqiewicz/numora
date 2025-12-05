@@ -424,7 +424,7 @@ describe('Negative Number Support', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      handleOnPasteNumoraInput(mockEvent, 2, false, true);
+      handleOnPasteNumoraInput(mockEvent, 2, { enableNegative: true });
 
       expect(inputElement.value).toBe('-123.45');
     });
@@ -442,7 +442,7 @@ describe('Negative Number Support', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      handleOnPasteNumoraInput(mockEvent, 2, false, true);
+      handleOnPasteNumoraInput(mockEvent, 2, { enableNegative: true });
 
       expect(inputElement.value).toBe('-123.45');
     });
@@ -692,7 +692,7 @@ describe('Leading Zeros Support', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      handleOnPasteNumoraInput(mockEvent, 2, false, false, true);
+      handleOnPasteNumoraInput(mockEvent, 2, { enableLeadingZeros: true });
 
       expect(inputElement.value).toBe('000123');
     });

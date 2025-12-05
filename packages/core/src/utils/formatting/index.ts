@@ -12,7 +12,7 @@ export type { thousandStyle, ChangeRange } from './constants';
 export { GROUPING_CONFIG } from './constants';
 
 // === NUMBER FORMATTING ===
-export { formatWithSeparators } from './thousand-grouping';
+export { formatWithSeparators, applyFormattingIfNeeded } from './thousand-grouping';
 
 // === CURSOR POSITION CALCULATION ===
 export {

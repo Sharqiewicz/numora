@@ -4,6 +4,7 @@ import { expandScientificNotation } from './scientific-notation';
 import { expandCompactNotation } from './compact-notation';
 import { removeLeadingZeros } from './leading-zeros';
 import { filterMobileKeyboardArtifacts } from './mobile-keyboard-filtering';
+import type { FormattingOptions, Separators } from '@/types';
 
 export interface SanitizationOptions {
   enableCompactNotation?: boolean;
@@ -65,3 +66,25 @@ export const sanitizeNumoraInput = (
 
   return sanitized;
 };
+
+/**
+ * Builds sanitization options from formatting options and separators.
+ *
+ * @param formattingOptions - Optional formatting options
+ * @param separators - Separator configuration
+ * @param shouldRemoveThousandSeparators - Whether to remove thousand separators
+ * @returns Sanitization options
+ */
+export function buildSanitizationOptions(
+  formattingOptions: FormattingOptions | undefined,
+  separators: Separators,
+  shouldRemoveThousandSeparators: boolean
+): SanitizationOptions {
+  return {
+    enableCompactNotation: formattingOptions?.enableCompactNotation,
+    enableNegative: formattingOptions?.enableNegative,
+    enableLeadingZeros: formattingOptions?.enableLeadingZeros,
+    decimalSeparator: separators.decimalSeparator,
+    thousandSeparator: shouldRemoveThousandSeparators ? separators.thousandSeparator : undefined,
+  };
+}

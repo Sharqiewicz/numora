@@ -1,14 +1,6 @@
 import { DEFAULT_DECIMAL_SEPARATOR } from "@/config";
+import type { SeparatorOptions, Separators, FormattingOptions } from '@/types';
 
-export interface SeparatorOptions {
-  decimalSeparator?: string;
-  thousandSeparator?: string;
-}
-
-export interface Separators {
-  decimalSeparator: string;
-  thousandSeparator?: string;
-}
 
 /**
  * Normalizes separator configuration with defaults.
@@ -21,6 +13,19 @@ export function getSeparators(options: SeparatorOptions): Separators {
     decimalSeparator: options.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
     thousandSeparator: options.thousandSeparator,
   };
+}
+
+/**
+ * Gets separators from FormattingOptions.
+ *
+ * @param formattingOptions - Optional formatting options
+ * @returns Normalized separator configuration
+ */
+export function getSeparatorsFromOptions(formattingOptions?: FormattingOptions) {
+  return getSeparators({
+    decimalSeparator: formattingOptions?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
+    thousandSeparator: formattingOptions?.thousandSeparator,
+  });
 }
 
 /**

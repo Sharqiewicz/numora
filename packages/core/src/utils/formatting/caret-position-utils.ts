@@ -3,6 +3,18 @@
  * Includes mobile browser workarounds and retry mechanisms.
  */
 
+import {
+  findChangedRangeFromCaretPositions,
+  findChangeRange,
+} from './change-detection';
+import {
+  calculateCursorPositionAfterFormatting,
+  type CursorPositionOptions,
+} from './cursor-position';
+import { getCaretBoundary } from './cursor-boundary';
+import { defaultIsCharacterEquivalent } from './character-equivalence';
+import type { FormattingOptions, CaretPositionInfo, Separators } from '@/types';
+
 /**
  * Sets the caret position in an input element.
  * Includes workaround for Chrome/Safari mobile browser bugs.
@@ -83,5 +95,73 @@ export function setCaretPositionWithRetry(
 export function getInputCaretPosition(el: HTMLInputElement): number {
   // Max of selectionStart and selectionEnd is taken for mobile device caret bug fix
   return Math.max(el.selectionStart as number, el.selectionEnd as number);
+}
+
+/**
+ * Updates cursor position after value changes, handling both formatted and unformatted values.
+ *
+ * @param target - The input element
+ * @param oldValue - The value before the change
+ * @param newValue - The value after the change
+ * @param oldCursorPosition - The cursor position before the change
+ * @param caretPositionBeforeChange - Optional caret position info from keydown handler
+ * @param rawInputValue - The raw input value before processing
+ * @param separators - Separator configuration
+ * @param formattingOptions - Optional formatting options
+ */
+export function updateCursorPosition(
+  target: HTMLInputElement,
+  oldValue: string,
+  newValue: string,
+  oldCursorPosition: number,
+  caretPositionBeforeChange: CaretPositionInfo | undefined,
+  rawInputValue: string,
+  separators: Separators,
+  formattingOptions?: FormattingOptions
+): void {
+  if (!caretPositionBeforeChange) return;
+
+  const { selectionStart = 0, selectionEnd = 0, endOffset = 0 } = caretPositionBeforeChange;
+
+  let changeRange = findChangedRangeFromCaretPositions(
+    { selectionStart, selectionEnd, endOffset },
+    oldValue,
+    newValue
+  );
+
+  if (!changeRange) {
+    changeRange = findChangeRange(oldValue, newValue);
+  }
+
+  if (!changeRange) return;
+
+  const boundary = getCaretBoundary(newValue, {
+    thousandSeparator: formattingOptions?.thousandSeparator ?? separators.thousandSeparator,
+    decimalSeparator: separators.decimalSeparator,
+  });
+
+  const cursorOptions: CursorPositionOptions = {
+    thousandSeparator: formattingOptions?.thousandSeparator ?? separators.thousandSeparator,
+    decimalSeparator: separators.decimalSeparator,
+    isCharacterEquivalent: defaultIsCharacterEquivalent,
+    rawInputValue,
+    boundary,
+  };
+
+  const thousandSeparator = formattingOptions?.thousandSeparator ?? separators.thousandSeparator ?? ',';
+  const thousandStyle = formattingOptions?.thousandStyle ?? 'thousand';
+
+  const newCursorPosition = calculateCursorPositionAfterFormatting(
+    oldValue,
+    newValue,
+    oldCursorPosition,
+    thousandSeparator,
+    thousandStyle,
+    changeRange,
+    separators.decimalSeparator,
+    cursorOptions
+  );
+
+  setCaretPositionWithRetry(target, newCursorPosition, newValue);
 }
 

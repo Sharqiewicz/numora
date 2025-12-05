@@ -1,43 +1,17 @@
 import {
   trimToMaxDecimals,
   alreadyHasDecimal,
-  getSeparators,
+  getSeparatorsFromOptions,
 } from '@/utils/decimals';
-import { sanitizeNumoraInput } from '@/utils/sanitization';
+import { sanitizeNumoraInput, buildSanitizationOptions } from '@/utils/sanitization';
 import {
-  findChangedRangeFromCaretPositions,
-  findChangeRange,
-  calculateCursorPositionAfterFormatting,
-  formatWithSeparators,
-  type thousandStyle,
-  getCaretBoundary,
-  type CursorPositionOptions,
+  applyFormattingIfNeeded,
 } from '@/utils/formatting';
 import {
-  setCaretPositionWithRetry,
   getInputCaretPosition,
+  updateCursorPosition,
 } from '@/utils/formatting/caret-position-utils';
-import {
-  defaultIsCharacterEquivalent,
-} from '@/utils/formatting/character-equivalence';
-import { DEFAULT_DECIMAL_SEPARATOR } from '@/config';
-
-export interface FormattingOptions {
-  formatOn?: 'blur' | 'change';
-  thousandSeparator?: string;
-  thousandStyle?: thousandStyle;
-  enableCompactNotation?: boolean;
-  enableNegative?: boolean;
-  enableLeadingZeros?: boolean;
-  decimalSeparator?: string;
-}
-
-
-export interface CaretPositionInfo {
-  selectionStart?: number;
-  selectionEnd?: number;
-  endOffset?: number;
-}
+import type { FormattingOptions, CaretPositionInfo } from '@/types';
 
 /**
  * Handles the keydown event to prevent the user from entering a second decimal point.
@@ -52,10 +26,7 @@ export function handleOnKeyDownNumoraInput(
   e: KeyboardEvent,
   formattingOptions?: FormattingOptions
 ): CaretPositionInfo | undefined {
-  const separators = getSeparators({
-    decimalSeparator: formattingOptions?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
-    thousandSeparator: formattingOptions?.thousandSeparator,
-  });
+  const separators = getSeparatorsFromOptions(formattingOptions);
 
   if (alreadyHasDecimal(e, separators.decimalSeparator)) {
     e.preventDefault();
@@ -101,8 +72,6 @@ export function handleOnKeyDownNumoraInput(
   return undefined;
 }
 
-
-
 /**
  * Handles the input change event to ensure the value does not exceed the maximum number of decimal places,
  * replaces commas with dots, and removes invalid non-numeric characters.
@@ -124,132 +93,31 @@ export function handleOnChangeNumoraInput(
   const oldValue = target.value;
   const oldCursorPosition = getInputCaretPosition(target);
 
-  const separators = getSeparators({
-    decimalSeparator: formattingOptions?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
-    thousandSeparator: formattingOptions?.thousandSeparator,
-  });
-
-  // Track raw input value before any processing
+  const separators = getSeparatorsFromOptions(formattingOptions);
   const rawInputValue = target.value;
 
-  target.value = sanitizeNumoraInput(target.value, {
-    enableCompactNotation: formattingOptions?.enableCompactNotation,
-    enableNegative: formattingOptions?.enableNegative,
-    enableLeadingZeros: formattingOptions?.enableLeadingZeros,
-    decimalSeparator: separators.decimalSeparator,
-    thousandSeparator: formattingOptions?.formatOn === 'change' ? separators.thousandSeparator : undefined,
-  });
+  const shouldRemoveThousandSeparators = formattingOptions?.formatOn === 'change';
+  target.value = sanitizeNumoraInput(
+    target.value,
+    buildSanitizationOptions(formattingOptions, separators, shouldRemoveThousandSeparators)
+  );
 
   target.value = trimToMaxDecimals(target.value, decimalMaxLength, separators.decimalSeparator);
 
   const sanitizedValue = target.value;
+  const newValue = applyFormattingIfNeeded(target, sanitizedValue, formattingOptions, separators);
 
-  // Step 2: Apply formatting if formatOn is 'change'
-  if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandSeparator) {
-    const formatted = formatWithSeparators(
-      sanitizedValue,
-      formattingOptions.thousandSeparator,
-      formattingOptions.thousandStyle || 'thousand',
-      formattingOptions.enableLeadingZeros,
-      separators.decimalSeparator
+  if (oldValue !== newValue) {
+    updateCursorPosition(
+      target,
+      oldValue,
+      newValue,
+      oldCursorPosition,
+      caretPositionBeforeChange,
+      rawInputValue,
+      separators,
+      formattingOptions
     );
-
-    target.value = formatted;
-    const newValue = formatted;
-
-    // Step 3: Calculate and set cursor position
-    if (caretPositionBeforeChange) {
-      const { selectionStart = 0, selectionEnd = 0, endOffset = 0 } = caretPositionBeforeChange;
-
-      // Prioritize caret-based change detection (more accurate)
-      let changeRange = findChangedRangeFromCaretPositions(
-        { selectionStart, selectionEnd, endOffset },
-        oldValue,
-        newValue
-      );
-
-      // Fallback to string comparison if caret-based detection fails
-      if (!changeRange) {
-        changeRange = findChangeRange(oldValue, newValue);
-      }
-
-      if (changeRange) {
-        // Create caret boundary
-        const boundary = getCaretBoundary(newValue, {
-          thousandSeparator: formattingOptions.thousandSeparator,
-          decimalSeparator: separators.decimalSeparator,
-        });
-
-        const cursorOptions: CursorPositionOptions = {
-          thousandSeparator: formattingOptions.thousandSeparator,
-          decimalSeparator: separators.decimalSeparator,
-          isCharacterEquivalent: defaultIsCharacterEquivalent,
-          rawInputValue,
-          boundary,
-        };
-
-        const newCursorPosition = calculateCursorPositionAfterFormatting(
-          oldValue,
-          newValue,
-          oldCursorPosition,
-          formattingOptions.thousandSeparator,
-          formattingOptions.thousandStyle || 'thousand',
-          changeRange,
-          separators.decimalSeparator,
-          cursorOptions
-        );
-
-        // Use mobile browser retry mechanism
-        setCaretPositionWithRetry(target, newCursorPosition, newValue);
-      }
-    }
-  } else {
-    // No real-time formatting - just handle cursor for sanitization changes
-    const newValue = sanitizedValue;
-
-    if (oldValue !== newValue && caretPositionBeforeChange) {
-      const { selectionStart = 0, selectionEnd = 0, endOffset = 0 } = caretPositionBeforeChange;
-
-      // Prioritize caret-based change detection (more accurate)
-      let changeRange = findChangedRangeFromCaretPositions(
-        { selectionStart, selectionEnd, endOffset },
-        oldValue,
-        newValue
-      );
-
-      // Fallback to string comparison if caret-based detection fails
-      if (!changeRange) {
-        changeRange = findChangeRange(oldValue, newValue);
-      }
-
-      if (changeRange) {
-        const boundary = getCaretBoundary(newValue, {
-          thousandSeparator: separators.thousandSeparator,
-          decimalSeparator: separators.decimalSeparator,
-        });
-
-        const cursorOptions: CursorPositionOptions = {
-          thousandSeparator: separators.thousandSeparator,
-          decimalSeparator: separators.decimalSeparator,
-          isCharacterEquivalent: defaultIsCharacterEquivalent,
-          rawInputValue,
-          boundary,
-        };
-
-        const newCursorPosition = calculateCursorPositionAfterFormatting(
-          oldValue,
-          newValue,
-          oldCursorPosition,
-          separators.thousandSeparator || ',',
-          'thousand',
-          changeRange,
-          separators.decimalSeparator,
-          cursorOptions
-        );
-
-        setCaretPositionWithRetry(target, newCursorPosition, newValue);
-      }
-    }
   }
 }
 
@@ -260,39 +128,29 @@ export function handleOnChangeNumoraInput(
  *
  * @param e - The clipboard event triggered by the input.
  * @param decimalMaxLength - The maximum number of decimal places allowed.
- * @param enableCompactNotation - Optional flag to enable compact notation expansion (1k → 1000)
+ * @param formattingOptions - Optional formatting options
  * @returns The sanitized value after the paste event.
  */
 export function handleOnPasteNumoraInput(
   e: ClipboardEvent,
   decimalMaxLength: number,
-  enableCompactNotation?: boolean,
-  enableNegative?: boolean,
-  enableLeadingZeros?: boolean,
-  decimalSeparator?: string,
-  thousandSeparator?: string
+  formattingOptions?: FormattingOptions
 ): string {
   e.preventDefault();
 
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
 
-  const separators = getSeparators({
-    decimalSeparator: decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
-    thousandSeparator,
-  });
+  const separators = getSeparatorsFromOptions(formattingOptions);
 
   const clipboardData = e.clipboardData?.getData('text/plain') || '';
   const combinedValue =
     value.slice(0, selectionStart || 0) + clipboardData + value.slice(selectionEnd || 0);
 
-  const sanitizedValue = sanitizeNumoraInput(combinedValue, {
-    enableCompactNotation,
-    enableNegative,
-    enableLeadingZeros,
-    decimalSeparator: separators.decimalSeparator,
-    thousandSeparator: separators.thousandSeparator,
-  });
+  const sanitizedValue = sanitizeNumoraInput(
+    combinedValue,
+    buildSanitizationOptions(formattingOptions, separators, true)
+  );
 
   inputElement.value = trimToMaxDecimals(sanitizedValue, decimalMaxLength, separators.decimalSeparator);
 

@@ -174,15 +174,15 @@ export class NumoraInput {
   }
 
   private handlePaste(e: ClipboardEvent): void {
-    handleOnPasteNumoraInput(
-      e,
-      this.options.decimalMaxLength,
-      this.options.enableCompactNotation,
-      this.options.enableNegative,
-      this.options.enableLeadingZeros,
-      this.options.decimalSeparator,
-      this.options.thousandSeparator
-    );
+    handleOnPasteNumoraInput(e, this.options.decimalMaxLength, {
+      formatOn: this.options.formatOn,
+      thousandSeparator: this.options.thousandSeparator,
+      thousandStyle: this.options.thousandStyle,
+      enableCompactNotation: this.options.enableCompactNotation,
+      enableNegative: this.options.enableNegative,
+      enableLeadingZeros: this.options.enableLeadingZeros,
+      decimalSeparator: this.options.decimalSeparator,
+    });
     if (this.options.onChange) {
       this.options.onChange((e.target as HTMLInputElement).value);
     }
