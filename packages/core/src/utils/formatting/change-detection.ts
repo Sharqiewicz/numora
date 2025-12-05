@@ -90,7 +90,6 @@ export function findChangeRange(
   }
 
   let start = 0;
-  let end = oldValue.length;
 
   // Find where the strings start differing from the beginning
   while (start < oldValue.length && start < newValue.length && oldValue[start] === newValue[start]) {

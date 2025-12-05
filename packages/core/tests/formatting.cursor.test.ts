@@ -579,6 +579,106 @@ describe('calculateCursorPositionAfterFormatting', () => {
 
         expect(result).toBe(1);
       });
+
+      it('should maintain cursor at beginning when deleting first digit (1,234,567,890.6789 -> 234,567,890.6789)', () => {
+        const oldValue = '1,234,567,890.6789';
+        const newValue = '234,567,890.6789';
+        const cursor = 0;
+        const changeRange: ChangeRange = {
+          start: 0,
+          end: 2,
+          deletedLength: 2,
+          isDelete: false,
+        };
+
+        const result = calculateCursorPositionAfterFormatting(
+          oldValue,
+          newValue,
+          cursor,
+          ',',
+          'thousand',
+          changeRange,
+          '.'
+        );
+
+        expect(result).toBe(0);
+        expect(newValue[result]).toBe('2');
+      });
+
+      it('should maintain cursor at beginning when deleting first digit using findChangeRange fallback', () => {
+        const oldValue = '1,234,567,890.6789';
+        const newValue = '234,567,890.6789';
+        const cursor = 0;
+        const changeRange: ChangeRange = {
+          start: 0,
+          end: 2,
+          deletedLength: 2,
+          isDelete: true,
+        };
+
+        const result = calculateCursorPositionAfterFormatting(
+          oldValue,
+          newValue,
+          cursor,
+          ',',
+          'thousand',
+          changeRange,
+          '.'
+        );
+
+        expect(result).toBe(0);
+        expect(newValue[result]).toBe('2');
+      });
+
+      it('should maintain cursor position when deleting second digit (1,234,567,890.6789 -> 1,34,567,890.6789)', () => {
+        const oldValue = '1,234,567,890.6789';
+        const newValue = '1,34,567,890.6789';
+        const cursor = 2;
+        const changeRange: ChangeRange = {
+          start: 2,
+          end: 3,
+          deletedLength: 1,
+          isDelete: false,
+        };
+
+        const result = calculateCursorPositionAfterFormatting(
+          oldValue,
+          newValue,
+          cursor,
+          ',',
+          'thousand',
+          changeRange,
+          '.'
+        );
+
+        expect(result).toBe(2);
+        expect(newValue[result]).toBe('3');
+      });
+
+      it('should maintain cursor position when deleting third digit (1,234,567,890.6789 -> 1,24,567,890.6789)', () => {
+        const oldValue = '1,234,567,890.6789';
+        const newValue = '1,24,567,890.6789';
+        const cursor = 3;
+        const changeRange: ChangeRange = {
+          start: 3,
+          end: 4,
+          deletedLength: 1,
+          isDelete: false,
+        };
+
+        const result = calculateCursorPositionAfterFormatting(
+          oldValue,
+          newValue,
+          cursor,
+          ',',
+          'thousand',
+          changeRange,
+          '.'
+        );
+
+        expect(result).toBe(3);
+        expect(newValue[result]).toBe('4');
+      });
     });
 
     describe('findChangedRangeFromCaretPositions', () => {

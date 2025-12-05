@@ -428,7 +428,7 @@ function findCursorPositionAfterDeletion(
       );
 
       // Fine-tune position if needed
-      if (!changeRange && digitsRemoved > 0 && newPosition < integerPart.length) {
+      if (newPosition < integerPart.length) {
         const digitsAtNewPosition = countMeaningfulDigitsBeforePosition(
           integerPart,
           newPosition,
@@ -436,8 +436,20 @@ function findCursorPositionAfterDeletion(
           decimalSeparator
         );
 
-        if (digitsAtNewPosition === targetDigitCount && newPosition < integerPart.length - 1) {
-          return Math.min(newPosition + 1, integerPart.length);
+        if (digitsAtNewPosition === targetDigitCount) {
+          // Move past separator if we're on one, this is a deletion with changeRange, and we removed digits
+          if (
+            integerPart[newPosition] === separator &&
+            changeRange &&
+            digitsRemoved > 0 &&
+            newPosition < integerPart.length - 1
+          ) {
+            return newPosition + 1;
+          }
+          // Original fine-tuning for non-separator cases
+          if (!changeRange && digitsRemoved > 0 && newPosition < integerPart.length - 1) {
+            return Math.min(newPosition + 1, integerPart.length);
+          }
         }
       }
 
@@ -454,7 +466,7 @@ function findCursorPositionAfterDeletion(
   );
 
   // === ADJUSTMENT: Fine-tune position if needed ===
-  if (!changeRange && digitsRemoved > 0 && newPosition < newFormattedValue.length) {
+  if (newPosition < newFormattedValue.length) {
     const digitsAtNewPosition = countMeaningfulDigitsBeforePosition(
       newFormattedValue,
       newPosition,
@@ -462,8 +474,20 @@ function findCursorPositionAfterDeletion(
       decimalSeparator
     );
 
-    if (digitsAtNewPosition === targetDigitCount && newPosition < newFormattedValue.length - 1) {
-      return Math.min(newPosition + 1, newFormattedValue.length);
+    if (digitsAtNewPosition === targetDigitCount) {
+      // Move past separator if we're on one, this is a deletion with changeRange, and we removed digits
+      if (
+        newFormattedValue[newPosition] === separator &&
+        changeRange &&
+        digitsRemoved > 0 &&
+        newPosition < newFormattedValue.length - 1
+      ) {
+        return newPosition + 1;
+      }
+      // Original fine-tuning for non-separator cases
+      if (!changeRange && digitsRemoved > 0 && newPosition < newFormattedValue.length - 1) {
+        return Math.min(newPosition + 1, newFormattedValue.length);
+      }
     }
   }
 

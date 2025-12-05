@@ -68,6 +68,20 @@ export class NumoraInput {
       );
     }
 
+    if (thousandSeparator && thousandSeparator.length > 1) {
+      throw new Error(
+        `Thousand separator must be a single character. ` +
+        `Received: "${thousandSeparator}" (length: ${thousandSeparator.length})`
+      );
+    }
+
+    if (decimalSeparator && decimalSeparator.length > 1) {
+      throw new Error(
+        `Decimal separator must be a single character. ` +
+        `Received: "${decimalSeparator}" (length: ${decimalSeparator.length})`
+      );
+    }
+
     this.options = {
       decimalMaxLength,
       onChange,
