@@ -219,4 +219,58 @@ describe('formatWithSeparators', () => {
       expect(formatWithSeparators('123.', ',', 'thousand')).toBe('123.');
     });
   });
+
+  describe('additional test cases from react-number-format', () => {
+    describe('thousand style edge cases', () => {
+      it('should format 10040 to 10,040', () => {
+        expect(formatWithSeparators('10040', ',', 'thousand')).toBe('10,040');
+      });
+
+      it('should format -1000.40 to -1,000.40', () => {
+        expect(formatWithSeparators('-1000.40', ',', 'thousand', false, '.')).toBe('-1,000.40');
+      });
+
+      it('should format -100.40 to -100.40 (no separator needed)', () => {
+        expect(formatWithSeparators('-100.40', ',', 'thousand', false, '.')).toBe('-100.40');
+      });
+    });
+
+    describe('lakh style edge cases', () => {
+      it('should format 1004000 to 10,04,000', () => {
+        expect(formatWithSeparators('1004000', ',', 'lakh')).toBe('10,04,000');
+      });
+
+      it('should format 100400.5 to 1,00,400.5', () => {
+        expect(formatWithSeparators('100400.5', ',', 'lakh', false, '.')).toBe('1,00,400.5');
+      });
+
+      it('should format -100400.5 to -1,00,400.5', () => {
+        expect(formatWithSeparators('-100400.5', ',', 'lakh', false, '.')).toBe('-1,00,400.5');
+      });
+
+      it('should format -100.40 to -100.40 (no separator needed)', () => {
+        expect(formatWithSeparators('-100.40', ',', 'lakh', false, '.')).toBe('-100.40');
+      });
+    });
+
+    describe('wan style edge cases', () => {
+      it('should format 123456789 to 1,2345,6789', () => {
+        expect(formatWithSeparators('123456789', ',', 'wan')).toBe('1,2345,6789');
+      });
+
+      it('should format -12345.67 to -1,2345.67', () => {
+        expect(formatWithSeparators('-12345.67', ',', 'wan', false, '.')).toBe('-1,2345.67');
+      });
+    });
+
+    describe('none style (thousand grouping without special rules)', () => {
+      it('should format 1000 to 1,000', () => {
+        expect(formatWithSeparators('1000', ',', 'none')).toBe('1,000');
+      });
+
+      it('should format -12345678.90 to -12,345,678.90', () => {
+        expect(formatWithSeparators('-12345678.90', ',', 'none', false, '.')).toBe('-12,345,678.90');
+      });
+    });
+  });
 });

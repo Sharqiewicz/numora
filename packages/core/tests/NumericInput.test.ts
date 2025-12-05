@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { NumericInput } from '../src/NumericInput';
-import { handleOnPasteNumericInput } from '../src/utils/event-handlers';
+import { NumoraInput } from '../src/NumoraInput';
+import { handleOnPasteNumoraInput } from '../src/utils/event-handlers';
 
-describe('NumericInput Component', () => {
+describe('NumoraInput Component', () => {
   let container: HTMLElement;
   let onChangeMock: ReturnType<typeof vi.fn>;
 
@@ -18,7 +18,7 @@ describe('NumericInput Component', () => {
   });
 
   function createInputWithPlaceholder(options = {}) {
-    const input = new NumericInput(container, {
+    const input = new NumoraInput(container, {
       placeholder: '0.0',
       onChange: onChangeMock,
       ...options,
@@ -192,16 +192,16 @@ describe('Paste handler sanitization cases', () => {
         },
       } as unknown as ClipboardEvent;
 
-      const result = handleOnPasteNumericInput(mockEvent, maxDecimals);
+      const result = handleOnPasteNumoraInput(mockEvent, maxDecimals);
       expect(result).toBe(expected);
       expect(mockInputElement.value).toBe(expected);
     }
   );
 });
 
-describe('NumericInput edge cases', () => {
+describe('NumoraInput edge cases', () => {
   let container: HTMLElement;
-  let numericInput: NumericInput;
+  let NumoraInput: NumoraInput;
 
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -215,7 +215,7 @@ describe('NumericInput edge cases', () => {
   });
 
   it('should accept only one decimal point', () => {
-    numericInput = new NumericInput(container, { maxDecimals: 3 });
+    NumoraInput = new NumoraInput(container, { maxDecimals: 3 });
     const inputElement = container.querySelector('input') as HTMLInputElement;
 
     for (let i = 0; i < 10; i++) {
@@ -232,7 +232,7 @@ describe('NumericInput edge cases', () => {
 
   it('should call onChange callback when value changes', () => {
     const onChange = vi.fn();
-    numericInput = new NumericInput(container, {
+    NumoraInput = new NumoraInput(container, {
       maxDecimals: 2,
       onChange,
     });
@@ -246,7 +246,7 @@ describe('NumericInput edge cases', () => {
   });
 
   it('should allow navigation keys', () => {
-    numericInput = new NumericInput(container, { maxDecimals: 2 });
+    NumoraInput = new NumoraInput(container, { maxDecimals: 2 });
     const inputElement = container.querySelector('input') as HTMLInputElement;
 
     const arrowEvent = new KeyboardEvent('keydown', { key: 'ArrowLeft' });
@@ -274,7 +274,7 @@ describe('Negative Number Support', () => {
   });
 
   function createInputWithNegatives(options = {}) {
-    const input = new NumericInput(container, {
+    const input = new NumoraInput(container, {
       allowNegative: true,
       onChange: onChangeMock,
       ...options,
@@ -424,7 +424,7 @@ describe('Negative Number Support', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      handleOnPasteNumericInput(mockEvent, 2, false, true);
+      handleOnPasteNumoraInput(mockEvent, 2, false, true);
 
       expect(inputElement.value).toBe('-123.45');
     });
@@ -442,7 +442,7 @@ describe('Negative Number Support', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      handleOnPasteNumericInput(mockEvent, 2, false, true);
+      handleOnPasteNumoraInput(mockEvent, 2, false, true);
 
       expect(inputElement.value).toBe('-123.45');
     });
@@ -556,7 +556,7 @@ describe('Leading Zeros Support', () => {
   });
 
   function createInputWithLeadingZeros(options = {}) {
-    const input = new NumericInput(container, {
+    const input = new NumoraInput(container, {
       allowLeadingZeros: true,
       onChange: onChangeMock,
       ...options,
@@ -570,7 +570,7 @@ describe('Leading Zeros Support', () => {
 
   describe('Default behavior (allowLeadingZeros: false)', () => {
     it('should remove leading zeros by default', () => {
-      const input = new NumericInput(container, { onChange: onChangeMock });
+      const input = new NumoraInput(container, { onChange: onChangeMock });
       const inputElement = getInputElement();
 
       inputElement.value = '007';
@@ -580,7 +580,7 @@ describe('Leading Zeros Support', () => {
     });
 
     it('should remove multiple leading zeros', () => {
-      const input = new NumericInput(container, { onChange: onChangeMock });
+      const input = new NumoraInput(container, { onChange: onChangeMock });
       const inputElement = getInputElement();
 
       inputElement.value = '0001';
@@ -590,7 +590,7 @@ describe('Leading Zeros Support', () => {
     });
 
     it('should preserve single zero', () => {
-      const input = new NumericInput(container, { onChange: onChangeMock });
+      const input = new NumoraInput(container, { onChange: onChangeMock });
       const inputElement = getInputElement();
 
       inputElement.value = '0';
@@ -600,7 +600,7 @@ describe('Leading Zeros Support', () => {
     });
 
     it('should handle leading zeros with decimals', () => {
-      const input = new NumericInput(container, { onChange: onChangeMock });
+      const input = new NumoraInput(container, { onChange: onChangeMock });
       const inputElement = getInputElement();
 
       inputElement.value = '00.5';
@@ -610,7 +610,7 @@ describe('Leading Zeros Support', () => {
     });
 
     it('should remove leading zeros from negative numbers', () => {
-      const input = new NumericInput(container, {
+      const input = new NumoraInput(container, {
         allowNegative: true,
         onChange: onChangeMock,
       });
@@ -692,7 +692,7 @@ describe('Leading Zeros Support', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      handleOnPasteNumericInput(mockEvent, 2, false, false, true);
+      handleOnPasteNumoraInput(mockEvent, 2, false, false, true);
 
       expect(inputElement.value).toBe('000123');
     });
@@ -747,7 +747,7 @@ describe('Leading Zeros Support', () => {
 
 describe('Scientific Notation Expansion', () => {
   let container: HTMLElement;
-  let numericInput: NumericInput;
+  let NumoraInput: NumoraInput;
 
   beforeEach(() => {
     container = document.createElement('div');
@@ -760,7 +760,7 @@ describe('Scientific Notation Expansion', () => {
 
   describe('Negative exponents (small numbers)', () => {
     it('should expand 1.5e-7 to 0.00000015', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 8 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 8 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.5e-7';
@@ -770,7 +770,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1.5e-1 to 0.15', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 2 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 2 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.5e-1';
@@ -780,7 +780,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1.23e-4 to 0.000123', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 6 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 6 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.23e-4';
@@ -790,7 +790,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 2e-3 to 0.002', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 3 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 3 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '2e-3';
@@ -800,7 +800,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 0.5e-2 to 0.005', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 3 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 3 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '0.5e-2';
@@ -810,7 +810,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1e-10 to 0.0000000001', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 10 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 10 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1e-10';
@@ -820,7 +820,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 123.456e-2 to 1.23456', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 5 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 5 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '123.456e-2';
@@ -832,7 +832,7 @@ describe('Scientific Notation Expansion', () => {
 
   describe('Positive exponents (large numbers)', () => {
     it('should expand 2e+5 to 200000', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 0 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '2e+5';
@@ -842,7 +842,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1.5e+2 to 150', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 0 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.5e+2';
@@ -852,7 +852,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1.5e+1 to 15', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 0 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.5e+1';
@@ -862,7 +862,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 12.34e+1 to 123.4', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 1 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 1 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '12.34e+1';
@@ -872,7 +872,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 12.34e+2 to 1234', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 0 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '12.34e+2';
@@ -882,7 +882,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1e+3 to 1000', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 0 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1e+3';
@@ -894,7 +894,7 @@ describe('Scientific Notation Expansion', () => {
 
   describe('Edge cases', () => {
     it('should handle exponent of 0', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 2 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 2 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.5e0';
@@ -904,7 +904,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should handle uppercase E', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 8 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 8 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.5E-7';
@@ -914,7 +914,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should handle integer base without decimal point', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 3 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 3 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '5e-3';
@@ -924,7 +924,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should respect maxDecimals when expanding', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 2 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 2 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.234567e-2';
@@ -934,7 +934,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should not expand non-scientific notation', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 2 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 2 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '123.45';
@@ -944,7 +944,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should handle paste events with scientific notation', () => {
-      numericInput = new NumericInput(container, { maxDecimals: 8 });
+      NumoraInput = new NumoraInput(container, { maxDecimals: 8 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       const mockEvent = {
@@ -956,7 +956,7 @@ describe('Scientific Notation Expansion', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      handleOnPasteNumericInput(mockEvent, 8);
+      handleOnPasteNumoraInput(mockEvent, 8);
 
       expect(inputElement.value).toBe('0.00000015');
     });
