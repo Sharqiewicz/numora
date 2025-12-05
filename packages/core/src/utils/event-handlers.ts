@@ -2,6 +2,7 @@ import {
   trimToMaxDecimals,
   alreadyHasDecimal,
   getSeparatorsFromOptions,
+  convertCommaOrDotToDecimalSeparator,
 } from '@/utils/decimals';
 import { sanitizeNumoraInput, buildSanitizationOptions } from '@/utils/sanitization';
 import {
@@ -27,14 +28,18 @@ export function handleOnKeyDownNumoraInput(
   formattingOptions?: FormattingOptions
 ): CaretPositionInfo | undefined {
   const separators = getSeparatorsFromOptions(formattingOptions);
+  const inputElement = e.target as HTMLInputElement;
+  const { selectionStart, selectionEnd, value } = inputElement;
+  const { key } = e;
+
+  // Convert comma or dot to decimal separator when thousandStyle is None/undefined
+  if (convertCommaOrDotToDecimalSeparator(e, inputElement, formattingOptions, separators)) {
+    return undefined;
+  }
 
   if (alreadyHasDecimal(e, separators.decimalSeparator)) {
     e.preventDefault();
   }
-
-  const inputElement = e.target as HTMLInputElement;
-  const { selectionStart, selectionEnd, value } = inputElement;
-  const { key } = e;
 
   // Skip over thousand separator on delete/backspace (only for 'change' mode)
   if (formattingOptions?.formatOn === FormatOn.Change && formattingOptions.thousandSeparator && selectionStart !== null && selectionEnd !== null) {
