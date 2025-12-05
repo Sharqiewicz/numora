@@ -2,10 +2,12 @@ import { removeExtraDots } from './decimals';
 import { removeNonNumericCharacters } from './nonNumericCharacters';
 import { expandScientificNotation } from './scientific-notation';
 import { expandShorthand } from './shorthand';
+import { removeLeadingZeros } from './leading-zeros';
 
 export interface SanitizationOptions {
   shorthandParsing?: boolean;
   allowNegative?: boolean;
+  allowLeadingZeros?: boolean;
 }
 
 /**
@@ -14,6 +16,7 @@ export interface SanitizationOptions {
  * 2. Expanding scientific notation (e.g., 1.5e-5 → 0.000015)
  * 3. Removing non-numeric characters
  * 4. Removing extra decimal points
+ * 5. (Optional) Removing leading zeros
  *
  * @param value - The string value to sanitize
  * @param options - Optional sanitization configuration
@@ -36,5 +39,12 @@ export const sanitizeNumericInput = (
   sanitized = removeNonNumericCharacters(sanitized, options?.allowNegative);
 
   // Step 4: Remove extra dots
-  return removeExtraDots(sanitized);
+  sanitized = removeExtraDots(sanitized);
+
+  // Step 5: Remove leading zeros (if not allowed)
+  if (!options?.allowLeadingZeros) {
+    sanitized = removeLeadingZeros(sanitized);
+  }
+
+  return sanitized;
 };

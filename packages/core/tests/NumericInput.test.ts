@@ -97,7 +97,7 @@ describe('NumericInput Component', () => {
     expect(inputElement.className).toBe('extra-style');
   });
 
-  it('should handle leading zeros correctly', () => {
+  it('should remove leading zeros by default', () => {
     createInputWithPlaceholder();
     const inputElement = getInputElement();
 
@@ -105,7 +105,7 @@ describe('NumericInput Component', () => {
     inputElement.dispatchEvent(new Event('input'));
 
     expect(onChangeMock).toHaveBeenCalled();
-    expect(inputElement.value).toBe('007');
+    expect(inputElement.value).toBe('7');
   });
 
   it('should not allow negative numbers by default', () => {
@@ -519,7 +519,7 @@ describe('Negative Number Support', () => {
     });
 
     it('should handle negative number with leading zeros', () => {
-      createInputWithNegatives();
+      createInputWithNegatives({ allowLeadingZeros: true });
       const inputElement = getInputElement();
 
       inputElement.value = '-007';
@@ -536,6 +536,211 @@ describe('Negative Number Support', () => {
       inputElement.dispatchEvent(new Event('input'));
 
       expect(inputElement.value).toBe('-123.45');
+    });
+  });
+});
+
+describe('Leading Zeros Support', () => {
+  let container: HTMLElement;
+  let onChangeMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    onChangeMock = vi.fn();
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  function createInputWithLeadingZeros(options = {}) {
+    const input = new NumericInput(container, {
+      allowLeadingZeros: true,
+      onChange: onChangeMock,
+      ...options,
+    });
+    return input;
+  }
+
+  function getInputElement() {
+    return container.querySelector('input') as HTMLInputElement;
+  }
+
+  describe('Default behavior (allowLeadingZeros: false)', () => {
+    it('should remove leading zeros by default', () => {
+      const input = new NumericInput(container, { onChange: onChangeMock });
+      const inputElement = getInputElement();
+
+      inputElement.value = '007';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('7');
+    });
+
+    it('should remove multiple leading zeros', () => {
+      const input = new NumericInput(container, { onChange: onChangeMock });
+      const inputElement = getInputElement();
+
+      inputElement.value = '0001';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('1');
+    });
+
+    it('should preserve single zero', () => {
+      const input = new NumericInput(container, { onChange: onChangeMock });
+      const inputElement = getInputElement();
+
+      inputElement.value = '0';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0');
+    });
+
+    it('should handle leading zeros with decimals', () => {
+      const input = new NumericInput(container, { onChange: onChangeMock });
+      const inputElement = getInputElement();
+
+      inputElement.value = '00.5';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0.5');
+    });
+
+    it('should remove leading zeros from negative numbers', () => {
+      const input = new NumericInput(container, {
+        allowNegative: true,
+        onChange: onChangeMock,
+      });
+      const inputElement = getInputElement();
+
+      inputElement.value = '-007';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-7');
+    });
+  });
+
+  describe('With allowLeadingZeros: true', () => {
+    it('should preserve leading zeros when enabled', () => {
+      createInputWithLeadingZeros();
+      const inputElement = getInputElement();
+
+      inputElement.value = '007';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('007');
+      expect(onChangeMock).toHaveBeenCalledWith('007');
+    });
+
+    it('should preserve multiple leading zeros', () => {
+      createInputWithLeadingZeros();
+      const inputElement = getInputElement();
+
+      inputElement.value = '0001';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0001');
+    });
+
+    it('should preserve leading zeros with decimals', () => {
+      createInputWithLeadingZeros({ maxDecimals: 2 });
+      const inputElement = getInputElement();
+
+      inputElement.value = '00.5';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('00.5');
+    });
+
+    it('should preserve leading zeros in negative numbers', () => {
+      createInputWithLeadingZeros({ allowNegative: true });
+      const inputElement = getInputElement();
+
+      inputElement.value = '-007';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('-007');
+    });
+
+    it('should preserve leading zeros when typing', () => {
+      createInputWithLeadingZeros();
+      const inputElement = getInputElement();
+
+      inputElement.value = '0';
+      inputElement.dispatchEvent(new Event('input'));
+      inputElement.value = '00';
+      inputElement.dispatchEvent(new Event('input'));
+      inputElement.value = '007';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('007');
+    });
+
+    it('should handle paste events with leading zeros', () => {
+      createInputWithLeadingZeros();
+      const inputElement = getInputElement();
+
+      const mockEvent = {
+        target: inputElement,
+        preventDefault: vi.fn(),
+        clipboardData: {
+          getData: vi.fn().mockReturnValue('000123'),
+        },
+      } as unknown as ClipboardEvent;
+
+      inputElement.value = '';
+      handleOnPasteNumericInput(mockEvent, 2, false, false, true);
+
+      expect(inputElement.value).toBe('000123');
+    });
+
+    it('should preserve leading zeros with formatting', () => {
+      createInputWithLeadingZeros({
+        formatOn: 'change',
+        thousandsSeparator: ',',
+        thousandsGroupStyle: 'thousand',
+      });
+      const inputElement = getInputElement();
+
+      inputElement.value = '0001234';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('0001,234');
+    });
+  });
+
+  describe('Edge cases', () => {
+    it('should handle just zeros', () => {
+      createInputWithLeadingZeros();
+      const inputElement = getInputElement();
+
+      inputElement.value = '000';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('000');
+    });
+
+    it('should handle zero with decimal point', () => {
+      createInputWithLeadingZeros();
+      const inputElement = getInputElement();
+
+      inputElement.value = '00.';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('00.');
+    });
+
+    it('should handle leading zeros after sanitization', () => {
+      createInputWithLeadingZeros();
+      const inputElement = getInputElement();
+
+      inputElement.value = '00abc123';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('00123');
     });
   });
 });

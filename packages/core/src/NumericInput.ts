@@ -21,6 +21,7 @@ export interface NumericInputOptions extends Partial<HTMLInputElement> {
   // Parsing options
   shorthandParsing?: boolean;  // Default: false
   allowNegative?: boolean;  // Default: false
+  allowLeadingZeros?: boolean;  // Default: false
 }
 
 export class NumericInput {
@@ -42,6 +43,7 @@ export class NumericInput {
       thousandsGroupStyle = 'thousand',
       shorthandParsing = false,
       allowNegative = false,
+      allowLeadingZeros = false,
       ...rest
     }: NumericInputOptions
   ) {
@@ -53,6 +55,7 @@ export class NumericInput {
       thousandsGroupStyle,
       shorthandParsing,
       allowNegative,
+      allowLeadingZeros,
       ...rest,
     };
 
@@ -101,6 +104,7 @@ export class NumericInput {
         thousandsGroupStyle: this.options.thousandsGroupStyle,
         shorthandParsing: this.options.shorthandParsing,
         allowNegative: this.options.allowNegative,
+        allowLeadingZeros: this.options.allowLeadingZeros,
       }
     );
     this.caretPositionBeforeChange = undefined;
@@ -138,7 +142,8 @@ export class NumericInput {
       e,
       this.options.maxDecimals || DEFAULT_MAX_DECIMALS,
       this.options.shorthandParsing,
-      this.options.allowNegative
+      this.options.allowNegative,
+      this.options.allowLeadingZeros
     );
     if (this.options.onChange) {
       this.options.onChange((e.target as HTMLInputElement).value);
@@ -163,7 +168,8 @@ export class NumericInput {
       const formatted = formatWithSeparators(
         target.value,
         this.options.thousandsSeparator,
-        this.options.thousandsGroupStyle || 'thousand'
+        this.options.thousandsGroupStyle || 'thousand',
+        this.options.allowLeadingZeros
       );
       target.value = formatted;
 

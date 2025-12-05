@@ -14,6 +14,7 @@ export interface FormattingOptions {
   thousandsGroupStyle?: ThousandsGroupStyle;
   shorthandParsing?: boolean;
   allowNegative?: boolean;
+  allowLeadingZeros?: boolean;
 }
 
 
@@ -50,7 +51,8 @@ export function handleOnChangeNumericInput(
 
   target.value = sanitizeNumericInput(target.value, {
     shorthandParsing: formattingOptions?.shorthandParsing,
-    allowNegative: formattingOptions?.allowNegative
+    allowNegative: formattingOptions?.allowNegative,
+    allowLeadingZeros: formattingOptions?.allowLeadingZeros
   });
   target.value = trimToMaxDecimals(target.value, maxDecimals);
 
@@ -61,7 +63,8 @@ export function handleOnChangeNumericInput(
     const formatted = formatWithSeparators(
       sanitizedValue,
       formattingOptions.thousandsSeparator,
-      formattingOptions.thousandsGroupStyle || 'thousand'
+      formattingOptions.thousandsGroupStyle || 'thousand',
+      formattingOptions.allowLeadingZeros
     );
 
     target.value = formatted;
@@ -217,14 +220,15 @@ export function handleOnPasteNumericInput(
   e: ClipboardEvent,
   maxDecimals: number,
   shorthandParsing?: boolean,
-  allowNegative?: boolean
+  allowNegative?: boolean,
+  allowLeadingZeros?: boolean
 ): string {
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
 
   const sanitizedClipboardData = sanitizeNumericInput(
     e.clipboardData?.getData('text/plain') || '',
-    { shorthandParsing, allowNegative }
+    { shorthandParsing, allowNegative, allowLeadingZeros }
   );
 
   const combinedValue =
@@ -232,7 +236,8 @@ export function handleOnPasteNumericInput(
 
   const sanitizedCombined = sanitizeNumericInput(combinedValue, {
     shorthandParsing,
-    allowNegative
+    allowNegative,
+    allowLeadingZeros
   });
 
   const isNegative = sanitizedCombined.startsWith('-');

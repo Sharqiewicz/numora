@@ -22,7 +22,8 @@ import { GROUPING_CONFIG, type ThousandsGroupStyle } from './constants';
 export function formatWithSeparators(
   value: string,
   separator: string,
-  groupStyle: ThousandsGroupStyle = 'thousand'
+  groupStyle: ThousandsGroupStyle = 'thousand',
+  allowLeadingZeros = false
 ): string {
   // Handle edge cases: empty, zero, or just decimal point
   if (!value || value === '0' || value === '.' || value === '-' || value === '-.') {
@@ -38,6 +39,25 @@ export function formatWithSeparators(
   if (!integerPart) {
     const result = decimalPart ? `.${decimalPart}` : absoluteValue;
     return isNegative ? `-${result}` : result;
+  }
+
+  // Preserve leading zeros if allowed
+  if (allowLeadingZeros && integerPart.startsWith('0') && integerPart.length > 1) {
+    const leadingZerosMatch = integerPart.match(/^(0+)/);
+    if (leadingZerosMatch) {
+      const leadingZeros = leadingZerosMatch[1];
+      const significantPart = integerPart.slice(leadingZeros.length);
+      if (significantPart) {
+        const formattedSignificant = formatIntegerPart(significantPart, separator, groupStyle);
+        const formattedInteger = leadingZeros + formattedSignificant;
+        const prefix = isNegative ? '-' : '';
+        
+        if (hasDecimalPoint) {
+          return decimalPart ? `${prefix}${formattedInteger}.${decimalPart}` : `${prefix}${formattedInteger}.`;
+        }
+        return `${prefix}${formattedInteger}`;
+      }
+    }
   }
 
   const formattedInteger = formatIntegerPart(integerPart, separator, groupStyle);
