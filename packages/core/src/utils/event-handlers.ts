@@ -1,4 +1,9 @@
-import { trimToMaxDecimals, alreadyHasDecimal, replaceCommasWithDots } from '@/utils/decimals';
+import {
+  trimToMaxDecimals,
+  alreadyHasDecimal,
+  normalizeDecimalSeparator,
+  getSeparators,
+} from '@/utils/decimals';
 import { sanitizeNumericInput } from '@/utils/sanitization';
 import {
   findChangedRangeFromCaretPositions,
@@ -6,7 +11,16 @@ import {
   calculateCursorPositionAfterFormatting,
   formatWithSeparators,
   type ThousandsGroupStyle,
+  getCaretBoundary,
+  type CursorPositionOptions,
 } from '@/utils/formatting';
+import {
+  setCaretPositionWithRetry,
+  getInputCaretPosition,
+} from '@/utils/formatting/caret-position-utils';
+import {
+  createDecimalSeparatorEquivalence,
+} from '@/utils/formatting/character-equivalence';
 
 export interface FormattingOptions {
   formatOn?: 'blur' | 'change';
@@ -15,6 +29,8 @@ export interface FormattingOptions {
   shorthandParsing?: boolean;
   allowNegative?: boolean;
   allowLeadingZeros?: boolean;
+  decimalSeparator?: string;
+  allowedDecimalSeparators?: string[];
 }
 
 
@@ -37,7 +53,16 @@ export function handleOnChangeNumericInput(
 ): void {
   const target = e.target as HTMLInputElement;
   const oldValue = target.value;
-  const oldCursorPosition = target.selectionStart ?? 0;
+  const oldCursorPosition = getInputCaretPosition(target);
+
+  const separators = getSeparators({
+    decimalSeparator: formattingOptions?.decimalSeparator,
+    thousandSeparator: formattingOptions?.thousandsSeparator,
+    allowedDecimalSeparators: formattingOptions?.allowedDecimalSeparators,
+  });
+
+  // Track raw input value before any processing
+  const rawInputValue = target.value;
 
   // Step 1: Sanitize the input
   if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandsSeparator) {
@@ -45,16 +70,22 @@ export function handleOnChangeNumericInput(
     const escapedSeparator = formattingOptions.thousandsSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     target.value = target.value.replace(new RegExp(escapedSeparator, 'g'), '');
   } else {
-    // In 'blur' mode or no formatting: convert commas to dots (comma as decimal separator)
-    target.value = replaceCommasWithDots(target.value);
+    // In 'blur' mode or no formatting: normalize allowed decimal separators to canonical one
+    target.value = normalizeDecimalSeparator(
+      target.value,
+      separators.allowedDecimalSeparators,
+      separators.decimalSeparator
+    );
   }
 
   target.value = sanitizeNumericInput(target.value, {
     shorthandParsing: formattingOptions?.shorthandParsing,
     allowNegative: formattingOptions?.allowNegative,
-    allowLeadingZeros: formattingOptions?.allowLeadingZeros
+    allowLeadingZeros: formattingOptions?.allowLeadingZeros,
+    decimalSeparator: separators.decimalSeparator,
+    allowedDecimalSeparators: separators.allowedDecimalSeparators,
   });
-  target.value = trimToMaxDecimals(target.value, maxDecimals);
+  target.value = trimToMaxDecimals(target.value, maxDecimals, separators.decimalSeparator);
 
   const sanitizedValue = target.value;
 
@@ -64,7 +95,8 @@ export function handleOnChangeNumericInput(
       sanitizedValue,
       formattingOptions.thousandsSeparator,
       formattingOptions.thousandsGroupStyle || 'thousand',
-      formattingOptions.allowLeadingZeros
+      formattingOptions.allowLeadingZeros,
+      separators.decimalSeparator
     );
 
     target.value = formatted;
@@ -73,35 +105,57 @@ export function handleOnChangeNumericInput(
     // Step 3: Calculate and set cursor position
     if (caretPositionBeforeChange) {
       const { selectionStart = 0, selectionEnd = 0, endOffset = 0 } = caretPositionBeforeChange;
-      const changeRange = findChangedRangeFromCaretPositions(
+      
+      // Prioritize caret-based change detection (more accurate)
+      let changeRange = findChangedRangeFromCaretPositions(
         { selectionStart, selectionEnd, endOffset },
         oldValue,
         newValue
       );
 
+      // Fallback to string comparison if caret-based detection fails
+      if (!changeRange) {
+        changeRange = findChangeRange(oldValue, newValue);
+      }
+
       if (changeRange) {
+        // Create character equivalence function for decimal separators
+        const isCharacterEquivalent = separators.allowedDecimalSeparators
+          ? createDecimalSeparatorEquivalence(
+              separators.allowedDecimalSeparators,
+              separators.decimalSeparator,
+              separators.thousandSeparator
+            )
+          : undefined;
+
+        // Create caret boundary
+        const boundary = getCaretBoundary(newValue, {
+          thousandsSeparator: formattingOptions.thousandsSeparator,
+          decimalSeparator: separators.decimalSeparator,
+        });
+
+        const cursorOptions: CursorPositionOptions = {
+          thousandsSeparator: formattingOptions.thousandsSeparator,
+          decimalSeparator: separators.decimalSeparator,
+          allowedDecimalSeparators: separators.allowedDecimalSeparators,
+          isCharacterEquivalent,
+          rawInputValue,
+          boundary,
+        };
+
         const newCursorPosition = calculateCursorPositionAfterFormatting(
           oldValue,
           newValue,
           oldCursorPosition,
           formattingOptions.thousandsSeparator,
           formattingOptions.thousandsGroupStyle || 'thousand',
-          changeRange
+          changeRange,
+          separators.decimalSeparator,
+          cursorOptions
         );
-        target.setSelectionRange(newCursorPosition, newCursorPosition);
-      } else {
-        const fallbackChangeRange = findChangeRange(oldValue, newValue);
-        if (fallbackChangeRange) {
-          const newCursorPosition = calculateCursorPositionAfterFormatting(
-            oldValue,
-            newValue,
-            oldCursorPosition,
-            formattingOptions.thousandsSeparator,
-            formattingOptions.thousandsGroupStyle || 'thousand',
-            fallbackChangeRange
-          );
-          target.setSelectionRange(newCursorPosition, newCursorPosition);
-        }
+
+        // Use mobile browser retry mechanism
+        setCaretPositionWithRetry(target, newCursorPosition, newValue);
       }
     }
   } else {
@@ -110,35 +164,54 @@ export function handleOnChangeNumericInput(
 
     if (oldValue !== newValue && caretPositionBeforeChange) {
       const { selectionStart = 0, selectionEnd = 0, endOffset = 0 } = caretPositionBeforeChange;
-      const changeRange = findChangedRangeFromCaretPositions(
+
+      // Prioritize caret-based change detection (more accurate)
+      let changeRange = findChangedRangeFromCaretPositions(
         { selectionStart, selectionEnd, endOffset },
         oldValue,
         newValue
       );
 
+      // Fallback to string comparison if caret-based detection fails
+      if (!changeRange) {
+        changeRange = findChangeRange(oldValue, newValue);
+      }
+
       if (changeRange) {
+        const isCharacterEquivalent = separators.allowedDecimalSeparators
+          ? createDecimalSeparatorEquivalence(
+              separators.allowedDecimalSeparators,
+              separators.decimalSeparator,
+              separators.thousandSeparator
+            )
+          : undefined;
+
+        const boundary = getCaretBoundary(newValue, {
+          thousandsSeparator: separators.thousandSeparator,
+          decimalSeparator: separators.decimalSeparator,
+        });
+
+        const cursorOptions: CursorPositionOptions = {
+          thousandsSeparator: separators.thousandSeparator,
+          decimalSeparator: separators.decimalSeparator,
+          allowedDecimalSeparators: separators.allowedDecimalSeparators,
+          isCharacterEquivalent,
+          rawInputValue,
+          boundary,
+        };
+
         const newCursorPosition = calculateCursorPositionAfterFormatting(
           oldValue,
           newValue,
           oldCursorPosition,
-          ',',
+          separators.thousandSeparator || ',',
           'thousand',
-          changeRange
+          changeRange,
+          separators.decimalSeparator,
+          cursorOptions
         );
-        target.setSelectionRange(newCursorPosition, newCursorPosition);
-      } else {
-        const fallbackChangeRange = findChangeRange(oldValue, newValue);
-        if (fallbackChangeRange) {
-          const newCursorPosition = calculateCursorPositionAfterFormatting(
-            oldValue,
-            newValue,
-            oldCursorPosition,
-            ',',
-            'thousand',
-            fallbackChangeRange
-          );
-          target.setSelectionRange(newCursorPosition, newCursorPosition);
-        }
+
+        setCaretPositionWithRetry(target, newCursorPosition, newValue);
       }
     }
   }
@@ -163,7 +236,13 @@ export function handleOnKeyDownNumericInput(
   e: KeyboardEvent,
   formattingOptions?: FormattingOptions
 ): CaretPositionInfo | undefined {
-  if (alreadyHasDecimal(e)) {
+  const separators = getSeparators({
+    decimalSeparator: formattingOptions?.decimalSeparator,
+    thousandSeparator: formattingOptions?.thousandsSeparator,
+    allowedDecimalSeparators: formattingOptions?.allowedDecimalSeparators,
+  });
+
+  if (alreadyHasDecimal(e, separators.allowedDecimalSeparators, separators.decimalSeparator)) {
     e.preventDefault();
   }
 
@@ -221,14 +300,27 @@ export function handleOnPasteNumericInput(
   maxDecimals: number,
   shorthandParsing?: boolean,
   allowNegative?: boolean,
-  allowLeadingZeros?: boolean
+  allowLeadingZeros?: boolean,
+  decimalSeparator?: string,
+  allowedDecimalSeparators?: string[]
 ): string {
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
 
+  const separators = getSeparators({
+    decimalSeparator,
+    allowedDecimalSeparators,
+  });
+
   const sanitizedClipboardData = sanitizeNumericInput(
     e.clipboardData?.getData('text/plain') || '',
-    { shorthandParsing, allowNegative, allowLeadingZeros }
+    {
+      shorthandParsing,
+      allowNegative,
+      allowLeadingZeros,
+      decimalSeparator: separators.decimalSeparator,
+      allowedDecimalSeparators: separators.allowedDecimalSeparators,
+    }
   );
 
   const combinedValue =
@@ -237,16 +329,21 @@ export function handleOnPasteNumericInput(
   const sanitizedCombined = sanitizeNumericInput(combinedValue, {
     shorthandParsing,
     allowNegative,
-    allowLeadingZeros
+    allowLeadingZeros,
+    decimalSeparator: separators.decimalSeparator,
+    allowedDecimalSeparators: separators.allowedDecimalSeparators,
   });
 
   const isNegative = sanitizedCombined.startsWith('-');
   const absoluteValue = isNegative ? sanitizedCombined.slice(1) : sanitizedCombined;
-  const [integerPart, ...decimalParts] = absoluteValue.split('.');
-  const sanitizedValue = (isNegative ? '-' : '') + integerPart + (decimalParts.length > 0 ? '.' + decimalParts.join('') : '');
+  const [integerPart, ...decimalParts] = absoluteValue.split(separators.decimalSeparator);
+  const sanitizedValue =
+    (isNegative ? '-' : '') +
+    integerPart +
+    (decimalParts.length > 0 ? separators.decimalSeparator + decimalParts.join('') : '');
 
   e.preventDefault();
-  inputElement.value = trimToMaxDecimals(sanitizedValue, maxDecimals);
+  inputElement.value = trimToMaxDecimals(sanitizedValue, maxDecimals, separators.decimalSeparator);
 
   const newCursorPosition =
     (selectionStart || 0) +
@@ -254,5 +351,5 @@ export function handleOnPasteNumericInput(
     (combinedValue.length - sanitizedValue.length);
   inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
 
-  return trimToMaxDecimals(sanitizedValue, maxDecimals);
+  return trimToMaxDecimals(sanitizedValue, maxDecimals, separators.decimalSeparator);
 }

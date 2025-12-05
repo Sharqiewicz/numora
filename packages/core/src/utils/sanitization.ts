@@ -1,5 +1,5 @@
-import { removeExtraDots } from './decimals';
-import { removeNonNumericCharacters } from './nonNumericCharacters';
+import { removeExtraDecimalSeparators } from './decimals';
+import { removeNonNumericCharacters } from './non-numeric-characters';
 import { expandScientificNotation } from './scientific-notation';
 import { expandShorthand } from './shorthand';
 import { removeLeadingZeros } from './leading-zeros';
@@ -8,6 +8,8 @@ export interface SanitizationOptions {
   shorthandParsing?: boolean;
   allowNegative?: boolean;
   allowLeadingZeros?: boolean;
+  decimalSeparator?: string;
+  allowedDecimalSeparators?: string[];
 }
 
 /**
@@ -36,10 +38,14 @@ export const sanitizeNumericInput = (
   sanitized = expandScientificNotation(sanitized);
 
   // Step 3: Remove non-numeric characters
-  sanitized = removeNonNumericCharacters(sanitized, options?.allowNegative);
+  sanitized = removeNonNumericCharacters(
+    sanitized,
+    options?.allowNegative,
+    options?.allowedDecimalSeparators
+  );
 
-  // Step 4: Remove extra dots
-  sanitized = removeExtraDots(sanitized);
+  // Step 4: Remove extra decimal separators
+  sanitized = removeExtraDecimalSeparators(sanitized, options?.decimalSeparator || '.');
 
   // Step 5: Remove leading zeros (if not allowed)
   if (!options?.allowLeadingZeros) {

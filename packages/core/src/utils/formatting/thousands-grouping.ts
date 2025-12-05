@@ -11,33 +11,37 @@ import { GROUPING_CONFIG, type ThousandsGroupStyle } from './constants';
  * @param value - The numeric string to format (e.g., "1234567")
  * @param separator - The separator character to use (e.g., ",")
  * @param groupStyle - The grouping style: 'thousand' (1,234,567), 'lakh' (12,34,567), or 'wan' (123,4567)
+ * @param allowLeadingZeros - Whether to preserve leading zeros
+ * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The formatted string with separators
  *
  * @example
  * formatWithSeparators("1234567", ",", "thousand") // "1,234,567"
  * formatWithSeparators("1234567", ",", "lakh")     // "12,34,567"
  * formatWithSeparators("1234567", ",", "wan")      // "123,4567"
- * formatWithSeparators("1234.56", ",", "thousand") // "1,234.56"
+ * formatWithSeparators("1234.56", ",", "thousand", false, '.') // "1,234.56"
+ * formatWithSeparators("1234,56", ",", "thousand", false, ',') // "1,234,56"
  */
 export function formatWithSeparators(
   value: string,
   separator: string,
   groupStyle: ThousandsGroupStyle = 'thousand',
-  allowLeadingZeros = false
+  allowLeadingZeros = false,
+  decimalSeparator: string = '.'
 ): string {
-  // Handle edge cases: empty, zero, or just decimal point
-  if (!value || value === '0' || value === '.' || value === '-' || value === '-.') {
+  // Handle edge cases: empty, zero, or just decimal separator
+  if (!value || value === '0' || value === decimalSeparator || value === '-' || value === `-${decimalSeparator}`) {
     return value;
   }
 
-  const hasDecimalPoint = value.includes('.');
+  const hasDecimalSeparator = value.includes(decimalSeparator);
   const isNegative = value.startsWith('-');
   const absoluteValue = isNegative ? value.slice(1) : value;
-  const [integerPart, decimalPart] = absoluteValue.split('.');
+  const [integerPart, decimalPart] = absoluteValue.split(decimalSeparator);
 
-  // Handle edge case: value starts with decimal point (e.g., ".5")
+  // Handle edge case: value starts with decimal separator (e.g., ".5" or ",5")
   if (!integerPart) {
-    const result = decimalPart ? `.${decimalPart}` : absoluteValue;
+    const result = decimalPart ? `${decimalSeparator}${decimalPart}` : absoluteValue;
     return isNegative ? `-${result}` : result;
   }
 
@@ -51,9 +55,9 @@ export function formatWithSeparators(
         const formattedSignificant = formatIntegerPart(significantPart, separator, groupStyle);
         const formattedInteger = leadingZeros + formattedSignificant;
         const prefix = isNegative ? '-' : '';
-        
-        if (hasDecimalPoint) {
-          return decimalPart ? `${prefix}${formattedInteger}.${decimalPart}` : `${prefix}${formattedInteger}.`;
+
+        if (hasDecimalSeparator) {
+          return decimalPart ? `${prefix}${formattedInteger}${decimalSeparator}${decimalPart}` : `${prefix}${formattedInteger}${decimalSeparator}`;
         }
         return `${prefix}${formattedInteger}`;
       }
@@ -63,9 +67,9 @@ export function formatWithSeparators(
   const formattedInteger = formatIntegerPart(integerPart, separator, groupStyle);
   const prefix = isNegative ? '-' : '';
 
-  // Preserve decimal point even if no decimal digits
-  if (hasDecimalPoint) {
-    return decimalPart ? `${prefix}${formattedInteger}.${decimalPart}` : `${prefix}${formattedInteger}.`;
+  // Preserve decimal separator even if no decimal digits
+  if (hasDecimalSeparator) {
+    return decimalPart ? `${prefix}${formattedInteger}${decimalSeparator}${decimalPart}` : `${prefix}${formattedInteger}${decimalSeparator}`;
   }
 
   return `${prefix}${formattedInteger}`;

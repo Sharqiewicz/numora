@@ -10,21 +10,24 @@
  * @param value - The formatted string value
  * @param position - The position to count up to
  * @param separator - The thousands separator character
+ * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The count of meaningful digits before the position
  *
  * @example
  * countMeaningfulDigitsBeforePosition("1,234", 3, ",") // Returns: 2 (digits "1" and "2")
  * countMeaningfulDigitsBeforePosition("1,234.56", 8, ",") // Returns: 6
+ * countMeaningfulDigitsBeforePosition("1.234,56", 8, ".", ",") // Returns: 6
  */
 export function countMeaningfulDigitsBeforePosition(
   value: string,
   position: number,
-  separator: string
+  separator: string,
+  decimalSeparator: string = '.'
 ): number {
   let digitCount = 0;
   for (let i = 0; i < position && i < value.length; i++) {
     const char = value[i];
-    if (char !== separator && char !== '.') {
+    if (char !== separator && char !== decimalSeparator) {
       digitCount++;
     }
   }
@@ -38,6 +41,7 @@ export function countMeaningfulDigitsBeforePosition(
  * @param value - The formatted string value
  * @param targetDigitIndex - The zero-based index of the target digit
  * @param separator - The thousands separator character
+ * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The position after the target digit
  *
  * @example
@@ -46,7 +50,8 @@ export function countMeaningfulDigitsBeforePosition(
 export function findPositionForDigitIndex(
   value: string,
   targetDigitIndex: number,
-  separator: string
+  separator: string,
+  decimalSeparator: string = '.'
 ): number {
   if (targetDigitIndex === 0) {
     return 0;
@@ -55,7 +60,7 @@ export function findPositionForDigitIndex(
   let digitCount = 0;
   for (let i = 0; i < value.length; i++) {
     const char = value[i];
-    if (char !== separator && char !== '.') {
+    if (char !== separator && char !== decimalSeparator) {
       if (digitCount === targetDigitIndex - 1) {
         return i + 1;
       }
@@ -72,6 +77,7 @@ export function findPositionForDigitIndex(
  * @param value - The formatted string value
  * @param targetDigitCount - The target number of digits
  * @param separator - The thousands separator character
+ * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The position where digit count equals target
  *
  * @example
@@ -80,7 +86,8 @@ export function findPositionForDigitIndex(
 export function findPositionWithMeaningfulDigitCount(
   value: string,
   targetDigitCount: number,
-  separator: string
+  separator: string,
+  decimalSeparator: string = '.'
 ): number {
   if (targetDigitCount === 0) {
     return 0;
@@ -89,7 +96,7 @@ export function findPositionWithMeaningfulDigitCount(
   let digitCount = 0;
   for (let i = 0; i < value.length; i++) {
     const char = value[i];
-    if (char !== separator && char !== '.') {
+    if (char !== separator && char !== decimalSeparator) {
       digitCount++;
       if (digitCount === targetDigitCount) {
         return i + 1;

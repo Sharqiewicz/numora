@@ -4,6 +4,7 @@ import {
   handleOnPasteNumericInput,
 } from '@/utils/event-handlers';
 import { formatWithSeparators, type ThousandsGroupStyle } from '@/utils/formatting';
+import { getSeparators } from '@/utils/decimals';
 
 const DEFAULT_MAX_DECIMALS = 2;
 
@@ -17,6 +18,8 @@ export interface NumericInputOptions extends Partial<HTMLInputElement> {
   formatOn?: FormatOn;  // Default: 'blur'
   thousandsSeparator?: string;  // Default: ','
   thousandsGroupStyle?: ThousandsGroupStyle;  // Default: 'thousand'
+  decimalSeparator?: string;  // Default: '.'
+  allowedDecimalSeparators?: string[];  // Default: [decimalSeparator, '.']
 
   // Parsing options
   shorthandParsing?: boolean;  // Default: false
@@ -41,18 +44,36 @@ export class NumericInput {
       formatOn = 'blur',
       thousandsSeparator = ',',
       thousandsGroupStyle = 'thousand',
+      decimalSeparator = '.',
+      allowedDecimalSeparators,
       shorthandParsing = false,
       allowNegative = false,
       allowLeadingZeros = false,
       ...rest
     }: NumericInputOptions
   ) {
+    const separators = getSeparators({
+      decimalSeparator,
+      thousandSeparator: thousandsSeparator,
+      allowedDecimalSeparators,
+    });
+
+    if (separators.thousandSeparator && separators.thousandSeparator === separators.decimalSeparator) {
+      throw new Error(
+        `Decimal separator can't be same as thousand separator. ` +
+        `thousandSeparator: ${separators.thousandSeparator}, ` +
+        `decimalSeparator: ${separators.decimalSeparator}`
+      );
+    }
+
     this.options = {
       maxDecimals,
       onChange,
       formatOn,
       thousandsSeparator,
       thousandsGroupStyle,
+      decimalSeparator: separators.decimalSeparator,
+      allowedDecimalSeparators: separators.allowedDecimalSeparators,
       shorthandParsing,
       allowNegative,
       allowLeadingZeros,
@@ -67,9 +88,13 @@ export class NumericInput {
     this.element = document.createElement('input');
 
     this.element.setAttribute('minlength', '1');
+    
+    const escapedSeparators = (this.options.allowedDecimalSeparators || ['.'])
+      .map((sep) => sep.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      .join('');
     const pattern = this.options.allowNegative 
-      ? '^-?[0-9]*[.,]?[0-9]*$' 
-      : '^[0-9]*[.,]?[0-9]*$';
+      ? `^-?[0-9]*[${escapedSeparators}]?[0-9]*$` 
+      : `^[0-9]*[${escapedSeparators}]?[0-9]*$`;
     this.element.setAttribute('pattern', pattern);
     this.element.setAttribute('spellcheck', 'false');
     this.element.setAttribute('type', 'text');
@@ -105,6 +130,8 @@ export class NumericInput {
         shorthandParsing: this.options.shorthandParsing,
         allowNegative: this.options.allowNegative,
         allowLeadingZeros: this.options.allowLeadingZeros,
+        decimalSeparator: this.options.decimalSeparator,
+        allowedDecimalSeparators: this.options.allowedDecimalSeparators,
       }
     );
     this.caretPositionBeforeChange = undefined;
@@ -121,6 +148,8 @@ export class NumericInput {
       formatOn: this.options.formatOn,
       thousandsSeparator: this.options.thousandsSeparator,
       thousandsGroupStyle: this.options.thousandsGroupStyle,
+      decimalSeparator: this.options.decimalSeparator,
+      allowedDecimalSeparators: this.options.allowedDecimalSeparators,
     });
 
     if (caretInfo) {
@@ -143,7 +172,9 @@ export class NumericInput {
       this.options.maxDecimals || DEFAULT_MAX_DECIMALS,
       this.options.shorthandParsing,
       this.options.allowNegative,
-      this.options.allowLeadingZeros
+      this.options.allowLeadingZeros,
+      this.options.decimalSeparator,
+      this.options.allowedDecimalSeparators
     );
     if (this.options.onChange) {
       this.options.onChange((e.target as HTMLInputElement).value);
@@ -169,7 +200,8 @@ export class NumericInput {
         target.value,
         this.options.thousandsSeparator,
         this.options.thousandsGroupStyle || 'thousand',
-        this.options.allowLeadingZeros
+        this.options.allowLeadingZeros,
+        this.options.decimalSeparator
       );
       target.value = formatted;
 

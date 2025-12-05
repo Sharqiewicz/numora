@@ -15,10 +15,30 @@ export { GROUPING_CONFIG } from './constants';
 export { formatWithSeparators } from './thousands-grouping';
 
 // === CURSOR POSITION CALCULATION ===
-export { calculateCursorPositionAfterFormatting } from './cursor-position';
+export {
+  calculateCursorPositionAfterFormatting,
+  type CursorPositionOptions,
+  type IsCharacterEquivalent,
+} from './cursor-position';
 
 // === CHANGE DETECTION ===
 export { findChangedRangeFromCaretPositions, findChangeRange } from './change-detection';
+
+// === CARET BOUNDARY SYSTEM ===
+export { getCaretBoundary, getCaretPosInBoundary } from './cursor-boundary';
+
+// === CHARACTER EQUIVALENCE ===
+export {
+  createDecimalSeparatorEquivalence,
+  defaultIsCharacterEquivalent,
+} from './character-equivalence';
+
+// === CARET POSITION UTILITIES ===
+export {
+  setCaretPosition,
+  setCaretPositionWithRetry,
+  getInputCaretPosition,
+} from './caret-position-utils';
 
 // === DIGIT COUNTING UTILITIES ===
 // These are primarily for internal use but exported for advanced use cases
