@@ -8,9 +8,6 @@ import { formatWithSeparators, type thousandStyle } from '@/utils/formatting';
 import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_THOUSAND_STYLE } from './config';
 import { FormatOn } from './types';
 
-
-
-
 export interface NumoraInputOptions extends Partial<HTMLInputElement> {
   // Formatting options
   formatOn: FormatOn;
@@ -47,8 +44,6 @@ export class NumoraInput {
     lastSpaceTime: 0,
     lastSpacePosition: -1,
   };
-
-  private isComposing: boolean = false;
 
   constructor(
     container: HTMLElement,
@@ -91,14 +86,15 @@ export class NumoraInput {
   }
 
   private createInputElement(container: HTMLElement): void {
-    this.element = document.createElement('input');
 
-    this.element.setAttribute('minlength', '1');
+    this.element = document.createElement('input');
 
     const escapedSeparator = this.options.decimalSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const pattern = this.options.enableNegative
-      ? `^-?[0-9]*[${escapedSeparator}]?[0-9]*$`
-      : `^[0-9]*[${escapedSeparator}]?[0-9]*$`;
+    ? `^-?[0-9]*[${escapedSeparator}]?[0-9]*$`
+    : `^[0-9]*[${escapedSeparator}]?[0-9]*$`;
+
+    this.element.setAttribute('minlength', '1');
     this.element.setAttribute('pattern', pattern);
     this.element.setAttribute('spellcheck', 'false');
     this.element.setAttribute('type', 'text');
@@ -118,11 +114,6 @@ export class NumoraInput {
     this.element.addEventListener('keydown', this.handleKeyDown.bind(this));
     this.element.addEventListener('paste', this.handlePaste.bind(this));
 
-    // IME composition event handlers for mobile keyboards (Android, Asian keyboards)
-    this.element.addEventListener('compositionstart', this.handleCompositionStart.bind(this));
-    this.element.addEventListener('compositionupdate', this.handleCompositionUpdate.bind(this));
-    this.element.addEventListener('compositionend', this.handleCompositionEnd.bind(this));
-
     // Only add focus/blur handlers for 'blur' mode formatting
     if (this.options.formatOn === 'blur' && this.options.thousandSeparator) {
       this.element.addEventListener('focus', this.handleFocus.bind(this));
@@ -134,19 +125,17 @@ export class NumoraInput {
     const target = e.target as HTMLInputElement;
     const cursorPosition = target.selectionStart ?? 0;
 
-    // Handle iOS double-space auto-period if not composing
-    if (!this.isComposing) {
-      const doubleSpaceResult = handleIOSDoubleSpace(
-        target.value,
-        cursorPosition,
-        this.spaceInputTracker,
-        this.options.decimalSeparator
-      );
+    // Handle iOS double-space auto-period
+    const doubleSpaceResult = handleIOSDoubleSpace(
+      target.value,
+      cursorPosition,
+      this.spaceInputTracker,
+      this.options.decimalSeparator
+    );
 
-      if (doubleSpaceResult) {
-        target.value = doubleSpaceResult.value;
-        target.setSelectionRange(doubleSpaceResult.cursorPosition, doubleSpaceResult.cursorPosition);
-      }
+    if (doubleSpaceResult) {
+      target.value = doubleSpaceResult.value;
+      target.setSelectionRange(doubleSpaceResult.cursorPosition, doubleSpaceResult.cursorPosition);
     }
 
     handleOnChangeNumoraInput(
@@ -206,25 +195,6 @@ export class NumoraInput {
     if (this.options.onChange) {
       this.options.onChange((e.target as HTMLInputElement).value);
     }
-  }
-
-  private handleCompositionStart(e: CompositionEvent): void {
-    this.isComposing = true;
-  }
-
-  private handleCompositionUpdate(e: CompositionEvent): void {
-    // During composition, allow IME to work normally
-    // We'll sanitize after composition ends
-  }
-
-  private handleCompositionEnd(e: CompositionEvent): void {
-    this.isComposing = false;
-    const target = e.target as HTMLInputElement;
-
-    // After composition ends, sanitize the composed text
-    // Trigger a change event to process the composed input
-    const changeEvent = new Event('input', { bubbles: true, cancelable: true });
-    target.dispatchEvent(changeEvent);
   }
 
   private handleFocus(e: FocusEvent): void {
