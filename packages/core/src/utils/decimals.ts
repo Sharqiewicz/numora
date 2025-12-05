@@ -1,13 +1,13 @@
-import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_THOUSAND_SEPARATOR } from "@/config";
+import { DEFAULT_DECIMAL_SEPARATOR } from "@/config";
 
 export interface SeparatorOptions {
-  decimalSeparator?: string;
-  thousandSeparator?: string | boolean;
+  decimalSeparator: string;
+  thousandSeparator?: string;
 }
 
 export interface Separators {
   decimalSeparator: string;
-  thousandSeparator: string | undefined;
+  thousandSeparator?: string;
 }
 
 /**
@@ -16,26 +16,11 @@ export interface Separators {
  * @param options - Separator configuration options
  * @returns Normalized separator configuration
  */
-export function getSeparators(options: SeparatorOptions = {}): Separators {
-  const { decimalSeparator = DEFAULT_DECIMAL_SEPARATOR } = options;
-  let { thousandSeparator } = options;
-
-  if (thousandSeparator === true) {
-    thousandSeparator = DEFAULT_THOUSAND_SEPARATOR;
-  }
-
+export function getSeparators(options: SeparatorOptions): Separators {
   return {
-    decimalSeparator,
-    thousandSeparator: thousandSeparator as string | undefined,
+    decimalSeparator: options.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
+    thousandSeparator: options.thousandSeparator,
   };
-}
-
-
-/**
- * Escapes special regex characters in a string.
- */
-function escapeRegExp(str: string): string {
-  return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
 }
 
 /**
@@ -69,11 +54,18 @@ export const alreadyHasDecimal = (
 export const trimToMaxDecimals = (
   value: string,
   decimalMaxLength: number,
-  decimalSeparator: string = '.'
+  decimalSeparator: string = DEFAULT_DECIMAL_SEPARATOR
 ): string => {
   const [integer, decimal] = value.split(decimalSeparator);
   return decimal ? `${integer}${decimalSeparator}${decimal.slice(0, decimalMaxLength)}` : value;
 };
+
+/**
+ * Escapes special regex characters in a string.
+ */
+function escapeRegExp(str: string): string {
+  return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
+}
 
 /**
  * Removes extra decimal separators, keeping only the first one.
@@ -84,7 +76,7 @@ export const trimToMaxDecimals = (
  */
 export const removeExtraDecimalSeparators = (
   value: string,
-  decimalSeparator: string = '.'
+  decimalSeparator: string = DEFAULT_DECIMAL_SEPARATOR
 ): string => {
   const escaped = escapeRegExp(decimalSeparator);
   const regex = new RegExp(`(${escaped}.*?)${escaped}`, 'g');

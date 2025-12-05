@@ -2,11 +2,11 @@ import {
   handleOnChangeNumoraInput,
   handleOnKeyDownNumoraInput,
   handleOnPasteNumoraInput,
-  handleIOSDoubleSpace,
 } from '@/utils/event-handlers';
 import { formatWithSeparators, type thousandStyle } from '@/utils/formatting';
 import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_THOUSAND_STYLE } from './config';
 import { FormatOn } from './types';
+import { validateNumoraInputOptions } from './validation';
 
 export interface NumoraInputOptions extends Partial<HTMLInputElement> {
   // Formatting options
@@ -60,27 +60,18 @@ export class NumoraInput {
       ...rest
     }: NumoraInputOptions
   ) {
-    if (thousandSeparator && thousandSeparator === decimalSeparator) {
-      throw new Error(
-        `Decimal separator can't be same as thousand separator. ` +
-        `thousandSeparator: ${thousandSeparator}, ` +
-        `decimalSeparator: ${decimalSeparator}`
-      );
-    }
 
-    if (thousandSeparator && thousandSeparator.length > 1) {
-      throw new Error(
-        `Thousand separator must be a single character. ` +
-        `Received: "${thousandSeparator}" (length: ${thousandSeparator.length})`
-      );
-    }
-
-    if (decimalSeparator && decimalSeparator.length > 1) {
-      throw new Error(
-        `Decimal separator must be a single character. ` +
-        `Received: "${decimalSeparator}" (length: ${decimalSeparator.length})`
-      );
-    }
+    validateNumoraInputOptions({
+      decimalMaxLength,
+      formatOn,
+      thousandSeparator,
+      thousandStyle,
+      decimalSeparator,
+      enableCompactNotation,
+      enableNegative,
+      enableLeadingZeros,
+      onChange,
+    });
 
     this.options = {
       decimalMaxLength,
@@ -136,21 +127,6 @@ export class NumoraInput {
   }
 
   private handleChange(e: Event): void {
-    const target = e.target as HTMLInputElement;
-    const cursorPosition = target.selectionStart ?? 0;
-
-    // Handle iOS double-space auto-period
-    const doubleSpaceResult = handleIOSDoubleSpace(
-      target.value,
-      cursorPosition,
-      this.spaceInputTracker,
-      this.options.decimalSeparator
-    );
-
-    if (doubleSpaceResult) {
-      target.value = doubleSpaceResult.value;
-      target.setSelectionRange(doubleSpaceResult.cursorPosition, doubleSpaceResult.cursorPosition);
-    }
 
     handleOnChangeNumoraInput(
       e,

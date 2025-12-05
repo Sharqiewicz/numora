@@ -20,7 +20,6 @@ import {
 import {
   defaultIsCharacterEquivalent,
 } from '@/utils/formatting/character-equivalence';
-import { isIOS } from '@/utils/mobile-keyboard-utils';
 
 export interface FormattingOptions {
   formatOn?: 'blur' | 'change';
@@ -32,85 +31,6 @@ export interface FormattingOptions {
   decimalSeparator?: string;
 }
 
-/**
- * Tracks space input for iOS double-space auto-period detection.
- */
-interface SpaceInputTracker {
-  lastSpaceTime: number;
-  lastSpacePosition: number;
-}
-
-const SPACE_DOUBLE_TAP_THRESHOLD_MS = 300;
-
-/**
- * Handles iOS double-space auto-period behavior.
- * Detects rapid double-space input and converts to decimal separator if appropriate.
- *
- * @param value - Current input value
- * @param cursorPosition - Current cursor position
- * @param tracker - Space input tracker (mutated)
- * @param decimalSeparator - Decimal separator character
- * @returns Modified value if double-space detected, null otherwise
- */
-export function handleIOSDoubleSpace(
-  value: string,
-  cursorPosition: number,
-  tracker: SpaceInputTracker,
-  decimalSeparator: string
-): { value: string; cursorPosition: number } | null {
-  if (!isIOS()) {
-    return null;
-  }
-
-  const now = Date.now();
-  const currentChar = value[cursorPosition - 1];
-
-  // Check if current character is a space
-  if (currentChar === ' ') {
-    // Check if this is a rapid second space (double-space)
-    // The previous space should be at cursorPosition - 2 (one position before current)
-    const isRapidDoubleSpace =
-      tracker.lastSpaceTime > 0 &&
-      now - tracker.lastSpaceTime < SPACE_DOUBLE_TAP_THRESHOLD_MS &&
-      tracker.lastSpacePosition === cursorPosition - 2;
-
-    if (isRapidDoubleSpace) {
-      // Check if we already have a decimal separator
-      const hasDecimalSeparator = value.includes(decimalSeparator);
-
-      // Only convert if we don't already have a decimal separator
-      if (!hasDecimalSeparator) {
-        // Replace both spaces with decimal separator (remove first space, replace second)
-        const newValue =
-          value.slice(0, cursorPosition - 2) + decimalSeparator + value.slice(cursorPosition);
-        return {
-          value: newValue,
-          cursorPosition: cursorPosition - 1, // Cursor after decimal separator
-        };
-      } else {
-        // Remove both spaces if we already have decimal separator
-        const newValue =
-          value.slice(0, cursorPosition - 2) + value.slice(cursorPosition);
-        return {
-          value: newValue,
-          cursorPosition: cursorPosition - 2,
-        };
-      }
-    }
-
-    // Update tracker with current space
-    tracker.lastSpaceTime = now;
-    tracker.lastSpacePosition = cursorPosition - 1;
-  } else {
-    // Reset tracker if not a space or too much time has passed
-    if (now - tracker.lastSpaceTime > SPACE_DOUBLE_TAP_THRESHOLD_MS) {
-      tracker.lastSpaceTime = 0;
-      tracker.lastSpacePosition = -1;
-    }
-  }
-
-  return null;
-}
 
 /**
  * Handles the input change event to ensure the value does not exceed the maximum number of decimal places,
