@@ -3,9 +3,11 @@
  * Supports multiple grouping styles: thousand (Western), lakh (Indian), wan (Chinese)
  */
 
-import { GROUPING_CONFIG, type thousandStyle } from './constants';
+import { GROUPING_CONFIG  } from './constants';
 import { DEFAULT_DECIMAL_SEPARATOR } from '@/config';
 import type { FormattingOptions, Separators } from '@/types';
+import { ThousandStyle } from '@/types';
+
 
 
 /**
@@ -13,7 +15,7 @@ import type { FormattingOptions, Separators } from '@/types';
  *
  * @param value - The numeric string to format (e.g., "1234567")
  * @param separator - The separator character to use (e.g., ",")
- * @param groupStyle - The grouping style: 'thousand' (1,234,567), 'lakh' (12,34,567), or 'wan' (123,4567)
+ * @param groupStyle - The grouping style: 'none' (no separators), 'thousand' (1,234,567), 'lakh' (12,34,567), or 'wan' (123,4567)
  * @param enableLeadingZeros - Whether to preserve leading zeros
  * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The formatted string with separators
@@ -28,7 +30,7 @@ import type { FormattingOptions, Separators } from '@/types';
 export function formatWithSeparators(
   value: string,
   separator: string,
-  groupStyle: thousandStyle = 'thousand',
+  groupStyle: ThousandStyle,
   enableLeadingZeros = false,
   decimalSeparator: string = '.'
 ): string {
@@ -84,21 +86,23 @@ export function formatWithSeparators(
 function formatIntegerPart(
   integerPart: string,
   separator: string,
-  groupStyle: thousandStyle
+  groupStyle: ThousandStyle
 ): string {
   if (integerPart === '0' || integerPart === '') {
     return integerPart;
   }
 
   switch (groupStyle) {
-    case 'thousand':
+    case ThousandStyle.None:
+      return integerPart;
+    case ThousandStyle.Thousand:
       return formatThousandStyle(integerPart, separator);
-    case 'lakh':
+    case ThousandStyle.Lakh:
       return formatLakhStyle(integerPart, separator);
-    case 'wan':
+    case ThousandStyle.Wan:
       return formatWanStyle(integerPart, separator);
     default:
-      return formatThousandStyle(integerPart, separator);
+      return integerPart;
   }
 }
 
@@ -181,7 +185,7 @@ export function applyFormattingIfNeeded(
     const formatted = formatWithSeparators(
       sanitizedValue,
       formattingOptions.thousandSeparator,
-      formattingOptions.thousandStyle || 'thousand',
+      formattingOptions.ThousandStyle ?? ThousandStyle.None,
       formattingOptions.enableLeadingZeros,
       separators?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR
     );

@@ -3,7 +3,8 @@
  * Handles cursor preservation during formatting changes, insertion, and deletion operations.
  */
 
-import type { ChangeRange, thousandStyle } from './constants';
+import type { ChangeRange } from './constants';
+import { ThousandStyle } from '@/types';
 import {
   countMeaningfulDigitsBeforePosition,
   findPositionForDigitIndex,
@@ -68,7 +69,7 @@ export function calculateCursorPositionAfterFormatting(
   newFormattedValue: string,
   oldCursorPosition: number,
   separator: string,
-  _groupStyle: thousandStyle = 'thousand',
+  _groupStyle: ThousandStyle,
   changeRange?: ChangeRange,
   decimalSeparator: string = '.',
   options: CursorPositionOptions = {}

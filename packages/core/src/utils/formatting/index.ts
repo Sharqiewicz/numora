@@ -8,7 +8,7 @@
  */
 
 // === TYPES & CONSTANTS ===
-export type { thousandStyle, ChangeRange } from './constants';
+export type {  ChangeRange } from './constants';
 export { GROUPING_CONFIG } from './constants';
 
 // === NUMBER FORMATTING ===

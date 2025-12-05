@@ -1,11 +1,11 @@
-import type { FormatOn } from './types';
-import type { thousandStyle } from './utils/formatting';
+import { FormatOn } from './types';
+import { ThousandStyle } from './types';
 
 export interface NumoraInputValidationOptions {
   decimalMaxLength?: number;
   formatOn?: FormatOn;
   thousandSeparator?: string;
-  thousandStyle?: thousandStyle;
+  thousandStyle?: ThousandStyle;
   decimalSeparator?: string;
   enableCompactNotation?: boolean;
   enableNegative?: boolean;
@@ -62,9 +62,9 @@ function validateFormatOn(value: FormatOn | undefined): void {
     return;
   }
 
-  if (value !== 'blur' && value !== 'change') {
+  if (value !== FormatOn.Blur && value !== FormatOn.Change) {
     throw new Error(
-      `formatOn must be either 'blur' or 'change'. ` +
+      `formatOn must be either ${FormatOn.Blur} or ${FormatOn.Change}. ` +
       `Received: ${JSON.stringify(value)}`
     );
   }
@@ -97,19 +97,18 @@ function validateThousandSeparator(value: string | undefined): void {
   }
 }
 
-function validateThousandStyle(value: thousandStyle | undefined): void {
+function validateThousandStyle(value: ThousandStyle | undefined): void {
   if (value === undefined) {
     return;
   }
 
-  const validStyles: thousandStyle[] = ['thousand', 'lakh', 'wan'];
-
-  if (!validStyles.includes(value)) {
+  if (!Object.values(ThousandStyle).includes(value)) {
     throw new Error(
-      `thousandStyle must be one of: ${validStyles.map(s => `'${s}'`).join(', ')}. ` +
+      `ThousandStyle must be one of: ${Object.values(ThousandStyle).map(s => `'${s}'`).join(', ')}. ` +
       `Received: ${JSON.stringify(value)}`
     );
   }
+
 }
 
 function validateDecimalSeparator(value: string | undefined): void {

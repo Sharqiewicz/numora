@@ -13,6 +13,7 @@ import {
 } from './cursor-position';
 import { getCaretBoundary } from './cursor-boundary';
 import { defaultIsCharacterEquivalent } from './character-equivalence';
+import {ThousandStyle} from '@/types';
 import type { FormattingOptions, CaretPositionInfo, Separators } from '@/types';
 
 /**
@@ -149,7 +150,7 @@ export function updateCursorPosition(
   };
 
   const thousandSeparator = formattingOptions?.thousandSeparator ?? separators.thousandSeparator ?? ',';
-  const thousandStyle = formattingOptions?.thousandStyle ?? 'thousand';
+  const thousandStyle = formattingOptions?.ThousandStyle ?? ThousandStyle.None;
 
   const newCursorPosition = calculateCursorPositionAfterFormatting(
     oldValue,

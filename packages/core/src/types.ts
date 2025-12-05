@@ -1,11 +1,21 @@
-import { thousandStyle } from "./utils/formatting";
 
-export type FormatOn = 'blur' | 'change';
+export enum FormatOn {
+    Blur = 'blur',
+    Change = 'change',
+}
+
+export enum ThousandStyle {
+    None = 'none',
+    Thousand = 'thousand',
+    Lakh = 'lakh',
+    Wan = 'wan',
+}
+
 
 export interface FormattingOptions {
     formatOn?: 'blur' | 'change';
     thousandSeparator?: string;
-    thousandStyle?: thousandStyle;
+    ThousandStyle?: ThousandStyle;
     enableCompactNotation?: boolean;
     enableNegative?: boolean;
     enableLeadingZeros?: boolean;

@@ -26,9 +26,9 @@ export function expandScientificNotation(value: string): string {
       const [integerPart, decimalPart = ''] = baseWithoutSign.split('.');
 
       if (exponent > 0) {
-        expanded = expandPositiveExponent(integerPart, decimalPart, exponent, baseWithoutSign.includes('.'));
+        expanded = expandPositiveExponent(integerPart, decimalPart, exponent);
       } else {
-        expanded = expandNegativeExponent(integerPart, decimalPart, Math.abs(exponent), baseWithoutSign.includes('.'));
+        expanded = expandNegativeExponent(integerPart, decimalPart, Math.abs(exponent));
       }
 
       if (isNegative) {
@@ -50,7 +50,6 @@ function expandPositiveExponent(
   integerPart: string,
   decimalPart: string,
   exponent: number,
-  hadDecimalPoint: boolean
 ): string {
   const allDigits = integerPart + decimalPart;
 
@@ -74,7 +73,6 @@ function expandNegativeExponent(
   integerPart: string,
   decimalPart: string,
   exponent: number,
-  hadDecimalPoint: boolean
 ): string {
   const allDigits = integerPart + decimalPart;
 

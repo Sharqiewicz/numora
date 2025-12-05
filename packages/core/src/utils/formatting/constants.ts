@@ -1,10 +1,4 @@
 /**
- * Type definitions and constants for number formatting
- */
-
-export type thousandStyle = 'thousand' | 'lakh' | 'wan';
-
-/**
  * Configuration for different grouping styles used in number formatting.
  *
  * - thousand: Groups by 3 digits (Western style) - 1,234,567

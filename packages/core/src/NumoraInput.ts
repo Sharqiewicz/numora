@@ -3,9 +3,9 @@ import {
   handleOnKeyDownNumoraInput,
   handleOnPasteNumoraInput,
 } from '@/utils/event-handlers';
-import { formatWithSeparators, type thousandStyle } from '@/utils/formatting';
+import { formatWithSeparators } from '@/utils/formatting';
 import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_THOUSAND_STYLE } from './config';
-import { FormatOn } from './types';
+import { FormatOn, ThousandStyle } from './types';
 import { validateNumoraInputOptions } from './validation';
 
 export interface NumoraInputOptions extends Partial<HTMLInputElement> {
@@ -14,7 +14,7 @@ export interface NumoraInputOptions extends Partial<HTMLInputElement> {
 
   // Thousand options
   thousandSeparator: string;
-  thousandStyle: thousandStyle;
+  thousandStyle: ThousandStyle;
 
   // Decimal options
   decimalSeparator: string;
@@ -38,11 +38,6 @@ export class NumoraInput {
     selectionStart: number;
     selectionEnd: number;
     endOffset?: number;
-  };
-
-  private spaceInputTracker: { lastSpaceTime: number; lastSpacePosition: number } = {
-    lastSpaceTime: 0,
-    lastSpacePosition: -1,
   };
 
   constructor(
@@ -135,7 +130,7 @@ export class NumoraInput {
       {
         formatOn: this.options.formatOn,
         thousandSeparator: this.options.thousandSeparator,
-        thousandStyle: this.options.thousandStyle,
+        ThousandStyle: this.options.thousandStyle,
         enableCompactNotation: this.options.enableCompactNotation,
         enableNegative: this.options.enableNegative,
         enableLeadingZeros: this.options.enableLeadingZeros,
@@ -155,7 +150,7 @@ export class NumoraInput {
     const caretInfo = handleOnKeyDownNumoraInput(e, {
       formatOn: this.options.formatOn,
       thousandSeparator: this.options.thousandSeparator,
-      thousandStyle: this.options.thousandStyle,
+      ThousandStyle: this.options.thousandStyle,
       decimalSeparator: this.options.decimalSeparator,
     });
 
@@ -177,7 +172,7 @@ export class NumoraInput {
     handleOnPasteNumoraInput(e, this.options.decimalMaxLength, {
       formatOn: this.options.formatOn,
       thousandSeparator: this.options.thousandSeparator,
-      thousandStyle: this.options.thousandStyle,
+      ThousandStyle: this.options.thousandStyle,
       enableCompactNotation: this.options.enableCompactNotation,
       enableNegative: this.options.enableNegative,
       enableLeadingZeros: this.options.enableLeadingZeros,
@@ -202,11 +197,11 @@ export class NumoraInput {
   private handleBlur(e: FocusEvent): void {
     const target = e.target as HTMLInputElement;
     // Add separators back in 'blur' mode
-    if (this.options.thousandSeparator && target.value) {
+    if (this.options.thousandSeparator && this.options.thousandStyle !== ThousandStyle.None && target.value) {
       const formatted = formatWithSeparators(
         target.value,
         this.options.thousandSeparator,
-        this.options.thousandStyle || 'thousand',
+        this.options.thousandStyle,
         this.options.enableLeadingZeros,
         this.options.decimalSeparator
       );

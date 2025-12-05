@@ -453,7 +453,7 @@ describe('Negative Number Support', () => {
       createInputWithNegatives({
         formatOn: 'change',
         thousandSeparator: ',',
-        thousandStyle: 'thousand',
+        ThousandStyle: 'thousand',
       });
       const inputElement = getInputElement();
 
@@ -467,7 +467,7 @@ describe('Negative Number Support', () => {
       createInputWithNegatives({
         formatOn: 'change',
         thousandSeparator: ',',
-        thousandStyle: 'thousand',
+        ThousandStyle: 'thousand',
         decimalMaxLength: 2,
       });
       const inputElement = getInputElement();
@@ -482,7 +482,7 @@ describe('Negative Number Support', () => {
       createInputWithNegatives({
         formatOn: 'blur',
         thousandSeparator: ',',
-        thousandStyle: 'thousand',
+        ThousandStyle: 'thousand',
       });
       const inputElement = getInputElement();
 
@@ -701,7 +701,7 @@ describe('Leading Zeros Support', () => {
       createInputWithLeadingZeros({
         formatOn: 'change',
         thousandSeparator: ',',
-        thousandStyle: 'thousand',
+        ThousandStyle: 'thousand',
       });
       const inputElement = getInputElement();
 

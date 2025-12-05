@@ -11,7 +11,7 @@ import {
   getInputCaretPosition,
   updateCursorPosition,
 } from '@/utils/formatting/caret-position-utils';
-import type { FormattingOptions, CaretPositionInfo } from '@/types';
+import { type FormattingOptions, type CaretPositionInfo, FormatOn } from '@/types';
 
 /**
  * Handles the keydown event to prevent the user from entering a second decimal point.
@@ -37,7 +37,7 @@ export function handleOnKeyDownNumoraInput(
   const { key } = e;
 
   // Skip over thousand separator on delete/backspace (only for 'change' mode)
-  if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandSeparator && selectionStart !== null && selectionEnd !== null) {
+  if (formattingOptions?.formatOn === FormatOn.Change && formattingOptions.thousandSeparator && selectionStart !== null && selectionEnd !== null) {
     const sep = formattingOptions.thousandSeparator;
 
     if (selectionStart === selectionEnd) {
@@ -96,7 +96,7 @@ export function handleOnChangeNumoraInput(
   const separators = getSeparatorsFromOptions(formattingOptions);
   const rawInputValue = target.value;
 
-  const shouldRemoveThousandSeparators = formattingOptions?.formatOn === 'change';
+  const shouldRemoveThousandSeparators = formattingOptions?.formatOn === FormatOn.Change;
   target.value = sanitizeNumoraInput(
     target.value,
     buildSanitizationOptions(formattingOptions, separators, shouldRemoveThousandSeparators)
