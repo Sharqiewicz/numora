@@ -20,6 +20,7 @@ import {
 import {
   defaultIsCharacterEquivalent,
 } from '@/utils/formatting/character-equivalence';
+import { DEFAULT_DECIMAL_SEPARATOR } from '@/config';
 
 export interface FormattingOptions {
   formatOn?: 'blur' | 'change';
@@ -30,6 +31,76 @@ export interface FormattingOptions {
   enableLeadingZeros?: boolean;
   decimalSeparator?: string;
 }
+
+
+export interface CaretPositionInfo {
+  selectionStart?: number;
+  selectionEnd?: number;
+  endOffset?: number;
+}
+
+/**
+ * Handles the keydown event to prevent the user from entering a second decimal point.
+ * Also tracks selection info for Delete/Backspace keys to enable proper cursor positioning.
+ * In 'change' mode with formatting, skips cursor over thousand separators on delete/backspace.
+ *
+ * @param e - The keyboard event triggered by the input.
+ * @param formattingOptions - Optional formatting options for separator skipping
+ * @returns Caret position info if Delete/Backspace was pressed, undefined otherwise
+ */
+export function handleOnKeyDownNumoraInput(
+  e: KeyboardEvent,
+  formattingOptions?: FormattingOptions
+): CaretPositionInfo | undefined {
+  const separators = getSeparators({
+    decimalSeparator: formattingOptions?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
+    thousandSeparator: formattingOptions?.thousandSeparator,
+  });
+
+  if (alreadyHasDecimal(e, separators.decimalSeparator)) {
+    e.preventDefault();
+  }
+
+  const inputElement = e.target as HTMLInputElement;
+  const { selectionStart, selectionEnd, value } = inputElement;
+  const { key } = e;
+
+  // Skip over thousand separator on delete/backspace (only for 'change' mode)
+  if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandSeparator && selectionStart !== null && selectionEnd !== null) {
+    const sep = formattingOptions.thousandSeparator;
+
+    if (selectionStart === selectionEnd) {
+      // Backspace: cursor moves left, skips over separator
+      if (key === 'Backspace' && selectionStart > 0 && value[selectionStart - 1] === sep) {
+        inputElement.setSelectionRange(selectionStart - 1, selectionStart - 1);
+        // Don't prevent default - let it delete the digit before separator
+      }
+
+      // Delete: cursor stays, skips over separator
+      if (key === 'Delete' && value[selectionStart] === sep) {
+        inputElement.setSelectionRange(selectionStart + 1, selectionStart + 1);
+        // Don't prevent default - let it delete the digit after separator
+      }
+    }
+  }
+
+  if (key === 'Backspace' || key === 'Delete') {
+    let endOffset = 0;
+
+    if (key === 'Delete' && selectionStart === selectionEnd) {
+      endOffset = 1;
+    }
+
+    return {
+      selectionStart: selectionStart ?? 0,
+      selectionEnd: selectionEnd ?? 0,
+      endOffset,
+    };
+  }
+
+  return undefined;
+}
+
 
 
 /**
@@ -54,26 +125,21 @@ export function handleOnChangeNumoraInput(
   const oldCursorPosition = getInputCaretPosition(target);
 
   const separators = getSeparators({
-    decimalSeparator: formattingOptions?.decimalSeparator,
+    decimalSeparator: formattingOptions?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
     thousandSeparator: formattingOptions?.thousandSeparator,
   });
 
   // Track raw input value before any processing
   const rawInputValue = target.value;
 
-  // Step 1: Sanitize the input (includes mobile keyboard artifact filtering)
-  if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandSeparator) {
-    // In 'change' mode: remove thousand separators (they're formatting, not decimal separators)
-    const escapedSeparator = formattingOptions.thousandSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    target.value = target.value.replace(new RegExp(escapedSeparator, 'g'), '');
-  }
-
   target.value = sanitizeNumoraInput(target.value, {
     enableCompactNotation: formattingOptions?.enableCompactNotation,
     enableNegative: formattingOptions?.enableNegative,
     enableLeadingZeros: formattingOptions?.enableLeadingZeros,
     decimalSeparator: separators.decimalSeparator,
+    thousandSeparator: formattingOptions?.formatOn === 'change' ? separators.thousandSeparator : undefined,
   });
+
   target.value = trimToMaxDecimals(target.value, decimalMaxLength, separators.decimalSeparator);
 
   const sanitizedValue = target.value;
@@ -187,73 +253,6 @@ export function handleOnChangeNumoraInput(
   }
 }
 
-export interface CaretPositionInfo {
-  selectionStart?: number;
-  selectionEnd?: number;
-  endOffset?: number;
-}
-
-/**
- * Handles the keydown event to prevent the user from entering a second decimal point.
- * Also tracks selection info for Delete/Backspace keys to enable proper cursor positioning.
- * In 'change' mode with formatting, skips cursor over thousand separators on delete/backspace.
- *
- * @param e - The keyboard event triggered by the input.
- * @param formattingOptions - Optional formatting options for separator skipping
- * @returns Caret position info if Delete/Backspace was pressed, undefined otherwise
- */
-export function handleOnKeyDownNumoraInput(
-  e: KeyboardEvent,
-  formattingOptions?: FormattingOptions
-): CaretPositionInfo | undefined {
-  const separators = getSeparators({
-    decimalSeparator: formattingOptions?.decimalSeparator,
-    thousandSeparator: formattingOptions?.thousandSeparator,
-  });
-
-  if (alreadyHasDecimal(e, separators.decimalSeparator)) {
-    e.preventDefault();
-  }
-
-  const inputElement = e.target as HTMLInputElement;
-  const { selectionStart, selectionEnd, value } = inputElement;
-  const { key } = e;
-
-  // Skip over thousand separator on delete/backspace (only for 'change' mode)
-  if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandSeparator && selectionStart !== null && selectionEnd !== null) {
-    const sep = formattingOptions.thousandSeparator;
-
-    if (selectionStart === selectionEnd) {
-      // Backspace: cursor moves left, skips over separator
-      if (key === 'Backspace' && selectionStart > 0 && value[selectionStart - 1] === sep) {
-        inputElement.setSelectionRange(selectionStart - 1, selectionStart - 1);
-        // Don't prevent default - let it delete the digit before separator
-      }
-
-      // Delete: cursor stays, skips over separator
-      if (key === 'Delete' && value[selectionStart] === sep) {
-        inputElement.setSelectionRange(selectionStart + 1, selectionStart + 1);
-        // Don't prevent default - let it delete the digit after separator
-      }
-    }
-  }
-
-  if (key === 'Backspace' || key === 'Delete') {
-    let endOffset = 0;
-
-    if (key === 'Delete' && selectionStart === selectionEnd) {
-      endOffset = 1;
-    }
-
-    return {
-      selectionStart: selectionStart ?? 0,
-      selectionEnd: selectionEnd ?? 0,
-      endOffset,
-    };
-  }
-
-  return undefined;
-}
 
 /**
  * Handles the paste event to ensure the value does not exceed the maximum number of decimal places,
@@ -270,51 +269,38 @@ export function handleOnPasteNumoraInput(
   enableCompactNotation?: boolean,
   enableNegative?: boolean,
   enableLeadingZeros?: boolean,
-  decimalSeparator?: string
+  decimalSeparator?: string,
+  thousandSeparator?: string
 ): string {
+  e.preventDefault();
+
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
 
   const separators = getSeparators({
-    decimalSeparator,
+    decimalSeparator: decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
+    thousandSeparator,
   });
 
-  const sanitizedClipboardData = sanitizeNumoraInput(
-    e.clipboardData?.getData('text/plain') || '',
-    {
-      enableCompactNotation,
-      enableNegative,
-      enableLeadingZeros,
-      decimalSeparator: separators.decimalSeparator,
-    }
-  );
-
+  const clipboardData = e.clipboardData?.getData('text/plain') || '';
   const combinedValue =
-    value.slice(0, selectionStart || 0) + sanitizedClipboardData + value.slice(selectionEnd || 0);
+    value.slice(0, selectionStart || 0) + clipboardData + value.slice(selectionEnd || 0);
 
-  const sanitizedCombined = sanitizeNumoraInput(combinedValue, {
+  const sanitizedValue = sanitizeNumoraInput(combinedValue, {
     enableCompactNotation,
     enableNegative,
     enableLeadingZeros,
     decimalSeparator: separators.decimalSeparator,
+    thousandSeparator: separators.thousandSeparator,
   });
 
-  const isNegative = sanitizedCombined.startsWith('-');
-  const absoluteValue = isNegative ? sanitizedCombined.slice(1) : sanitizedCombined;
-  const [integerPart, ...decimalParts] = absoluteValue.split(separators.decimalSeparator);
-  const sanitizedValue =
-    (isNegative ? '-' : '') +
-    integerPart +
-    (decimalParts.length > 0 ? separators.decimalSeparator + decimalParts.join('') : '');
-
-  e.preventDefault();
   inputElement.value = trimToMaxDecimals(sanitizedValue, decimalMaxLength, separators.decimalSeparator);
 
   const newCursorPosition =
     (selectionStart || 0) +
-    sanitizedClipboardData.length -
+    clipboardData.length -
     (combinedValue.length - sanitizedValue.length);
   inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
 
-  return trimToMaxDecimals(sanitizedValue, decimalMaxLength, separators.decimalSeparator);
+  return inputElement.value;
 }

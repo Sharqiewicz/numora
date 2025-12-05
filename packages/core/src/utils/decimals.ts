@@ -1,7 +1,7 @@
 import { DEFAULT_DECIMAL_SEPARATOR } from "@/config";
 
 export interface SeparatorOptions {
-  decimalSeparator: string;
+  decimalSeparator?: string;
   thousandSeparator?: string;
 }
 

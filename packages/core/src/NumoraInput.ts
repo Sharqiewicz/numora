@@ -180,7 +180,8 @@ export class NumoraInput {
       this.options.enableCompactNotation,
       this.options.enableNegative,
       this.options.enableLeadingZeros,
-      this.options.decimalSeparator
+      this.options.decimalSeparator,
+      this.options.thousandSeparator
     );
     if (this.options.onChange) {
       this.options.onChange((e.target as HTMLInputElement).value);
