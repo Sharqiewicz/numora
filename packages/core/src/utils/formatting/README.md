@@ -183,7 +183,7 @@ All modules are thoroughly tested:
 - ✅ **42 tests** for formatting functionality
 - ✅ **36 tests** for cursor position (30 passing, 6 pre-existing failures)
 - ✅ **Edge cases** covered
-- ✅ **Integration tests** via NumericInput
+- ✅ **Integration tests** via NumoraInput
 
 ---
 

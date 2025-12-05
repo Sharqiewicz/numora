@@ -3,6 +3,7 @@ import { removeNonNumericCharacters } from './non-numeric-characters';
 import { expandScientificNotation } from './scientific-notation';
 import { expandShorthand } from './shorthand';
 import { removeLeadingZeros } from './leading-zeros';
+import { filterMobileKeyboardArtifacts } from './mobile-keyboard-filtering';
 
 export interface SanitizationOptions {
   shorthandParsing?: boolean;
@@ -24,12 +25,14 @@ export interface SanitizationOptions {
  * @param options - Optional sanitization configuration
  * @returns The sanitized numeric string
  */
-export const sanitizeNumericInput = (
+export const sanitizeNumoraInput = (
   value: string,
   options?: SanitizationOptions
 ): string => {
+  // Step 0: Filter mobile keyboard artifacts (non-breaking spaces, Unicode whitespace)
+  let sanitized = filterMobileKeyboardArtifacts(value);
+
   // Step 1: Expand shorthand FIRST (if enabled)
-  let sanitized = value;
   if (options?.shorthandParsing) {
     sanitized = expandShorthand(sanitized);
   }

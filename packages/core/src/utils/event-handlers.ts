@@ -4,7 +4,7 @@ import {
   normalizeDecimalSeparator,
   getSeparators,
 } from '@/utils/decimals';
-import { sanitizeNumericInput } from '@/utils/sanitization';
+import { sanitizeNumoraInput } from '@/utils/sanitization';
 import {
   findChangedRangeFromCaretPositions,
   findChangeRange,
@@ -21,6 +21,7 @@ import {
 import {
   createDecimalSeparatorEquivalence,
 } from '@/utils/formatting/character-equivalence';
+import { isIOS } from '@/utils/mobile-keyboard-utils';
 
 export interface FormattingOptions {
   formatOn?: 'blur' | 'change';
@@ -33,6 +34,89 @@ export interface FormattingOptions {
   allowedDecimalSeparators?: string[];
 }
 
+/**
+ * Tracks space input for iOS double-space auto-period detection.
+ */
+interface SpaceInputTracker {
+  lastSpaceTime: number;
+  lastSpacePosition: number;
+}
+
+const SPACE_DOUBLE_TAP_THRESHOLD_MS = 300;
+
+/**
+ * Handles iOS double-space auto-period behavior.
+ * Detects rapid double-space input and converts to decimal separator if appropriate.
+ *
+ * @param value - Current input value
+ * @param cursorPosition - Current cursor position
+ * @param tracker - Space input tracker (mutated)
+ * @param allowedDecimalSeparators - Allowed decimal separator characters
+ * @param decimalSeparator - Canonical decimal separator
+ * @returns Modified value if double-space detected, null otherwise
+ */
+export function handleIOSDoubleSpace(
+  value: string,
+  cursorPosition: number,
+  tracker: SpaceInputTracker,
+  allowedDecimalSeparators: string[],
+  decimalSeparator: string
+): { value: string; cursorPosition: number } | null {
+  if (!isIOS()) {
+    return null;
+  }
+
+  const now = Date.now();
+  const currentChar = value[cursorPosition - 1];
+
+  // Check if current character is a space
+  if (currentChar === ' ') {
+    // Check if this is a rapid second space (double-space)
+    // The previous space should be at cursorPosition - 2 (one position before current)
+    const isRapidDoubleSpace =
+      tracker.lastSpaceTime > 0 &&
+      now - tracker.lastSpaceTime < SPACE_DOUBLE_TAP_THRESHOLD_MS &&
+      tracker.lastSpacePosition === cursorPosition - 2;
+
+    if (isRapidDoubleSpace) {
+      // Check if we already have a decimal separator
+      const hasDecimalSeparator = allowedDecimalSeparators.some((sep) =>
+        value.includes(sep)
+      );
+
+      // Only convert if we don't already have a decimal separator
+      if (!hasDecimalSeparator && allowedDecimalSeparators.includes(decimalSeparator)) {
+        // Replace both spaces with decimal separator (remove first space, replace second)
+        const newValue =
+          value.slice(0, cursorPosition - 2) + decimalSeparator + value.slice(cursorPosition);
+        return {
+          value: newValue,
+          cursorPosition: cursorPosition - 1, // Cursor after decimal separator
+        };
+      } else {
+        // Remove both spaces if we already have decimal separator
+        const newValue =
+          value.slice(0, cursorPosition - 2) + value.slice(cursorPosition);
+        return {
+          value: newValue,
+          cursorPosition: cursorPosition - 2,
+        };
+      }
+    }
+
+    // Update tracker with current space
+    tracker.lastSpaceTime = now;
+    tracker.lastSpacePosition = cursorPosition - 1;
+  } else {
+    // Reset tracker if not a space or too much time has passed
+    if (now - tracker.lastSpaceTime > SPACE_DOUBLE_TAP_THRESHOLD_MS) {
+      tracker.lastSpaceTime = 0;
+      tracker.lastSpacePosition = -1;
+    }
+  }
+
+  return null;
+}
 
 /**
  * Handles the input change event to ensure the value does not exceed the maximum number of decimal places,
@@ -45,7 +129,7 @@ export interface FormattingOptions {
  * @param caretPositionBeforeChange - Optional caret position info from keydown handler
  * @param formattingOptions - Optional formatting options for real-time formatting
  */
-export function handleOnChangeNumericInput(
+export function handleOnChangeNumoraInput(
   e: Event,
   maxDecimals: number,
   caretPositionBeforeChange?: CaretPositionInfo,
@@ -64,7 +148,7 @@ export function handleOnChangeNumericInput(
   // Track raw input value before any processing
   const rawInputValue = target.value;
 
-  // Step 1: Sanitize the input
+  // Step 1: Sanitize the input (includes mobile keyboard artifact filtering)
   if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandsSeparator) {
     // In 'change' mode: remove thousands separators (they're formatting, not decimal separators)
     const escapedSeparator = formattingOptions.thousandsSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -78,7 +162,7 @@ export function handleOnChangeNumericInput(
     );
   }
 
-  target.value = sanitizeNumericInput(target.value, {
+  target.value = sanitizeNumoraInput(target.value, {
     shorthandParsing: formattingOptions?.shorthandParsing,
     allowNegative: formattingOptions?.allowNegative,
     allowLeadingZeros: formattingOptions?.allowLeadingZeros,
@@ -105,7 +189,7 @@ export function handleOnChangeNumericInput(
     // Step 3: Calculate and set cursor position
     if (caretPositionBeforeChange) {
       const { selectionStart = 0, selectionEnd = 0, endOffset = 0 } = caretPositionBeforeChange;
-      
+
       // Prioritize caret-based change detection (more accurate)
       let changeRange = findChangedRangeFromCaretPositions(
         { selectionStart, selectionEnd, endOffset },
@@ -232,7 +316,7 @@ export interface CaretPositionInfo {
  * @param formattingOptions - Optional formatting options for separator skipping
  * @returns Caret position info if Delete/Backspace was pressed, undefined otherwise
  */
-export function handleOnKeyDownNumericInput(
+export function handleOnKeyDownNumoraInput(
   e: KeyboardEvent,
   formattingOptions?: FormattingOptions
 ): CaretPositionInfo | undefined {
@@ -295,7 +379,7 @@ export function handleOnKeyDownNumericInput(
  * @param shorthandParsing - Optional flag to enable shorthand expansion (1k → 1000)
  * @returns The sanitized value after the paste event.
  */
-export function handleOnPasteNumericInput(
+export function handleOnPasteNumoraInput(
   e: ClipboardEvent,
   maxDecimals: number,
   shorthandParsing?: boolean,
@@ -312,7 +396,7 @@ export function handleOnPasteNumericInput(
     allowedDecimalSeparators,
   });
 
-  const sanitizedClipboardData = sanitizeNumericInput(
+  const sanitizedClipboardData = sanitizeNumoraInput(
     e.clipboardData?.getData('text/plain') || '',
     {
       shorthandParsing,
@@ -326,7 +410,7 @@ export function handleOnPasteNumericInput(
   const combinedValue =
     value.slice(0, selectionStart || 0) + sanitizedClipboardData + value.slice(selectionEnd || 0);
 
-  const sanitizedCombined = sanitizeNumericInput(combinedValue, {
+  const sanitizedCombined = sanitizeNumoraInput(combinedValue, {
     shorthandParsing,
     allowNegative,
     allowLeadingZeros,
