@@ -1,6 +1,6 @@
 # Formatting Module
 
-A modular, well-organized formatting library for numeric inputs with thousands separators and sophisticated cursor position preservation.
+A modular, well-organized formatting library for numeric inputs with thousand separators and sophisticated cursor position preservation.
 
 ## 📁 File Structure
 
@@ -9,7 +9,7 @@ formatting/
 ├── README.md                    # This file
 ├── index.ts                     # Public API exports
 ├── constants.ts                 # Type definitions and constants
-├── thousands-grouping.ts        # Number formatting with separators
+├── thousand-grouping.ts        # Number formatting with separators
 ├── cursor-position.ts           # Cursor position calculation
 ├── change-detection.ts          # Change detection utilities
 └── digit-counting.ts            # Digit counting utilities
@@ -21,7 +21,7 @@ formatting/
 **Purpose:** Central location for types and configuration constants
 
 **Exports:**
-- `ThousandsGroupStyle` - Type for grouping styles (thousand, lakh, wan)
+- `thousandStyle` - Type for grouping styles (thousand, lakh, wan)
 - `ChangeRange` - Interface for tracking input changes
 - `GROUPING_CONFIG` - Configuration for different grouping styles
 
@@ -29,11 +29,11 @@ formatting/
 
 ---
 
-### `thousands-grouping.ts`
+### `thousand-grouping.ts`
 **Purpose:** Core number formatting functionality
 
 **Main Export:**
-- `formatWithSeparators()` - Formats numbers with thousands separators
+- `formatWithSeparators()` - Formats numbers with thousand separators
 
 **Features:**
 - ✅ Western style (1,234,567)
@@ -207,7 +207,7 @@ If you were importing from the old `formatting.ts`:
 import { formatWithSeparators } from './utils/formatting';
 
 // New (more explicit)
-import { formatWithSeparators } from './utils/formatting/thousands-grouping';
+import { formatWithSeparators } from './utils/formatting/thousand-grouping';
 
 // Recommended (via index)
 import { formatWithSeparators } from './utils/formatting';

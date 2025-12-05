@@ -1,0 +1,1 @@
+export type FormatOn = 'blur' | 'change';

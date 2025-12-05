@@ -1,18 +1,18 @@
 /**
  * Numora Formatting Module
  *
- * Provides comprehensive number formatting with thousands separators and
+ * Provides comprehensive number formatting with thousand separators and
  * sophisticated cursor position preservation for numeric input fields.
  *
  * @module formatting
  */
 
 // === TYPES & CONSTANTS ===
-export type { ThousandsGroupStyle, ChangeRange } from './constants';
+export type { thousandStyle, ChangeRange } from './constants';
 export { GROUPING_CONFIG } from './constants';
 
 // === NUMBER FORMATTING ===
-export { formatWithSeparators } from './thousands-grouping';
+export { formatWithSeparators } from './thousand-grouping';
 
 // === CURSOR POSITION CALCULATION ===
 export {
@@ -29,7 +29,6 @@ export { getCaretBoundary, getCaretPosInBoundary } from './cursor-boundary';
 
 // === CHARACTER EQUIVALENCE ===
 export {
-  createDecimalSeparatorEquivalence,
   defaultIsCharacterEquivalent,
 } from './character-equivalence';
 

@@ -2,7 +2,7 @@
  * Type definitions and constants for number formatting
  */
 
-export type ThousandsGroupStyle = 'thousand' | 'lakh' | 'wan';
+export type thousandStyle = 'thousand' | 'lakh' | 'wan';
 
 /**
  * Configuration for different grouping styles used in number formatting.

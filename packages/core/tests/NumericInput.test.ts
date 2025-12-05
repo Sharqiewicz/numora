@@ -118,8 +118,8 @@ describe('NumoraInput Component', () => {
     expect(inputElement.value).toBe('123');
   });
 
-  it('should not allow more decimals than maxDecimals', () => {
-    createInputWithPlaceholder({ maxDecimals: 2 });
+  it('should not allow more decimals than decimalMaxLength', () => {
+    createInputWithPlaceholder({ decimalMaxLength: 2 });
     const inputElement = getInputElement();
 
     inputElement.value = '123.456';
@@ -136,7 +136,7 @@ describe('NumoraInput Component', () => {
   });
 
   it('should handle paste events', () => {
-    createInputWithPlaceholder({ maxDecimals: 3 });
+    createInputWithPlaceholder({ decimalMaxLength: 3 });
     const inputElement = getInputElement();
 
     inputElement.value = '123.4567';
@@ -147,7 +147,7 @@ describe('NumoraInput Component', () => {
   });
 
   it('should handle paste events with multiple dots and commas', () => {
-    createInputWithPlaceholder({ maxDecimals: 2 });
+    createInputWithPlaceholder({ decimalMaxLength: 2 });
     const inputElement = getInputElement();
 
     inputElement.value = '123...45,,67.897';
@@ -159,28 +159,28 @@ describe('NumoraInput Component', () => {
 
 describe('Paste handler sanitization cases', () => {
   const testCases = [
-    { input: '1.......4.....2', maxDecimals: 8, expected: '1.42' },
-    { input: '12....34.....56', maxDecimals: 8, expected: '12.3456' },
-    { input: '....56789...', maxDecimals: 5, expected: '.56789' },
-    { input: '1.23..4..56.', maxDecimals: 6, expected: '1.23456' },
-    { input: '1.....2', maxDecimals: 8, expected: '1.2' },
-    { input: '123..4...56.7', maxDecimals: 7, expected: '123.4567' },
-    { input: 'a.b.c.123.4.def56', maxDecimals: 8, expected: '.123456' },
-    { input: '12abc34....def567', maxDecimals: 2, expected: '1234.56' },
-    { input: '.....a.b.c......', maxDecimals: 8, expected: '.' },
-    { input: '12.....3..4..5abc6', maxDecimals: 7, expected: '12.3456' },
-    { input: '1a2b3c4d5e.1234567', maxDecimals: 4, expected: '12345.1234' },
-    { input: '12abc@#34..def$%^567', maxDecimals: 2, expected: '1234.56' },
-    { input: '....!@#$$%^&*((', maxDecimals: 8, expected: '.' },
-    { input: '123....abc.def456ghi789', maxDecimals: 4, expected: '123.4567' },
-    { input: '00.00123...4', maxDecimals: 4, expected: '00.0012' },
-    { input: '.1...2.67.865', maxDecimals: 3, expected: '.126' },
-    { input: '123abc...', maxDecimals: 6, expected: '123.' },
+    { input: '1.......4.....2', decimalMaxLength: 8, expected: '1.42' },
+    { input: '12....34.....56', decimalMaxLength: 8, expected: '12.3456' },
+    { input: '....56789...', decimalMaxLength: 5, expected: '.56789' },
+    { input: '1.23..4..56.', decimalMaxLength: 6, expected: '1.23456' },
+    { input: '1.....2', decimalMaxLength: 8, expected: '1.2' },
+    { input: '123..4...56.7', decimalMaxLength: 7, expected: '123.4567' },
+    { input: 'a.b.c.123.4.def56', decimalMaxLength: 8, expected: '.123456' },
+    { input: '12abc34....def567', decimalMaxLength: 2, expected: '1234.56' },
+    { input: '.....a.b.c......', decimalMaxLength: 8, expected: '.' },
+    { input: '12.....3..4..5abc6', decimalMaxLength: 7, expected: '12.3456' },
+    { input: '1a2b3c4d5e.1234567', decimalMaxLength: 4, expected: '12345.1234' },
+    { input: '12abc@#34..def$%^567', decimalMaxLength: 2, expected: '1234.56' },
+    { input: '....!@#$$%^&*((', decimalMaxLength: 8, expected: '.' },
+    { input: '123....abc.def456ghi789', decimalMaxLength: 4, expected: '123.4567' },
+    { input: '00.00123...4', decimalMaxLength: 4, expected: '00.0012' },
+    { input: '.1...2.67.865', decimalMaxLength: 3, expected: '.126' },
+    { input: '123abc...', decimalMaxLength: 6, expected: '123.' },
   ];
 
   it.each(testCases)(
-    'should sanitize "$input" to "$expected" with max $maxDecimals decimals',
-    async ({ input, maxDecimals, expected }) => {
+    'should sanitize "$input" to "$expected" with max $decimalMaxLength decimals',
+    async ({ input, decimalMaxLength, expected }) => {
       const mockInputElement = document.createElement('input');
       mockInputElement.setSelectionRange = vi.fn();
 
@@ -192,7 +192,7 @@ describe('Paste handler sanitization cases', () => {
         },
       } as unknown as ClipboardEvent;
 
-      const result = handleOnPasteNumoraInput(mockEvent, maxDecimals);
+      const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLength);
       expect(result).toBe(expected);
       expect(mockInputElement.value).toBe(expected);
     }
@@ -215,7 +215,7 @@ describe('NumoraInput edge cases', () => {
   });
 
   it('should accept only one decimal point', () => {
-    NumoraInput = new NumoraInput(container, { maxDecimals: 3 });
+    NumoraInput = new NumoraInput(container, { decimalMaxLength: 3 });
     const inputElement = container.querySelector('input') as HTMLInputElement;
 
     for (let i = 0; i < 10; i++) {
@@ -233,7 +233,7 @@ describe('NumoraInput edge cases', () => {
   it('should call onChange callback when value changes', () => {
     const onChange = vi.fn();
     NumoraInput = new NumoraInput(container, {
-      maxDecimals: 2,
+      decimalMaxLength: 2,
       onChange,
     });
 
@@ -246,7 +246,7 @@ describe('NumoraInput edge cases', () => {
   });
 
   it('should allow navigation keys', () => {
-    NumoraInput = new NumoraInput(container, { maxDecimals: 2 });
+    NumoraInput = new NumoraInput(container, { decimalMaxLength: 2 });
     const inputElement = container.querySelector('input') as HTMLInputElement;
 
     const arrowEvent = new KeyboardEvent('keydown', { key: 'ArrowLeft' });
@@ -275,7 +275,7 @@ describe('Negative Number Support', () => {
 
   function createInputWithNegatives(options = {}) {
     const input = new NumoraInput(container, {
-      allowNegative: true,
+      enableNegative: true,
       onChange: onChangeMock,
       ...options,
     });
@@ -287,7 +287,7 @@ describe('Negative Number Support', () => {
   }
 
   describe('Basic negative number input', () => {
-    it('should allow negative numbers when allowNegative is true', () => {
+    it('should allow negative numbers when enableNegative is true', () => {
       createInputWithNegatives();
       const inputElement = getInputElement();
 
@@ -299,7 +299,7 @@ describe('Negative Number Support', () => {
     });
 
     it('should allow negative decimal numbers', () => {
-      createInputWithNegatives({ maxDecimals: 2 });
+      createInputWithNegatives({ decimalMaxLength: 2 });
       const inputElement = getInputElement();
 
       inputElement.value = '-123.45';
@@ -399,7 +399,7 @@ describe('Negative Number Support', () => {
     it('should handle negative numbers with commas', () => {
       createInputWithNegatives({
         formatOn: 'change',
-        thousandsSeparator: ',',
+        thousandSeparator: ',',
       });
       const inputElement = getInputElement();
 
@@ -412,7 +412,7 @@ describe('Negative Number Support', () => {
 
   describe('Paste events with negative numbers', () => {
     it('should handle pasting negative numbers', () => {
-      createInputWithNegatives({ maxDecimals: 2 });
+      createInputWithNegatives({ decimalMaxLength: 2 });
       const inputElement = getInputElement();
 
       const mockEvent = {
@@ -430,7 +430,7 @@ describe('Negative Number Support', () => {
     });
 
     it('should handle pasting negative numbers with invalid characters', () => {
-      createInputWithNegatives({ maxDecimals: 2 });
+      createInputWithNegatives({ decimalMaxLength: 2 });
       const inputElement = getInputElement();
 
       const mockEvent = {
@@ -449,11 +449,11 @@ describe('Negative Number Support', () => {
   });
 
   describe('Formatting with negative numbers', () => {
-    it('should format negative numbers with thousands separators', () => {
+    it('should format negative numbers with thousand separators', () => {
       createInputWithNegatives({
         formatOn: 'change',
-        thousandsSeparator: ',',
-        thousandsGroupStyle: 'thousand',
+        thousandSeparator: ',',
+        thousandStyle: 'thousand',
       });
       const inputElement = getInputElement();
 
@@ -466,9 +466,9 @@ describe('Negative Number Support', () => {
     it('should format negative decimal numbers with separators', () => {
       createInputWithNegatives({
         formatOn: 'change',
-        thousandsSeparator: ',',
-        thousandsGroupStyle: 'thousand',
-        maxDecimals: 2,
+        thousandSeparator: ',',
+        thousandStyle: 'thousand',
+        decimalMaxLength: 2,
       });
       const inputElement = getInputElement();
 
@@ -481,8 +481,8 @@ describe('Negative Number Support', () => {
     it('should handle negative numbers in blur mode', () => {
       createInputWithNegatives({
         formatOn: 'blur',
-        thousandsSeparator: ',',
-        thousandsGroupStyle: 'thousand',
+        thousandSeparator: ',',
+        thousandStyle: 'thousand',
       });
       const inputElement = getInputElement();
 
@@ -519,7 +519,7 @@ describe('Negative Number Support', () => {
     });
 
     it('should handle negative number with leading zeros', () => {
-      createInputWithNegatives({ allowLeadingZeros: true });
+      createInputWithNegatives({ enableLeadingZeros: true });
       const inputElement = getInputElement();
 
       inputElement.value = '-007';
@@ -528,8 +528,8 @@ describe('Negative Number Support', () => {
       expect(inputElement.value).toBe('-007');
     });
 
-    it('should respect maxDecimals for negative numbers', () => {
-      createInputWithNegatives({ maxDecimals: 2 });
+    it('should respect decimalMaxLength for negative numbers', () => {
+      createInputWithNegatives({ decimalMaxLength: 2 });
       const inputElement = getInputElement();
 
       inputElement.value = '-123.456';
@@ -557,7 +557,7 @@ describe('Leading Zeros Support', () => {
 
   function createInputWithLeadingZeros(options = {}) {
     const input = new NumoraInput(container, {
-      allowLeadingZeros: true,
+      enableLeadingZeros: true,
       onChange: onChangeMock,
       ...options,
     });
@@ -568,7 +568,7 @@ describe('Leading Zeros Support', () => {
     return container.querySelector('input') as HTMLInputElement;
   }
 
-  describe('Default behavior (allowLeadingZeros: false)', () => {
+  describe('Default behavior (enableLeadingZeros: false)', () => {
     it('should remove leading zeros by default', () => {
       const input = new NumoraInput(container, { onChange: onChangeMock });
       const inputElement = getInputElement();
@@ -611,7 +611,7 @@ describe('Leading Zeros Support', () => {
 
     it('should remove leading zeros from negative numbers', () => {
       const input = new NumoraInput(container, {
-        allowNegative: true,
+        enableNegative: true,
         onChange: onChangeMock,
       });
       const inputElement = getInputElement();
@@ -623,7 +623,7 @@ describe('Leading Zeros Support', () => {
     });
   });
 
-  describe('With allowLeadingZeros: true', () => {
+  describe('With enableLeadingZeros: true', () => {
     it('should preserve leading zeros when enabled', () => {
       createInputWithLeadingZeros();
       const inputElement = getInputElement();
@@ -646,7 +646,7 @@ describe('Leading Zeros Support', () => {
     });
 
     it('should preserve leading zeros with decimals', () => {
-      createInputWithLeadingZeros({ maxDecimals: 2 });
+      createInputWithLeadingZeros({ decimalMaxLength: 2 });
       const inputElement = getInputElement();
 
       inputElement.value = '00.5';
@@ -656,7 +656,7 @@ describe('Leading Zeros Support', () => {
     });
 
     it('should preserve leading zeros in negative numbers', () => {
-      createInputWithLeadingZeros({ allowNegative: true });
+      createInputWithLeadingZeros({ enableNegative: true });
       const inputElement = getInputElement();
 
       inputElement.value = '-007';
@@ -700,8 +700,8 @@ describe('Leading Zeros Support', () => {
     it('should preserve leading zeros with formatting', () => {
       createInputWithLeadingZeros({
         formatOn: 'change',
-        thousandsSeparator: ',',
-        thousandsGroupStyle: 'thousand',
+        thousandSeparator: ',',
+        thousandStyle: 'thousand',
       });
       const inputElement = getInputElement();
 
@@ -760,7 +760,7 @@ describe('Scientific Notation Expansion', () => {
 
   describe('Negative exponents (small numbers)', () => {
     it('should expand 1.5e-7 to 0.00000015', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 8 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 8 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.5e-7';
@@ -770,7 +770,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1.5e-1 to 0.15', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 2 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 2 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.5e-1';
@@ -780,7 +780,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1.23e-4 to 0.000123', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 6 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 6 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.23e-4';
@@ -790,7 +790,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 2e-3 to 0.002', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 3 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 3 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '2e-3';
@@ -800,7 +800,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 0.5e-2 to 0.005', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 3 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 3 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '0.5e-2';
@@ -810,7 +810,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1e-10 to 0.0000000001', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 10 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 10 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1e-10';
@@ -820,7 +820,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 123.456e-2 to 1.23456', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 5 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 5 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '123.456e-2';
@@ -832,7 +832,7 @@ describe('Scientific Notation Expansion', () => {
 
   describe('Positive exponents (large numbers)', () => {
     it('should expand 2e+5 to 200000', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 0 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '2e+5';
@@ -842,7 +842,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1.5e+2 to 150', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 0 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.5e+2';
@@ -852,7 +852,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1.5e+1 to 15', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 0 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.5e+1';
@@ -862,7 +862,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 12.34e+1 to 123.4', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 1 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 1 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '12.34e+1';
@@ -872,7 +872,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 12.34e+2 to 1234', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 0 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '12.34e+2';
@@ -882,7 +882,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1e+3 to 1000', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 0 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1e+3';
@@ -894,7 +894,7 @@ describe('Scientific Notation Expansion', () => {
 
   describe('Edge cases', () => {
     it('should handle exponent of 0', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 2 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 2 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.5e0';
@@ -904,7 +904,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should handle uppercase E', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 8 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 8 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.5E-7';
@@ -914,7 +914,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should handle integer base without decimal point', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 3 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 3 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '5e-3';
@@ -923,8 +923,8 @@ describe('Scientific Notation Expansion', () => {
       expect(inputElement.value).toBe('0.005');
     });
 
-    it('should respect maxDecimals when expanding', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 2 });
+    it('should respect decimalMaxLength when expanding', () => {
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 2 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '1.234567e-2';
@@ -934,7 +934,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should not expand non-scientific notation', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 2 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 2 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       inputElement.value = '123.45';
@@ -944,7 +944,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should handle paste events with scientific notation', () => {
-      NumoraInput = new NumoraInput(container, { maxDecimals: 8 });
+      NumoraInput = new NumoraInput(container, { decimalMaxLength: 8 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       const mockEvent = {

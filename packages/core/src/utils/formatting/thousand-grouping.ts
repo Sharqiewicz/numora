@@ -1,17 +1,17 @@
 /**
- * Number formatting utilities with thousands separators.
+ * Number formatting utilities with thousand separators.
  * Supports multiple grouping styles: thousand (Western), lakh (Indian), wan (Chinese)
  */
 
-import { GROUPING_CONFIG, type ThousandsGroupStyle } from './constants';
+import { GROUPING_CONFIG, type thousandStyle } from './constants';
 
 /**
- * Formats a numeric string with thousands separators based on the specified group style.
+ * Formats a numeric string with thousand separators based on the specified group style.
  *
  * @param value - The numeric string to format (e.g., "1234567")
  * @param separator - The separator character to use (e.g., ",")
  * @param groupStyle - The grouping style: 'thousand' (1,234,567), 'lakh' (12,34,567), or 'wan' (123,4567)
- * @param allowLeadingZeros - Whether to preserve leading zeros
+ * @param enableLeadingZeros - Whether to preserve leading zeros
  * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The formatted string with separators
  *
@@ -25,8 +25,8 @@ import { GROUPING_CONFIG, type ThousandsGroupStyle } from './constants';
 export function formatWithSeparators(
   value: string,
   separator: string,
-  groupStyle: ThousandsGroupStyle = 'thousand',
-  allowLeadingZeros = false,
+  groupStyle: thousandStyle = 'thousand',
+  enableLeadingZeros = false,
   decimalSeparator: string = '.'
 ): string {
   // Handle edge cases: empty, zero, or just decimal separator
@@ -46,7 +46,7 @@ export function formatWithSeparators(
   }
 
   // Preserve leading zeros if allowed
-  if (allowLeadingZeros && integerPart.startsWith('0') && integerPart.length > 1) {
+  if (enableLeadingZeros && integerPart.startsWith('0') && integerPart.length > 1) {
     const leadingZerosMatch = integerPart.match(/^(0+)/);
     if (leadingZerosMatch) {
       const leadingZeros = leadingZerosMatch[1];
@@ -81,7 +81,7 @@ export function formatWithSeparators(
 function formatIntegerPart(
   integerPart: string,
   separator: string,
-  groupStyle: ThousandsGroupStyle
+  groupStyle: thousandStyle
 ): string {
   if (integerPart === '0' || integerPart === '') {
     return integerPart;

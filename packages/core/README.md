@@ -36,14 +36,14 @@ pnpm add numora
 ## Usage
 
 ```typescript
-import { NumericInput } from 'numora';
+import { NumoraInput } from 'numora';
 
 // Get the container element where you want to mount the input
 const container = document.querySelector('#my-input-container');
 
-// Create a new NumericInput instance
-const numericInput = new NumericInput(container, {
-  maxDecimals: 2,
+// Create a new NumoraInput instance
+const NumoraInput = new NumoraInput(container, {
+  decimalMaxLength: 2,
   onChange: (value) => {
     console.log('Value changed:', value);
     // Do something with the value
@@ -54,10 +54,10 @@ const numericInput = new NumericInput(container, {
 
 ## Options
 
-The NumericInput constructor accepts the following options:
+The NumoraInput constructor accepts the following options:
 | Option | Type | Default | Description |
 | --------------- | -------- | --------- | -------------------------------------------------------- |
-| maxDecimals | number | 2 | Maximum number of decimal places allowed |
+| decimalMaxLength | number | 2 | Maximum number of decimal places allowed |
 | onChange | function | undefined | Callback function that runs when the input value changes |
 | supports all input properties | - | - | - |
 

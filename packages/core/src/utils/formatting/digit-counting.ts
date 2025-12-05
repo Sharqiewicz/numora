@@ -9,7 +9,7 @@
  *
  * @param value - The formatted string value
  * @param position - The position to count up to
- * @param separator - The thousands separator character
+ * @param separator - The thousand separator character
  * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The count of meaningful digits before the position
  *
@@ -40,7 +40,7 @@ export function countMeaningfulDigitsBeforePosition(
  *
  * @param value - The formatted string value
  * @param targetDigitIndex - The zero-based index of the target digit
- * @param separator - The thousands separator character
+ * @param separator - The thousand separator character
  * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The position after the target digit
  *
@@ -76,7 +76,7 @@ export function findPositionForDigitIndex(
  *
  * @param value - The formatted string value
  * @param targetDigitCount - The target number of digits
- * @param separator - The thousands separator character
+ * @param separator - The thousand separator character
  * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The position where digit count equals target
  *
@@ -114,7 +114,7 @@ export function findPositionWithMeaningfulDigitCount(
  *
  * @param value - The formatted string value
  * @param position - The position to check
- * @param separator - The thousands separator character
+ * @param separator - The thousand separator character
  * @returns True if the position is on a separator character
  *
  * @example

@@ -5,7 +5,6 @@ import { findChangeRange, type ChangeRange } from '../src/utils/formatting';
  * Testing module: formatting/change-detection.ts
  *
  * Tests for findChangeRange function which detects what changed between two values.
- * Adapted from react-number-format reference tests.
  */
 
 describe('findChangeRange', () => {

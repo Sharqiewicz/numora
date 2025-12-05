@@ -5,7 +5,6 @@ import { getCaretBoundary, getCaretPosInBoundary } from '../src/utils/formatting
  * Testing module: formatting/cursor-boundary.ts
  *
  * Tests for getCaretBoundary and getCaretPosInBoundary functions.
- * Adapted from react-number-format reference tests.
  */
 
 describe('getCaretBoundary', () => {
@@ -85,10 +84,10 @@ describe('getCaretBoundary', () => {
     });
   });
 
-  describe('With thousands separator', () => {
+  describe('With thousand separator', () => {
     it('should mark separator positions as non-editable', () => {
       const result = getCaretBoundary('1,234', {
-        thousandsSeparator: ',',
+        thousandSeparator: ',',
         decimalSeparator: '.',
       });
       // Separator at position 1 should be non-editable
@@ -161,7 +160,7 @@ describe('getCaretPosInBoundary', () => {
 
     it('should handle position at separator', () => {
       const boundary = getCaretBoundary('1,234', {
-        thousandsSeparator: ',',
+        thousandSeparator: ',',
         decimalSeparator: '.',
       });
       // Position 1 is at the separator, should move to next valid position
@@ -171,7 +170,7 @@ describe('getCaretPosInBoundary', () => {
 
     it('should handle position at separator with left direction', () => {
       const boundary = getCaretBoundary('1,234', {
-        thousandsSeparator: ',',
+        thousandSeparator: ',',
         decimalSeparator: '.',
       });
       // Position 1 is at the separator (boundary[1] is false), should move to previous valid position

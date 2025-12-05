@@ -5,7 +5,6 @@ import { removeLeadingZeros } from '../src/utils/leading-zeros';
  * Testing module: utils/leading-zeros.ts
  *
  * Tests for removeLeadingZeros function.
- * Adapted from react-number-format reference tests (fix-leading-zero.spec.ts).
  * Note: Tests for double negatives (--10002000) are skipped as numora doesn't handle that case.
  */
 

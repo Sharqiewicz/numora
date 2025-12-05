@@ -1,7 +1,6 @@
 import {
   trimToMaxDecimals,
   alreadyHasDecimal,
-  normalizeDecimalSeparator,
   getSeparators,
 } from '@/utils/decimals';
 import { sanitizeNumoraInput } from '@/utils/sanitization';
@@ -10,7 +9,7 @@ import {
   findChangeRange,
   calculateCursorPositionAfterFormatting,
   formatWithSeparators,
-  type ThousandsGroupStyle,
+  type thousandStyle,
   getCaretBoundary,
   type CursorPositionOptions,
 } from '@/utils/formatting';
@@ -19,19 +18,18 @@ import {
   getInputCaretPosition,
 } from '@/utils/formatting/caret-position-utils';
 import {
-  createDecimalSeparatorEquivalence,
+  defaultIsCharacterEquivalent,
 } from '@/utils/formatting/character-equivalence';
 import { isIOS } from '@/utils/mobile-keyboard-utils';
 
 export interface FormattingOptions {
   formatOn?: 'blur' | 'change';
-  thousandsSeparator?: string;
-  thousandsGroupStyle?: ThousandsGroupStyle;
-  shorthandParsing?: boolean;
-  allowNegative?: boolean;
-  allowLeadingZeros?: boolean;
+  thousandSeparator?: string;
+  thousandStyle?: thousandStyle;
+  enableCompactNotation?: boolean;
+  enableNegative?: boolean;
+  enableLeadingZeros?: boolean;
   decimalSeparator?: string;
-  allowedDecimalSeparators?: string[];
 }
 
 /**
@@ -51,15 +49,13 @@ const SPACE_DOUBLE_TAP_THRESHOLD_MS = 300;
  * @param value - Current input value
  * @param cursorPosition - Current cursor position
  * @param tracker - Space input tracker (mutated)
- * @param allowedDecimalSeparators - Allowed decimal separator characters
- * @param decimalSeparator - Canonical decimal separator
+ * @param decimalSeparator - Decimal separator character
  * @returns Modified value if double-space detected, null otherwise
  */
 export function handleIOSDoubleSpace(
   value: string,
   cursorPosition: number,
   tracker: SpaceInputTracker,
-  allowedDecimalSeparators: string[],
   decimalSeparator: string
 ): { value: string; cursorPosition: number } | null {
   if (!isIOS()) {
@@ -80,12 +76,10 @@ export function handleIOSDoubleSpace(
 
     if (isRapidDoubleSpace) {
       // Check if we already have a decimal separator
-      const hasDecimalSeparator = allowedDecimalSeparators.some((sep) =>
-        value.includes(sep)
-      );
+      const hasDecimalSeparator = value.includes(decimalSeparator);
 
       // Only convert if we don't already have a decimal separator
-      if (!hasDecimalSeparator && allowedDecimalSeparators.includes(decimalSeparator)) {
+      if (!hasDecimalSeparator) {
         // Replace both spaces with decimal separator (remove first space, replace second)
         const newValue =
           value.slice(0, cursorPosition - 2) + decimalSeparator + value.slice(cursorPosition);
@@ -125,13 +119,13 @@ export function handleIOSDoubleSpace(
  * Optionally formats with thousand separators in real-time if formatOn is 'change'.
  *
  * @param e - The event triggered by the input.
- * @param maxDecimals - The maximum number of decimal places allowed.
+ * @param decimalMaxLength - The maximum number of decimal places allowed.
  * @param caretPositionBeforeChange - Optional caret position info from keydown handler
  * @param formattingOptions - Optional formatting options for real-time formatting
  */
 export function handleOnChangeNumoraInput(
   e: Event,
-  maxDecimals: number,
+  decimalMaxLength: number,
   caretPositionBeforeChange?: CaretPositionInfo,
   formattingOptions?: FormattingOptions
 ): void {
@@ -141,45 +135,36 @@ export function handleOnChangeNumoraInput(
 
   const separators = getSeparators({
     decimalSeparator: formattingOptions?.decimalSeparator,
-    thousandSeparator: formattingOptions?.thousandsSeparator,
-    allowedDecimalSeparators: formattingOptions?.allowedDecimalSeparators,
+    thousandSeparator: formattingOptions?.thousandSeparator,
   });
 
   // Track raw input value before any processing
   const rawInputValue = target.value;
 
   // Step 1: Sanitize the input (includes mobile keyboard artifact filtering)
-  if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandsSeparator) {
-    // In 'change' mode: remove thousands separators (they're formatting, not decimal separators)
-    const escapedSeparator = formattingOptions.thousandsSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandSeparator) {
+    // In 'change' mode: remove thousand separators (they're formatting, not decimal separators)
+    const escapedSeparator = formattingOptions.thousandSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     target.value = target.value.replace(new RegExp(escapedSeparator, 'g'), '');
-  } else {
-    // In 'blur' mode or no formatting: normalize allowed decimal separators to canonical one
-    target.value = normalizeDecimalSeparator(
-      target.value,
-      separators.allowedDecimalSeparators,
-      separators.decimalSeparator
-    );
   }
 
   target.value = sanitizeNumoraInput(target.value, {
-    shorthandParsing: formattingOptions?.shorthandParsing,
-    allowNegative: formattingOptions?.allowNegative,
-    allowLeadingZeros: formattingOptions?.allowLeadingZeros,
+    enableCompactNotation: formattingOptions?.enableCompactNotation,
+    enableNegative: formattingOptions?.enableNegative,
+    enableLeadingZeros: formattingOptions?.enableLeadingZeros,
     decimalSeparator: separators.decimalSeparator,
-    allowedDecimalSeparators: separators.allowedDecimalSeparators,
   });
-  target.value = trimToMaxDecimals(target.value, maxDecimals, separators.decimalSeparator);
+  target.value = trimToMaxDecimals(target.value, decimalMaxLength, separators.decimalSeparator);
 
   const sanitizedValue = target.value;
 
   // Step 2: Apply formatting if formatOn is 'change'
-  if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandsSeparator) {
+  if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandSeparator) {
     const formatted = formatWithSeparators(
       sanitizedValue,
-      formattingOptions.thousandsSeparator,
-      formattingOptions.thousandsGroupStyle || 'thousand',
-      formattingOptions.allowLeadingZeros,
+      formattingOptions.thousandSeparator,
+      formattingOptions.thousandStyle || 'thousand',
+      formattingOptions.enableLeadingZeros,
       separators.decimalSeparator
     );
 
@@ -203,26 +188,16 @@ export function handleOnChangeNumoraInput(
       }
 
       if (changeRange) {
-        // Create character equivalence function for decimal separators
-        const isCharacterEquivalent = separators.allowedDecimalSeparators
-          ? createDecimalSeparatorEquivalence(
-              separators.allowedDecimalSeparators,
-              separators.decimalSeparator,
-              separators.thousandSeparator
-            )
-          : undefined;
-
         // Create caret boundary
         const boundary = getCaretBoundary(newValue, {
-          thousandsSeparator: formattingOptions.thousandsSeparator,
+          thousandSeparator: formattingOptions.thousandSeparator,
           decimalSeparator: separators.decimalSeparator,
         });
 
         const cursorOptions: CursorPositionOptions = {
-          thousandsSeparator: formattingOptions.thousandsSeparator,
+          thousandSeparator: formattingOptions.thousandSeparator,
           decimalSeparator: separators.decimalSeparator,
-          allowedDecimalSeparators: separators.allowedDecimalSeparators,
-          isCharacterEquivalent,
+          isCharacterEquivalent: defaultIsCharacterEquivalent,
           rawInputValue,
           boundary,
         };
@@ -231,8 +206,8 @@ export function handleOnChangeNumoraInput(
           oldValue,
           newValue,
           oldCursorPosition,
-          formattingOptions.thousandsSeparator,
-          formattingOptions.thousandsGroupStyle || 'thousand',
+          formattingOptions.thousandSeparator,
+          formattingOptions.thousandStyle || 'thousand',
           changeRange,
           separators.decimalSeparator,
           cursorOptions
@@ -262,24 +237,15 @@ export function handleOnChangeNumoraInput(
       }
 
       if (changeRange) {
-        const isCharacterEquivalent = separators.allowedDecimalSeparators
-          ? createDecimalSeparatorEquivalence(
-              separators.allowedDecimalSeparators,
-              separators.decimalSeparator,
-              separators.thousandSeparator
-            )
-          : undefined;
-
         const boundary = getCaretBoundary(newValue, {
-          thousandsSeparator: separators.thousandSeparator,
+          thousandSeparator: separators.thousandSeparator,
           decimalSeparator: separators.decimalSeparator,
         });
 
         const cursorOptions: CursorPositionOptions = {
-          thousandsSeparator: separators.thousandSeparator,
+          thousandSeparator: separators.thousandSeparator,
           decimalSeparator: separators.decimalSeparator,
-          allowedDecimalSeparators: separators.allowedDecimalSeparators,
-          isCharacterEquivalent,
+          isCharacterEquivalent: defaultIsCharacterEquivalent,
           rawInputValue,
           boundary,
         };
@@ -322,11 +288,10 @@ export function handleOnKeyDownNumoraInput(
 ): CaretPositionInfo | undefined {
   const separators = getSeparators({
     decimalSeparator: formattingOptions?.decimalSeparator,
-    thousandSeparator: formattingOptions?.thousandsSeparator,
-    allowedDecimalSeparators: formattingOptions?.allowedDecimalSeparators,
+    thousandSeparator: formattingOptions?.thousandSeparator,
   });
 
-  if (alreadyHasDecimal(e, separators.allowedDecimalSeparators, separators.decimalSeparator)) {
+  if (alreadyHasDecimal(e, separators.decimalSeparator)) {
     e.preventDefault();
   }
 
@@ -335,8 +300,8 @@ export function handleOnKeyDownNumoraInput(
   const { key } = e;
 
   // Skip over thousand separator on delete/backspace (only for 'change' mode)
-  if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandsSeparator && selectionStart !== null && selectionEnd !== null) {
-    const sep = formattingOptions.thousandsSeparator;
+  if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandSeparator && selectionStart !== null && selectionEnd !== null) {
+    const sep = formattingOptions.thousandSeparator;
 
     if (selectionStart === selectionEnd) {
       // Backspace: cursor moves left, skips over separator
@@ -375,35 +340,32 @@ export function handleOnKeyDownNumoraInput(
  * replaces commas with dots, and removes invalid non-numeric characters.
  *
  * @param e - The clipboard event triggered by the input.
- * @param maxDecimals - The maximum number of decimal places allowed.
- * @param shorthandParsing - Optional flag to enable shorthand expansion (1k → 1000)
+ * @param decimalMaxLength - The maximum number of decimal places allowed.
+ * @param enableCompactNotation - Optional flag to enable compact notation expansion (1k → 1000)
  * @returns The sanitized value after the paste event.
  */
 export function handleOnPasteNumoraInput(
   e: ClipboardEvent,
-  maxDecimals: number,
-  shorthandParsing?: boolean,
-  allowNegative?: boolean,
-  allowLeadingZeros?: boolean,
-  decimalSeparator?: string,
-  allowedDecimalSeparators?: string[]
+  decimalMaxLength: number,
+  enableCompactNotation?: boolean,
+  enableNegative?: boolean,
+  enableLeadingZeros?: boolean,
+  decimalSeparator?: string
 ): string {
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
 
   const separators = getSeparators({
     decimalSeparator,
-    allowedDecimalSeparators,
   });
 
   const sanitizedClipboardData = sanitizeNumoraInput(
     e.clipboardData?.getData('text/plain') || '',
     {
-      shorthandParsing,
-      allowNegative,
-      allowLeadingZeros,
+      enableCompactNotation,
+      enableNegative,
+      enableLeadingZeros,
       decimalSeparator: separators.decimalSeparator,
-      allowedDecimalSeparators: separators.allowedDecimalSeparators,
     }
   );
 
@@ -411,11 +373,10 @@ export function handleOnPasteNumoraInput(
     value.slice(0, selectionStart || 0) + sanitizedClipboardData + value.slice(selectionEnd || 0);
 
   const sanitizedCombined = sanitizeNumoraInput(combinedValue, {
-    shorthandParsing,
-    allowNegative,
-    allowLeadingZeros,
+    enableCompactNotation,
+    enableNegative,
+    enableLeadingZeros,
     decimalSeparator: separators.decimalSeparator,
-    allowedDecimalSeparators: separators.allowedDecimalSeparators,
   });
 
   const isNegative = sanitizedCombined.startsWith('-');
@@ -427,7 +388,7 @@ export function handleOnPasteNumoraInput(
     (decimalParts.length > 0 ? separators.decimalSeparator + decimalParts.join('') : '');
 
   e.preventDefault();
-  inputElement.value = trimToMaxDecimals(sanitizedValue, maxDecimals, separators.decimalSeparator);
+  inputElement.value = trimToMaxDecimals(sanitizedValue, decimalMaxLength, separators.decimalSeparator);
 
   const newCursorPosition =
     (selectionStart || 0) +
@@ -435,5 +396,5 @@ export function handleOnPasteNumoraInput(
     (combinedValue.length - sanitizedValue.length);
   inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
 
-  return trimToMaxDecimals(sanitizedValue, maxDecimals, separators.decimalSeparator);
+  return trimToMaxDecimals(sanitizedValue, decimalMaxLength, separators.decimalSeparator);
 }

@@ -3,7 +3,7 @@
  * Handles cursor preservation during formatting changes, insertion, and deletion operations.
  */
 
-import type { ChangeRange, ThousandsGroupStyle } from './constants';
+import type { ChangeRange, thousandStyle } from './constants';
 import {
   countMeaningfulDigitsBeforePosition,
   findPositionForDigitIndex,
@@ -33,9 +33,8 @@ export type IsCharacterEquivalent = (
  * Options for cursor position calculation.
  */
 export interface CursorPositionOptions {
-  thousandsSeparator?: string;
+  thousandSeparator?: string;
   decimalSeparator?: string;
-  allowedDecimalSeparators?: string[];
   isCharacterEquivalent?: IsCharacterEquivalent;
   rawInputValue?: string;
   boundary?: boolean[];
@@ -52,7 +51,7 @@ export interface CursorPositionOptions {
  * @param oldFormattedValue - The formatted value before the change
  * @param newFormattedValue - The formatted value after formatting
  * @param oldCursorPosition - The cursor position in the old formatted value
- * @param separator - The thousands separator character used in formatting
+ * @param separator - The thousand separator character used in formatting
  * @param _groupStyle - The grouping style used (unused but kept for API compatibility)
  * @param changeRange - Optional change range info to distinguish Delete vs Backspace
  * @param decimalSeparator - The decimal separator character (default: '.')
@@ -69,7 +68,7 @@ export function calculateCursorPositionAfterFormatting(
   newFormattedValue: string,
   oldCursorPosition: number,
   separator: string,
-  _groupStyle: ThousandsGroupStyle = 'thousand',
+  _groupStyle: thousandStyle = 'thousand',
   changeRange?: ChangeRange,
   decimalSeparator: string = '.',
   options: CursorPositionOptions = {}

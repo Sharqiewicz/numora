@@ -6,22 +6,22 @@ function escapeRegExp(str: string): string {
 }
 
 /**
- * Removes non-numeric characters from a string, preserving allowed decimal separators.
+ * Removes non-numeric characters from a string, preserving the decimal separator.
  *
  * @param value - The string to sanitize
- * @param allowNegative - Whether to allow negative sign
- * @param allowedDecimalSeparators - Array of allowed decimal separator characters (default: ['.'])
- * @returns The sanitized string with only numbers and allowed separators
+ * @param enableNegative - Whether to allow negative sign
+ * @param decimalSeparator - The decimal separator character (default: '.')
+ * @returns The sanitized string with only numbers and the decimal separator
  */
 export const removeNonNumericCharacters = (
   value: string,
-  allowNegative = false,
-  allowedDecimalSeparators: string[] = ['.']
+  enableNegative = false,
+  decimalSeparator: string = '.'
 ): string => {
-  const escapedSeparators = allowedDecimalSeparators.map(escapeRegExp).join('');
-  const regex = new RegExp(`[^0-9${escapedSeparators}]`, 'g');
+  const escapedSeparator = escapeRegExp(decimalSeparator);
+  const regex = new RegExp(`[^0-9${escapedSeparator}]`, 'g');
 
-  if (!allowNegative) {
+  if (!enableNegative) {
     return value.replace(regex, '');
   }
 

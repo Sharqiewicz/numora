@@ -12,21 +12,21 @@
  * @returns Boolean array indicating editable positions (length = formattedValue.length + 1)
  *
  * @example
- * getCaretBoundary("1,234.56", { thousandsSeparator: ",", decimalSeparator: "." })
+ * getCaretBoundary("1,234.56", { thousandSeparator: ",", decimalSeparator: "." })
  * // Returns: [true, true, false, true, true, true, false, true, true, ...]
  * //          (editable at positions 0,1,3,4,5,7,8,...)
  */
 export function getCaretBoundary(
   formattedValue: string,
   options: {
-    thousandsSeparator?: string;
+    thousandSeparator?: string;
     decimalSeparator?: string;
     prefix?: string;
     suffix?: string;
   } = {}
 ): boolean[] {
   const {
-    thousandsSeparator,
+    thousandSeparator,
     decimalSeparator = '.',
     prefix = '',
     suffix = '',
@@ -49,7 +49,7 @@ export function getCaretBoundary(
   for (let i = 0; i < formattedValue.length; i++) {
     const char = formattedValue[i];
     if (
-      (thousandsSeparator && char === thousandsSeparator) ||
+      (thousandSeparator && char === thousandSeparator) ||
       char === decimalSeparator
     ) {
       boundary[i] = false;
@@ -79,7 +79,7 @@ export function getCaretBoundary(
  * @returns Corrected caret position within editable area
  *
  * @example
- * const boundary = getCaretBoundary("1,234", { thousandsSeparator: "," });
+ * const boundary = getCaretBoundary("1,234", { thousandSeparator: "," });
  * getCaretPosInBoundary("1,234", 1, boundary, 'right')
  * // Returns: 2 (moves from separator position to next digit)
  */

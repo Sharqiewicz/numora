@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 
 /**
- * Testing module: formatting/thousands-grouping.ts
+ * Testing module: formatting/thousand-grouping.ts
  *
  * The formatting module has been reorganized into focused sub-modules:
- * - formatting/thousands-grouping.ts - Number formatting with separators
+ * - formatting/thousand-grouping.ts - Number formatting with separators
  * - formatting/cursor-position.ts - Cursor position calculation
  * - formatting/digit-counting.ts - Digit counting utilities
  * - formatting/change-detection.ts - Change detection utilities
