@@ -1,8 +1,7 @@
 import {
   trimToMaxDecimals,
-  alreadyHasDecimal,
   getSeparatorsFromOptions,
-  convertCommaOrDotToDecimalSeparator,
+  convertCommaOrDotToDecimalSeparatorAndPreventMultimpleDecimalSeparators,
 } from '@/utils/decimals';
 import { sanitizeNumoraInput, buildSanitizationOptions } from '@/utils/sanitization';
 import {
@@ -11,8 +10,34 @@ import {
 import {
   getInputCaretPosition,
   updateCursorPosition,
+  skipOverThousandSeparatorOnDelete,
 } from '@/utils/formatting/caret-position-utils';
 import { type FormattingOptions, type CaretPositionInfo, FormatOn } from '@/types';
+
+
+/**
+ * Calculates the end offset for the caret position.
+ * @param key - The key pressed.
+ * @param selectionStart - The selection start position.
+ * @param selectionEnd - The selection end position.
+ * @returns The end offset.
+ */
+
+function calculateEndOffset(key: string, selectionStart: number | null, selectionEnd: number | null) {
+  if (key === 'Backspace' || key === 'Delete') {
+
+    if (key === 'Delete' && selectionStart === selectionEnd) {
+      return {
+        endOffset: 1
+      };
+    }
+
+    return {
+      endOffset: 0
+    };
+
+  }
+}
 
 /**
  * Handles the keydown event to prevent the user from entering a second decimal point.
@@ -27,54 +52,19 @@ export function handleOnKeyDownNumoraInput(
   e: KeyboardEvent,
   formattingOptions?: FormattingOptions
 ): CaretPositionInfo | undefined {
+
   const separators = getSeparatorsFromOptions(formattingOptions);
   const inputElement = e.target as HTMLInputElement;
-  const { selectionStart, selectionEnd, value } = inputElement;
-  const { key } = e;
 
-  // Convert comma or dot to decimal separator when thousandStyle is None/undefined
-  if (convertCommaOrDotToDecimalSeparator(e, inputElement, formattingOptions, separators)) {
-    return undefined;
-  }
-
-  if (alreadyHasDecimal(e, separators.decimalSeparator)) {
+  if (convertCommaOrDotToDecimalSeparatorAndPreventMultimpleDecimalSeparators(e, inputElement, formattingOptions, separators.decimalSeparator)) {
     e.preventDefault();
+    return;
   }
 
-  // Skip over thousand separator on delete/backspace (only for 'change' mode)
-  if (formattingOptions?.formatOn === FormatOn.Change && formattingOptions.thousandSeparator && selectionStart !== null && selectionEnd !== null) {
-    const sep = formattingOptions.thousandSeparator;
+  skipOverThousandSeparatorOnDelete(e, inputElement, formattingOptions);
 
-    if (selectionStart === selectionEnd) {
-      // Backspace: cursor moves left, skips over separator
-      if (key === 'Backspace' && selectionStart > 0 && value[selectionStart - 1] === sep) {
-        inputElement.setSelectionRange(selectionStart - 1, selectionStart - 1);
-        // Don't prevent default - let it delete the digit before separator
-      }
+  return calculateEndOffset(e.key, inputElement.selectionStart, inputElement.selectionEnd)
 
-      // Delete: cursor stays, skips over separator
-      if (key === 'Delete' && value[selectionStart] === sep) {
-        inputElement.setSelectionRange(selectionStart + 1, selectionStart + 1);
-        // Don't prevent default - let it delete the digit after separator
-      }
-    }
-  }
-
-  if (key === 'Backspace' || key === 'Delete') {
-    let endOffset = 0;
-
-    if (key === 'Delete' && selectionStart === selectionEnd) {
-      endOffset = 1;
-    }
-
-    return {
-      selectionStart: selectionStart ?? 0,
-      selectionEnd: selectionEnd ?? 0,
-      endOffset,
-    };
-  }
-
-  return undefined;
 }
 
 /**

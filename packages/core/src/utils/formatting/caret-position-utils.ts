@@ -13,7 +13,7 @@ import {
 } from './cursor-position';
 import { getCaretBoundary } from './cursor-boundary';
 import { defaultIsCharacterEquivalent } from './character-equivalence';
-import {ThousandStyle} from '@/types';
+import {ThousandStyle, FormatOn} from '@/types';
 import type { FormattingOptions, CaretPositionInfo, Separators } from '@/types';
 
 /**
@@ -96,6 +96,46 @@ export function setCaretPositionWithRetry(
 export function getInputCaretPosition(el: HTMLInputElement): number {
   // Max of selectionStart and selectionEnd is taken for mobile device caret bug fix
   return Math.max(el.selectionStart as number, el.selectionEnd as number);
+}
+
+/**
+ * Skips cursor over thousand separator when deleting/backspacing in 'change' mode.
+ * This prevents the cursor from stopping on the separator, making deletion smoother.
+ *
+ * @param e - The keyboard event
+ * @param inputElement - The input element
+ * @param formattingOptions - Optional formatting options
+ */
+export function skipOverThousandSeparatorOnDelete(
+  e: KeyboardEvent,
+  inputElement: HTMLInputElement,
+  formattingOptions?: FormattingOptions
+): void {
+  if (formattingOptions?.formatOn !== FormatOn.Change || !formattingOptions.thousandSeparator) {
+    return;
+  }
+
+  const { selectionStart, selectionEnd, value } = inputElement;
+  if (selectionStart === null || selectionEnd === null) {
+    return;
+  }
+
+  if (selectionStart !== selectionEnd) {
+    return;
+  }
+
+  const { key } = e;
+  const separator = formattingOptions.thousandSeparator;
+
+  // Backspace: cursor moves left, skips over separator
+  if (key === 'Backspace' && selectionStart > 0 && value[selectionStart - 1] === separator) {
+    inputElement.setSelectionRange(selectionStart - 1, selectionStart - 1);
+  }
+
+  // Delete: cursor stays, skips over separator
+  if (key === 'Delete' && value[selectionStart] === separator) {
+    inputElement.setSelectionRange(selectionStart + 1, selectionStart + 1);
+  }
 }
 
 /**

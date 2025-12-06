@@ -35,10 +35,10 @@ export function getSeparatorsFromOptions(formattingOptions?: FormattingOptions) 
  * @param e - The keyboard event
  * @param decimalSeparator - The decimal separator character
  */
-export const alreadyHasDecimal = (
+function alreadyHasDecimal(
   e: KeyboardEvent,
   decimalSeparator: string
-) => {
+): boolean {
   if (e.key !== decimalSeparator) {
     return false;
   }
@@ -59,11 +59,11 @@ export const alreadyHasDecimal = (
  * @param separators - The separator configuration
  * @returns True if the conversion was handled (event should be prevented), false otherwise
  */
-export function convertCommaOrDotToDecimalSeparator(
+export function convertCommaOrDotToDecimalSeparatorAndPreventMultimpleDecimalSeparators(
   e: KeyboardEvent,
   inputElement: HTMLInputElement,
   formattingOptions: FormattingOptions | undefined,
-  separators: Separators
+  decimalSeparator: string
 ): boolean {
   const { selectionStart, selectionEnd, value } = inputElement;
   const { key } = e;
@@ -79,21 +79,17 @@ export function convertCommaOrDotToDecimalSeparator(
     return false;
   }
 
-  // Check if decimal separator already exists
-  if (value.includes(separators.decimalSeparator)) {
-    e.preventDefault();
+  if (alreadyHasDecimal(e, decimalSeparator)) {
     return true;
   }
 
   // If the typed key is different from the configured decimal separator, convert it
-  if (key !== separators.decimalSeparator) {
-    e.preventDefault();
-
+  if (key !== decimalSeparator) {
     const start = selectionStart ?? 0;
     const end = selectionEnd ?? start;
 
     // Insert the configured decimal separator at cursor position
-    const newValue = value.slice(0, start) + separators.decimalSeparator + value.slice(end);
+    const newValue = value.slice(0, start) + decimalSeparator + value.slice(end);
     inputElement.value = newValue;
 
     // Set cursor position after the inserted separator

@@ -156,8 +156,8 @@ export class NumoraInput {
 
     if (caretInfo) {
       this.caretPositionBeforeChange = {
-        selectionStart: caretInfo.selectionStart ?? selectionStart ?? 0,
-        selectionEnd: caretInfo.selectionEnd ?? selectionEnd ?? 0,
+        selectionStart: selectionStart ?? 0,
+        selectionEnd: selectionEnd ?? 0,
         endOffset: caretInfo.endOffset,
       };
     } else {
