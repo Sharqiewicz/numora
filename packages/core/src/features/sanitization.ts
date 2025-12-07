@@ -4,7 +4,21 @@ import { expandScientificNotation } from './scientific-notation';
 import { expandCompactNotation } from './compact-notation';
 import { removeLeadingZeros } from './leading-zeros';
 import { filterMobileKeyboardArtifacts } from './mobile-keyboard-filtering';
+import { escapeRegExp } from '../utils/escape-reg-exp';
 import type { FormattingOptions, Separators } from '@/types';
+
+/**
+ * Removes all occurrences of thousand separator from a string.
+ * Escapes special regex characters in the separator to ensure safe pattern matching.
+ *
+ * @param value - The string to remove separators from
+ * @param thousandSeparator - The thousand separator character to remove
+ * @returns The string with all thousand separators removed
+ */
+export function removeThousandSeparators(value: string, thousandSeparator: string): string {
+  const escapedSeparator = escapeRegExp(thousandSeparator);
+  return value.replace(new RegExp(escapedSeparator, 'g'), '');
+}
 
 export interface SanitizationOptions {
   enableCompactNotation?: boolean;
@@ -32,13 +46,13 @@ export const sanitizeNumoraInput = (
   value: string,
   options?: SanitizationOptions
 ): string => {
+
   // Step 0: Filter mobile keyboard artifacts (non-breaking spaces, Unicode whitespace)
   let sanitized = filterMobileKeyboardArtifacts(value);
 
   // Step 1: Remove thousand separators (they're formatting, not data)
   if (options?.thousandSeparator) {
-    const escapedSeparator = options.thousandSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    sanitized = sanitized.replace(new RegExp(escapedSeparator, 'g'), '');
+    sanitized = removeThousandSeparators(sanitized, options.thousandSeparator);
   }
 
   // Step 2: Expand compact notation FIRST (if enabled)

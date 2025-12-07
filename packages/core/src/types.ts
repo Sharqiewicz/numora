@@ -13,7 +13,7 @@ export enum ThousandStyle {
 
 
 export interface FormattingOptions {
-    formatOn?: 'blur' | 'change';
+    formatOn?: FormatOn;
     thousandSeparator?: string;
     ThousandStyle?: ThousandStyle;
     enableCompactNotation?: boolean;

@@ -170,27 +170,25 @@ function groupDigitsFromRight(integerPart: string, separator: string, groupSize:
  * Applies formatting to the input element if formatting is enabled.
  *
  * @param target - The input element
- * @param sanitizedValue - The sanitized value to format
+ * @param sanitizedAndTrimmedValue - The sanitized value to format
  * @param formattingOptions - Optional formatting options
  * @param separators - Optional separator configuration
  * @returns The formatted value, or the original value if formatting is not needed
  */
-export function applyFormattingIfNeeded(
-  target: HTMLInputElement,
-  sanitizedValue: string,
+export function formatNumoraInput(
+  sanitizedAndTrimmedValue: string,
   formattingOptions?: FormattingOptions,
   separators?: Separators
 ): string {
   if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandSeparator) {
-    const formatted = formatWithSeparators(
-      sanitizedValue,
+    const formattedValue = formatWithSeparators(
+      sanitizedAndTrimmedValue,
       formattingOptions.thousandSeparator,
       formattingOptions.ThousandStyle ?? ThousandStyle.None,
       formattingOptions.enableLeadingZeros,
       separators?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR
     );
-    target.value = formatted;
-    return formatted;
+    return formattedValue;
   }
-  return sanitizedValue;
+  return sanitizedAndTrimmedValue;
 }

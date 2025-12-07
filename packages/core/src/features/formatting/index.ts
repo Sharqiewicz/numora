@@ -12,7 +12,7 @@ export type {  ChangeRange } from './constants';
 export { GROUPING_CONFIG } from './constants';
 
 // === NUMBER FORMATTING ===
-export { formatWithSeparators, applyFormattingIfNeeded } from './thousand-grouping';
+export { formatWithSeparators, formatNumoraInput } from './thousand-grouping';
 
 // === CURSOR POSITION CALCULATION ===
 export {
@@ -27,16 +27,14 @@ export { findChangedRangeFromCaretPositions, findChangeRange } from './change-de
 // === CARET BOUNDARY SYSTEM ===
 export { getCaretBoundary, getCaretPosInBoundary } from './cursor-boundary';
 
-// === CHARACTER EQUIVALENCE ===
-export {
-  defaultIsCharacterEquivalent,
-} from './character-equivalence';
 
 // === CARET POSITION UTILITIES ===
 export {
   setCaretPosition,
   setCaretPositionWithRetry,
   getInputCaretPosition,
+  updateCursorPosition,
+  skipOverThousandSeparatorOnDelete
 } from './caret-position-utils';
 
 // === DIGIT COUNTING UTILITIES ===

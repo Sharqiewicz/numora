@@ -37,7 +37,6 @@ export interface CursorPositionOptions {
   thousandSeparator?: string;
   decimalSeparator?: string;
   isCharacterEquivalent?: IsCharacterEquivalent;
-  rawInputValue?: string;
   boundary?: boolean[];
 }
 
@@ -102,13 +101,11 @@ export function calculateCursorPositionAfterFormatting(
 
   // Use character mapping approach if raw input is available and character equivalence is defined
   const useCharacterMapping =
-    options.rawInputValue &&
     options.isCharacterEquivalent &&
     oldFormattedValue !== newFormattedValue;
 
   if (useCharacterMapping) {
     const mappedPosition = calculateCursorPositionWithCharacterMapping(
-      options.rawInputValue || '',
       oldFormattedValue,
       newFormattedValue,
       oldCursorPosition,
@@ -159,7 +156,6 @@ export function calculateCursorPositionAfterFormatting(
  * More robust for character transformations (e.g., decimal separator normalization).
  */
 function calculateCursorPositionWithCharacterMapping(
-  rawInputValue: string,
   oldFormattedValue: string,
   newFormattedValue: string,
   oldCursorPosition: number,
@@ -167,10 +163,10 @@ function calculateCursorPositionWithCharacterMapping(
   changeRange: ChangeRange | undefined,
   options: CursorPositionOptions
 ): number | undefined {
-  const curValLn = rawInputValue.length;
+  const curValLn = oldFormattedValue.length;
   const formattedValueLn = newFormattedValue.length;
 
-  // Create index map: rawInputValue[i] -> newFormattedValue[j]
+  // Create index map: oldFormattedValue[i] -> newFormattedValue[j]
   const addedIndexMap: { [key: number]: boolean } = {};
   const indexMap = new Array(curValLn);
 
@@ -180,7 +176,7 @@ function calculateCursorPositionWithCharacterMapping(
       if (addedIndexMap[j]) continue;
 
       const isCharSame = isCharacterEquivalent(
-        rawInputValue[i],
+        oldFormattedValue[i],
         newFormattedValue[j],
         {
           oldValue: oldFormattedValue,
@@ -201,7 +197,7 @@ function calculateCursorPositionWithCharacterMapping(
 
   // Find closest mapped characters on left and right of cursor
   let pos = oldCursorPosition;
-  while (pos < curValLn && (indexMap[pos] === -1 || !/\d/.test(rawInputValue[pos]))) {
+  while (pos < curValLn && (indexMap[pos] === -1 || !/\d/.test(oldFormattedValue[pos]))) {
     pos++;
   }
   const endIndex =
@@ -429,7 +425,8 @@ function findCursorPositionAfterDeletion(
       );
 
       // Fine-tune position if needed
-      if (newPosition < integerPart.length) {
+      // Skip fine-tuning when at position 0 to prevent cursor from jumping when deleting from beginning
+      if (newPosition > 0 && newPosition < integerPart.length) {
         const digitsAtNewPosition = countMeaningfulDigitsBeforePosition(
           integerPart,
           newPosition,
@@ -467,7 +464,8 @@ function findCursorPositionAfterDeletion(
   );
 
   // === ADJUSTMENT: Fine-tune position if needed ===
-  if (newPosition < newFormattedValue.length) {
+  // Skip fine-tuning when at position 0 to prevent cursor from jumping when deleting from beginning
+  if (newPosition > 0 && newPosition < newFormattedValue.length) {
     const digitsAtNewPosition = countMeaningfulDigitsBeforePosition(
       newFormattedValue,
       newPosition,

@@ -3,10 +3,21 @@ import {
   handleOnKeyDownNumoraInput,
   handleOnPasteNumoraInput,
 } from '@/utils/event-handlers';
-import { formatWithSeparators } from '@/utils/formatting';
+import { formatWithSeparators } from '@/features/formatting';
+import { removeThousandSeparators } from '@/features/sanitization';
+import { escapeRegExp } from '@/utils/escape-reg-exp';
 import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_THOUSAND_STYLE } from './config';
 import { FormatOn, ThousandStyle } from './types';
 import { validateNumoraInputOptions } from './validation';
+
+
+// Escape special regex characters in the decimal separator so it's treated as a literal character in the
+// regex pattern, allowing any character (including numbers, letters, or symbols) to be used safely.
+function getPattern(decimalSeparator: string, enableNegative: boolean) {
+  const escapedSeparator = escapeRegExp(decimalSeparator);
+  return enableNegative
+  ? `^-?[0-9]*[${escapedSeparator}]?[0-9]*$` : `^[0-9]*[${escapedSeparator}]?[0-9]*$`;
+}
 
 export interface NumoraInputOptions extends Partial<HTMLInputElement> {
   // Formatting options
@@ -89,13 +100,10 @@ export class NumoraInput {
 
     this.element = document.createElement('input');
 
-    const escapedSeparator = this.options.decimalSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const pattern = this.options.enableNegative
-    ? `^-?[0-9]*[${escapedSeparator}]?[0-9]*$`
-    : `^[0-9]*[${escapedSeparator}]?[0-9]*$`;
+    const pattern = getPattern(this.options.decimalSeparator, this.options.enableNegative);
+    this.element.setAttribute('pattern', pattern);
 
     this.element.setAttribute('minlength', '1');
-    this.element.setAttribute('pattern', pattern);
     this.element.setAttribute('spellcheck', 'false');
     this.element.setAttribute('type', 'text');
     this.element.setAttribute('inputmode', 'decimal');
@@ -137,7 +145,10 @@ export class NumoraInput {
         decimalSeparator: this.options.decimalSeparator,
       }
     );
+
+    // Clear caret position captured in handleKeyDown after it's used to restore cursor position after formatting.
     this.caretPositionBeforeChange = undefined;
+
     if (this.options.onChange) {
       this.options.onChange((e.target as HTMLInputElement).value);
     }
@@ -184,13 +195,10 @@ export class NumoraInput {
   }
 
   private handleFocus(e: FocusEvent): void {
-    const target = e.target as HTMLInputElement;
     // Remove separators for easier editing in 'blur' mode only
-    if (this.options.formatOn === 'blur' && this.options.thousandSeparator) {
-      target.value = target.value.replace(
-        new RegExp(this.options.thousandSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
-        ''
-      );
+    if (this.options.formatOn === FormatOn.Blur && this.options.thousandSeparator) {
+      const target = e.target as HTMLInputElement;
+      target.value = removeThousandSeparators(target.value, this.options.thousandSeparator);
     }
   }
 

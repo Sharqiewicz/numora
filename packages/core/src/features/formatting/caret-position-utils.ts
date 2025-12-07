@@ -146,7 +146,6 @@ export function skipOverThousandSeparatorOnDelete(
  * @param newValue - The value after the change
  * @param oldCursorPosition - The cursor position before the change
  * @param caretPositionBeforeChange - Optional caret position info from keydown handler
- * @param rawInputValue - The raw input value before processing
  * @param separators - Separator configuration
  * @param formattingOptions - Optional formatting options
  */
@@ -156,7 +155,6 @@ export function updateCursorPosition(
   newValue: string,
   oldCursorPosition: number,
   caretPositionBeforeChange: CaretPositionInfo | undefined,
-  rawInputValue: string,
   separators: Separators,
   formattingOptions?: FormattingOptions
 ): void {
@@ -185,7 +183,6 @@ export function updateCursorPosition(
     thousandSeparator: formattingOptions?.thousandSeparator ?? separators.thousandSeparator,
     decimalSeparator: separators.decimalSeparator,
     isCharacterEquivalent: defaultIsCharacterEquivalent,
-    rawInputValue,
     boundary,
   };
 

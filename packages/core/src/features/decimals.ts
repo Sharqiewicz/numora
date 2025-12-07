@@ -1,6 +1,7 @@
 import { DEFAULT_DECIMAL_SEPARATOR } from "@/config";
 import type { SeparatorOptions, Separators, FormattingOptions } from '@/types';
 import { ThousandStyle } from '@/types';
+import { escapeRegExp } from '../utils/escape-reg-exp';
 
 
 /**
@@ -9,24 +10,12 @@ import { ThousandStyle } from '@/types';
  * @param options - Separator configuration options
  * @returns Normalized separator configuration
  */
-export function getSeparators(options: SeparatorOptions): Separators {
-  return {
-    decimalSeparator: options.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
-    thousandSeparator: options.thousandSeparator,
-  };
-}
 
-/**
- * Gets separators from FormattingOptions.
- *
- * @param formattingOptions - Optional formatting options
- * @returns Normalized separator configuration
- */
-export function getSeparatorsFromOptions(formattingOptions?: FormattingOptions) {
-  return getSeparators({
-    decimalSeparator: formattingOptions?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
-    thousandSeparator: formattingOptions?.thousandSeparator,
-  });
+export function getSeparators(options: SeparatorOptions | FormattingOptions | undefined): Separators {
+  return {
+    decimalSeparator: options?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
+    thousandSeparator: options?.thousandSeparator,
+  };
 }
 
 /**
@@ -110,7 +99,7 @@ export function convertCommaOrDotToDecimalSeparatorAndPreventMultimpleDecimalSep
  * @param decimalSeparator - The decimal separator character to use.
  * @returns The trimmed string.
  */
-export const trimToMaxDecimals = (
+export const trimToDecimalMaxLength = (
   value: string,
   decimalMaxLength: number,
   decimalSeparator: string = DEFAULT_DECIMAL_SEPARATOR
@@ -118,13 +107,6 @@ export const trimToMaxDecimals = (
   const [integer, decimal] = value.split(decimalSeparator);
   return decimal ? `${integer}${decimalSeparator}${decimal.slice(0, decimalMaxLength)}` : value;
 };
-
-/**
- * Escapes special regex characters in a string.
- */
-function escapeRegExp(str: string): string {
-  return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
-}
 
 /**
  * Removes extra decimal separators, keeping only the first one.

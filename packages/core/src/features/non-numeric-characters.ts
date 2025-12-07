@@ -1,9 +1,4 @@
-/**
- * Escapes special regex characters in a string.
- */
-function escapeRegExp(str: string): string {
-  return str.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
-}
+import { escapeRegExp } from '../utils/escape-reg-exp';
 
 /**
  * Removes non-numeric characters from a string, preserving the decimal separator.
