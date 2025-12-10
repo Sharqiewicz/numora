@@ -6,6 +6,7 @@ import { removeLeadingZeros } from './leading-zeros';
 import { filterMobileKeyboardArtifacts } from './mobile-keyboard-filtering';
 import { escapeRegExp } from '../utils/escape-reg-exp';
 import type { FormattingOptions, Separators } from '@/types';
+import { DEFAULT_DECIMAL_SEPARATOR } from '@/config';
 
 /**
  * Removes all occurrences of thousand separator from a string.
@@ -71,7 +72,7 @@ export const sanitizeNumoraInput = (
   );
 
   // Step 5: Remove extra decimal separators
-  sanitized = removeExtraDecimalSeparators(sanitized, options?.decimalSeparator || '.');
+  sanitized = removeExtraDecimalSeparators(sanitized, options?.decimalSeparator || DEFAULT_DECIMAL_SEPARATOR);
 
   // Step 6: Remove leading zeros (if not allowed)
   if (!options?.enableLeadingZeros) {
