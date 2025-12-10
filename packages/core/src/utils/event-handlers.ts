@@ -1,5 +1,6 @@
 import {
   trimToDecimalMaxLength,
+  ensureMinDecimals,
   getSeparators,
   convertCommaOrDotToDecimalSeparatorAndPreventMultimpleDecimalSeparators,
 } from '@/features/decimals';
@@ -41,7 +42,14 @@ function processAndFormatValue(
     separators.decimalSeparator
   );
 
-  return formatNumoraInput(sanitizedAndTrimmedValue, formattingOptions, separators);
+  const minDecimals = formattingOptions?.decimalMinLength ?? 0;
+  const valueWithMinDecimals = ensureMinDecimals(
+    sanitizedAndTrimmedValue,
+    minDecimals,
+    separators.decimalSeparator
+  );
+
+  return formatNumoraInput(valueWithMinDecimals, formattingOptions, separators);
 }
 
 /**

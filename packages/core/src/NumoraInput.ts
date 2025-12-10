@@ -6,7 +6,7 @@ import {
 import { formatWithSeparators } from '@/features/formatting';
 import { removeThousandSeparators } from '@/features/sanitization';
 import { escapeRegExp } from '@/utils/escape-reg-exp';
-import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_THOUSAND_STYLE } from './config';
+import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_DECIMAL_MIN_LENGTH, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_THOUSAND_STYLE } from './config';
 import { FormatOn, ThousandStyle } from './types';
 import { validateNumoraInputOptions } from './validation';
 
@@ -30,6 +30,7 @@ export interface NumoraInputOptions extends Partial<HTMLInputElement> {
   // Decimal options
   decimalSeparator: string;
   decimalMaxLength: number;
+  decimalMinLength?: number;
 
   // Parsing options
   enableCompactNotation: boolean;
@@ -55,6 +56,7 @@ export class NumoraInput {
     container: HTMLElement,
     {
       decimalMaxLength = DEFAULT_DECIMAL_MAX_LENGTH,
+      decimalMinLength = DEFAULT_DECIMAL_MIN_LENGTH,
       formatOn = DEFAULT_FORMAT_ON,
       thousandSeparator = DEFAULT_THOUSAND_SEPARATOR,
       thousandStyle = DEFAULT_THOUSAND_STYLE,
@@ -69,6 +71,7 @@ export class NumoraInput {
 
     validateNumoraInputOptions({
       decimalMaxLength,
+      decimalMinLength,
       formatOn,
       thousandSeparator,
       thousandStyle,
@@ -81,6 +84,7 @@ export class NumoraInput {
 
     this.options = {
       decimalMaxLength,
+      decimalMinLength,
       onChange,
       formatOn,
       thousandSeparator,
@@ -143,6 +147,7 @@ export class NumoraInput {
         enableNegative: this.options.enableNegative,
         enableLeadingZeros: this.options.enableLeadingZeros,
         decimalSeparator: this.options.decimalSeparator,
+        decimalMinLength: this.options.decimalMinLength,
       }
     );
 
@@ -188,6 +193,7 @@ export class NumoraInput {
       enableNegative: this.options.enableNegative,
       enableLeadingZeros: this.options.enableLeadingZeros,
       decimalSeparator: this.options.decimalSeparator,
+      decimalMinLength: this.options.decimalMinLength,
     });
     if (this.options.onChange) {
       this.options.onChange((e.target as HTMLInputElement).value);

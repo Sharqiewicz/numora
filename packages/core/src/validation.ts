@@ -3,6 +3,7 @@ import { ThousandStyle } from './types';
 
 export interface NumoraInputValidationOptions {
   decimalMaxLength?: number;
+  decimalMinLength?: number;
   formatOn?: FormatOn;
   thousandSeparator?: string;
   thousandStyle?: ThousandStyle;
@@ -19,6 +20,8 @@ export interface NumoraInputValidationOptions {
  */
 export function validateNumoraInputOptions(options: NumoraInputValidationOptions): void {
   validateDecimalMaxLength(options.decimalMaxLength);
+  validateDecimalMinLength(options.decimalMinLength);
+  validateDecimalLengths(options.decimalMinLength, options.decimalMaxLength);
   validateFormatOn(options.formatOn);
   validateThousandSeparator(options.thousandSeparator);
   validateThousandStyle(options.thousandStyle);
@@ -53,6 +56,45 @@ function validateDecimalMaxLength(value: number | undefined): void {
     throw new Error(
       `decimalMaxLength must be non-negative. ` +
       `Received: ${value}`
+    );
+  }
+}
+
+function validateDecimalMinLength(value: number | undefined): void {
+  if (value === undefined) {
+    return;
+  }
+
+  if (typeof value !== 'number') {
+    throw new Error(
+      `decimalMinLength must be a number. ` +
+      `Received: ${typeof value} (${JSON.stringify(value)})`
+    );
+  }
+
+  if (!Number.isInteger(value)) {
+    throw new Error(
+      `decimalMinLength must be an integer. ` +
+      `Received: ${value}`
+    );
+  }
+
+  if (value < 0) {
+    throw new Error(
+      `decimalMinLength must be non-negative. ` +
+      `Received: ${value}`
+    );
+  }
+}
+
+function validateDecimalLengths(minLength: number | undefined, maxLength: number | undefined): void {
+  if (minLength === undefined || maxLength === undefined) {
+    return;
+  }
+
+  if (minLength > maxLength) {
+    throw new Error(
+      `decimalMinLength (${minLength}) cannot be greater than decimalMaxLength (${maxLength}).`
     );
   }
 }

@@ -20,6 +20,7 @@ export interface FormattingOptions {
     enableNegative?: boolean;
     enableLeadingZeros?: boolean;
     decimalSeparator?: string;
+    decimalMinLength?: number;
 }
 
 

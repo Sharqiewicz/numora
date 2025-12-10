@@ -123,3 +123,59 @@ export const removeExtraDecimalSeparators = (
   const regex = new RegExp(`(${escaped}.*?)${escaped}`, 'g');
   return value.replace(regex, `$1${decimalSeparator}`);
 };
+
+/**
+ * Ensures a numeric string has at least the specified minimum number of decimal places.
+ * Pads with zeros if needed, but does not truncate if more decimals exist.
+ *
+ * @param value - The string value to ensure minimum decimals for
+ * @param minDecimals - The minimum number of decimal places (default: 0, meaning no minimum)
+ * @param decimalSeparator - The decimal separator character (default: '.')
+ * @returns The string with at least minDecimals decimal places
+ *
+ * @example
+ * ensureMinDecimals("1", 2, ".")      // "1.00"
+ * ensureMinDecimals("1.5", 2, ".")   // "1.50"
+ * ensureMinDecimals("1.123", 2, ".") // "1.123" (doesn't truncate)
+ * ensureMinDecimals("1", 0, ".")      // "1" (no minimum)
+ */
+export const ensureMinDecimals = (
+  value: string,
+  minDecimals: number = 0,
+  decimalSeparator: string = DEFAULT_DECIMAL_SEPARATOR
+): string => {
+  if (minDecimals === 0) {
+    return value;
+  }
+
+  if (!value || value === '0' || value === decimalSeparator || value === '-' || value === `-${decimalSeparator}`) {
+    if (value === '-' || value === `-${decimalSeparator}`) {
+      return `-${decimalSeparator}${'0'.repeat(minDecimals)}`;
+    }
+    if (value === decimalSeparator) {
+      return `${decimalSeparator}${'0'.repeat(minDecimals)}`;
+    }
+    return `${value}${decimalSeparator}${'0'.repeat(minDecimals)}`;
+  }
+
+  const hasDecimalSeparator = value.includes(decimalSeparator);
+  const isNegative = value.startsWith('-');
+  const absoluteValue = isNegative ? value.slice(1) : value;
+  const [integerPart, decimalPart = ''] = absoluteValue.split(decimalSeparator);
+
+  // If no decimal separator exists, add it with zeros
+  if (!hasDecimalSeparator) {
+    const zeros = '0'.repeat(minDecimals);
+    return isNegative ? `-${integerPart}${decimalSeparator}${zeros}` : `${integerPart}${decimalSeparator}${zeros}`;
+  }
+
+  // If decimal part exists but is shorter than minimum, pad it
+  if (decimalPart.length < minDecimals) {
+    const zerosToAdd = minDecimals - decimalPart.length;
+    const paddedDecimal = decimalPart + '0'.repeat(zerosToAdd);
+    return isNegative ? `-${integerPart}${decimalSeparator}${paddedDecimal}` : `${integerPart}${decimalSeparator}${paddedDecimal}`;
+  }
+
+  // If decimal part already meets or exceeds minimum, return as-is
+  return value;
+};

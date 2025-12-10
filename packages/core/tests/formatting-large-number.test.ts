@@ -13,7 +13,7 @@ describe('formatLargeNumber', () => {
       const result1k = formatLargeNumber('1234');
       // Should show as 1.23k or similar
       expect(result1k).toBeTruthy();
-      
+
       const result1M = formatLargeNumber('1234567');
       expect(result1M).toContain('M');
     });

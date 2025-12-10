@@ -45,3 +45,9 @@ export {
   findPositionWithMeaningfulDigitCount,
   isPositionOnSeparator,
 } from './digit-counting';
+
+// === DISPLAY FORMATTING UTILITIES ===
+// These are for formatting values for display (not for input processing)
+export { formatPercent, formatLargePercent } from './percent';
+export { condenseDecimalZeros } from './subscript-notation';
+export { formatLargeNumber, type FormatLargeNumberOptions } from './large-number';
