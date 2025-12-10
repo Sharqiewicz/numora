@@ -6,40 +6,37 @@ import {
 import { formatWithSeparators } from '@/features/formatting';
 import { removeThousandSeparators } from '@/features/sanitization';
 import { escapeRegExp } from '@/utils/escape-reg-exp';
+import { getNumoraPattern } from '@/utils/input-pattern';
 import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_DECIMAL_MIN_LENGTH, DEFAULT_RAW_VALUE_MODE, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_THOUSAND_STYLE } from './config';
 import { FormatOn, ThousandStyle } from './types';
 import { validateNumoraInputOptions } from './validation';
 
 
-// Escape special regex characters in the decimal separator so it's treated as a literal character in the
-// regex pattern, allowing any character (including numbers, letters, or symbols) to be used safely.
-function getPattern(decimalSeparator: string, enableNegative: boolean) {
-  const escapedSeparator = escapeRegExp(decimalSeparator);
-  return enableNegative
-  ? `^-?[0-9]*[${escapedSeparator}]?[0-9]*$` : `^[0-9]*[${escapedSeparator}]?[0-9]*$`;
-}
-
-export interface NumoraInputOptions extends Partial<HTMLInputElement> {
+export interface NumoraInputOptions extends Partial<Omit<HTMLInputElement, 'value' | 'defaultValue' | 'onchange'>> {
   // Formatting options
-  formatOn: FormatOn;
+  formatOn?: FormatOn;
 
   // Thousand options
-  thousandSeparator: string;
-  thousandStyle: ThousandStyle;
+  thousandSeparator?: string;
+  thousandStyle?: ThousandStyle;
 
   // Decimal options
-  decimalSeparator: string;
-  decimalMaxLength: number;
+  decimalSeparator?: string;
+  decimalMaxLength?: number;
   decimalMinLength?: number;
 
   // Parsing options
-  enableCompactNotation: boolean;
-  enableNegative: boolean;
-  enableLeadingZeros: boolean;
+  enableCompactNotation?: boolean;
+  enableNegative?: boolean;
+  enableLeadingZeros?: boolean;
   rawValueMode?: boolean;
 
   // Event handlers
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
+
+  // Value initialization
+  value?: string;
+  defaultValue?: string;
 }
 
 export class NumoraInput {
@@ -115,13 +112,28 @@ export class NumoraInput {
       this.rawValue = raw;
 
       // Format for display if needed
-      if (this.options.thousandSeparator && this.options.thousandStyle !== ThousandStyle.None && raw) {
+      const thousandStyle = this.options.thousandStyle ?? DEFAULT_THOUSAND_STYLE;
+      if (this.options.thousandSeparator && thousandStyle !== ThousandStyle.None && raw) {
         const formatted = formatWithSeparators(
           raw,
           this.options.thousandSeparator,
-          this.options.thousandStyle,
-          this.options.enableLeadingZeros,
-          this.options.decimalSeparator
+          thousandStyle,
+          this.options.enableLeadingZeros ?? DEFAULT_ENABLE_LEADING_ZEROS,
+          this.options.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR
+        );
+        this.element.value = formatted;
+      }
+    } else if (this.element.value && !this.options.rawValueMode) {
+      // If not in rawValueMode but has initial value, apply formatting if needed
+      const initialValue = this.element.value;
+      const thousandStyle = this.options.thousandStyle ?? DEFAULT_THOUSAND_STYLE;
+      if (this.options.thousandSeparator && thousandStyle !== ThousandStyle.None && initialValue) {
+        const formatted = formatWithSeparators(
+          initialValue,
+          this.options.thousandSeparator,
+          thousandStyle,
+          this.options.enableLeadingZeros ?? DEFAULT_ENABLE_LEADING_ZEROS,
+          this.options.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR
         );
         this.element.value = formatted;
       }
@@ -129,22 +141,61 @@ export class NumoraInput {
   }
 
   private createInputElement(container: HTMLElement): void {
-
     this.element = document.createElement('input');
 
-    const pattern = getPattern(this.options.decimalSeparator, this.options.enableNegative);
-    this.element.setAttribute('pattern', pattern);
-
-    this.element.setAttribute('minlength', '1');
-    this.element.setAttribute('spellcheck', 'false');
+    // These attributes are REQUIRED for Numora to work correctly and must not be overridden:
+    // - type='text': Using 'number' would cause browser-native validation/formatting that conflicts with Numora
+    // - inputmode='decimal': Ensures mobile keyboards show numeric keypad
+    // - spellcheck='false': Prevents spellcheck from interfering with numeric input
+    // - autocomplete='off': Prevents browser autocomplete from interfering with formatting
+    // - autocorrect='off': Prevents iOS Safari autocorrect from interfering with numeric input
+    // - autoCapitalize='off': Prevents iOS Safari auto-capitalization from interfering with numeric input
     this.element.setAttribute('type', 'text');
     this.element.setAttribute('inputmode', 'decimal');
+    this.element.setAttribute('spellcheck', 'false');
     this.element.setAttribute('autocomplete', 'off');
     this.element.setAttribute('autocorrect', 'off');
-    this.element.setAttribute('autoCapitalize', 'off');
 
-    const { decimalMaxLength, onChange, ...rest } = this.options;
-    Object.assign(this.element, rest);
+    // Set pattern only if decimal separator and enableNegative are configured
+    // Pattern helps with native validation but is optional
+    if (this.options.decimalSeparator !== undefined && this.options.enableNegative !== undefined) {
+      const pattern = getNumoraPattern(this.options.decimalSeparator, this.options.enableNegative);
+      this.element.setAttribute('pattern', pattern);
+    }
+
+    // Extract Numora-specific options and protected attributes that shouldn't be assigned to the element
+    const {
+      decimalMaxLength,
+      decimalMinLength,
+      formatOn,
+      thousandSeparator,
+      thousandStyle,
+      decimalSeparator,
+      enableCompactNotation,
+      enableNegative,
+      enableLeadingZeros,
+      rawValueMode,
+      onChange,
+      value,
+      defaultValue,
+      type, // Exclude - forced to 'text' above
+      inputMode, // Exclude - forced to 'decimal' above
+      spellcheck, // Exclude - forced to 'false' above
+      autocomplete, // Exclude - forced to 'off' above
+      autocorrect, // Exclude - forced to 'off' above
+      ...nativeProps
+    } = this.options;
+
+    // Assign all native HTMLInputElement properties (except type which is forced)
+    Object.assign(this.element, nativeProps);
+
+    // Handle value initialization
+    if (value !== undefined) {
+      this.element.value = value;
+    } else if (defaultValue !== undefined) {
+      this.element.defaultValue = defaultValue;
+      this.element.value = defaultValue;
+    }
 
     container.appendChild(this.element);
   }
@@ -155,7 +206,8 @@ export class NumoraInput {
     this.element.addEventListener('paste', this.handlePaste.bind(this));
 
     // Only add focus/blur handlers for 'blur' mode formatting
-    if (this.options.formatOn === 'blur' && this.options.thousandSeparator) {
+    const formatOn = this.options.formatOn ?? DEFAULT_FORMAT_ON;
+    if (formatOn === FormatOn.Blur && this.options.thousandSeparator) {
       this.element.addEventListener('focus', this.handleFocus.bind(this));
       this.element.addEventListener('blur', this.handleBlur.bind(this));
     }
@@ -166,7 +218,7 @@ export class NumoraInput {
 
     handleOnChangeNumoraInput(
       e,
-      this.options.decimalMaxLength,
+      this.options.decimalMaxLength ?? DEFAULT_DECIMAL_MAX_LENGTH,
       this.caretPositionBeforeChange,
       {
         formatOn: this.options.formatOn,
@@ -189,10 +241,14 @@ export class NumoraInput {
       this.updateRawValue(target.value);
     }
 
+    // Call Numora onChange callback if provided
     if (this.options.onChange) {
       const valueToEmit = this.options.rawValueMode ? this.rawValue : target.value;
       this.options.onChange(valueToEmit);
     }
+
+    // Native 'input' event will continue to bubble naturally
+    // Users can attach their own listeners via addEventListener or getElement()
   }
 
   private handleKeyDown(e: KeyboardEvent): void {
@@ -221,8 +277,7 @@ export class NumoraInput {
   }
 
   private handlePaste(e: ClipboardEvent): void {
-    const target = e.target as HTMLInputElement;
-    const result = handleOnPasteNumoraInput(e, this.options.decimalMaxLength, {
+    const result = handleOnPasteNumoraInput(e, this.options.decimalMaxLength ?? DEFAULT_DECIMAL_MAX_LENGTH, {
       formatOn: this.options.formatOn,
       thousandSeparator: this.options.thousandSeparator,
       ThousandStyle: this.options.thousandStyle,
@@ -239,15 +294,23 @@ export class NumoraInput {
       this.updateRawValue(result);
     }
 
+    // Call Numora onChange callback if provided
     if (this.options.onChange) {
       const valueToEmit = this.options.rawValueMode ? this.rawValue : result;
       this.options.onChange(valueToEmit);
     }
+
+    // Note: handleOnPasteNumoraInput calls e.preventDefault() internally
+    // We manually set the value, so we need to dispatch a synthetic input event
+    // to ensure native event listeners are notified
+    const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+    this.element.dispatchEvent(inputEvent);
   }
 
   private handleFocus(e: FocusEvent): void {
     // Remove separators for easier editing in 'blur' mode only
-    if (this.options.formatOn === FormatOn.Blur && this.options.thousandSeparator) {
+    const formatOn = this.options.formatOn ?? DEFAULT_FORMAT_ON;
+    if (formatOn === FormatOn.Blur && this.options.thousandSeparator) {
       const target = e.target as HTMLInputElement;
       target.value = removeThousandSeparators(target.value, this.options.thousandSeparator);
     }
@@ -256,13 +319,15 @@ export class NumoraInput {
   private handleBlur(e: FocusEvent): void {
     const target = e.target as HTMLInputElement;
     // Add separators back in 'blur' mode
-    if (this.options.thousandSeparator && this.options.thousandStyle !== ThousandStyle.None && target.value) {
+    const thousandStyle = this.options.thousandStyle ?? DEFAULT_THOUSAND_STYLE;
+    if (this.options.thousandSeparator && thousandStyle !== ThousandStyle.None && target.value) {
+      const oldValue = target.value;
       const formatted = formatWithSeparators(
         target.value,
         this.options.thousandSeparator,
-        this.options.thousandStyle,
-        this.options.enableLeadingZeros,
-        this.options.decimalSeparator
+        thousandStyle,
+        this.options.enableLeadingZeros ?? DEFAULT_ENABLE_LEADING_ZEROS,
+        this.options.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR
       );
       target.value = formatted;
 
@@ -271,9 +336,18 @@ export class NumoraInput {
         this.updateRawValue(formatted);
       }
 
+      // Call Numora onChange callback if provided
       if (this.options.onChange) {
         const valueToEmit = this.options.rawValueMode ? this.rawValue : formatted;
         this.options.onChange(valueToEmit);
+      }
+
+      // Dispatch input and change events if value changed
+      if (oldValue !== formatted) {
+        const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+        this.element.dispatchEvent(inputEvent);
+        const changeEvent = new Event('change', { bubbles: true, cancelable: true });
+        this.element.dispatchEvent(changeEvent);
       }
     }
   }
@@ -319,13 +393,14 @@ export class NumoraInput {
       this.rawValue = raw;
 
       // Format for display if formatting is enabled
-      if (this.options.thousandSeparator && this.options.thousandStyle !== ThousandStyle.None && raw) {
+      const thousandStyle = this.options.thousandStyle ?? DEFAULT_THOUSAND_STYLE;
+      if (this.options.thousandSeparator && thousandStyle !== ThousandStyle.None && raw) {
         const formatted = formatWithSeparators(
           raw,
           this.options.thousandSeparator,
-          this.options.thousandStyle,
-          this.options.enableLeadingZeros,
-          this.options.decimalSeparator
+          thousandStyle,
+          this.options.enableLeadingZeros ?? DEFAULT_ENABLE_LEADING_ZEROS,
+          this.options.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR
         );
         this.element.value = formatted;
       } else {
@@ -350,5 +425,62 @@ export class NumoraInput {
 
   public removeEventListener(event: string, callback: EventListenerOrEventListenerObject): void {
     this.element.removeEventListener(event, callback);
+  }
+
+  /**
+   * Returns the underlying HTMLInputElement for direct access.
+   * This allows users to interact with the input as a normal HTMLInputElement.
+   */
+  public getElement(): HTMLInputElement {
+    return this.element;
+  }
+
+  /**
+   * Gets the current value of the input.
+   * In rawValueMode, returns the raw numeric value without formatting.
+   * Otherwise, returns the formatted display value.
+   */
+  public get value(): string {
+    return this.getValue();
+  }
+
+  /**
+   * Sets the value of the input.
+   * In rawValueMode, the value will be formatted for display.
+   * Otherwise, sets the value directly.
+   */
+  public set value(val: string) {
+    this.setValue(val);
+  }
+
+  /**
+   * Gets the value as a number, similar to HTMLInputElement.valueAsNumber.
+   * Returns NaN if the value cannot be converted to a number.
+   */
+  public get valueAsNumber(): number {
+    const value = this.getValue();
+    if (!value) {
+      return NaN;
+    }
+    // Remove thousand separators and convert decimal separator to dot for parsing
+    const cleanValue = this.options.thousandSeparator
+      ? removeThousandSeparators(value, this.options.thousandSeparator)
+      : value;
+    const normalizedValue = this.options.decimalSeparator && this.options.decimalSeparator !== '.'
+      ? cleanValue.replace(new RegExp(escapeRegExp(this.options.decimalSeparator), 'g'), '.')
+      : cleanValue;
+    return parseFloat(normalizedValue);
+  }
+
+  /**
+   * Sets the value from a number, similar to HTMLInputElement.valueAsNumber.
+   */
+  public set valueAsNumber(num: number) {
+    if (isNaN(num)) {
+      this.setValue('');
+      return;
+    }
+    const stringValue = num.toString();
+    this.setValue(stringValue);
   }
 }

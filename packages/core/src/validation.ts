@@ -219,7 +219,7 @@ function validateOnChange(value: ((value: string) => void) | undefined): void {
 
   if (typeof value !== 'function') {
     throw new Error(
-      `onChange must be a function. ` +
+      `onChange must be a function or undefined. ` +
       `Received: ${typeof value} (${JSON.stringify(value)})`
     );
   }
