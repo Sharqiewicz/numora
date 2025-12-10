@@ -146,13 +146,11 @@ export class NumoraInput {
     // - inputmode='decimal': Ensures mobile keyboards show numeric keypad
     // - spellcheck='false': Prevents spellcheck from interfering with numeric input
     // - autocomplete='off': Prevents browser autocomplete from interfering with formatting
-    // - autocorrect='off': Prevents iOS Safari autocorrect from interfering with numeric input
     // - autoCapitalize='off': Prevents iOS Safari auto-capitalization from interfering with numeric input
     this.element.setAttribute('type', 'text');
     this.element.setAttribute('inputmode', 'decimal');
     this.element.setAttribute('spellcheck', 'false');
     this.element.setAttribute('autocomplete', 'off');
-    this.element.setAttribute('autocorrect', 'off');
 
     // Set pattern only if decimal separator and enableNegative are configured
     // Pattern helps with native validation but is optional
@@ -180,7 +178,6 @@ export class NumoraInput {
       inputMode, // Exclude - forced to 'decimal' above
       spellcheck, // Exclude - forced to 'false' above
       autocomplete, // Exclude - forced to 'off' above
-      autocorrect, // Exclude - forced to 'off' above
       ...nativeProps
     } = this.options;
 
