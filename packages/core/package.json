@@ -1,6 +1,6 @@
 {
   "name": "numora",
-  "version": "2.0.0",
+  "version": "1.0.5",
   "description": "Precision-first numeric input library for DeFi and financial applications",
   "homepage": "https://numora.xyz/",
   "main": "dist/index.js",
