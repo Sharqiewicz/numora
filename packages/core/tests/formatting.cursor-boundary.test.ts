@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getCaretBoundary, getCaretPosInBoundary } from '../src/utils/formatting';
+import { getCaretBoundary, getCaretPosInBoundary } from '../src/features/formatting';
 
 /**
  * Testing module: formatting/cursor-boundary.ts

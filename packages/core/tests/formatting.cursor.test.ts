@@ -17,7 +17,7 @@ import {
   findChangedRangeFromCaretPositions,
   ChangeRange,
   getCaretBoundary,
-} from '../src/utils/formatting';
+} from '../src/features/formatting';
 
 describe('calculateCursorPositionAfterFormatting', () => {
   describe('thousand style - typing that triggers comma insertion', () => {

@@ -13,7 +13,7 @@ import { describe, it, expect } from 'vitest';
  * Imports from 'utils/formatting' use the re-export from formatting/index.ts
  * for backward compatibility.
  */
-import { formatWithSeparators } from '../src/utils/formatting';
+import { formatWithSeparators } from '../src/features/formatting';
 
 describe('formatWithSeparators', () => {
   describe('thousand style (standard Western)', () => {

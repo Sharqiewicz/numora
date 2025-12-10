@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { expandCompactNotation } from '../src/utils/compact-notation';
+import { expandCompactNotation } from '../src/features/compact-notation';
 
 describe('expandCompactNotation', () => {
   describe('thousand (k)', () => {
@@ -163,6 +163,90 @@ describe('expandCompactNotation', () => {
       expect(expandCompactNotation('5K')).toBe('5000');
       expect(expandCompactNotation('10M')).toBe('10000000');
       expect(expandCompactNotation('3B')).toBe('3000000000');
+    });
+
+    it('should handle very big number', () => {
+      expect(expandCompactNotation('111222333444555666777.8888K')).toBe('111222333444555666777888.8');
+    });
+  });
+
+  describe('extended scales (M, T, Qa, Qi, Sx, Sp, O, N)', () => {
+    describe('trillion (T)', () => {
+      it('should expand 1T to 1000000000000', () => {
+        expect(expandCompactNotation('1T')).toBe('1000000000000');
+      });
+
+      it('should expand 2.5T to 2500000000000', () => {
+        expect(expandCompactNotation('2.5T')).toBe('2500000000000');
+      });
+
+      it('should be case-insensitive (t)', () => {
+        expect(expandCompactNotation('1t')).toBe('1000000000000');
+      });
+    });
+
+    describe('quadrillion (Qa)', () => {
+      it('should expand 1Qa to 1000000000000000', () => {
+        expect(expandCompactNotation('1Qa')).toBe('1000000000000000');
+      });
+
+      it('should expand 1.5Qa to 1500000000000000', () => {
+        expect(expandCompactNotation('1.5Qa')).toBe('1500000000000000');
+      });
+
+      it('should be case-insensitive (qa)', () => {
+        expect(expandCompactNotation('1qa')).toBe('1000000000000000');
+      });
+    });
+
+    describe('quintillion (Qi)', () => {
+      it('should expand 1Qi to 1000000000000000000', () => {
+        expect(expandCompactNotation('1Qi')).toBe('1000000000000000000');
+      });
+
+      it('should be case-insensitive (qi)', () => {
+        expect(expandCompactNotation('1qi')).toBe('1000000000000000000');
+      });
+    });
+
+    describe('sextillion (Sx)', () => {
+      it('should expand 1Sx to 1000000000000000000000', () => {
+        expect(expandCompactNotation('1Sx')).toBe('1000000000000000000000');
+      });
+
+      it('should be case-insensitive (sx)', () => {
+        expect(expandCompactNotation('1sx')).toBe('1000000000000000000000');
+      });
+    });
+
+    describe('septillion (Sp)', () => {
+      it('should expand 1Sp to 1000000000000000000000000', () => {
+        expect(expandCompactNotation('1Sp')).toBe('1000000000000000000000000');
+      });
+
+      it('should be case-insensitive (sp)', () => {
+        expect(expandCompactNotation('1sp')).toBe('1000000000000000000000000');
+      });
+    });
+
+    describe('octillion (O)', () => {
+      it('should expand 1O to 1000000000000000000000000000', () => {
+        expect(expandCompactNotation('1O')).toBe('1000000000000000000000000000');
+      });
+
+      it('should be case-insensitive (o)', () => {
+        expect(expandCompactNotation('1o')).toBe('1000000000000000000000000000');
+      });
+    });
+
+    describe('nonillion (N)', () => {
+      it('should expand 1N to 1000000000000000000000000000000', () => {
+        expect(expandCompactNotation('1N')).toBe('1000000000000000000000000000000');
+      });
+
+      it('should be case-insensitive (n)', () => {
+        expect(expandCompactNotation('1n')).toBe('1000000000000000000000000000000');
+      });
     });
   });
 });

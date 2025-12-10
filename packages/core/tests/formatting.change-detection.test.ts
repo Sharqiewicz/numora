@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { findChangeRange, type ChangeRange } from '../src/utils/formatting';
+import { findChangeRange } from '../src/features/formatting';
 
 /**
  * Testing module: formatting/change-detection.ts

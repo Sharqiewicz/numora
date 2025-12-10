@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { removeLeadingZeros } from '../src/utils/leading-zeros';
+import { removeLeadingZeros } from '../src/features/leading-zeros';
 
 /**
  * Testing module: utils/leading-zeros.ts

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { expandScientificNotation } from '../src/utils/scientific-notation';
+import { expandScientificNotation } from '../src/features/scientific-notation';
 
 describe('expandScientificNotation', () => {
   describe('Negative exponents (small numbers)', () => {
