@@ -1,74 +1,185 @@
 # numora
 
 [![npm version](https://img.shields.io/npm/v/numora.svg)](https://www.npmjs.com/package/numora)
+[![npm downloads](https://img.shields.io/npm/dm/numora.svg)](https://www.npmjs.com/package/numora)
 
-A lightweight, framework-agnostic numeric input library for handling currency and decimal inputs in **financial/DeFi** applications. Built with TypeScript and designed for modern web applications with:
+A precision-first numeric input library for DeFi and financial applications. Built with TypeScript, zero dependencies, and designed for accuracy-critical use cases.
 
-- **Zero dependencies** - minimal footprint for your bundle
-- **Type safety** - fully typed API for better developer experience
-- **Framework agnostic** - use with any framework or vanilla JavaScript
-- **Customizable** - extensive options to fit your specific needs
-
-## Demo
-
-Check out the [live demo](https://numora.netlify.app/) to see Numora in action.
-
-## Features
-
-- Validates and sanitizes numeric input
-- Limits decimal places
-- Handles paste events
-- Converts commas to dots
-- Prevents multiple decimal points
-- Customizable with various options
-- Framework-agnostic core with adapters for popular frameworks
-
-## Installation
+## 🚀 Quick Start
 
 ```bash
+# Core package (vanilla JS/TypeScript)
 npm install numora
-# or
-yarn add numora
-# or
-pnpm add numora
+
+# React
+npm install numora-react
 ```
 
-## Usage
+## 📦 Packages
+
+| Package | Version | Description |
+|---------|---------|-------------|
+| [`numora`](./packages/core) | [![npm version](https://img.shields.io/npm/v/numora.svg)](https://www.npmjs.com/package/numora) | Core framework-agnostic library |
+| [`numora-react`](./packages/react) | [![npm version](https://img.shields.io/npm/v/numora-react.svg)](https://www.npmjs.com/package/numora-react) | React component wrapper |
+
+## ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| **⭐️ Zero Dependencies** | No external dependencies, minimal bundle size |
+| **⭐️ Framework Agnostic** | Works with any framework or vanilla JavaScript |
+| **Decimal Precision Control** | Configure minimum and maximum decimal places (`decimalMinLength`, `decimalMaxLength`) |
+| **Minimum Decimal Places** | Automatically pad values with zeros to ensure minimum decimal places (e.g., `"1"` with `decimalMinLength: 2` becomes `"1.00"`) |
+| **Thousand Separators** | Customizable thousand separators with multiple grouping styles (`Thousand`, `Lakh`, `Wan`, `None`) |
+| **Custom Decimal Separator** | Support for different decimal separators (e.g., `.` or `,`) |
+| **Format on Blur/Change** | Choose when to apply formatting: `on blur (clean editing)` or `on change (real-time)` |
+| **Compact Notation Expansion** | When enabled, expands compact notation during paste/setValue (e.g., `"1k"` → `"1000"`, `"1.5m"` → `"1500000"`, `"2B"` → `"2000000000"`) |
+| **Scientific Notation Expansion** | Always automatically expands scientific notation (e.g., `"1.5e-7"` → `"0.00000015"`, `"2e+5"` → `"200000"`) |
+| **Negative Number Support** | Optional support for negative numbers with `enableNegative` |
+| **Leading Zeros Support** | Control leading zero behavior with `enableLeadingZeros` |
+| **Raw Value Mode** | Get unformatted numeric values while displaying formatted values |
+| **Paste Event Handling** | Intelligent paste handling with automatic sanitization, formatting, and cursor positioning |
+| **Cursor Position Preservation** | Smart cursor positioning that works with thousand separators, even during formatting |
+| **Thousand Separator Skipping** | On delete/backspace, cursor automatically skips over thousand separators for better UX |
+| **Mobile Keyboard Optimization** | Automatic `inputmode="decimal"` for mobile numeric keyboards |
+| **Mobile Keyboard Filtering** | Automatically filters non-breaking spaces and Unicode whitespace artifacts from mobile keyboards |
+| **Non-numeric Character Filtering** | Automatic removal of invalid characters |
+| **Comma/Dot Conversion** | When `thousandStyle` is `None`, typing comma or dot automatically converts to the configured `decimalSeparator` |
+| **Character Equivalence** | Automatic conversion of commas to dots (or custom decimal separator) for easier input |
+| **Sanitization** | Comprehensive input sanitization for security and data integrity |
+| **TypeScript Support** | Full TypeScript definitions included |
+| **Display Formatting Utilities** | Utility functions for formatting numbers for display: `formatPercent`, `formatLargePercent`, `formatLargeNumber`, `condenseDecimalZeros` |
+
+## 📊 Comparison
+
+| Feature | Numora | react-number-format | Native Number Input |
+|---------|--------|---------------------|---------------------|
+| **Framework Support** | ✅ All frameworks | ❌ React only | ✅ All frameworks |
+| **Dependencies** | ✅ Zero | ⚠️ React required | ✅ Zero |
+| **Raw Value Mode** | ✅ Yes | ⚠️ Limited | ❌ No |
+| **Comma/Dot Conversion** | ✅ Yes | ⚠️ Limited | ❌ No |
+| **Scientific Notation** | ✅ Auto-expand | ❌ No | ❌ No |
+| **Display Formatting Utils** | ✅ Yes | ❌ No | ❌ No |
+| **Compact Notation** | ✅ Auto-expand | ❌ No | ❌ No |
+| **Mobile Support** | ✅ Yes | ✅ Yes | ⚠️ Limited |
+| **Decimal Precision Control** | ✅ Yes | ✅ Yes | ❌ Limited |
+| **Thousand Separators** | ✅ Customizable | ✅ Yes | ❌ No |
+| **Custom Decimal Separator** | ✅ Yes | ✅ Yes | ❌ No (always `.`) |
+| **Formatting Options** | ✅ Blur/Change modes | ✅ Multiple modes | ❌ No |
+| **Cursor Preservation** | ✅ Advanced | ✅ Basic | ❌ N/A |
+| **TypeScript Support** | ✅ Yes | ✅ Yes | ⚠️ Partial |
+| **Paste Handling** | ✅ Intelligent | ✅ Yes | ⚠️ Basic |
+| **Grouping Styles** | ✅ Thousand/Lakh/Wan | ✅ Thousand/Lakh/Wan | ❌ No |
+| **Leading Zeros Control** | ✅ Yes | ✅ Yes | ❌ No |
+
+## 🎯 Why Numora?
+
+### The Problem
+
+Standard HTML number inputs and JavaScript's `Number` type have serious limitations:
+
+```javascript
+// ❌ JavaScript floating-point precision issues
+0.1 + 0.2 === 0.3  // false! (0.30000000000000004)
+1.005 * 100        // 100.49999999999999
+
+// ❌ HTML number input limitations
+<input type="number">  // Can't handle custom formatting
+                       // Poor mobile keyboard support
+                       // Loses leading zeros
+```
+
+### The Solution
+
+Numora provides:
+
+✅ **String-only arithmetic** - No floating-point errors  
+✅ **Precision control** - Configurable decimal places (min/max)  
+✅ **Smart formatting** - Thousands separators with cursor preservation  
+✅ **Scientific notation** - Automatic expansion (1.5e-7 → 0.00000015)  
+✅ **Compact notation** - Expand "1k" → "1000" on paste/setValue  
+✅ **Mobile-friendly** - Decimal keyboard on mobile devices  
+✅ **Zero dependencies** - Lightweight and secure  
+✅ **Framework adapters** - React, Vue (planned), Vanilla JS  
+✅ **Display utilities** - Format percentages, large numbers, and more  
+
+## 📖 Documentation
+
+- [Core Package Documentation](./packages/core/README.md)
+- [React Package Documentation](./packages/react/README.md)
+- [Live Demo](https://numora.xyz/)
+- [Developer Guide](./DEVELOPER_GUIDE.md)
+
+## 💻 Examples
+
+### Vanilla JavaScript/TypeScript
 
 ```typescript
-import { NumericInput } from 'numora';
+import { NumoraInput, FormatOn, ThousandStyle } from 'numora';
 
-// Get the container element where you want to mount the input
 const container = document.querySelector('#my-input-container');
 
-// Create a new NumericInput instance
-const numericInput = new NumericInput(container, {
-  maxDecimals: 2,
+const numoraInput = new NumoraInput(container, {
+  decimalMaxLength: 18,
+  decimalMinLength: 2, // Pads with zeros
+  thousandSeparator: ',',
+  thousandStyle: ThousandStyle.Thousand,
+  formatOn: FormatOn.Change,
+  enableCompactNotation: true, // Expands "1k" → "1000" on paste
   onChange: (value) => {
-    console.log('Value changed:', value);
-    // Do something with the value
+    console.log('Value:', value);
   },
-  // ... all other input properties you want
 });
 ```
 
-## Options
+### React
 
-The NumericInput constructor accepts the following options:
-| Option | Type | Default | Description |
-| --------------- | -------- | --------- | -------------------------------------------------------- |
-| maxDecimals | number | 2 | Maximum number of decimal places allowed |
-| onChange | function | undefined | Callback function that runs when the input value changes |
-| supports all input properties | - | - | - |
+```tsx
+import { NumericInput } from 'numora-react';
 
-## Framework Adapters
+function App() {
+  return (
+    <NumericInput
+      maxDecimals={18}
+      thousandsSeparator=","
+      formatOn="change"
+      onChange={(e) => {
+        console.log('Value:', e.target.value);
+      }}
+    />
+  );
+}
+```
 
-Numora is also available for popular frameworks:
+### Display Formatting Utilities
 
-- React: `numora-react` (in progress)
-- Vue: `numora-vue` (in progress)
-- Svelte: `numora`
+```typescript
+import { formatPercent, formatLargeNumber, condenseDecimalZeros } from 'numora';
 
-## License
+// Format as percentage
+const percent = formatPercent('0.01', 2); // "1.00%"
+
+// Format large numbers
+const large = formatLargeNumber('1234567'); // "1.23M"
+
+// Condense decimal zeros
+const condensed = condenseDecimalZeros('0.000001', 8); // "0₆1"
+```
+
+## 🛠️ Use Cases
+
+- 💰 Cryptocurrency wallets (precise token amounts)
+- 📊 Trading platforms (accurate price inputs)
+- 💳 Payment forms (exact currency amounts)
+- 🏦 Financial calculators (decimal precision critical)
+
+## 📄 License
 
 MIT
+
+## 👤 Author
+
+**Kacper Szarkiewicz**
+
+- Website: [sharqiewicz.com](https://sharqiewicz.com)
+- Email: contact@sharqiewicz.com
