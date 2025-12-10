@@ -11,6 +11,7 @@ export interface NumoraInputValidationOptions {
   enableCompactNotation?: boolean;
   enableNegative?: boolean;
   enableLeadingZeros?: boolean;
+  rawValueMode?: boolean;
   onChange?: (value: string) => void;
 }
 
@@ -30,6 +31,7 @@ export function validateNumoraInputOptions(options: NumoraInputValidationOptions
   validateBooleanOption('enableCompactNotation', options.enableCompactNotation);
   validateBooleanOption('enableNegative', options.enableNegative);
   validateBooleanOption('enableLeadingZeros', options.enableLeadingZeros);
+  validateBooleanOption('rawValueMode', options.rawValueMode);
   validateOnChange(options.onChange);
 }
 

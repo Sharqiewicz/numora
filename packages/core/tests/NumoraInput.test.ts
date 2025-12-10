@@ -962,3 +962,315 @@ describe('Scientific Notation Expansion', () => {
     });
   });
 });
+
+describe('Raw Value Mode', () => {
+  let container: HTMLElement;
+  let onChangeMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    onChangeMock = vi.fn();
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  function createInputWithRawValueMode(options = {}) {
+    const input = new NumoraInput(container, {
+      formatOn: 'change',
+      thousandSeparator: ',',
+      thousandStyle: 'thousand',
+      decimalSeparator: '.',
+      decimalMaxLength: 8,
+      enableCompactNotation: false,
+      enableNegative: false,
+      enableLeadingZeros: false,
+      rawValueMode: true,
+      onChange: onChangeMock,
+      ...options,
+    });
+    return input;
+  }
+
+  function getInputElement() {
+    return container.querySelector('input') as HTMLInputElement;
+  }
+
+  describe('Basic functionality', () => {
+    it('should store raw value separately from formatted display', () => {
+      const input = createInputWithRawValueMode();
+      const inputElement = getInputElement();
+
+      inputElement.value = '1234';
+      inputElement.dispatchEvent(new Event('input'));
+
+      // Display shows formatted value
+      expect(inputElement.value).toBe('1,234');
+      // getValue returns raw value
+      expect(input.getValue()).toBe('1234');
+      // onChange receives raw value
+      expect(onChangeMock).toHaveBeenCalledWith('1234');
+    });
+
+    it('should return raw value from getValue() when rawValueMode is enabled', () => {
+      const input = createInputWithRawValueMode();
+      const inputElement = getInputElement();
+
+      inputElement.value = '1234567';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('1,234,567');
+      expect(input.getValue()).toBe('1234567');
+    });
+
+    it('should return formatted value from getValue() when rawValueMode is disabled', () => {
+      const input = new NumoraInput(container, {
+        formatOn: 'change',
+        thousandSeparator: ',',
+        thousandStyle: 'thousand',
+        decimalSeparator: '.',
+        decimalMaxLength: 8,
+        enableCompactNotation: false,
+        enableNegative: false,
+        enableLeadingZeros: false,
+        rawValueMode: false,
+        onChange: onChangeMock,
+      });
+      const inputElement = getInputElement();
+
+      inputElement.value = '1234567';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('1,234,567');
+      expect(input.getValue()).toBe('1,234,567');
+    });
+  });
+
+  describe('setValue with raw value mode', () => {
+    it('should format raw value for display when setValue is called', () => {
+      const input = createInputWithRawValueMode();
+      const inputElement = getInputElement();
+
+      input.setValue('1234567');
+
+      // Display shows formatted
+      expect(inputElement.value).toBe('1,234,567');
+      // getValue returns raw
+      expect(input.getValue()).toBe('1234567');
+    });
+
+    it('should handle decimal values', () => {
+      const input = createInputWithRawValueMode();
+      const inputElement = getInputElement();
+
+      input.setValue('1234.56');
+
+      expect(inputElement.value).toBe('1,234.56');
+      expect(input.getValue()).toBe('1234.56');
+    });
+
+    it('should handle empty string', () => {
+      const input = createInputWithRawValueMode();
+      const inputElement = getInputElement();
+
+      input.setValue('');
+
+      expect(inputElement.value).toBe('');
+      expect(input.getValue()).toBe('');
+    });
+  });
+
+  describe('Input events with raw value mode', () => {
+    it('should extract raw value during typing', () => {
+      const input = createInputWithRawValueMode();
+      const inputElement = getInputElement();
+
+      // Simulate typing "1234"
+      inputElement.value = '1';
+      inputElement.dispatchEvent(new Event('input'));
+      expect(input.getValue()).toBe('1');
+
+      inputElement.value = '12';
+      inputElement.dispatchEvent(new Event('input'));
+      expect(input.getValue()).toBe('12');
+
+      inputElement.value = '123';
+      inputElement.dispatchEvent(new Event('input'));
+      expect(input.getValue()).toBe('123');
+
+      inputElement.value = '1234';
+      inputElement.dispatchEvent(new Event('input'));
+      expect(input.getValue()).toBe('1234');
+      expect(inputElement.value).toBe('1,234');
+    });
+
+    it('should handle decimal input', () => {
+      const input = createInputWithRawValueMode();
+      const inputElement = getInputElement();
+
+      inputElement.value = '1234.56';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(inputElement.value).toBe('1,234.56');
+      expect(input.getValue()).toBe('1234.56');
+    });
+  });
+
+  describe('Paste events with raw value mode', () => {
+    it('should extract raw value from pasted content', () => {
+      const input = createInputWithRawValueMode();
+      const inputElement = getInputElement();
+
+      const mockEvent = {
+        target: inputElement,
+        preventDefault: vi.fn(),
+        clipboardData: {
+          getData: vi.fn().mockReturnValue('1234567'),
+        },
+      } as unknown as ClipboardEvent;
+
+      inputElement.value = '';
+      handleOnPasteNumoraInput(mockEvent, 8, {
+        formatOn: 'change',
+        thousandSeparator: ',',
+        ThousandStyle: 'thousand',
+        rawValueMode: true,
+      });
+
+      expect(inputElement.value).toBe('1,234,567');
+      expect(input.getValue()).toBe('1234567');
+    });
+  });
+
+  describe('Blur mode with raw value mode', () => {
+    it('should extract raw value in blur mode', () => {
+      const input = new NumoraInput(container, {
+        formatOn: 'blur',
+        thousandSeparator: ',',
+        thousandStyle: 'thousand',
+        decimalSeparator: '.',
+        decimalMaxLength: 8,
+        enableCompactNotation: false,
+        enableNegative: false,
+        enableLeadingZeros: false,
+        rawValueMode: true,
+        onChange: onChangeMock,
+      });
+      const inputElement = getInputElement();
+
+      inputElement.value = '1234567';
+      inputElement.dispatchEvent(new Event('blur'));
+
+      expect(inputElement.value).toBe('1,234,567');
+      expect(input.getValue()).toBe('1234567');
+      expect(onChangeMock).toHaveBeenCalledWith('1234567');
+    });
+  });
+
+  describe('Edge cases with raw value mode', () => {
+    it('should handle empty string', () => {
+      const input = createInputWithRawValueMode();
+      const inputElement = getInputElement();
+
+      inputElement.value = '';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(input.getValue()).toBe('');
+      expect(inputElement.value).toBe('');
+    });
+
+    it('should handle just decimal separator', () => {
+      const input = createInputWithRawValueMode();
+      const inputElement = getInputElement();
+
+      inputElement.value = '.';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(input.getValue()).toBe('.');
+      expect(inputElement.value).toBe('.');
+    });
+
+    it('should handle zero', () => {
+      const input = createInputWithRawValueMode();
+      const inputElement = getInputElement();
+
+      inputElement.value = '0';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(input.getValue()).toBe('0');
+      expect(inputElement.value).toBe('0');
+    });
+
+    it('should work without thousand separator', () => {
+      const input = new NumoraInput(container, {
+        formatOn: 'change',
+        thousandSeparator: '',
+        thousandStyle: 'none',
+        decimalSeparator: '.',
+        decimalMaxLength: 8,
+        enableCompactNotation: false,
+        enableNegative: false,
+        enableLeadingZeros: false,
+        rawValueMode: true,
+        onChange: onChangeMock,
+      });
+      const inputElement = getInputElement();
+
+      inputElement.value = '1234.56';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(input.getValue()).toBe('1234.56');
+      expect(inputElement.value).toBe('1234.56');
+    });
+  });
+
+  describe('Backward compatibility', () => {
+    it('should maintain current behavior when rawValueMode is false', () => {
+      const input = new NumoraInput(container, {
+        formatOn: 'change',
+        thousandSeparator: ',',
+        thousandStyle: 'thousand',
+        decimalSeparator: '.',
+        decimalMaxLength: 8,
+        enableCompactNotation: false,
+        enableNegative: false,
+        enableLeadingZeros: false,
+        rawValueMode: false,
+        onChange: onChangeMock,
+      });
+      const inputElement = getInputElement();
+
+      inputElement.value = '1234567';
+      inputElement.dispatchEvent(new Event('input'));
+
+      // Both display and getValue return formatted value
+      expect(inputElement.value).toBe('1,234,567');
+      expect(input.getValue()).toBe('1,234,567');
+      expect(onChangeMock).toHaveBeenCalledWith('1,234,567');
+    });
+
+    it('should default to false for backward compatibility', () => {
+      const input = new NumoraInput(container, {
+        formatOn: 'change',
+        thousandSeparator: ',',
+        thousandStyle: 'thousand',
+        decimalSeparator: '.',
+        decimalMaxLength: 8,
+        enableCompactNotation: false,
+        enableNegative: false,
+        enableLeadingZeros: false,
+        // rawValueMode not specified - should default to false
+        onChange: onChangeMock,
+      });
+      const inputElement = getInputElement();
+
+      inputElement.value = '1234567';
+      inputElement.dispatchEvent(new Event('input'));
+
+      expect(input.getValue()).toBe('1,234,567');
+    });
+  });
+});

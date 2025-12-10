@@ -22,7 +22,7 @@ import { type FormattingOptions, type CaretPositionInfo, FormatOn } from '@/type
  * @param shouldRemoveThousandSeparators - Whether to remove thousand separators during sanitization
  * @param formattingOptions - Optional formatting options
  * @param separators - Separator configuration
- * @returns The processed and formatted value
+ * @returns Object with formatted value and raw value (raw value is the value before formatting)
  */
 function processAndFormatValue(
   rawValue: string,
@@ -30,7 +30,7 @@ function processAndFormatValue(
   shouldRemoveThousandSeparators: boolean,
   formattingOptions: FormattingOptions | undefined,
   separators: ReturnType<typeof getSeparators>
-): string {
+): { formatted: string; raw: string } {
   const sanitizedValue = sanitizeNumoraInput(
     rawValue,
     buildSanitizationOptions(formattingOptions, separators, shouldRemoveThousandSeparators)
@@ -49,7 +49,13 @@ function processAndFormatValue(
     separators.decimalSeparator
   );
 
-  return formatNumoraInput(valueWithMinDecimals, formattingOptions, separators);
+  // Raw value is the value before formatting (after sanitization, trimming, min decimals)
+  const raw = valueWithMinDecimals;
+
+  // Formatted value includes thousand separators if formatting is enabled
+  const formatted = formatNumoraInput(valueWithMinDecimals, formattingOptions, separators);
+
+  return { formatted, raw };
 }
 
 /**
@@ -129,7 +135,7 @@ export function handleOnChangeNumoraInput(
   // In 'blur' mode, formatNumoraInput does nothing during typing, so removing separators would be unnecessary.
   const shouldRemoveThousandSeparators = formattingOptions?.formatOn === FormatOn.Change;
 
-  const newValue = processAndFormatValue(
+  const { formatted: newValue, raw: rawValue } = processAndFormatValue(
     oldValue,
     decimalMaxLength,
     shouldRemoveThousandSeparators,
@@ -138,6 +144,11 @@ export function handleOnChangeNumoraInput(
   );
 
   target.value = newValue;
+
+  // Store raw value in a data attribute if rawValueMode is enabled (for NumoraInput to access)
+  if (formattingOptions?.rawValueMode) {
+    target.setAttribute('data-raw-value', rawValue);
+  }
 
   if (oldValue !== newValue) {
     updateCursorPosition(
@@ -190,7 +201,7 @@ export function handleOnPasteNumoraInput(
 
   // Always remove thousand separators during paste: pasted content may contain separators, current value may
   // have separators (blur mode), and we need to parse the combined value correctly.
-  const formattedValue = processAndFormatValue(
+  const { formatted: formattedValue, raw: rawValue } = processAndFormatValue(
     combinedValue,
     decimalMaxLength,
     true,
@@ -199,6 +210,11 @@ export function handleOnPasteNumoraInput(
   );
 
   inputElement.value = formattedValue;
+
+  // Store raw value in a data attribute if rawValueMode is enabled (for NumoraInput to access)
+  if (formattingOptions?.rawValueMode) {
+    inputElement.setAttribute('data-raw-value', rawValue);
+  }
 
   const newCursorPosition = calculateCursorPositionAfterPaste(
     selectionStart || 0,

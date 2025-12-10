@@ -6,7 +6,7 @@ import {
 import { formatWithSeparators } from '@/features/formatting';
 import { removeThousandSeparators } from '@/features/sanitization';
 import { escapeRegExp } from '@/utils/escape-reg-exp';
-import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_DECIMAL_MIN_LENGTH, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_THOUSAND_STYLE } from './config';
+import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_DECIMAL_MIN_LENGTH, DEFAULT_RAW_VALUE_MODE, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_THOUSAND_STYLE } from './config';
 import { FormatOn, ThousandStyle } from './types';
 import { validateNumoraInputOptions } from './validation';
 
@@ -36,6 +36,7 @@ export interface NumoraInputOptions extends Partial<HTMLInputElement> {
   enableCompactNotation: boolean;
   enableNegative: boolean;
   enableLeadingZeros: boolean;
+  rawValueMode?: boolean;
 
   // Event handlers
   onChange: (value: string) => void;
@@ -45,6 +46,8 @@ export class NumoraInput {
   private element!: HTMLInputElement;
 
   private options: NumoraInputOptions;
+
+  private rawValue: string = '';
 
   private caretPositionBeforeChange?: {
     selectionStart: number;
@@ -64,6 +67,7 @@ export class NumoraInput {
       enableCompactNotation = DEFAULT_ENABLE_COMPACT_NOTATION,
       enableNegative = DEFAULT_ENABLE_NEGATIVE,
       enableLeadingZeros = DEFAULT_ENABLE_LEADING_ZEROS,
+      rawValueMode = DEFAULT_RAW_VALUE_MODE,
       onChange,
       ...rest
     }: NumoraInputOptions
@@ -79,6 +83,7 @@ export class NumoraInput {
       enableCompactNotation,
       enableNegative,
       enableLeadingZeros,
+      rawValueMode,
       onChange,
     });
 
@@ -93,11 +98,34 @@ export class NumoraInput {
       enableCompactNotation,
       enableNegative,
       enableLeadingZeros,
+      rawValueMode,
       ...rest,
     };
 
     this.createInputElement(container);
     this.setupEventListeners();
+
+    // Initialize raw value if rawValueMode is enabled and element has initial value
+    if (this.options.rawValueMode && this.element.value) {
+      // If initial value is set, extract raw value and format for display
+      const initialValue = this.element.value;
+      const raw = this.options.thousandSeparator
+        ? removeThousandSeparators(initialValue, this.options.thousandSeparator)
+        : initialValue;
+      this.rawValue = raw;
+
+      // Format for display if needed
+      if (this.options.thousandSeparator && this.options.thousandStyle !== ThousandStyle.None && raw) {
+        const formatted = formatWithSeparators(
+          raw,
+          this.options.thousandSeparator,
+          this.options.thousandStyle,
+          this.options.enableLeadingZeros,
+          this.options.decimalSeparator
+        );
+        this.element.value = formatted;
+      }
+    }
   }
 
   private createInputElement(container: HTMLElement): void {
@@ -134,6 +162,7 @@ export class NumoraInput {
   }
 
   private handleChange(e: Event): void {
+    const target = e.target as HTMLInputElement;
 
     handleOnChangeNumoraInput(
       e,
@@ -148,14 +177,21 @@ export class NumoraInput {
         enableLeadingZeros: this.options.enableLeadingZeros,
         decimalSeparator: this.options.decimalSeparator,
         decimalMinLength: this.options.decimalMinLength,
+        rawValueMode: this.options.rawValueMode,
       }
     );
 
     // Clear caret position captured in handleKeyDown after it's used to restore cursor position after formatting.
     this.caretPositionBeforeChange = undefined;
 
+    // Update raw value if rawValueMode is enabled
+    if (this.options.rawValueMode) {
+      this.updateRawValue(target.value);
+    }
+
     if (this.options.onChange) {
-      this.options.onChange((e.target as HTMLInputElement).value);
+      const valueToEmit = this.options.rawValueMode ? this.rawValue : target.value;
+      this.options.onChange(valueToEmit);
     }
   }
 
@@ -185,7 +221,8 @@ export class NumoraInput {
   }
 
   private handlePaste(e: ClipboardEvent): void {
-    handleOnPasteNumoraInput(e, this.options.decimalMaxLength, {
+    const target = e.target as HTMLInputElement;
+    const result = handleOnPasteNumoraInput(e, this.options.decimalMaxLength, {
       formatOn: this.options.formatOn,
       thousandSeparator: this.options.thousandSeparator,
       ThousandStyle: this.options.thousandStyle,
@@ -194,9 +231,17 @@ export class NumoraInput {
       enableLeadingZeros: this.options.enableLeadingZeros,
       decimalSeparator: this.options.decimalSeparator,
       decimalMinLength: this.options.decimalMinLength,
+      rawValueMode: this.options.rawValueMode,
     });
+
+    // Update raw value if rawValueMode is enabled
+    if (this.options.rawValueMode) {
+      this.updateRawValue(result);
+    }
+
     if (this.options.onChange) {
-      this.options.onChange((e.target as HTMLInputElement).value);
+      const valueToEmit = this.options.rawValueMode ? this.rawValue : result;
+      this.options.onChange(valueToEmit);
     }
   }
 
@@ -221,18 +266,74 @@ export class NumoraInput {
       );
       target.value = formatted;
 
+      // Update raw value if rawValueMode is enabled
+      if (this.options.rawValueMode) {
+        this.updateRawValue(formatted);
+      }
+
       if (this.options.onChange) {
-        this.options.onChange(formatted);
+        const valueToEmit = this.options.rawValueMode ? this.rawValue : formatted;
+        this.options.onChange(valueToEmit);
       }
     }
   }
 
+  /**
+   * Extracts and stores the raw numeric value from a formatted value.
+   * Gets the raw value from the data attribute set by event handlers, or extracts it from formatted value.
+   */
+  private updateRawValue(formattedValue: string): void {
+    // Try to get raw value from data attribute (set by event handlers)
+    const rawFromAttribute = this.element.getAttribute('data-raw-value');
+    if (rawFromAttribute !== null) {
+      this.rawValue = rawFromAttribute;
+      this.element.removeAttribute('data-raw-value');
+      return;
+    }
+
+    // Fallback: extract raw value by removing separators
+    if (!this.options.thousandSeparator) {
+      this.rawValue = formattedValue;
+      return;
+    }
+
+    // Remove thousand separators to get raw value
+    this.rawValue = removeThousandSeparators(formattedValue, this.options.thousandSeparator);
+  }
+
   public getValue(): string {
+    if (this.options.rawValueMode) {
+      return this.rawValue;
+    }
     return this.element.value;
   }
 
   public setValue(value: string): void {
-    this.element.value = value;
+    if (this.options.rawValueMode) {
+      // Remove separators to get raw value (in case formatted value is passed)
+      const raw = this.options.thousandSeparator
+        ? removeThousandSeparators(value, this.options.thousandSeparator)
+        : value;
+
+      // Store raw value
+      this.rawValue = raw;
+
+      // Format for display if formatting is enabled
+      if (this.options.thousandSeparator && this.options.thousandStyle !== ThousandStyle.None && raw) {
+        const formatted = formatWithSeparators(
+          raw,
+          this.options.thousandSeparator,
+          this.options.thousandStyle,
+          this.options.enableLeadingZeros,
+          this.options.decimalSeparator
+        );
+        this.element.value = formatted;
+      } else {
+        this.element.value = raw;
+      }
+    } else {
+      this.element.value = value;
+    }
   }
 
   public disable(): void {

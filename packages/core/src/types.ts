@@ -21,6 +21,7 @@ export interface FormattingOptions {
     enableLeadingZeros?: boolean;
     decimalSeparator?: string;
     decimalMinLength?: number;
+    rawValueMode?: boolean;
 }
 
 

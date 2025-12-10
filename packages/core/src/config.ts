@@ -9,3 +9,4 @@ export const DEFAULT_DECIMAL_SEPARATOR = '.';
 export const DEFAULT_ENABLE_COMPACT_NOTATION = false;
 export const DEFAULT_ENABLE_NEGATIVE = false;
 export const DEFAULT_ENABLE_LEADING_ZEROS = false;
+export const DEFAULT_RAW_VALUE_MODE = false;
