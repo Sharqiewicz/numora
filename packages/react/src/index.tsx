@@ -1,24 +1,30 @@
 import React, { ChangeEvent, ClipboardEvent, forwardRef } from 'react';
 import {
-  handleOnChangeNumericInput,
-  handleOnPasteNumericInput,
-  handleOnKeyDownNumericInput,
-  type ThousandsGroupStyle,
-  type FormatOn,
+  handleOnChangeNumoraInput,
+  handleOnPasteNumoraInput,
+  handleOnKeyDownNumoraInput,
+  FormatOn,
+  ThousandStyle,
+  type FormattingOptions,
+  type CaretPositionInfo,
 } from 'numora';
 
 interface NumericInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'type' | 'inputMode'> {
-  additionalStyle?: string;
   maxDecimals?: number;
   onChange?: (e: ChangeEvent<HTMLInputElement> | ClipboardEvent<HTMLInputElement>) => void;
 
   // Formatting options
-  formatOn?: FormatOn;  // Default: 'blur'
-  thousandsSeparator?: string;  // Default: ','
-  thousandsGroupStyle?: ThousandsGroupStyle;  // Default: 'thousand'
+  formatOn?: FormatOn;
+  thousandSeparator?: string;
+  thousandStyle?: ThousandStyle;
+  decimalSeparator?: string;
+  decimalMinLength?: number;
 
-  // Parsing options
-  shorthandParsing?: boolean;  // Default: false
+  // Feature flags
+  enableCompactNotation?: boolean;
+  enableNegative?: boolean;
+  enableLeadingZeros?: boolean;
+  rawValueMode?: boolean;
 }
 
 const DEFAULT_PROPS = {
@@ -36,21 +42,34 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
   ({
     maxDecimals = 2,
     onChange,
-    formatOn = 'blur',
-    thousandsSeparator = ',',
-    thousandsGroupStyle = 'thousand',
-    shorthandParsing = false,
+    formatOn = FormatOn.Blur,
+    thousandSeparator = ',',
+    thousandStyle = ThousandStyle.Thousand,
+    decimalSeparator = '.',
+    decimalMinLength,
+    enableCompactNotation = false,
+    enableNegative = false,
+    enableLeadingZeros = false,
+    rawValueMode = false,
     ...props
   }: NumericInputProps, ref) => {
     const [caretPositionBeforeChange, setCaretPositionBeforeChange] =
-      React.useState<{ selectionStart: number; selectionEnd: number; endOffset?: number }>();
+      React.useState<CaretPositionInfo>();
+
+    const formattingOptions: FormattingOptions = {
+      formatOn,
+      thousandSeparator,
+      ThousandStyle: thousandStyle as any,
+      decimalSeparator,
+      decimalMinLength,
+      enableCompactNotation,
+      enableNegative,
+      enableLeadingZeros,
+      rawValueMode,
+    };
 
     function handleOnKeyDown(e: React.KeyboardEvent<HTMLInputElement>): void {
-      const caretInfo = handleOnKeyDownNumericInput(e.nativeEvent, {
-        formatOn,
-        thousandsSeparator,
-        thousandsGroupStyle,
-      });
+      const caretInfo = handleOnKeyDownNumoraInput(e.nativeEvent, formattingOptions);
 
       if (caretInfo) {
         setCaretPositionBeforeChange(caretInfo);
@@ -62,59 +81,42 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
         });
       }
 
-      // Call user's onKeyDown if provided
       if (props.onKeyDown) {
         props.onKeyDown(e);
       }
     }
 
     function handleOnChange(e: ChangeEvent<HTMLInputElement>): void {
-      handleOnChangeNumericInput(
+      handleOnChangeNumoraInput(
         e.nativeEvent,
         maxDecimals,
         caretPositionBeforeChange,
-        {
-          formatOn,
-          thousandsSeparator,
-          thousandsGroupStyle,
-          shorthandParsing,
-        }
+        formattingOptions
       );
       setCaretPositionBeforeChange(undefined);
       if (onChange) onChange(e);
     }
 
     function handleOnPaste(e: ClipboardEvent<HTMLInputElement>): void {
-      handleOnPasteNumericInput(e.nativeEvent, maxDecimals, shorthandParsing);
+      handleOnPasteNumoraInput(e.nativeEvent, maxDecimals, formattingOptions);
       if (onChange) onChange(e);
     }
 
     function handleOnFocus(e: React.FocusEvent<HTMLInputElement>): void {
-      // Remove separators for easier editing in 'blur' mode
-      if (formatOn === 'blur' && thousandsSeparator) {
+      if (formatOn === FormatOn.Blur && thousandSeparator) {
         const target = e.currentTarget;
         target.value = target.value.replace(
-          new RegExp(thousandsSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+          new RegExp(thousandSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
           ''
         );
       }
 
-      // Call user's onFocus if provided
       if (props.onFocus) {
         props.onFocus(e);
       }
     }
 
     function handleOnBlur(e: React.FocusEvent<HTMLInputElement>): void {
-      // Add separators back in 'blur' mode
-      if (formatOn === 'blur' && thousandsSeparator && e.currentTarget.value) {
-        const target = e.currentTarget;
-
-        // Need to import formatWithSeparators or handle differently
-        // For now, we'll trigger onChange which will handle it
-      }
-
-      // Call user's onBlur if provided
       if (props.onBlur) {
         props.onBlur(e);
       }

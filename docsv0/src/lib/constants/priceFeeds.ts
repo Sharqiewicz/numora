@@ -1,3 +1,7 @@
+/**
+ * Chainlink Price Feed addresses for different networks
+ */
+
 import type { TokenSymbol } from './tokens';
 
 export type NetworkName = 'mainnet' | 'base';
@@ -8,10 +12,13 @@ export type PriceFeedsConfig = {
   };
 };
 
+/**
+ * Chainlink Price Feed contract addresses
+ */
 export const PRICE_FEEDS: PriceFeedsConfig = {
   mainnet: {
     ETH: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
-    WETH: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419',
+    WETH: '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', // Same as ETH
     USDC: '0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6',
     DAI: '0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9',
     cbBTC: '0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c',
@@ -29,6 +36,9 @@ export const PRICE_FEEDS: PriceFeedsConfig = {
   },
 };
 
+/**
+ * Minimal Chainlink Price Feed ABI
+ */
 export const PRICE_FEED_ABI = [
   {
     inputs: [],
@@ -44,4 +54,3 @@ export const PRICE_FEED_ABI = [
     type: 'function',
   },
 ] as const;
-

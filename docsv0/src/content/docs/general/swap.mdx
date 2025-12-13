@@ -1,0 +1,124 @@
+---
+title: DeFi Token Swap
+description: Interactive example of numora in a DeFi swap interface
+---
+
+This example demonstrates how to use Numora in a DeFi token swap interface with real-time Chainlink price feeds.
+
+## Overview
+
+The component uses the `numora` core library for handling numeric inputs with precision, which is essential for cryptocurrency transactions. The example showcases:
+
+- **Precision Control**: Different tokens have different decimal places (e.g., cbBTC: 8, ETH: 18, USDC: 6)
+- **Input Validation**: Prevents invalid numeric input
+- **Real-time Pricing**: Fetches live prices from Chainlink oracles
+- **Clean Architecture**: Follows SOLID principles with separated concerns
+
+## Component Implementation
+
+The swap interface uses the `handleOnChangeNumoraInput` and `handleOnPasteNumoraInput` functions from `numora` core library:
+
+### Token Amount Input
+
+```svelte
+<input
+  type="text"
+  inputmode="decimal"
+  placeholder="0.0"
+  value={fromAmount}
+  oninput={handleFromInputChange}
+  onpaste={handleFromInputPaste}
+/>
+```
+
+### Input Handler Functions
+
+```typescript
+import { handleOnChangeNumoraInput, handleOnPasteNumoraInput } from 'numora';
+
+function handleFromInputChange(e: Event) {
+  handleOnChangeNumoraInput(e, fromToken.decimals);
+  fromAmount = (e.target as HTMLInputElement).value;
+}
+
+function handleFromInputPaste(e: ClipboardEvent) {
+  handleOnPasteNumoraInput(e, fromToken.decimals);
+  fromAmount = (e.target as HTMLInputElement).value;
+}
+```
+
+### Key Features
+
+1. **Token Selection**: Choose from 7 different tokens (ETH, WETH, USDC, DAI, cbBTC, wstETH, EURC)
+2. **Real-time Exchange Rates**: Powered by Chainlink Price Feeds
+3. **Automatic Calculations**: Output amount calculated automatically based on current prices
+4. **Input Validation**: Prevents invalid inputs for financial transactions
+5. **Scientific Notation Support**: Automatically expands scientific notation (e.g., "1.5e-7" → "0.00000015")
+6. **Compact Notation Support**: Can be enabled to expand compact notation (e.g., "1k" → "1000") on paste
+
+## Advanced Features in DeFi Context
+
+### Using Formatting Options
+
+For better UX in DeFi applications, you can use formatting options:
+
+```typescript
+import { handleOnChangeNumoraInput, FormatOn, ThousandStyle } from 'numora';
+
+function handleFromInputChange(e: Event) {
+  handleOnChangeNumoraInput(
+    e,
+    fromToken.decimals,
+    undefined, // caretPositionBeforeChange
+    {
+      formatOn: FormatOn.Blur, // Clean editing experience
+      thousandSeparator: ',',
+      ThousandStyle: ThousandStyle.Thousand,
+      enableCompactNotation: true, // Expand "1k" → "1000"
+    }
+  );
+  fromAmount = (e.target as HTMLInputElement).value;
+}
+```
+
+### Raw Value Mode for Calculations
+
+When performing swap calculations, you might want unformatted values:
+
+```typescript
+import { NumoraInput } from 'numora';
+
+const numoraInput = new NumoraInput(container, {
+  decimalMaxLength: fromToken.decimals,
+  rawValueMode: true, // Get unformatted values
+  onChange: (value) => {
+    // value is "1234.56" (unformatted, ready for calculations)
+    // Display shows "1,234.56" (formatted for user)
+    performSwapCalculation(value);
+  },
+});
+```
+
+## Why Use Numora for DeFi Applications?
+
+DeFi applications require precise handling of numeric inputs, as even small errors can result in significant financial implications. Numora provides:
+
+- **Precision**: Handles token-specific decimal places correctly (up to 18 decimals)
+- **Validation**: Prevents users from entering invalid amounts
+- **Consistency**: Ensures consistent number formatting across the application
+- **Framework Agnostic**: Works seamlessly with any framework (Svelte, React, Vue, etc.)
+- **Scientific Notation**: Automatically handles scientific notation that users might paste
+- **Compact Notation**: Can expand shorthand like "1k" or "1.5m" for user convenience
+- **String-based Arithmetic**: Avoids floating-point precision errors
+- **Mobile Support**: Optimized for mobile keyboards and input methods
+
+## Best Practices for DeFi
+
+1. **Always use token-specific decimal places** - Different tokens have different precision requirements
+2. **Enable compact notation** - Users often paste values like "1k" or "1.5m"
+3. **Use raw value mode for calculations** - Get unformatted values for blockchain transactions
+4. **Validate against available balance** - Check that input doesn't exceed user's balance
+5. **Handle edge cases** - Empty inputs, zero values, very large numbers
+6. **Format for display, calculate with raw values** - Use formatting for UX, raw values for logic
+
+For more examples and documentation, check out the [Getting Started](/docs/general/getting-started) guide.

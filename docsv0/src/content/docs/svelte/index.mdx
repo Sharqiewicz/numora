@@ -1,0 +1,253 @@
+---
+title: Svelte Guide
+description: Using Numora with Svelte
+---
+
+# Numora for Svelte
+
+Complete guide to using Numora with Svelte. Since Numora is framework-agnostic, you can use it directly in Svelte components.
+
+## Installation
+
+```bash
+npm install numora
+# or
+yarn add numora
+# or
+pnpm add numora
+# or
+bun add numora
+```
+
+## Basic Usage with NumoraInput
+
+```svelte
+<script>
+  import { onMount, onDestroy } from 'svelte';
+  import { NumoraInput } from 'numora';
+
+  let container;
+  let numoraInputInstance;
+  let value = '0';
+
+  onMount(() => {
+    numoraInputInstance = new NumoraInput(container, {
+      decimalMaxLength: 2,
+      onChange: (newValue) => {
+        value = newValue;
+        console.log('Value changed:', newValue);
+      },
+    });
+  });
+
+  onDestroy(() => {
+    if (numoraInputInstance) {
+      container.innerHTML = '';
+    }
+  });
+</script>
+
+<div bind:this={container}></div>
+<div>Current value: {value}</div>
+```
+
+## Using Event Handlers Directly
+
+For more control, you can use Numora's event handlers directly with Svelte's event handlers:
+
+```svelte
+<script>
+  import { handleOnChangeNumoraInput, handleOnPasteNumoraInput } from 'numora';
+  import { FormatOn, ThousandStyle } from 'numora';
+
+  let fromAmount = '1';
+  let decimals = 18;
+
+  function handleFromInputChange(e) {
+    handleOnChangeNumoraInput(e, decimals, undefined, {
+      formatOn: FormatOn.Change,
+      thousandSeparator: ',',
+      ThousandStyle: ThousandStyle.Thousand,
+    });
+    fromAmount = e.target.value;
+  }
+
+  function handleFromInputPaste(e) {
+    handleOnPasteNumoraInput(e, decimals, {
+      enableCompactNotation: true,
+    });
+    fromAmount = e.target.value;
+  }
+</script>
+
+<input
+  type="text"
+  inputmode="decimal"
+  placeholder="0.0"
+  value={fromAmount}
+  oninput={handleFromInputChange}
+  onpaste={handleFromInputPaste}
+/>
+```
+
+## Advanced Example with Configuration
+
+```svelte
+<script>
+  import { onMount, onDestroy } from 'svelte';
+  import { NumoraInput, FormatOn, ThousandStyle } from 'numora';
+
+  let container;
+  let numoraInputInstance;
+  let value = '';
+  
+  let decimalMaxLength = 18;
+  let thousandSeparator = ',';
+  let formatOn = FormatOn.Blur;
+  let enableCompactNotation = false;
+
+  function createInput() {
+    if (numoraInputInstance) {
+      container.innerHTML = '';
+    }
+
+    numoraInputInstance = new NumoraInput(container, {
+      decimalMaxLength,
+      thousandSeparator,
+      thousandStyle: ThousandStyle.Thousand,
+      formatOn,
+      enableCompactNotation,
+      onChange: (newValue) => {
+        value = newValue;
+      },
+    });
+  }
+
+  onMount(() => {
+    createInput();
+  });
+
+  onDestroy(() => {
+    if (numoraInputInstance) {
+      container.innerHTML = '';
+    }
+  });
+
+  $: if (decimalMaxLength || thousandSeparator || formatOn || enableCompactNotation) {
+    createInput();
+  }
+</script>
+
+<div class="config">
+  <label>
+    Max Decimals:
+    <input type="number" bind:value={decimalMaxLength} min="0" max="20" />
+  </label>
+  <label>
+    Thousand Separator:
+    <input type="text" bind:value={thousandSeparator} />
+  </label>
+  <label>
+    Format On:
+    <select bind:value={formatOn}>
+      <option value={FormatOn.Blur}>Blur</option>
+      <option value={FormatOn.Change}>Change</option>
+    </select>
+  </label>
+  <label>
+    <input type="checkbox" bind:checked={enableCompactNotation} />
+    Enable Compact Notation
+  </label>
+</div>
+
+<div bind:this={container}></div>
+<div>Value: {value}</div>
+```
+
+## DeFi Swap Example
+
+Here's a complete example from the swap component:
+
+```svelte
+<script lang="ts">
+  import { handleOnChangeNumoraInput, handleOnPasteNumoraInput } from 'numora';
+
+  let fromAmount = $state('1');
+  let effectiveFromDecimals = 18;
+
+  function handleFromInputChange(e: Event) {
+    handleOnChangeNumoraInput(e, effectiveFromDecimals);
+    fromAmount = (e.target as HTMLInputElement).value;
+  }
+
+  function handleFromInputPaste(e: ClipboardEvent) {
+    handleOnPasteNumoraInput(e, effectiveFromDecimals);
+    fromAmount = (e.target as HTMLInputElement).value;
+  }
+</script>
+
+<input
+  type="text"
+  inputmode="decimal"
+  placeholder="0.0"
+  value={fromAmount}
+  oninput={handleFromInputChange}
+  onpaste={handleFromInputPaste}
+/>
+```
+
+## Using with Svelte Stores
+
+```svelte
+<script>
+  import { writable } from 'svelte/store';
+  import { onMount } from 'svelte';
+  import { NumoraInput } from 'numora';
+
+  const amount = writable('0');
+  let container;
+  let numoraInputInstance;
+
+  onMount(() => {
+    numoraInputInstance = new NumoraInput(container, {
+      decimalMaxLength: 2,
+      rawValueMode: true,
+      onChange: (value) => {
+        amount.set(value);
+      },
+    });
+  });
+</script>
+
+<div bind:this={container}></div>
+<div>Amount: {$amount}</div>
+```
+
+## Best Practices for Svelte
+
+1. **Clean up on destroy** - Always clean up the container when the component is destroyed
+2. **Use event handlers for reactive updates** - Update Svelte state in the onChange callback
+3. **Recreate instance on config changes** - If configuration changes, recreate the NumoraInput instance
+4. **Use rawValueMode for calculations** - Get unformatted values when you need to perform calculations
+5. **Handle edge cases** - Empty inputs, zero values, etc.
+
+## Features Available in Svelte
+
+All Numora features are available in Svelte:
+
+- ✅ Decimal precision control (min/max)
+- ✅ Thousand separators with customizable grouping styles
+- ✅ Format on blur/change modes
+- ✅ Compact notation expansion
+- ✅ Scientific notation expansion (always automatic)
+- ✅ Paste event handling
+- ✅ Cursor position preservation
+- ✅ Mobile keyboard optimization
+- ✅ Raw value mode
+- ✅ Display formatting utilities
+
+## Related
+
+- [Vanilla JS Guide](/docs/vanilla) - Core package documentation
+- [Examples](/docs/general/example) - More usage examples
+- [Swap Example](/docs/general/swap) - Real-world DeFi example
