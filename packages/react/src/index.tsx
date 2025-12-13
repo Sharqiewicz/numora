@@ -10,14 +10,12 @@ interface NumoraInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   maxDecimals?: number;
   onChange?: (e: ChangeEvent<HTMLInputElement> | ClipboardEvent<HTMLInputElement>) => void;
 
-  // Formatting options
   formatOn?: FormatOn;
   thousandSeparator?: string;
   thousandStyle?: ThousandStyle;
   decimalSeparator?: string;
   decimalMinLength?: number;
 
-  // Feature flags
   enableCompactNotation?: boolean;
   enableNegative?: boolean;
   enableLeadingZeros?: boolean;
@@ -51,10 +49,21 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>(
       onChangeRef.current = onChange;
     }, [onChange]);
 
-    // Initialize NumoraInput class once when container is mounted
+    // Initialize and update NumoraInput class when container is mounted or options change
     useEffect(() => {
       const container = containerRef.current;
-      if (!container || numoraInputRef.current) return;
+      if (!container) return;
+
+      // Preserve current value when recreating instance
+      const currentValue = numoraInputRef.current?.getValue() || 
+        (typeof props.value === 'string' ? props.value : props.value !== undefined ? String(props.value) : undefined) ||
+        (typeof props.defaultValue === 'string' ? props.defaultValue : props.defaultValue !== undefined ? String(props.defaultValue) : undefined);
+
+      // Clean up old instance - clear container and reset ref
+      if (numoraInputRef.current) {
+        container.innerHTML = '';
+        numoraInputRef.current = null;
+      }
 
       // Extract and convert value/defaultValue props
       const { value, defaultValue, ...restProps } = props;
@@ -72,15 +81,26 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>(
         enableNegative,
         enableLeadingZeros,
         rawValueMode,
-        value: stringValue,
+        value: stringValue ?? currentValue,
         defaultValue: stringDefaultValue,
         onChange: (value: string) => {
           // Use ref to get latest onChange without recreating NumoraInput
           if (onChangeRef.current && numoraInputRef.current) {
             const inputElement = numoraInputRef.current.getElement();
+            // The value parameter is the processed value from NumoraInput (after compact notation expansion, formatting, etc.)
+            // Create a synthetic event that properly exposes the processed value
+            // We create a new object to avoid mutating the actual input element
             const syntheticEvent = {
-              target: inputElement,
-              currentTarget: inputElement,
+              target: {
+                ...inputElement,
+                value: value,
+              },
+              currentTarget: {
+                ...inputElement,
+                value: value,
+              },
+              preventDefault: () => {},
+              stopPropagation: () => {},
             } as ChangeEvent<HTMLInputElement>;
             onChangeRef.current(syntheticEvent);
           }
@@ -101,9 +121,23 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>(
 
       // Cleanup on unmount
       return () => {
+        if (numoraInputRef.current && container) {
+          container.innerHTML = '';
+        }
         numoraInputRef.current = null;
       };
-    }, []);
+    }, [
+      maxDecimals,
+      decimalMinLength,
+      formatOn,
+      thousandSeparator,
+      thousandStyle,
+      decimalSeparator,
+      enableCompactNotation,
+      enableNegative,
+      enableLeadingZeros,
+      rawValueMode,
+    ]);
 
     // Handle programmatic value changes (when value prop changes externally)
     useEffect(() => {

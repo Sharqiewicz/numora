@@ -217,7 +217,7 @@
   </div>
 
   <script type="module">
-    import { NumericInput } from './packages/core/dist/index.mjs';
+    import { NumoraInput } from './packages/core/dist/index.mjs';
 
     const input1Container = document.getElementById('input1');
     const input2Container = document.getElementById('input2');
@@ -232,23 +232,23 @@
     let separator1 = ',', separator2 = ',';
     let style1 = 'thousand', style2 = 'thousand';
 
-    input1Element = new NumericInput(input1Container, {
+    input1Element = new NumoraInput(input1Container, {
       allowNegative: true,
       maxDecimals: 2,
       placeholder: 'Enter a number...',
       formatOn: 'change',
       thousandsSeparator: separator1,
       thousandsGroupStyle: style1,
-      shorthandParsing: true
+      enableCompactNotation: true
     });
 
-    input2Element = new NumericInput(input2Container, {
+    input2Element = new NumoraInput(input2Container, {
       maxDecimals: 6,
       placeholder: 'Enter a number with up to 6 decimals...',
       formatOn: 'blur',
       thousandsSeparator: separator2,
       thousandsGroupStyle: style2,
-      shorthandParsing: true
+      enableCompactNotation: true
     });
 
     separator1Select.addEventListener('change', (e) => {

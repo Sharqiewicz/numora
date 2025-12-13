@@ -29,16 +29,13 @@ export function expandCompactNotation(value: string): string {
     // Scale values: k=3, m/M=6, b=9, T=12, Qa=15, Qi=18, Sx=21, Sp=24, O=27, N=30
     const zeroCounts: Record<string, number> = {
       k: 3,   // Thousand
+      K: 3,   // Thousand
       m: 6,   // Million (lowercase)
       M: 6,   // Million (uppercase)
       b: 9,   // Billion
+      B: 9,   // Billion
       T: 12,  // Trillion
-      Qa: 15, // Quadrillion
-      Qi: 18, // Quintillion
-      Sx: 21, // Sextillion
-      Sp: 24, // Septillion
-      O: 27,  // Octillion
-      N: 30,  // Nonillion
+      t: 12,  // Trillion
     };
 
     // Handle case-insensitive matching
@@ -47,7 +44,9 @@ export function expandCompactNotation(value: string): string {
     let zerosToAdd: number | undefined;
     if (suffix.length > 1) {
       // Multi-character: Qa, Qi, Sx, Sp - case-insensitive
-      zerosToAdd = zeroCounts[suffix] || zeroCounts[suffix.charAt(0).toUpperCase() + suffix.slice(1).toLowerCase()];
+      // Try exact match first, then normalized case (first char uppercase, rest lowercase)
+      const normalizedSuffix = suffix.charAt(0).toUpperCase() + suffix.slice(1).toLowerCase();
+      zerosToAdd = zeroCounts[suffix] || zeroCounts[normalizedSuffix];
     } else {
       // Single character: check both original and lowercase
       const suffixLower = suffix.toLowerCase();
@@ -88,8 +87,10 @@ export function expandCompactNotation(value: string): string {
       result = isNegative ? '-0' : '0';
     }
 
-    // Trim trailing zeros from decimal part
-    result = result.replace(/\.?0+$/, '');
+    // Trim trailing zeros from decimal part only (if decimal point exists)
+    if (result.includes('.')) {
+      result = result.replace(/\.?0+$/, '');
+    }
 
     return isNegative && !result.startsWith('-') ? '-' + result : result;
   });

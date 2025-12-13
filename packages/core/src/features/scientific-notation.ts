@@ -125,4 +125,3 @@ function trimTrailingZeros(value: string): string {
 
   return value.replace(/\.?0+$/, '') || value;
 }
-

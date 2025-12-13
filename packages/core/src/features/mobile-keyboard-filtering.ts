@@ -23,4 +23,3 @@ export function filterMobileKeyboardArtifacts(value: string): string {
     .replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000]/g, ' ') // Unicode whitespace variants
     .replace(/\s/g, ''); // Remove all whitespace
 }
-

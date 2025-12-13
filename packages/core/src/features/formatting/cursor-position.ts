@@ -86,6 +86,19 @@ export function calculateCursorPositionAfterFormatting(
     return newFormattedValue.length;
   }
 
+  // === SPECIAL CASE: Compact notation expansion ===
+  // When compact notation expands (e.g., "1k" → "1000"), if cursor was at/near end, place at end
+  // Only match if old value matches compact notation pattern (number + suffix) and new value is expanded
+  const compactNotationPattern = /(\d+\.?\d*)\s*[kmbMTOQaqiSxsxSpOoNn]$/i;
+  if (
+    compactNotationPattern.test(oldFormattedValue) &&
+    !compactNotationPattern.test(newFormattedValue) &&
+    newFormattedValue.length > oldFormattedValue.length &&
+    oldCursorPosition >= oldFormattedValue.length - 1
+  ) {
+    return newFormattedValue.length;
+  }
+
   // === DETERMINE: Operation type (insertion vs deletion) ===
   const isDeletion = newFormattedValue.length < oldFormattedValue.length;
 

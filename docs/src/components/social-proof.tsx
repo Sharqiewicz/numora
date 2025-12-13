@@ -22,7 +22,7 @@ const logos = [
 
 export function SocialProof() {
   return (
-    <div className="py-12 sm:py-16 px-4 sm:px-16 my-16 border rounded-xl border-[#23272b] bg-[#181a1b]/80 hover:scale-[1.02] transition-transform duration-300">
+    <div className="py-12 sm:py-16 px-4 sm:px-16 my-16 border rounded-xl border-[#23272b] bg-[#181a1b] ">
         <div className="text-center max-w-3xl mx-auto mb-10 px-4">
           <h2 className="text-3xl mb-4">
             We analyzed the industry leaders.
@@ -39,7 +39,7 @@ export function SocialProof() {
               href={logo.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="social-logo-group transition-all duration-300"
+              className="transition-all duration-300 hover:scale-110"
             >
               <img
                 src={logo.src}
