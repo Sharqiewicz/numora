@@ -9,14 +9,92 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DocsRouteImport } from './routes/docs'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DocsIndexRouteImport } from './routes/docs/index'
+import { Route as DocsInstallationRouteImport } from './routes/docs/installation'
+import { Route as DocsFeaturesSubscriptNotationRouteImport } from './routes/docs/features/subscript-notation'
+import { Route as DocsFeaturesScientificNotationRouteImport } from './routes/docs/features/scientific-notation'
+import { Route as DocsFeaturesSanitizationRouteImport } from './routes/docs/features/sanitization'
+import { Route as DocsFeaturesPercentRouteImport } from './routes/docs/features/percent'
+import { Route as DocsFeaturesNumberPrecisionSafetyRouteImport } from './routes/docs/features/number-precision-safety'
+import { Route as DocsFeaturesLeadingZerosRouteImport } from './routes/docs/features/leading-zeros'
+import { Route as DocsFeaturesFormattingRouteImport } from './routes/docs/features/formatting'
+import { Route as DocsFeaturesDecimalsRouteImport } from './routes/docs/features/decimals'
+import { Route as DocsFeaturesCompactNotationRouteImport } from './routes/docs/features/compact-notation'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsIndexRoute = DocsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsInstallationRoute = DocsInstallationRouteImport.update({
+  id: '/installation',
+  path: '/installation',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsFeaturesSubscriptNotationRoute =
+  DocsFeaturesSubscriptNotationRouteImport.update({
+    id: '/features/subscript-notation',
+    path: '/features/subscript-notation',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsFeaturesScientificNotationRoute =
+  DocsFeaturesScientificNotationRouteImport.update({
+    id: '/features/scientific-notation',
+    path: '/features/scientific-notation',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsFeaturesSanitizationRoute =
+  DocsFeaturesSanitizationRouteImport.update({
+    id: '/features/sanitization',
+    path: '/features/sanitization',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsFeaturesPercentRoute = DocsFeaturesPercentRouteImport.update({
+  id: '/features/percent',
+  path: '/features/percent',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsFeaturesNumberPrecisionSafetyRoute =
+  DocsFeaturesNumberPrecisionSafetyRouteImport.update({
+    id: '/features/number-precision-safety',
+    path: '/features/number-precision-safety',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsFeaturesLeadingZerosRoute =
+  DocsFeaturesLeadingZerosRouteImport.update({
+    id: '/features/leading-zeros',
+    path: '/features/leading-zeros',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsFeaturesFormattingRoute = DocsFeaturesFormattingRouteImport.update({
+  id: '/features/formatting',
+  path: '/features/formatting',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsFeaturesDecimalsRoute = DocsFeaturesDecimalsRouteImport.update({
+  id: '/features/decimals',
+  path: '/features/decimals',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsFeaturesCompactNotationRoute =
+  DocsFeaturesCompactNotationRouteImport.update({
+    id: '/features/compact-notation',
+    path: '/features/compact-notation',
+    getParentRoute: () => DocsRoute,
+  } as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   id: '/api/trpc/$',
   path: '/api/trpc/$',
@@ -25,38 +103,200 @@ const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/docs': typeof DocsRouteWithChildren
+  '/docs/installation': typeof DocsInstallationRoute
+  '/docs/': typeof DocsIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/docs/features/compact-notation': typeof DocsFeaturesCompactNotationRoute
+  '/docs/features/decimals': typeof DocsFeaturesDecimalsRoute
+  '/docs/features/formatting': typeof DocsFeaturesFormattingRoute
+  '/docs/features/leading-zeros': typeof DocsFeaturesLeadingZerosRoute
+  '/docs/features/number-precision-safety': typeof DocsFeaturesNumberPrecisionSafetyRoute
+  '/docs/features/percent': typeof DocsFeaturesPercentRoute
+  '/docs/features/sanitization': typeof DocsFeaturesSanitizationRoute
+  '/docs/features/scientific-notation': typeof DocsFeaturesScientificNotationRoute
+  '/docs/features/subscript-notation': typeof DocsFeaturesSubscriptNotationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/docs/installation': typeof DocsInstallationRoute
+  '/docs': typeof DocsIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/docs/features/compact-notation': typeof DocsFeaturesCompactNotationRoute
+  '/docs/features/decimals': typeof DocsFeaturesDecimalsRoute
+  '/docs/features/formatting': typeof DocsFeaturesFormattingRoute
+  '/docs/features/leading-zeros': typeof DocsFeaturesLeadingZerosRoute
+  '/docs/features/number-precision-safety': typeof DocsFeaturesNumberPrecisionSafetyRoute
+  '/docs/features/percent': typeof DocsFeaturesPercentRoute
+  '/docs/features/sanitization': typeof DocsFeaturesSanitizationRoute
+  '/docs/features/scientific-notation': typeof DocsFeaturesScientificNotationRoute
+  '/docs/features/subscript-notation': typeof DocsFeaturesSubscriptNotationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/docs': typeof DocsRouteWithChildren
+  '/docs/installation': typeof DocsInstallationRoute
+  '/docs/': typeof DocsIndexRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/docs/features/compact-notation': typeof DocsFeaturesCompactNotationRoute
+  '/docs/features/decimals': typeof DocsFeaturesDecimalsRoute
+  '/docs/features/formatting': typeof DocsFeaturesFormattingRoute
+  '/docs/features/leading-zeros': typeof DocsFeaturesLeadingZerosRoute
+  '/docs/features/number-precision-safety': typeof DocsFeaturesNumberPrecisionSafetyRoute
+  '/docs/features/percent': typeof DocsFeaturesPercentRoute
+  '/docs/features/sanitization': typeof DocsFeaturesSanitizationRoute
+  '/docs/features/scientific-notation': typeof DocsFeaturesScientificNotationRoute
+  '/docs/features/subscript-notation': typeof DocsFeaturesSubscriptNotationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/trpc/$'
+  fullPaths:
+    | '/'
+    | '/docs'
+    | '/docs/installation'
+    | '/docs/'
+    | '/api/trpc/$'
+    | '/docs/features/compact-notation'
+    | '/docs/features/decimals'
+    | '/docs/features/formatting'
+    | '/docs/features/leading-zeros'
+    | '/docs/features/number-precision-safety'
+    | '/docs/features/percent'
+    | '/docs/features/sanitization'
+    | '/docs/features/scientific-notation'
+    | '/docs/features/subscript-notation'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/trpc/$'
-  id: '__root__' | '/' | '/api/trpc/$'
+  to:
+    | '/'
+    | '/docs/installation'
+    | '/docs'
+    | '/api/trpc/$'
+    | '/docs/features/compact-notation'
+    | '/docs/features/decimals'
+    | '/docs/features/formatting'
+    | '/docs/features/leading-zeros'
+    | '/docs/features/number-precision-safety'
+    | '/docs/features/percent'
+    | '/docs/features/sanitization'
+    | '/docs/features/scientific-notation'
+    | '/docs/features/subscript-notation'
+  id:
+    | '__root__'
+    | '/'
+    | '/docs'
+    | '/docs/installation'
+    | '/docs/'
+    | '/api/trpc/$'
+    | '/docs/features/compact-notation'
+    | '/docs/features/decimals'
+    | '/docs/features/formatting'
+    | '/docs/features/leading-zeros'
+    | '/docs/features/number-precision-safety'
+    | '/docs/features/percent'
+    | '/docs/features/sanitization'
+    | '/docs/features/scientific-notation'
+    | '/docs/features/subscript-notation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DocsRoute: typeof DocsRouteWithChildren
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/docs/': {
+      id: '/docs/'
+      path: '/'
+      fullPath: '/docs/'
+      preLoaderRoute: typeof DocsIndexRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/installation': {
+      id: '/docs/installation'
+      path: '/installation'
+      fullPath: '/docs/installation'
+      preLoaderRoute: typeof DocsInstallationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/features/subscript-notation': {
+      id: '/docs/features/subscript-notation'
+      path: '/features/subscript-notation'
+      fullPath: '/docs/features/subscript-notation'
+      preLoaderRoute: typeof DocsFeaturesSubscriptNotationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/features/scientific-notation': {
+      id: '/docs/features/scientific-notation'
+      path: '/features/scientific-notation'
+      fullPath: '/docs/features/scientific-notation'
+      preLoaderRoute: typeof DocsFeaturesScientificNotationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/features/sanitization': {
+      id: '/docs/features/sanitization'
+      path: '/features/sanitization'
+      fullPath: '/docs/features/sanitization'
+      preLoaderRoute: typeof DocsFeaturesSanitizationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/features/percent': {
+      id: '/docs/features/percent'
+      path: '/features/percent'
+      fullPath: '/docs/features/percent'
+      preLoaderRoute: typeof DocsFeaturesPercentRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/features/number-precision-safety': {
+      id: '/docs/features/number-precision-safety'
+      path: '/features/number-precision-safety'
+      fullPath: '/docs/features/number-precision-safety'
+      preLoaderRoute: typeof DocsFeaturesNumberPrecisionSafetyRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/features/leading-zeros': {
+      id: '/docs/features/leading-zeros'
+      path: '/features/leading-zeros'
+      fullPath: '/docs/features/leading-zeros'
+      preLoaderRoute: typeof DocsFeaturesLeadingZerosRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/features/formatting': {
+      id: '/docs/features/formatting'
+      path: '/features/formatting'
+      fullPath: '/docs/features/formatting'
+      preLoaderRoute: typeof DocsFeaturesFormattingRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/features/decimals': {
+      id: '/docs/features/decimals'
+      path: '/features/decimals'
+      fullPath: '/docs/features/decimals'
+      preLoaderRoute: typeof DocsFeaturesDecimalsRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/features/compact-notation': {
+      id: '/docs/features/compact-notation'
+      path: '/features/compact-notation'
+      fullPath: '/docs/features/compact-notation'
+      preLoaderRoute: typeof DocsFeaturesCompactNotationRouteImport
+      parentRoute: typeof DocsRoute
     }
     '/api/trpc/$': {
       id: '/api/trpc/$'
@@ -68,8 +308,40 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface DocsRouteChildren {
+  DocsInstallationRoute: typeof DocsInstallationRoute
+  DocsIndexRoute: typeof DocsIndexRoute
+  DocsFeaturesCompactNotationRoute: typeof DocsFeaturesCompactNotationRoute
+  DocsFeaturesDecimalsRoute: typeof DocsFeaturesDecimalsRoute
+  DocsFeaturesFormattingRoute: typeof DocsFeaturesFormattingRoute
+  DocsFeaturesLeadingZerosRoute: typeof DocsFeaturesLeadingZerosRoute
+  DocsFeaturesNumberPrecisionSafetyRoute: typeof DocsFeaturesNumberPrecisionSafetyRoute
+  DocsFeaturesPercentRoute: typeof DocsFeaturesPercentRoute
+  DocsFeaturesSanitizationRoute: typeof DocsFeaturesSanitizationRoute
+  DocsFeaturesScientificNotationRoute: typeof DocsFeaturesScientificNotationRoute
+  DocsFeaturesSubscriptNotationRoute: typeof DocsFeaturesSubscriptNotationRoute
+}
+
+const DocsRouteChildren: DocsRouteChildren = {
+  DocsInstallationRoute: DocsInstallationRoute,
+  DocsIndexRoute: DocsIndexRoute,
+  DocsFeaturesCompactNotationRoute: DocsFeaturesCompactNotationRoute,
+  DocsFeaturesDecimalsRoute: DocsFeaturesDecimalsRoute,
+  DocsFeaturesFormattingRoute: DocsFeaturesFormattingRoute,
+  DocsFeaturesLeadingZerosRoute: DocsFeaturesLeadingZerosRoute,
+  DocsFeaturesNumberPrecisionSafetyRoute:
+    DocsFeaturesNumberPrecisionSafetyRoute,
+  DocsFeaturesPercentRoute: DocsFeaturesPercentRoute,
+  DocsFeaturesSanitizationRoute: DocsFeaturesSanitizationRoute,
+  DocsFeaturesScientificNotationRoute: DocsFeaturesScientificNotationRoute,
+  DocsFeaturesSubscriptNotationRoute: DocsFeaturesSubscriptNotationRoute,
+}
+
+const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DocsRoute: DocsRouteWithChildren,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,
 }
 export const routeTree = rootRouteImport

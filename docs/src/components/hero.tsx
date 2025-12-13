@@ -1,5 +1,6 @@
 import { HeroBadges } from '@/components/hero-badges'
 import { Button } from '@/components/ui/button'
+import { Link } from '@tanstack/react-router'
 
 export function Hero() {
 
@@ -13,7 +14,8 @@ export function Hero() {
             <strong className="font-numora">numora</strong> solves the nightmares of building all financial inputs validation, formatting and sanitization.
           </p>
           <div className="delay-[3s] animate-fade-in opacity-0 mb-8"> <HeroBadges /></div>
-          <div className="delay-[3s] animate-fade-in opacity-0 gap-4 flex"> <Button className="min-w-[150px]" >Get Started</Button>
+          <div className="delay-[3s] animate-fade-in opacity-0 gap-4 flex">
+            <Link to="/docs"><Button className="min-w-[150px]" >Get Started</Button></Link>
           <a href="#tamper-proof-section"><Button variant="secondary" className="min-w-[150px]" >Try it</Button></a></div>
         </>
     )

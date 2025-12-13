@@ -17,7 +17,7 @@ code {
   --font-righteous: 'Righteous', sans-serif;
 
   --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.785 0 0);
+  --foreground: oklch(0.885 0 0);
   --card: oklch(0.141 0.005 285.823);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.141 0.005 285.823);
@@ -35,14 +35,14 @@ code {
   --border: oklch(0.274 0.006 286.033);
   --input: oklch(0.274 0.006 286.033);
   --ring: oklch(0.442 0.017 285.786);
-  --sidebar: oklch(0.21 0.006 285.885);
+  --sidebar: oklch(0.141 0.005 285.823);;
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.274 0.006 286.033);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.274 0.006 286.033);
-  --sidebar-ring: oklch(0.442 0.017 285.786);
+  --sidebar-ring: #010101;
 
   --gradient-1-color: rgba(124, 58, 237, 0.12);
   --gradient-2-color: rgba(59, 130, 246, 0.10);
@@ -210,5 +210,96 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .prose {
+    @apply text-foreground;
+  }
+
+  .prose h1 {
+    @apply text-4xl font-bold mb-4 mt-8 first:mt-0;
+  }
+
+  .prose h2 {
+    @apply text-3xl font-semibold mb-3 mt-8;
+  }
+
+  .prose h3 {
+    @apply text-2xl font-semibold mb-2 mt-6;
+  }
+
+  .prose h4 {
+    @apply text-xl font-semibold mb-2 mt-4;
+  }
+
+  .prose p {
+    @apply mb-4 leading-7;
+  }
+
+  .prose ul,
+  .prose ol {
+    @apply mb-4 ml-6;
+  }
+
+  .prose ul {
+    @apply list-disc;
+  }
+
+  .prose ol {
+    @apply list-decimal;
+  }
+
+  .prose li {
+    @apply mb-2;
+  }
+
+  .prose code {
+    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+
+  .prose pre {
+    @apply mb-4;
+  }
+
+  .prose a {
+    @apply text-primary underline-offset-4 hover:underline;
+  }
+
+  .prose table {
+    @apply w-full border-collapse mb-4;
+  }
+
+  .prose th {
+    @apply border border-border px-4 py-2 text-left font-semibold bg-muted/50;
+  }
+
+  .prose td {
+    @apply border border-border px-4 py-2;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-border pl-4 italic my-4;
+  }
+
+  .prose hr {
+    @apply border-border my-8;
+  }
+
+  .prose strong {
+    @apply font-semibold;
+  }
+
+  .prose em {
+    @apply italic;
+  }
+
+  .prose pre[class*="language-"] {
+    @apply m-0;
+  }
+
+  .prose code[class*="language-"] {
+    @apply text-sm;
   }
 }
