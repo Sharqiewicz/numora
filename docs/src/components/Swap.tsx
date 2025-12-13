@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
-import { NumoraInput } from 'numora-react';
 import {FormatOn, ThousandStyle } from 'numora';
+import { NumoraInput } from 'numora-react';
+import { useEffect, useState } from 'react';
 import { useTRPC } from '@/integrations/trpc/react';
 import { TOKENS, type TokenInfo } from '@/lib/constants/tokens';
-import { TokenSelector } from './TokenSelector';
 import {
-  calculateSwapAmount,
-  calculateReverseSwapAmount,
   calculateExchangeRate,
+  calculateReverseSwapAmount,
+  calculateSwapAmount,
 } from '@/lib/utils/swapCalculator';
 import GlareHover from './GlareHover';
+import { TokenSelector } from './TokenSelector';
 
 export function Swap() {
   const [fromToken, setFromToken] = useState<TokenInfo>(TOKENS[0]);
@@ -248,24 +248,14 @@ export function Swap() {
         <div className="mt-2 text-sm text-center text-[#a0a3c4] text-gray-500 mb-6">
           {priceInfo}
         </div>
-        <GlareHover
-          glareOpacity={0.3}
-          glareAngle={-30}
-          glareSize={200}
-          transitionDuration={250}
-          playOnce={false}
-          width="100%"
-          height="100%"
-          className="rounded-xl"
-        >
         <button
-          className="w-full py-3 font-bold rounded-xl text-base text-white border-none cursor-pointer transition-transform duration-200 active:scale-105 bg-[#5b2ff5] disabled:bg-[#c4b5fd] disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#4520b4] disabled:bg-[#3b1f7a] disabled:text-white disabled:opacity-100"
+          type='button'
+          className=" active:scale-102 w-full py-3 font-bold rounded-xl text-base text-white border-none cursor-pointer transition-transform duration-200 bg-[#5b2ff5] disabled:bg-[#c4b5fd] disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#4520b4] disabled:bg-[#3b1f7a] disabled:text-white disabled:opacity-100"
           disabled={!parseFloat(fromAmount) || isLoading}
           onClick={handleSwap}
         >
           {isLoading ? 'Loading...' : 'Swap'}
         </button>
-        </GlareHover>
       </div>
       <p className="w-full text-center text-sm mt-4">
         Input fields powered by <strong className="text-secondary font-numora">numora</strong>

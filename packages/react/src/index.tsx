@@ -141,4 +141,4 @@ const NumoraInput = forwardRef<HTMLInputElement, NumericInputProps>(
 
 NumoraInput.displayName = 'NumoraInput';
 
-export default NumoraInput;
+export { NumoraInput };

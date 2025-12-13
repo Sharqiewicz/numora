@@ -1,6 +1,6 @@
 import { Swap } from './Swap';
 
-export function Battlefield() {
+export function SwapPlayground() {
   return (
     <div className="pb-16 relative">
       <div className="text-center mb-12 max-w-3xl mx-auto px-4">

@@ -5,5 +5,7 @@
 **/dist
 **/coverage
 **/build
-**/pnpm-lock.yaml
+**/.netlify
+**/.tanstack
+**/.vscode
 .prettierrc

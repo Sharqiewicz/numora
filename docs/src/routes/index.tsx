@@ -1,13 +1,14 @@
-import { Battlefield } from '@/components/Battlefield'
+import { createFileRoute } from '@tanstack/react-router'
 import { Hero } from '@/components/hero'
 import LightRays from '@/components/LightRays'
+import { SwapPlayground } from '@/components/SwapPlayground'
 import { SocialProof } from '@/components/social-proof'
 import { Socials } from '@/components/socials'
-import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({ component: App })
 
 function App() {
+
   return (
   <div className="min-h-screen animated-gradient-bg relative overflow-x-hidden">
     <Socials className="animate-fade-in delay-[3s] opacity-0 fixed z-90 bottom-2 left-1/2 -translate-x-1/2 sm:top-4 sm:right-8 sm:translate-x-0 sm:bottom-auto sm:left-auto"  />
@@ -17,7 +18,7 @@ function App() {
         <Hero />
       </section>
       <section id="tamper-proof-section" className="container mx-auto flex flex-col items-center justify-center px-4 sm:px-8 scroll-mt-8">
-        <Battlefield />
+        <SwapPlayground  />
       </section>
       <section id="social-proof-section" className="container mx-auto flex flex-col items-center justify-center px-4 sm:px-8 scroll-mt-8">
         <SocialProof />

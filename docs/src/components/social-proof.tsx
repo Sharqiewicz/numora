@@ -1,12 +1,12 @@
-import uniswapLogo from '@/assets/defi/uniswap.png'
-import sushiswapLogo from '@/assets/defi/sushiswap.png'
-import pancakeswapLogo from '@/assets/defi/pancakeswap.png'
-import vortexLogo from '@/assets/defi/vortex.png'
-import pendulumLogo from '@/assets/defi/pendulum.png'
+import aaveLogo from '@/assets/defi/aave.png'
 import beefyLogo from '@/assets/defi/beefy.png'
 import curvefiLogo from '@/assets/defi/curvefi.png'
+import pancakeswapLogo from '@/assets/defi/pancakeswap.png'
+import pendulumLogo from '@/assets/defi/pendulum.png'
+import sushiswapLogo from '@/assets/defi/sushiswap.png'
+import uniswapLogo from '@/assets/defi/uniswap.png'
+import vortexLogo from '@/assets/defi/vortex.png'
 import hydrationLogo from '@/assets/tokens/hydration.svg'
-import aaveLogo from '@/assets/defi/aave.png'
 
 const logos = [
   { name: 'Uniswap', src: uniswapLogo, url: 'https://uniswap.org/' },
