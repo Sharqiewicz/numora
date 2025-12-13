@@ -174,6 +174,7 @@ export function Swap() {
 
         <div className="!mt-0 flex items-center gap-2 p-2 border rounded-t-xl bg-[#23272b] border-[#363b3f] hover:bg-[#34383b]">
           <NumoraInput
+            id="fromAmount"
             name="fromAmount"
             className="flex bg-transparent text-2xl my-3 focus:outline-none text-white placeholder-[#a0a3c4]"
             placeholder={effectiveFromPlaceholder}
@@ -222,6 +223,7 @@ export function Swap() {
 
         <div className="!mt-0 flex items-center gap-2 p-2 border border-t-0 rounded-b-xl bg-[#23272b] border-[#363b3f] hover:bg-[#34383b]">
           <NumoraInput
+            id="toAmount"
             name="toAmount"
             className="flex bg-transparent border-none text-2xl my-3 focus:outline-none text-white placeholder-[#a0a3c4]"
             placeholder={effectiveToPlaceholder}

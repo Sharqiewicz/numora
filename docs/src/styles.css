@@ -61,7 +61,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-
   background-color: black;
   background-image:
     radial-gradient(circle at 20% 30%, rgba(124, 58, 237, 0.12) 0%, transparent 50%),
@@ -73,7 +72,6 @@ body {
   animation: gradient-shift 25s ease infinite;
 
 }
-
 
 @keyframes gradient-shift {
   0%, 100% {
@@ -113,7 +111,6 @@ body {
     transform: translateY(0);
   }
 }
-
 
 @theme inline {
   --color-background: var(--background);
@@ -185,5 +182,33 @@ body {
 
   .font-satoshi {
     font-family: var(--font-satoshi);
+  }
+}
+
+.dark {
+  --sidebar:
+    hsl(240 5.9% 10%);
+  --sidebar-foreground:
+    hsl(240 4.8% 95.9%);
+  --sidebar-primary:
+    hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground:
+    hsl(0 0% 100%);
+  --sidebar-accent:
+    hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground:
+    hsl(240 4.8% 95.9%);
+  --sidebar-border:
+    hsl(240 3.7% 15.9%);
+  --sidebar-ring:
+    hsl(217.2 91.2% 59.8%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
