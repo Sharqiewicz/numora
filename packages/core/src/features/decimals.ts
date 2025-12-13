@@ -28,10 +28,6 @@ function alreadyHasDecimal(
   e: KeyboardEvent,
   decimalSeparator: string
 ): boolean {
-  if (e.key !== decimalSeparator) {
-    return false;
-  }
-
   const target = e.target as HTMLInputElement;
   if (!target) return false;
 
