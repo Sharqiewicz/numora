@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NumoraInput  } from 'numora-react';
+import { NumoraInput } from 'numora-react';
 import {FormatOn, ThousandStyle } from 'numora';
 import { useTRPC } from '@/integrations/trpc/react';
 import { TOKENS, type TokenInfo } from '@/lib/constants/tokens';
