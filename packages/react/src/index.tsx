@@ -38,7 +38,7 @@ const DEFAULT_PROPS = {
   step: 'any',
 };
 
-const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
+const NumoraInput = forwardRef<HTMLInputElement, NumericInputProps>(
   ({
     maxDecimals = 2,
     onChange,
@@ -139,6 +139,6 @@ const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
   }
 );
 
-NumericInput.displayName = 'NumericInput';
+NumoraInput.displayName = 'NumoraInput';
 
-export { NumericInput };
+export { NumoraInput };

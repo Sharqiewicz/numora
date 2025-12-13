@@ -1,12 +1,12 @@
 {
   "name": "numora-react",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "Numora for React - Headless finance input library",
   "homepage": "https://numora.netlify.app/",
   "type": "module",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/index.d.ts",
   "sideEffects": false,
   "repository": {
     "type": "git",
@@ -63,7 +63,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
-    "numora": "^1.0.4",
+    "numora": "^2.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   }
