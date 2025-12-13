@@ -2,8 +2,21 @@
   "name": "numora",
   "version": "0.0.0",
   "description": "Monorepo for Numora and its framework adapters",
+  "private": true,
   "keywords": [],
   "author": "Kacper Szarkiewicz <contact@sharqiewicz.com>",
   "license": "MIT",
-  "packageManager": "pnpm@9.13.2+sha512.88c9c3864450350e65a33587ab801acf946d7c814ed1134da4a924f6df5a2120fd36b46aab68f7cd1d413149112d53c7db3a4136624cfd00ff1846a0c6cef48a"
+  "packageManager": "pnpm@9.13.2+sha512.88c9c3864450350e65a33587ab801acf946d7c814ed1134da4a924f6df5a2120fd36b46aab68f7cd1d413149112d53c7db3a4136624cfd00ff1846a0c6cef48a",
+  "scripts": {
+    "build": "pnpm --filter \"./packages/*\" build",
+    "dev": "pnpm --filter \"./packages/*\" dev",
+    "test": "pnpm --filter \"./packages/*\" test",
+    "lint": "pnpm --filter \"./packages/*\" lint",
+    "clean": "pnpm --filter \"./packages/*\" clean && pnpm --filter \"./docs\" clean && pnpm --filter \"./docsv0\" clean",
+    "docs:dev": "pnpm --filter \"./docs\" dev",
+    "docs:build": "pnpm --filter \"./docs\" build"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
 }

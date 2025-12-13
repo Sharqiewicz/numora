@@ -2,6 +2,7 @@ import {
   handleOnChangeNumoraInput,
   handleOnKeyDownNumoraInput,
   handleOnPasteNumoraInput,
+  formatValueForNumoraWithRaw,
 } from '@/utils/event-handlers';
 import { formatWithSeparators } from '@/features/formatting';
 import { removeThousandSeparators } from '@/features/sanitization';
@@ -387,20 +388,26 @@ export class NumoraInput {
   }
 
   public setValue(value: string): void {
-    if (this.resolvedOptions.rawValueMode) {
-      // Remove separators to get raw value (in case formatted value is passed)
-      const raw = this.resolvedOptions.thousandSeparator
-        ? removeThousandSeparators(value, this.resolvedOptions.thousandSeparator)
-        : value;
-
-      // Store raw value
-      this.rawValue = raw;
-
-      // Format for display if formatting is enabled
-      this.element.value = this.formatValueForDisplay(raw);
-    } else {
-      this.element.value = value;
+    if (!value) {
+      this.element.value = '';
+      if (this.resolvedOptions.rawValueMode) {
+        this.rawValue = '';
+      }
+      return;
     }
+
+    // Use the full formatting pipeline (sanitize, trim decimals, format)
+    const { formatted, raw } = formatValueForNumoraWithRaw(
+      value,
+      this.resolvedOptions.decimalMaxLength,
+      this.buildFormattingOptions()
+    );
+
+    if (this.resolvedOptions.rawValueMode) {
+      this.rawValue = raw;
+    }
+
+    this.element.value = formatted;
   }
 
   public disable(): void {

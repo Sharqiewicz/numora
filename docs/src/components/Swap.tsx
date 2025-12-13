@@ -1,5 +1,4 @@
-import {FormatOn, ThousandStyle } from 'numora';
-import { NumoraInput } from 'numora-react';
+import { FormatOn, NumoraInput, ThousandStyle } from 'numora-react';
 import { useEffect, useState } from 'react';
 import { useTRPC } from '@/integrations/trpc/react';
 import { TOKENS, type TokenInfo } from '@/lib/constants/tokens';
@@ -8,7 +7,6 @@ import {
   calculateReverseSwapAmount,
   calculateSwapAmount,
 } from '@/lib/utils/swapCalculator';
-import GlareHover from './GlareHover';
 import { TokenSelector } from './TokenSelector';
 
 export function Swap() {
