@@ -18,7 +18,7 @@ importers:
         specifier: ^10.0.0
         version: 10.1.0
       '@netlify/vite-plugin-tanstack-start':
-        specifier: ^1.0.2
+        specifier: ^1.2.3
         version: 1.2.3(@netlify/api@14.0.12)(@tanstack/react-start@1.141.2(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(vite@7.2.7(@types/node@22.19.1)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.1)))(idb-keyval@6.2.2)(rollup@4.53.2)(vite@7.2.7(@types/node@22.19.1)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.1))
       '@radix-ui/react-dialog':
         specifier: ^1.1.15
