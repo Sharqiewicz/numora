@@ -7,6 +7,10 @@ import tailwindcss from '@tailwindcss/vite'
 import netlify from '@netlify/vite-plugin-tanstack-start'
 
 const config = defineConfig({
+
+  ssr: {
+    noExternal: ['react-syntax-highlighter'],
+  },
   plugins: [
     devtools(),
     netlify(),
@@ -18,6 +22,7 @@ const config = defineConfig({
     tanstackStart(),
     viteReact(),
   ],
+
 })
 
 export default config
