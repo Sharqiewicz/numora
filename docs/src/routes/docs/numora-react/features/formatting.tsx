@@ -171,18 +171,18 @@ function Formatting() {
         better UX:
       </p>
 
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput, FormatOn } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  formatOn: FormatOn.Change,
-  thousandSeparator: ',',
+<NumoraInput
+  formatOn="change"
+  thousandSeparator=","
   // Value: "1,234"
   // Cursor before "2"
   // User presses backspace
   // Cursor skips over "," and deletes "1"
   // Result: "234"
-})`}
+/>`}
       </CodeBlock>
 
       <h2>Custom Separators</h2>

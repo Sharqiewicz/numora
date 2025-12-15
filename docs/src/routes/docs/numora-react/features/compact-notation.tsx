@@ -97,36 +97,27 @@ function CompactNotation() {
       />
 
       <h3>With Decimal Values</h3>
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  enableCompactNotation: true,
-  decimalMaxLength: 18,
-})
-
-// User pastes "1.5k"
-// Expands to "1500"
-
-// User pastes "2.75m"
-// Expands to "2750000"
-
-// User pastes "0.5k"
-// Expands to "500"`}
+<NumoraInput
+  enableCompactNotation={true}
+  maxDecimals={18}
+  // User pastes "1.5k"  → "1500"
+  // User pastes "2.75m" → "2750000"
+  // User pastes "0.5k"  → "500"
+/>`}
       </CodeBlock>
 
       <h3>Programmatic Usage</h3>
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  enableCompactNotation: true,
-})
-
-// Set value using compact notation
-numoraInput.setValue('1.5k') // Expands to "1500"
-numoraInput.setValue('2M') // Expands to "2000000"
-numoraInput.setValue('3.5B') // Expands to "3500000000"`}
+// Set initial values using props or state; paste still expands compact notation
+<NumoraInput
+  enableCompactNotation={true}
+  defaultValue="1.5k" // Will render as expanded value
+/>`}
       </CodeBlock>
 
       <h2>How It Works</h2>

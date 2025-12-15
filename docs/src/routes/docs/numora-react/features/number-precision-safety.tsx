@@ -35,18 +35,15 @@ Number(9007199254740992) === Number(9007199254740993)  // true!`}
         arithmetic entirely:
       </p>
 
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  decimalMaxLength: 18,
+<NumoraInput
+  maxDecimals={18}
   // All operations use string arithmetic
   // No precision loss, even with very large numbers
-})
-
-// Example: User enters "999999999999999999.99"
-// Numora handles this accurately using strings
-// No precision loss occurs`}
+  onChange={(e) => console.log('Value:', e.target.value)}
+/>`}
       </CodeBlock>
 
       <h2>Benefits</h2>
@@ -70,57 +67,57 @@ const numoraInput = new NumoraInput(container, {
       <h2>Examples</h2>
 
       <h3>Large Integers</h3>
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  decimalMaxLength: 0,
+<NumoraInput
+  maxDecimals={0}
   // Handles numbers like:
   // "9007199254740992999" (beyond safe integer range)
   // "999999999999999999999" (very large numbers)
   // All handled accurately with string arithmetic
-})`}
+/>`}
       </CodeBlock>
 
       <h3>Precise Decimals</h3>
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  decimalMaxLength: 18,
+<NumoraInput
+  maxDecimals={18}
   // Handles precise decimals like:
   // "0.123456789012345678"
   // "999.999999999999999"
   // No floating-point rounding errors
-})`}
+/>`}
       </CodeBlock>
 
       <h3>Scientific Notation Expansion</h3>
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  decimalMaxLength: 18,
+<NumoraInput
+  maxDecimals={18}
   // Scientific notation is expanded using string arithmetic:
   // "1.5e-7" → "0.00000015" (accurate)
   // "2e+5" → "200000" (accurate)
   // No precision loss during expansion
-})`}
+/>`}
       </CodeBlock>
 
       <h3>Compact Notation Expansion</h3>
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  enableCompactNotation: true,
-  decimalMaxLength: 18,
+<NumoraInput
+  enableCompactNotation={true}
+  maxDecimals={18}
   // Compact notation expansion uses string arithmetic:
   // "1.5k" → "1500" (accurate)
   // "2.5M" → "2500000" (accurate)
   // "1.23T" → "1230000000000" (accurate)
   // No precision loss
-})`}
+/>`}
       </CodeBlock>
 
       <h2>Best Practices</h2>
@@ -142,21 +139,17 @@ const numoraInput = new NumoraInput(container, {
         </li>
       </ul>
 
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  rawValueMode: true, // Get unformatted string values
-  onChange: (value) => {
+<NumoraInput
+  rawValueMode={true}
+  onChange={(e) => {
     // value is a string - use for calculations
     // No precision loss
-    console.log('String value:', value)
-    
-    // If you need a number, be aware of precision limits
-    const num = numoraInput.valueAsNumber
-    // May lose precision for very large numbers
-  },
-})`}
+    console.log('String value:', e.target.value)
+  }}
+/>`}
       </CodeBlock>
     </div>
   )

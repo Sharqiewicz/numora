@@ -58,17 +58,16 @@ function LeadingZeros() {
         You can enable leading zeros if your use case requires them:
       </p>
 
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  enableLeadingZeros: true,
+<NumoraInput
+  enableLeadingZeros={true}
   // User types: "007"
   // Result: "007" (leading zeros preserved)
-  
   // User types: "0001"
   // Result: "0001" (leading zeros preserved)
-})`}
+/>`}
       </CodeBlock>
 
       <h2>How It Works</h2>
@@ -76,53 +75,53 @@ const numoraInput = new NumoraInput(container, {
         Leading zero removal only affects the integer part of numbers, not decimal values:
       </p>
 
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  enableLeadingZeros: false,
+<NumoraInput
+  enableLeadingZeros={false}
   // "007" → "7" (integer part, zeros removed)
   // "0.5" → "0.5" (decimal part, zeros preserved)
   // "00.5" → "0.5" (integer part zeros removed, decimal preserved)
   // "0" → "0" (single zero preserved)
-})`}
+/>`}
       </CodeBlock>
 
       <h2>Edge Cases</h2>
 
       <h3>Single Zero</h3>
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  enableLeadingZeros: false,
+<NumoraInput
+  enableLeadingZeros={false}
   // "0" → "0" (single zero is always preserved)
   // "-0" → "-0" (preserved)
-})`}
+/>`}
       </CodeBlock>
 
       <h3>Negative Numbers</h3>
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  enableLeadingZeros: false,
-  enableNegative: true,
+<NumoraInput
+  enableLeadingZeros={false}
+  enableNegative={true}
   // "-007" → "-7" (leading zeros removed, sign preserved)
   // "-0001" → "-1" (leading zeros removed)
-})`}
+/>`}
       </CodeBlock>
 
       <h3>Decimal Values</h3>
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  enableLeadingZeros: false,
+<NumoraInput
+  enableLeadingZeros={false}
   // "00.5" → "0.5" (integer zeros removed)
   // "0.05" → "0.05" (decimal zeros preserved)
   // "0.005" → "0.005" (decimal zeros preserved)
-})`}
+/>`}
       </CodeBlock>
 
       <h2>Use Cases</h2>

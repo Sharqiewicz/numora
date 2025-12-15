@@ -61,55 +61,39 @@ function ScientificNotation() {
       <h2>Examples</h2>
 
       <h3>Negative Exponents (Small Numbers)</h3>
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  decimalMaxLength: 18,
-})
-
-// User pastes "1.5e-7"
-// Automatically expands to "0.00000015"
-
-// User pastes "2e-5"
-// Automatically expands to "0.00002"
-
-// User pastes "1.23e-4"
-// Automatically expands to "0.000123"`}
+<NumoraInput
+  maxDecimals={18}
+  // User pastes "1.5e-7" → "0.00000015"
+  // User pastes "2e-5"   → "0.00002"
+  // User pastes "1.23e-4"→ "0.000123"
+/>`}
       </CodeBlock>
 
       <h3>Positive Exponents (Large Numbers)</h3>
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  decimalMaxLength: 18,
-})
-
-// User pastes "2e+5"
-// Automatically expands to "200000"
-
-// User pastes "1.5e3"
-// Automatically expands to "1500"
-
-// User pastes "5e6"
-// Automatically expands to "5000000"`}
+<NumoraInput
+  maxDecimals={18}
+  // User pastes "2e+5" → "200000"
+  // User pastes "1.5e3" → "1500"
+  // User pastes "5e6" → "5000000"
+/>`}
       </CodeBlock>
 
       <h3>Negative Numbers</h3>
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  enableNegative: true,
-  decimalMaxLength: 18,
-})
-
-// User pastes "-1.5e-7"
-// Automatically expands to "-0.00000015"
-
-// User pastes "-2e+5"
-// Automatically expands to "-200000"`}
+<NumoraInput
+  enableNegative={true}
+  maxDecimals={18}
+  // User pastes "-1.5e-7" → "-0.00000015"
+  // User pastes "-2e+5" → "-200000"
+/>`}
       </CodeBlock>
 
       <h2>How It Works</h2>
@@ -160,16 +144,15 @@ const numoraInput = new NumoraInput(container, {
         very small or very large numbers:
       </p>
 
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <CodeBlock language="tsx">
+{`import { NumoraInput } from 'numora-react'
 
-const numoraInput = new NumoraInput(container, {
-  decimalMaxLength: 18,
-})
-
-// These are all handled accurately:
-// "1.5e-18" → "0.0000000000000000015" (no precision loss
-// "9.999999999999999e+20" → "999999999999999900000" (no precision loss)`}
+<NumoraInput
+  maxDecimals={18}
+  // These are all handled accurately:
+  // "1.5e-18" → "0.0000000000000000015" (no precision loss)
+  // "9.999999999999999e+20" → "999999999999999900000" (no precision loss)
+/>`}
       </CodeBlock>
 
       <h2>Important Notes</h2>

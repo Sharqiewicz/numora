@@ -10,6 +10,7 @@ import {
   ThousandStyle,
   type CaretPositionInfo,
   type FormattingOptions,
+  handleOnChangeNumoraInput,
 } from 'numora';
 import {
   handleNumoraOnBlur,
@@ -91,6 +92,22 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     rawValueMode,
   };
 
+  const formatValueWithCore = (value: string): string => {
+    const el = inputRef.current ?? document.createElement('input');
+    el.value = value;
+    const fakeEvent = { target: el } as unknown as Event;
+    handleOnChangeNumoraInput(fakeEvent, maxDecimals, undefined, formattingOptions);
+    return el.value;
+  };
+
+  // When controlled value changes, normalize/format it for display
+  useEffect(() => {
+    if (controlledValue !== undefined) {
+      const formatted = formatValueWithCore(String(controlledValue));
+      setInternalValue(formatted);
+    }
+  }, [controlledValue, formatOn, thousandSeparator, thousandStyle, decimalSeparator, decimalMinLength, enableCompactNotation, enableNegative, enableLeadingZeros, rawValueMode, maxDecimals]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, rawValue } = handleNumoraOnChange(e, {
       decimalMaxLength: maxDecimals,
@@ -100,6 +117,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     caretInfoRef.current = undefined;
 
     if (controlledValue === undefined) {
+      setInternalValue(value);
+    } else {
       setInternalValue(value);
     }
 
@@ -121,6 +140,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     });
 
     if (controlledValue === undefined) {
+      setInternalValue(value);
+    } else {
       setInternalValue(value);
     }
 
@@ -151,6 +172,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
 
     if (controlledValue === undefined) {
       setInternalValue(value);
+    } else {
+      setInternalValue(value);
     }
 
     if (onBlur) {
@@ -158,7 +181,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     }
 
     if (rawValue && e.target && rawValueMode) {
-      e.target.setAttribute('data-raw-value', rawValue);
+      (e.target as HTMLInputElement).setAttribute('data-raw-value', rawValue);
     }
   };
 
@@ -166,7 +189,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     <input
       {...rest}
       ref={inputRef}
-      value={controlledValue !== undefined ? controlledValue : internalValue}
+      value={internalValue}
       onChange={handleChange}
       onPaste={handlePaste}
       onKeyDown={handleKeyDown}
