@@ -1,14 +1,30 @@
-import React, { ChangeEvent, ClipboardEvent, forwardRef, useEffect, useRef } from 'react';
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 import {
   FormatOn,
   ThousandStyle,
-  NumoraInput as NumoraInputClass,
-  type NumoraInputOptions,
+  type CaretPositionInfo,
+  type FormattingOptions,
 } from 'numora';
+import {
+  handleNumoraOnBlur,
+  handleNumoraOnChange,
+  handleNumoraOnKeyDown,
+  handleNumoraOnPaste,
+} from './handlers';
 
-interface NumoraInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'type' | 'inputMode'> {
+interface NumoraInputProps
+  extends Omit<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    'onChange' | 'type' | 'inputMode'
+  > {
   maxDecimals?: number;
-  onChange?: (e: ChangeEvent<HTMLInputElement> | ClipboardEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement> | React.ClipboardEvent<HTMLInputElement>) => void;
 
   formatOn?: FormatOn;
   thousandSeparator?: string;
@@ -22,39 +38,13 @@ interface NumoraInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   rawValueMode?: boolean;
 }
 
-// Helper: Convert any value to string, handling undefined
-function toStringValue(value: unknown): string | undefined {
-  if (value === undefined) return undefined;
-  return typeof value === 'string' ? value : String(value);
-}
-
-// Helper: Create React synthetic event from NumoraInput onChange
-function createChangeEvent(
-  element: HTMLInputElement,
-  value: string
-): ChangeEvent<HTMLInputElement> {
-  return {
-    target: Object.assign(element, { value }),
-    currentTarget: Object.assign(element, { value }),
-  } as ChangeEvent<HTMLInputElement>;
-}
-
-// Helper: Forward ref to input element
-function forwardRefToElement(
-  ref: React.Ref<HTMLInputElement>,
-  element: HTMLInputElement
-): void {
-  if (typeof ref === 'function') {
-    ref(element);
-  } else if (ref) {
-    ref.current = element;
-  }
-}
-
-const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>(
-  ({
+const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) => {
+  const {
     maxDecimals = 2,
     onChange,
+    onPaste,
+    onBlur,
+    onKeyDown,
     formatOn = FormatOn.Blur,
     thousandSeparator = ',',
     thousandStyle = ThousandStyle.Thousand,
@@ -64,105 +54,128 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>(
     enableNegative = false,
     enableLeadingZeros = false,
     rawValueMode = false,
-    ...props
-  }: NumoraInputProps, ref: React.Ref<HTMLInputElement>) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const instanceRef = useRef<NumoraInputClass | null>(null);
+    value: controlledValue,
+    defaultValue,
+    ...rest
+  } = props;
 
-    // Store onChange in a ref to avoid recreating NumoraInput when it changes
-    const onChangeRef = useRef(onChange);
-    useEffect(() => {
-      onChangeRef.current = onChange;
-    }, [onChange]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const caretInfoRef = useRef<CaretPositionInfo | undefined>(undefined);
 
-    // Initialize and update NumoraInput instance when container is mounted or options change
-    useEffect(() => {
-      const container = containerRef.current;
-      if (!container) return;
+  const [internalValue, setInternalValue] = useState<string>(
+    controlledValue !== undefined
+      ? String(controlledValue)
+      : defaultValue !== undefined
+        ? String(defaultValue)
+        : ''
+  );
 
-      // Preserve current value when recreating instance
-      const preservedValue = instanceRef.current?.getValue() ||
-        toStringValue(props.value) ||
-        toStringValue(props.defaultValue);
+  // Keep internal state in sync when controlled
+  useEffect(() => {
+    if (controlledValue !== undefined) {
+      setInternalValue(String(controlledValue));
+    }
+  }, [controlledValue]);
 
-      // Clean up old instance
-      if (instanceRef.current) {
-        container.innerHTML = '';
-        instanceRef.current = null;
-      }
+  useImperativeHandle(ref, () => inputRef.current as HTMLInputElement, []);
 
-      // Extract and convert value/defaultValue props
-      const { value, defaultValue, ...restProps } = props;
-      const valueStr = toStringValue(value);
-      const defaultValueStr = toStringValue(defaultValue);
+  const formattingOptions: FormattingOptions & { rawValueMode?: boolean } = {
+    formatOn,
+    thousandSeparator,
+    ThousandStyle: thousandStyle,
+    decimalSeparator,
+    decimalMinLength,
+    enableCompactNotation,
+    enableNegative,
+    enableLeadingZeros,
+    rawValueMode,
+  };
 
-      const numoraOptions: NumoraInputOptions = {
-        decimalMaxLength: maxDecimals,
-        decimalMinLength,
-        formatOn,
-        thousandSeparator,
-        thousandStyle,
-        decimalSeparator,
-        enableCompactNotation,
-        enableNegative,
-        enableLeadingZeros,
-        rawValueMode,
-        value: valueStr ?? preservedValue,
-        defaultValue: defaultValueStr,
-        onChange: (value: string) => {
-          if (onChangeRef.current && instanceRef.current) {
-            const element = instanceRef.current.getElement();
-            const event = createChangeEvent(element, value);
-            onChangeRef.current(event);
-          }
-        },
-        ...(restProps as NumoraInputOptions),
-      };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, rawValue } = handleNumoraOnChange(e, {
+      decimalMaxLength: maxDecimals,
+      caretPositionBeforeChange: caretInfoRef.current,
+      formattingOptions,
+    });
+    caretInfoRef.current = undefined;
 
-      const instance = new NumoraInputClass(container, numoraOptions);
-      instanceRef.current = instance;
+    if (controlledValue === undefined) {
+      setInternalValue(value);
+    }
 
-      forwardRefToElement(ref, instance.getElement());
+    if (onChange) {
+      onChange(e);
+    }
 
-      return () => {
-        if (instanceRef.current && container) {
-          container.innerHTML = '';
-        }
-        instanceRef.current = null;
-      };
-    }, [
-      maxDecimals,
-      decimalMinLength,
-      formatOn,
-      thousandSeparator,
-      thousandStyle,
-      decimalSeparator,
-      enableCompactNotation,
-      enableNegative,
-      enableLeadingZeros,
-      rawValueMode,
-    ]);
+    // Optionally expose rawValue via a custom event attribute if needed later
+    if (rawValue && e.target && rawValueMode) {
+      // Keep the raw value on the input for consumers that read it directly
+      e.target.setAttribute('data-raw-value', rawValue);
+    }
+  };
 
-    // Sync external value prop changes to NumoraInput (controlled component)
-    useEffect(() => {
-      const instance = instanceRef.current;
-      if (!instance) return;
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const { value, rawValue } = handleNumoraOnPaste(e, {
+      decimalMaxLength: maxDecimals,
+      formattingOptions,
+    });
 
-      const currentValue = toStringValue(props.value);
-      const instanceValue = instance.getValue();
+    if (controlledValue === undefined) {
+      setInternalValue(value);
+    }
 
-      if (currentValue !== instanceValue) {
-        const element = instance.getElement();
-        instance.setValue(currentValue ?? '');
+    if (onPaste) {
+      onPaste(e);
+    }
+    if (onChange) {
+      onChange(e);
+    }
 
-        const inputEvent = new Event('input', { bubbles: true, cancelable: true });
-        element.dispatchEvent(inputEvent);
-      }
-    }, [props.value]);
+    if (rawValue && e.target && rawValueMode) {
+      (e.target as HTMLInputElement).setAttribute('data-raw-value', rawValue);
+    }
+  };
 
-    return <div ref={containerRef} style={{ display: 'contents' }} />;
-  }
-);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    caretInfoRef.current = handleNumoraOnKeyDown(e, formattingOptions);
+    if (onKeyDown) {
+      onKeyDown(e);
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { value, rawValue } = handleNumoraOnBlur(e, {
+      decimalMaxLength: maxDecimals,
+      formattingOptions,
+    });
+
+    if (controlledValue === undefined) {
+      setInternalValue(value);
+    }
+
+    if (onBlur) {
+      onBlur(e);
+    }
+
+    if (rawValue && e.target && rawValueMode) {
+      e.target.setAttribute('data-raw-value', rawValue);
+    }
+  };
+
+  return (
+    <input
+      {...rest}
+      ref={inputRef}
+      value={controlledValue !== undefined ? controlledValue : internalValue}
+      onChange={handleChange}
+      onPaste={handlePaste}
+      onKeyDown={handleKeyDown}
+      onBlur={handleBlur}
+      type="text"
+      inputMode="decimal"
+    />
+  );
+});
 
 NumoraInput.displayName = 'NumoraInput';
 
