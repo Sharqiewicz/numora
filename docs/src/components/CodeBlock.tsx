@@ -1,5 +1,5 @@
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { oneDark } from 'react-syntax-highlighter/dist/cjs/styles/prism'
+import {oneDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { cn } from '@/lib/utils'
 
 interface CodeBlockProps {
@@ -10,6 +10,7 @@ interface CodeBlockProps {
 
 export function CodeBlock({ children, className, language = 'typescript' }: CodeBlockProps) {
   const codeString = typeof children === 'string' ? children : String(children)
+
 
   return (
     <div className="relative my-6 overflow-hidden rounded-lg border border-muted/50">
