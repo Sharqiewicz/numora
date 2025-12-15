@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
-import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 
-export const Route = createFileRoute('/docs/features/sanitization')({
+export const Route = createFileRoute('/docs/numora/features/sanitization')({
   component: Sanitization,
 })
 
@@ -58,19 +57,15 @@ function Sanitization() {
         variants that can cause issues. Numora automatically filters these artifacts:
       </p>
 
-      <ExampleWithDemo
-        code={`import { NumoraInput } from 'numora-react'
+      <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
 
-<NumoraInput
-  maxDecimals={2}
+const numoraInput = new NumoraInput(container, {
+  decimalMaxLength: 2,
   // Mobile keyboard artifacts are automatically filtered
-/>`}
-        language="tsx"
-        config={{
-          maxDecimals: 2,
-        }}
-        description="Try typing with spaces or special characters - they'll be automatically filtered"
-      />
+  // Try typing with spaces or special characters - they'll be automatically filtered
+})`}
+      </CodeBlock>
 
       <h3>Filtered Characters</h3>
       <ul>
@@ -93,19 +88,15 @@ function Sanitization() {
         <li>Negative sign (-) if <code>enableNegative</code> is true</li>
       </ul>
 
-      <ExampleWithDemo
-        code={`import { NumoraInput } from 'numora-react'
+      <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
 
-<NumoraInput
-  maxDecimals={2}
+const numoraInput = new NumoraInput(container, {
+  decimalMaxLength: 2,
   // Invalid characters are automatically removed
-/>`}
-        language="tsx"
-        config={{
-          maxDecimals: 2,
-        }}
-        description="Try typing letters or special characters - only numbers will be kept"
-      />
+  // Try typing letters or special characters - only numbers will be kept
+})`}
+      </CodeBlock>
 
       <h2>Decimal Separator Handling</h2>
       <p>
@@ -113,20 +104,15 @@ function Sanitization() {
         separators are entered, only the first one is kept:
       </p>
 
-      <ExampleWithDemo
-        code={`import { NumoraInput } from 'numora-react'
+      <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
 
-<NumoraInput
-  decimalSeparator="."
-  maxDecimals={2}
-/>`}
-        language="tsx"
-        config={{
-          decimalSeparator: '.',
-          maxDecimals: 2,
-        }}
-        description="Try typing multiple decimal points - only the first one will be kept"
-      />
+const numoraInput = new NumoraInput(container, {
+  decimalSeparator: '.',
+  decimalMaxLength: 2,
+  // Try typing multiple decimal points - only the first one will be kept
+})`}
+      </CodeBlock>
 
       <h2>Leading Zeros</h2>
       <p>
@@ -135,65 +121,52 @@ function Sanitization() {
       </p>
 
       <div className="space-y-4">
-        <ExampleWithDemo
-          code={`import { NumoraInput } from 'numora-react'
+        <div>
+          <h4 className="text-lg font-semibold">Default: Leading Zeros Removed</h4>
+          <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
 
-<NumoraInput
-  enableLeadingZeros={false}
+const numoraInput = new NumoraInput(container, {
+  enableLeadingZeros: false,
+  decimalMaxLength: 2,
   // Default: Leading zeros removed
-/>`}
-          language="tsx"
-          config={{
-            enableLeadingZeros: false,
-            maxDecimals: 2,
-          }}
-          title="Default: Leading Zeros Removed"
-          description="Try typing '007' - it will become '7'"
-        />
-        <ExampleWithDemo
-          code={`import { NumoraInput } from 'numora-react'
+  // Try typing '007' - it will become '7'
+})`}
+          </CodeBlock>
+        </div>
+        <div>
+          <h4 className="text-lg font-semibold">Leading Zeros Enabled</h4>
+          <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
 
-<NumoraInput
-  enableLeadingZeros={true}
+const numoraInput = new NumoraInput(container, {
+  enableLeadingZeros: true,
+  decimalMaxLength: 2,
   // Leading zeros preserved
-/>`}
-          language="tsx"
-          config={{
-            enableLeadingZeros: true,
-            maxDecimals: 2,
-          }}
-          title="Leading Zeros Enabled"
-          description="Try typing '007' - it will be preserved"
-        />
+  // Try typing '007' - it will be preserved
+})`}
+          </CodeBlock>
+        </div>
       </div>
 
       <h2>Complete Example</h2>
-      <ExampleWithDemo
-        code={`import { NumoraInput } from 'numora-react'
+      <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
 
-<NumoraInput
-  maxDecimals={2}
-  decimalSeparator="."
-  thousandSeparator=","
-  enableCompactNotation={true}
-  enableNegative={false}
-  enableLeadingZeros={false}
-  onChange={(e) => {
+const numoraInput = new NumoraInput(container, {
+  decimalMaxLength: 2,
+  decimalSeparator: '.',
+  thousandSeparator: ',',
+  enableCompactNotation: true,
+  enableNegative: false,
+  enableLeadingZeros: false,
+  onChange: (value) => {
     // Value is always sanitized before this callback
-    console.log('Sanitized value:', e.target.value)
-  }}
-/>`}
-        language="tsx"
-        config={{
-          maxDecimals: 2,
-          decimalSeparator: '.',
-          thousandSeparator: ',',
-          enableCompactNotation: true,
-          enableNegative: false,
-          enableLeadingZeros: false,
-        }}
-        description="Try pasting ' 1,234.56.78abc' - it will be sanitized and formatted"
-      />
+    console.log('Sanitized value:', value)
+  },
+})
+// Try pasting ' 1,234.56.78abc' - it will be sanitized and formatted`}
+      </CodeBlock>
     </div>
   )
 }

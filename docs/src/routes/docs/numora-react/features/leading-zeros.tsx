@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 
-export const Route = createFileRoute('/docs/features/leading-zeros')({
+export const Route = createFileRoute('/docs/numora-react/features/leading-zeros')({
   component: LeadingZeros,
 })
 

@@ -11,7 +11,7 @@ function App() {
 
   return (
   <div className="min-h-screen animated-gradient-bg relative overflow-x-hidden">
-    <Socials className="animate-fade-in delay-[3s] opacity-0 fixed z-90 bottom-2 left-1/2 -translate-x-1/2 sm:top-4 sm:right-8 sm:translate-x-0 sm:bottom-auto sm:left-auto"  />
+    <Socials className="bg-gray-900/60 border border-gray-900 rounded-full px-8 py-2 animate-fade-in delay-[3s] opacity-0 fixed z-90 bottom-2 left-1/2 -translate-x-1/2 sm:top-4 sm:right-8 sm:translate-x-0 sm:bottom-auto sm:left-auto"  />
     <main className="flex justify-center items-center flex-col">
       <LightRays />
       <section className="min-h-screen container mx-auto flex flex-col items-center justify-center px-4 sm:px-8">

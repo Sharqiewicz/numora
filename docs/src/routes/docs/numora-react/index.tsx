@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 
-export const Route = createFileRoute('/docs/')({
+export const Route = createFileRoute('/docs/numora-react/')({
   component: GetStarted,
 })
 
@@ -40,14 +40,14 @@ function GetStarted() {
       </ul>
 
       <h2>Quick Start</h2>
-      <p>Install Numora for your framework:</p>
+      <p>Install Numora React:</p>
 
       <CodeBlock language="bash">
-{`# React
-pnpm add numora-react
-
-# Core (for other frameworks)
-pnpm add numora`}
+{`pnpm add numora-react
+# or
+npm install numora-react
+# or
+yarn add numora-react`}
       </CodeBlock>
 
       <p>Then use it in your component:</p>
@@ -72,9 +72,9 @@ function App() {
 
       <h2>Next Steps</h2>
       <p>
-        Check out the <a href="/docs/installation">Installation</a> guide for detailed setup
-        instructions for your framework, or explore the{' '}
-        <a href="/docs/features/sanitization">Features</a> to learn about all the capabilities
+        Check out the <a href="/docs/numora-react/installation">Installation</a> guide for detailed setup
+        instructions, or explore the{' '}
+        <a href="/docs/numora-react/features/sanitization">Features</a> to learn about all the capabilities
         Numora offers.
       </p>
     </div>

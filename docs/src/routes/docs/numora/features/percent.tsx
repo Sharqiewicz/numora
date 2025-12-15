@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 
-export const Route = createFileRoute('/docs/features/percent')({
+export const Route = createFileRoute('/docs/numora/features/percent')({
   component: Percent,
 })
 
@@ -163,13 +163,7 @@ function formatYield(yieldValue: string) {
 
 formatYield('0.01')        // "1.00%"
 formatYield('1000')        // "100000%"
-formatYield('1000000')     // "100M%"
-
-// In a React component
-function PercentageDisplay({ value }: { value: string }) {
-  const formatted = formatPercent(value, 2)
-  return <span>{formatted}</span>
-}`}
+formatYield('1000000')     // "100M%"`}
       </CodeBlock>
 
       <h2>Important Notes</h2>

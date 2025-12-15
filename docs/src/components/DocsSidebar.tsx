@@ -1,4 +1,4 @@
-import { Link, useRouterState } from '@tanstack/react-router'
+import { Link, useRouterState, useNavigate } from '@tanstack/react-router'
 import {
   Rocket,
   Download,
@@ -20,6 +20,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { TabsClipPath } from './TabsClipPath'
+import { PackageTab, usePackage } from '@/contexts/PackageContext'
+import { getPackageHref, extractPageFromPath, buildPackagePath } from '@/utils/packageRoutes'
 
 const navigation = [
   {
@@ -89,26 +92,53 @@ const navigation = [
   },
 ]
 
+
+const frameworkTabs: PackageTab[] = [
+ 'core', 'react', 'svelte'
+]
+
+
 export function DocsSidebar() {
   const router = useRouterState()
+  const navigate = useNavigate()
   const currentPath = router.location.pathname
+  const { selectedPackage, setSelectedPackage, getPackageRoutePrefix } = usePackage()
+  const packagePrefix = getPackageRoutePrefix()
+
+  const handlePackageChange = (tab: string) => {
+    const newPackage = tab as typeof selectedPackage
+    setSelectedPackage(newPackage)
+
+    const page = extractPageFromPath(currentPath)
+    if (page !== null) {
+      const newPrefix = newPackage === 'react' ? 'numora-react' : 'numora'
+      const newPath = buildPackagePath(page, newPrefix)
+      navigate({ to: newPath })
+    }
+  }
 
   return (
     <SidebarContent>
+      <TabsClipPath
+        tabs={frameworkTabs}
+        activeTab={selectedPackage}
+        onChange={handlePackageChange}
+      />
       {navigation.map((group) => (
         <SidebarGroup key={group.title}>
           <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {group.items.map((item) => {
+                const packageHref = getPackageHref(item.href, packagePrefix)
                 const isActive =
-                  currentPath === item.href ||
-                  (item.href !== '/docs' && currentPath.startsWith(item.href + '/'))
+                  currentPath === packageHref ||
+                  (packageHref !== `/docs/${packagePrefix}` && currentPath.startsWith(packageHref + '/'))
                 const Icon = item.icon
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton asChild isActive={isActive}>
-                      <Link to={item.href}>
+                      <Link to={packageHref}>
                         <Icon />
                         <span>{item.title}</span>
                       </Link>

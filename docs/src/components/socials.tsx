@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 
 export function Socials({className}: {className: string}) {
   return (
-    <div className={cn(className, 'flex gap-6 bg-gray-900/60 border border-gray-900 rounded-full px-8 py-2')}>
+    <div className={cn(className, 'flex gap-6')}>
       <a href="https://x.com/sharqiewicz" target="_blank" rel="noopener noreferrer">
         <img src={x} alt="X" className="w-6 h-6 hover:scale-105 transition-transform duration-300 cursor-pointer" />
       </a>

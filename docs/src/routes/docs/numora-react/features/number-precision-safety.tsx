@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 
-export const Route = createFileRoute('/docs/features/number-precision-safety')({
+export const Route = createFileRoute('/docs/numora-react/features/number-precision-safety')({
   component: NumberPrecisionSafety,
 })
 

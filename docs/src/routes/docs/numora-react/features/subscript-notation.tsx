@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 
-export const Route = createFileRoute('/docs/features/subscript-notation')({
+export const Route = createFileRoute('/docs/numora-react/features/subscript-notation')({
   component: SubscriptNotation,
 })
 

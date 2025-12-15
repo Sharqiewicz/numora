@@ -9,21 +9,44 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as NumoraReactRouteImport } from './routes/numora-react'
+import { Route as NumoraRouteImport } from './routes/numora'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DocsIndexRouteImport } from './routes/docs/index'
-import { Route as DocsInstallationRouteImport } from './routes/docs/installation'
-import { Route as DocsFeaturesSubscriptNotationRouteImport } from './routes/docs/features/subscript-notation'
-import { Route as DocsFeaturesScientificNotationRouteImport } from './routes/docs/features/scientific-notation'
-import { Route as DocsFeaturesSanitizationRouteImport } from './routes/docs/features/sanitization'
-import { Route as DocsFeaturesPercentRouteImport } from './routes/docs/features/percent'
-import { Route as DocsFeaturesNumberPrecisionSafetyRouteImport } from './routes/docs/features/number-precision-safety'
-import { Route as DocsFeaturesLeadingZerosRouteImport } from './routes/docs/features/leading-zeros'
-import { Route as DocsFeaturesFormattingRouteImport } from './routes/docs/features/formatting'
-import { Route as DocsFeaturesDecimalsRouteImport } from './routes/docs/features/decimals'
-import { Route as DocsFeaturesCompactNotationRouteImport } from './routes/docs/features/compact-notation'
+import { Route as DocsNumoraIndexRouteImport } from './routes/docs/numora/index'
+import { Route as DocsNumoraReactIndexRouteImport } from './routes/docs/numora-react/index'
+import { Route as DocsNumoraInstallationRouteImport } from './routes/docs/numora/installation'
+import { Route as DocsNumoraReactInstallationRouteImport } from './routes/docs/numora-react/installation'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
+import { Route as DocsNumoraFeaturesSubscriptNotationRouteImport } from './routes/docs/numora/features/subscript-notation'
+import { Route as DocsNumoraFeaturesScientificNotationRouteImport } from './routes/docs/numora/features/scientific-notation'
+import { Route as DocsNumoraFeaturesSanitizationRouteImport } from './routes/docs/numora/features/sanitization'
+import { Route as DocsNumoraFeaturesPercentRouteImport } from './routes/docs/numora/features/percent'
+import { Route as DocsNumoraFeaturesNumberPrecisionSafetyRouteImport } from './routes/docs/numora/features/number-precision-safety'
+import { Route as DocsNumoraFeaturesLeadingZerosRouteImport } from './routes/docs/numora/features/leading-zeros'
+import { Route as DocsNumoraFeaturesFormattingRouteImport } from './routes/docs/numora/features/formatting'
+import { Route as DocsNumoraFeaturesDecimalsRouteImport } from './routes/docs/numora/features/decimals'
+import { Route as DocsNumoraFeaturesCompactNotationRouteImport } from './routes/docs/numora/features/compact-notation'
+import { Route as DocsNumoraReactFeaturesSubscriptNotationRouteImport } from './routes/docs/numora-react/features/subscript-notation'
+import { Route as DocsNumoraReactFeaturesScientificNotationRouteImport } from './routes/docs/numora-react/features/scientific-notation'
+import { Route as DocsNumoraReactFeaturesSanitizationRouteImport } from './routes/docs/numora-react/features/sanitization'
+import { Route as DocsNumoraReactFeaturesPercentRouteImport } from './routes/docs/numora-react/features/percent'
+import { Route as DocsNumoraReactFeaturesNumberPrecisionSafetyRouteImport } from './routes/docs/numora-react/features/number-precision-safety'
+import { Route as DocsNumoraReactFeaturesLeadingZerosRouteImport } from './routes/docs/numora-react/features/leading-zeros'
+import { Route as DocsNumoraReactFeaturesFormattingRouteImport } from './routes/docs/numora-react/features/formatting'
+import { Route as DocsNumoraReactFeaturesDecimalsRouteImport } from './routes/docs/numora-react/features/decimals'
+import { Route as DocsNumoraReactFeaturesCompactNotationRouteImport } from './routes/docs/numora-react/features/compact-notation'
 
+const NumoraReactRoute = NumoraReactRouteImport.update({
+  id: '/numora-react',
+  path: '/numora-react',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NumoraRoute = NumoraRouteImport.update({
+  id: '/numora',
+  path: '/numora',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DocsRoute = DocsRouteImport.update({
   id: '/docs',
   path: '/docs',
@@ -34,65 +57,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DocsIndexRoute = DocsIndexRouteImport.update({
-  id: '/',
-  path: '/',
+const DocsNumoraIndexRoute = DocsNumoraIndexRouteImport.update({
+  id: '/numora/',
+  path: '/numora/',
   getParentRoute: () => DocsRoute,
 } as any)
-const DocsInstallationRoute = DocsInstallationRouteImport.update({
-  id: '/installation',
-  path: '/installation',
+const DocsNumoraReactIndexRoute = DocsNumoraReactIndexRouteImport.update({
+  id: '/numora-react/',
+  path: '/numora-react/',
   getParentRoute: () => DocsRoute,
 } as any)
-const DocsFeaturesSubscriptNotationRoute =
-  DocsFeaturesSubscriptNotationRouteImport.update({
-    id: '/features/subscript-notation',
-    path: '/features/subscript-notation',
-    getParentRoute: () => DocsRoute,
-  } as any)
-const DocsFeaturesScientificNotationRoute =
-  DocsFeaturesScientificNotationRouteImport.update({
-    id: '/features/scientific-notation',
-    path: '/features/scientific-notation',
-    getParentRoute: () => DocsRoute,
-  } as any)
-const DocsFeaturesSanitizationRoute =
-  DocsFeaturesSanitizationRouteImport.update({
-    id: '/features/sanitization',
-    path: '/features/sanitization',
-    getParentRoute: () => DocsRoute,
-  } as any)
-const DocsFeaturesPercentRoute = DocsFeaturesPercentRouteImport.update({
-  id: '/features/percent',
-  path: '/features/percent',
+const DocsNumoraInstallationRoute = DocsNumoraInstallationRouteImport.update({
+  id: '/numora/installation',
+  path: '/numora/installation',
   getParentRoute: () => DocsRoute,
 } as any)
-const DocsFeaturesNumberPrecisionSafetyRoute =
-  DocsFeaturesNumberPrecisionSafetyRouteImport.update({
-    id: '/features/number-precision-safety',
-    path: '/features/number-precision-safety',
-    getParentRoute: () => DocsRoute,
-  } as any)
-const DocsFeaturesLeadingZerosRoute =
-  DocsFeaturesLeadingZerosRouteImport.update({
-    id: '/features/leading-zeros',
-    path: '/features/leading-zeros',
-    getParentRoute: () => DocsRoute,
-  } as any)
-const DocsFeaturesFormattingRoute = DocsFeaturesFormattingRouteImport.update({
-  id: '/features/formatting',
-  path: '/features/formatting',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsFeaturesDecimalsRoute = DocsFeaturesDecimalsRouteImport.update({
-  id: '/features/decimals',
-  path: '/features/decimals',
-  getParentRoute: () => DocsRoute,
-} as any)
-const DocsFeaturesCompactNotationRoute =
-  DocsFeaturesCompactNotationRouteImport.update({
-    id: '/features/compact-notation',
-    path: '/features/compact-notation',
+const DocsNumoraReactInstallationRoute =
+  DocsNumoraReactInstallationRouteImport.update({
+    id: '/numora-react/installation',
+    path: '/numora-react/installation',
     getParentRoute: () => DocsRoute,
   } as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
@@ -100,113 +83,317 @@ const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   path: '/api/trpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsNumoraFeaturesSubscriptNotationRoute =
+  DocsNumoraFeaturesSubscriptNotationRouteImport.update({
+    id: '/numora/features/subscript-notation',
+    path: '/numora/features/subscript-notation',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFeaturesScientificNotationRoute =
+  DocsNumoraFeaturesScientificNotationRouteImport.update({
+    id: '/numora/features/scientific-notation',
+    path: '/numora/features/scientific-notation',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFeaturesSanitizationRoute =
+  DocsNumoraFeaturesSanitizationRouteImport.update({
+    id: '/numora/features/sanitization',
+    path: '/numora/features/sanitization',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFeaturesPercentRoute =
+  DocsNumoraFeaturesPercentRouteImport.update({
+    id: '/numora/features/percent',
+    path: '/numora/features/percent',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFeaturesNumberPrecisionSafetyRoute =
+  DocsNumoraFeaturesNumberPrecisionSafetyRouteImport.update({
+    id: '/numora/features/number-precision-safety',
+    path: '/numora/features/number-precision-safety',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFeaturesLeadingZerosRoute =
+  DocsNumoraFeaturesLeadingZerosRouteImport.update({
+    id: '/numora/features/leading-zeros',
+    path: '/numora/features/leading-zeros',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFeaturesFormattingRoute =
+  DocsNumoraFeaturesFormattingRouteImport.update({
+    id: '/numora/features/formatting',
+    path: '/numora/features/formatting',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFeaturesDecimalsRoute =
+  DocsNumoraFeaturesDecimalsRouteImport.update({
+    id: '/numora/features/decimals',
+    path: '/numora/features/decimals',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFeaturesCompactNotationRoute =
+  DocsNumoraFeaturesCompactNotationRouteImport.update({
+    id: '/numora/features/compact-notation',
+    path: '/numora/features/compact-notation',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraReactFeaturesSubscriptNotationRoute =
+  DocsNumoraReactFeaturesSubscriptNotationRouteImport.update({
+    id: '/numora-react/features/subscript-notation',
+    path: '/numora-react/features/subscript-notation',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraReactFeaturesScientificNotationRoute =
+  DocsNumoraReactFeaturesScientificNotationRouteImport.update({
+    id: '/numora-react/features/scientific-notation',
+    path: '/numora-react/features/scientific-notation',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraReactFeaturesSanitizationRoute =
+  DocsNumoraReactFeaturesSanitizationRouteImport.update({
+    id: '/numora-react/features/sanitization',
+    path: '/numora-react/features/sanitization',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraReactFeaturesPercentRoute =
+  DocsNumoraReactFeaturesPercentRouteImport.update({
+    id: '/numora-react/features/percent',
+    path: '/numora-react/features/percent',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraReactFeaturesNumberPrecisionSafetyRoute =
+  DocsNumoraReactFeaturesNumberPrecisionSafetyRouteImport.update({
+    id: '/numora-react/features/number-precision-safety',
+    path: '/numora-react/features/number-precision-safety',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraReactFeaturesLeadingZerosRoute =
+  DocsNumoraReactFeaturesLeadingZerosRouteImport.update({
+    id: '/numora-react/features/leading-zeros',
+    path: '/numora-react/features/leading-zeros',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraReactFeaturesFormattingRoute =
+  DocsNumoraReactFeaturesFormattingRouteImport.update({
+    id: '/numora-react/features/formatting',
+    path: '/numora-react/features/formatting',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraReactFeaturesDecimalsRoute =
+  DocsNumoraReactFeaturesDecimalsRouteImport.update({
+    id: '/numora-react/features/decimals',
+    path: '/numora-react/features/decimals',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraReactFeaturesCompactNotationRoute =
+  DocsNumoraReactFeaturesCompactNotationRouteImport.update({
+    id: '/numora-react/features/compact-notation',
+    path: '/numora-react/features/compact-notation',
+    getParentRoute: () => DocsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/docs': typeof DocsRouteWithChildren
-  '/docs/installation': typeof DocsInstallationRoute
-  '/docs/': typeof DocsIndexRoute
+  '/numora': typeof NumoraRoute
+  '/numora-react': typeof NumoraReactRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/docs/features/compact-notation': typeof DocsFeaturesCompactNotationRoute
-  '/docs/features/decimals': typeof DocsFeaturesDecimalsRoute
-  '/docs/features/formatting': typeof DocsFeaturesFormattingRoute
-  '/docs/features/leading-zeros': typeof DocsFeaturesLeadingZerosRoute
-  '/docs/features/number-precision-safety': typeof DocsFeaturesNumberPrecisionSafetyRoute
-  '/docs/features/percent': typeof DocsFeaturesPercentRoute
-  '/docs/features/sanitization': typeof DocsFeaturesSanitizationRoute
-  '/docs/features/scientific-notation': typeof DocsFeaturesScientificNotationRoute
-  '/docs/features/subscript-notation': typeof DocsFeaturesSubscriptNotationRoute
+  '/docs/numora-react/installation': typeof DocsNumoraReactInstallationRoute
+  '/docs/numora/installation': typeof DocsNumoraInstallationRoute
+  '/docs/numora-react': typeof DocsNumoraReactIndexRoute
+  '/docs/numora': typeof DocsNumoraIndexRoute
+  '/docs/numora-react/features/compact-notation': typeof DocsNumoraReactFeaturesCompactNotationRoute
+  '/docs/numora-react/features/decimals': typeof DocsNumoraReactFeaturesDecimalsRoute
+  '/docs/numora-react/features/formatting': typeof DocsNumoraReactFeaturesFormattingRoute
+  '/docs/numora-react/features/leading-zeros': typeof DocsNumoraReactFeaturesLeadingZerosRoute
+  '/docs/numora-react/features/number-precision-safety': typeof DocsNumoraReactFeaturesNumberPrecisionSafetyRoute
+  '/docs/numora-react/features/percent': typeof DocsNumoraReactFeaturesPercentRoute
+  '/docs/numora-react/features/sanitization': typeof DocsNumoraReactFeaturesSanitizationRoute
+  '/docs/numora-react/features/scientific-notation': typeof DocsNumoraReactFeaturesScientificNotationRoute
+  '/docs/numora-react/features/subscript-notation': typeof DocsNumoraReactFeaturesSubscriptNotationRoute
+  '/docs/numora/features/compact-notation': typeof DocsNumoraFeaturesCompactNotationRoute
+  '/docs/numora/features/decimals': typeof DocsNumoraFeaturesDecimalsRoute
+  '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
+  '/docs/numora/features/leading-zeros': typeof DocsNumoraFeaturesLeadingZerosRoute
+  '/docs/numora/features/number-precision-safety': typeof DocsNumoraFeaturesNumberPrecisionSafetyRoute
+  '/docs/numora/features/percent': typeof DocsNumoraFeaturesPercentRoute
+  '/docs/numora/features/sanitization': typeof DocsNumoraFeaturesSanitizationRoute
+  '/docs/numora/features/scientific-notation': typeof DocsNumoraFeaturesScientificNotationRoute
+  '/docs/numora/features/subscript-notation': typeof DocsNumoraFeaturesSubscriptNotationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/docs/installation': typeof DocsInstallationRoute
-  '/docs': typeof DocsIndexRoute
+  '/docs': typeof DocsRouteWithChildren
+  '/numora': typeof NumoraRoute
+  '/numora-react': typeof NumoraReactRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/docs/features/compact-notation': typeof DocsFeaturesCompactNotationRoute
-  '/docs/features/decimals': typeof DocsFeaturesDecimalsRoute
-  '/docs/features/formatting': typeof DocsFeaturesFormattingRoute
-  '/docs/features/leading-zeros': typeof DocsFeaturesLeadingZerosRoute
-  '/docs/features/number-precision-safety': typeof DocsFeaturesNumberPrecisionSafetyRoute
-  '/docs/features/percent': typeof DocsFeaturesPercentRoute
-  '/docs/features/sanitization': typeof DocsFeaturesSanitizationRoute
-  '/docs/features/scientific-notation': typeof DocsFeaturesScientificNotationRoute
-  '/docs/features/subscript-notation': typeof DocsFeaturesSubscriptNotationRoute
+  '/docs/numora-react/installation': typeof DocsNumoraReactInstallationRoute
+  '/docs/numora/installation': typeof DocsNumoraInstallationRoute
+  '/docs/numora-react': typeof DocsNumoraReactIndexRoute
+  '/docs/numora': typeof DocsNumoraIndexRoute
+  '/docs/numora-react/features/compact-notation': typeof DocsNumoraReactFeaturesCompactNotationRoute
+  '/docs/numora-react/features/decimals': typeof DocsNumoraReactFeaturesDecimalsRoute
+  '/docs/numora-react/features/formatting': typeof DocsNumoraReactFeaturesFormattingRoute
+  '/docs/numora-react/features/leading-zeros': typeof DocsNumoraReactFeaturesLeadingZerosRoute
+  '/docs/numora-react/features/number-precision-safety': typeof DocsNumoraReactFeaturesNumberPrecisionSafetyRoute
+  '/docs/numora-react/features/percent': typeof DocsNumoraReactFeaturesPercentRoute
+  '/docs/numora-react/features/sanitization': typeof DocsNumoraReactFeaturesSanitizationRoute
+  '/docs/numora-react/features/scientific-notation': typeof DocsNumoraReactFeaturesScientificNotationRoute
+  '/docs/numora-react/features/subscript-notation': typeof DocsNumoraReactFeaturesSubscriptNotationRoute
+  '/docs/numora/features/compact-notation': typeof DocsNumoraFeaturesCompactNotationRoute
+  '/docs/numora/features/decimals': typeof DocsNumoraFeaturesDecimalsRoute
+  '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
+  '/docs/numora/features/leading-zeros': typeof DocsNumoraFeaturesLeadingZerosRoute
+  '/docs/numora/features/number-precision-safety': typeof DocsNumoraFeaturesNumberPrecisionSafetyRoute
+  '/docs/numora/features/percent': typeof DocsNumoraFeaturesPercentRoute
+  '/docs/numora/features/sanitization': typeof DocsNumoraFeaturesSanitizationRoute
+  '/docs/numora/features/scientific-notation': typeof DocsNumoraFeaturesScientificNotationRoute
+  '/docs/numora/features/subscript-notation': typeof DocsNumoraFeaturesSubscriptNotationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/docs': typeof DocsRouteWithChildren
-  '/docs/installation': typeof DocsInstallationRoute
-  '/docs/': typeof DocsIndexRoute
+  '/numora': typeof NumoraRoute
+  '/numora-react': typeof NumoraReactRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
-  '/docs/features/compact-notation': typeof DocsFeaturesCompactNotationRoute
-  '/docs/features/decimals': typeof DocsFeaturesDecimalsRoute
-  '/docs/features/formatting': typeof DocsFeaturesFormattingRoute
-  '/docs/features/leading-zeros': typeof DocsFeaturesLeadingZerosRoute
-  '/docs/features/number-precision-safety': typeof DocsFeaturesNumberPrecisionSafetyRoute
-  '/docs/features/percent': typeof DocsFeaturesPercentRoute
-  '/docs/features/sanitization': typeof DocsFeaturesSanitizationRoute
-  '/docs/features/scientific-notation': typeof DocsFeaturesScientificNotationRoute
-  '/docs/features/subscript-notation': typeof DocsFeaturesSubscriptNotationRoute
+  '/docs/numora-react/installation': typeof DocsNumoraReactInstallationRoute
+  '/docs/numora/installation': typeof DocsNumoraInstallationRoute
+  '/docs/numora-react/': typeof DocsNumoraReactIndexRoute
+  '/docs/numora/': typeof DocsNumoraIndexRoute
+  '/docs/numora-react/features/compact-notation': typeof DocsNumoraReactFeaturesCompactNotationRoute
+  '/docs/numora-react/features/decimals': typeof DocsNumoraReactFeaturesDecimalsRoute
+  '/docs/numora-react/features/formatting': typeof DocsNumoraReactFeaturesFormattingRoute
+  '/docs/numora-react/features/leading-zeros': typeof DocsNumoraReactFeaturesLeadingZerosRoute
+  '/docs/numora-react/features/number-precision-safety': typeof DocsNumoraReactFeaturesNumberPrecisionSafetyRoute
+  '/docs/numora-react/features/percent': typeof DocsNumoraReactFeaturesPercentRoute
+  '/docs/numora-react/features/sanitization': typeof DocsNumoraReactFeaturesSanitizationRoute
+  '/docs/numora-react/features/scientific-notation': typeof DocsNumoraReactFeaturesScientificNotationRoute
+  '/docs/numora-react/features/subscript-notation': typeof DocsNumoraReactFeaturesSubscriptNotationRoute
+  '/docs/numora/features/compact-notation': typeof DocsNumoraFeaturesCompactNotationRoute
+  '/docs/numora/features/decimals': typeof DocsNumoraFeaturesDecimalsRoute
+  '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
+  '/docs/numora/features/leading-zeros': typeof DocsNumoraFeaturesLeadingZerosRoute
+  '/docs/numora/features/number-precision-safety': typeof DocsNumoraFeaturesNumberPrecisionSafetyRoute
+  '/docs/numora/features/percent': typeof DocsNumoraFeaturesPercentRoute
+  '/docs/numora/features/sanitization': typeof DocsNumoraFeaturesSanitizationRoute
+  '/docs/numora/features/scientific-notation': typeof DocsNumoraFeaturesScientificNotationRoute
+  '/docs/numora/features/subscript-notation': typeof DocsNumoraFeaturesSubscriptNotationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/docs'
-    | '/docs/installation'
-    | '/docs/'
+    | '/numora'
+    | '/numora-react'
     | '/api/trpc/$'
-    | '/docs/features/compact-notation'
-    | '/docs/features/decimals'
-    | '/docs/features/formatting'
-    | '/docs/features/leading-zeros'
-    | '/docs/features/number-precision-safety'
-    | '/docs/features/percent'
-    | '/docs/features/sanitization'
-    | '/docs/features/scientific-notation'
-    | '/docs/features/subscript-notation'
+    | '/docs/numora-react/installation'
+    | '/docs/numora/installation'
+    | '/docs/numora-react'
+    | '/docs/numora'
+    | '/docs/numora-react/features/compact-notation'
+    | '/docs/numora-react/features/decimals'
+    | '/docs/numora-react/features/formatting'
+    | '/docs/numora-react/features/leading-zeros'
+    | '/docs/numora-react/features/number-precision-safety'
+    | '/docs/numora-react/features/percent'
+    | '/docs/numora-react/features/sanitization'
+    | '/docs/numora-react/features/scientific-notation'
+    | '/docs/numora-react/features/subscript-notation'
+    | '/docs/numora/features/compact-notation'
+    | '/docs/numora/features/decimals'
+    | '/docs/numora/features/formatting'
+    | '/docs/numora/features/leading-zeros'
+    | '/docs/numora/features/number-precision-safety'
+    | '/docs/numora/features/percent'
+    | '/docs/numora/features/sanitization'
+    | '/docs/numora/features/scientific-notation'
+    | '/docs/numora/features/subscript-notation'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/docs/installation'
     | '/docs'
+    | '/numora'
+    | '/numora-react'
     | '/api/trpc/$'
-    | '/docs/features/compact-notation'
-    | '/docs/features/decimals'
-    | '/docs/features/formatting'
-    | '/docs/features/leading-zeros'
-    | '/docs/features/number-precision-safety'
-    | '/docs/features/percent'
-    | '/docs/features/sanitization'
-    | '/docs/features/scientific-notation'
-    | '/docs/features/subscript-notation'
+    | '/docs/numora-react/installation'
+    | '/docs/numora/installation'
+    | '/docs/numora-react'
+    | '/docs/numora'
+    | '/docs/numora-react/features/compact-notation'
+    | '/docs/numora-react/features/decimals'
+    | '/docs/numora-react/features/formatting'
+    | '/docs/numora-react/features/leading-zeros'
+    | '/docs/numora-react/features/number-precision-safety'
+    | '/docs/numora-react/features/percent'
+    | '/docs/numora-react/features/sanitization'
+    | '/docs/numora-react/features/scientific-notation'
+    | '/docs/numora-react/features/subscript-notation'
+    | '/docs/numora/features/compact-notation'
+    | '/docs/numora/features/decimals'
+    | '/docs/numora/features/formatting'
+    | '/docs/numora/features/leading-zeros'
+    | '/docs/numora/features/number-precision-safety'
+    | '/docs/numora/features/percent'
+    | '/docs/numora/features/sanitization'
+    | '/docs/numora/features/scientific-notation'
+    | '/docs/numora/features/subscript-notation'
   id:
     | '__root__'
     | '/'
     | '/docs'
-    | '/docs/installation'
-    | '/docs/'
+    | '/numora'
+    | '/numora-react'
     | '/api/trpc/$'
-    | '/docs/features/compact-notation'
-    | '/docs/features/decimals'
-    | '/docs/features/formatting'
-    | '/docs/features/leading-zeros'
-    | '/docs/features/number-precision-safety'
-    | '/docs/features/percent'
-    | '/docs/features/sanitization'
-    | '/docs/features/scientific-notation'
-    | '/docs/features/subscript-notation'
+    | '/docs/numora-react/installation'
+    | '/docs/numora/installation'
+    | '/docs/numora-react/'
+    | '/docs/numora/'
+    | '/docs/numora-react/features/compact-notation'
+    | '/docs/numora-react/features/decimals'
+    | '/docs/numora-react/features/formatting'
+    | '/docs/numora-react/features/leading-zeros'
+    | '/docs/numora-react/features/number-precision-safety'
+    | '/docs/numora-react/features/percent'
+    | '/docs/numora-react/features/sanitization'
+    | '/docs/numora-react/features/scientific-notation'
+    | '/docs/numora-react/features/subscript-notation'
+    | '/docs/numora/features/compact-notation'
+    | '/docs/numora/features/decimals'
+    | '/docs/numora/features/formatting'
+    | '/docs/numora/features/leading-zeros'
+    | '/docs/numora/features/number-precision-safety'
+    | '/docs/numora/features/percent'
+    | '/docs/numora/features/sanitization'
+    | '/docs/numora/features/scientific-notation'
+    | '/docs/numora/features/subscript-notation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DocsRoute: typeof DocsRouteWithChildren
+  NumoraRoute: typeof NumoraRoute
+  NumoraReactRoute: typeof NumoraReactRoute
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/numora-react': {
+      id: '/numora-react'
+      path: '/numora-react'
+      fullPath: '/numora-react'
+      preLoaderRoute: typeof NumoraReactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/numora': {
+      id: '/numora'
+      path: '/numora'
+      fullPath: '/numora'
+      preLoaderRoute: typeof NumoraRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/docs': {
       id: '/docs'
       path: '/docs'
@@ -221,81 +408,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/docs/': {
-      id: '/docs/'
-      path: '/'
-      fullPath: '/docs/'
-      preLoaderRoute: typeof DocsIndexRouteImport
+    '/docs/numora/': {
+      id: '/docs/numora/'
+      path: '/numora'
+      fullPath: '/docs/numora'
+      preLoaderRoute: typeof DocsNumoraIndexRouteImport
       parentRoute: typeof DocsRoute
     }
-    '/docs/installation': {
-      id: '/docs/installation'
-      path: '/installation'
-      fullPath: '/docs/installation'
-      preLoaderRoute: typeof DocsInstallationRouteImport
+    '/docs/numora-react/': {
+      id: '/docs/numora-react/'
+      path: '/numora-react'
+      fullPath: '/docs/numora-react'
+      preLoaderRoute: typeof DocsNumoraReactIndexRouteImport
       parentRoute: typeof DocsRoute
     }
-    '/docs/features/subscript-notation': {
-      id: '/docs/features/subscript-notation'
-      path: '/features/subscript-notation'
-      fullPath: '/docs/features/subscript-notation'
-      preLoaderRoute: typeof DocsFeaturesSubscriptNotationRouteImport
+    '/docs/numora/installation': {
+      id: '/docs/numora/installation'
+      path: '/numora/installation'
+      fullPath: '/docs/numora/installation'
+      preLoaderRoute: typeof DocsNumoraInstallationRouteImport
       parentRoute: typeof DocsRoute
     }
-    '/docs/features/scientific-notation': {
-      id: '/docs/features/scientific-notation'
-      path: '/features/scientific-notation'
-      fullPath: '/docs/features/scientific-notation'
-      preLoaderRoute: typeof DocsFeaturesScientificNotationRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/features/sanitization': {
-      id: '/docs/features/sanitization'
-      path: '/features/sanitization'
-      fullPath: '/docs/features/sanitization'
-      preLoaderRoute: typeof DocsFeaturesSanitizationRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/features/percent': {
-      id: '/docs/features/percent'
-      path: '/features/percent'
-      fullPath: '/docs/features/percent'
-      preLoaderRoute: typeof DocsFeaturesPercentRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/features/number-precision-safety': {
-      id: '/docs/features/number-precision-safety'
-      path: '/features/number-precision-safety'
-      fullPath: '/docs/features/number-precision-safety'
-      preLoaderRoute: typeof DocsFeaturesNumberPrecisionSafetyRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/features/leading-zeros': {
-      id: '/docs/features/leading-zeros'
-      path: '/features/leading-zeros'
-      fullPath: '/docs/features/leading-zeros'
-      preLoaderRoute: typeof DocsFeaturesLeadingZerosRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/features/formatting': {
-      id: '/docs/features/formatting'
-      path: '/features/formatting'
-      fullPath: '/docs/features/formatting'
-      preLoaderRoute: typeof DocsFeaturesFormattingRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/features/decimals': {
-      id: '/docs/features/decimals'
-      path: '/features/decimals'
-      fullPath: '/docs/features/decimals'
-      preLoaderRoute: typeof DocsFeaturesDecimalsRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/features/compact-notation': {
-      id: '/docs/features/compact-notation'
-      path: '/features/compact-notation'
-      fullPath: '/docs/features/compact-notation'
-      preLoaderRoute: typeof DocsFeaturesCompactNotationRouteImport
+    '/docs/numora-react/installation': {
+      id: '/docs/numora-react/installation'
+      path: '/numora-react/installation'
+      fullPath: '/docs/numora-react/installation'
+      preLoaderRoute: typeof DocsNumoraReactInstallationRouteImport
       parentRoute: typeof DocsRoute
     }
     '/api/trpc/$': {
@@ -305,36 +443,194 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTrpcSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs/numora/features/subscript-notation': {
+      id: '/docs/numora/features/subscript-notation'
+      path: '/numora/features/subscript-notation'
+      fullPath: '/docs/numora/features/subscript-notation'
+      preLoaderRoute: typeof DocsNumoraFeaturesSubscriptNotationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/features/scientific-notation': {
+      id: '/docs/numora/features/scientific-notation'
+      path: '/numora/features/scientific-notation'
+      fullPath: '/docs/numora/features/scientific-notation'
+      preLoaderRoute: typeof DocsNumoraFeaturesScientificNotationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/features/sanitization': {
+      id: '/docs/numora/features/sanitization'
+      path: '/numora/features/sanitization'
+      fullPath: '/docs/numora/features/sanitization'
+      preLoaderRoute: typeof DocsNumoraFeaturesSanitizationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/features/percent': {
+      id: '/docs/numora/features/percent'
+      path: '/numora/features/percent'
+      fullPath: '/docs/numora/features/percent'
+      preLoaderRoute: typeof DocsNumoraFeaturesPercentRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/features/number-precision-safety': {
+      id: '/docs/numora/features/number-precision-safety'
+      path: '/numora/features/number-precision-safety'
+      fullPath: '/docs/numora/features/number-precision-safety'
+      preLoaderRoute: typeof DocsNumoraFeaturesNumberPrecisionSafetyRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/features/leading-zeros': {
+      id: '/docs/numora/features/leading-zeros'
+      path: '/numora/features/leading-zeros'
+      fullPath: '/docs/numora/features/leading-zeros'
+      preLoaderRoute: typeof DocsNumoraFeaturesLeadingZerosRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/features/formatting': {
+      id: '/docs/numora/features/formatting'
+      path: '/numora/features/formatting'
+      fullPath: '/docs/numora/features/formatting'
+      preLoaderRoute: typeof DocsNumoraFeaturesFormattingRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/features/decimals': {
+      id: '/docs/numora/features/decimals'
+      path: '/numora/features/decimals'
+      fullPath: '/docs/numora/features/decimals'
+      preLoaderRoute: typeof DocsNumoraFeaturesDecimalsRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/features/compact-notation': {
+      id: '/docs/numora/features/compact-notation'
+      path: '/numora/features/compact-notation'
+      fullPath: '/docs/numora/features/compact-notation'
+      preLoaderRoute: typeof DocsNumoraFeaturesCompactNotationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora-react/features/subscript-notation': {
+      id: '/docs/numora-react/features/subscript-notation'
+      path: '/numora-react/features/subscript-notation'
+      fullPath: '/docs/numora-react/features/subscript-notation'
+      preLoaderRoute: typeof DocsNumoraReactFeaturesSubscriptNotationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora-react/features/scientific-notation': {
+      id: '/docs/numora-react/features/scientific-notation'
+      path: '/numora-react/features/scientific-notation'
+      fullPath: '/docs/numora-react/features/scientific-notation'
+      preLoaderRoute: typeof DocsNumoraReactFeaturesScientificNotationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora-react/features/sanitization': {
+      id: '/docs/numora-react/features/sanitization'
+      path: '/numora-react/features/sanitization'
+      fullPath: '/docs/numora-react/features/sanitization'
+      preLoaderRoute: typeof DocsNumoraReactFeaturesSanitizationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora-react/features/percent': {
+      id: '/docs/numora-react/features/percent'
+      path: '/numora-react/features/percent'
+      fullPath: '/docs/numora-react/features/percent'
+      preLoaderRoute: typeof DocsNumoraReactFeaturesPercentRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora-react/features/number-precision-safety': {
+      id: '/docs/numora-react/features/number-precision-safety'
+      path: '/numora-react/features/number-precision-safety'
+      fullPath: '/docs/numora-react/features/number-precision-safety'
+      preLoaderRoute: typeof DocsNumoraReactFeaturesNumberPrecisionSafetyRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora-react/features/leading-zeros': {
+      id: '/docs/numora-react/features/leading-zeros'
+      path: '/numora-react/features/leading-zeros'
+      fullPath: '/docs/numora-react/features/leading-zeros'
+      preLoaderRoute: typeof DocsNumoraReactFeaturesLeadingZerosRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora-react/features/formatting': {
+      id: '/docs/numora-react/features/formatting'
+      path: '/numora-react/features/formatting'
+      fullPath: '/docs/numora-react/features/formatting'
+      preLoaderRoute: typeof DocsNumoraReactFeaturesFormattingRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora-react/features/decimals': {
+      id: '/docs/numora-react/features/decimals'
+      path: '/numora-react/features/decimals'
+      fullPath: '/docs/numora-react/features/decimals'
+      preLoaderRoute: typeof DocsNumoraReactFeaturesDecimalsRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora-react/features/compact-notation': {
+      id: '/docs/numora-react/features/compact-notation'
+      path: '/numora-react/features/compact-notation'
+      fullPath: '/docs/numora-react/features/compact-notation'
+      preLoaderRoute: typeof DocsNumoraReactFeaturesCompactNotationRouteImport
+      parentRoute: typeof DocsRoute
+    }
   }
 }
 
 interface DocsRouteChildren {
-  DocsInstallationRoute: typeof DocsInstallationRoute
-  DocsIndexRoute: typeof DocsIndexRoute
-  DocsFeaturesCompactNotationRoute: typeof DocsFeaturesCompactNotationRoute
-  DocsFeaturesDecimalsRoute: typeof DocsFeaturesDecimalsRoute
-  DocsFeaturesFormattingRoute: typeof DocsFeaturesFormattingRoute
-  DocsFeaturesLeadingZerosRoute: typeof DocsFeaturesLeadingZerosRoute
-  DocsFeaturesNumberPrecisionSafetyRoute: typeof DocsFeaturesNumberPrecisionSafetyRoute
-  DocsFeaturesPercentRoute: typeof DocsFeaturesPercentRoute
-  DocsFeaturesSanitizationRoute: typeof DocsFeaturesSanitizationRoute
-  DocsFeaturesScientificNotationRoute: typeof DocsFeaturesScientificNotationRoute
-  DocsFeaturesSubscriptNotationRoute: typeof DocsFeaturesSubscriptNotationRoute
+  DocsNumoraReactInstallationRoute: typeof DocsNumoraReactInstallationRoute
+  DocsNumoraInstallationRoute: typeof DocsNumoraInstallationRoute
+  DocsNumoraReactIndexRoute: typeof DocsNumoraReactIndexRoute
+  DocsNumoraIndexRoute: typeof DocsNumoraIndexRoute
+  DocsNumoraReactFeaturesCompactNotationRoute: typeof DocsNumoraReactFeaturesCompactNotationRoute
+  DocsNumoraReactFeaturesDecimalsRoute: typeof DocsNumoraReactFeaturesDecimalsRoute
+  DocsNumoraReactFeaturesFormattingRoute: typeof DocsNumoraReactFeaturesFormattingRoute
+  DocsNumoraReactFeaturesLeadingZerosRoute: typeof DocsNumoraReactFeaturesLeadingZerosRoute
+  DocsNumoraReactFeaturesNumberPrecisionSafetyRoute: typeof DocsNumoraReactFeaturesNumberPrecisionSafetyRoute
+  DocsNumoraReactFeaturesPercentRoute: typeof DocsNumoraReactFeaturesPercentRoute
+  DocsNumoraReactFeaturesSanitizationRoute: typeof DocsNumoraReactFeaturesSanitizationRoute
+  DocsNumoraReactFeaturesScientificNotationRoute: typeof DocsNumoraReactFeaturesScientificNotationRoute
+  DocsNumoraReactFeaturesSubscriptNotationRoute: typeof DocsNumoraReactFeaturesSubscriptNotationRoute
+  DocsNumoraFeaturesCompactNotationRoute: typeof DocsNumoraFeaturesCompactNotationRoute
+  DocsNumoraFeaturesDecimalsRoute: typeof DocsNumoraFeaturesDecimalsRoute
+  DocsNumoraFeaturesFormattingRoute: typeof DocsNumoraFeaturesFormattingRoute
+  DocsNumoraFeaturesLeadingZerosRoute: typeof DocsNumoraFeaturesLeadingZerosRoute
+  DocsNumoraFeaturesNumberPrecisionSafetyRoute: typeof DocsNumoraFeaturesNumberPrecisionSafetyRoute
+  DocsNumoraFeaturesPercentRoute: typeof DocsNumoraFeaturesPercentRoute
+  DocsNumoraFeaturesSanitizationRoute: typeof DocsNumoraFeaturesSanitizationRoute
+  DocsNumoraFeaturesScientificNotationRoute: typeof DocsNumoraFeaturesScientificNotationRoute
+  DocsNumoraFeaturesSubscriptNotationRoute: typeof DocsNumoraFeaturesSubscriptNotationRoute
 }
 
 const DocsRouteChildren: DocsRouteChildren = {
-  DocsInstallationRoute: DocsInstallationRoute,
-  DocsIndexRoute: DocsIndexRoute,
-  DocsFeaturesCompactNotationRoute: DocsFeaturesCompactNotationRoute,
-  DocsFeaturesDecimalsRoute: DocsFeaturesDecimalsRoute,
-  DocsFeaturesFormattingRoute: DocsFeaturesFormattingRoute,
-  DocsFeaturesLeadingZerosRoute: DocsFeaturesLeadingZerosRoute,
-  DocsFeaturesNumberPrecisionSafetyRoute:
-    DocsFeaturesNumberPrecisionSafetyRoute,
-  DocsFeaturesPercentRoute: DocsFeaturesPercentRoute,
-  DocsFeaturesSanitizationRoute: DocsFeaturesSanitizationRoute,
-  DocsFeaturesScientificNotationRoute: DocsFeaturesScientificNotationRoute,
-  DocsFeaturesSubscriptNotationRoute: DocsFeaturesSubscriptNotationRoute,
+  DocsNumoraReactInstallationRoute: DocsNumoraReactInstallationRoute,
+  DocsNumoraInstallationRoute: DocsNumoraInstallationRoute,
+  DocsNumoraReactIndexRoute: DocsNumoraReactIndexRoute,
+  DocsNumoraIndexRoute: DocsNumoraIndexRoute,
+  DocsNumoraReactFeaturesCompactNotationRoute:
+    DocsNumoraReactFeaturesCompactNotationRoute,
+  DocsNumoraReactFeaturesDecimalsRoute: DocsNumoraReactFeaturesDecimalsRoute,
+  DocsNumoraReactFeaturesFormattingRoute:
+    DocsNumoraReactFeaturesFormattingRoute,
+  DocsNumoraReactFeaturesLeadingZerosRoute:
+    DocsNumoraReactFeaturesLeadingZerosRoute,
+  DocsNumoraReactFeaturesNumberPrecisionSafetyRoute:
+    DocsNumoraReactFeaturesNumberPrecisionSafetyRoute,
+  DocsNumoraReactFeaturesPercentRoute: DocsNumoraReactFeaturesPercentRoute,
+  DocsNumoraReactFeaturesSanitizationRoute:
+    DocsNumoraReactFeaturesSanitizationRoute,
+  DocsNumoraReactFeaturesScientificNotationRoute:
+    DocsNumoraReactFeaturesScientificNotationRoute,
+  DocsNumoraReactFeaturesSubscriptNotationRoute:
+    DocsNumoraReactFeaturesSubscriptNotationRoute,
+  DocsNumoraFeaturesCompactNotationRoute:
+    DocsNumoraFeaturesCompactNotationRoute,
+  DocsNumoraFeaturesDecimalsRoute: DocsNumoraFeaturesDecimalsRoute,
+  DocsNumoraFeaturesFormattingRoute: DocsNumoraFeaturesFormattingRoute,
+  DocsNumoraFeaturesLeadingZerosRoute: DocsNumoraFeaturesLeadingZerosRoute,
+  DocsNumoraFeaturesNumberPrecisionSafetyRoute:
+    DocsNumoraFeaturesNumberPrecisionSafetyRoute,
+  DocsNumoraFeaturesPercentRoute: DocsNumoraFeaturesPercentRoute,
+  DocsNumoraFeaturesSanitizationRoute: DocsNumoraFeaturesSanitizationRoute,
+  DocsNumoraFeaturesScientificNotationRoute:
+    DocsNumoraFeaturesScientificNotationRoute,
+  DocsNumoraFeaturesSubscriptNotationRoute:
+    DocsNumoraFeaturesSubscriptNotationRoute,
 }
 
 const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
@@ -342,6 +638,8 @@ const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DocsRoute: DocsRouteWithChildren,
+  NumoraRoute: NumoraRoute,
+  NumoraReactRoute: NumoraReactRoute,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,
 }
 export const routeTree = rootRouteImport

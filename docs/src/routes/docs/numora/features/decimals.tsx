@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
-import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 
-export const Route = createFileRoute('/docs/features/decimals')({
+export const Route = createFileRoute('/docs/numora/features/decimals')({
   component: Decimals,
 })
 
@@ -20,40 +19,31 @@ function Decimals() {
         Control the maximum number of decimal places allowed:
       </p>
 
-      <ExampleWithDemo
-        code={`import { NumoraInput } from 'numora-react'
+      <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
 
-<NumoraInput
-  maxDecimals={2}
+const numoraInput = new NumoraInput(container, {
+  decimalMaxLength: 2,
   // Maximum 2 decimal places
-/>`}
-        language="tsx"
-        config={{
-          maxDecimals: 2,
-        }}
-        description="Try typing more than 2 decimal places - they'll be truncated"
-      />
+  // Try typing more than 2 decimal places - they'll be truncated
+})`}
+      </CodeBlock>
 
       <h2>Minimum Decimal Places</h2>
       <p>
         Automatically pad values with zeros to ensure minimum decimal places:
       </p>
 
-      <ExampleWithDemo
-        code={`import { NumoraInput } from 'numora-react'
+      <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
 
-<NumoraInput
-  decimalMinLength={2}
-  maxDecimals={18}
+const numoraInput = new NumoraInput(container, {
+  decimalMinLength: 2,
+  decimalMaxLength: 18,
   // Minimum 2 decimal places (pads with zeros)
-/>`}
-        language="tsx"
-        config={{
-          decimalMinLength: 2,
-          maxDecimals: 18,
-        }}
-        description="Try typing '1' and blur - it will become '1.00'"
-      />
+  // Try typing '1' and blur - it will become '1.00'
+})`}
+      </CodeBlock>
 
       <h2>Custom Decimal Separator</h2>
       <p>
@@ -84,22 +74,17 @@ const custom = new NumoraInput(container, {
         the exact separator:
       </p>
 
-      <ExampleWithDemo
-        code={`import { NumoraInput } from 'numora-react'
+      <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
 
-<NumoraInput
-  decimalSeparator=","
-  thousandsGroupStyle={undefined}
-  maxDecimals={2}
+const numoraInput = new NumoraInput(container, {
+  decimalSeparator: ',',
+  thousandStyle: undefined,
+  decimalMaxLength: 2,
   // Comma/dot conversion enabled
-/>`}
-        language="tsx"
-        config={{
-          decimalSeparator: ',',
-          maxDecimals: 2,
-        }}
-        description="Try typing '.' or ',' - both will be converted to ','"
-      />
+  // Try typing '.' or ',' - both will be converted to ','
+})`}
+      </CodeBlock>
 
       <h3>How It Works</h3>
       <p>
@@ -157,27 +142,20 @@ const numoraInput = new NumoraInput(container, {
       </CodeBlock>
 
       <h2>Complete Example</h2>
-      <ExampleWithDemo
-        code={`import { NumoraInput } from 'numora-react'
+      <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
 
-<NumoraInput
-  maxDecimals={18}
-  decimalMinLength={2}
-  decimalSeparator="."
-  thousandSeparator=","
-  onChange={(e) => {
-    console.log('Decimal value:', e.target.value)
-  }}
-/>`}
-        language="tsx"
-        config={{
-          maxDecimals: 18,
-          decimalMinLength: 2,
-          decimalSeparator: '.',
-          thousandSeparator: ',',
-        }}
-        description="Try various decimal inputs to see precision control and padding"
-      />
+const numoraInput = new NumoraInput(container, {
+  decimalMaxLength: 18,
+  decimalMinLength: 2,
+  decimalSeparator: '.',
+  thousandSeparator: ',',
+  onChange: (value) => {
+    console.log('Decimal value:', value)
+  },
+})
+// Try various decimal inputs to see precision control and padding`}
+      </CodeBlock>
     </div>
   )
 }

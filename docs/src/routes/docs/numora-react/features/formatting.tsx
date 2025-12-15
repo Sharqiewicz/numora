@@ -3,7 +3,7 @@ import { CodeBlock } from '@/components/CodeBlock'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 import { FormatOn, ThousandStyle } from 'numora-react'
 
-export const Route = createFileRoute('/docs/features/formatting')({
+export const Route = createFileRoute('/docs/numora-react/features/formatting')({
   component: Formatting,
 })
 

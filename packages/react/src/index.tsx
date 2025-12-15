@@ -22,6 +22,35 @@ interface NumoraInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   rawValueMode?: boolean;
 }
 
+// Helper: Convert any value to string, handling undefined
+function toStringValue(value: unknown): string | undefined {
+  if (value === undefined) return undefined;
+  return typeof value === 'string' ? value : String(value);
+}
+
+// Helper: Create React synthetic event from NumoraInput onChange
+function createChangeEvent(
+  element: HTMLInputElement,
+  value: string
+): ChangeEvent<HTMLInputElement> {
+  return {
+    target: Object.assign(element, { value }),
+    currentTarget: Object.assign(element, { value }),
+  } as ChangeEvent<HTMLInputElement>;
+}
+
+// Helper: Forward ref to input element
+function forwardRefToElement(
+  ref: React.Ref<HTMLInputElement>,
+  element: HTMLInputElement
+): void {
+  if (typeof ref === 'function') {
+    ref(element);
+  } else if (ref) {
+    ref.current = element;
+  }
+}
+
 const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>(
   ({
     maxDecimals = 2,
@@ -38,10 +67,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>(
     ...props
   }: NumoraInputProps, ref: React.Ref<HTMLInputElement>) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const numoraInputRef = useRef<NumoraInputClass | null>(null);
-    const previousValueRef = useRef<string | undefined>(
-      typeof props.value === 'string' ? props.value : props.value?.toString()
-    );
+    const instanceRef = useRef<NumoraInputClass | null>(null);
 
     // Store onChange in a ref to avoid recreating NumoraInput when it changes
     const onChangeRef = useRef(onChange);
@@ -49,26 +75,26 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>(
       onChangeRef.current = onChange;
     }, [onChange]);
 
-    // Initialize and update NumoraInput class when container is mounted or options change
+    // Initialize and update NumoraInput instance when container is mounted or options change
     useEffect(() => {
       const container = containerRef.current;
       if (!container) return;
 
       // Preserve current value when recreating instance
-      const currentValue = numoraInputRef.current?.getValue() || 
-        (typeof props.value === 'string' ? props.value : props.value !== undefined ? String(props.value) : undefined) ||
-        (typeof props.defaultValue === 'string' ? props.defaultValue : props.defaultValue !== undefined ? String(props.defaultValue) : undefined);
+      const preservedValue = instanceRef.current?.getValue() ||
+        toStringValue(props.value) ||
+        toStringValue(props.defaultValue);
 
-      // Clean up old instance - clear container and reset ref
-      if (numoraInputRef.current) {
+      // Clean up old instance
+      if (instanceRef.current) {
         container.innerHTML = '';
-        numoraInputRef.current = null;
+        instanceRef.current = null;
       }
 
       // Extract and convert value/defaultValue props
       const { value, defaultValue, ...restProps } = props;
-      const stringValue = typeof value === 'string' ? value : value !== undefined ? String(value) : undefined;
-      const stringDefaultValue = typeof defaultValue === 'string' ? defaultValue : defaultValue !== undefined ? String(defaultValue) : undefined;
+      const valueStr = toStringValue(value);
+      const defaultValueStr = toStringValue(defaultValue);
 
       const numoraOptions: NumoraInputOptions = {
         decimalMaxLength: maxDecimals,
@@ -81,50 +107,28 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>(
         enableNegative,
         enableLeadingZeros,
         rawValueMode,
-        value: stringValue ?? currentValue,
-        defaultValue: stringDefaultValue,
+        value: valueStr ?? preservedValue,
+        defaultValue: defaultValueStr,
         onChange: (value: string) => {
-          // Use ref to get latest onChange without recreating NumoraInput
-          if (onChangeRef.current && numoraInputRef.current) {
-            const inputElement = numoraInputRef.current.getElement();
-            // The value parameter is the processed value from NumoraInput (after compact notation expansion, formatting, etc.)
-            // Create a synthetic event that properly exposes the processed value
-            // We create a new object to avoid mutating the actual input element
-            const syntheticEvent = {
-              target: {
-                ...inputElement,
-                value: value,
-              },
-              currentTarget: {
-                ...inputElement,
-                value: value,
-              },
-              preventDefault: () => {},
-              stopPropagation: () => {},
-            } as ChangeEvent<HTMLInputElement>;
-            onChangeRef.current(syntheticEvent);
+          if (onChangeRef.current && instanceRef.current) {
+            const element = instanceRef.current.getElement();
+            const event = createChangeEvent(element, value);
+            onChangeRef.current(event);
           }
         },
         ...(restProps as NumoraInputOptions),
       };
 
-      const numoraInput = new NumoraInputClass(container, numoraOptions);
-      numoraInputRef.current = numoraInput;
+      const instance = new NumoraInputClass(container, numoraOptions);
+      instanceRef.current = instance;
 
-      // Forward the input element ref
-      const inputElement = numoraInput.getElement();
-      if (typeof ref === 'function') {
-        ref(inputElement);
-      } else if (ref) {
-        ref.current = inputElement;
-      }
+      forwardRefToElement(ref, instance.getElement());
 
-      // Cleanup on unmount
       return () => {
-        if (numoraInputRef.current && container) {
+        if (instanceRef.current && container) {
           container.innerHTML = '';
         }
-        numoraInputRef.current = null;
+        instanceRef.current = null;
       };
     }, [
       maxDecimals,
@@ -139,28 +143,21 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>(
       rawValueMode,
     ]);
 
-    // Handle programmatic value changes (when value prop changes externally)
+    // Sync external value prop changes to NumoraInput (controlled component)
     useEffect(() => {
-      const numoraInput = numoraInputRef.current;
-      if (!numoraInput) return;
+      const instance = instanceRef.current;
+      if (!instance) return;
 
-      const currentValue = typeof props.value === 'string'
-        ? props.value
-        : props.value !== undefined
-          ? String(props.value)
-          : undefined;
-      const previousValue = previousValueRef.current;
+      const currentValue = toStringValue(props.value);
+      const instanceValue = instance.getValue();
 
-      // Only update if value changed externally
-      if (currentValue !== previousValue) {
-        if (currentValue !== undefined) {
-          numoraInput.setValue(currentValue);
-        } else {
-          numoraInput.setValue('');
-        }
+      if (currentValue !== instanceValue) {
+        const element = instance.getElement();
+        instance.setValue(currentValue ?? '');
+
+        const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+        element.dispatchEvent(inputEvent);
       }
-
-      previousValueRef.current = currentValue;
     }, [props.value]);
 
     return <div ref={containerRef} style={{ display: 'contents' }} />;

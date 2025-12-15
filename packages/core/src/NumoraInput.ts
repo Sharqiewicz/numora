@@ -77,7 +77,7 @@ export class NumoraInput {
       thousandSeparator = DEFAULT_THOUSAND_SEPARATOR,
       thousandStyle = DEFAULT_THOUSAND_STYLE,
       decimalSeparator = DEFAULT_DECIMAL_SEPARATOR,
-      enableCompactNotation = DEFAULT_ENABLE_COMPACT_NOTATION,
+      enableCompactNotation = true,
       enableNegative = DEFAULT_ENABLE_NEGATIVE,
       enableLeadingZeros = DEFAULT_ENABLE_LEADING_ZEROS,
       rawValueMode = DEFAULT_RAW_VALUE_MODE,

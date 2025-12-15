@@ -1,8 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
-import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 
-export const Route = createFileRoute('/docs/features/compact-notation')({
+export const Route = createFileRoute('/docs/numora/features/compact-notation')({
   component: CompactNotation,
 })
 
@@ -58,43 +57,33 @@ function CompactNotation() {
         Compact notation expansion is optional and must be enabled:
       </p>
 
-      <ExampleWithDemo
-        code={`import { NumoraInput } from 'numora-react'
+      <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
 
-<NumoraInput
-  enableCompactNotation={true}
-  maxDecimals={18}
-  onChange={(e) => {
-    console.log('Expanded value:', e.target.value)
-  }}
-/>`}
-        language="tsx"
-        config={{
-          enableCompactNotation: true,
-          maxDecimals: 18,
-        }}
-        description="Try pasting '1k', '1.5m', or '2B' - they'll be automatically expanded"
-      />
+const numoraInput = new NumoraInput(container, {
+  enableCompactNotation: true,
+  decimalMaxLength: 18,
+  onChange: (value) => {
+    console.log('Expanded value:', value)
+  },
+})
+// Try pasting '1k', '1.5m', or '2B' - they'll be automatically expanded`}
+      </CodeBlock>
 
       <h2>Usage Examples</h2>
 
       <h3>Basic Expansion</h3>
-      <ExampleWithDemo
-        code={`import { NumoraInput } from 'numora-react'
+      <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
 
-<NumoraInput
-  enableCompactNotation={true}
+const numoraInput = new NumoraInput(container, {
+  enableCompactNotation: true,
+  decimalMaxLength: 18,
   // Paste "1k" → "1000"
   // Paste "1.5m" → "1500000"
   // Paste "2B" → "2000000000"
-/>`}
-        language="tsx"
-        config={{
-          enableCompactNotation: true,
-          maxDecimals: 18,
-        }}
-        description="Paste compact notation like '1k', '1.5m', or '2B' to see expansion"
-      />
+})`}
+      </CodeBlock>
 
       <h3>With Decimal Values</h3>
       <CodeBlock language="typescript">
@@ -190,27 +179,20 @@ numoraInput.setValue('3.5B') // Expands to "3500000000"`}
       </ul>
 
       <h2>Complete Example</h2>
-      <ExampleWithDemo
-        code={`import { NumoraInput } from 'numora-react'
+      <CodeBlock language="typescript">
+{`import { NumoraInput, FormatOn } from 'numora'
 
-<NumoraInput
-  enableCompactNotation={true}
-  maxDecimals={18}
-  thousandSeparator=","
-  formatOn="blur"
-  onChange={(e) => {
-    console.log('Value:', e.target.value)
-  }}
-/>`}
-        language="tsx"
-        config={{
-          enableCompactNotation: true,
-          maxDecimals: 18,
-          thousandSeparator: ',',
-          formatOn: 'blur',
-        }}
-        description="Paste '1.5k' and blur to see expansion and formatting"
-      />
+const numoraInput = new NumoraInput(container, {
+  enableCompactNotation: true,
+  decimalMaxLength: 18,
+  thousandSeparator: ',',
+  formatOn: FormatOn.Blur,
+  onChange: (value) => {
+    console.log('Value:', value)
+  },
+})
+// Paste '1.5k' and blur to see expansion and formatting`}
+      </CodeBlock>
     </div>
   )
 }
