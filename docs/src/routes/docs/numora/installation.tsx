@@ -6,73 +6,32 @@ export const Route = createFileRoute('/docs/numora/installation')({
   component: Installation,
 })
 
+
 function Installation() {
+
   return (
     <div className="prose prose-invert max-w-none">
       <h1>Installation</h1>
       <p className="text-lg text-muted-foreground">
-        Get started with Numora core package for Vue, Svelte, or vanilla JavaScript.
+        Get started with the Numora core package for Svelte or vanilla JavaScript.
       </p>
 
       <h2>Install</h2>
       <p>Install the core package:</p>
       <CodeBlock language="bash">
-{`pnpm add numora
-# or
-npm install numora
-# or
-yarn add numora`}
+{`pnpm add numora`}
       </CodeBlock>
 
-      <Tabs defaultValue="vue" className="mt-8">
+      <Tabs defaultValue="svelte" className="mt-8">
         <TabsList>
-          <TabsTrigger value="vue">Vue</TabsTrigger>
-          <TabsTrigger value="svelte">Svelte</TabsTrigger>
-          <TabsTrigger value="vanilla">Vanilla JS</TabsTrigger>
+          <TabsTrigger value="svelte">svelte</TabsTrigger>
+          <TabsTrigger value="vanilla">javascript</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="vue" className="mt-6">
-          <h2>Vue</h2>
-          <p className="text-muted-foreground">
-            <strong>Note:</strong> Vue wrapper is coming soon. For now, use the core package
-            directly.
-          </p>
-
-          <h3>Basic Usage</h3>
-          <CodeBlock language="vue">
-{`<template>
-  <div ref="container"></div>
-</template>
-
-<script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { NumoraInput } from 'numora'
-
-const container = ref<HTMLElement | null>(null)
-let numoraInput: NumoraInput | null = null
-
-onMounted(() => {
-  if (container.value) {
-    numoraInput = new NumoraInput(container.value, {
-      decimalMaxLength: 2,
-      onChange: (value) => {
-        console.log('Value:', value)
-      },
-    })
-  }
-})
-
-onUnmounted(() => {
-  // Cleanup if needed
-})
-</script>`}
-          </CodeBlock>
-        </TabsContent>
 
         <TabsContent value="svelte" className="mt-6">
           <h2>Svelte</h2>
           <h3>Basic Usage</h3>
-          <CodeBlock language="svelte">
+          <CodeBlock language="typescript">
 {`<script lang="ts">
   import { onMount } from 'svelte'
   import { NumoraInput } from 'numora'
@@ -97,7 +56,7 @@ onUnmounted(() => {
         </TabsContent>
 
         <TabsContent value="vanilla" className="mt-6">
-          <h2>Vanilla JavaScript</h2>
+          <h2>javascript</h2>
           <h3>Basic Usage</h3>
           <CodeBlock language="typescript">
 {`import { NumoraInput } from 'numora'

@@ -11,7 +11,7 @@ function GetStarted() {
     <div className="prose prose-invert max-w-none text-muted-foreground!">
       <h1>Get Started</h1>
       <p >
-        <strong className="font-numora">numora</strong> is a powerful, tamper-proof numeric input library that provides safe number handling,
+        <strong className="font-numora">numora</strong> is a powerful, <strong className="font-numora">framework-agnostic</strong>, tamper-proof numeric input library that provides safe number handling,
          sanitization, validation, formatting and more.
       </p>
 

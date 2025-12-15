@@ -12,9 +12,9 @@ export function CodeBlock({ children, className, language = 'typescript' }: Code
   const codeString = typeof children === 'string' ? children : String(children)
 
   return (
-    <div className="relative my-6 overflow-hidden rounded-lg border bg-muted/50">
+    <div className="relative my-6 overflow-hidden rounded-lg border border-muted/50">
       {language && (
-        <div className="border-b bg-muted px-4 py-2 text-xs font-medium text-muted-foreground">
+        <div className="border-b border-muted bg-[#171717] px-4 py-2 text-xs font-medium text-muted-foreground">
           {language}
         </div>
       )}
@@ -24,10 +24,11 @@ export function CodeBlock({ children, className, language = 'typescript' }: Code
         customStyle={{
           margin: 0,
           padding: '1rem',
-          background: 'transparent',
+          background: '#282828',
           fontSize: '0.875rem',
           lineHeight: '1.5',
         }}
+
         codeTagProps={{
           className: cn('text-sm', className),
         }}
