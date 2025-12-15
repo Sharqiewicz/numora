@@ -8,7 +8,9 @@ import tailwindcss from '@tailwindcss/vite'
 const config = defineConfig({
   plugins: [
     devtools(),
-    tanstackRouter(),
+    tanstackRouter({
+      autoCodeSplitting: true,
+    }),
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
