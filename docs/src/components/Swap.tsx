@@ -1,4 +1,5 @@
-import { FormatOn, NumoraInput, ThousandStyle } from 'numora-react';
+import { NumoraInput } from 'numora-react';
+import { FormatOn, ThousandStyle } from 'numora';
 import { useEffect, useState } from 'react';
 import { useTRPC } from '@/integrations/trpc/react';
 import { TOKENS, type TokenInfo } from '@/lib/constants/tokens';
