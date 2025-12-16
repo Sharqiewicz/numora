@@ -1,3 +1,4 @@
+import { CopyButton } from './CopyButton';
 import { Swap } from './Swap';
 
 export function SwapPlayground() {
@@ -5,14 +6,23 @@ export function SwapPlayground() {
     <div className="pb-16 relative">
       <div className="text-center mb-12 max-w-3xl mx-auto px-4">
         <h2 className="text-4xl mb-4">
-          Built for the <span className="text-secondary">Swap Interface</span>.
+          Built for the <br className="block sm:hidden" /> <span className="text-secondary">Swap Interface</span>
         </h2>
         <p>
           Handling numeric state in DeFi is deceptively hard. You need tosanitize "bad" keystrokes,
-          handle scientific notation, calculate the caret position and respect user locale—all while
-          keeping the underlying value pristine for the blockchain.
+          handle scientific notation, calculate the caret position and more...
         </p>
       </div>
+
+      <h3 className="text-lg text-center">Try <strong className="text-secondary">pasting</strong> these values:</h3>
+        <div className="container mx-auto flex justify-around items-center my-5 gap-8">
+          <CopyButton text="1e-5" className="w-full" />
+          <CopyButton text="1e+5" className="w-full" />
+          <CopyButton text="1k" className="w-full" />
+          <CopyButton text="1m" className="w-full" />
+          <CopyButton text="1me-8" className="w-full" />
+          <CopyButton text="1ke+3" className="w-full" />
+        </div>
 
       <div className="relative max-w-md mx-auto">
         <div
@@ -61,7 +71,6 @@ export function SwapPlayground() {
             Pastes are sanitized instantly.
           </div>
         </div>
-
           <Swap />
       </div>
     </div>

@@ -9,7 +9,7 @@ export function Hero() {
           <p className="animate-fade-in-out text-center opacity-0 absolute top-20 sm:top-1/12 left-1/2 -translate-x-1/2 text-lg">Stop reinventing the wheel.</p>
           <p className="animate-fade-in-out delay-[1.2s] text-center opacity-0 absolute top-20  sm:top-1/12  left-1/2 -translate-x-1/2 text-lg">just use...</p>
           <h1 className="font-numora text-5xl text-white animate-fade-in delay-[2.4s] opacity-0 absolute top-20  sm:top-1/12  left-1/2 -translate-x-1/2">numora.</h1>
-          <h2 className="delay-[3s] animate-fade-in opacity-0 text-3xl sm:text-4xl text-center">The Standard for <strong className="text-secondary">DeFi Numeric Inputs</strong></h2>
+          <h2 className="delay-[3s] animate-fade-in opacity-0 text-3xl sm:text-4xl text-center">The Standard for <br className="block sm:hidden" /> <strong className="text-secondary">DeFi Numeric Inputs</strong></h2>
           <p className="text-center delay-[3s] animate-fade-in opacity-0 mt-8"> Native inputs destroy precision. Regex is fragile. <br/>
             <strong className="font-numora">numora</strong> solves the nightmares of building all financial inputs validation, formatting and sanitization.
           </p>

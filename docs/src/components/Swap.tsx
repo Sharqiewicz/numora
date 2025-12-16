@@ -142,7 +142,7 @@ export function Swap() {
 
   return (
     <div className="flex items-center flex-col justify-center sm:w-[460px]">
-      <div className="relative p-4 rounded-xl border bg-[#181a1b] border-[#23272b] w-full">
+      <div className="relative p-4 rounded-xl sm:border bg-[#181a1b] border-[#23272b] w-full">
         <div className="w-full flex justify-end">
           <button
             className="px-3 py-1 rounded-xl mb-2 cursor-pointer transition-transform duration-200 border active:scale-105 bg-[#181a1b] border-[#23272b] hover:bg-[#23272b] border-[#363b3f]hover:bg-gray-200"
