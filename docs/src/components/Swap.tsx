@@ -252,7 +252,6 @@ export function Swap() {
         <button
           type='button'
           className=" active:scale-102 w-full py-3 font-bold rounded-xl text-base text-white border-none cursor-pointer transition-transform duration-200 bg-[#5b2ff5] disabled:bg-[#c4b5fd] disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#4520b4] disabled:bg-[#3b1f7a] disabled:text-white disabled:opacity-100"
-          disabled={!parseFloat(fromAmount) || isLoading}
           onClick={handleSwap}
         >
           {isLoading ? 'Loading...' : 'Swap'}

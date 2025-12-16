@@ -3,8 +3,8 @@ import { Swap } from './Swap';
 
 export function SwapPlayground() {
   return (
-    <div className="pb-16 relative">
-      <div className="text-center mb-12 max-w-3xl mx-auto px-4">
+    <div className="pb-16 relative bg-radial-[at_50%_60%] from-white/10 via-transparent to-transparent">
+      <div className="text-center mb-12 max-w-3xl mx-auto px-6">
         <h2 className="text-4xl mb-4">
           Built for the <br className="block sm:hidden" /> <span className="text-secondary">Swap Interface</span>
         </h2>
@@ -15,13 +15,13 @@ export function SwapPlayground() {
       </div>
 
       <h3 className="text-lg text-center">Try <strong className="text-secondary">pasting</strong> these values:</h3>
-        <div className="container mx-auto flex justify-around items-center my-5 gap-8">
-          <CopyButton text="1e-5" className="w-full" />
-          <CopyButton text="1e+5" className="w-full" />
-          <CopyButton text="1k" className="w-full" />
-          <CopyButton text="1m" className="w-full" />
-          <CopyButton text="1me-8" className="w-full" />
-          <CopyButton text="1ke+3" className="w-full" />
+        <div className="container px-6 mx-auto grid grid-cols-3 md:grid-cols-6 justify-around items-center my-5 gap-8">
+          <CopyButton text="1e-5" />
+          <CopyButton text="1e+5" />
+          <CopyButton text="1k" />
+          <CopyButton text="1m" />
+          <CopyButton text="1me-8" />
+          <CopyButton text="1ke+3" />
         </div>
 
       <div className="relative max-w-md mx-auto">
