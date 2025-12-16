@@ -8,9 +8,9 @@ import React, {
 import {
   FormatOn,
   ThousandStyle,
+  formatValue,
   type CaretPositionInfo,
   type FormattingOptions,
-  formatValue,
 } from 'numora';
 import {
   handleNumoraOnBlur,
@@ -63,23 +63,6 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   const inputRef = useRef<HTMLInputElement>(null);
   const caretInfoRef = useRef<CaretPositionInfo | undefined>(undefined);
 
-  const [internalValue, setInternalValue] = useState<string>(
-    controlledValue !== undefined
-      ? String(controlledValue)
-      : defaultValue !== undefined
-        ? String(defaultValue)
-        : ''
-  );
-
-  // Keep internal state in sync when controlled
-  useEffect(() => {
-    if (controlledValue !== undefined) {
-      setInternalValue(String(controlledValue));
-    }
-  }, [controlledValue]);
-
-  useImperativeHandle(ref, () => inputRef.current as HTMLInputElement, []);
-
   const formattingOptions: FormattingOptions & { rawValueMode?: boolean } = {
     formatOn,
     thousandSeparator,
@@ -92,6 +75,26 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     rawValueMode,
   };
 
+  const getFormattedDefaultValue = (): string => {
+    if (defaultValue !== undefined) {
+      const { formatted } = formatValue(String(defaultValue), maxDecimals, formattingOptions);
+      return formatted;
+    }
+    return '';
+  };
+
+  const getInitialControlledValue = (): string => {
+    if (controlledValue !== undefined) {
+      const { formatted } = formatValue(String(controlledValue), maxDecimals, formattingOptions);
+      return formatted;
+    }
+    return '';
+  };
+
+  const [internalValue, setInternalValue] = useState<string>(getInitialControlledValue);
+
+  useImperativeHandle(ref, () => inputRef.current as HTMLInputElement, []);
+
   // When controlled value changes, normalize/format it for display
   useEffect(() => {
     if (controlledValue !== undefined) {
@@ -100,18 +103,43 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     }
   }, [controlledValue, maxDecimals, formatOn, thousandSeparator, thousandStyle, decimalSeparator, decimalMinLength, enableCompactNotation, enableNegative, enableLeadingZeros, rawValueMode]);
 
+  const isControlled = controlledValue !== undefined;
+
   const updateValue = (value: string) => {
-    setInternalValue(value);
+    if (isControlled) {
+      setInternalValue(value);
+    }
+  };
+
+  const syncEventValue = (
+    target: HTMLInputElement,
+    formattedValue: string,
+    rawValue?: string
+  ): void => {
+    Object.defineProperty(target, 'value', {
+      writable: true,
+      value: formattedValue,
+    });
+
+    if (rawValue !== undefined) {
+      Object.defineProperty(target, 'rawValue', {
+        writable: true,
+        value: rawValue,
+        enumerable: true,
+        configurable: true,
+      });
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = handleNumoraOnChange(e, {
+    const { value, rawValue } = handleNumoraOnChange(e, {
       decimalMaxLength: maxDecimals,
       caretPositionBeforeChange: caretInfoRef.current,
       formattingOptions,
     });
     caretInfoRef.current = undefined;
 
+    syncEventValue(e.target, value, rawValue);
     updateValue(value);
 
     if (onChange) {
@@ -120,11 +148,12 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const { value } = handleNumoraOnPaste(e, {
+    const { value, rawValue } = handleNumoraOnPaste(e, {
       decimalMaxLength: maxDecimals,
       formattingOptions,
     });
 
+    syncEventValue(e.target, value, rawValue);
     updateValue(value);
 
     if (onPaste) {
@@ -143,11 +172,12 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const { value } = handleNumoraOnBlur(e, {
+    const { value, rawValue } = handleNumoraOnBlur(e, {
       decimalMaxLength: maxDecimals,
       formattingOptions,
     });
 
+    syncEventValue(e.target, value, rawValue);
     updateValue(value);
 
     if (onBlur) {
@@ -159,7 +189,10 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     <input
       {...rest}
       ref={inputRef}
-      value={internalValue}
+      {...(isControlled
+        ? { value: internalValue }
+        : { defaultValue: getFormattedDefaultValue() }
+      )}
       onChange={handleChange}
       onPaste={handlePaste}
       onKeyDown={handleKeyDown}

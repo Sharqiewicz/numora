@@ -174,14 +174,13 @@ export class NumoraInput {
       onChange,
       value,
       defaultValue,
-      type, // Exclude - forced to 'text' above
-      inputMode, // Exclude - forced to 'decimal' above
-      spellcheck, // Exclude - forced to 'false' above
-      autocomplete, // Exclude - forced to 'off' above
+      type,
+      inputMode,
+      spellcheck,
+      autocomplete,
       ...nativeProps
     } = this.options;
 
-    // Assign all native HTMLInputElement properties (except type which is forced)
     Object.assign(this.element, nativeProps);
 
     // Handle value initialization
