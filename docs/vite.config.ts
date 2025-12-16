@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
-import tanstackRouter from '@tanstack/router-plugin/vite'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import netlify from '@netlify/vite-plugin-tanstack-start'
 import viteReact from '@vitejs/plugin-react'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
@@ -12,9 +13,20 @@ const config = defineConfig({
   },
   plugins: [
     devtools(),
-    tanstackRouter({
-      autoCodeSplitting: true,
+    tanstackStart({
+      prerender: {
+        enabled: true,
+        autoSubfolderIndex: true,
+        autoStaticPathsDiscovery: true,
+        crawlLinks: true,
+        concurrency: 14,
+        retryCount: 2,
+        retryDelay: 1000,
+        maxRedirects: 5,
+        failOnError: true,
+      },
     }),
+    netlify(),
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),

@@ -1,6 +1,6 @@
 [build]
   command = "vite build"
-  publish = "dist"
+  publish = "dist/client"
   dir = "dist"
 [dev]
   command = "vite dev"
