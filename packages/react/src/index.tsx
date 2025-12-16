@@ -153,7 +153,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       formattingOptions,
     });
 
-    syncEventValue(e.target, value, rawValue);
+    syncEventValue(e.target as HTMLInputElement, value, rawValue);
     updateValue(value);
 
     if (onPaste) {
