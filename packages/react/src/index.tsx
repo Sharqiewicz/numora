@@ -10,7 +10,7 @@ import {
   ThousandStyle,
   type CaretPositionInfo,
   type FormattingOptions,
-  handleOnChangeNumoraInput,
+  formatValue,
 } from 'numora';
 import {
   handleNumoraOnBlur,
@@ -92,68 +92,46 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     rawValueMode,
   };
 
-  const formatValueWithCore = (value: string): string => {
-    const el = inputRef.current ?? document.createElement('input');
-    el.value = value;
-    const fakeEvent = { target: el } as unknown as Event;
-    handleOnChangeNumoraInput(fakeEvent, maxDecimals, undefined, formattingOptions);
-    return el.value;
-  };
-
   // When controlled value changes, normalize/format it for display
   useEffect(() => {
     if (controlledValue !== undefined) {
-      const formatted = formatValueWithCore(String(controlledValue));
+      const { formatted } = formatValue(String(controlledValue), maxDecimals, formattingOptions);
       setInternalValue(formatted);
     }
-  }, [controlledValue, formatOn, thousandSeparator, thousandStyle, decimalSeparator, decimalMinLength, enableCompactNotation, enableNegative, enableLeadingZeros, rawValueMode, maxDecimals]);
+  }, [controlledValue, maxDecimals, formatOn, thousandSeparator, thousandStyle, decimalSeparator, decimalMinLength, enableCompactNotation, enableNegative, enableLeadingZeros, rawValueMode]);
+
+  const updateValue = (value: string) => {
+    setInternalValue(value);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, rawValue } = handleNumoraOnChange(e, {
+    const { value } = handleNumoraOnChange(e, {
       decimalMaxLength: maxDecimals,
       caretPositionBeforeChange: caretInfoRef.current,
       formattingOptions,
     });
     caretInfoRef.current = undefined;
 
-    if (controlledValue === undefined) {
-      setInternalValue(value);
-    } else {
-      setInternalValue(value);
-    }
+    updateValue(value);
 
     if (onChange) {
       onChange(e);
     }
-
-    // Optionally expose rawValue via a custom event attribute if needed later
-    if (rawValue && e.target && rawValueMode) {
-      // Keep the raw value on the input for consumers that read it directly
-      e.target.setAttribute('data-raw-value', rawValue);
-    }
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const { value, rawValue } = handleNumoraOnPaste(e, {
+    const { value } = handleNumoraOnPaste(e, {
       decimalMaxLength: maxDecimals,
       formattingOptions,
     });
 
-    if (controlledValue === undefined) {
-      setInternalValue(value);
-    } else {
-      setInternalValue(value);
-    }
+    updateValue(value);
 
     if (onPaste) {
       onPaste(e);
     }
     if (onChange) {
       onChange(e);
-    }
-
-    if (rawValue && e.target && rawValueMode) {
-      (e.target as HTMLInputElement).setAttribute('data-raw-value', rawValue);
     }
   };
 
@@ -165,23 +143,15 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    const { value, rawValue } = handleNumoraOnBlur(e, {
+    const { value } = handleNumoraOnBlur(e, {
       decimalMaxLength: maxDecimals,
       formattingOptions,
     });
 
-    if (controlledValue === undefined) {
-      setInternalValue(value);
-    } else {
-      setInternalValue(value);
-    }
+    updateValue(value);
 
     if (onBlur) {
       onBlur(e);
-    }
-
-    if (rawValue && e.target && rawValueMode) {
-      (e.target as HTMLInputElement).setAttribute('data-raw-value', rawValue);
     }
   };
 

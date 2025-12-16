@@ -3,6 +3,7 @@ import {
   handleOnChangeNumoraInput,
   handleOnKeyDownNumoraInput,
   handleOnPasteNumoraInput,
+  formatValue,
   type CaretPositionInfo,
   type FormattingOptions,
   FormatOn,
@@ -26,22 +27,16 @@ export function handleNumoraOnChange(
   e: React.ChangeEvent<HTMLInputElement>,
   options: BaseOptions
 ): ChangeResult {
-  handleOnChangeNumoraInput(
+  const { formatted, raw } = handleOnChangeNumoraInput(
     e.nativeEvent as unknown as Event,
     options.decimalMaxLength,
     options.caretPositionBeforeChange,
     options.formattingOptions
   );
 
-  const target = e.target;
-  const rawValue = target.getAttribute('data-raw-value') ?? undefined;
-  if (rawValue) {
-    target.removeAttribute('data-raw-value');
-  }
-
   return {
-    value: target.value,
-    rawValue,
+    value: formatted,
+    rawValue: raw,
   };
 }
 
@@ -49,21 +44,15 @@ export function handleNumoraOnPaste(
   e: React.ClipboardEvent<HTMLInputElement>,
   options: Omit<BaseOptions, 'caretPositionBeforeChange'>
 ): PasteResult {
-  const value = handleOnPasteNumoraInput(
+  const { formatted, raw } = handleOnPasteNumoraInput(
     e.nativeEvent as ClipboardEvent,
     options.decimalMaxLength,
     options.formattingOptions
   );
 
-  const target = e.target as HTMLInputElement;
-  const rawValue = target.getAttribute('data-raw-value') ?? undefined;
-  if (rawValue) {
-    target.removeAttribute('data-raw-value');
-  }
-
   return {
-    value,
-    rawValue,
+    value: formatted,
+    rawValue: raw,
   };
 }
 
@@ -84,24 +73,22 @@ export function handleNumoraOnBlur(
     formattingOptions: FormattingOptions & { rawValueMode?: boolean };
   }
 ): BlurResult {
-  // If formatOn is blur, force formatting on blur by invoking change handler logic
+  // If formatOn is blur, format the value using the pure formatting utility
   if (options.formattingOptions.formatOn === FormatOn.Blur) {
-    handleOnChangeNumoraInput(
-      e.nativeEvent as unknown as Event,
+    const { formatted, raw } = formatValue(
+      e.target.value,
       options.decimalMaxLength,
-      undefined,
       { ...options.formattingOptions, formatOn: FormatOn.Change }
     );
-  }
-
-  const target = e.target;
-  const rawValue = target.getAttribute('data-raw-value') ?? undefined;
-  if (rawValue) {
-    target.removeAttribute('data-raw-value');
+    e.target.value = formatted;
+    return {
+      value: formatted,
+      rawValue: raw,
+    };
   }
 
   return {
-    value: target.value,
-    rawValue,
+    value: e.target.value,
+    rawValue: undefined,
   };
 }

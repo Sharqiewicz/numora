@@ -1,62 +1,14 @@
 import {
-  trimToDecimalMaxLength,
-  ensureMinDecimals,
   getSeparators,
   convertCommaOrDotToDecimalSeparatorAndPreventMultimpleDecimalSeparators,
 } from '@/features/decimals';
-import { sanitizeNumoraInput, buildSanitizationOptions } from '@/features/sanitization';
 import {
   getInputCaretPosition,
   updateCursorPosition,
-  formatNumoraInput,
   skipOverThousandSeparatorOnDelete,
 } from '@/features/formatting';
 import { type FormattingOptions, type CaretPositionInfo, FormatOn } from '@/types';
-
-
-/**
- * Processes and formats a numeric input value by sanitizing, trimming decimals, and applying formatting.
- *
- * @param rawValue - The raw input value to process
- * @param decimalMaxLength - Maximum number of decimal places allowed
- * @param shouldRemoveThousandSeparators - Whether to remove thousand separators during sanitization
- * @param formattingOptions - Optional formatting options
- * @param separators - Separator configuration
- * @returns Object with formatted value and raw value (raw value is the value before formatting)
- */
-function processAndFormatValue(
-  rawValue: string,
-  decimalMaxLength: number,
-  shouldRemoveThousandSeparators: boolean,
-  formattingOptions: FormattingOptions | undefined,
-  separators: ReturnType<typeof getSeparators>
-): { formatted: string; raw: string } {
-  const sanitizedValue = sanitizeNumoraInput(
-    rawValue,
-    buildSanitizationOptions(formattingOptions, separators, shouldRemoveThousandSeparators)
-  );
-
-  const sanitizedAndTrimmedValue = trimToDecimalMaxLength(
-    sanitizedValue,
-    decimalMaxLength,
-    separators.decimalSeparator
-  );
-
-  const minDecimals = formattingOptions?.decimalMinLength ?? 0;
-  const valueWithMinDecimals = ensureMinDecimals(
-    sanitizedAndTrimmedValue,
-    minDecimals,
-    separators.decimalSeparator
-  );
-
-  // Raw value is the value before formatting (after sanitization, trimming, min decimals)
-  const raw = valueWithMinDecimals;
-
-  // Formatted value includes thousand separators if formatting is enabled
-  const formatted = formatNumoraInput(valueWithMinDecimals, formattingOptions, separators);
-
-  return { formatted, raw };
-}
+import { processAndFormatValue } from './format-utils';
 
 /**
  * Calculates the end offset for the caret position.
@@ -119,13 +71,14 @@ export function handleOnKeyDownNumoraInput(
  * @param decimalMaxLength - The maximum number of decimal places allowed.
  * @param caretPositionBeforeChange - Optional caret position info from keydown handler
  * @param formattingOptions - Optional formatting options for real-time formatting
+ * @returns Object with formatted value and raw value
  */
 export function handleOnChangeNumoraInput(
   e: Event,
   decimalMaxLength: number,
   caretPositionBeforeChange?: CaretPositionInfo,
   formattingOptions?: FormattingOptions
-): void {
+): { formatted: string; raw: string } {
   const target = e.target as HTMLInputElement;
   const oldValue = target.value;
   const oldCursorPosition = getInputCaretPosition(target);
@@ -138,17 +91,11 @@ export function handleOnChangeNumoraInput(
   const { formatted: newValue, raw: rawValue } = processAndFormatValue(
     oldValue,
     decimalMaxLength,
-    shouldRemoveThousandSeparators,
     formattingOptions,
-    separators
+    shouldRemoveThousandSeparators
   );
 
   target.value = newValue;
-
-  // Store raw value in a data attribute if rawValueMode is enabled (for NumoraInput to access)
-  if (formattingOptions?.rawValueMode) {
-    target.setAttribute('data-raw-value', rawValue);
-  }
 
   if (oldValue !== newValue) {
     updateCursorPosition(
@@ -161,6 +108,8 @@ export function handleOnChangeNumoraInput(
       formattingOptions
     );
   }
+
+  return { formatted: newValue, raw: rawValue };
 }
 
 
@@ -187,13 +136,12 @@ export function handleOnPasteNumoraInput(
   e: ClipboardEvent,
   decimalMaxLength: number,
   formattingOptions?: FormattingOptions
-): string {
+): { formatted: string; raw: string } {
   // Prevent default paste to handle it manually with sanitization, formatting, and proper cursor positioning.
   e.preventDefault();
 
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
-  const separators = getSeparators(formattingOptions);
 
   const clipboardData = e.clipboardData?.getData('text/plain') || '';
   const combinedValue =
@@ -204,17 +152,11 @@ export function handleOnPasteNumoraInput(
   const { formatted: formattedValue, raw: rawValue } = processAndFormatValue(
     combinedValue,
     decimalMaxLength,
-    true,
     formattingOptions,
-    separators
+    true
   );
 
   inputElement.value = formattedValue;
-
-  // Store raw value in a data attribute if rawValueMode is enabled (for NumoraInput to access)
-  if (formattingOptions?.rawValueMode) {
-    inputElement.setAttribute('data-raw-value', rawValue);
-  }
 
   const newCursorPosition = calculateCursorPositionAfterPaste(
     selectionStart || 0,
@@ -225,5 +167,5 @@ export function handleOnPasteNumoraInput(
 
   inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
 
-  return inputElement.value;
+  return { formatted: formattedValue, raw: rawValue };
 }

@@ -131,8 +131,8 @@ export class NumoraInput {
 
       // Format for display if needed
       this.element.value = this.formatValueForDisplay(raw);
-    } else if (this.element.value && !this.resolvedOptions.rawValueMode) {
-      // If not in rawValueMode but has initial value, apply formatting if needed
+    } else if (this.element.value) {
+      // If has initial value, apply formatting if needed
       const initialValue = this.element.value;
       this.element.value = this.formatValueForDisplay(initialValue);
     }
@@ -237,15 +237,13 @@ export class NumoraInput {
     };
   }
 
-  private handleValueChange(newValue: string, sourceValue?: string): void {
-    const valueToProcess = sourceValue ?? newValue;
-
-    if (this.resolvedOptions.rawValueMode) {
-      this.updateRawValue(valueToProcess);
+  private handleValueChange(formattedValue: string, rawValue?: string): void {
+    if (this.resolvedOptions.rawValueMode && rawValue !== undefined) {
+      this.rawValue = rawValue;
     }
 
     if (this.resolvedOptions.onChange) {
-      const valueToEmit = this.resolvedOptions.rawValueMode ? this.rawValue : newValue;
+      const valueToEmit = this.resolvedOptions.rawValueMode ? this.rawValue : formattedValue;
       this.resolvedOptions.onChange(valueToEmit);
     }
   }
@@ -271,9 +269,7 @@ export class NumoraInput {
   }
 
   private handleChange(e: Event): void {
-    const target = e.target as HTMLInputElement;
-
-    handleOnChangeNumoraInput(
+    const { formatted, raw } = handleOnChangeNumoraInput(
       e,
       this.resolvedOptions.decimalMaxLength,
       this.caretPositionBeforeChange,
@@ -283,7 +279,7 @@ export class NumoraInput {
     // Clear caret position captured in handleKeyDown after it's used to restore cursor position after formatting.
     this.caretPositionBeforeChange = undefined;
 
-    this.handleValueChange(target.value);
+    this.handleValueChange(formatted, raw);
 
     // Native 'input' event will continue to bubble naturally
     // Users can attach their own listeners via addEventListener or getElement()
@@ -316,9 +312,9 @@ export class NumoraInput {
   }
 
   private handlePaste(e: ClipboardEvent): void {
-    const result = handleOnPasteNumoraInput(e, this.resolvedOptions.decimalMaxLength, this.buildFormattingOptions());
+    const { formatted, raw } = handleOnPasteNumoraInput(e, this.resolvedOptions.decimalMaxLength, this.buildFormattingOptions());
 
-    this.handleValueChange(result);
+    this.handleValueChange(formatted, raw);
 
     // Note: handleOnPasteNumoraInput calls e.preventDefault() internally
     // We manually set the value, so we need to dispatch a synthetic input event
@@ -344,7 +340,12 @@ export class NumoraInput {
       const formatted = this.formatValueForDisplay(target.value);
       target.value = formatted;
 
-      this.handleValueChange(formatted);
+      // Extract raw value by removing separators for rawValueMode
+      const raw = this.resolvedOptions.rawValueMode
+        ? removeThousandSeparators(formatted, thousandSeparator)
+        : undefined;
+
+      this.handleValueChange(formatted, raw);
 
       // Dispatch input and change events if value changed
       if (oldValue !== formatted) {
@@ -354,29 +355,6 @@ export class NumoraInput {
         this.element.dispatchEvent(changeEvent);
       }
     }
-  }
-
-  /**
-   * Extracts and stores the raw numeric value from a formatted value.
-   * Gets the raw value from the data attribute set by event handlers, or extracts it from formatted value.
-   */
-  private updateRawValue(formattedValue: string): void {
-    // Try to get raw value from data attribute (set by event handlers)
-    const rawFromAttribute = this.element.getAttribute('data-raw-value');
-    if (rawFromAttribute !== null) {
-      this.rawValue = rawFromAttribute;
-      this.element.removeAttribute('data-raw-value');
-      return;
-    }
-
-    // Fallback: extract raw value by removing separators
-    if (!this.resolvedOptions.thousandSeparator) {
-      this.rawValue = formattedValue;
-      return;
-    }
-
-    // Remove thousand separators to get raw value
-    this.rawValue = removeThousandSeparators(formattedValue, this.resolvedOptions.thousandSeparator);
   }
 
   public getValue(): string {
