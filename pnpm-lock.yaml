@@ -99,8 +99,8 @@ importers:
         specifier: ^2.0.5
         version: 2.0.5
       numora-react:
-        specifier: ^2.0.5
-        version: 2.0.5
+        specifier: workspace:*
+        version: link:../packages/react
       ogl:
         specifier: ^1.0.11
         version: 1.0.11
@@ -3886,9 +3886,6 @@ packages:
 
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
-
-  numora-react@2.0.5:
-    resolution: {integrity: sha512-kqsblwg77uY0a/TOyi+n7oNPc1ooDo4T9p7OD91Ghut+Q44ZfbcVDW7Oz2mYG8nLE+MOUxH3oSyy28zHtvx2sA==}
 
   numora@2.0.5:
     resolution: {integrity: sha512-tw8hCH8BuyB4lBs0PWAOVicARNsRvHo9P1uWmhgZlCUvItuYDLaDrAAv05GxNDfo5P7RS/a0eqqtIAGd2tExFg==}
@@ -8826,8 +8823,6 @@ snapshots:
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
-
-  numora-react@2.0.5: {}
 
   numora@2.0.5: {}
 

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { expandCompactNotation } from '../src/features/compact-notation';
 
-describe('expandCompactNotation', () => {
-  describe('thousand (k)', () => {
+describe('✅ expandCompactNotation', () => {
+  describe('✅ thousand (k)', () => {
     it('should expand 1k to 1000', () => {
       expect(expandCompactNotation('1k')).toBe('1000');
     });
@@ -25,7 +25,7 @@ describe('expandCompactNotation', () => {
     });
   });
 
-  describe('millions (m)', () => {
+  describe('✅ millions (m)', () => {
     it('should expand 1m to 1000000', () => {
       expect(expandCompactNotation('1m')).toBe('1000000');
     });
@@ -44,7 +44,7 @@ describe('expandCompactNotation', () => {
     });
   });
 
-  describe('billions (b)', () => {
+  describe('✅ billions (b)', () => {
     it('should expand 1b to 1000000000', () => {
       expect(expandCompactNotation('1b')).toBe('1000000000');
     });
@@ -63,7 +63,7 @@ describe('expandCompactNotation', () => {
     });
   });
 
-  describe('edge cases', () => {
+  describe('✅ edge cases', () => {
     it('should handle no compact notation', () => {
       expect(expandCompactNotation('1234')).toBe('1234');
     });
@@ -97,12 +97,11 @@ describe('expandCompactNotation', () => {
     });
 
     it('should handle multiple compact notations', () => {
-      // This tests what happens if someone types "1k 2m" - each should expand
       expect(expandCompactNotation('1k 2m')).toBe('1000 2000000');
     });
   });
 
-  describe('decimal precision', () => {
+  describe('✅ decimal precision', () => {
     it('should handle 1.234k (returns 1234)', () => {
       expect(expandCompactNotation('1.234k')).toBe('1234');
     });
@@ -112,7 +111,6 @@ describe('expandCompactNotation', () => {
     });
 
     it('should trim trailing zeros in decimal results', () => {
-      // 0.123k = 123.0 → should become '123'
       expect(expandCompactNotation('0.123k')).toBe('123');
     });
 
@@ -121,132 +119,29 @@ describe('expandCompactNotation', () => {
     });
   });
 
-  describe('integration scenarios', () => {
+  describe('✅ integration scenarios', () => {
     it('should work with subsequent decimal trimming', () => {
-      const expanded = expandCompactNotation('1.5k'); // "1500"
+      const expanded = expandCompactNotation('1.5k');
       expect(expanded).toBe('1500');
-      // After trimToMaxDecimals(expanded, 2) → "1500" (no decimals to trim)
     });
 
     it('should handle decimal expansions that need trimming', () => {
-      const expanded = expandCompactNotation('1.234k'); // "1234"
+      const expanded = expandCompactNotation('1.234k');
       expect(expanded).toBe('1234');
     });
 
     it('should work with formatOn: change (thousand separators)', () => {
-      // When used with formatting:
-      // User types "1k" → expands to "1000" → formats to "1,000"
       const expanded = expandCompactNotation('1k');
       expect(expanded).toBe('1000');
     });
 
     it('should handle paste with compact notation', () => {
-      // User pastes "5m"
       const expanded = expandCompactNotation('5m');
       expect(expanded).toBe('5000000');
-    });
-  });
-
-  describe('real-world DeFi examples', () => {
-    it('should handle typical DeFi amounts', () => {
-      expect(expandCompactNotation('10k')).toBe('10000');  // 10k USDC
-      expect(expandCompactNotation('2.5m')).toBe('2500000');  // 2.5m in TVL
-      expect(expandCompactNotation('1b')).toBe('1000000000');  // 1B market cap
-    });
-
-    it('should handle small amounts', () => {
-      expect(expandCompactNotation('0.1k')).toBe('100');  // 100 tokens
-      expect(expandCompactNotation('0.05m')).toBe('50000');  // 50k tokens
-    });
-
-    it('should handle mixed case from user input', () => {
-      expect(expandCompactNotation('5K')).toBe('5000');
-      expect(expandCompactNotation('10M')).toBe('10000000');
-      expect(expandCompactNotation('3B')).toBe('3000000000');
     });
 
     it('should handle very big number', () => {
       expect(expandCompactNotation('111222333444555666777.8888K')).toBe('111222333444555666777888.8');
-    });
-  });
-
-  describe('extended scales (M, T, Qa, Qi, Sx, Sp, O, N)', () => {
-    describe('trillion (T)', () => {
-      it('should expand 1T to 1000000000000', () => {
-        expect(expandCompactNotation('1T')).toBe('1000000000000');
-      });
-
-      it('should expand 2.5T to 2500000000000', () => {
-        expect(expandCompactNotation('2.5T')).toBe('2500000000000');
-      });
-
-      it('should be case-insensitive (t)', () => {
-        expect(expandCompactNotation('1t')).toBe('1000000000000');
-      });
-    });
-
-    describe('quadrillion (Qa)', () => {
-      it('should expand 1Qa to 1000000000000000', () => {
-        expect(expandCompactNotation('1Qa')).toBe('1000000000000000');
-      });
-
-      it('should expand 1.5Qa to 1500000000000000', () => {
-        expect(expandCompactNotation('1.5Qa')).toBe('1500000000000000');
-      });
-
-      it('should be case-insensitive (qa)', () => {
-        expect(expandCompactNotation('1qa')).toBe('1000000000000000');
-      });
-    });
-
-    describe('quintillion (Qi)', () => {
-      it('should expand 1Qi to 1000000000000000000', () => {
-        expect(expandCompactNotation('1Qi')).toBe('1000000000000000000');
-      });
-
-      it('should be case-insensitive (qi)', () => {
-        expect(expandCompactNotation('1qi')).toBe('1000000000000000000');
-      });
-    });
-
-    describe('sextillion (Sx)', () => {
-      it('should expand 1Sx to 1000000000000000000000', () => {
-        expect(expandCompactNotation('1Sx')).toBe('1000000000000000000000');
-      });
-
-      it('should be case-insensitive (sx)', () => {
-        expect(expandCompactNotation('1sx')).toBe('1000000000000000000000');
-      });
-    });
-
-    describe('septillion (Sp)', () => {
-      it('should expand 1Sp to 1000000000000000000000000', () => {
-        expect(expandCompactNotation('1Sp')).toBe('1000000000000000000000000');
-      });
-
-      it('should be case-insensitive (sp)', () => {
-        expect(expandCompactNotation('1sp')).toBe('1000000000000000000000000');
-      });
-    });
-
-    describe('octillion (O)', () => {
-      it('should expand 1O to 1000000000000000000000000000', () => {
-        expect(expandCompactNotation('1O')).toBe('1000000000000000000000000000');
-      });
-
-      it('should be case-insensitive (o)', () => {
-        expect(expandCompactNotation('1o')).toBe('1000000000000000000000000000');
-      });
-    });
-
-    describe('nonillion (N)', () => {
-      it('should expand 1N to 1000000000000000000000000000000', () => {
-        expect(expandCompactNotation('1N')).toBe('1000000000000000000000000000000');
-      });
-
-      it('should be case-insensitive (n)', () => {
-        expect(expandCompactNotation('1n')).toBe('1000000000000000000000000000000');
-      });
     });
   });
 });

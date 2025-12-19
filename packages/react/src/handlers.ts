@@ -27,12 +27,16 @@ export function handleNumoraOnChange(
   e: React.ChangeEvent<HTMLInputElement>,
   options: BaseOptions
 ): ChangeResult {
+
   const { formatted, raw } = handleOnChangeNumoraInput(
     e.nativeEvent as unknown as Event,
     options.decimalMaxLength,
     options.caretPositionBeforeChange,
     options.formattingOptions
   );
+
+  console.log('formatted', formatted);
+  console.log('raw', raw);
 
   return {
     value: formatted,

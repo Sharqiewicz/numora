@@ -1,6 +1,6 @@
 import {
   getSeparators,
-  convertCommaOrDotToDecimalSeparatorAndPreventMultimpleDecimalSeparators,
+  handleDecimalSeparatorKey,
 } from '@/features/decimals';
 import {
   getInputCaretPosition,
@@ -50,7 +50,7 @@ export function handleOnKeyDownNumoraInput(
   const { decimalSeparator } = getSeparators(formattingOptions);
   const inputElement = e.target as HTMLInputElement;
 
-  if (convertCommaOrDotToDecimalSeparatorAndPreventMultimpleDecimalSeparators(e, inputElement, formattingOptions, decimalSeparator)) {
+  if (handleDecimalSeparatorKey(e, inputElement, formattingOptions, decimalSeparator)) {
     e.preventDefault();
     return;
   }

@@ -1,0 +1,1463 @@
+
+> numora@0.0.0 test /Users/kacpersatoshipay/Programmer/github-sharqiewicz/numora
+> pnpm --filter "./packages/*" test
+
+Scope: 2 of 4 workspace projects
+packages/core test$ vitest run
+packages/core test:  RUN  v3.2.4 /Users/kacpersatoshipay/Programmer/github-sharqiewicz/numora/packages/core
+packages/core test:  ✓ tests/scientific-notation.test.ts (30 tests) 4ms
+packages/core test:  ❯ tests/compact-notation.test.ts (50 tests | 13 failed) 13ms
+packages/core test:    ✓ expandCompactNotation > thousand (k) > should expand 1k to 1000 1ms
+packages/core test:    ✓ expandCompactNotation > thousand (k) > should expand 1.5k to 1500 0ms
+packages/core test:    ✓ expandCompactNotation > thousand (k) > should be case-insensitive (K) 0ms
+packages/core test:    ✓ expandCompactNotation > thousand (k) > should handle decimals (0.5k) 0ms
+packages/core test:    ✓ expandCompactNotation > thousand (k) > should handle 100k 0ms
+packages/core test:    ✓ expandCompactNotation > millions (m) > should expand 1m to 1000000 0ms
+packages/core test:    ✓ expandCompactNotation > millions (m) > should expand 2.5m to 2500000 0ms
+packages/core test:    ✓ expandCompactNotation > millions (m) > should be case-insensitive (M) 0ms
+packages/core test:    ✓ expandCompactNotation > millions (m) > should handle 0.5m 0ms
+packages/core test:    ✓ expandCompactNotation > billions (b) > should expand 1b to 1000000000 0ms
+packages/core test:    ✓ expandCompactNotation > billions (b) > should expand 3.5b to 3500000000 0ms
+packages/core test:    ✓ expandCompactNotation > billions (b) > should be case-insensitive (B) 0ms
+packages/core test:    ✓ expandCompactNotation > billions (b) > should handle 0.1b 0ms
+packages/core test:    ✓ expandCompactNotation > edge cases > should handle no compact notation 0ms
+packages/core test:    ✓ expandCompactNotation > edge cases > should handle empty string 0ms
+packages/core test:    ✓ expandCompactNotation > edge cases > should handle leading zeros (01k) 0ms
+packages/core test:    ✓ expandCompactNotation > edge cases > should handle very small decimals (0.001k) 0ms
+packages/core test:    ✓ expandCompactNotation > edge cases > should handle large numbers (999b) 0ms
+packages/core test:    ✓ expandCompactNotation > edge cases > should not expand invalid patterns (k1) 0ms
+packages/core test:    ✓ expandCompactNotation > edge cases > should not expand non-numeric patterns (abc) 0ms
+packages/core test:    ✓ expandCompactNotation > edge cases > should handle whitespace before suffix (1 k) 0ms
+packages/core test:    ✓ expandCompactNotation > edge cases > should handle multiple compact notations 0ms
+packages/core test:    ✓ expandCompactNotation > decimal precision > should handle 1.234k (returns 1234) 0ms
+packages/core test:    ✓ expandCompactNotation > decimal precision > should handle 2.5678m (returns 2567800) 0ms
+packages/core test:    ✓ expandCompactNotation > decimal precision > should trim trailing zeros in decimal results 0ms
+packages/core test:    ✓ expandCompactNotation > decimal precision > should handle very precise decimals (1.23456789k) 0ms
+packages/core test:    ✓ expandCompactNotation > integration scenarios > should work with subsequent decimal trimming 0ms
+packages/core test:    ✓ expandCompactNotation > integration scenarios > should handle decimal expansions that need trimming 0ms
+packages/core test:    ✓ expandCompactNotation > integration scenarios > should work with formatOn: change (thousand separators) 0ms
+packages/core test:    ✓ expandCompactNotation > integration scenarios > should handle paste with compact notation 0ms
+packages/core test:    ✓ expandCompactNotation > real-world DeFi examples > should handle typical DeFi amounts 0ms
+packages/core test:    ✓ expandCompactNotation > real-world DeFi examples > should handle small amounts 0ms
+packages/core test:    ✓ expandCompactNotation > real-world DeFi examples > should handle mixed case from user input 0ms
+packages/core test:    ✓ expandCompactNotation > real-world DeFi examples > should handle very big number 0ms
+packages/core test:    ✓ expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > trillion (T) > should expand 1T to 1000000000000 0ms
+packages/core test:    ✓ expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > trillion (T) > should expand 2.5T to 2500000000000 0ms
+packages/core test:    ✓ expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > trillion (T) > should be case-insensitive (t) 0ms
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > quadrillion (Qa) > should expand 1Qa to 1000000000000000 5ms
+packages/core test:      → expected '1Qa' to be '1000000000000000' // Object.is equality
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > quadrillion (Qa) > should expand 1.5Qa to 1500000000000000 1ms
+packages/core test:      → expected '1.5Qa' to be '1500000000000000' // Object.is equality
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > quadrillion (Qa) > should be case-insensitive (qa) 0ms
+packages/core test:      → expected '1qa' to be '1000000000000000' // Object.is equality
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > quintillion (Qi) > should expand 1Qi to 1000000000000000000 1ms
+packages/core test:      → expected '1Qi' to be '1000000000000000000' // Object.is equality
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > quintillion (Qi) > should be case-insensitive (qi) 0ms
+packages/core test:      → expected '1qi' to be '1000000000000000000' // Object.is equality
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > sextillion (Sx) > should expand 1Sx to 1000000000000000000000 0ms
+packages/core test:      → expected '1Sx' to be '1000000000000000000000' // Object.is equality
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > sextillion (Sx) > should be case-insensitive (sx) 0ms
+packages/core test:      → expected '1sx' to be '1000000000000000000000' // Object.is equality
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > septillion (Sp) > should expand 1Sp to 1000000000000000000000000 0ms
+packages/core test:      → expected '1Sp' to be '1000000000000000000000000' // Object.is equality
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > septillion (Sp) > should be case-insensitive (sp) 0ms
+packages/core test:      → expected '1sp' to be '1000000000000000000000000' // Object.is equality
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > octillion (O) > should expand 1O to 1000000000000000000000000000 0ms
+packages/core test:      → expected '1O' to be '1000000000000000000000000000' // Object.is equality
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > octillion (O) > should be case-insensitive (o) 0ms
+packages/core test:      → expected '1o' to be '1000000000000000000000000000' // Object.is equality
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > nonillion (N) > should expand 1N to 1000000000000000000000000000000 0ms
+packages/core test:      → expected '1N' to be '1000000000000000000000000000000' // Object.is equality
+packages/core test:    × expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > nonillion (N) > should be case-insensitive (n) 0ms
+packages/core test:      → expected '1n' to be '1000000000000000000000000000000' // Object.is equality
+packages/core test:  ❯ tests/formatting-large-number.test.ts (14 tests | 2 failed) 11ms
+packages/core test:    × formatLargeNumber > basic functionality > should format small numbers without scale 7ms
+packages/core test:      → expected '1k' to be '1234' // Object.is equality
+packages/core test:    ✓ formatLargeNumber > basic functionality > should format numbers with scale notation 0ms
+packages/core test:    ✓ formatLargeNumber > basic functionality > should handle zero 0ms
+packages/core test:    ✓ formatLargeNumber > basic functionality > should handle negative values 0ms
+packages/core test:    × formatLargeNumber > decimal places > should show decimals for values under threshold 1ms
+packages/core test:      → expected '123' to match /\d+\.\d+/
+packages/core test:    ✓ formatLargeNumber > decimal places > should not show decimals for large values 0ms
+packages/core test:    ✓ formatLargeNumber > decimal places > should respect minimum decimals 0ms
+packages/core test:    ✓ formatLargeNumber > edge cases > should handle empty string 0ms
+packages/core test:    ✓ formatLargeNumber > edge cases > should handle very large numbers 0ms
+packages/core test:    ✓ formatLargeNumber > edge cases > should use custom very large placeholder 0ms
+packages/core test:    ✓ formatLargeNumber > options > should respect minScale option 0ms
+packages/core test:    ✓ formatLargeNumber > options > should apply minimum decimals to zero if enabled 0ms
+packages/core test:    ✓ formatLargeNumber > custom separators > should work with custom decimal separator 0ms
+packages/core test:    ✓ formatLargeNumber > custom separators > should format with thousand separators 0ms
+packages/core test:  ❯ tests/formatting-subscript.test.ts (9 tests | 5 failed) 15ms
+packages/core test:    × condenseDecimalZeros > basic functionality > should condense leading zeros to subscript 11ms
+packages/core test:      → expected '0.0₅1' to be '0₆1' // Object.is equality
+packages/core test:    ✓ condenseDecimalZeros > basic functionality > should not condense if less than 3 leading zeros 0ms
+packages/core test:    ✓ condenseDecimalZeros > basic functionality > should handle values without leading zeros 0ms
+packages/core test:    ✓ condenseDecimalZeros > edge cases > should handle values without decimal separator 0ms
+packages/core test:    ✓ condenseDecimalZeros > edge cases > should handle empty string 0ms
+packages/core test:    × condenseDecimalZeros > edge cases > should handle negative values 1ms
+packages/core test:      → expected '-0.0₅1' to be '-0₆1' // Object.is equality
+packages/core test:    × condenseDecimalZeros > edge cases > should respect maxDecimalDigits 1ms
+packages/core test:      → expected '0.0₅123' to match /0₆\d{1,5}$/
+packages/core test:    × condenseDecimalZeros > custom decimal separator > should work with comma separator 0ms
+packages/core test:      → expected '0,0₅1' to be '0₆1' // Object.is equality
+packages/core test:    × condenseDecimalZeros > real-world scenarios > should handle very small DeFi amounts 0ms
+packages/core test:      → expected '0.0₆1' to be '0₇1' // Object.is equality
+packages/core test:  ❯ tests/formatting-percent.test.ts (15 tests | 9 failed) 14ms
+packages/core test:    × formatPercent > basic functionality > should format decimal as percentage 6ms
+packages/core test:      → expected '001%' to be '1.00%' // Object.is equality
+packages/core test:    × formatPercent > basic functionality > should respect decimal places 1ms
+packages/core test:      → expected '012.34%' to be '12.34%' // Object.is equality
+packages/core test:    ✓ formatPercent > basic functionality > should handle zero 0ms
+packages/core test:    × formatPercent > basic functionality > should handle negative values 1ms
+packages/core test:      → expected '-001%' to be '-1.00%' // Object.is equality
+packages/core test:    × formatPercent > edge cases > should handle very small values 1ms
+packages/core test:      → expected '000.01%' to be '0.0100%' // Object.is equality
+packages/core test:    × formatPercent > edge cases > should handle very large values 1ms
+packages/core test:      → expected '1000%' to be '1000.00%' // Object.is equality
+packages/core test:    × formatPercent > edge cases > should remove trailing zeros 1ms
+packages/core test:      → expected '010%' to be '10.00%' // Object.is equality
+packages/core test:    × formatPercent > custom separators > should work with comma decimal separator 0ms
+packages/core test:      → expected '001,00%' to be '1,00%' // Object.is equality
+packages/core test:    × formatLargePercent > basic functionality > should format normal percentages 1ms
+packages/core test:      → expected '00100%' to be '1.00%' // Object.is equality
+packages/core test:    ✓ formatLargePercent > basic functionality > should handle null/undefined 0ms
+packages/core test:    ✓ formatLargePercent > basic functionality > should handle zero 0ms
+packages/core test:    × formatLargePercent > basic functionality > should handle negative values 0ms
+packages/core test:      → expected '-00100%' to be '-1.00%' // Object.is equality
+packages/core test:    ✓ formatLargePercent > large percentages with scale notation > should format very large percentages 0ms
+packages/core test:    ✓ formatLargePercent > options > should use custom missing placeholder 0ms
+packages/core test:    ✓ formatLargePercent > options > should use custom very large placeholder 0ms
+packages/core test:  ✓ tests/formatting.change-detection.test.ts (9 tests) 3ms
+packages/core test:  ✓ tests/formatting.cursor-boundary.test.ts (16 tests) 6ms
+packages/core test:  ❯ tests/formatting.cursor.test.ts (44 tests | 6 failed | 2 skipped) 14ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > thousand style - typing that triggers comma insertion > should maintain cursor when typing digit that adds comma (100 -> 1,000) 1ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > thousand style - typing that triggers comma insertion > should maintain cursor when typing at end (1000 -> 1,000) 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > thousand style - typing that triggers comma insertion > should maintain cursor when typing digit that creates first comma (999 -> 1,000) 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > thousand style - deleting that removes comma > should maintain cursor when deleting digit that removes comma (1,000 -> 100) 0ms
+packages/core test:    × calculateCursorPositionAfterFormatting > thousand style - deleting that removes comma > should maintain cursor when deleting from middle (1,234 -> 123) 5ms
+packages/core test:      → expected 2 to be 3 // Object.is equality
+packages/core test:    × calculateCursorPositionAfterFormatting > thousand style - inserting in middle > should maintain cursor when inserting digit in middle (1,0|0 -> 1,5|00) 2ms
+packages/core test:      → expected '0' to be '5' // Object.is equality
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > thousand style - inserting in middle > should maintain cursor when inserting before comma (1|,000 -> 12,000) 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > thousand style - inserting in middle > should maintain cursor when inserting after comma (1,|000 -> 1,5000) 0ms
+packages/core test:    ↓ calculateCursorPositionAfterFormatting > thousand style - backspace on separator > should move cursor backward when separator is deleted (1,|000 -> 1,000)
+packages/core test:    ↓ calculateCursorPositionAfterFormatting > thousand style - backspace on separator > should handle backspace on separator in middle (1,2|34,567 -> 12,345,67)
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > thousand style - pasting > should maintain cursor when pasting at start (| -> 5,000|) 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > thousand style - pasting > should maintain cursor when pasting in middle (1,| -> 1,5000|) 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > thousand style - pasting > should handle pasting 5000 into 1,| (cursor after comma) 0ms
+packages/core test:    × calculateCursorPositionAfterFormatting > thousand style - decimal values > should maintain cursor in integer part (1,234.56 -> 12,345.6) 0ms
+packages/core test:      → expected 1 to be 2 // Object.is equality
+packages/core test:    × calculateCursorPositionAfterFormatting > thousand style - decimal values > should maintain cursor in decimal part (1,234.5|6 -> 1,234.56|) 1ms
+packages/core test:      → expected 8 to be 9 // Object.is equality
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > lakh style > should maintain cursor when formatting changes (123456 -> 1,23,456) 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > lakh style > should handle backspace on separator in lakh style 0ms
+packages/core test:    × calculateCursorPositionAfterFormatting > wan style > should maintain cursor when formatting changes (1234567 -> 123,4567) 0ms
+packages/core test:      → expected 5 to be 4 // Object.is equality
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > wan style > should handle backspace on separator in wan style 0ms
+packages/core test:    × calculateCursorPositionAfterFormatting > edge cases > should handle cursor at start 0ms
+packages/core test:      → expected 1 to be +0 // Object.is equality
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > edge cases > should handle cursor at end 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > edge cases > should handle negative cursor position 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > edge cases > should handle cursor beyond value length 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > edge cases > should handle empty old value 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > edge cases > should handle empty new value 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > real-world scenarios > should handle typing sequence: 1 -> 12 -> 123 -> 1,234 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > real-world scenarios > should handle deletion sequence: 1,234 -> 123 -> 12 -> 1 1ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > Delete key (deletes after cursor, cursor stays) > should keep cursor at position when Delete removes character after cursor 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > Delete key (deletes after cursor, cursor stays) > should handle Delete at separator position 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > Delete key (deletes after cursor, cursor stays) > should handle Delete with selection 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > Backspace key (deletes before cursor, cursor moves left) > should move cursor left when Backspace removes character before cursor 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > Backspace key (deletes before cursor, cursor moves left) > should handle Backspace at separator position 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > Backspace key (deletes before cursor, cursor moves left) > should handle Backspace with selection 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > Backspace key (deletes before cursor, cursor moves left) > should maintain cursor at beginning when deleting first digit (1,234,567,890.6789 -> 234,567,890.6789) 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > Backspace key (deletes before cursor, cursor moves left) > should maintain cursor at beginning when deleting first digit using findChangeRange fallback 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > Backspace key (deletes before cursor, cursor moves left) > should maintain cursor position when deleting second digit (1,234,567,890.6789 -> 1,34,567,890.6789) 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > Backspace key (deletes before cursor, cursor moves left) > should maintain cursor position when deleting third digit (1,234,567,890.6789 -> 1,24,567,890.6789) 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > findChangedRangeFromCaretPositions > should detect Delete key with endOffset 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > findChangedRangeFromCaretPositions > should detect Backspace key without endOffset 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > Delete vs Backspace key handling > findChangedRangeFromCaretPositions > should handle selection range 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > prefix and suffix scenarios (from react-number-format) > should maintain cursor with prefix when value decreases ($10000 -> $1000) 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > prefix and suffix scenarios (from react-number-format) > should maintain cursor with prefix when value decreases at position 2 ($10000 -> $1000) 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > prefix and suffix scenarios (from react-number-format) > should maintain cursor with prefix and suffix (100-1000 USD -> 100-10000 USD) 0ms
+packages/core test:    ✓ calculateCursorPositionAfterFormatting > prefix and suffix scenarios (from react-number-format) > should handle empty value with prefix and suffix (100-1000 USD -> empty) 0ms
+packages/core test:  ❯ tests/formatting.test.ts (59 tests | 3 failed) 13ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should format 1234567 to 1,234,567 2ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should format 123456 to 123,456 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should format 12345 to 12,345 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should format 1234 to 1,234 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should format 123 to 123 (no separator needed) 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should format 12 to 12 (no separator needed) 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should format 1 to 1 (no separator needed) 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should format 1000000 to 1,000,000 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should format 1234567890 to 1,234,567,890 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should handle decimal values 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should handle values starting with decimal point 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should handle empty string 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should handle zero 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should handle single decimal point 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should use custom separator 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should handle very large numbers 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should format negative numbers 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should format negative decimal numbers 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should handle negative zero 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should handle just minus sign 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should handle minus with decimal point 0ms
+packages/core test:    ✓ formatWithSeparators > thousand style (standard Western) > should handle negative numbers starting with decimal 0ms
+packages/core test:    ✓ formatWithSeparators > lakh style (Indian numbering) > should format 1234567 to 12,34,567 0ms
+packages/core test:    ✓ formatWithSeparators > lakh style (Indian numbering) > should format 123456 to 1,23,456 0ms
+packages/core test:    ✓ formatWithSeparators > lakh style (Indian numbering) > should format 12345 to 12,345 0ms
+packages/core test:    ✓ formatWithSeparators > lakh style (Indian numbering) > should format 1234 to 1,234 0ms
+packages/core test:    ✓ formatWithSeparators > lakh style (Indian numbering) > should format 123 to 123 (no separator needed) 0ms
+packages/core test:    ✓ formatWithSeparators > lakh style (Indian numbering) > should format 100000 to 1,00,000 0ms
+packages/core test:    ✓ formatWithSeparators > lakh style (Indian numbering) > should format 1000000 to 10,00,000 0ms
+packages/core test:    ✓ formatWithSeparators > lakh style (Indian numbering) > should format 12345678 to 1,23,45,678 0ms
+packages/core test:    ✓ formatWithSeparators > lakh style (Indian numbering) > should handle decimal values 0ms
+packages/core test:    ✓ formatWithSeparators > lakh style (Indian numbering) > should use custom separator 0ms
+packages/core test:    ✓ formatWithSeparators > wan style (Chinese numbering) > should format 1234567 to 123,4567 0ms
+packages/core test:    ✓ formatWithSeparators > wan style (Chinese numbering) > should format 123456 to 12,3456 0ms
+packages/core test:    ✓ formatWithSeparators > wan style (Chinese numbering) > should format 12345 to 1,2345 0ms
+packages/core test:    ✓ formatWithSeparators > wan style (Chinese numbering) > should format 1234 to 1234 (no separator needed) 0ms
+packages/core test:    ✓ formatWithSeparators > wan style (Chinese numbering) > should format 123 to 123 (no separator needed) 0ms
+packages/core test:    ✓ formatWithSeparators > wan style (Chinese numbering) > should format 10000 to 1,0000 0ms
+packages/core test:    ✓ formatWithSeparators > wan style (Chinese numbering) > should format 100000 to 10,0000 0ms
+packages/core test:    ✓ formatWithSeparators > wan style (Chinese numbering) > should format 12345678 to 1234,5678 0ms
+packages/core test:    ✓ formatWithSeparators > wan style (Chinese numbering) > should format 123456789 to 1,2345,6789 0ms
+packages/core test:    ✓ formatWithSeparators > wan style (Chinese numbering) > should handle decimal values 0ms
+packages/core test:    ✓ formatWithSeparators > wan style (Chinese numbering) > should use custom separator 0ms
+packages/core test:    × formatWithSeparators > default behavior > should default to thousand style when groupStyle is not specified 5ms
+packages/core test:      → expected '1234567' to be '1,234,567' // Object.is equality
+packages/core test:    ✓ formatWithSeparators > edge cases > should handle leading zeros 0ms
+packages/core test:    ✓ formatWithSeparators > edge cases > should handle very small numbers 0ms
+packages/core test:    ✓ formatWithSeparators > edge cases > should handle numbers with only decimal part 0ms
+packages/core test:    ✓ formatWithSeparators > edge cases > should handle numbers ending with decimal point 0ms
+packages/core test:    ✓ formatWithSeparators > additional test cases from react-number-format > thousand style edge cases > should format 10040 to 10,040 0ms
+packages/core test:    ✓ formatWithSeparators > additional test cases from react-number-format > thousand style edge cases > should format -1000.40 to -1,000.40 0ms
+packages/core test:    ✓ formatWithSeparators > additional test cases from react-number-format > thousand style edge cases > should format -100.40 to -100.40 (no separator needed) 0ms
+packages/core test:    ✓ formatWithSeparators > additional test cases from react-number-format > lakh style edge cases > should format 1004000 to 10,04,000 0ms
+packages/core test:    ✓ formatWithSeparators > additional test cases from react-number-format > lakh style edge cases > should format 100400.5 to 1,00,400.5 0ms
+packages/core test:    ✓ formatWithSeparators > additional test cases from react-number-format > lakh style edge cases > should format -100400.5 to -1,00,400.5 0ms
+packages/core test:    ✓ formatWithSeparators > additional test cases from react-number-format > lakh style edge cases > should format -100.40 to -100.40 (no separator needed) 0ms
+packages/core test:    ✓ formatWithSeparators > additional test cases from react-number-format > wan style edge cases > should format 123456789 to 1,2345,6789 0ms
+packages/core test:    ✓ formatWithSeparators > additional test cases from react-number-format > wan style edge cases > should format -12345.67 to -1,2345.67 0ms
+packages/core test:    × formatWithSeparators > additional test cases from react-number-format > none style (thousand grouping without special rules) > should format 1000 to 1,000 0ms
+packages/core test:      → expected '1000' to be '1,000' // Object.is equality
+packages/core test:    × formatWithSeparators > additional test cases from react-number-format > none style (thousand grouping without special rules) > should format -12345678.90 to -12,345,678.90 0ms
+packages/core test:      → expected '-12345678.90' to be '-12,345,678.90' // Object.is equality
+packages/core test:  ❯ tests/NumoraInput.test.ts (103 tests | 49 failed) 56ms
+packages/core test:    ✓ NumoraInput Component > should render the component 9ms
+packages/core test:    ✓ NumoraInput Component > should allow numeric input 3ms
+packages/core test:    ✓ NumoraInput Component > should prevent non-numeric input 2ms
+packages/core test:    ✓ NumoraInput Component > should prevent multiple decimal points 2ms
+packages/core test:    × NumoraInput Component > should replace comma with period 6ms
+packages/core test:      → expected '11' to be '1.1' // Object.is equality
+packages/core test:    ✓ NumoraInput Component > should work with readOnly property 1ms
+packages/core test:    ✓ NumoraInput Component > should apply additional className 0ms
+packages/core test:    ✓ NumoraInput Component > should remove leading zeros by default 1ms
+packages/core test:    ✓ NumoraInput Component > should not allow negative numbers by default 1ms
+packages/core test:    ✓ NumoraInput Component > should not allow more decimals than decimalMaxLength 1ms
+packages/core test:    ✓ NumoraInput Component > should initialize with default value 0ms
+packages/core test:    ✓ NumoraInput Component > should handle paste events 1ms
+packages/core test:    × NumoraInput Component > should handle paste events with multiple dots and commas 1ms
+packages/core test:      → expected '123.' to contain '123.45'
+packages/core test:    × Paste handler sanitization cases > should sanitize "'1.......4.....2'" to "'1.42'" with max 8 decimals 2ms
+packages/core test:      → expected { formatted: '1.', raw: '1.' } to be '1.42' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'12....34.....56'" to "'12.3456'" with max 8 decimals 1ms
+packages/core test:      → expected { formatted: '12.', raw: '12.' } to be '12.3456' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'....56789...'" to "'.56789'" with max 5 decimals 1ms
+packages/core test:      → expected { formatted: '....56789...', …(1) } to be '.56789' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'1.23..4..56.'" to "'1.23456'" with max 6 decimals 0ms
+packages/core test:      → expected { formatted: '1.23', raw: '1.23' } to be '1.23456' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'1.....2'" to "'1.2'" with max 8 decimals 0ms
+packages/core test:      → expected { formatted: '1.', raw: '1.' } to be '1.2' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'123..4...56.7'" to "'123.4567'" with max 7 decimals 0ms
+packages/core test:      → expected { formatted: '123.', raw: '123.' } to be '123.4567' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'a.b.c.123.4.def56'" to "'.123456'" with max 8 decimals 0ms
+packages/core test:      → expected { formatted: '...123.4.56', …(1) } to be '.123456' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'12abc34....def567'" to "'1234.56'" with max 2 decimals 0ms
+packages/core test:      → expected { formatted: '1234.', raw: '1234.' } to be '1234.56' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'.....a.b.c......'" to "'.'" with max 8 decimals 0ms
+packages/core test:      → expected { formatted: '.............', …(1) } to be '.' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'12.....3..4..5abc6'" to "'12.3456'" with max 7 decimals 0ms
+packages/core test:      → expected { formatted: '12.', raw: '12.' } to be '12.3456' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'1a2b3c4d5e.1234567'" to "'12345.1234'" with max 4 decimals 0ms
+packages/core test:      → expected { formatted: '12345.1234', …(1) } to be '12345.1234' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'12abc@#34..def$%^567'" to "'1234.56'" with max 2 decimals 0ms
+packages/core test:      → expected { formatted: '1234.', raw: '1234.' } to be '1234.56' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'....!@#$$%^&*(('" to "'.'" with max 8 decimals 0ms
+packages/core test:      → expected { formatted: '....', raw: '....' } to be '.' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'123....abc.def456ghi789'" to "'123.4567'" with max 4 decimals 0ms
+packages/core test:      → expected { formatted: '123.', raw: '123.' } to be '123.4567' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'00.00123...4'" to "'00.0012'" with max 4 decimals 0ms
+packages/core test:      → expected { formatted: '0.0012', raw: '0.0012' } to be '00.0012' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'.1...2.67.865'" to "'.126'" with max 3 decimals 0ms
+packages/core test:      → expected { formatted: '.1', raw: '.1' } to be '.126' // Object.is equality
+packages/core test:    × Paste handler sanitization cases > should sanitize "'123abc...'" to "'123.'" with max 6 decimals 0ms
+packages/core test:      → expected { formatted: '123.', raw: '123.' } to be '123.' // Object.is equality
+packages/core test:    × NumoraInput edge cases > should accept only one decimal point 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × NumoraInput edge cases > should call onChange callback when value changes 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × NumoraInput edge cases > should allow navigation keys 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    ✓ Negative Number Support > Basic negative number input > should allow negative numbers when enableNegative is true 1ms
+packages/core test:    ✓ Negative Number Support > Basic negative number input > should allow negative decimal numbers 0ms
+packages/core test:    ✓ Negative Number Support > Basic negative number input > should allow typing minus sign at the start 0ms
+packages/core test:    ✓ Negative Number Support > Basic negative number input > should allow negative zero 0ms
+packages/core test:    ✓ Negative Number Support > Minus sign position and multiple minus signs > should only allow minus sign at the start 0ms
+packages/core test:    ✓ Negative Number Support > Minus sign position and multiple minus signs > should prevent multiple minus signs 0ms
+packages/core test:    ✓ Negative Number Support > Minus sign position and multiple minus signs > should handle minus sign in the middle by removing it 0ms
+packages/core test:    ✓ Negative Number Support > Minus sign position and multiple minus signs > should preserve minus sign when typing after it 0ms
+packages/core test:    ✓ Negative Number Support > Sanitization with negative numbers > should preserve minus sign during sanitization 0ms
+packages/core test:    ✓ Negative Number Support > Sanitization with negative numbers > should remove minus sign if no digits follow 0ms
+packages/core test:    × Negative Number Support > Sanitization with negative numbers > should handle negative numbers with commas 1ms
+packages/core test:      → expected '-1234.56' to be '-1,234.56' // Object.is equality
+packages/core test:    ✓ Negative Number Support > Paste events with negative numbers > should handle pasting negative numbers 2ms
+packages/core test:    ✓ Negative Number Support > Paste events with negative numbers > should handle pasting negative numbers with invalid characters 0ms
+packages/core test:    × Negative Number Support > Formatting with negative numbers > should format negative numbers with thousand separators 1ms
+packages/core test:      → expected '-1234567' to be '-1,234,567' // Object.is equality
+packages/core test:    × Negative Number Support > Formatting with negative numbers > should format negative decimal numbers with separators 0ms
+packages/core test:      → expected '-1234567.89' to be '-1,234,567.89' // Object.is equality
+packages/core test:    × Negative Number Support > Formatting with negative numbers > should handle negative numbers in blur mode 1ms
+packages/core test:      → expected '-1234567' to be '-1,234,567' // Object.is equality
+packages/core test:    ✓ Negative Number Support > Edge cases > should handle just minus sign 0ms
+packages/core test:    ✓ Negative Number Support > Edge cases > should handle minus sign with decimal point 0ms
+packages/core test:    ✓ Negative Number Support > Edge cases > should handle negative number with leading zeros 0ms
+packages/core test:    ✓ Negative Number Support > Edge cases > should respect decimalMaxLength for negative numbers 0ms
+packages/core test:    ✓ Leading Zeros Support > Default behavior (enableLeadingZeros: false) > should remove leading zeros by default 0ms
+packages/core test:    ✓ Leading Zeros Support > Default behavior (enableLeadingZeros: false) > should remove multiple leading zeros 0ms
+packages/core test:    ✓ Leading Zeros Support > Default behavior (enableLeadingZeros: false) > should preserve single zero 0ms
+packages/core test:    ✓ Leading Zeros Support > Default behavior (enableLeadingZeros: false) > should handle leading zeros with decimals 0ms
+packages/core test:    ✓ Leading Zeros Support > Default behavior (enableLeadingZeros: false) > should remove leading zeros from negative numbers 0ms
+packages/core test:    ✓ Leading Zeros Support > With enableLeadingZeros: true > should preserve leading zeros when enabled 0ms
+packages/core test:    ✓ Leading Zeros Support > With enableLeadingZeros: true > should preserve multiple leading zeros 0ms
+packages/core test:    ✓ Leading Zeros Support > With enableLeadingZeros: true > should preserve leading zeros with decimals 0ms
+packages/core test:    ✓ Leading Zeros Support > With enableLeadingZeros: true > should preserve leading zeros in negative numbers 0ms
+packages/core test:    ✓ Leading Zeros Support > With enableLeadingZeros: true > should preserve leading zeros when typing 0ms
+packages/core test:    ✓ Leading Zeros Support > With enableLeadingZeros: true > should handle paste events with leading zeros 0ms
+packages/core test:    × Leading Zeros Support > With enableLeadingZeros: true > should preserve leading zeros with formatting 0ms
+packages/core test:      → expected '0001234' to be '0001,234' // Object.is equality
+packages/core test:    ✓ Leading Zeros Support > Edge cases > should handle just zeros 0ms
+packages/core test:    ✓ Leading Zeros Support > Edge cases > should handle zero with decimal point 0ms
+packages/core test:    ✓ Leading Zeros Support > Edge cases > should handle leading zeros after sanitization 0ms
+packages/core test:    × Scientific Notation Expansion > Negative exponents (small numbers) > should expand 1.5e-7 to 0.00000015 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Negative exponents (small numbers) > should expand 1.5e-1 to 0.15 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Negative exponents (small numbers) > should expand 1.23e-4 to 0.000123 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Negative exponents (small numbers) > should expand 2e-3 to 0.002 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Negative exponents (small numbers) > should expand 0.5e-2 to 0.005 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Negative exponents (small numbers) > should expand 1e-10 to 0.0000000001 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Negative exponents (small numbers) > should expand 123.456e-2 to 1.23456 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Positive exponents (large numbers) > should expand 2e+5 to 200000 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Positive exponents (large numbers) > should expand 1.5e+2 to 150 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Positive exponents (large numbers) > should expand 1.5e+1 to 15 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Positive exponents (large numbers) > should expand 12.34e+1 to 123.4 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Positive exponents (large numbers) > should expand 12.34e+2 to 1234 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Positive exponents (large numbers) > should expand 1e+3 to 1000 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Edge cases > should handle exponent of 0 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Edge cases > should handle uppercase E 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Edge cases > should handle integer base without decimal point 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Edge cases > should respect decimalMaxLength when expanding 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Edge cases > should not expand non-scientific notation 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    × Scientific Notation Expansion > Edge cases > should handle paste events with scientific notation 0ms
+packages/core test:      → NumoraInput2 is not a constructor
+packages/core test:    ✓ Raw Value Mode > Basic functionality > should store raw value separately from formatted display 0ms
+packages/core test:    ✓ Raw Value Mode > Basic functionality > should return raw value from getValue() when rawValueMode is enabled 0ms
+packages/core test:    ✓ Raw Value Mode > Basic functionality > should return formatted value from getValue() when rawValueMode is disabled 0ms
+packages/core test:    ✓ Raw Value Mode > setValue with raw value mode > should format raw value for display when setValue is called 0ms
+packages/core test:    ✓ Raw Value Mode > setValue with raw value mode > should handle decimal values 0ms
+packages/core test:    ✓ Raw Value Mode > setValue with raw value mode > should handle empty string 0ms
+packages/core test:    ✓ Raw Value Mode > Input events with raw value mode > should extract raw value during typing 0ms
+packages/core test:    ✓ Raw Value Mode > Input events with raw value mode > should handle decimal input 0ms
+packages/core test:    × Raw Value Mode > Paste events with raw value mode > should extract raw value from pasted content 1ms
+packages/core test:      → expected '' to be '1234567' // Object.is equality
+packages/core test:    × Raw Value Mode > Blur mode with raw value mode > should extract raw value in blur mode 0ms
+packages/core test:      → expected '1234567' to be '1,234,567' // Object.is equality
+packages/core test:    ✓ Raw Value Mode > Edge cases with raw value mode > should handle empty string 0ms
+packages/core test:    ✓ Raw Value Mode > Edge cases with raw value mode > should handle just decimal separator 0ms
+packages/core test:    ✓ Raw Value Mode > Edge cases with raw value mode > should handle zero 0ms
+packages/core test:    × Raw Value Mode > Edge cases with raw value mode > should work without thousand separator 1ms
+packages/core test:      → thousandSeparator cannot be empty. Received: ""
+packages/core test:    ✓ Raw Value Mode > Backward compatibility > should maintain current behavior when rawValueMode is false 0ms
+packages/core test:    ✓ Raw Value Mode > Backward compatibility > should default to false for backward compatibility 0ms
+packages/core test:  ✓ tests/leading-zeros.test.ts (18 tests) 2ms
+packages/core test:  ✓ tests/decimals-min.test.ts (12 tests) 2ms
+packages/core test: ⎯⎯⎯⎯⎯⎯ Failed Tests 87 ⎯⎯⎯⎯⎯⎯⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > NumoraInput Component > should replace comma with period
+packages/core test: AssertionError: expected '11' to be '1.1' // Object.is equality
+packages/core test: Expected: [32m"1[7m.[27m1"[39m
+packages/core test: Received: [31m"11"[39m
+packages/core test:  ❯ tests/NumoraInput.test.ts:83:32
+packages/core test:      81| 
+packages/core test:      82|     expect(onChangeMock).toHaveBeenCalled();
+packages/core test:      83|     expect(inputElement.value).toBe('1.1');
+packages/core test:        |                                ^
+packages/core test:      84|   });
+packages/core test:      85| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > NumoraInput Component > should handle paste events with multiple dots and commas
+packages/core test: AssertionError: expected '123.' to contain '123.45'
+packages/core test: Expected: [32m"123.[7m45[27m"[39m
+packages/core test: Received: [31m"123."[39m
+packages/core test:  ❯ tests/NumoraInput.test.ts:156:32
+packages/core test:     154|     inputElement.dispatchEvent(new Event('paste'));
+packages/core test:     155| 
+packages/core test:     156|     expect(inputElement.value).toContain('123.45');
+packages/core test:        |                                ^
+packages/core test:     157|   });
+packages/core test:     158| });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'1.......4.....2'" to "'1.42'" with max 8 decimals
+packages/core test: AssertionError: expected { formatted: '1.', raw: '1.' } to be '1.42' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: "1.42"
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": "1.",
+packages/core test:   "raw": "1.",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'12....34.....56'" to "'12.3456'" with max 8 decimals
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'12.....3..4..5abc6'" to "'12.3456'" with max 7 decimals
+packages/core test: AssertionError: expected { formatted: '12.', raw: '12.' } to be '12.3456' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: "12.3456"
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": "12.",
+packages/core test:   "raw": "12.",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'....56789...'" to "'.56789'" with max 5 decimals
+packages/core test: AssertionError: expected { formatted: '....56789...', …(1) } to be '.56789' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: ".56789"
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": "....56789...",
+packages/core test:   "raw": "....56789...",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'1.23..4..56.'" to "'1.23456'" with max 6 decimals
+packages/core test: AssertionError: expected { formatted: '1.23', raw: '1.23' } to be '1.23456' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: "1.23456"
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": "1.23",
+packages/core test:   "raw": "1.23",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'1.....2'" to "'1.2'" with max 8 decimals
+packages/core test: AssertionError: expected { formatted: '1.', raw: '1.' } to be '1.2' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: "1.2"
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": "1.",
+packages/core test:   "raw": "1.",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'123..4...56.7'" to "'123.4567'" with max 7 decimals
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'123....abc.def456ghi789'" to "'123.4567'" with max 4 decimals
+packages/core test: AssertionError: expected { formatted: '123.', raw: '123.' } to be '123.4567' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: "123.4567"
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": "123.",
+packages/core test:   "raw": "123.",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'a.b.c.123.4.def56'" to "'.123456'" with max 8 decimals
+packages/core test: AssertionError: expected { formatted: '...123.4.56', …(1) } to be '.123456' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: ".123456"
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": "...123.4.56",
+packages/core test:   "raw": "...123.4.56",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'12abc34....def567'" to "'1234.56'" with max 2 decimals
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'12abc@#34..def$%^567'" to "'1234.56'" with max 2 decimals
+packages/core test: AssertionError: expected { formatted: '1234.', raw: '1234.' } to be '1234.56' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: "1234.56"
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": "1234.",
+packages/core test:   "raw": "1234.",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'.....a.b.c......'" to "'.'" with max 8 decimals
+packages/core test: AssertionError: expected { formatted: '.............', …(1) } to be '.' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: "."
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": ".............",
+packages/core test:   "raw": ".............",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'1a2b3c4d5e.1234567'" to "'12345.1234'" with max 4 decimals
+packages/core test: AssertionError: expected { formatted: '12345.1234', …(1) } to be '12345.1234' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: "12345.1234"
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": "12345.1234",
+packages/core test:   "raw": "12345.1234",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'....!@#$$%^&*(('" to "'.'" with max 8 decimals
+packages/core test: AssertionError: expected { formatted: '....', raw: '....' } to be '.' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: "."
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": "....",
+packages/core test:   "raw": "....",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'00.00123...4'" to "'00.0012'" with max 4 decimals
+packages/core test: AssertionError: expected { formatted: '0.0012', raw: '0.0012' } to be '00.0012' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: "00.0012"
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": "0.0012",
+packages/core test:   "raw": "0.0012",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'.1...2.67.865'" to "'.126'" with max 3 decimals
+packages/core test: AssertionError: expected { formatted: '.1', raw: '.1' } to be '.126' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: ".126"
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": ".1",
+packages/core test:   "raw": ".1",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Paste handler sanitization cases > should sanitize "'123abc...'" to "'123.'" with max 6 decimals
+packages/core test: AssertionError: expected { formatted: '123.', raw: '123.' } to be '123.' // Object.is equality
+packages/core test: [32m- Expected:[39m 
+packages/core test: "123."
+packages/core test: [31m+ Received:[39m 
+packages/core test: {
+packages/core test:   "formatted": "123.",
+packages/core test:   "raw": "123.",
+packages/core test: }
+packages/core test:  ❯ tests/NumoraInput.test.ts:196:22
+packages/core test:     194| 
+packages/core test:     195|       const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLen…
+packages/core test:     196|       expect(result).toBe(expected);
+packages/core test:        |                      ^
+packages/core test:     197|       expect(mockInputElement.value).toBe(expected);
+packages/core test:     198|     }
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > NumoraInput edge cases > should accept only one decimal point
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:218:19
+packages/core test:     216| 
+packages/core test:     217|   it('should accept only one decimal point', () => {
+packages/core test:     218|     NumoraInput = new NumoraInput(container, { decimalMaxLength: 3 });
+packages/core test:        |                   ^
+packages/core test:     219|     const inputElement = container.querySelector('input') as HTMLInput…
+packages/core test:     220| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > NumoraInput edge cases > should call onChange callback when value changes
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:235:19
+packages/core test:     233|   it('should call onChange callback when value changes', () => {
+packages/core test:     234|     const onChange = vi.fn();
+packages/core test:     235|     NumoraInput = new NumoraInput(container, {
+packages/core test:        |                   ^
+packages/core test:     236|       decimalMaxLength: 2,
+packages/core test:     237|       onChange,
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > NumoraInput edge cases > should allow navigation keys
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:249:19
+packages/core test:     247| 
+packages/core test:     248|   it('should allow navigation keys', () => {
+packages/core test:     249|     NumoraInput = new NumoraInput(container, { decimalMaxLength: 2 });
+packages/core test:        |                   ^
+packages/core test:     250|     const inputElement = container.querySelector('input') as HTMLInput…
+packages/core test:     251| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Negative Number Support > Sanitization with negative numbers > should handle negative numbers with commas
+packages/core test: AssertionError: expected '-1234.56' to be '-1,234.56' // Object.is equality
+packages/core test: Expected: [32m"-1[7m,[27m234.56"[39m
+packages/core test: Received: [31m"-1234.56"[39m
+packages/core test:  ❯ tests/NumoraInput.test.ts:409:34
+packages/core test:     407|       inputElement.dispatchEvent(new Event('input'));
+packages/core test:     408| 
+packages/core test:     409|       expect(inputElement.value).toBe('-1,234.56');
+packages/core test:        |                                  ^
+packages/core test:     410|     });
+packages/core test:     411|   });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Negative Number Support > Formatting with negative numbers > should format negative numbers with thousand separators
+packages/core test: AssertionError: expected '-1234567' to be '-1,234,567' // Object.is equality
+packages/core test: Expected: [32m"-1[7m,[27m234[7m,[27m567"[39m
+packages/core test: Received: [31m"-1234567"[39m
+packages/core test:  ❯ tests/NumoraInput.test.ts:463:34
+packages/core test:     461|       inputElement.dispatchEvent(new Event('input'));
+packages/core test:     462| 
+packages/core test:     463|       expect(inputElement.value).toBe('-1,234,567');
+packages/core test:        |                                  ^
+packages/core test:     464|     });
+packages/core test:     465| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Negative Number Support > Formatting with negative numbers > should format negative decimal numbers with separators
+packages/core test: AssertionError: expected '-1234567.89' to be '-1,234,567.89' // Object.is equality
+packages/core test: Expected: [32m"-1[7m,[27m234[7m,[27m567.89"[39m
+packages/core test: Received: [31m"-1234567.89"[39m
+packages/core test:  ❯ tests/NumoraInput.test.ts:478:34
+packages/core test:     476|       inputElement.dispatchEvent(new Event('input'));
+packages/core test:     477| 
+packages/core test:     478|       expect(inputElement.value).toBe('-1,234,567.89');
+packages/core test:        |                                  ^
+packages/core test:     479|     });
+packages/core test:     480| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Negative Number Support > Formatting with negative numbers > should handle negative numbers in blur mode
+packages/core test: AssertionError: expected '-1234567' to be '-1,234,567' // Object.is equality
+packages/core test: Expected: [32m"-1[7m,[27m234[7m,[27m567"[39m
+packages/core test: Received: [31m"-1234567"[39m
+packages/core test:  ❯ tests/NumoraInput.test.ts:496:34
+packages/core test:     494|       inputElement.dispatchEvent(new Event('blur'));
+packages/core test:     495| 
+packages/core test:     496|       expect(inputElement.value).toBe('-1,234,567');
+packages/core test:        |                                  ^
+packages/core test:     497|     });
+packages/core test:     498|   });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Leading Zeros Support > With enableLeadingZeros: true > should preserve leading zeros with formatting
+packages/core test: AssertionError: expected '0001234' to be '0001,234' // Object.is equality
+packages/core test: Expected: [32m"0001[7m,[27m234"[39m
+packages/core test: Received: [31m"0001234"[39m
+packages/core test:  ❯ tests/NumoraInput.test.ts:711:34
+packages/core test:     709|       inputElement.dispatchEvent(new Event('input'));
+packages/core test:     710| 
+packages/core test:     711|       expect(inputElement.value).toBe('0001,234');
+packages/core test:        |                                  ^
+packages/core test:     712|     });
+packages/core test:     713|   });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Negative exponents (small numbers) > should expand 1.5e-7 to 0.00000015
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:763:21
+packages/core test:     761|   describe('Negative exponents (small numbers)', () => {
+packages/core test:     762|     it('should expand 1.5e-7 to 0.00000015', () => {
+packages/core test:     763|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 8 }…
+packages/core test:        |                     ^
+packages/core test:     764|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     765| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Negative exponents (small numbers) > should expand 1.5e-1 to 0.15
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:773:21
+packages/core test:     771| 
+packages/core test:     772|     it('should expand 1.5e-1 to 0.15', () => {
+packages/core test:     773|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 2 }…
+packages/core test:        |                     ^
+packages/core test:     774|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     775| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Negative exponents (small numbers) > should expand 1.23e-4 to 0.000123
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:783:21
+packages/core test:     781| 
+packages/core test:     782|     it('should expand 1.23e-4 to 0.000123', () => {
+packages/core test:     783|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 6 }…
+packages/core test:        |                     ^
+packages/core test:     784|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     785| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Negative exponents (small numbers) > should expand 2e-3 to 0.002
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:793:21
+packages/core test:     791| 
+packages/core test:     792|     it('should expand 2e-3 to 0.002', () => {
+packages/core test:     793|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 3 }…
+packages/core test:        |                     ^
+packages/core test:     794|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     795| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Negative exponents (small numbers) > should expand 0.5e-2 to 0.005
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:803:21
+packages/core test:     801| 
+packages/core test:     802|     it('should expand 0.5e-2 to 0.005', () => {
+packages/core test:     803|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 3 }…
+packages/core test:        |                     ^
+packages/core test:     804|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     805| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Negative exponents (small numbers) > should expand 1e-10 to 0.0000000001
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:813:21
+packages/core test:     811| 
+packages/core test:     812|     it('should expand 1e-10 to 0.0000000001', () => {
+packages/core test:     813|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 10 …
+packages/core test:        |                     ^
+packages/core test:     814|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     815| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Negative exponents (small numbers) > should expand 123.456e-2 to 1.23456
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:823:21
+packages/core test:     821| 
+packages/core test:     822|     it('should expand 123.456e-2 to 1.23456', () => {
+packages/core test:     823|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 5 }…
+packages/core test:        |                     ^
+packages/core test:     824|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     825| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Positive exponents (large numbers) > should expand 2e+5 to 200000
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:835:21
+packages/core test:     833|   describe('Positive exponents (large numbers)', () => {
+packages/core test:     834|     it('should expand 2e+5 to 200000', () => {
+packages/core test:     835|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 0 }…
+packages/core test:        |                     ^
+packages/core test:     836|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     837| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Positive exponents (large numbers) > should expand 1.5e+2 to 150
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:845:21
+packages/core test:     843| 
+packages/core test:     844|     it('should expand 1.5e+2 to 150', () => {
+packages/core test:     845|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 0 }…
+packages/core test:        |                     ^
+packages/core test:     846|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     847| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Positive exponents (large numbers) > should expand 1.5e+1 to 15
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:855:21
+packages/core test:     853| 
+packages/core test:     854|     it('should expand 1.5e+1 to 15', () => {
+packages/core test:     855|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 0 }…
+packages/core test:        |                     ^
+packages/core test:     856|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     857| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Positive exponents (large numbers) > should expand 12.34e+1 to 123.4
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:865:21
+packages/core test:     863| 
+packages/core test:     864|     it('should expand 12.34e+1 to 123.4', () => {
+packages/core test:     865|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 1 }…
+packages/core test:        |                     ^
+packages/core test:     866|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     867| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Positive exponents (large numbers) > should expand 12.34e+2 to 1234
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:875:21
+packages/core test:     873| 
+packages/core test:     874|     it('should expand 12.34e+2 to 1234', () => {
+packages/core test:     875|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 0 }…
+packages/core test:        |                     ^
+packages/core test:     876|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     877| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[36/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Positive exponents (large numbers) > should expand 1e+3 to 1000
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:885:21
+packages/core test:     883| 
+packages/core test:     884|     it('should expand 1e+3 to 1000', () => {
+packages/core test:     885|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 0 }…
+packages/core test:        |                     ^
+packages/core test:     886|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     887| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[37/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Edge cases > should handle exponent of 0
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:897:21
+packages/core test:     895|   describe('Edge cases', () => {
+packages/core test:     896|     it('should handle exponent of 0', () => {
+packages/core test:     897|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 2 }…
+packages/core test:        |                     ^
+packages/core test:     898|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     899| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[38/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Edge cases > should handle uppercase E
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:907:21
+packages/core test:     905| 
+packages/core test:     906|     it('should handle uppercase E', () => {
+packages/core test:     907|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 8 }…
+packages/core test:        |                     ^
+packages/core test:     908|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     909| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Edge cases > should handle integer base without decimal point
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:917:21
+packages/core test:     915| 
+packages/core test:     916|     it('should handle integer base without decimal point', () => {
+packages/core test:     917|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 3 }…
+packages/core test:        |                     ^
+packages/core test:     918|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     919| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[40/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Edge cases > should respect decimalMaxLength when expanding
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:927:21
+packages/core test:     925| 
+packages/core test:     926|     it('should respect decimalMaxLength when expanding', () => {
+packages/core test:     927|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 2 }…
+packages/core test:        |                     ^
+packages/core test:     928|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     929| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[41/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Edge cases > should not expand non-scientific notation
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:937:21
+packages/core test:     935| 
+packages/core test:     936|     it('should not expand non-scientific notation', () => {
+packages/core test:     937|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 2 }…
+packages/core test:        |                     ^
+packages/core test:     938|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     939| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[42/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Scientific Notation Expansion > Edge cases > should handle paste events with scientific notation
+packages/core test: TypeError: NumoraInput2 is not a constructor
+packages/core test:  ❯ tests/NumoraInput.test.ts:947:21
+packages/core test:     945| 
+packages/core test:     946|     it('should handle paste events with scientific notation', () => {
+packages/core test:     947|       NumoraInput = new NumoraInput(container, { decimalMaxLength: 8 }…
+packages/core test:        |                     ^
+packages/core test:     948|       const inputElement = container.querySelector('input') as HTMLInp…
+packages/core test:     949| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[43/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Raw Value Mode > Paste events with raw value mode > should extract raw value from pasted content
+packages/core test: AssertionError: expected '' to be '1234567' // Object.is equality
+packages/core test: [32m- Expected[39m
+packages/core test: [31m+ Received[39m
+packages/core test: [32m- 1234567[39m
+packages/core test:  ❯ tests/NumoraInput.test.ts:1144:32
+packages/core test:     1142| 
+packages/core test:     1143|       expect(inputElement.value).toBe('1,234,567');
+packages/core test:     1144|       expect(input.getValue()).toBe('1234567');
+packages/core test:        |                                ^
+packages/core test:     1145|     });
+packages/core test:     1146|   });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[44/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Raw Value Mode > Blur mode with raw value mode > should extract raw value in blur mode
+packages/core test: AssertionError: expected '1234567' to be '1,234,567' // Object.is equality
+packages/core test: Expected: [32m"1[7m,[27m234[7m,[27m567"[39m
+packages/core test: Received: [31m"1234567"[39m
+packages/core test:  ❯ tests/NumoraInput.test.ts:1167:34
+packages/core test:     1165|       inputElement.dispatchEvent(new Event('blur'));
+packages/core test:     1166| 
+packages/core test:     1167|       expect(inputElement.value).toBe('1,234,567');
+packages/core test:        |                                  ^
+packages/core test:     1168|       expect(input.getValue()).toBe('1234567');
+packages/core test:     1169|       expect(onChangeMock).toHaveBeenCalledWith('1234567');
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[45/87]⎯
+packages/core test:  FAIL  tests/NumoraInput.test.ts > Raw Value Mode > Edge cases with raw value mode > should work without thousand separator
+packages/core test: Error: thousandSeparator cannot be empty. Received: ""
+packages/core test:  ❯ validateThousandSeparator src/validation.ts:130:11
+packages/core test:     128| 
+packages/core test:     129|   if (value.length === 0) {
+packages/core test:     130|     throw new Error(
+packages/core test:        |           ^
+packages/core test:     131|       `thousandSeparator cannot be empty. ` +
+packages/core test:     132|       `Received: ${JSON.stringify(value)}`
+packages/core test:  ❯ validateNumoraInputOptions src/validation.ts:27:3
+packages/core test:  ❯ new NumoraInput src/NumoraInput.ts:89:5
+packages/core test:  ❯ tests/NumoraInput.test.ts:1208:21
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[46/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > quadrillion (Qa) > should expand 1Qa to 1000000000000000
+packages/core test: AssertionError: expected '1Qa' to be '1000000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m000000000000000[27m"[39m
+packages/core test: Received: [31m"1[7mQa[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:190:46
+packages/core test:     188|     describe('quadrillion (Qa)', () => {
+packages/core test:     189|       it('should expand 1Qa to 1000000000000000', () => {
+packages/core test:     190|         expect(expandCompactNotation('1Qa')).toBe('1000000000000000');
+packages/core test:        |                                              ^
+packages/core test:     191|       });
+packages/core test:     192| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[47/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > quadrillion (Qa) > should expand 1.5Qa to 1500000000000000
+packages/core test: AssertionError: expected '1.5Qa' to be '1500000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m500000000000000[27m"[39m
+packages/core test: Received: [31m"1[7m.5Qa[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:194:48
+packages/core test:     192| 
+packages/core test:     193|       it('should expand 1.5Qa to 1500000000000000', () => {
+packages/core test:     194|         expect(expandCompactNotation('1.5Qa')).toBe('1500000000000000'…
+packages/core test:        |                                                ^
+packages/core test:     195|       });
+packages/core test:     196| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[48/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > quadrillion (Qa) > should be case-insensitive (qa)
+packages/core test: AssertionError: expected '1qa' to be '1000000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m000000000000000[27m"[39m
+packages/core test: Received: [31m"1[7mqa[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:198:46
+packages/core test:     196| 
+packages/core test:     197|       it('should be case-insensitive (qa)', () => {
+packages/core test:     198|         expect(expandCompactNotation('1qa')).toBe('1000000000000000');
+packages/core test:        |                                              ^
+packages/core test:     199|       });
+packages/core test:     200|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[49/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > quintillion (Qi) > should expand 1Qi to 1000000000000000000
+packages/core test: AssertionError: expected '1Qi' to be '1000000000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m000000000000000000[27m"[39m
+packages/core test: Received: [31m"1[7mQi[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:204:46
+packages/core test:     202|     describe('quintillion (Qi)', () => {
+packages/core test:     203|       it('should expand 1Qi to 1000000000000000000', () => {
+packages/core test:     204|         expect(expandCompactNotation('1Qi')).toBe('1000000000000000000…
+packages/core test:        |                                              ^
+packages/core test:     205|       });
+packages/core test:     206| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[50/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > quintillion (Qi) > should be case-insensitive (qi)
+packages/core test: AssertionError: expected '1qi' to be '1000000000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m000000000000000000[27m"[39m
+packages/core test: Received: [31m"1[7mqi[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:208:46
+packages/core test:     206| 
+packages/core test:     207|       it('should be case-insensitive (qi)', () => {
+packages/core test:     208|         expect(expandCompactNotation('1qi')).toBe('1000000000000000000…
+packages/core test:        |                                              ^
+packages/core test:     209|       });
+packages/core test:     210|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[51/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > sextillion (Sx) > should expand 1Sx to 1000000000000000000000
+packages/core test: AssertionError: expected '1Sx' to be '1000000000000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m000000000000000000000[27m"[39m
+packages/core test: Received: [31m"1[7mSx[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:214:46
+packages/core test:     212|     describe('sextillion (Sx)', () => {
+packages/core test:     213|       it('should expand 1Sx to 1000000000000000000000', () => {
+packages/core test:     214|         expect(expandCompactNotation('1Sx')).toBe('1000000000000000000…
+packages/core test:        |                                              ^
+packages/core test:     215|       });
+packages/core test:     216| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[52/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > sextillion (Sx) > should be case-insensitive (sx)
+packages/core test: AssertionError: expected '1sx' to be '1000000000000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m000000000000000000000[27m"[39m
+packages/core test: Received: [31m"1[7msx[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:218:46
+packages/core test:     216| 
+packages/core test:     217|       it('should be case-insensitive (sx)', () => {
+packages/core test:     218|         expect(expandCompactNotation('1sx')).toBe('1000000000000000000…
+packages/core test:        |                                              ^
+packages/core test:     219|       });
+packages/core test:     220|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[53/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > septillion (Sp) > should expand 1Sp to 1000000000000000000000000
+packages/core test: AssertionError: expected '1Sp' to be '1000000000000000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m000000000000000000000000[27m"[39m
+packages/core test: Received: [31m"1[7mSp[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:224:46
+packages/core test:     222|     describe('septillion (Sp)', () => {
+packages/core test:     223|       it('should expand 1Sp to 1000000000000000000000000', () => {
+packages/core test:     224|         expect(expandCompactNotation('1Sp')).toBe('1000000000000000000…
+packages/core test:        |                                              ^
+packages/core test:     225|       });
+packages/core test:     226| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[54/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > septillion (Sp) > should be case-insensitive (sp)
+packages/core test: AssertionError: expected '1sp' to be '1000000000000000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m000000000000000000000000[27m"[39m
+packages/core test: Received: [31m"1[7msp[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:228:46
+packages/core test:     226| 
+packages/core test:     227|       it('should be case-insensitive (sp)', () => {
+packages/core test:     228|         expect(expandCompactNotation('1sp')).toBe('1000000000000000000…
+packages/core test:        |                                              ^
+packages/core test:     229|       });
+packages/core test:     230|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[55/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > octillion (O) > should expand 1O to 1000000000000000000000000000
+packages/core test: AssertionError: expected '1O' to be '1000000000000000000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m000000000000000000000000000[27m"[39m
+packages/core test: Received: [31m"1[7mO[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:234:45
+packages/core test:     232|     describe('octillion (O)', () => {
+packages/core test:     233|       it('should expand 1O to 1000000000000000000000000000', () => {
+packages/core test:     234|         expect(expandCompactNotation('1O')).toBe('10000000000000000000…
+packages/core test:        |                                             ^
+packages/core test:     235|       });
+packages/core test:     236| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[56/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > octillion (O) > should be case-insensitive (o)
+packages/core test: AssertionError: expected '1o' to be '1000000000000000000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m000000000000000000000000000[27m"[39m
+packages/core test: Received: [31m"1[7mo[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:238:45
+packages/core test:     236| 
+packages/core test:     237|       it('should be case-insensitive (o)', () => {
+packages/core test:     238|         expect(expandCompactNotation('1o')).toBe('10000000000000000000…
+packages/core test:        |                                             ^
+packages/core test:     239|       });
+packages/core test:     240|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[57/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > nonillion (N) > should expand 1N to 1000000000000000000000000000000
+packages/core test: AssertionError: expected '1N' to be '1000000000000000000000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m000000000000000000000000000000[27m"[39m
+packages/core test: Received: [31m"1[7mN[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:244:45
+packages/core test:     242|     describe('nonillion (N)', () => {
+packages/core test:     243|       it('should expand 1N to 1000000000000000000000000000000', () => {
+packages/core test:     244|         expect(expandCompactNotation('1N')).toBe('10000000000000000000…
+packages/core test:        |                                             ^
+packages/core test:     245|       });
+packages/core test:     246| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[58/87]⎯
+packages/core test:  FAIL  tests/compact-notation.test.ts > expandCompactNotation > extended scales (M, T, Qa, Qi, Sx, Sp, O, N) > nonillion (N) > should be case-insensitive (n)
+packages/core test: AssertionError: expected '1n' to be '1000000000000000000000000000000' // Object.is equality
+packages/core test: Expected: [32m"1[7m000000000000000000000000000000[27m"[39m
+packages/core test: Received: [31m"1[7mn[27m"[39m
+packages/core test:  ❯ tests/compact-notation.test.ts:248:45
+packages/core test:     246| 
+packages/core test:     247|       it('should be case-insensitive (n)', () => {
+packages/core test:     248|         expect(expandCompactNotation('1n')).toBe('10000000000000000000…
+packages/core test:        |                                             ^
+packages/core test:     249|       });
+packages/core test:     250|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[59/87]⎯
+packages/core test:  FAIL  tests/formatting-large-number.test.ts > formatLargeNumber > basic functionality > should format small numbers without scale
+packages/core test: AssertionError: expected '1k' to be '1234' // Object.is equality
+packages/core test: Expected: [32m"1[7m234[27m"[39m
+packages/core test: Received: [31m"1[7mk[27m"[39m
+packages/core test:  ❯ tests/formatting-large-number.test.ts:9:41
+packages/core test:       7|     it('should format small numbers without scale', () => {
+packages/core test:       8|       expect(formatLargeNumber('123')).toBe('123');
+packages/core test:       9|       expect(formatLargeNumber('1234')).toBe('1234');
+packages/core test:        |                                         ^
+packages/core test:      10|     });
+packages/core test:      11| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[60/87]⎯
+packages/core test:  FAIL  tests/formatting-large-number.test.ts > formatLargeNumber > decimal places > should show decimals for values under threshold
+packages/core test: AssertionError: expected '123' to match /\d+\.\d+/
+packages/core test: [32m- Expected:[39m 
+packages/core test: /\d+\.\d+/
+packages/core test: [31m+ Received:[39m 
+packages/core test: "123"
+packages/core test:  ❯ tests/formatting-large-number.test.ts:33:22
+packages/core test:      31|     it('should show decimals for values under threshold', () => {
+packages/core test:      32|       const result = formatLargeNumber('123', { decimalsUnder: 1000, d…
+packages/core test:      33|       expect(result).toMatch(/\d+\.\d+/);
+packages/core test:        |                      ^
+packages/core test:      34|     });
+packages/core test:      35| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[61/87]⎯
+packages/core test:  FAIL  tests/formatting-percent.test.ts > formatPercent > basic functionality > should format decimal as percentage
+packages/core test: AssertionError: expected '001%' to be '1.00%' // Object.is equality
+packages/core test: Expected: [32m"[7m1.[27m00%"[39m
+packages/core test: Received: [31m"00[7m1[27m%"[39m
+packages/core test:  ❯ tests/formatting-percent.test.ts:8:40
+packages/core test:       6|   describe('basic functionality', () => {
+packages/core test:       7|     it('should format decimal as percentage', () => {
+packages/core test:       8|       expect(formatPercent('0.01', 2)).toBe('1.00%');
+packages/core test:        |                                        ^
+packages/core test:       9|       expect(formatPercent('0.1', 2)).toBe('10.00%');
+packages/core test:      10|       expect(formatPercent('1', 2)).toBe('100.00%');
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[62/87]⎯
+packages/core test:  FAIL  tests/formatting-percent.test.ts > formatPercent > basic functionality > should respect decimal places
+packages/core test: AssertionError: expected '012.34%' to be '12.34%' // Object.is equality
+packages/core test: Expected: [32m"12.34%"[39m
+packages/core test: Received: [31m"[7m0[27m12.34%"[39m
+packages/core test:  ❯ tests/formatting-percent.test.ts:14:42
+packages/core test:      12| 
+packages/core test:      13|     it('should respect decimal places', () => {
+packages/core test:      14|       expect(formatPercent('0.1234', 2)).toBe('12.34%');
+packages/core test:        |                                          ^
+packages/core test:      15|       expect(formatPercent('0.1234', 0)).toBe('12%');
+packages/core test:      16|       expect(formatPercent('0.1234', 4)).toBe('12.3400%');
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[63/87]⎯
+packages/core test:  FAIL  tests/formatting-percent.test.ts > formatPercent > basic functionality > should handle negative values
+packages/core test: AssertionError: expected '-001%' to be '-1.00%' // Object.is equality
+packages/core test: Expected: [32m"-[7m1.[27m00%"[39m
+packages/core test: Received: [31m"-00[7m1[27m%"[39m
+packages/core test:  ❯ tests/formatting-percent.test.ts:25:41
+packages/core test:      23| 
+packages/core test:      24|     it('should handle negative values', () => {
+packages/core test:      25|       expect(formatPercent('-0.01', 2)).toBe('-1.00%');
+packages/core test:        |                                         ^
+packages/core test:      26|       expect(formatPercent('-0.1', 2)).toBe('-10.00%');
+packages/core test:      27|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[64/87]⎯
+packages/core test:  FAIL  tests/formatting-percent.test.ts > formatPercent > edge cases > should handle very small values
+packages/core test: AssertionError: expected '000.01%' to be '0.0100%' // Object.is equality
+packages/core test: Expected: [32m"0.01[7m00[27m%"[39m
+packages/core test: Received: [31m"0[7m00[27m.01%"[39m
+packages/core test:  ❯ tests/formatting-percent.test.ts:32:42
+packages/core test:      30|   describe('edge cases', () => {
+packages/core test:      31|     it('should handle very small values', () => {
+packages/core test:      32|       expect(formatPercent('0.0001', 4)).toBe('0.0100%');
+packages/core test:        |                                          ^
+packages/core test:      33|       expect(formatPercent('0.00001', 5)).toBe('0.00100%');
+packages/core test:      34|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[65/87]⎯
+packages/core test:  FAIL  tests/formatting-percent.test.ts > formatPercent > edge cases > should handle very large values
+packages/core test: AssertionError: expected '1000%' to be '1000.00%' // Object.is equality
+packages/core test: Expected: [32m"1000[7m.00[27m%"[39m
+packages/core test: Received: [31m"1000%"[39m
+packages/core test:  ❯ tests/formatting-percent.test.ts:37:38
+packages/core test:      35| 
+packages/core test:      36|     it('should handle very large values', () => {
+packages/core test:      37|       expect(formatPercent('10', 2)).toBe('1000.00%');
+packages/core test:        |                                      ^
+packages/core test:      38|       expect(formatPercent('100', 0)).toBe('10000%');
+packages/core test:      39|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[66/87]⎯
+packages/core test:  FAIL  tests/formatting-percent.test.ts > formatPercent > edge cases > should remove trailing zeros
+packages/core test: AssertionError: expected '010%' to be '10.00%' // Object.is equality
+packages/core test: Expected: [32m"[7m10.[27m00%"[39m
+packages/core test: Received: [31m"0[7m1[27m0%"[39m
+packages/core test:  ❯ tests/formatting-percent.test.ts:42:39
+packages/core test:      40| 
+packages/core test:      41|     it('should remove trailing zeros', () => {
+packages/core test:      42|       expect(formatPercent('0.1', 2)).toBe('10.00%');
+packages/core test:        |                                       ^
+packages/core test:      43|       expect(formatPercent('0.12', 2)).toBe('12.00%');
+packages/core test:      44|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[67/87]⎯
+packages/core test:  FAIL  tests/formatting-percent.test.ts > formatPercent > custom separators > should work with comma decimal separator
+packages/core test: AssertionError: expected '001,00%' to be '1,00%' // Object.is equality
+packages/core test: Expected: [32m"1,00%"[39m
+packages/core test: Received: [31m"[7m00[27m1,00%"[39m
+packages/core test:  ❯ tests/formatting-percent.test.ts:49:45
+packages/core test:      47|   describe('custom separators', () => {
+packages/core test:      48|     it('should work with comma decimal separator', () => {
+packages/core test:      49|       expect(formatPercent('0,01', 2, ',')).toBe('1,00%');
+packages/core test:        |                                             ^
+packages/core test:      50|       expect(formatPercent('0,1234', 2, ',')).toBe('12,34%');
+packages/core test:      51|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[68/87]⎯
+packages/core test:  FAIL  tests/formatting-percent.test.ts > formatLargePercent > basic functionality > should format normal percentages
+packages/core test: AssertionError: expected '00100%' to be '1.00%' // Object.is equality
+packages/core test: Expected: [32m"1[7m.[27m00%"[39m
+packages/core test: Received: [31m"[7m00[27m100%"[39m
+packages/core test:  ❯ tests/formatting-percent.test.ts:58:45
+packages/core test:      56|   describe('basic functionality', () => {
+packages/core test:      57|     it('should format normal percentages', () => {
+packages/core test:      58|       expect(formatLargePercent('0.01', 2)).toBe('1.00%');
+packages/core test:        |                                             ^
+packages/core test:      59|       expect(formatLargePercent('0.1', 2)).toBe('10.00%');
+packages/core test:      60|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[69/87]⎯
+packages/core test:  FAIL  tests/formatting-percent.test.ts > formatLargePercent > basic functionality > should handle negative values
+packages/core test: AssertionError: expected '-00100%' to be '-1.00%' // Object.is equality
+packages/core test: Expected: [32m"-1[7m.[27m00%"[39m
+packages/core test: Received: [31m"-[7m00[27m100%"[39m
+packages/core test:  ❯ tests/formatting-percent.test.ts:73:46
+packages/core test:      71| 
+packages/core test:      72|     it('should handle negative values', () => {
+packages/core test:      73|       expect(formatLargePercent('-0.01', 2)).toBe('-1.00%');
+packages/core test:        |                                              ^
+packages/core test:      74|     });
+packages/core test:      75|   });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[70/87]⎯
+packages/core test:  FAIL  tests/formatting-subscript.test.ts > condenseDecimalZeros > basic functionality > should condense leading zeros to subscript
+packages/core test: AssertionError: expected '0.0₅1' to be '0₆1' // Object.is equality
+packages/core test: Expected: [32m"0[7m₆[27m1"[39m
+packages/core test: Received: [31m"0[7m.0₅[27m1"[39m
+packages/core test:  ❯ tests/formatting-subscript.test.ts:7:51
+packages/core test:       5|   describe('basic functionality', () => {
+packages/core test:       6|     it('should condense leading zeros to subscript', () => {
+packages/core test:       7|       expect(condenseDecimalZeros('0.000001', 8)).toBe('0₆1');
+packages/core test:        |                                                   ^
+packages/core test:       8|       expect(condenseDecimalZeros('0.000123', 8)).toBe('0₃123');
+packages/core test:       9|       expect(condenseDecimalZeros('0.0000001', 8)).toBe('0₇1');
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[71/87]⎯
+packages/core test:  FAIL  tests/formatting-subscript.test.ts > condenseDecimalZeros > edge cases > should handle negative values
+packages/core test: AssertionError: expected '-0.0₅1' to be '-0₆1' // Object.is equality
+packages/core test: Expected: [32m"-0[7m₆[27m1"[39m
+packages/core test: Received: [31m"-0[7m.0₅[27m1"[39m
+packages/core test:  ❯ tests/formatting-subscript.test.ts:35:52
+packages/core test:      33| 
+packages/core test:      34|     it('should handle negative values', () => {
+packages/core test:      35|       expect(condenseDecimalZeros('-0.000001', 8)).toBe('-0₆1');
+packages/core test:        |                                                    ^
+packages/core test:      36|     });
+packages/core test:      37| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[72/87]⎯
+packages/core test:  FAIL  tests/formatting-subscript.test.ts > condenseDecimalZeros > edge cases > should respect maxDecimalDigits
+packages/core test: AssertionError: expected '0.0₅123' to match /0₆\d{1,5}$/
+packages/core test: [32m- Expected:[39m 
+packages/core test: /0₆\d{1,5}$/
+packages/core test: [31m+ Received:[39m 
+packages/core test: "0.0₅123"
+packages/core test:  ❯ tests/formatting-subscript.test.ts:41:22
+packages/core test:      39|       const result = condenseDecimalZeros('0.00000123456789', 5);
+packages/core test:      40|       // Should limit to 5 digits after the subscript
+packages/core test:      41|       expect(result).toMatch(/0₆\d{1,5}$/);
+packages/core test:        |                      ^
+packages/core test:      42|     });
+packages/core test:      43|   });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[73/87]⎯
+packages/core test:  FAIL  tests/formatting-subscript.test.ts > condenseDecimalZeros > custom decimal separator > should work with comma separator
+packages/core test: AssertionError: expected '0,0₅1' to be '0₆1' // Object.is equality
+packages/core test: Expected: [32m"0[7m₆[27m1"[39m
+packages/core test: Received: [31m"0[7m,0₅[27m1"[39m
+packages/core test:  ❯ tests/formatting-subscript.test.ts:47:56
+packages/core test:      45|   describe('custom decimal separator', () => {
+packages/core test:      46|     it('should work with comma separator', () => {
+packages/core test:      47|       expect(condenseDecimalZeros('0,000001', 8, ',')).toBe('0₆1');
+packages/core test:        |                                                        ^
+packages/core test:      48|     });
+packages/core test:      49|   });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[74/87]⎯
+packages/core test:  FAIL  tests/formatting-subscript.test.ts > condenseDecimalZeros > real-world scenarios > should handle very small DeFi amounts
+packages/core test: AssertionError: expected '0.0₆1' to be '0₇1' // Object.is equality
+packages/core test: Expected: [32m"0[7m₇[27m1"[39m
+packages/core test: Received: [31m"0[7m.0₆[27m1"[39m
+packages/core test:  ❯ tests/formatting-subscript.test.ts:53:52
+packages/core test:      51|   describe('real-world scenarios', () => {
+packages/core test:      52|     it('should handle very small DeFi amounts', () => {
+packages/core test:      53|       expect(condenseDecimalZeros('0.0000001', 8)).toBe('0₇1');
+packages/core test:        |                                                    ^
+packages/core test:      54|       expect(condenseDecimalZeros('0.000000123', 8)).toBe('0₇123');
+packages/core test:      55|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[75/87]⎯
+packages/core test:  FAIL  tests/formatting.cursor.test.ts > calculateCursorPositionAfterFormatting > thousand style - deleting that removes comma > should maintain cursor when deleting from middle (1,234 -> 123)
+packages/core test: AssertionError: expected 2 to be 3 // Object.is equality
+packages/core test: [32m- Expected[39m
+packages/core test: [31m+ Received[39m
+packages/core test: [32m- 3[39m
+packages/core test: [31m+ 2[39m
+packages/core test:  ❯ tests/formatting.cursor.test.ts:95:25
+packages/core test:      93|         'thousand'
+packages/core test:      94|       );
+packages/core test:      95|       expect(newCursor).toBe(3);
+packages/core test:        |                         ^
+packages/core test:      96|     });
+packages/core test:      97|   });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[76/87]⎯
+packages/core test:  FAIL  tests/formatting.cursor.test.ts > calculateCursorPositionAfterFormatting > thousand style - inserting in middle > should maintain cursor when inserting digit in middle (1,0|0 -> 1,5|00)
+packages/core test: AssertionError: expected '0' to be '5' // Object.is equality
+packages/core test: Expected: [32m"5"[39m
+packages/core test: Received: [31m"0"[39m
+packages/core test:  ❯ tests/formatting.cursor.test.ts:112:39
+packages/core test:     110|       );
+packages/core test:     111|       expect(newCursor).toBe(4);
+packages/core test:     112|       expect(newValue[newCursor - 1]).toBe('5');
+packages/core test:        |                                       ^
+packages/core test:     113|     });
+packages/core test:     114| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[77/87]⎯
+packages/core test:  FAIL  tests/formatting.cursor.test.ts > calculateCursorPositionAfterFormatting > thousand style - decimal values > should maintain cursor in integer part (1,234.56 -> 12,345.6)
+packages/core test: AssertionError: expected 1 to be 2 // Object.is equality
+packages/core test: [32m- Expected[39m
+packages/core test: [31m+ Received[39m
+packages/core test: [32m- 2[39m
+packages/core test: [31m+ 1[39m
+packages/core test:  ❯ tests/formatting.cursor.test.ts:232:25
+packages/core test:     230|         'thousand'
+packages/core test:     231|       );
+packages/core test:     232|       expect(newCursor).toBe(2);
+packages/core test:        |                         ^
+packages/core test:     233|     });
+packages/core test:     234| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[78/87]⎯
+packages/core test:  FAIL  tests/formatting.cursor.test.ts > calculateCursorPositionAfterFormatting > thousand style - decimal values > should maintain cursor in decimal part (1,234.5|6 -> 1,234.56|)
+packages/core test: AssertionError: expected 8 to be 9 // Object.is equality
+packages/core test: [32m- Expected[39m
+packages/core test: [31m+ Received[39m
+packages/core test: [32m- 9[39m
+packages/core test: [31m+ 8[39m
+packages/core test:  ❯ tests/formatting.cursor.test.ts:246:25
+packages/core test:     244|         'thousand'
+packages/core test:     245|       );
+packages/core test:     246|       expect(newCursor).toBe(9);
+packages/core test:        |                         ^
+packages/core test:     247|     });
+packages/core test:     248|   });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[79/87]⎯
+packages/core test:  FAIL  tests/formatting.cursor.test.ts > calculateCursorPositionAfterFormatting > wan style > should maintain cursor when formatting changes (1234567 -> 123,4567)
+packages/core test: AssertionError: expected 5 to be 4 // Object.is equality
+packages/core test: [32m- Expected[39m
+packages/core test: [31m+ Received[39m
+packages/core test: [32m- 4[39m
+packages/core test: [31m+ 5[39m
+packages/core test:  ❯ tests/formatting.cursor.test.ts:292:25
+packages/core test:     290|         'wan'
+packages/core test:     291|       );
+packages/core test:     292|       expect(newCursor).toBe(4);
+packages/core test:        |                         ^
+packages/core test:     293|     });
+packages/core test:     294| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[80/87]⎯
+packages/core test:  FAIL  tests/formatting.cursor.test.ts > calculateCursorPositionAfterFormatting > edge cases > should handle cursor at start
+packages/core test: AssertionError: expected 1 to be +0 // Object.is equality
+packages/core test: [32m- Expected[39m
+packages/core test: [31m+ Received[39m
+packages/core test: [32m- 0[39m
+packages/core test: [31m+ 1[39m
+packages/core test:  ❯ tests/formatting.cursor.test.ts:322:25
+packages/core test:     320|         'thousand'
+packages/core test:     321|       );
+packages/core test:     322|       expect(newCursor).toBe(0);
+packages/core test:        |                         ^
+packages/core test:     323|     });
+packages/core test:     324| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[81/87]⎯
+packages/core test:  FAIL  tests/formatting.test.ts > formatWithSeparators > default behavior > should default to thousand style when groupStyle is not specified
+packages/core test: AssertionError: expected '1234567' to be '1,234,567' // Object.is equality
+packages/core test: Expected: [32m"1[7m,[27m234[7m,[27m567"[39m
+packages/core test: Received: [31m"1234567"[39m
+packages/core test:  ❯ tests/formatting.test.ts:199:52
+packages/core test:     197|   describe('default behavior', () => {
+packages/core test:     198|     it('should default to thousand style when groupStyle is not specif…
+packages/core test:     199|       expect(formatWithSeparators('1234567', ',')).toBe('1,234,567');
+packages/core test:        |                                                    ^
+packages/core test:     200|     });
+packages/core test:     201|   });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[82/87]⎯
+packages/core test:  FAIL  tests/formatting.test.ts > formatWithSeparators > additional test cases from react-number-format > none style (thousand grouping without special rules) > should format 1000 to 1,000
+packages/core test: AssertionError: expected '1000' to be '1,000' // Object.is equality
+packages/core test: Expected: [32m"1[7m,[27m000"[39m
+packages/core test: Received: [31m"1000"[39m
+packages/core test:  ❯ tests/formatting.test.ts:268:59
+packages/core test:     266|     describe('none style (thousand grouping without special rules)', (…
+packages/core test:     267|       it('should format 1000 to 1,000', () => {
+packages/core test:     268|         expect(formatWithSeparators('1000', ',', 'none')).toBe('1,000'…
+packages/core test:        |                                                           ^
+packages/core test:     269|       });
+packages/core test:     270| 
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[83/87]⎯
+packages/core test:  FAIL  tests/formatting.test.ts > formatWithSeparators > additional test cases from react-number-format > none style (thousand grouping without special rules) > should format -12345678.90 to -12,345,678.90
+packages/core test: AssertionError: expected '-12345678.90' to be '-12,345,678.90' // Object.is equality
+packages/core test: Expected: [32m"-12[7m,[27m345[7m,[27m678.90"[39m
+packages/core test: Received: [31m"-12345678.90"[39m
+packages/core test:  ❯ tests/formatting.test.ts:272:79
+packages/core test:     270| 
+packages/core test:     271|       it('should format -12345678.90 to -12,345,678.90', () => {
+packages/core test:     272|         expect(formatWithSeparators('-12345678.90', ',', 'none', false…
+packages/core test:        |                                                                               ^
+packages/core test:     273|       });
+packages/core test:     274|     });
+packages/core test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[84/87]⎯
+packages/core test:  Test Files  7 failed | 5 passed (12)
+packages/core test:       Tests  87 failed | 290 passed | 2 skipped (379)
+packages/core test:    Start at  18:37:44
+packages/core test:    Duration  1.24s (transform 666ms, setup 0ms, collect 1.48s, tests 155ms, environment 5.34s, prepare 1.02s)
+packages/core test: Failed
+/Users/kacpersatoshipay/Programmer/github-sharqiewicz/numora/packages/core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  numora@2.0.5 test: `vitest run`
+Exit status 1
+ ELIFECYCLE  Test failed. See above for more details.

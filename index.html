@@ -153,67 +153,7 @@
 <body>
   <div class="container">
     <h1>Numora Core Preview</h1>
-
-    <div class="input-group">
-      <label>Numeric Input (max 2 decimals)</label>
-      <div class="input-container" id="input1"></div>
-      <div class="separator-config">
-        <label class="config-label">Separator:</label>
-        <select id="separator1" class="config-select">
-          <option value=",">, (comma)</option>
-          <option value=" "> (space)</option>
-          <option value="'">' (apostrophe)</option>
-          <option value="">None</option>
-        </select>
-        <label class="config-label">Style:</label>
-        <select id="style1" class="config-select">
-          <option value="thousand">Thousand (1,234,567)</option>
-          <option value="lakh">Lakh (12,34,567)</option>
-          <option value="wan">Wan (123,4567)</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="input-group">
-      <label>Numeric Input (max 6 decimals)</label>
-      <div class="input-container" id="input2"></div>
-      <div class="separator-config">
-        <label class="config-label">Separator:</label>
-        <select id="separator2" class="config-select">
-          <option value=",">, (comma)</option>
-          <option value=" "> (space)</option>
-          <option value="'">' (apostrophe)</option>
-          <option value="">None</option>
-        </select>
-        <label class="config-label">Style:</label>
-        <select id="style2" class="config-select">
-          <option value="thousand">Thousand (1,234,567)</option>
-          <option value="lakh">Lakh (12,34,567)</option>
-          <option value="wan">Wan (123,4567)</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="value-display">
-      <strong>Input 1 value:</strong> <span id="value1">-</span><br>
-      <strong>Input 2 value:</strong> <span id="value2">-</span>
-    </div>
-
-    <div class="examples">
-      <h2>Try these:</h2>
-      <div class="example-item">
-        <strong>Type:</strong> 1234.5678 (will be limited to 2 decimals)
-      </div>
-      <div class="example-item">
-        <strong>Paste:</strong> 1,234.56 (commas will be converted)
-      </div>
-      <div class="example-item">
-        <strong>Scientific:</strong> 1.23e5 (will be expanded)
-      </div>
-      <div class="example-item">
-        <strong>Thousands:</strong> Change separator and style above to see formatting
-      </div>
-    </div>
+    <div class="input-container" id="input1"></div>
   </div>
 
   <script type="module">

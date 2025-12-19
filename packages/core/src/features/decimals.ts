@@ -1,16 +1,11 @@
 import { DEFAULT_DECIMAL_SEPARATOR } from "@/config";
 import type { SeparatorOptions, Separators, FormattingOptions } from '@/types';
 import { ThousandStyle } from '@/types';
-import { escapeRegExp } from '../utils/escape-reg-exp';
 
 
 /**
  * Normalizes separator configuration with defaults.
- *
- * @param options - Separator configuration options
- * @returns Normalized separator configuration
  */
-
 export function getSeparators(options: SeparatorOptions | FormattingOptions | undefined): Separators {
   return {
     decimalSeparator: options?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
@@ -18,68 +13,73 @@ export function getSeparators(options: SeparatorOptions | FormattingOptions | un
   };
 }
 
-/**
- * Checks if the input already has a decimal separator and prevents entering another one.
- *
- * @param e - The keyboard event
- * @param decimalSeparator - The decimal separator character
- */
-function alreadyHasDecimal(
-  e: KeyboardEvent,
-  decimalSeparator: string
-): boolean {
-  const target = e.target as HTMLInputElement;
-  if (!target) return false;
-
-  return target.value.includes(decimalSeparator);
-};
+interface NumberParts {
+  sign: string;
+  integer: string;
+  decimal: string;
+}
 
 /**
- * Converts comma or dot to the configured decimal separator when thousandStyle is None/undefined.
- * This makes it easier for users to type decimal separators without knowing the exact separator character.
- *
- * @param e - The keyboard event
- * @param inputElement - The input element
- * @param formattingOptions - Optional formatting options
- * @param separators - The separator configuration
- * @returns True if the conversion was handled (event should be prevented), false otherwise
+ * Splits a numeric string into sign, integer and decimal parts.
  */
-export function convertCommaOrDotToDecimalSeparatorAndPreventMultimpleDecimalSeparators(
+function splitNumber(value: string, decimalSeparator: string): NumberParts {
+  const isNegative = value.startsWith('-');
+  const absoluteValue = isNegative ? value.slice(1) : value;
+  const [integer = '', decimal = ''] = absoluteValue.split(decimalSeparator);
+
+  return {
+    sign: isNegative ? '-' : '',
+    integer,
+    decimal,
+  };
+}
+
+/**
+ * Checks if input already has a decimal separator that isn't currently selected.
+ */
+function shouldPreventMultipleDecimals(input: HTMLInputElement, decimalSeparator: string): boolean {
+  if (!input.value.includes(decimalSeparator)) return false;
+
+  const { selectionStart, selectionEnd, value } = input;
+  const selectedText = value.slice(selectionStart ?? 0, selectionEnd ?? 0);
+
+  // If the decimal separator is within the selection, it will be overwritten, so don't prevent.
+  return !selectedText.includes(decimalSeparator);
+}
+
+/**
+ * Handles keyboard events for decimal separators, converting comma/dot and preventing duplicates.
+ */
+export function handleDecimalSeparatorKey(
   e: KeyboardEvent,
   inputElement: HTMLInputElement,
   formattingOptions: FormattingOptions | undefined,
   decimalSeparator: string
 ): boolean {
-  const { selectionStart, selectionEnd, value } = inputElement;
   const { key } = e;
 
-  // Only apply when thousandStyle is None/undefined
+  // Only handle comma or dot
+  if (key !== ',' && key !== '.') return false;
+
+  // Only apply conversion when thousandStyle is None/undefined to avoid conflicts with thousand separators
   const thousandStyle = formattingOptions?.ThousandStyle;
   if (thousandStyle !== ThousandStyle.None && thousandStyle !== undefined) {
     return false;
   }
 
-  // Only handle comma or dot
-  if (key !== ',' && key !== '.') {
-    return false;
-  }
-
-  if (alreadyHasDecimal(e, decimalSeparator)) {
+  if (shouldPreventMultipleDecimals(inputElement, decimalSeparator)) {
     return true;
   }
 
-  // If the typed key is different from the configured decimal separator, convert it
+  // If typed key differs from configured separator, convert it
   if (key !== decimalSeparator) {
+    const { selectionStart, selectionEnd, value } = inputElement;
     const start = selectionStart ?? 0;
     const end = selectionEnd ?? start;
 
-    // Insert the configured decimal separator at cursor position
-    const newValue = value.slice(0, start) + decimalSeparator + value.slice(end);
-    inputElement.value = newValue;
-
-    // Set cursor position after the inserted separator
-    const newCursorPosition = start + 1;
-    inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
+    inputElement.value = value.slice(0, start) + decimalSeparator + value.slice(end);
+    const newPos = start + 1;
+    inputElement.setSelectionRange(newPos, newPos);
 
     return true;
   }
@@ -88,90 +88,59 @@ export function convertCommaOrDotToDecimalSeparatorAndPreventMultimpleDecimalSep
 }
 
 /**
- * Trims a string representation of a number to a maximum number of decimal places.
- *
- * @param value - The string to trim.
- * @param decimalMaxLength - The maximum number of decimal places to allow.
- * @param decimalSeparator - The decimal separator character to use.
- * @returns The trimmed string.
+ * Trims decimals to a maximum length.
  */
 export const trimToDecimalMaxLength = (
   value: string,
   decimalMaxLength: number,
   decimalSeparator: string = DEFAULT_DECIMAL_SEPARATOR
 ): string => {
-  const [integer, decimal] = value.split(decimalSeparator);
-  return decimal ? `${integer}${decimalSeparator}${decimal.slice(0, decimalMaxLength)}` : value;
+  const { sign, integer, decimal } = splitNumber(value, decimalSeparator);
+  const hasSeparator = value.includes(decimalSeparator);
+
+  if (!hasSeparator) return value;
+
+  const trimmedDecimal = decimal.slice(0, decimalMaxLength);
+  return `${sign}${integer}${decimalSeparator}${trimmedDecimal}`;
 };
 
 /**
  * Removes extra decimal separators, keeping only the first one.
- *
- * @param value - The string value
- * @param decimalSeparator - The decimal separator character
- * @returns The string with only the first decimal separator
  */
 export const removeExtraDecimalSeparators = (
   value: string,
   decimalSeparator: string = DEFAULT_DECIMAL_SEPARATOR
 ): string => {
-  const escaped = escapeRegExp(decimalSeparator);
-  const regex = new RegExp(`(${escaped}.*?)${escaped}`, 'g');
-  return value.replace(regex, `$1${decimalSeparator}`);
+  const firstIdx = value.indexOf(decimalSeparator);
+  if (firstIdx === -1) return value;
+
+  const head = value.slice(0, firstIdx + 1);
+  const tail = value.slice(firstIdx + 1);
+
+  // Remove any occurrences of decimal separator, comma or dot from the tail
+  const cleanedTail = tail.split(',').join('').split('.').join('').split(decimalSeparator).join('');
+
+  return head + cleanedTail;
 };
 
 /**
  * Ensures a numeric string has at least the specified minimum number of decimal places.
- * Pads with zeros if needed, but does not truncate if more decimals exist.
- *
- * @param value - The string value to ensure minimum decimals for
- * @param minDecimals - The minimum number of decimal places (default: 0, meaning no minimum)
- * @param decimalSeparator - The decimal separator character (default: '.')
- * @returns The string with at least minDecimals decimal places
- *
- * @example
- * ensureMinDecimals("1", 2, ".")      // "1.00"
- * ensureMinDecimals("1.5", 2, ".")   // "1.50"
- * ensureMinDecimals("1.123", 2, ".") // "1.123" (doesn't truncate)
- * ensureMinDecimals("1", 0, ".")      // "1" (no minimum)
  */
 export const ensureMinDecimals = (
   value: string,
   minDecimals: number = 0,
   decimalSeparator: string = DEFAULT_DECIMAL_SEPARATOR
 ): string => {
-  if (minDecimals === 0) {
-    return value;
+  if (minDecimals <= 0) return value;
+
+  const { sign, integer, decimal } = splitNumber(value, decimalSeparator);
+
+  if (decimal.length >= minDecimals) {
+    // Already has enough decimals, but we must ensure the separator is present if it wasn't
+    // (though splitNumber might have "swallowed" it)
+    return value.includes(decimalSeparator) ? value : `${sign}${integer}${decimalSeparator}${decimal}`;
   }
 
-  if (!value || value === '0' || value === decimalSeparator || value === '-' || value === `-${decimalSeparator}`) {
-    if (value === '-' || value === `-${decimalSeparator}`) {
-      return `-${decimalSeparator}${'0'.repeat(minDecimals)}`;
-    }
-    if (value === decimalSeparator) {
-      return `${decimalSeparator}${'0'.repeat(minDecimals)}`;
-    }
-    return `${value}${decimalSeparator}${'0'.repeat(minDecimals)}`;
-  }
-
-  const hasDecimalSeparator = value.includes(decimalSeparator);
-  const isNegative = value.startsWith('-');
-  const absoluteValue = isNegative ? value.slice(1) : value;
-  const [integerPart, decimalPart = ''] = absoluteValue.split(decimalSeparator);
-
-  // If no decimal separator exists, add it with zeros
-  if (!hasDecimalSeparator) {
-    const zeros = '0'.repeat(minDecimals);
-    return isNegative ? `-${integerPart}${decimalSeparator}${zeros}` : `${integerPart}${decimalSeparator}${zeros}`;
-  }
-
-  // If decimal part exists but is shorter than minimum, pad it
-  if (decimalPart.length < minDecimals) {
-    const zerosToAdd = minDecimals - decimalPart.length;
-    const paddedDecimal = decimalPart + '0'.repeat(zerosToAdd);
-    return isNegative ? `-${integerPart}${decimalSeparator}${paddedDecimal}` : `${integerPart}${decimalSeparator}${paddedDecimal}`;
-  }
-
-  // If decimal part already meets or exceeds minimum, return as-is
-  return value;
+  const paddedDecimal = decimal.padEnd(minDecimals, '0');
+  return `${sign}${integer}${decimalSeparator}${paddedDecimal}`;
 };
