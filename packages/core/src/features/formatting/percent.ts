@@ -6,6 +6,7 @@
 import { formatWithSeparators } from './thousand-grouping';
 import { ThousandStyle } from '@/types';
 import { DEFAULT_DECIMAL_SEPARATOR } from '@/config';
+import { applyDecimalPrecision, applyScaleNotation, compareStrings, isVeryLarge } from './numeric-formatting-utils';
 
 /**
  * Formats a decimal value as a percentage string.
@@ -53,21 +54,14 @@ export function formatPercent(
     );
   }
 
-  // Apply decimal precision
-  const [integerPart, decimalPart = ''] = formatted.split(decimalSeparator);
-  let result: string;
-  if (decimals === 0) {
-    result = integerPart;
-  } else if (decimalPart.length === 0) {
-    result = `${integerPart}${decimalSeparator}${'0'.repeat(decimals)}`;
-  } else if (decimalPart.length < decimals) {
-    result = `${integerPart}${decimalSeparator}${decimalPart}${'0'.repeat(decimals - decimalPart.length)}`;
-  } else {
-    result = `${integerPart}${decimalSeparator}${decimalPart.slice(0, decimals)}`;
-  }
-
-  // Remove trailing zeros after decimal point
-  result = result.replace(/(\.[0-9]*?)0+$/, '$1').replace(/\.$/, '');
+  const result = applyDecimalPrecision(
+    formatted,
+    decimals,
+    0, // decimalsMin for formatPercent is always 0, as there is no decimalsMinAppliesToZero
+    decimalSeparator,
+    false, // decimalsMinAppliesToZero is false for formatPercent
+    value === '0'
+  );
 
   return `${isNegative ? '-' : ''}${result}%`;
 }
@@ -171,103 +165,4 @@ function multiplyBy100(value: string, decimalSeparator: string): string {
     const remainingDecimal = decimalPart.slice(2);
     return integerPart + decimalToMove + decimalSeparator + remainingDecimal;
   }
-}
-
-/**
- * Applies scale notation (k, M, T, etc.) to a large number.
- * Returns the scaled value and suffix.
- */
-function applyScaleNotation(
-  value: string,
-  decimalSeparator: string
-): { scaledValue: string; scaleSuffix: string } {
-  const scales: Array<{ suffix: string; zeros: number }> = [
-    { suffix: 'N', zeros: 30 },  // Nonillion
-    { suffix: 'O', zeros: 27 },  // Octillion
-    { suffix: 'Sp', zeros: 24 }, // Septillion
-    { suffix: 'Sx', zeros: 21 }, // Sextillion
-    { suffix: 'Qi', zeros: 18 }, // Quintillion
-    { suffix: 'Qa', zeros: 15 }, // Quadrillion
-    { suffix: 'T', zeros: 12 },  // Trillion
-    { suffix: 'B', zeros: 9 },   // Billion
-    { suffix: 'M', zeros: 6 },   // Million
-    { suffix: 'k', zeros: 3 },   // Thousand
-  ];
-
-  const [integerPart, decimalPart = ''] = value.split(decimalSeparator);
-  // Count total significant digits (excluding leading zeros in integer part)
-  const cleanedInteger = integerPart.replace(/^0+/, '') || '0';
-  const totalSignificantDigits = cleanedInteger.length + decimalPart.length;
-
-  for (const scale of scales) {
-    // Apply scale if the number has more digits than the scale requires
-    // e.g., 1234 has 4 digits, which is > 3 (thousand scale), so use 'k'
-    if (cleanedInteger.length > scale.zeros || (cleanedInteger.length === scale.zeros && decimalPart.length > 0)) {
-      // Divide by moving decimal point left by scale.zeros positions
-      const movePoint = scale.zeros;
-
-      if (cleanedInteger.length > movePoint) {
-        // Integer part is long enough: move decimal point left within integer
-        const newInteger = cleanedInteger.slice(0, -movePoint);
-        const movedDigits = cleanedInteger.slice(-movePoint);
-        const newDecimal = movedDigits + decimalPart;
-        // Trim trailing zeros from decimal
-        const trimmedDecimal = newDecimal.replace(/0+$/, '');
-        const scaledValue = trimmedDecimal
-          ? `${newInteger}${decimalSeparator}${trimmedDecimal}`
-          : newInteger;
-        return { scaledValue, scaleSuffix: scale.suffix };
-      } else {
-        // Integer part is shorter: need to pad with zeros from decimal
-        const digitsNeeded = movePoint - cleanedInteger.length;
-        const newInteger = '0';
-        const newDecimal = '0'.repeat(digitsNeeded) + cleanedInteger + decimalPart;
-        // Trim trailing zeros
-        const trimmedDecimal = newDecimal.replace(/0+$/, '');
-        const scaledValue = trimmedDecimal
-          ? `${newInteger}${decimalSeparator}${trimmedDecimal}`
-          : newInteger;
-        return { scaledValue, scaleSuffix: scale.suffix };
-      }
-    }
-  }
-
-  return { scaledValue: value, scaleSuffix: '' };
-}
-
-/**
- * Checks if a numeric string represents a very large number (exceeds our scale notation).
- */
-function isVeryLarge(value: string): boolean {
-  const [integerPart, decimalPart = ''] = value.split('.');
-  const totalDigits = integerPart.length + decimalPart.length;
-  // Consider values with more than 30 digits as "very large"
-  return totalDigits > 30;
-}
-
-/**
- * Compares two numeric strings using string comparison.
- * Returns negative if a < b, positive if a > b, 0 if equal.
- * Uses string-based comparison to avoid precision issues.
- */
-function compareStrings(a: string, b: string): number {
-  // Remove decimal separator for comparison
-  const aClean = a.replace('.', '');
-  const bClean = b.replace('.', '');
-
-  // Pad with zeros to same length
-  const maxLen = Math.max(aClean.length, bClean.length);
-  const aPadded = aClean.padStart(maxLen, '0');
-  const bPadded = bClean.padStart(maxLen, '0');
-
-  // Compare digit by digit
-  for (let i = 0; i < maxLen; i++) {
-    const aDigit = parseInt(aPadded[i], 10);
-    const bDigit = parseInt(bPadded[i], 10);
-    if (aDigit !== bDigit) {
-      return aDigit - bDigit;
-    }
-  }
-
-  return 0;
 }

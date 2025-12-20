@@ -51,3 +51,9 @@ export {
 export { formatPercent, formatLargePercent } from './percent';
 export { condenseDecimalZeros } from './subscript-notation';
 export { formatLargeNumber, type FormatLargeNumberOptions } from './large-number';
+export {
+    applyDecimalPrecision,
+    applyScaleNotation,
+    compareStrings,
+    isVeryLarge
+} from './numeric-formatting-utils';
