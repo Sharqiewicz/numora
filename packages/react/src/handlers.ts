@@ -27,9 +27,6 @@ export function handleNumoraOnChange(
   e: React.ChangeEvent<HTMLInputElement>,
   options: BaseOptions
 ): ChangeResult {
-
-  console.log('handleNumoraOnChange', e.nativeEvent);
-
   const { formatted, raw } = handleOnChangeNumoraInput(
     e.nativeEvent as unknown as Event,
     options.decimalMaxLength,
@@ -37,7 +34,6 @@ export function handleNumoraOnChange(
     options.formattingOptions
   );
 
-  console.log('handleNumoraOnChange formatted', formatted, 'raw', raw);
   return {
     value: formatted,
     rawValue: raw,

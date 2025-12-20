@@ -119,17 +119,23 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   });
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('handleChange', e.nativeEvent);
     const { value, rawValue } = handleNumoraOnChange(e, {
       decimalMaxLength: maxDecimals,
       caretPositionBeforeChange: caretInfoRef.current,
       formattingOptions,
     });
 
-    caretInfoRef.current = undefined;
+    // Store cursor position AFTER core library has calculated and set it
+    // The core library modifies the DOM element directly during handleNumoraOnChange
+    // Read from the input ref (which is the same element) to get the position set by the core library
+    if (internalInputRef.current) {
+      const cursorPos = internalInputRef.current.selectionStart;
+      if (cursorPos !== null && cursorPos !== undefined) {
+        lastCaretPosRef.current = cursorPos;
+      }
+    }
 
-    // Store current cursor position to restore after React render
-    lastCaretPosRef.current = e.target.selectionStart;
+    caretInfoRef.current = undefined;
 
     // Add rawValue to the event object without overriding 'value' property
     (e.target as any).rawValue = rawValue;
@@ -142,7 +148,21 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   }, [maxDecimals, formattingOptions, onChange]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    caretInfoRef.current = handleNumoraOnKeyDown(e, formattingOptions);
+    const coreCaretInfo = handleNumoraOnKeyDown(e, formattingOptions);
+    
+    // Always capture cursor position info, even if core library doesn't return it
+    // This is needed for cursor position calculation during normal typing (not just Delete/Backspace)
+    if (!coreCaretInfo && internalInputRef.current) {
+      const selectionStart = internalInputRef.current.selectionStart ?? 0;
+      const selectionEnd = internalInputRef.current.selectionEnd ?? 0;
+      caretInfoRef.current = {
+        selectionStart,
+        selectionEnd,
+      };
+    } else {
+      caretInfoRef.current = coreCaretInfo;
+    }
+    
     if (onKeyDown) {
       onKeyDown(e);
     }
