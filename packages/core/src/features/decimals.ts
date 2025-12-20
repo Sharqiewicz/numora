@@ -61,17 +61,13 @@ export function handleDecimalSeparatorKey(
   // Only handle comma or dot
   if (key !== ',' && key !== '.') return false;
 
-  // Only apply conversion when thousandStyle is None/undefined to avoid conflicts with thousand separators
-  const thousandStyle = formattingOptions?.ThousandStyle;
-  if (thousandStyle !== ThousandStyle.None && thousandStyle !== undefined) {
-    return false;
-  }
-
   if (shouldPreventMultipleDecimals(inputElement, decimalSeparator)) {
     return true;
   }
 
   // If typed key differs from configured separator, convert it
+  // This works even when thousand separators are enabled because we're handling the keydown
+  // event before the value is formatted with thousand separators.
   if (key !== decimalSeparator) {
     const { selectionStart, selectionEnd, value } = inputElement;
     const start = selectionStart ?? 0;

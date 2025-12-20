@@ -8,7 +8,7 @@ import {
   skipOverThousandSeparatorOnDelete,
 } from '@/features/formatting';
 import { type FormattingOptions, type CaretPositionInfo, FormatOn } from '@/types';
-import { processAndFormatValue } from './format-utils';
+import { formatInputValue } from './format-utils';
 
 /**
  * Calculates the end offset for the caret position.
@@ -88,7 +88,7 @@ export function handleOnChangeNumoraInput(
   // In 'blur' mode, formatNumoraInput does nothing during typing, so removing separators would be unnecessary.
   const shouldRemoveThousandSeparators = formattingOptions?.formatOn === FormatOn.Change;
 
-  const { formatted: newValue, raw: rawValue } = processAndFormatValue(
+  const { formatted: newValue, raw: rawValue } = formatInputValue(
     oldValue,
     decimalMaxLength,
     formattingOptions,
@@ -149,7 +149,7 @@ export function handleOnPasteNumoraInput(
 
   // Always remove thousand separators during paste: pasted content may contain separators, current value may
   // have separators (blur mode), and we need to parse the combined value correctly.
-  const { formatted: formattedValue, raw: rawValue } = processAndFormatValue(
+  const { formatted: formattedValue, raw: rawValue } = formatInputValue(
     combinedValue,
     decimalMaxLength,
     formattingOptions,

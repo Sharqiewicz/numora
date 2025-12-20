@@ -2,13 +2,14 @@ import React, {
   useRef,
   useState,
   useEffect,
+  useLayoutEffect,
   forwardRef,
-  useImperativeHandle,
+  useCallback,
 } from 'react';
 import {
   FormatOn,
   ThousandStyle,
-  formatValue,
+  formatValueForDisplay,
   type CaretPositionInfo,
   type FormattingOptions,
 } from 'numora';
@@ -19,13 +20,13 @@ import {
   handleNumoraOnPaste,
 } from './handlers';
 
-interface NumoraInputProps
+export interface NumoraInputProps
   extends Omit<
     React.InputHTMLAttributes<HTMLInputElement>,
     'onChange' | 'type' | 'inputMode'
   > {
   maxDecimals?: number;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement> | React.ClipboardEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 
   formatOn?: FormatOn;
   thousandSeparator?: string;
@@ -60,10 +61,11 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     ...rest
   } = props;
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const internalInputRef = useRef<HTMLInputElement>(null);
   const caretInfoRef = useRef<CaretPositionInfo | undefined>(undefined);
+  const lastCaretPosRef = useRef<number | null>(null);
 
-  const formattingOptions: FormattingOptions & { rawValueMode?: boolean } = {
+  const formattingOptions: FormattingOptions = {
     formatOn,
     thousandSeparator,
     ThousandStyle: thousandStyle,
@@ -75,130 +77,130 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     rawValueMode,
   };
 
-  const getFormattedDefaultValue = (): string => {
-    if (defaultValue !== undefined) {
-      const { formatted } = formatValue(String(defaultValue), maxDecimals, formattingOptions);
+  const getInitialValue = (): string => {
+    const valueToFormat = controlledValue !== undefined ? controlledValue : defaultValue;
+    if (valueToFormat !== undefined) {
+      const { formatted } = formatValueForDisplay(String(valueToFormat), maxDecimals, formattingOptions);
       return formatted;
     }
     return '';
   };
 
-  const getInitialControlledValue = (): string => {
-    if (controlledValue !== undefined) {
-      const { formatted } = formatValue(String(controlledValue), maxDecimals, formattingOptions);
-      return formatted;
+  const [displayValue, setDisplayValue] = useState<string>(getInitialValue);
+
+  // Sync external ref with internal ref
+  useLayoutEffect(() => {
+    if (!ref) return;
+    if (typeof ref === 'function') {
+      ref(internalInputRef.current);
+    } else {
+      ref.current = internalInputRef.current;
     }
-    return '';
-  };
+  }, [ref]);
 
-  const [internalValue, setInternalValue] = useState<string>(getInitialControlledValue);
-
-  useImperativeHandle(ref, () => inputRef.current as HTMLInputElement, []);
-
-  // When controlled value changes, normalize/format it for display
+  // When controlled value changes from outside, update display value
   useEffect(() => {
     if (controlledValue !== undefined) {
-      const { formatted } = formatValue(String(controlledValue), maxDecimals, formattingOptions);
-      setInternalValue(formatted);
+      const { formatted } = formatValueForDisplay(String(controlledValue), maxDecimals, formattingOptions);
+      if (formatted !== displayValue) {
+        setDisplayValue(formatted);
+      }
     }
-  }, [controlledValue, maxDecimals, formatOn, thousandSeparator, thousandStyle, decimalSeparator, decimalMinLength, enableCompactNotation, enableNegative, enableLeadingZeros, rawValueMode]);
+  }, [controlledValue, maxDecimals, formattingOptions]);
 
-  const isControlled = controlledValue !== undefined;
-
-  const updateValue = (value: string) => {
-    if (isControlled) {
-      setInternalValue(value);
+  // Restore cursor position after render
+  useLayoutEffect(() => {
+    if (internalInputRef.current && lastCaretPosRef.current !== null) {
+      const input = internalInputRef.current;
+      const pos = lastCaretPosRef.current;
+      input.setSelectionRange(pos, pos);
+      lastCaretPosRef.current = null;
     }
-  };
+  });
 
-  const syncEventValue = (
-    target: HTMLInputElement,
-    formattedValue: string,
-    rawValue?: string
-  ): void => {
-    Object.defineProperty(target, 'value', {
-      writable: true,
-      value: formattedValue,
-    });
-
-    if (rawValue !== undefined) {
-      Object.defineProperty(target, 'rawValue', {
-        writable: true,
-        value: rawValue,
-        enumerable: true,
-        configurable: true,
-      });
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('handleChange', e.nativeEvent);
     const { value, rawValue } = handleNumoraOnChange(e, {
       decimalMaxLength: maxDecimals,
       caretPositionBeforeChange: caretInfoRef.current,
       formattingOptions,
     });
+
     caretInfoRef.current = undefined;
 
-    syncEventValue(e.target, value, rawValue);
-    updateValue(value);
+    // Store current cursor position to restore after React render
+    lastCaretPosRef.current = e.target.selectionStart;
+
+    // Add rawValue to the event object without overriding 'value' property
+    (e.target as any).rawValue = rawValue;
+
+    setDisplayValue(value);
 
     if (onChange) {
       onChange(e);
     }
-  };
+  }, [maxDecimals, formattingOptions, onChange]);
 
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    caretInfoRef.current = handleNumoraOnKeyDown(e, formattingOptions);
+    if (onKeyDown) {
+      onKeyDown(e);
+    }
+  }, [formattingOptions, onKeyDown]);
+
+  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
     const { value, rawValue } = handleNumoraOnPaste(e, {
       decimalMaxLength: maxDecimals,
       formattingOptions,
     });
 
-    syncEventValue(e.target as HTMLInputElement, value, rawValue);
-    updateValue(value);
+    // For paste, we often want to move cursor to the end of pasted content
+    // handleNumoraOnPaste already handles DOM value and cursor, but React will overwrite it.
+    // So we capture where the core logic set the cursor.
+    lastCaretPosRef.current = (e.target as HTMLInputElement).selectionStart;
+    (e.target as any).rawValue = rawValue;
+
+    setDisplayValue(value);
 
     if (onPaste) {
       onPaste(e);
     }
+
+    // Trigger onChange manually because paste event doesn't always trigger a ChangeEvent in all React versions
+    // when we preventDefault.
     if (onChange) {
-      onChange(e);
+      const changeEvent = e as unknown as React.ChangeEvent<HTMLInputElement>;
+      onChange(changeEvent);
     }
-  };
+  }, [maxDecimals, formattingOptions, onPaste, onChange]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    caretInfoRef.current = handleNumoraOnKeyDown(e, formattingOptions);
-    if (onKeyDown) {
-      onKeyDown(e);
-    }
-  };
-
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     const { value, rawValue } = handleNumoraOnBlur(e, {
       decimalMaxLength: maxDecimals,
       formattingOptions,
     });
 
-    syncEventValue(e.target, value, rawValue);
-    updateValue(value);
+    (e.target as any).rawValue = rawValue;
+    setDisplayValue(value);
 
     if (onBlur) {
       onBlur(e);
     }
-  };
+  }, [maxDecimals, formattingOptions, onBlur]);
 
   return (
     <input
       {...rest}
-      ref={inputRef}
-      {...(isControlled
-        ? { value: internalValue }
-        : { defaultValue: getFormattedDefaultValue() }
-      )}
+      ref={internalInputRef}
+      value={displayValue}
       onChange={handleChange}
-      onPaste={handlePaste}
       onKeyDown={handleKeyDown}
+      onPaste={handlePaste}
       onBlur={handleBlur}
       type="text"
       inputMode="decimal"
+      spellCheck={false}
+      autoComplete="off"
     />
   );
 });

@@ -183,7 +183,6 @@ export function Swap() {
             onChange={(e) => handleFromInputChange(e as React.ChangeEvent<HTMLInputElement>)}
             maxDecimals={effectiveFromDecimals}
             formatOn={FormatOn.Change}
-            thousandSeparator=","
             thousandStyle={ThousandStyle.Thousand}
             enableCompactNotation={true}
           />

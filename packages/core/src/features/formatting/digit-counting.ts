@@ -22,12 +22,12 @@ export function countMeaningfulDigitsBeforePosition(
   value: string,
   position: number,
   separator: string,
-  decimalSeparator: string = '.'
+  _decimalSeparator: string = '.'
 ): number {
   let digitCount = 0;
   for (let i = 0; i < position && i < value.length; i++) {
     const char = value[i];
-    if (char !== separator && char !== decimalSeparator) {
+    if (char !== separator) {
       digitCount++;
     }
   }
@@ -51,7 +51,7 @@ export function findPositionForDigitIndex(
   value: string,
   targetDigitIndex: number,
   separator: string,
-  decimalSeparator: string = '.'
+  _decimalSeparator: string = '.'
 ): number {
   if (targetDigitIndex === 0) {
     return 0;
@@ -60,7 +60,7 @@ export function findPositionForDigitIndex(
   let digitCount = 0;
   for (let i = 0; i < value.length; i++) {
     const char = value[i];
-    if (char !== separator && char !== decimalSeparator) {
+    if (char !== separator) {
       if (digitCount === targetDigitIndex - 1) {
         return i + 1;
       }
@@ -87,7 +87,7 @@ export function findPositionWithMeaningfulDigitCount(
   value: string,
   targetDigitCount: number,
   separator: string,
-  decimalSeparator: string = '.'
+  _decimalSeparator: string = '.'
 ): number {
   if (targetDigitCount === 0) {
     return 0;
@@ -96,7 +96,7 @@ export function findPositionWithMeaningfulDigitCount(
   let digitCount = 0;
   for (let i = 0; i < value.length; i++) {
     const char = value[i];
-    if (char !== separator && char !== decimalSeparator) {
+    if (char !== separator) {
       digitCount++;
       if (digitCount === targetDigitCount) {
         return i + 1;

@@ -8,16 +8,16 @@ import { formatNumoraInput } from '@/features/formatting';
 import { type FormattingOptions, FormatOn } from '@/types';
 
 /**
- * Processes and formats a numeric input value by sanitizing, trimming decimals, and applying formatting.
- * This is a pure function that doesn't require DOM elements or events.
+ * Formats a value from user input events (onChange, onBlur) by sanitizing, trimming decimals, and applying formatting.
+ * The behavior adapts based on formatOn mode - removes separators in 'change' mode since they'll be re-added.
  *
- * @param rawValue - The raw input value to process
+ * @param rawValue - The raw input value from the user event
  * @param decimalMaxLength - Maximum number of decimal places allowed
  * @param formattingOptions - Optional formatting options
  * @param shouldRemoveThousandSeparators - Whether to remove thousand separators during sanitization (default: determined by formatOn)
  * @returns Object with formatted value and raw value (raw value is the value before formatting)
  */
-export function processAndFormatValue(
+export function formatInputValue(
   rawValue: string,
   decimalMaxLength: number,
   formattingOptions?: FormattingOptions,
@@ -59,23 +59,21 @@ export function processAndFormatValue(
 }
 
 /**
- * Formats a value for display using the provided formatting options.
- * This is a pure function that can be used without DOM events.
+ * Formats a value for display (e.g., initial values, controlled values).
+ * Assumes the value might already contain thousand separators, so removes them before processing.
  *
- * @param value - The value to format
+ * @param value - The value to format for display
  * @param decimalMaxLength - Maximum number of decimal places allowed
  * @param formattingOptions - Optional formatting options
  * @returns Object with formatted value and raw value
  */
-export function formatValue(
+export function formatValueForDisplay(
   value: string,
   decimalMaxLength: number,
   formattingOptions?: FormattingOptions
 ): { formatted: string; raw: string } {
-  // For pure formatting (not from an input event), we should remove separators
-  // if they exist, since the value might already be formatted
   const shouldRemoveThousandSeparators = !!formattingOptions?.thousandSeparator;
-  return processAndFormatValue(
+  return formatInputValue(
     value,
     decimalMaxLength,
     formattingOptions,

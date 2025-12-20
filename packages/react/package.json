@@ -60,7 +60,7 @@
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "numora": "workspace:*",
+    "numora": "workspace:^",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "rollup": "^4.53.5",

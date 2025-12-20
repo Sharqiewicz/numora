@@ -30,7 +30,7 @@ import { ThousandStyle } from '@/types';
 export function formatWithSeparators(
   value: string,
   separator: string,
-  groupStyle: ThousandStyle,
+  groupStyle: ThousandStyle = ThousandStyle.Thousand,
   enableLeadingZeros = false,
   decimalSeparator: string = '.'
 ): string {

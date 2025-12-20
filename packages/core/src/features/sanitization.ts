@@ -39,6 +39,9 @@ export interface SanitizationOptions {
  * 5. Removing extra decimal points
  * 6. (Optional) Removing leading zeros
  *
+ * Note: Decimal separator conversion (comma ↔ dot) is handled in the keydown event
+ * (handleDecimalSeparatorKey), not here, to avoid converting thousand separators.
+ *
  * @param value - The string value to sanitize
  * @param options - Optional sanitization configuration
  * @returns The sanitized numeric string
@@ -52,6 +55,8 @@ export const sanitizeNumoraInput = (
   let sanitized = filterMobileKeyboardArtifacts(value);
 
   // Step 1: Remove thousand separators (they're formatting, not data)
+  // Note: Decimal separator conversion is handled in keydown event (handleDecimalSeparatorKey),
+  // not here, to avoid converting thousand separators that were added by formatting.
   if (options?.thousandSeparator) {
     sanitized = removeThousandSeparators(sanitized, options.thousandSeparator);
   }

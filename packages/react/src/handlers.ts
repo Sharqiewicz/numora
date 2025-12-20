@@ -3,7 +3,7 @@ import {
   handleOnChangeNumoraInput,
   handleOnKeyDownNumoraInput,
   handleOnPasteNumoraInput,
-  formatValue,
+  formatValueForDisplay,
   type CaretPositionInfo,
   type FormattingOptions,
   FormatOn,
@@ -28,6 +28,8 @@ export function handleNumoraOnChange(
   options: BaseOptions
 ): ChangeResult {
 
+  console.log('handleNumoraOnChange', e.nativeEvent);
+
   const { formatted, raw } = handleOnChangeNumoraInput(
     e.nativeEvent as unknown as Event,
     options.decimalMaxLength,
@@ -35,9 +37,7 @@ export function handleNumoraOnChange(
     options.formattingOptions
   );
 
-  console.log('formatted', formatted);
-  console.log('raw', raw);
-
+  console.log('handleNumoraOnChange formatted', formatted, 'raw', raw);
   return {
     value: formatted,
     rawValue: raw,
@@ -77,14 +77,12 @@ export function handleNumoraOnBlur(
     formattingOptions: FormattingOptions & { rawValueMode?: boolean };
   }
 ): BlurResult {
-  // If formatOn is blur, format the value using the pure formatting utility
   if (options.formattingOptions.formatOn === FormatOn.Blur) {
-    const { formatted, raw } = formatValue(
+    const { formatted, raw } = formatValueForDisplay(
       e.target.value,
       options.decimalMaxLength,
       { ...options.formattingOptions, formatOn: FormatOn.Change }
     );
-    e.target.value = formatted;
     return {
       value: formatted,
       rawValue: raw,

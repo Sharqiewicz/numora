@@ -6,7 +6,7 @@ export {
   handleOnKeyDownNumoraInput,
 } from './utils/event-handlers';
 export {
-  formatValue,
-  processAndFormatValue,
+  formatValueForDisplay,
+  formatInputValue,
 } from './utils/format-utils';
 export type { FormattingOptions, CaretPositionInfo } from './types';

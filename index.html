@@ -157,109 +157,20 @@
   </div>
 
   <script type="module">
-    import { NumoraInput } from './packages/core/dist/index.mjs';
+    import { NumoraInput, FormatOn, ThousandStyle } from './packages/core/dist/index.mjs';
 
     const input1Container = document.getElementById('input1');
-    const input2Container = document.getElementById('input2');
-    const value1Display = document.getElementById('value1');
-    const value2Display = document.getElementById('value2');
-    const separator1Select = document.getElementById('separator1');
-    const separator2Select = document.getElementById('separator2');
-    const style1Select = document.getElementById('style1');
-    const style2Select = document.getElementById('style2');
 
-    let input1Element, input2Element;
-    let separator1 = ',', separator2 = ',';
-    let style1 = 'thousand', style2 = 'thousand';
-
-    input1Element = new NumoraInput(input1Container, {
-      allowNegative: true,
-      maxDecimals: 2,
+    const input1Element = new NumoraInput(input1Container, {
+      enableNegative: false,
+      decimalMaxLength: 6,
       placeholder: 'Enter a number...',
-      formatOn: 'change',
-      thousandsSeparator: separator1,
-      thousandsGroupStyle: style1,
-      enableCompactNotation: true
-    });
-
-    input2Element = new NumoraInput(input2Container, {
-      maxDecimals: 6,
-      placeholder: 'Enter a number with up to 6 decimals...',
-      formatOn: 'blur',
-      thousandsSeparator: separator2,
-      thousandsGroupStyle: style2,
-      enableCompactNotation: false
-    });
-
-    separator1Select.addEventListener('change', (e) => {
-      separator1 = e.target.value;
-      const currentValue = input1Element.getValue();
-      const cleanValue = removeSeparators(currentValue);
-      input1Container.innerHTML = '';
-      input1Element = new NumericInput(input1Container, {
-        maxDecimals: 2,
-        placeholder: 'Enter a number...',
-        formatOn: 'change',
-        thousandsSeparator: separator1,
-        thousandsGroupStyle: style1,
-        shorthandParsing: true
-      });
-      if (cleanValue) {
-        input1Element.setValue(cleanValue);
-      }
-    });
-
-    separator2Select.addEventListener('change', (e) => {
-      separator2 = e.target.value;
-      const currentValue = input2Element.getValue();
-      const cleanValue = removeSeparators(currentValue);
-      input2Container.innerHTML = '';
-      input2Element = new NumericInput(input2Container, {
-        maxDecimals: 6,
-        placeholder: 'Enter a number with up to 6 decimals...',
-        formatOn: 'blur',
-        thousandsSeparator: separator2,
-        thousandsGroupStyle: style2,
-        shorthandParsing: true
-      });
-      if (cleanValue) {
-        input2Element.setValue(cleanValue);
-      }
-    });
-
-    style1Select.addEventListener('change', (e) => {
-      style1 = e.target.value;
-      const currentValue = input1Element.getValue();
-      const cleanValue = removeSeparators(currentValue);
-      input1Container.innerHTML = '';
-      input1Element = new NumericInput(input1Container, {
-        maxDecimals: 2,
-        placeholder: 'Enter a number...',
-        formatOn: 'change',
-        thousandsSeparator: separator1,
-        thousandsGroupStyle: style1,
-        shorthandParsing: true
-      });
-      if (cleanValue) {
-        input1Element.setValue(cleanValue);
-      }
-    });
-
-    style2Select.addEventListener('change', (e) => {
-      style2 = e.target.value;
-      const currentValue = input2Element.getValue();
-      const cleanValue = removeSeparators(currentValue);
-      input2Container.innerHTML = '';
-      input2Element = new NumericInput(input2Container, {
-        maxDecimals: 6,
-        placeholder: 'Enter a number with up to 6 decimals...',
-        formatOn: 'blur',
-        thousandsSeparator: separator2,
-        thousandsGroupStyle: style2,
-        shorthandParsing: true
-      });
-      if (cleanValue) {
-        input2Element.setValue(cleanValue);
+      formatOn: FormatOn.Change,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+      enableCompactNotation: true,
+      onChange: (value) => {
+        console.log('Value changed:', value);
       }
     });
   </script>
