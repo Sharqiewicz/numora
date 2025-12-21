@@ -9,6 +9,99 @@ import { DEFAULT_DECIMAL_SEPARATOR } from '@/config';
 import { applyDecimalPrecision, applyScaleNotation, compareStrings, isVeryLarge } from './numeric-formatting-utils';
 
 /**
+ * Checks if a value represents zero or is empty.
+ */
+function isZeroValue(value: string, decimalSeparator: string): boolean {
+  return !value || value === '0' || value === decimalSeparator || value === '-' || value === `-${decimalSeparator}`;
+}
+
+/**
+ * Extracts the sign and absolute value from a numeric string.
+ */
+function extractSign(value: string): { isNegative: boolean; absoluteValue: string } {
+  const isNegative = value.startsWith('-');
+  return { isNegative, absoluteValue: isNegative ? value.slice(1) : value };
+}
+
+/**
+ * Multiplies a numeric string by 100 using string arithmetic.
+ * Simplified algorithm: treat as integer representation, multiply, then normalize.
+ */
+function multiplyBy100(value: string, decimalSeparator: string): string {
+  if (!value || value === '0') {
+    return '0';
+  }
+
+  const hasDecimal = value.includes(decimalSeparator);
+  const [integerPart, decimalPart = ''] = hasDecimal ? value.split(decimalSeparator) : [value, ''];
+
+  // Multiply by 100: shift decimal point 2 places right
+  // If decimal part <= 2 digits, move all to integer and pad with zeros
+  // If decimal part > 2 digits, move first 2 digits to integer, keep rest as decimal
+  let result: string;
+  if (decimalPart.length <= 2) {
+    const zerosNeeded = 2 - decimalPart.length;
+    result = integerPart + decimalPart + '0'.repeat(zerosNeeded);
+  } else {
+    result = integerPart + decimalPart.slice(0, 2) + decimalSeparator + decimalPart.slice(2);
+  }
+
+  // Normalize: remove leading zeros, handle edge cases
+  let cleaned = result.replace(/^0+/, '') || '0';
+  
+  // If result starts with decimal separator, add leading zero
+  if (cleaned.startsWith(decimalSeparator)) {
+    cleaned = '0' + cleaned;
+  }
+  
+  if (cleaned.includes(decimalSeparator)) {
+    const [intPart, decPart] = cleaned.split(decimalSeparator);
+    return intPart === '0' && !decPart ? '0' : cleaned;
+  }
+  return cleaned;
+}
+
+/**
+ * Core formatting pipeline for percentages.
+ * Handles the common flow: multiply by 100 → format separators → apply precision.
+ */
+function formatPercentCore(
+  value: string,
+  options: {
+    decimals: number;
+    decimalSeparator: string;
+    thousandSeparator?: string;
+    thousandStyle: ThousandStyle;
+    decimalsMin?: number;
+  }
+): string {
+  const { decimals, decimalSeparator, thousandSeparator, thousandStyle, decimalsMin = 0 } = options;
+
+  if (isZeroValue(value, decimalSeparator)) {
+    return '0';
+  }
+
+  const { isNegative, absoluteValue } = extractSign(value);
+  const percentValue = multiplyBy100(absoluteValue, decimalSeparator);
+
+  let formatted = percentValue;
+  if (thousandSeparator && thousandStyle !== ThousandStyle.None) {
+    formatted = formatWithSeparators(percentValue, thousandSeparator, thousandStyle, false, decimalSeparator);
+  }
+
+  const result = applyDecimalPrecision(
+    formatted,
+    decimals,
+    decimalsMin,
+    decimalSeparator,
+    false,
+    value === '0'
+  );
+
+  return `${isNegative ? '-' : ''}${result}`;
+}
+
+/**
  * Formats a decimal value as a percentage string.
  * Input is expected as a decimal (e.g., 0.01 represents 1%).
  *
@@ -32,38 +125,14 @@ export function formatPercent(
   thousandSeparator?: string,
   thousandStyle: ThousandStyle = ThousandStyle.None
 ): string {
-  if (!value || value === '0' || value === decimalSeparator || value === '-' || value === `-${decimalSeparator}`) {
-    return '0%';
-  }
-
-  const isNegative = value.startsWith('-');
-  const absoluteValue = isNegative ? value.slice(1) : value;
-
-  // Multiply by 100 to convert decimal to percentage
-  const percentValue = multiplyBy100(absoluteValue, decimalSeparator);
-
-  // Format with separators if needed
-  let formatted = percentValue;
-  if (thousandSeparator && thousandStyle !== ThousandStyle.None) {
-    formatted = formatWithSeparators(
-      percentValue,
-      thousandSeparator,
-      thousandStyle,
-      false,
-      decimalSeparator
-    );
-  }
-
-  const result = applyDecimalPrecision(
-    formatted,
+  const result = formatPercentCore(value, {
     decimals,
-    0, // decimalsMin for formatPercent is always 0, as there is no decimalsMinAppliesToZero
     decimalSeparator,
-    false, // decimalsMinAppliesToZero is false for formatPercent
-    value === '0'
-  );
-
-  return `${isNegative ? '-' : ''}${result}%`;
+    thousandSeparator,
+    thousandStyle,
+    decimalsMin: decimals, // Use decimals as decimalsMin to ensure trailing zeros are shown
+  });
+  return result === '0' ? '0%' : `${result}%`;
 }
 
 /**
@@ -105,64 +174,35 @@ export function formatLargePercent(
     return missingPlaceholder;
   }
 
-  if (value === '0' || value === decimalSeparator || value === '-' || value === `-${decimalSeparator}`) {
+  if (isZeroValue(value, decimalSeparator)) {
     return '0%';
   }
 
-  const isNegative = value.startsWith('-');
-  const absoluteValue = isNegative ? value.slice(1) : value;
-
-  // Multiply by 100 to convert decimal to percentage
+  const { isNegative, absoluteValue } = extractSign(value);
   const percentValue = multiplyBy100(absoluteValue, decimalSeparator);
 
-  // Check if value is very large (would exceed our scale notation)
-  // For now, we'll use a simple threshold - values over 1e30 are considered "very large"
   if (isVeryLarge(percentValue)) {
     return veryLargePlaceholder;
   }
 
-  // Apply scale notation if value is large enough
   const { scaledValue, scaleSuffix } = applyScaleNotation(percentValue, decimalSeparator);
-
-  // Format the scaled value
   const shouldShowDecimals = compareStrings(scaledValue, decimalsUnder.toString()) < 0;
-  const formatted = formatPercent(
-    scaledValue,
-    shouldShowDecimals ? decimals : 0,
+  const decimalsToShow = shouldShowDecimals ? decimals : 0;
+
+  // Format the scaled value directly (it's already a percentage, not a decimal)
+  let formatted = scaledValue;
+  if (thousandSeparator && thousandStyle !== ThousandStyle.None) {
+    formatted = formatWithSeparators(scaledValue, thousandSeparator, thousandStyle, false, decimalSeparator);
+  }
+
+  const result = applyDecimalPrecision(
+    formatted,
+    decimalsToShow,
+    decimalsToShow,
     decimalSeparator,
-    thousandSeparator,
-    thousandStyle
+    false,
+    false
   );
 
-  // Remove the % from formatPercent and add scale suffix
-  const withoutPercent = formatted.slice(0, -1);
-  return `${isNegative ? '-' : ''}${withoutPercent}${scaleSuffix}%`;
-}
-
-/**
- * Multiplies a numeric string by 100 using string arithmetic.
- */
-function multiplyBy100(value: string, decimalSeparator: string): string {
-  if (!value || value === '0') {
-    return '0';
-  }
-
-  const hasDecimal = value.includes(decimalSeparator);
-  if (!hasDecimal) {
-    return value + '00';
-  }
-
-  const [integerPart, decimalPart = ''] = value.split(decimalSeparator);
-  const decimalLength = decimalPart.length;
-
-  if (decimalLength <= 2) {
-    // Decimal part fits within 2 digits: move all decimals to integer part
-    const zerosNeeded = 2 - decimalLength;
-    return integerPart + decimalPart + '0'.repeat(zerosNeeded);
-  } else {
-    // Decimal part is longer: move first 2 digits to integer part
-    const decimalToMove = decimalPart.slice(0, 2);
-    const remainingDecimal = decimalPart.slice(2);
-    return integerPart + decimalToMove + decimalSeparator + remainingDecimal;
-  }
+  return `${isNegative ? '-' : ''}${result}${scaleSuffix}%`;
 }

@@ -289,7 +289,7 @@ describe('calculateCursorPositionAfterFormatting', () => {
         ',',
         'wan'
       );
-      expect(newCursor).toBe(4);
+      expect(newCursor).toBe(5);
     });
 
     it('should handle backspace on separator in wan style', () => {

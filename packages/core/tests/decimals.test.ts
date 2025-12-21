@@ -5,7 +5,6 @@ import {
   trimToDecimalMaxLength,
   removeExtraDecimalSeparators
 } from '../src/features/decimals';
-import { ThousandStyle } from '../src/types';
 
 describe('ensureMinDecimals', () => {
   describe('basic functionality', () => {
@@ -124,7 +123,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       const result = handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
@@ -139,7 +137,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       const result = handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         ','
       );
 
@@ -154,7 +151,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       const result = handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
@@ -168,7 +164,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       const result = handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
@@ -184,7 +179,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       const result = handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
@@ -198,7 +192,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       const result = handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         ','
       );
 
@@ -212,85 +205,12 @@ describe('✅ handleDecimalSeparatorKey', () => {
       const result = handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
       expect(result).toBe(true);
       expect(input.value).toBe('1.23');
       expect(input.setSelectionRange).toHaveBeenCalledWith(2, 2);
-    });
-  });
-
-  describe('✅ ThousandStyle conditions', () => {
-    it('should return false when thousandStyle is Thousand', () => {
-      const input = createMockInputElement('123', 3);
-      const event = createKeyboardEvent(',');
-      const result = handleDecimalSeparatorKey(
-        event,
-        input,
-        { ThousandStyle: ThousandStyle.Thousand },
-        '.'
-      );
-
-      expect(result).toBe(false);
-      expect(input.value).toBe('123');
-    });
-
-    it('should return false when thousandStyle is Lakh', () => {
-      const input = createMockInputElement('123', 3);
-      const event = createKeyboardEvent(',');
-      const result = handleDecimalSeparatorKey(
-        event,
-        input,
-        { ThousandStyle: ThousandStyle.Lakh },
-        '.'
-      );
-
-      expect(result).toBe(false);
-      expect(input.value).toBe('123');
-    });
-
-    it('should return false when thousandStyle is Wan', () => {
-      const input = createMockInputElement('123', 3);
-      const event = createKeyboardEvent(',');
-      const result = handleDecimalSeparatorKey(
-        event,
-        input,
-        { ThousandStyle: ThousandStyle.Wan },
-        '.'
-      );
-
-      expect(result).toBe(false);
-      expect(input.value).toBe('123');
-    });
-
-    it('should work correctly when thousandStyle is None', () => {
-      const input = createMockInputElement('123', 3);
-      const event = createKeyboardEvent(',');
-      const result = handleDecimalSeparatorKey(
-        event,
-        input,
-        { ThousandStyle: ThousandStyle.None },
-        '.'
-      );
-
-      expect(result).toBe(true);
-      expect(input.value).toBe('123.');
-    });
-
-    it('should work correctly when thousandStyle is undefined', () => {
-      const input = createMockInputElement('123', 3);
-      const event = createKeyboardEvent(',');
-      const result = handleDecimalSeparatorKey(
-        event,
-        input,
-        undefined,
-        '.'
-      );
-
-      expect(result).toBe(true);
-      expect(input.value).toBe('123.');
     });
   });
 
@@ -301,7 +221,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
@@ -315,7 +234,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
@@ -329,7 +247,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
@@ -345,7 +262,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       const result = handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
@@ -360,7 +276,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       const result = handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
@@ -374,7 +289,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
@@ -389,7 +303,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       const result = handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
@@ -403,7 +316,6 @@ describe('✅ handleDecimalSeparatorKey', () => {
       const result = handleDecimalSeparatorKey(
         event,
         input,
-        { ThousandStyle: ThousandStyle.None },
         '.'
       );
 
@@ -525,7 +437,7 @@ describe('✅ removeExtraDecimalSeparators', () => {
 
     it('should handle multiple separators at end', () => {
       expect(removeExtraDecimalSeparators('1.23.', '.')).toBe('1.23');
-    });
+    }); 
 
     it('should handle empty string', () => {
       expect(removeExtraDecimalSeparators('', '.')).toBe('');

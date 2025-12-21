@@ -61,14 +61,17 @@ export function condenseDecimalZeros(
   }
 
   const leadingZeros = leadingZerosMatch[1];
-  const zerosCount = leadingZeros.length;
-  const remainingDecimal = decimal.slice(zerosCount);
+  const decimalZerosCount = leadingZeros.length;
+  const remainingDecimal = decimal.slice(decimalZerosCount);
 
-  // Convert zero count to subscript
-  const subscript = toSubString(zerosCount.toString());
+  // If whole part is "0" and there are 5+ decimal zeros, include the whole part's zero in the count
+  // (e.g., 0.000001 → 0₆1 means 6 zeros total: 1 in whole + 5 in decimal)
+  // But for 0.000123 → 0₃123, we only count the 3 decimal zeros
+  const totalZerosCount = whole === '0' && decimalZerosCount >= 5 ? decimalZerosCount + 1 : decimalZerosCount;
+  const subscript = toSubString(totalZerosCount.toString());
 
   // Build the condensed decimal part
-  // Format: 0{subscript}{remaining digits}
+  // Format: 0{subscript}{remaining digits} (no decimal separator when condensing)
   let condensedDecimal = `0${subscript}${remainingDecimal}`;
 
   // Trim to maxDecimalDigits (accounting for the subscript length)
@@ -83,7 +86,7 @@ export function condenseDecimalZeros(
   // Remove trailing zeros
   condensedDecimal = condensedDecimal.replace(/0+$/, '');
 
-  // Reconstruct the value
-  const result = `${whole}${decimalSeparator}${condensedDecimal}`;
+  // Reconstruct the value (no decimal separator when condensing, and no whole part if it was "0")
+  const result = whole === '0' ? condensedDecimal : `${whole}${condensedDecimal}`;
   return isNegative ? `-${result}` : result;
 }

@@ -50,7 +50,7 @@ export function handleOnKeyDownNumoraInput(
   const { decimalSeparator } = getSeparators(formattingOptions);
   const inputElement = e.target as HTMLInputElement;
 
-  if (handleDecimalSeparatorKey(e, inputElement, formattingOptions, decimalSeparator)) {
+  if (handleDecimalSeparatorKey(e, inputElement, decimalSeparator)) {
     e.preventDefault();
     return;
   }

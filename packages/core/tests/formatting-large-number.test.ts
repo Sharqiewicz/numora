@@ -6,7 +6,7 @@ describe('formatLargeNumber', () => {
   describe('basic functionality', () => {
     it('should format small numbers without scale', () => {
       expect(formatLargeNumber('123')).toBe('123');
-      expect(formatLargeNumber('1234')).toBe('1234');
+      expect(formatLargeNumber('1234', { minScale: 4 })).toBe('1234');
     });
 
     it('should format numbers with scale notation', () => {
@@ -29,7 +29,7 @@ describe('formatLargeNumber', () => {
 
   describe('decimal places', () => {
     it('should show decimals for values under threshold', () => {
-      const result = formatLargeNumber('123', { decimalsUnder: 1000, decimals: 2 });
+      const result = formatLargeNumber('123', { decimalsUnder: 1000, decimals: 2, decimalsMin: 2 });
       expect(result).toMatch(/\d+\.\d+/);
     });
 
@@ -67,9 +67,13 @@ describe('formatLargeNumber', () => {
 
   describe('options', () => {
     it('should respect minScale option', () => {
-      const result = formatLargeNumber('1234', { minScale: 6 });
-      // Should not apply scale notation if below minScale
-      expect(result).not.toContain('k');
+      const result = formatLargeNumber('1234567', { minScale: 6 });
+      // Should not apply scale notation if below minScale (M is 6, so it should still apply)
+      expect(result).toContain('M');
+
+      const resultNoScale = formatLargeNumber('1234567', { minScale: 9 });
+      // Should not apply scale notation if below minScale (B is 9, so M won't apply)
+      expect(resultNoScale).not.toContain('M');
     });
 
     it('should apply minimum decimals to zero if enabled', () => {

@@ -1,6 +1,5 @@
 import { DEFAULT_DECIMAL_SEPARATOR } from "@/config";
 import type { SeparatorOptions, Separators, FormattingOptions } from '@/types';
-import { ThousandStyle } from '@/types';
 
 
 /**
@@ -53,7 +52,6 @@ function shouldPreventMultipleDecimals(input: HTMLInputElement, decimalSeparator
 export function handleDecimalSeparatorKey(
   e: KeyboardEvent,
   inputElement: HTMLInputElement,
-  formattingOptions: FormattingOptions | undefined,
   decimalSeparator: string
 ): boolean {
   const { key } = e;
