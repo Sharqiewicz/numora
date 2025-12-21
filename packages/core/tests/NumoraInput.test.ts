@@ -527,7 +527,7 @@ describe('Negative Number Support', () => {
   });
 
   describe('Edge cases', () => {
-    it.skip('should handle just minus sign', () => {
+    it('should handle just minus sign', () => {
       createInputWithNegatives();
       const inputElement = getInputElement();
 
@@ -1254,7 +1254,7 @@ describe('Raw Value Mode', () => {
       expect(inputElement.value).toBe('0');
     });
 
-    it.skip('should work without thousand separator', () => {
+    it('should work without thousand separator', () => {
       const input = new NumoraInput(container, {
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
