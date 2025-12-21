@@ -1,22 +1,9 @@
 import { describe, it, expect } from 'vitest';
-
-/**
- * Testing module: formatting/thousand-grouping.ts
- *
- * The formatting module has been reorganized into focused sub-modules:
- * - formatting/thousand-grouping.ts - Number formatting with separators
- * - formatting/cursor-position.ts - Cursor position calculation
- * - formatting/digit-counting.ts - Digit counting utilities
- * - formatting/change-detection.ts - Change detection utilities
- * - formatting/constants.ts - Type definitions and constants
- *
- * Imports from 'utils/formatting' use the re-export from formatting/index.ts
- * for backward compatibility.
- */
 import { formatWithSeparators } from '../src/features/formatting';
 
-describe('formatWithSeparators', () => {
-  describe('thousand style (standard Western)', () => {
+
+describe('✅ formatWithSeparators', () => {
+  describe('✅ thousand style (standard Western)', () => {
     it('should format 1234567 to 1,234,567', () => {
       expect(formatWithSeparators('1234567', ',', 'thousand')).toBe('1,234,567');
     });
@@ -106,7 +93,7 @@ describe('formatWithSeparators', () => {
     });
   });
 
-  describe('lakh style (Indian numbering)', () => {
+  describe('✅ lakh style (Indian numbering)', () => {
     it('should format 1234567 to 12,34,567', () => {
       expect(formatWithSeparators('1234567', ',', 'lakh')).toBe('12,34,567');
     });
@@ -148,7 +135,7 @@ describe('formatWithSeparators', () => {
     });
   });
 
-  describe('wan style (Chinese numbering)', () => {
+  describe('✅ wan style (Chinese numbering)', () => {
     it('should format 1234567 to 123,4567', () => {
       expect(formatWithSeparators('1234567', ',', 'wan')).toBe('123,4567');
     });
@@ -194,13 +181,23 @@ describe('formatWithSeparators', () => {
     });
   });
 
-  describe('default behavior', () => {
+  describe('✅ default behavior', () => {
     it('should default to thousand style when groupStyle is not specified', () => {
       expect(formatWithSeparators('1234567', ',')).toBe('1,234,567');
     });
+
+    it('should format 1000 to 1,000', () => {
+      expect(formatWithSeparators('1000', ',')).toBe('1,000');
+    });
+
+    it('should format -12345678.90 to -12,345,678.90', () => {
+      expect(formatWithSeparators('-12345678.90', ',')).toBe('-12,345,678.90');
+    });
+
   });
 
-  describe('edge cases', () => {
+  describe('✅ edge cases', () => {
+
     it('should handle leading zeros', () => {
       expect(formatWithSeparators('001234567', ',', 'thousand')).toBe('001,234,567');
     });
@@ -218,9 +215,7 @@ describe('formatWithSeparators', () => {
     it('should handle numbers ending with decimal point', () => {
       expect(formatWithSeparators('123.', ',', 'thousand')).toBe('123.');
     });
-  });
 
-  describe('additional test cases from react-number-format', () => {
     describe('thousand style edge cases', () => {
       it('should format 10040 to 10,040', () => {
         expect(formatWithSeparators('10040', ',', 'thousand')).toBe('10,040');
@@ -260,16 +255,6 @@ describe('formatWithSeparators', () => {
 
       it('should format -12345.67 to -1,2345.67', () => {
         expect(formatWithSeparators('-12345.67', ',', 'wan', false, '.')).toBe('-1,2345.67');
-      });
-    });
-
-    describe('none style (thousand grouping without special rules)', () => {
-      it('should format 1000 to 1,000', () => {
-        expect(formatWithSeparators('1000', ',', 'none')).toBe('1,000');
-      });
-
-      it('should format -12345678.90 to -12,345,678.90', () => {
-        expect(formatWithSeparators('-12345678.90', ',', 'none', false, '.')).toBe('-12,345,678.90');
       });
     });
   });

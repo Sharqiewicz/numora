@@ -6,7 +6,7 @@
 import { GROUPING_CONFIG  } from './constants';
 import { DEFAULT_DECIMAL_SEPARATOR } from '@/config';
 import type { FormattingOptions, Separators } from '@/types';
-import { ThousandStyle } from '@/types';
+import { ThousandStyle, FormatOn } from '@/types';
 
 
 
@@ -180,7 +180,7 @@ export function formatNumoraInput(
   formattingOptions?: FormattingOptions,
   separators?: Separators
 ): string {
-  if (formattingOptions?.formatOn === 'change' && formattingOptions.thousandSeparator) {
+  if (formattingOptions?.formatOn === FormatOn.Change && formattingOptions.thousandSeparator) {
     const formattedValue = formatWithSeparators(
       sanitizedAndTrimmedValue,
       formattingOptions.thousandSeparator,
