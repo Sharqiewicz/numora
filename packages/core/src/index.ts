@@ -10,3 +10,6 @@ export {
   formatInputValue,
 } from './utils/format-utils';
 export type { FormattingOptions, CaretPositionInfo } from './types';
+export { formatPercent, formatLargePercent } from './features/formatting/percent';
+export { formatLargeNumber, type FormatLargeNumberOptions } from './features/formatting/large-number';
+export { condenseDecimalZeros } from './features/formatting/subscript-notation';

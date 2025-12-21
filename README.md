@@ -135,13 +135,13 @@ const numoraInput = new NumoraInput(container, {
 ### React
 
 ```tsx
-import { NumericInput } from 'numora-react';
+import { NumoraInput } from 'numora-react';
 
 function App() {
   return (
-    <NumericInput
+    <NumoraInput
       maxDecimals={18}
-      thousandsSeparator=","
+      thousandSeparator=","
       formatOn="change"
       onChange={(e) => {
         console.log('Value:', e.target.value);

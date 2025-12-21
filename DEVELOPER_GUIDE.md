@@ -122,7 +122,7 @@ Layer 3:     Advanced cursor positioning
                      │
                      ▼
 ┌─────────────────────────────────────────────────┐
-│              NumericInput Class                 │
+│              NumoraInput Class                   │
 │         (Presentation & Coordination)           │
 │  - Creates <input> element                      │
 │  - Manages event listeners                      │
@@ -194,29 +194,30 @@ Update DOM (input.value & cursor)
 
 ```
 packages/core/src/
-├── NumericInput.ts               # Main presentation class
+├── NumoraInput.ts                # Main presentation class
 ├── index.ts                      # Public API exports
+├── features/
+│   ├── sanitization.ts           # Input cleaning pipeline
+│   ├── decimals.ts               # Decimal handling utilities
+│   ├── scientific-notation.ts    # Scientific notation expansion
+│   ├── non-numeric-characters.ts # Character filtering
+│   └── formatting/               # 🆕 MODULAR (recently refactored)
+│       ├── constants.ts          # Types & grouping configuration
+│       ├── thousand-grouping.ts  # Number formatting logic
+│       ├── cursor-position.ts    # Cursor calculation (complex!)
+│       ├── change-detection.ts   # Change tracking utilities
+│       ├── digit-counting.ts     # Digit manipulation utilities
+│       ├── index.ts              # Public API
+│       └── README.md             # Detailed module docs
 └── utils/
-    ├── event-handlers.ts         # User interaction handlers
-    ├── sanitization.ts           # Input cleaning pipeline
-    ├── decimals.ts               # Decimal handling utilities
-    ├── scientific-notation.ts    # Scientific notation expansion
-    ├── nonNumericCharacters.ts   # Character filtering
-    └── formatting/               # 🆕 MODULAR (recently refactored)
-        ├── constants.ts          # Types & grouping configuration
-        ├── thousands-grouping.ts # Number formatting logic
-        ├── cursor-position.ts    # Cursor calculation (complex!)
-        ├── change-detection.ts   # Change tracking utilities
-        ├── digit-counting.ts     # Digit manipulation utilities
-        ├── index.ts              # Public API
-        └── README.md             # Detailed module docs
+    └── event-handlers.ts         # User interaction handlers
 ```
 
 ---
 
 ### Module Details
 
-#### 1. **NumericInput.ts** - Main Class
+#### 1. **NumoraInput.ts** - Main Class
 
 **Purpose:** Presentation layer that manages the DOM input element and coordinates events.
 
@@ -229,8 +230,8 @@ packages/core/src/
 
 **Example:**
 ```typescript
-const input = new NumericInput(container, {
-  maxDecimals: 6,
+const input = new NumoraInput(container, {
+  decimalMaxLength: 6,
   placeholder: "Enter amount",
   onChange: (value) => console.log(value)
 });
@@ -258,31 +259,31 @@ private caretPositionBeforeChange?: {
 
 ```typescript
 // 1. onChange - Main input processing
-handleOnChangeNumericInput(
+handleOnChangeNumoraInput(
   e: Event,
-  maxDecimals: number,
+  decimalMaxLength: number,
   caretPositionBeforeChange?: CaretPositionInfo
 ): void
 
 // 2. onKeyDown - Track caret & prevent invalid input
-handleOnKeyDownNumericInput(
+handleOnKeyDownNumoraInput(
   e: KeyboardEvent
 ): CaretPositionInfo | undefined
 
 // 3. onPaste - Handle clipboard data
-handleOnPasteNumericInput(
+handleOnPasteNumoraInput(
   e: ClipboardEvent,
-  maxDecimals: number
+  decimalMaxLength: number
 ): string
 ```
 
 **Flow:**
 ```
-keydown → handleOnKeyDownNumericInput()
+keydown → handleOnKeyDownNumoraInput()
             ↓ (returns caret info)
-input → handleOnChangeNumericInput(event, maxDecimals, caretInfo)
+input → handleOnChangeNumoraInput(event, decimalMaxLength, caretInfo)
             ↓ (sanitize → format → position cursor)
-paste → handleOnPasteNumericInput(event, maxDecimals)
+paste → handleOnPasteNumoraInput(event, decimalMaxLength)
 ```
 
 ---
@@ -293,18 +294,39 @@ paste → handleOnPasteNumericInput(event, maxDecimals)
 
 **Pipeline:**
 ```typescript
-export const sanitizeNumericInput = (value: string): string => {
-  const expanded = expandScientificNotation(value);  // 1.5e-7 → 0.00000015
-  const cleaned = removeNonNumericCharacters(expanded);  // Remove letters, etc.
-  return removeExtraDots(cleaned);  // Keep only first dot
+export const sanitizeNumoraInput = (
+  value: string,
+  options?: SanitizationOptions
+): string => {
+  // Filter mobile keyboard artifacts
+  let sanitized = filterMobileKeyboardArtifacts(value);
+  // Remove thousand separators
+  if (options?.thousandSeparator) {
+    sanitized = removeThousandSeparators(sanitized, options.thousandSeparator);
+  }
+  // Expand compact notation (if enabled)
+  if (options?.enableCompactNotation) {
+    sanitized = expandCompactNotation(sanitized);
+  }
+  // Expand scientific notation
+  sanitized = expandScientificNotation(sanitized);
+  // Remove non-numeric characters
+  sanitized = removeNonNumericCharacters(sanitized, options?.enableNegative, options?.decimalSeparator);
+  // Remove extra decimal separators
+  sanitized = removeExtraDecimalSeparators(sanitized, options?.decimalSeparator || DEFAULT_DECIMAL_SEPARATOR);
+  // Remove leading zeros (if not allowed)
+  if (!options?.enableLeadingZeros) {
+    sanitized = removeLeadingZeros(sanitized);
+  }
+  return sanitized;
 };
 ```
 
 **Example:**
 ```typescript
-sanitizeNumericInput("$1,234.56abc");  // "1234.56"
-sanitizeNumericInput("1.5e-7");        // "0.00000015"
-sanitizeNumericInput("1..2.3");        // "1.23"
+sanitizeNumoraInput("$1,234.56abc", { thousandSeparator: ',' });  // "1234.56"
+sanitizeNumoraInput("1.5e-7");        // "0.00000015"
+sanitizeNumoraInput("1..2.3");        // "1.23"
 ```
 
 ---
@@ -362,7 +384,7 @@ expandScientificNotation("5e0")      // "5"
 
 **Recently refactored into focused sub-modules!**
 
-See [`packages/core/src/utils/formatting/README.md`](packages/core/src/utils/formatting/README.md) for complete documentation.
+See [`packages/core/src/features/formatting/README.md`](packages/core/src/features/formatting/README.md) for complete documentation.
 
 **Sub-modules:**
 
@@ -422,18 +444,17 @@ countMeaningfulDigitsBeforePosition("1,234", 3, ",")  // 2 (digits "1" and "2")
 ```typescript
 Step 1: keydown event
     ↓
-handleOnKeyDownNumericInput(e)
+handleOnKeyDownNumoraInput(e)
   - Captures: selectionStart=4, selectionEnd=4
   - Returns: { selectionStart: 4, selectionEnd: 4 }
   ────────────────────────────────────────────────
 Step 2: input event triggered (value now "10004")
     ↓
-handleOnChangeNumericInput(e, maxDecimals=2, caretInfo)
+handleOnChangeNumoraInput(e, decimalMaxLength=2, caretInfo)
   Input: "10004"
     ↓
-  replaceCommas(With Dots("10004")  → "10004"
-  sanitize NumericInput("10004")    → "10004"
-  trimToMaxDecimals("10004", 2)     → "10004"
+  sanitizeNumoraInput("10004", options)    → "10004"
+  trimToDecimalMaxLength("10004", 2)     → "10004"
     ↓
   formatWithSeparators("10004", ",", "thousand")
     → "10,004"
@@ -516,7 +537,7 @@ npm run dev           # Development mode
 
 ```
 packages/core/tests/
-├── NumericInput.test.ts           # Main class tests
+├── NumoraInput.test.ts            # Main class tests
 ├── formatting.test.ts             # Formatting logic
 ├── formatting.cursor.test.ts      # Cursor positioning (complex!)
 └── scientific-notation.test.ts    # Scientific notation expansion
@@ -532,7 +553,7 @@ npm test
 ### Test Status
 
 ```
-✅ NumericInput.test.ts:         52 tests passing
+✅ NumoraInput.test.ts:           52 tests passing
 ✅ formatting.test.ts:            42 tests passing
 ⚠️  formatting.cursor.test.ts:    30/36 passing (6 pre-existing failures)
 ✅ scientific-notation.test.ts:   30 tests passing
@@ -597,16 +618,29 @@ export function expandShorthand(value: string): string {
 
 **Step 2: Add to Sanitization Pipeline**
 
-File: `packages/core/src/utils/sanitization.ts`
+File: `packages/core/src/features/sanitization.ts`
 
 ```typescript
-import { expandShorthand } from './shorthand';
+import { expandCompactNotation } from './compact-notation';
 
-export const sanitizeNumericInput = (value: string): string => {
-  const expanded = expandScientificNotation(value);
-  const withShorthand = expandShorthand(expanded);  // 🆕 Add this
-  const cleaned = removeNonNumericCharacters(withShorthand);
-  return removeExtraDots(cleaned);
+export const sanitizeNumoraInput = (
+  value: string,
+  options?: SanitizationOptions
+): string => {
+  let sanitized = filterMobileKeyboardArtifacts(value);
+  if (options?.thousandSeparator) {
+    sanitized = removeThousandSeparators(sanitized, options.thousandSeparator);
+  }
+  if (options?.enableCompactNotation) {
+    sanitized = expandCompactNotation(sanitized);  // 🆕 Add this
+  }
+  sanitized = expandScientificNotation(sanitized);
+  sanitized = removeNonNumericCharacters(sanitized, options?.enableNegative, options?.decimalSeparator);
+  sanitized = removeExtraDecimalSeparators(sanitized, options?.decimalSeparator || DEFAULT_DECIMAL_SEPARATOR);
+  if (!options?.enableLeadingZeros) {
+    sanitized = removeLeadingZeros(sanitized);
+  }
+  return sanitized;
 };
 ```
 
@@ -752,7 +786,7 @@ Step 3: Find position for 4 digits in new value
 Result: Cursor at position 5 in "1,000"
 ```
 
-**See:** `formatting/cursor-position.ts` for full implementation.
+**See:** `features/formatting/cursor-position.ts` for full implementation.
 
 ---
 
@@ -773,7 +807,7 @@ Delete at position 2:    "1,|234" → "1,|34" (position 2)
 **Detection:**
 
 ```typescript
-handleOnKeyDownNumericInput(e: KeyboardEvent) {
+handleOnKeyDownNumoraInput(e: KeyboardEvent) {
   if (e.key === 'Delete') {
     return {
       selectionStart,
@@ -802,12 +836,12 @@ handleOnKeyDownNumericInput(e: KeyboardEvent) {
 1. User presses key
    ↓
 2. keydown event fires
-   → handleOnKeyDownNumericInput()
+   → handleOnKeyDownNumoraInput()
    → Capture caret position
    → Store selectionStart, selectionEnd, endOffset
    ↓
 3. input event fires (value already changed by browser)
-   → handleOnChangeNumericInput()
+   → handleOnChangeNumoraInput()
    → Sanitize value
    → Format value
    → Calculate new cursor position using stored caret info
@@ -845,14 +879,14 @@ export const sanitizeNumericInput = (value: string): string => {
 ### Pattern 2: Adding Configuration Options
 
 ```typescript
-// 1. Extend interface in NumericInput.ts
-interface NumericInputOptions extends Partial<HTMLInputElement> {
-  maxDecimals?: number;
+// 1. Extend interface in NumoraInput.ts
+interface NumoraInputOptions extends Partial<HTMLInputElement> {
+  decimalMaxLength?: number;
   yourNewOption?: YourType;  // ← Add here
 }
 
 // 2. Use in constructor
-constructor(container: HTMLElement, options: NumericInputOptions) {
+constructor(container: HTMLElement, options: NumoraInputOptions) {
   this.options = { ...options };
   // Access via this.options.yourNewOption
 }
@@ -901,7 +935,7 @@ console.log('Calculated cursor:', newCursorPosition);
 console.log('Change range:', changeRange);
 ```
 
-**Fix:** Check `formatting/cursor-position.ts` logic.
+**Fix:** Check `features/formatting/cursor-position.ts` logic.
 
 ---
 
@@ -910,15 +944,15 @@ console.log('Change range:', changeRange);
 **Symptoms:** Input allows more decimals than `maxDecimals`.
 
 **Check:**
-1. Is `trimToMaxDecimals()` being called?
-2. Is `maxDecimals` passed correctly?
+1. Is `trimToDecimalMaxLength()` being called?
+2. Is `decimalMaxLength` passed correctly?
 3. Is there a race condition?
 
 **Debug:**
 ```typescript
-console.log('maxDecimals:', maxDecimals);
+console.log('decimalMaxLength:', decimalMaxLength);
 console.log('Value before trim:', value);
-console.log('Value after trim:', trimToMaxDecimals(value, maxDecimals));
+console.log('Value after trim:', trimToDecimalMaxLength(value, decimalMaxLength, decimalSeparator));
 ```
 
 ---
@@ -946,12 +980,12 @@ console.log(expandScientificNotation("1e-7"));  // Should be "0.0000001"
 1. **Import paths changed:**
    ```typescript
    // ❌ Old path
-   import { formatWithSeparators } from '../src/formatting';
+   import { formatWithSeparators } from '../src/utils/formatting';
 
    // ✅ New path (after refactoring)
-   import { formatWithSeparators } from '../src/formatting/thousands-grouping';
+   import { formatWithSeparators } from '../src/features/formatting/thousand-grouping';
    // OR use re-export
-   import { formatWithSeparators } from '../src/formatting';
+   import { formatWithSeparators } from '../src/features/formatting';
    ```
 
 2. **Expected behavior changed:**
