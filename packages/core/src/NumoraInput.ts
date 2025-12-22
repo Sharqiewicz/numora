@@ -345,14 +345,6 @@ export class NumoraInput {
         : undefined;
 
       this.handleValueChange(formatted, raw);
-
-      // Dispatch input and change events if value changed
-      if (oldValue !== formatted) {
-        const inputEvent = new Event('input', { bubbles: true, cancelable: true });
-        this.element.dispatchEvent(inputEvent);
-        const changeEvent = new Event('change', { bubbles: true, cancelable: true });
-        this.element.dispatchEvent(changeEvent);
-      }
     }
   }
 
