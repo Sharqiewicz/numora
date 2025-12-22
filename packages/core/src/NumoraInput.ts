@@ -26,7 +26,7 @@ interface ResolvedNumoraOptions {
   onChange?: (value: string) => void;
 }
 
-export interface NumoraInputOptions extends Partial<Omit<HTMLInputElement, 'value' | 'defaultValue' | 'onchange'>> {
+export interface NumoraInputOptions extends Partial<Omit<HTMLInputElement, 'value' | 'defaultValue' | 'onChange'>> {
   // Formatting options
   formatOn?: FormatOn;
 
