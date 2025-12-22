@@ -96,11 +96,11 @@ importers:
         specifier: ^12.23.26
         version: 12.23.26(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       numora:
-        specifier: workspace:^
-        version: link:../packages/core
+        specifier: ^3.0.2
+        version: 3.0.2
       numora-react:
-        specifier: workspace:^
-        version: link:../packages/react
+        specifier: ^3.0.2
+        version: 3.0.2
       ogl:
         specifier: ^1.0.11
         version: 1.0.11
@@ -3886,6 +3886,12 @@ packages:
 
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
+
+  numora-react@3.0.2:
+    resolution: {integrity: sha512-PsWjhFsvk1AxB4C2jA8Lj4pNJ5fvCEIjJtop48gxJjZyPjfOZBqLzdt4UwA6+rogOc/gYeMhCzS9uyjGKQBpjA==}
+
+  numora@3.0.2:
+    resolution: {integrity: sha512-L1EQPudBSbX1G1v4vWtbdTaZrhJhexwffslc8TtcKXaN0ZNzo/+oPPyRNtVx3HWlDmRccTxlAiE+A4K5BGsuCQ==}
 
   nwsapi@2.2.22:
     resolution: {integrity: sha512-ujSMe1OWVn55euT1ihwCI1ZcAaAU3nxUiDwfDQldc51ZXaB9m2AyOn6/jh1BLe2t/G8xd6uKG1UBF2aZJeg2SQ==}
@@ -8820,6 +8826,10 @@ snapshots:
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
+
+  numora-react@3.0.2: {}
+
+  numora@3.0.2: {}
 
   nwsapi@2.2.22: {}
 
