@@ -27,6 +27,7 @@ import { Route as DocsNumoraFeaturesLeadingZerosRouteImport } from './routes/doc
 import { Route as DocsNumoraFeaturesFormattingRouteImport } from './routes/docs/numora/features/formatting'
 import { Route as DocsNumoraFeaturesDecimalsRouteImport } from './routes/docs/numora/features/decimals'
 import { Route as DocsNumoraFeaturesCompactNotationRouteImport } from './routes/docs/numora/features/compact-notation'
+import { Route as DocsNumoraReactIntegrationsReactHookFormRouteImport } from './routes/docs/numora-react/integrations/react-hook-form'
 import { Route as DocsNumoraReactFeaturesSubscriptNotationRouteImport } from './routes/docs/numora-react/features/subscript-notation'
 import { Route as DocsNumoraReactFeaturesScientificNotationRouteImport } from './routes/docs/numora-react/features/scientific-notation'
 import { Route as DocsNumoraReactFeaturesSanitizationRouteImport } from './routes/docs/numora-react/features/sanitization'
@@ -137,6 +138,12 @@ const DocsNumoraFeaturesCompactNotationRoute =
     path: '/numora/features/compact-notation',
     getParentRoute: () => DocsRoute,
   } as any)
+const DocsNumoraReactIntegrationsReactHookFormRoute =
+  DocsNumoraReactIntegrationsReactHookFormRouteImport.update({
+    id: '/numora-react/integrations/react-hook-form',
+    path: '/numora-react/integrations/react-hook-form',
+    getParentRoute: () => DocsRoute,
+  } as any)
 const DocsNumoraReactFeaturesSubscriptNotationRoute =
   DocsNumoraReactFeaturesSubscriptNotationRouteImport.update({
     id: '/numora-react/features/subscript-notation',
@@ -211,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/docs/numora-react/features/sanitization': typeof DocsNumoraReactFeaturesSanitizationRoute
   '/docs/numora-react/features/scientific-notation': typeof DocsNumoraReactFeaturesScientificNotationRoute
   '/docs/numora-react/features/subscript-notation': typeof DocsNumoraReactFeaturesSubscriptNotationRoute
+  '/docs/numora-react/integrations/react-hook-form': typeof DocsNumoraReactIntegrationsReactHookFormRoute
   '/docs/numora/features/compact-notation': typeof DocsNumoraFeaturesCompactNotationRoute
   '/docs/numora/features/decimals': typeof DocsNumoraFeaturesDecimalsRoute
   '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
@@ -240,6 +248,7 @@ export interface FileRoutesByTo {
   '/docs/numora-react/features/sanitization': typeof DocsNumoraReactFeaturesSanitizationRoute
   '/docs/numora-react/features/scientific-notation': typeof DocsNumoraReactFeaturesScientificNotationRoute
   '/docs/numora-react/features/subscript-notation': typeof DocsNumoraReactFeaturesSubscriptNotationRoute
+  '/docs/numora-react/integrations/react-hook-form': typeof DocsNumoraReactIntegrationsReactHookFormRoute
   '/docs/numora/features/compact-notation': typeof DocsNumoraFeaturesCompactNotationRoute
   '/docs/numora/features/decimals': typeof DocsNumoraFeaturesDecimalsRoute
   '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
@@ -270,6 +279,7 @@ export interface FileRoutesById {
   '/docs/numora-react/features/sanitization': typeof DocsNumoraReactFeaturesSanitizationRoute
   '/docs/numora-react/features/scientific-notation': typeof DocsNumoraReactFeaturesScientificNotationRoute
   '/docs/numora-react/features/subscript-notation': typeof DocsNumoraReactFeaturesSubscriptNotationRoute
+  '/docs/numora-react/integrations/react-hook-form': typeof DocsNumoraReactIntegrationsReactHookFormRoute
   '/docs/numora/features/compact-notation': typeof DocsNumoraFeaturesCompactNotationRoute
   '/docs/numora/features/decimals': typeof DocsNumoraFeaturesDecimalsRoute
   '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
@@ -301,6 +311,7 @@ export interface FileRouteTypes {
     | '/docs/numora-react/features/sanitization'
     | '/docs/numora-react/features/scientific-notation'
     | '/docs/numora-react/features/subscript-notation'
+    | '/docs/numora-react/integrations/react-hook-form'
     | '/docs/numora/features/compact-notation'
     | '/docs/numora/features/decimals'
     | '/docs/numora/features/formatting'
@@ -330,6 +341,7 @@ export interface FileRouteTypes {
     | '/docs/numora-react/features/sanitization'
     | '/docs/numora-react/features/scientific-notation'
     | '/docs/numora-react/features/subscript-notation'
+    | '/docs/numora-react/integrations/react-hook-form'
     | '/docs/numora/features/compact-notation'
     | '/docs/numora/features/decimals'
     | '/docs/numora/features/formatting'
@@ -359,6 +371,7 @@ export interface FileRouteTypes {
     | '/docs/numora-react/features/sanitization'
     | '/docs/numora-react/features/scientific-notation'
     | '/docs/numora-react/features/subscript-notation'
+    | '/docs/numora-react/integrations/react-hook-form'
     | '/docs/numora/features/compact-notation'
     | '/docs/numora/features/decimals'
     | '/docs/numora/features/formatting'
@@ -506,6 +519,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsNumoraFeaturesCompactNotationRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/docs/numora-react/integrations/react-hook-form': {
+      id: '/docs/numora-react/integrations/react-hook-form'
+      path: '/numora-react/integrations/react-hook-form'
+      fullPath: '/docs/numora-react/integrations/react-hook-form'
+      preLoaderRoute: typeof DocsNumoraReactIntegrationsReactHookFormRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/docs/numora-react/features/subscript-notation': {
       id: '/docs/numora-react/features/subscript-notation'
       path: '/numora-react/features/subscript-notation'
@@ -586,6 +606,7 @@ interface DocsRouteChildren {
   DocsNumoraReactFeaturesSanitizationRoute: typeof DocsNumoraReactFeaturesSanitizationRoute
   DocsNumoraReactFeaturesScientificNotationRoute: typeof DocsNumoraReactFeaturesScientificNotationRoute
   DocsNumoraReactFeaturesSubscriptNotationRoute: typeof DocsNumoraReactFeaturesSubscriptNotationRoute
+  DocsNumoraReactIntegrationsReactHookFormRoute: typeof DocsNumoraReactIntegrationsReactHookFormRoute
   DocsNumoraFeaturesCompactNotationRoute: typeof DocsNumoraFeaturesCompactNotationRoute
   DocsNumoraFeaturesDecimalsRoute: typeof DocsNumoraFeaturesDecimalsRoute
   DocsNumoraFeaturesFormattingRoute: typeof DocsNumoraFeaturesFormattingRoute
@@ -618,6 +639,8 @@ const DocsRouteChildren: DocsRouteChildren = {
     DocsNumoraReactFeaturesScientificNotationRoute,
   DocsNumoraReactFeaturesSubscriptNotationRoute:
     DocsNumoraReactFeaturesSubscriptNotationRoute,
+  DocsNumoraReactIntegrationsReactHookFormRoute:
+    DocsNumoraReactIntegrationsReactHookFormRoute,
   DocsNumoraFeaturesCompactNotationRoute:
     DocsNumoraFeaturesCompactNotationRoute,
   DocsNumoraFeaturesDecimalsRoute: DocsNumoraFeaturesDecimalsRoute,

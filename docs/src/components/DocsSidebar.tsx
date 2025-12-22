@@ -10,6 +10,7 @@ import {
   FunctionSquare,
   Hash,
   Percent,
+  Plug,
 } from 'lucide-react'
 import {
   SidebarContent,
@@ -90,6 +91,16 @@ const navigation = [
       },
     ],
   },
+  {
+    title: 'Integrations',
+    items: [
+      {
+        title: 'React Hook Form',
+        href: '/docs/integrations/react-hook-form',
+        icon: Plug,
+      },
+    ],
+  },
 ]
 
 
@@ -124,32 +135,39 @@ export function DocsSidebar() {
         activeTab={selectedPackage}
         onChange={handlePackageChange}
       />
-      {navigation.map((group) => (
-        <SidebarGroup key={group.title}>
-          <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {group.items.map((item) => {
-                const packageHref = getPackageHref(item.href, packagePrefix)
-                const isActive =
-                  currentPath === packageHref ||
-                  (packageHref !== `/docs/${packagePrefix}` && currentPath.startsWith(packageHref + '/'))
-                const Icon = item.icon
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link to={packageHref}>
-                        <Icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      ))}
+      {navigation.map((group) => {
+        // Only show Integrations section for react package
+        if (group.title === 'Integrations' && selectedPackage !== 'react') {
+          return null
+        }
+        
+        return (
+          <SidebarGroup key={group.title}>
+            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const packageHref = getPackageHref(item.href, packagePrefix)
+                  const isActive =
+                    currentPath === packageHref ||
+                    (packageHref !== `/docs/${packagePrefix}` && currentPath.startsWith(packageHref + '/'))
+                  const Icon = item.icon
+                  return (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton asChild isActive={isActive}>
+                        <Link to={packageHref}>
+                          <Icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )
+      })}
     </SidebarContent>
   )
 }

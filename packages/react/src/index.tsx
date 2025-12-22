@@ -130,7 +130,6 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   });
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    console.log('handleChange', e);
     const { value, rawValue } = handleNumoraOnChange(e, {
       decimalMaxLength: maxDecimals,
       caretPositionBeforeChange: caretInfoRef.current,
@@ -159,7 +158,6 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   }, [maxDecimals, formattingOptions, onChange]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
-    console.log('handleKeyDown', e);
     const coreCaretInfo = handleNumoraOnKeyDown(e, formattingOptions);
 
     // Always capture cursor position info, even if core library doesn't return it
@@ -207,7 +205,6 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   }, [maxDecimals, formattingOptions, onPaste, onChange]);
 
   const handleFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
-    console.log('handleFocus', e);
     if (formattingOptions.formatOn === FormatOn.Blur && formattingOptions.thousandSeparator) {
       const unformattedValue = removeThousandSeparators(displayValue, formattingOptions.thousandSeparator);
       setDisplayValue(unformattedValue);
@@ -219,7 +216,6 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   }, [formattingOptions, onFocus, displayValue]);
 
   const handleBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
-    console.log('handleBlur', e);
     const { value, rawValue } = handleNumoraOnBlur(e, {
       decimalMaxLength: maxDecimals,
       formattingOptions,

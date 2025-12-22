@@ -18,6 +18,11 @@ export function getPackageHref(basePath: string, packagePrefix: PackageRoutePref
     return `/docs/${packagePrefix}/features/${feature}`
   }
 
+  if (basePath.startsWith('/docs/integrations/')) {
+    const integration = basePath.replace('/docs/integrations/', '')
+    return `/docs/${packagePrefix}/integrations/${integration}`
+  }
+
   return basePath
 }
 
