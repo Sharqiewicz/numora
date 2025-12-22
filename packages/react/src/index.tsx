@@ -1,15 +1,21 @@
-import React, {
+import {
   useRef,
   useState,
   useEffect,
   useLayoutEffect,
   forwardRef,
   useCallback,
+  ClipboardEvent,
+  ChangeEvent,
+  FocusEvent,
+  KeyboardEvent,
+  InputHTMLAttributes
 } from 'react';
 import {
   FormatOn,
   ThousandStyle,
   formatValueForDisplay,
+  removeThousandSeparators,
   type CaretPositionInfo,
   type FormattingOptions,
 } from 'numora';
@@ -22,11 +28,13 @@ import {
 
 export interface NumoraInputProps
   extends Omit<
-    React.InputHTMLAttributes<HTMLInputElement>,
-    'onChange' | 'type' | 'inputMode'
+    InputHTMLAttributes<HTMLInputElement>,
+    'onChange' | 'type' | 'inputMode' | 'onFocus' | 'onBlur'
   > {
   maxDecimals?: number;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
+  onFocus?: (e: FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
 
   formatOn?: FormatOn;
   thousandSeparator?: string;
@@ -47,6 +55,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     onPaste,
     onBlur,
     onKeyDown,
+    onFocus,
     formatOn = FormatOn.Blur,
     thousandSeparator = ',',
     thousandStyle = ThousandStyle.Thousand,
@@ -106,7 +115,9 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
         setDisplayValue(formatted);
       }
     }
-  }, [controlledValue, maxDecimals, formattingOptions]);
+  }, [controlledValue, maxDecimals, formattingOptions.ThousandStyle, formattingOptions.decimalSeparator, formattingOptions.decimalMinLength,
+    formattingOptions.enableCompactNotation, formattingOptions.enableLeadingZeros, formattingOptions.enableNegative,
+    formattingOptions.formatOn, formattingOptions.rawValueMode, formattingOptions.thousandSeparator]);
 
   // Restore cursor position after render
   useLayoutEffect(() => {
@@ -118,7 +129,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     }
   });
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    console.log('handleChange', e);
     const { value, rawValue } = handleNumoraOnChange(e, {
       decimalMaxLength: maxDecimals,
       caretPositionBeforeChange: caretInfoRef.current,
@@ -137,7 +149,6 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
 
     caretInfoRef.current = undefined;
 
-    // Add rawValue to the event object without overriding 'value' property
     (e.target as any).rawValue = rawValue;
 
     setDisplayValue(value);
@@ -147,9 +158,10 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     }
   }, [maxDecimals, formattingOptions, onChange]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
+    console.log('handleKeyDown', e);
     const coreCaretInfo = handleNumoraOnKeyDown(e, formattingOptions);
-    
+
     // Always capture cursor position info, even if core library doesn't return it
     // This is needed for cursor position calculation during normal typing (not just Delete/Backspace)
     if (!coreCaretInfo && internalInputRef.current) {
@@ -162,13 +174,13 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     } else {
       caretInfoRef.current = coreCaretInfo;
     }
-    
+
     if (onKeyDown) {
       onKeyDown(e);
     }
   }, [formattingOptions, onKeyDown]);
 
-  const handlePaste = useCallback((e: React.ClipboardEvent<HTMLInputElement>) => {
+  const handlePaste = useCallback((e: ClipboardEvent<HTMLInputElement>) => {
     const { value, rawValue } = handleNumoraOnPaste(e, {
       decimalMaxLength: maxDecimals,
       formattingOptions,
@@ -189,12 +201,25 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // Trigger onChange manually because paste event doesn't always trigger a ChangeEvent in all React versions
     // when we preventDefault.
     if (onChange) {
-      const changeEvent = e as unknown as React.ChangeEvent<HTMLInputElement>;
+      const changeEvent = e as unknown as ChangeEvent<HTMLInputElement>;
       onChange(changeEvent);
     }
   }, [maxDecimals, formattingOptions, onPaste, onChange]);
 
-  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+  const handleFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
+    console.log('handleFocus', e);
+    if (formattingOptions.formatOn === FormatOn.Blur && formattingOptions.thousandSeparator) {
+      const unformattedValue = removeThousandSeparators(displayValue, formattingOptions.thousandSeparator);
+      setDisplayValue(unformattedValue);
+    }
+
+    if (onFocus) {
+      onFocus(e);
+    }
+  }, [formattingOptions, onFocus, displayValue]);
+
+  const handleBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
+    console.log('handleBlur', e);
     const { value, rawValue } = handleNumoraOnBlur(e, {
       decimalMaxLength: maxDecimals,
       formattingOptions,
@@ -216,6 +241,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       onChange={handleChange}
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
+      onFocus={handleFocus}
       onBlur={handleBlur}
       type="text"
       inputMode="decimal"
