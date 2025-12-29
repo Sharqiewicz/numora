@@ -161,9 +161,62 @@ function App() {
 
 #### React Hook Form
 
-`NumoraInput` works seamlessly with react-hook-form. You can use it in two modes:
+`NumoraInput` works seamlessly with react-hook-form. The recommended approach is to use the `Controller` component, which is react-hook-form's official pattern for controlled components.
 
-**Uncontrolled Mode** (for basic forms):
+**Recommended: Controller Pattern**
+```tsx
+import { useForm, Controller } from 'react-hook-form';
+import { NumoraInput } from 'numora-react';
+
+function Form() {
+  const { control, handleSubmit, setValue } = useForm();
+
+  return (
+    <form onSubmit={handleSubmit((data) => console.log(data))}>
+      <Controller
+        control={control}
+        name="amount"
+        render={({ field: { onChange, name, value } }) => (
+          <NumoraInput
+            name={name}
+            value={value || ''}
+            onChange={onChange}
+            maxDecimals={2}
+            thousandSeparator=","
+          />
+        )}
+      />
+      <button type="button" onClick={() => setValue('amount', '1000')}>
+        Set to 1000
+      </button>
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+```
+
+**Storing Raw Values** (for calculations):
+If you need to store raw values (without thousand separators) in your form state:
+
+```tsx
+<Controller
+  control={control}
+  name="amount"
+  render={({ field }) => (
+    <NumoraInput
+      value={field.value || ''}
+      onChange={(e) => {
+        // Store raw value - better for calculations
+        field.onChange((e.target as any).rawValue);
+      }}
+      maxDecimals={2}
+      thousandSeparator=","
+    />
+  )}
+/>
+```
+
+**Alternative: Register Pattern** (uncontrolled, basic forms only):
 ```tsx
 import { useForm } from 'react-hook-form';
 import { NumoraInput } from 'numora-react';
@@ -184,48 +237,10 @@ function Form() {
 }
 ```
 
-**Controlled Mode** (required when using `setValue()`):
-When you need to programmatically update the form value using `setValue()`, use controlled mode with `useWatch` or `watch`:
-
-```tsx
-import { useForm, useWatch } from 'react-hook-form';
-import { NumoraInput } from 'numora-react';
-
-function Form() {
-  const form = useForm();
-  const { register, setValue } = form;
-  const amountString = useWatch({ control: form.control, name: 'amount' });
-
-  return (
-    <>
-      <NumoraInput
-        {...register('amount')}
-        value={amountString || ''}  // Controlled mode - required for setValue
-        maxDecimals={2}
-        thousandSeparator=","
-      />
-      <button onClick={() => setValue('amount', '1000')}>
-        Set to 1000
-      </button>
-    </>
-  );
-}
-```
-
-**Alternative pattern** (passing register directly):
-```tsx
-const form = useForm<FormFieldValues>();
-const { setValue } = form;
-const amountString = useWatch({ control: form.control, name: 'amount' });
-
-<NumoraInput
-  register={form.register('amount')}
-  value={amountString || ''}
-  maxDecimals={2}
-/>
-```
-
-**Note:** `numora-react` does not require `react-hook-form` as a dependency. It works with react-hook-form when it's present in your project.
+**Note:** 
+- `numora-react` does not require `react-hook-form` as a dependency. It works with react-hook-form when it's present in your project.
+- The `Controller` pattern is recommended because it works seamlessly with `setValue()`, validation, and all react-hook-form features.
+- `NumoraInput` provides both formatted (`e.target.value`) and raw (`e.target.rawValue`) values in the onChange event.
 
 #### Formik
 

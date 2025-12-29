@@ -5,9 +5,7 @@ import type { TokenSymbol } from '../constants/tokens';
 
 export interface PriceData {
   ETH: number;
-  WETH: number;
   USDC: number;
-  DAI: number;
   cbBTC: number;
   wstETH: number;
   EURC: number;
@@ -45,12 +43,10 @@ export async function fetchPrice(symbol: TokenSymbol, network: NetworkName): Pro
 }
 
 export async function fetchAllTokenPrices(network: NetworkName): Promise<PriceData> {
-  const [ethPrice, wethPrice, usdcPrice, daiPrice, cbBTCPrice, wstETHPrice, eurcPrice] =
+  const [ethPrice, usdcPrice, cbBTCPrice, wstETHPrice, eurcPrice] =
     await Promise.all([
       fetchPrice('ETH', network),
-      fetchPrice('WETH', network),
       fetchPrice('USDC', network),
-      fetchPrice('DAI', network),
       fetchPrice('cbBTC', network),
       fetchPrice('wstETH', network),
       fetchPrice('EURC', network),
@@ -58,9 +54,7 @@ export async function fetchAllTokenPrices(network: NetworkName): Promise<PriceDa
 
   return {
     ETH: ethPrice,
-    WETH: wethPrice,
     USDC: usdcPrice,
-    DAI: daiPrice,
     cbBTC: cbBTCPrice,
     wstETH: wstETHPrice,
     EURC: eurcPrice,
