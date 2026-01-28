@@ -1,6 +1,33 @@
 /**
  * Utilities for counting and locating meaningful digits in formatted numbers.
- * "Meaningful digits" are actual numeric digits, excluding separators and decimal points.
+ *
+ * ## Core Concept
+ *
+ * "Meaningful digits" are the actual numeric characters (0-9) in a formatted string,
+ * excluding formatting characters like thousand separators and decimal points.
+ *
+ * For example, in "1,234.56":
+ * - Meaningful digits: 1, 2, 3, 4, 5, 6 (count = 6)
+ * - Non-meaningful: comma (,) and period (.)
+ *
+ * ## Usage in Cursor Positioning
+ *
+ * These utilities enable cursor preservation during formatting by:
+ * 1. Counting digits before cursor in OLD value
+ * 2. Finding position with same digit count in NEW value
+ *
+ * Example: Typing "0" in "99|" (cursor at end)
+ * - Old value: "99" → 2 digits before cursor
+ * - User types: "0" → becomes "990"
+ * - Formatting: "990" → "990" (no separator yet)
+ * - New cursor: position after 3rd digit = position 3
+ *
+ * Example: Typing "9" in "99|9" → "9,999"
+ * - Old value: "999" → 3 digits before cursor at position 2
+ * - After formatting: "9,999"
+ * - Find position with 3 digits before it → position 4 (after "9,99")
+ *
+ * @module digit-counting
  */
 
 /**

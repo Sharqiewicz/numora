@@ -1,6 +1,48 @@
 /**
  * Advanced cursor position calculation for formatted numeric inputs.
  * Handles cursor preservation during formatting changes, insertion, and deletion operations.
+ *
+ * ## Algorithm Overview
+ *
+ * The cursor position calculation uses a "meaningful digit" approach:
+ * 1. Count the number of actual digits (0-9) before the cursor, ignoring separators
+ * 2. After formatting, find the position that has the same number of digits before it
+ * 3. Apply adjustments for separator boundaries and special cases
+ *
+ * ## Processing Flow
+ *
+ * ```
+ * calculateCursorPositionAfterFormatting()
+ *   ├── Guard clauses (empty values, out of bounds)
+ *   ├── Compact notation detection (1k → 1000)
+ *   ├── Character mapping approach (optional, for complex transformations)
+ *   └── Route to handler based on operation type:
+ *       ├── handleDeletion() - for backspace/delete operations
+ *       │   ├── handleSeparatorDeletion() - cursor was on separator
+ *       │   ├── Calculate target digit count
+ *       │   └── Find new position + fine-tune for separators
+ *       └── handleInsertion() - for typing/paste operations
+ *           ├── Handle cursor at end
+ *           └── Find position maintaining digit-relative position
+ * ```
+ *
+ * ## Key Concepts
+ *
+ * - **Meaningful digits**: Numeric characters (0-9) that represent actual value
+ * - **Separators**: Thousand separators that are formatting-only (not part of value)
+ * - **Digit index**: The nth digit from the start (ignoring separators)
+ * - **ChangeRange**: Info about what was typed/deleted to distinguish Delete vs Backspace
+ *
+ * ## Edge Cases Handled
+ *
+ * - Cursor at start/end of input
+ * - Cursor on separator during deletion
+ * - Delete key vs Backspace key (different cursor behavior)
+ * - Compact notation expansion (1k → 1000)
+ * - Integer/decimal part transitions
+ * - Boundary constraints (prefix/suffix)
+ *
+ * @module cursor-position
  */
 
 import type { ChangeRange } from './constants';
