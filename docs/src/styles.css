@@ -82,33 +82,170 @@ body {
   }
 }
 
+/* ==========================================================================
+   ANIMATION SYSTEM - GPU-Accelerated & Performance Optimized
+   ========================================================================== */
+
+/* Use transform3d for hardware acceleration across all animations */
 @keyframes fade-in-out {
   0% {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translate3d(0, 10px, 0);
   }
   33.33% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   66.66% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
   100% {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translate3d(0, -10px, 0);
   }
 }
 
 @keyframes fade-in {
   0% {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translate3d(0, 10px, 0);
   }
   100% {
     opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Staggered entrance for annotations - elegant float-in from side */
+@keyframes slide-in-left {
+  0% {
+    opacity: 0;
+    transform: translate3d(-20px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translate3d(20px, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Subtle floating animation - much more refined than bounce */
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -6px, 0);
+  }
+}
+
+/* Scroll-triggered reveal animation */
+@keyframes reveal-up {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 30px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Logo stagger animation for social proof */
+@keyframes logo-reveal {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 15px, 0) scale(0.9);
+  }
+  100% {
+    opacity: 0.6;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Docs page content transition */
+@keyframes content-enter {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Button pulse glow effect */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(167, 139, 250, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px rgba(167, 139, 250, 0.3);
+  }
+}
+
+/* Line drawing animation for annotation connectors */
+@keyframes draw-line {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  100% {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+
+@keyframes draw-line-right {
+  0% {
+    transform: scaleX(0);
+    transform-origin: right center;
+  }
+  100% {
+    transform: scaleX(1);
+    transform-origin: right center;
+  }
+}
+
+/* Expand animation for hero underline */
+@keyframes expand {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* Shimmer effect for text highlights */
+@keyframes shimmer {
+  0%, 100% {
+    background-position: -200% center;
+  }
+  50% {
+    background-position: 200% center;
+  }
+}
+
+/* Gentle bounce for scroll indicator */
+@keyframes bounce {
+  0%, 100% {
     transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
   }
 }
 
@@ -151,6 +288,15 @@ body {
   --color-sidebar-ring: var(--sidebar-ring);
   --animate-fade-in-out: fade-in-out 1.5s ease forwards;
   --animate-fade-in: fade-in 1.5s ease forwards;
+  --animate-slide-in-left: slide-in-left 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slide-in-right: slide-in-right 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-float-gentle: float-gentle 4s ease-in-out infinite;
+  --animate-reveal-up: reveal-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-logo-reveal: logo-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-content-enter: content-enter 0.4s ease-out forwards;
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-draw-line: draw-line 0.4s ease-out forwards;
+  --animate-draw-line-right: draw-line-right 0.4s ease-out forwards;
 }
 
 @layer base {
@@ -182,6 +328,90 @@ body {
 
   .font-satoshi {
     font-family: var(--font-satoshi);
+  }
+
+  /* GPU-accelerated animation utilities */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  .will-animate {
+    will-change: transform, opacity;
+  }
+
+  /* Staggered entrance animations */
+  .animate-slide-in-left {
+    animation: var(--animate-slide-in-left);
+    opacity: 0;
+  }
+
+  .animate-slide-in-right {
+    animation: var(--animate-slide-in-right);
+    opacity: 0;
+  }
+
+  .animate-float-gentle {
+    animation: var(--animate-float-gentle);
+  }
+
+  .animate-reveal-up {
+    animation: var(--animate-reveal-up);
+    opacity: 0;
+  }
+
+  .animate-logo-reveal {
+    animation: var(--animate-logo-reveal);
+    opacity: 0;
+  }
+
+  .animate-content-enter {
+    animation: var(--animate-content-enter);
+  }
+
+  .animate-pulse-glow {
+    animation: var(--animate-pulse-glow);
+  }
+
+  .animate-draw-line {
+    animation: var(--animate-draw-line);
+  }
+
+  .animate-draw-line-right {
+    animation: var(--animate-draw-line-right);
+  }
+
+  /* Scroll-triggered visibility state */
+  .scroll-reveal {
+    opacity: 0;
+    transform: translate3d(0, 30px, 0);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .scroll-reveal.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* Reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in,
+    .animate-fade-in-out,
+    .animate-slide-in-left,
+    .animate-slide-in-right,
+    .animate-float-gentle,
+    .animate-reveal-up,
+    .animate-logo-reveal,
+    .animate-content-enter,
+    .animate-pulse-glow,
+    .scroll-reveal {
+      animation: none !important;
+      transition: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
   }
 }
 
