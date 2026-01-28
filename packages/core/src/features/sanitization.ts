@@ -4,21 +4,21 @@ import { expandScientificNotation } from './scientific-notation';
 import { expandCompactNotation } from './compact-notation';
 import { removeLeadingZeros } from './leading-zeros';
 import { filterMobileKeyboardArtifacts } from './mobile-keyboard-filtering';
-import { escapeRegExp } from '../utils/escape-reg-exp';
+import { getCachedSeparatorRegex } from '../utils/regex-cache';
 import type { FormattingOptions, Separators } from '@/types';
 import { DEFAULT_DECIMAL_SEPARATOR } from '@/config';
 
 /**
  * Removes all occurrences of thousand separator from a string.
- * Escapes special regex characters in the separator to ensure safe pattern matching.
+ * Uses cached regex for performance optimization.
  *
  * @param value - The string to remove separators from
  * @param thousandSeparator - The thousand separator character to remove
  * @returns The string with all thousand separators removed
  */
 export function removeThousandSeparators(value: string, thousandSeparator: string): string {
-  const escapedSeparator = escapeRegExp(thousandSeparator);
-  return value.replace(new RegExp(escapedSeparator, 'g'), '');
+  const regex = getCachedSeparatorRegex(thousandSeparator);
+  return value.replace(regex, '');
 }
 
 export interface SanitizationOptions {

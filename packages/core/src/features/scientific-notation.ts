@@ -1,4 +1,18 @@
 /**
+ * Static regex patterns for scientific notation processing.
+ * Defined at module level to avoid recompilation on each function call.
+ */
+
+// Match scientific notation: number with optional sign, optional decimal, followed by e/E and exponent
+const SCIENTIFIC_NOTATION_REGEX = /([+-]?\d+\.?\d*)[eE]([+-]?\d+)/g;
+
+// Match strings that are all zeros
+const ALL_ZEROS_REGEX = /^0+$/;
+
+// Trim trailing zeros from decimal part (including optional decimal point)
+const TRAILING_ZEROS_REGEX = /\.?0+$/;
+
+/**
  * Expands scientific notation to decimal notation using string manipulation only.
  * Handles formats like: 1.5e-7, 2e+5, 1.23e-4, etc.
  * Finds and expands scientific notation anywhere in the string.
@@ -7,12 +21,13 @@
  * @returns The expanded decimal string, or original value if not scientific notation
  */
 export function expandScientificNotation(value: string): string {
-  const scientificNotationRegex = /([+-]?\d+\.?\d*)[eE]([+-]?\d+)/g;
+  // Create a new regex for each call to reset lastIndex (needed for global regex with exec)
+  const regex = new RegExp(SCIENTIFIC_NOTATION_REGEX.source, SCIENTIFIC_NOTATION_REGEX.flags);
   let result = value;
   let match;
   const matches: Array<{ full: string; expanded: string }> = [];
 
-  while ((match = scientificNotationRegex.exec(value)) !== null) {
+  while ((match = regex.exec(value)) !== null) {
     const fullMatch = match[0];
     const base = match[1];
     const exponent = parseInt(match[2], 10);
@@ -53,7 +68,7 @@ function expandPositiveExponent(
 ): string {
   const allDigits = integerPart + decimalPart;
 
-  if (allDigits === '0' || allDigits.match(/^0+$/)) {
+  if (allDigits === '0' || ALL_ZEROS_REGEX.test(allDigits)) {
     return '0';
   }
 
@@ -76,7 +91,7 @@ function expandNegativeExponent(
 ): string {
   const allDigits = integerPart + decimalPart;
 
-  if (allDigits === '0' || allDigits.match(/^0+$/)) {
+  if (allDigits === '0' || ALL_ZEROS_REGEX.test(allDigits)) {
     return '0';
   }
 
@@ -111,17 +126,17 @@ function trimTrailingZeros(value: string): string {
   }
 
   if (value.startsWith('0.')) {
-    const trimmed = value.replace(/\.?0+$/, '');
+    const trimmed = value.replace(TRAILING_ZEROS_REGEX, '');
     return trimmed === '0' ? '0' : trimmed || '0';
   }
 
   if (value.startsWith('-0.')) {
-    const trimmed = value.replace(/\.?0+$/, '');
+    const trimmed = value.replace(TRAILING_ZEROS_REGEX, '');
     if (trimmed === '-0' || trimmed === '0') {
       return '0';
     }
     return trimmed || '0';
   }
 
-  return value.replace(/\.?0+$/, '') || value;
+  return value.replace(TRAILING_ZEROS_REGEX, '') || value;
 }
