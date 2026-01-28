@@ -81,6 +81,10 @@ interface Uniforms {
   distortion: { value: number };
 }
 
+// Target 30fps for smooth animation while saving resources
+const TARGET_FPS = 30;
+const FRAME_INTERVAL = 1000 / TARGET_FPS;
+
 const LightRays: React.FC<LightRaysProps> = ({
   raysOrigin = 'top-center',
   raysColor = DEFAULT_COLOR,
@@ -106,6 +110,8 @@ const LightRays: React.FC<LightRaysProps> = ({
   const cleanupFunctionRef = useRef<(() => void) | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastFrameTimeRef = useRef<number>(0);
+  const isDocumentVisibleRef = useRef<boolean>(true);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -314,6 +320,20 @@ void main() {
           return;
         }
 
+        // Skip rendering if document is hidden (tab not visible)
+        if (!isDocumentVisibleRef.current) {
+          animationIdRef.current = requestAnimationFrame(loop);
+          return;
+        }
+
+        // Throttle to target FPS for better performance
+        const elapsed = t - lastFrameTimeRef.current;
+        if (elapsed < FRAME_INTERVAL) {
+          animationIdRef.current = requestAnimationFrame(loop);
+          return;
+        }
+        lastFrameTimeRef.current = t - (elapsed % FRAME_INTERVAL);
+
         uniforms.iTime.value = t * 0.001;
 
         if (followMouse && mouseInfluence > 0.0) {
@@ -334,6 +354,12 @@ void main() {
         }
       };
 
+      // Handle document visibility changes to pause when tab is hidden
+      const handleVisibilityChange = () => {
+        isDocumentVisibleRef.current = !document.hidden;
+      };
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+
       window.addEventListener('resize', updatePlacement);
       updatePlacement();
       animationIdRef.current = requestAnimationFrame(loop);
@@ -345,6 +371,7 @@ void main() {
         }
 
         window.removeEventListener('resize', updatePlacement);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
 
         if (renderer) {
           try {
