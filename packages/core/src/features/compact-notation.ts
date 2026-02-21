@@ -4,8 +4,7 @@
  */
 
 // Match compact notation patterns: number followed by scale suffix (case-insensitive)
-// Multi-character suffixes (Qa, Qi, Sx, Sp) must come before single characters
-const COMPACT_NOTATION_REGEX = /(\d+\.?\d*)\s*(Qa|Qi|Sx|Sp|[kmbMTO]|N)/gi;
+const COMPACT_NOTATION_REGEX = /(\d+\.?\d*)\s*([kmbt])/gi;
 
 // Remove leading zeros from integer part
 const LEADING_ZEROS_REGEX = /^0+/;
@@ -31,8 +30,8 @@ const ZERO_COUNTS: Record<string, number> = {
 };
 
 /**
- * Expands compact notation (k, m, b, M, T, Qa, Qi, Sx, Sp, O, N) to full numbers using string manipulation.
- * Handles formats like: 1k, 1.5m, 2B, 1M, 2.5T, 3Qa (case-insensitive)
+ * Expands compact notation (k, m, b, t) to full numbers using string manipulation.
+ * Handles formats like: 1k, 1.5m, 2B, 1M, 2.5T (case-insensitive)
  * Uses string arithmetic to avoid precision loss with large numbers.
  *
  * @param value - The string value that may contain compact notation
@@ -56,9 +55,7 @@ export function expandCompactNotation(value: string): string {
       return match;
     }
 
-    const isNegative = number.startsWith('-');
-    const numberWithoutSign = isNegative ? number.slice(1) : number;
-    const [integerPart, decimalPart = ''] = numberWithoutSign.split('.');
+    const [integerPart, decimalPart = ''] = number.split('.');
 
     // Remove leading zeros from integer part (but keep at least one digit if it's all zeros)
     const cleanedInteger = integerPart.replace(LEADING_ZEROS_REGEX, '') || '0';
@@ -84,7 +81,7 @@ export function expandCompactNotation(value: string): string {
 
     // If result is all zeros, keep one zero
     if (ALL_ZEROS_REGEX.test(result)) {
-      result = isNegative ? '-0' : '0';
+      result = '0';
     }
 
     // Trim trailing zeros from decimal part only (if decimal point exists)
@@ -92,6 +89,6 @@ export function expandCompactNotation(value: string): string {
       result = result.replace(TRAILING_ZEROS_REGEX, '');
     }
 
-    return isNegative && !result.startsWith('-') ? '-' + result : result;
+    return result;
   });
 }
