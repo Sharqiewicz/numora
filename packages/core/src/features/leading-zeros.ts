@@ -23,14 +23,14 @@ export function removeLeadingZeros(value: string): string {
   const isNegative = value.startsWith('-');
   const absoluteValue = isNegative ? value.slice(1) : value;
 
-  if (!absoluteValue || absoluteValue === '0' || absoluteValue === '.') {
+  if (absoluteValue === '.') {
     return value;
   }
 
   const hasDecimal = absoluteValue.includes('.');
   if (hasDecimal) {
     const [integerPart, decimalPart] = absoluteValue.split('.');
-    if (integerPart && integerPart.length > 0) {
+    if (integerPart) {
       const cleanedInteger = integerPart.replace(/^0+/, '') || '0';
       const result = cleanedInteger + '.' + decimalPart;
       return isNegative ? '-' + result : result;
@@ -38,7 +38,7 @@ export function removeLeadingZeros(value: string): string {
     return value;
   }
 
-  if (absoluteValue.startsWith('0') && absoluteValue.length > 1) {
+  if (absoluteValue.startsWith('0')) {
     const withoutLeadingZeros = absoluteValue.replace(/^0+/, '') || '0';
     return isNegative ? '-' + withoutLeadingZeros : withoutLeadingZeros;
   }
