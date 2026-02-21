@@ -5,12 +5,12 @@ import { CodeBlock } from '@/components/CodeBlock'
 export const Route = createFileRoute('/docs/numora/installation')({
   head: () => ({
     meta: [
-      { title: 'Installation — Numora Core | JavaScript Numeric Input' },
+      { title: 'Installation - Numora Core | JavaScript Numeric Input' },
       { name: 'description', content: 'How to install numora in your JavaScript project. Zero dependencies, 6.4kb gzipped, works with any framework.' },
-      { property: 'og:title', content: 'Installation — Numora Core | JavaScript Numeric Input' },
+      { property: 'og:title', content: 'Installation - Numora Core | JavaScript Numeric Input' },
       { property: 'og:description', content: 'How to install numora in your JavaScript project. Zero dependencies, 6.4kb gzipped, works with any framework.' },
       { property: 'og:url', content: 'https://numora.xyz/docs/numora/installation' },
-      { name: 'twitter:title', content: 'Installation — Numora Core | JavaScript Numeric Input' },
+      { name: 'twitter:title', content: 'Installation - Numora Core | JavaScript Numeric Input' },
       { name: 'twitter:description', content: 'How to install numora in your JavaScript project. Zero dependencies, works with any framework.' },
     ],
   }),

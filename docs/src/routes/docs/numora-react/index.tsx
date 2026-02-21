@@ -5,12 +5,12 @@ import CHEVRON_RIGHT from '@/assets/chevron-right.svg'
 export const Route = createFileRoute('/docs/numora-react/')({
   head: () => ({
     meta: [
-      { title: 'numora-react — React Numeric Input Component' },
+      { title: 'numora-react - React Numeric Input Component' },
       { name: 'description', content: 'The NumoraInput React component for formatted numeric inputs. Thousand separators, decimal limits, cursor position, TypeScript support.' },
-      { property: 'og:title', content: 'numora-react — React Numeric Input Component' },
+      { property: 'og:title', content: 'numora-react - React Numeric Input Component' },
       { property: 'og:description', content: 'The NumoraInput React component for formatted numeric inputs. Thousand separators, decimal limits, cursor position, TypeScript support.' },
       { property: 'og:url', content: 'https://numora.xyz/docs/numora-react' },
-      { name: 'twitter:title', content: 'numora-react — React Numeric Input Component' },
+      { name: 'twitter:title', content: 'numora-react - React Numeric Input Component' },
       { name: 'twitter:description', content: 'The NumoraInput React component for formatted numeric inputs. Thousand separators, decimal limits, TypeScript support.' },
     ],
   }),

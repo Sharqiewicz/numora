@@ -5,7 +5,6 @@ import { Link } from '@tanstack/react-router';
 export function Hero() {
   return (
     <>
-      {/* Intro text sequence - refined timing */}
       <p
         className="
           animate-fade-in-out text-center opacity-0 absolute top-14 sm:top-1/12
@@ -25,8 +24,6 @@ export function Hero() {
       >
         just use...
       </p>
-
-      {/* Brand reveal with subtle glow */}
       <div
         className="
           absolute top-14 sm:top-1/12 left-1/2 -translate-x-1/2
@@ -41,7 +38,6 @@ export function Hero() {
         >
           numora.
         </h1>
-        {/* Subtle underline accent */}
         <div
           className="
             h-[2px] w-0 mx-auto mt-1
@@ -50,8 +46,6 @@ export function Hero() {
           "
         />
       </div>
-
-      {/* Main headline */}
       <h2
         className="
           delay-[3s] animate-fade-in opacity-0
@@ -62,19 +56,8 @@ export function Hero() {
         The Standard for <br className="block sm:hidden" />
         <strong className="text-secondary relative">
           DeFi Numeric Inputs
-          {/* Animated highlight underline */}
-          <span
-            className="
-              absolute -bottom-1 left-0 right-0 h-[3px]
-              bg-gradient-to-r from-secondary/0 via-secondary to-secondary/0
-              animate-[shimmer_2s_ease-in-out_infinite]
-              opacity-50
-            "
-          />
         </strong>
       </h2>
-
-      {/* Description */}
       <p
         className="
           text-center delay-[3s] animate-fade-in opacity-0 mt-8
@@ -87,7 +70,6 @@ export function Hero() {
         building all financial inputs validation, formatting and sanitization.
       </p>
 
-      {/* Badges with staggered entrance */}
       <div
         className="
           delay-[3.2s] animate-fade-in opacity-0 mb-8
@@ -96,7 +78,6 @@ export function Hero() {
         <HeroBadges />
       </div>
 
-      {/* CTA Buttons with hover effects */}
       <div className="delay-[3.4s] animate-fade-in opacity-0 gap-4 flex">
         <Link to="/docs/numora">
           <Button
@@ -109,7 +90,6 @@ export function Hero() {
             "
           >
             <span className="relative z-10">Get Started</span>
-            {/* Shine effect on hover */}
             <span
               className="
                 absolute inset-0 -translate-x-full
@@ -139,7 +119,7 @@ export function Hero() {
   );
 }
 
-export function ScrollIndicator() {
+export function ScrollIndicator({ target = '#tamper-proof-section' }: { target?: string } = {}) {
   return (
     <div
       className="
@@ -148,7 +128,7 @@ export function ScrollIndicator() {
       "
     >
       <a
-        href="#tamper-proof-section"
+        href={target}
         className="
           flex flex-col items-center gap-2
           text-muted-foreground hover:text-foreground

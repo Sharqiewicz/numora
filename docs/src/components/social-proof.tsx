@@ -1,3 +1,4 @@
+import React from 'react';
 import { useStaggeredReveal } from '@/hooks/use-scroll-reveal';
 
 import aaveLogo from '@/assets/defi/aave.png';
@@ -22,11 +23,26 @@ const logos = [
   { name: 'Aave', src: aaveLogo, url: 'https://aave.com/' },
 ];
 
-export function SocialProof() {
+interface SocialProofProps {
+  heading?: string;
+  description?: React.ReactNode;
+}
+
+export function SocialProof({ heading, description }: SocialProofProps = {}) {
   const { ref, isVisible } = useStaggeredReveal(logos.length, {
     threshold: 0.15,
     staggerDelay: 80,
   });
+
+  const defaultDescription = (
+    <>
+      We didn't guess how to handle money,{' '}
+      <strong className="text-foreground">we analyzed the DeFi leaders.</strong> Numora's core
+      logic is a unification of the audited, hardened implementations used in the most trusted
+      protocols in DeFi. We extracted the logic, removed the framework dependencies, and
+      standardized the API.
+    </>
+  );
 
   return (
     <div
@@ -39,14 +55,8 @@ export function SocialProof() {
           scroll-reveal ${isVisible ? 'is-visible' : ''}
         `}
       >
-        <h2 className="text-3xl mb-4">We analyzed the industry leaders.</h2>
-        <p className="text-muted-foreground">
-          We didn't guess how to handle money,{' '}
-          <strong className="text-foreground">we analyzed the DeFi leaders.</strong> Numora's core
-          logic is a unification of the audited, hardened implementations used in the most trusted
-          protocols in DeFi. We extracted the logic, removed the framework dependencies, and
-          standardized the API.
-        </p>
+        <h2 className="text-3xl mb-4">{heading ?? 'We analyzed the industry leaders.'}</h2>
+        <p className="text-muted-foreground">{description ?? defaultDescription}</p>
       </div>
 
       <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 px-4">
@@ -67,7 +77,6 @@ export function SocialProof() {
               animationFillMode: 'forwards',
             }}
           >
-            {/* Glow effect on hover */}
             <div
               className="
                 absolute inset-0 -z-10
@@ -90,16 +99,6 @@ export function SocialProof() {
           </a>
         ))}
       </div>
-
-      {/* Decorative bottom gradient line */}
-      <div
-        className={`
-          mt-10 mx-auto h-[1px] max-w-md
-          bg-gradient-to-r from-transparent via-secondary/40 to-transparent
-          scroll-reveal ${isVisible ? 'is-visible' : ''}
-        `}
-        style={{ transitionDelay: '0.8s' }}
-      />
     </div>
   );
 }

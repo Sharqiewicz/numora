@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button'
 export const Route = createFileRoute('/docs/numora/')({
   head: () => ({
     meta: [
-      { title: 'Numora — Core JavaScript Numeric Input Library' },
-      { name: 'description', content: 'Install and configure numora — the zero-dependency numeric input library for JavaScript. Works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.' },
-      { property: 'og:title', content: 'Numora — Core JavaScript Numeric Input Library' },
-      { property: 'og:description', content: 'Install and configure numora — the zero-dependency numeric input library for JavaScript. Works with React, Vue, Svelte, Angular, and Vanilla JS.' },
+      { title: 'Numora - Core JavaScript Numeric Input Library' },
+      { name: 'description', content: 'Install and configure numora - the zero-dependency numeric input library for JavaScript. Works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.' },
+      { property: 'og:title', content: 'Numora - Core JavaScript Numeric Input Library' },
+      { property: 'og:description', content: 'Install and configure numora - the zero-dependency numeric input library for JavaScript. Works with React, Vue, Svelte, Angular, and Vanilla JS.' },
       { property: 'og:url', content: 'https://numora.xyz/docs/numora' },
-      { name: 'twitter:title', content: 'Numora — Core JavaScript Numeric Input Library' },
-      { name: 'twitter:description', content: 'Install and configure numora — the zero-dependency numeric input library for JavaScript. Works with any framework.' },
+      { name: 'twitter:title', content: 'Numora - Core JavaScript Numeric Input Library' },
+      { name: 'twitter:description', content: 'Install and configure numora - the zero-dependency numeric input library for JavaScript. Works with any framework.' },
     ],
   }),
   component: GetStarted,

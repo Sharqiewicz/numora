@@ -473,7 +473,7 @@ void main() {
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full pointer-events-none z-[3] overflow-hidden absolute inset-0 ${className}`.trim()}
+      className={`w-full h-full pointer-events-none z-[1] overflow-hidden absolute inset-0 ${className}`.trim()}
     />
   );
 };

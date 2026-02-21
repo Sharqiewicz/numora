@@ -9,7 +9,6 @@ import {
   Minimize2,
   FunctionSquare,
   Hash,
-  Percent,
   Plug,
 } from 'lucide-react'
 import {
@@ -75,19 +74,9 @@ const navigation = [
         icon: FunctionSquare,
       },
       {
-        title: 'Subscript Notation',
-        href: '/docs/features/subscript-notation',
-        icon: Hash,
-      },
-      {
         title: 'Leading Zeros',
         href: '/docs/features/leading-zeros',
         icon: Hash,
-      },
-      {
-        title: 'Percent',
-        href: '/docs/features/percent',
-        icon: Percent,
       },
     ],
   },
@@ -105,7 +94,7 @@ const navigation = [
 
 
 const frameworkTabs: PackageTab[] = [
- 'core', 'react', 'svelte'
+ 'core', 'react'
 ]
 
 
@@ -140,7 +129,7 @@ export function DocsSidebar() {
         if (group.title === 'Integrations' && selectedPackage !== 'react') {
           return null
         }
-        
+
         return (
           <SidebarGroup key={group.title}>
             <SidebarGroupLabel>{group.title}</SidebarGroupLabel>

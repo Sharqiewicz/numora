@@ -68,7 +68,7 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
             </div>
             <Socials className="justify-end" />
           </header>
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1">
             <div
               className={`
                 container mx-auto max-w-3xl px-4 py-8

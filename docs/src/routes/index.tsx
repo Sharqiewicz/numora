@@ -1,3 +1,9 @@
+
+import { useScrollReveal } from '@/hooks/use-scroll-reveal'
+import reactLogo from '@/assets/frameworks/react.svg'
+import vueLogo from '@/assets/frameworks/vue.svg'
+import svelteLogo from '@/assets/frameworks/svelte.svg'
+import jsLogo from '@/assets/frameworks/js.svg'
 import { createFileRoute } from '@tanstack/react-router'
 import { Hero, ScrollIndicator } from '@/components/hero'
 import LightRays from '@/components/LightRays'
@@ -5,19 +11,68 @@ import { SwapPlayground } from '@/components/SwapPlayground'
 import { SocialProof } from '@/components/social-proof'
 import { Socials } from '@/components/socials'
 
+const frameworks = [
+  { name: 'React', note: 'numora-react', logo: reactLogo },
+  { name: 'Vue', note: 'numora', logo: vueLogo },
+  { name: 'Svelte', note: 'numora', logo: svelteLogo },
+  { name: 'Vanilla JS', note: 'numora', logo: jsLogo },
+]
+
+function FrameworkSection() {
+  const { ref, isVisible } = useScrollReveal({ threshold: 0.15 })
+
+  return (
+    <div ref={ref} className="py-16 px-4 w-full max-w-4xl mx-auto">
+      <div className={`text-center mb-10 scroll-reveal ${isVisible ? 'is-visible' : ''}`}>
+        <p className="text-xs text-secondary uppercase tracking-widest font-semibold mb-3">
+          The only framework-agnostic numeric input library
+        </p>
+        <h2 className="text-3xl mb-4">
+          Every framework. One library.
+        </h2>
+        <p className="text-muted-foreground">
+          Every alternative is React-only.{' '}
+          <strong className="text-foreground">numora</strong> is the first numeric input library
+          with a zero-dependency core that runs anywhere - and first-class React bindings when you need them.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        {frameworks.map(({ name, note, logo }, i) => (
+          <div
+            key={name}
+            className={`
+              scroll-reveal ${isVisible ? 'is-visible' : ''}
+              rounded-xl border border-[#23272b] bg-[#181a1b] p-5 text-center
+              hover:border-secondary/40 transition-all duration-300
+            `}
+            style={{ transitionDelay: `${i * 80}ms` }}
+          >
+            <img src={logo} alt={name} className="h-8 w-8 mx-auto mb-3" />
+            <div className="text-sm font-semibold text-foreground">{name}</div>
+            <div className="text-xs text-muted-foreground mt-1 font-mono">{note}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+
 export const Route = createFileRoute('/')({ component: App })
 
 function App() {
 
   return (
   <div className="min-h-screen animated-gradient-bg relative overflow-x-hidden">
-    <Socials className="bg-gray-900/60 border border-gray-900 rounded-full px-8 py-2 animate-fade-in delay-[3s] opacity-0 fixed z-90 bottom-2 left-1/2 -translate-x-1/2 sm:top-4 sm:right-8 sm:translate-x-0 sm:bottom-auto sm:left-auto"  />
-    <main className="flex justify-center items-center flex-col">
-      <LightRays />
+    <LightRays />
+    <Socials className="bg-gray-900/60 border border-gray-900 rounded-full px-8 py-2 animate-fade-in delay-[3s] opacity-0 fixed z-90 bottom-2 left-1/2 -translate-x-1/2 sm:top-4 sm:right-8 sm:translate-x-0 sm:bottom-auto sm:left-auto z-[8]"  />
+    <main className="flex justify-center items-center flex-col z-[5] relative">
       <section className="relative min-h-screen container mx-auto flex flex-col items-center justify-center px-4 sm:px-8">
         <Hero />
         <ScrollIndicator />
       </section>
+      <FrameworkSection/>
       <section id="tamper-proof-section" className="container mx-auto flex flex-col items-center justify-center px-4 sm:px-8 scroll-mt-8">
         <SwapPlayground  />
       </section>

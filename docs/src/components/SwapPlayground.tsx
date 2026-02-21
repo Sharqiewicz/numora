@@ -1,6 +1,11 @@
 import { Swap } from './Swap';
 import { useScrollReveal } from '@/hooks/use-scroll-reveal';
 
+interface SwapPlaygroundProps {
+  heading?: string;
+  description?: string;
+}
+
 interface AnnotationProps {
   side: 'left' | 'right';
   title: string;
@@ -69,8 +74,18 @@ function Annotation({ side, title, description, delay, topOffset }: AnnotationPr
   );
 }
 
-export function SwapPlayground() {
+export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {}) {
   const { ref, isVisible } = useScrollReveal({ threshold: 0.2 });
+
+  const defaultHeading = (
+    <>
+      Built for the <br className="block sm:hidden" />
+      <span className="text-secondary">Swap Interface</span>
+    </>
+  );
+
+  const defaultDescription =
+    'Handling numeric state in DeFi is deceptively hard. You need to sanitize "bad" keystrokes, handle scientific notation, calculate the caret position and more...';
 
   return (
     <div
@@ -84,13 +99,16 @@ export function SwapPlayground() {
         `}
       >
         <h2 className="text-4xl mb-4">
-          Built for the <br className="block sm:hidden" />
-          <span className="text-secondary">Swap Interface</span>
+          {heading ? (
+            <>
+              Built for <br className="block sm:hidden" />
+              <span className="text-secondary">{heading}</span>
+            </>
+          ) : (
+            defaultHeading
+          )}
         </h2>
-        <p className="text-muted-foreground">
-          Handling numeric state in DeFi is deceptively hard. You need to sanitize "bad" keystrokes,
-          handle scientific notation, calculate the caret position and more...
-        </p>
+        <p className="text-muted-foreground">{description ?? defaultDescription}</p>
       </div>
 
       <div className="relative max-w-md mx-auto">
