@@ -2,20 +2,19 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
-import packageJson from './package.json' assert { type: 'json' };
 
 export default {
   input: 'src/index.tsx',
   output: [
     {
-      file: packageJson.main,
+      file: 'dist/index.cjs',
       format: 'cjs',
       sourcemap: true,
       exports: 'named',
       interop: 'auto',
     },
     {
-      file: packageJson.module,
+      file: 'dist/index.mjs',
       format: 'esm',
       sourcemap: true,
     },
