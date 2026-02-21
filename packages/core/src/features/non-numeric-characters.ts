@@ -25,13 +25,8 @@ export const removeNonNumericCharacters = (
   const hasLeadingMinus = value.startsWith('-');
   const numericOnly = value.replace(regex, '');
 
-  if (hasLeadingMinus) {
-    if (numericOnly.length > 0) {
-      return '-' + numericOnly;
-    }
-    if (value === '-') {
-      return '-';
-    }
+  if (hasLeadingMinus && (numericOnly.length > 0 || value === '-')) {
+    return '-' + numericOnly;
   }
 
   return numericOnly;

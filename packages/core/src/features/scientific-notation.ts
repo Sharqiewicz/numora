@@ -21,44 +21,28 @@ const TRAILING_ZEROS_REGEX = /\.?0+$/;
  * @returns The expanded decimal string, or original value if not scientific notation
  */
 export function expandScientificNotation(value: string): string {
-  // Create a new regex for each call to reset lastIndex (needed for global regex with exec)
-  const regex = new RegExp(SCIENTIFIC_NOTATION_REGEX.source, SCIENTIFIC_NOTATION_REGEX.flags);
-  let result = value;
-  let match;
-  const matches: Array<{ full: string; expanded: string }> = [];
+  // Fast early-exit for the dominant case (no scientific notation present)
+  if (!value.includes('e') && !value.includes('E')) return value;
 
-  while ((match = regex.exec(value)) !== null) {
-    const fullMatch = match[0];
-    const base = match[1];
-    const exponent = parseInt(match[2], 10);
+  // Single-pass replacement: String.replace() with a callback eliminates the
+  // per-call new RegExp() compilation and the two-phase collect+replace loop.
+  // String.replace() resets lastIndex to 0 before each global replace, so
+  // SCIENTIFIC_NOTATION_REGEX can be reused safely as a module-level constant.
+  return value.replace(SCIENTIFIC_NOTATION_REGEX, (_full, base, exp) => {
+    const exponent = parseInt(exp, 10);
 
-    let expanded: string;
-    if (exponent === 0) {
-      expanded = base;
-    } else {
-      const isNegative = base.startsWith('-');
-      const baseWithoutSign = isNegative ? base.slice(1) : base;
-      const [integerPart, decimalPart = ''] = baseWithoutSign.split('.');
+    if (exponent === 0) return base;
 
-      if (exponent > 0) {
-        expanded = expandPositiveExponent(integerPart, decimalPart, exponent);
-      } else {
-        expanded = expandNegativeExponent(integerPart, decimalPart, Math.abs(exponent));
-      }
+    const isNegative = base.startsWith('-');
+    const baseWithoutSign = isNegative ? base.slice(1) : base;
+    const [integerPart, decimalPart = ''] = baseWithoutSign.split('.');
 
-      if (isNegative) {
-        expanded = '-' + expanded;
-      }
-    }
+    const expanded = exponent > 0
+      ? expandPositiveExponent(integerPart, decimalPart, exponent)
+      : expandNegativeExponent(integerPart, decimalPart, Math.abs(exponent));
 
-    matches.push({ full: fullMatch, expanded });
-  }
-
-  for (const { full, expanded } of matches) {
-    result = result.replace(full, expanded);
-  }
-
-  return result;
+    return isNegative ? '-' + expanded : expanded;
+  });
 }
 
 function expandPositiveExponent(
@@ -97,8 +81,7 @@ function expandNegativeExponent(
 
   const currentDecimalPosition = integerPart.length;
 
-  const totalPlacesToMove = exponent;
-  const newDecimalPosition = currentDecimalPosition - totalPlacesToMove;
+  const newDecimalPosition = currentDecimalPosition - exponent;
 
   if (newDecimalPosition <= 0) {
     const leadingZeros = Math.abs(newDecimalPosition);
@@ -121,7 +104,7 @@ function trimTrailingZeros(value: string): string {
     return value;
   }
 
-  if (value === '0' || value === '0.') {
+  if (value === '0.') {
     return '0';
   }
 

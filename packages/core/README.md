@@ -41,19 +41,6 @@ Check out the [live demo](https://numora.xyz/) to see Numora in action.
 | **Sanitization** | Comprehensive input sanitization for security and data integrity |
 | **TypeScript Support** | Full TypeScript definitions included |
 
-## Display Formatting Utilities
-
-Numora also exports utility functions for formatting numbers for display (outside of the input component):
-
-| Utility | Description | Example |
-|---------|-------------|---------|
-| `formatPercent` | Format decimal values as percentages | `formatPercent("0.01", 2)` → `"1.00%"` |
-| `formatLargePercent` | Format large percentages with scale notation (k, M, T, etc.) | `formatLargePercent("1000", 2)` → `"100000%"` |
-| `formatLargeNumber` | Format large numbers with scale notation | `formatLargeNumber("1234")` → `"1.23k"` |
-| `condenseDecimalZeros` | Condense leading decimal zeros to subscript notation | `condenseDecimalZeros("0.000001", 8)` → `"0₆1"` |
-
-These utilities use string arithmetic to avoid floating-point precision issues.
-
 ## 📊 Comparison
 
 | Feature | Numora | react-number-format | Native Number Input |
@@ -63,7 +50,7 @@ These utilities use string arithmetic to avoid floating-point precision issues.
 | **Raw Value Mode** | ✅ Yes | ⚠️ Limited | ❌ No |
 | **Comma/Dot Conversion** | ✅ Yes | ⚠️ Limited | ❌ No |
 | **Scientific Notation** | ✅ Auto-expand | ❌ No | ❌ No |
-| **Display Formatting Utils** | ✅ Yes | ❌ No | ❌ No |
+| **Display Formatting Utils** | ❌ No | ❌ No | ❌ No |
 | **Compact Notation** | ✅ Auto-expand | ❌ No | ❌ No |
 | **Mobile Support** | ✅ Yes | ✅ Yes | ⚠️ Limited |
 | **Decimal Precision Control** | ✅ Yes | ✅ Yes | ❌ Limited |
@@ -197,24 +184,6 @@ const numoraInput = new NumoraInput(container, {
 // - User types "." → automatically converted to ","
 // - User types "," → automatically converted to ","
 // This makes it easier for users without knowing the exact separator
-```
-
-### Using Display Formatting Utilities
-
-```typescript
-import { formatPercent, formatLargePercent, formatLargeNumber, condenseDecimalZeros } from 'numora';
-
-// Format as percentage
-const percent = formatPercent('0.01', 2); // "1.00%"
-const largePercent = formatLargePercent('1000', 2); // "100000%"
-
-// Format large numbers with scale notation
-const large = formatLargeNumber('1234567'); // "1.23M"
-const small = formatLargeNumber('1234'); // "1.23k"
-
-// Condense decimal zeros
-const condensed = condenseDecimalZeros('0.000001', 8); // "0₆1"
-const condensed2 = condenseDecimalZeros('0.000123', 8); // "0₃123"
 ```
 
 ### Programmatic Value Control

@@ -20,7 +20,7 @@
     "url": "https://github.com/Sharqiewicz/numora"
   },
   "scripts": {
-    "build": "vite build & tsc --emitDeclarationOnly",
+    "build": "vite build && tsc --emitDeclarationOnly",
     "test": "vitest run",
     "dev": "vite build --watch"
   },
@@ -63,6 +63,7 @@
     "vite": "^6.2.2",
     "vitest": "^3.0.9"
   },
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   }

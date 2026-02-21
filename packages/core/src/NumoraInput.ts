@@ -77,7 +77,7 @@ export class NumoraInput {
       thousandSeparator = DEFAULT_THOUSAND_SEPARATOR,
       thousandStyle = DEFAULT_THOUSAND_STYLE,
       decimalSeparator = DEFAULT_DECIMAL_SEPARATOR,
-      enableCompactNotation = true,
+      enableCompactNotation = DEFAULT_ENABLE_COMPACT_NOTATION,
       enableNegative = DEFAULT_ENABLE_NEGATIVE,
       enableLeadingZeros = DEFAULT_ENABLE_LEADING_ZEROS,
       rawValueMode = DEFAULT_RAW_VALUE_MODE,
@@ -152,12 +152,9 @@ export class NumoraInput {
     this.element.setAttribute('spellcheck', 'false');
     this.element.setAttribute('autocomplete', 'off');
 
-    // Set pattern only if decimal separator and enableNegative are configured
     // Pattern helps with native validation but is optional
-    if (this.resolvedOptions.decimalSeparator !== undefined && this.resolvedOptions.enableNegative !== undefined) {
-      const pattern = getNumoraPattern(this.resolvedOptions.decimalSeparator, this.resolvedOptions.enableNegative);
-      this.element.setAttribute('pattern', pattern);
-    }
+    const pattern = getNumoraPattern(this.resolvedOptions.decimalSeparator, this.resolvedOptions.enableNegative);
+    this.element.setAttribute('pattern', pattern);
 
     // Extract Numora-specific options and protected attributes that shouldn't be assigned to the element
     const {
@@ -335,7 +332,6 @@ export class NumoraInput {
     // Add separators back in 'blur' mode
     const { thousandSeparator, thousandStyle } = this.resolvedOptions;
     if (thousandSeparator && thousandStyle !== ThousandStyle.None && target.value) {
-      const oldValue = target.value;
       const formatted = this.formatValueForDisplay(target.value);
       target.value = formatted;
 

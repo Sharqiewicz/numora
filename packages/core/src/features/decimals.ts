@@ -1,5 +1,11 @@
 import { DEFAULT_DECIMAL_SEPARATOR } from "@/config";
 import type { SeparatorOptions, Separators, FormattingOptions } from '@/types';
+import { getCachedRegex } from '@/utils/regex-cache';
+import { escapeRegExp } from '@/utils/escape-reg-exp';
+
+// Pre-compiled regex for the common case: decimal separator is '.' or ','.
+// The character class [.,] covers both hardcoded removals in a single pass.
+const TAIL_CLEAN_REGEX = /[.,]/g;
 
 
 /**
@@ -90,9 +96,7 @@ export const trimToDecimalMaxLength = (
   decimalSeparator: string = DEFAULT_DECIMAL_SEPARATOR
 ): string => {
   const { sign, integer, decimal } = splitNumber(value, decimalSeparator);
-  const hasSeparator = value.includes(decimalSeparator);
-
-  if (!hasSeparator) return value;
+  if (!decimal) return value;
 
   const trimmedDecimal = decimal.slice(0, decimalMaxLength);
   return `${sign}${integer}${decimalSeparator}${trimmedDecimal}`;
@@ -107,14 +111,21 @@ export const removeExtraDecimalSeparators = (
 ): string => {
   const firstIdx = value.indexOf(decimalSeparator);
   if (firstIdx === -1) return value;
+  // Early exit: tail is empty (e.g. "123."), nothing to clean
+  if (firstIdx === value.length - 1) return value;
 
   const head = value.slice(0, firstIdx + 1);
   const tail = value.slice(firstIdx + 1);
 
-  // Remove any occurrences of decimal separator, comma or dot from the tail
-  const cleanedTail = tail.split(',').join('').split('.').join('').split(decimalSeparator).join('');
+  // Single-pass removal of all three characters (',', '.', decimalSeparator).
+  // For standard separators use the pre-compiled constant; for custom separators
+  // build and cache a character-class regex that covers all three.
+  const isStandardSeparator = decimalSeparator === '.' || decimalSeparator === ',';
+  const cleanRegex = isStandardSeparator
+    ? TAIL_CLEAN_REGEX
+    : getCachedRegex('[,\\.' + escapeRegExp(decimalSeparator) + ']', 'g');
 
-  return head + cleanedTail;
+  return head + tail.replace(cleanRegex, '');
 };
 
 /**
@@ -130,9 +141,7 @@ export const ensureMinDecimals = (
   const { sign, integer, decimal } = splitNumber(value, decimalSeparator);
 
   if (decimal.length >= minDecimals) {
-    // Already has enough decimals, but we must ensure the separator is present if it wasn't
-    // (though splitNumber might have "swallowed" it)
-    return value.includes(decimalSeparator) ? value : `${sign}${integer}${decimalSeparator}${decimal}`;
+    return value;
   }
 
   const paddedDecimal = decimal.padEnd(minDecimals, '0');

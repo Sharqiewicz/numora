@@ -14,7 +14,6 @@ export default defineConfig({
       fileName: 'index',
       formats: ['es', 'cjs'],
     },
-    outDir: 'dist',
   },
   test: {
     environment: 'jsdom',
