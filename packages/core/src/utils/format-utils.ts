@@ -49,13 +49,10 @@ export function formatInputValue(
     separators.decimalSeparator
   );
 
-  // Raw value is the value before formatting (after sanitization, trimming, min decimals)
-  const raw = valueWithMinDecimals;
-
   // Formatted value includes thousand separators if formatting is enabled
   const formatted = formatNumoraInput(valueWithMinDecimals, formattingOptions, separators);
 
-  return { formatted, raw };
+  return { formatted, raw: valueWithMinDecimals };
 }
 
 /**
