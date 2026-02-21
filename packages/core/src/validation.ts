@@ -1,5 +1,4 @@
-import { FormatOn } from './types';
-import { ThousandStyle } from './types';
+import { FormatOn, ThousandStyle } from './types';
 
 export interface NumoraInputValidationOptions {
   decimalMaxLength?: number;
