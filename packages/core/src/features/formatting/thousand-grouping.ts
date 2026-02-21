@@ -8,6 +8,8 @@ import { DEFAULT_DECIMAL_SEPARATOR } from '@/config';
 import type { FormattingOptions, Separators } from '@/types';
 import { ThousandStyle, FormatOn } from '@/types';
 
+const LEADING_ZEROS_CAPTURE_RE = /^(0+)/;
+
 
 
 /**
@@ -52,7 +54,7 @@ export function formatWithSeparators(
 
   // Preserve leading zeros if allowed
   if (enableLeadingZeros && integerPart.startsWith('0') && integerPart.length > 1) {
-    const leadingZerosMatch = integerPart.match(/^(0+)/);
+    const leadingZerosMatch = integerPart.match(LEADING_ZEROS_CAPTURE_RE);
     if (leadingZerosMatch) {
       const leadingZeros = leadingZerosMatch[1];
       const significantPart = integerPart.slice(leadingZeros.length);
@@ -96,22 +98,14 @@ function formatIntegerPart(
     case ThousandStyle.None:
       return integerPart;
     case ThousandStyle.Thousand:
-      return formatThousandStyle(integerPart, separator);
+      return groupDigitsFromRight(integerPart, separator, GROUPING_CONFIG.thousand.size);
     case ThousandStyle.Lakh:
       return formatLakhStyle(integerPart, separator);
     case ThousandStyle.Wan:
-      return formatWanStyle(integerPart, separator);
+      return groupDigitsFromRight(integerPart, separator, GROUPING_CONFIG.wan.size);
     default:
       return integerPart;
   }
-}
-
-/**
- * Formats with Western-style grouping (groups of 3).
- * @example "1234567" → "1,234,567"
- */
-function formatThousandStyle(integerPart: string, separator: string): string {
-  return groupDigitsFromRight(integerPart, separator, GROUPING_CONFIG.thousand.size);
 }
 
 /**
@@ -123,27 +117,18 @@ function formatLakhStyle(integerPart: string, separator: string): string {
     return integerPart;
   }
 
-  const reversed = integerPart.split('').reverse();
   const groups: string[] = [];
+  const firstGroupStart = integerPart.length - GROUPING_CONFIG.lakh.firstGroup;
 
-  // First group: 3 digits from the right
-  const firstGroup = reversed.slice(0, GROUPING_CONFIG.lakh.firstGroup).reverse().join('');
-  groups.push(firstGroup);
+  // First group: last 3 digits
+  groups.unshift(integerPart.slice(firstGroupStart));
 
-  // Remaining groups: 2 digits each
-  for (let i = GROUPING_CONFIG.lakh.firstGroup; i < reversed.length; i += GROUPING_CONFIG.lakh.restGroup) {
-    groups.push(reversed.slice(i, i + GROUPING_CONFIG.lakh.restGroup).reverse().join(''));
+  // Remaining groups: 2 digits each, right-to-left
+  for (let i = firstGroupStart; i > 0; i -= GROUPING_CONFIG.lakh.restGroup) {
+    groups.unshift(integerPart.slice(Math.max(0, i - GROUPING_CONFIG.lakh.restGroup), i));
   }
 
-  return groups.reverse().join(separator);
-}
-
-/**
- * Formats with Chinese-style grouping (groups of 4).
- * @example "12345678" → "1234,5678"
- */
-function formatWanStyle(integerPart: string, separator: string): string {
-  return groupDigitsFromRight(integerPart, separator, GROUPING_CONFIG.wan.size);
+  return groups.join(separator);
 }
 
 /**
@@ -156,14 +141,13 @@ function formatWanStyle(integerPart: string, separator: string): string {
  * @returns The formatted string
  */
 function groupDigitsFromRight(integerPart: string, separator: string, groupSize: number): string {
-  const reversed = integerPart.split('').reverse();
   const groups: string[] = [];
 
-  for (let i = 0; i < reversed.length; i += groupSize) {
-    groups.push(reversed.slice(i, i + groupSize).reverse().join(''));
+  for (let i = integerPart.length; i > 0; i -= groupSize) {
+    groups.unshift(integerPart.slice(Math.max(0, i - groupSize), i));
   }
 
-  return groups.reverse().join(separator);
+  return groups.join(separator);
 }
 
 /**

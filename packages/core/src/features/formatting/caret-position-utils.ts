@@ -10,9 +10,9 @@ import {
 import {
   calculateCursorPositionAfterFormatting,
   type CursorPositionOptions,
+  defaultIsCharacterEquivalent,
 } from './cursor-position';
 import { getCaretBoundary } from './cursor-boundary';
-import { defaultIsCharacterEquivalent } from './character-equivalence';
 import {ThousandStyle, FormatOn} from '@/types';
 import type { FormattingOptions, CaretPositionInfo, Separators } from '@/types';
 

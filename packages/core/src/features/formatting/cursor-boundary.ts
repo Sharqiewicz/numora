@@ -3,6 +3,8 @@
  * Prevents cursor from being placed in non-editable areas (separators, prefix, suffix).
  */
 
+const IS_DIGIT_RE = /\d/;
+
 /**
  * Determines which positions in a formatted value are editable.
  * Returns a boolean array where true = editable position, false = non-editable.
@@ -32,7 +34,7 @@ export function getCaretBoundary(
     suffix = '',
   } = options;
 
-  const boundary = Array.from({ length: formattedValue.length + 1 }).map(() => true);
+  const boundary = new Array(formattedValue.length + 1).fill(true);
 
   // Mark prefix positions as non-editable
   if (prefix) {
@@ -54,7 +56,7 @@ export function getCaretBoundary(
     ) {
       boundary[i] = false;
       // Also mark position after separator as non-editable if it's not a digit
-      if (i + 1 < formattedValue.length && !/\d/.test(formattedValue[i + 1])) {
+      if (i + 1 < formattedValue.length && !IS_DIGIT_RE.test(formattedValue[i + 1])) {
         boundary[i + 1] = false;
       }
     }

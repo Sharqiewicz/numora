@@ -31,26 +31,24 @@
  */
 
 /**
- * Counts meaningful digits (non-separator, non-decimal) before a position.
+ * Counts meaningful non-thousand-separator characters (digits and decimal separator) before a position.
  * This is the core digit counting logic used throughout cursor positioning.
  *
  * @param value - The formatted string value
  * @param position - The position to count up to
  * @param separator - The thousand separator character
- * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The count of meaningful digits before the position
  *
  * @example
  * countMeaningfulDigitsBeforePosition("1,234", 3, ",") // Returns: 2 (digits "1" and "2")
- * countMeaningfulDigitsBeforePosition("1,234.56", 8, ",") // Returns: 6
- * countMeaningfulDigitsBeforePosition("1.234,56", 8, ".", ",") // Returns: 6
+ * countMeaningfulDigitsBeforePosition("1,234.56", 8, ",") // Returns: 7
  */
 export function countMeaningfulDigitsBeforePosition(
   value: string,
   position: number,
-  separator: string,
-  _decimalSeparator: string = '.'
+  separator: string
 ): number {
+  // Decimal separator is a non-digit character and is naturally skipped by the digit scan.
   let digitCount = 0;
   for (let i = 0; i < position && i < value.length; i++) {
     const char = value[i];
@@ -68,18 +66,17 @@ export function countMeaningfulDigitsBeforePosition(
  * @param value - The formatted string value
  * @param targetDigitIndex - The zero-based index of the target digit
  * @param separator - The thousand separator character
- * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The position after the target digit
  *
  * @example
- * findPositionForDigitIndex("1,234", 2, ",") // Returns: 4 (after digit "3")
+ * findPositionForDigitIndex("1,234", 3, ",") // Returns: 4 (after digit "3")
  */
 export function findPositionForDigitIndex(
   value: string,
   targetDigitIndex: number,
-  separator: string,
-  _decimalSeparator: string = '.'
+  separator: string
 ): number {
+  // Decimal separator is a non-digit character and is naturally skipped by the digit scan.
   if (targetDigitIndex === 0) {
     return 0;
   }
@@ -104,18 +101,17 @@ export function findPositionForDigitIndex(
  * @param value - The formatted string value
  * @param targetDigitCount - The target number of digits
  * @param separator - The thousand separator character
- * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The position where digit count equals target
  *
  * @example
- * findPositionWithMeaningfulDigitCount("1,234", 3, ",") // Returns: 5 (after "2,3")
+ * findPositionWithMeaningfulDigitCount("1,234", 3, ",") // Returns: 4 (after "2,3")
  */
 export function findPositionWithMeaningfulDigitCount(
   value: string,
   targetDigitCount: number,
-  separator: string,
-  _decimalSeparator: string = '.'
+  separator: string
 ): number {
+  // Decimal separator is a non-digit character and is naturally skipped by the digit scan.
   if (targetDigitCount === 0) {
     return 0;
   }
