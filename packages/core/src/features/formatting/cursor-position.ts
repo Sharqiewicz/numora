@@ -51,7 +51,7 @@ import { ThousandStyle } from '@/types';
 const COMPACT_NOTATION_CURSOR_RE = /(\d+\.?\d*)\s*[kmbt]$/i;
 
 /**
- * Digit-count function signature — matches countMeaningfulDigitsBeforePosition so the raw
+ * Digit-count function signature - matches countMeaningfulDigitsBeforePosition so the raw
  * function can be used as a drop-in default, and the memoised closure can ignore the sep arg.
  */
 type CountFn = (val: string, pos: number, sep: string) => number;
@@ -190,7 +190,7 @@ export function calculateCursorPositionAfterFormatting(
   // Keyed by "o:pos" (old value) or "n:pos" (new value) to distinguish the two strings while
   // keeping the Map allocation O(1) per keystroke (≤ 5 distinct positions queried).
   const _dcCache = new Map<string, number>();
-  // sep arg is ignored — separator is captured from the outer scope
+  // sep arg is ignored - separator is captured from the outer scope
   const cachedCount: CountFn = (val: string, pos: number, _sep: string): number => {
     const key = `${val === oldFormattedValue ? 'o' : 'n'}:${pos}`;
     if (!_dcCache.has(key)) {
@@ -249,7 +249,7 @@ function calculateCursorPositionWithCharacterMapping(
 
   // Two-pointer forward scan: O(n) for order-preserving isCharacterEquivalent.
   // Directly computes startIndex and endIndex without O(n) heap allocations.
-  // Precondition: isCharacterEquivalent must be order-preserving — if old[i] maps to
+  // Precondition: isCharacterEquivalent must be order-preserving - if old[i] maps to
   // new[j], then old[i+1]'s match (if any) is at new[j'] where j' >= j. This holds
   // for defaultIsCharacterEquivalent and all built-in formatting paths.
   let j = 0;                          // next unclaimed position in newFormattedValue
