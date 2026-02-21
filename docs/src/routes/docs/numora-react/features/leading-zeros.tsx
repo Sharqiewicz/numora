@@ -3,6 +3,17 @@ import { CodeBlock } from '@/components/CodeBlock'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 
 export const Route = createFileRoute('/docs/numora-react/features/leading-zeros')({
+  head: () => ({
+    meta: [
+      { title: 'Leading Zero Handling | numora-react' },
+      { name: 'description', content: 'Control leading zeros using the NumoraInput React component. Enable or disable leading zero input for financial forms with full React support.' },
+      { property: 'og:title', content: 'Leading Zero Handling | numora-react' },
+      { property: 'og:description', content: 'Control leading zeros using the NumoraInput React component. Enable or disable for financial forms.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/features/leading-zeros' },
+      { name: 'twitter:title', content: 'Leading Zero Handling | numora-react' },
+      { name: 'twitter:description', content: 'Control leading zeros using the NumoraInput React component.' },
+    ],
+  }),
   component: LeadingZeros,
 })
 

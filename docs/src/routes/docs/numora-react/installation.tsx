@@ -3,6 +3,17 @@ import { CodeBlock } from '@/components/CodeBlock'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 
 export const Route = createFileRoute('/docs/numora-react/installation')({
+  head: () => ({
+    meta: [
+      { title: 'Installation — numora-react | React Numeric Input Component' },
+      { name: 'description', content: 'Install numora-react and start using NumoraInput, the React wrapper for the numora core library.' },
+      { property: 'og:title', content: 'Installation — numora-react | React Numeric Input Component' },
+      { property: 'og:description', content: 'Install numora-react and start using NumoraInput, the React wrapper for the numora core library.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/installation' },
+      { name: 'twitter:title', content: 'Installation — numora-react | React Numeric Input Component' },
+      { name: 'twitter:description', content: 'Install numora-react and start using NumoraInput, the React wrapper for the numora core library.' },
+    ],
+  }),
   component: Installation,
 })
 

@@ -2,6 +2,17 @@ import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 
 export const Route = createFileRoute('/docs/numora/features/compact-notation')({
+  head: () => ({
+    meta: [
+      { title: 'Compact Notation (1k, 1m, 1b) | Numora' },
+      { name: 'description', content: 'Enable compact number notation in inputs with Numora. Let users type "1k" for 1,000 or "1m" for 1,000,000. Shorthand number input for financial UIs.' },
+      { property: 'og:title', content: 'Compact Notation (1k, 1m, 1b) | Numora' },
+      { property: 'og:description', content: 'Enable compact number notation in inputs with Numora. Let users type "1k", "1m", "1b" for shorthand number input.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora/features/compact-notation' },
+      { name: 'twitter:title', content: 'Compact Notation (1k, 1m, 1b) | Numora' },
+      { name: 'twitter:description', content: 'Enable compact number notation in inputs with Numora. Type "1k" for 1,000.' },
+    ],
+  }),
   component: CompactNotation,
 })
 

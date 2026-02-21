@@ -3,6 +3,17 @@ import { CodeBlock } from '@/components/CodeBlock'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 
 export const Route = createFileRoute('/docs/numora-react/features/compact-notation')({
+  head: () => ({
+    meta: [
+      { title: 'Compact Notation (1k, 1m, 1b) | numora-react' },
+      { name: 'description', content: 'Enable compact number notation using the NumoraInput React component. Let users type "1k", "1m", "1b" for compact shorthand number input.' },
+      { property: 'og:title', content: 'Compact Notation (1k, 1m, 1b) | numora-react' },
+      { property: 'og:description', content: 'Enable compact number notation using the NumoraInput React component. Type "1k", "1m", "1b" for shorthand input.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/features/compact-notation' },
+      { name: 'twitter:title', content: 'Compact Notation (1k, 1m, 1b) | numora-react' },
+      { name: 'twitter:description', content: 'Enable compact number notation using the NumoraInput React component.' },
+    ],
+  }),
   component: CompactNotation,
 })
 

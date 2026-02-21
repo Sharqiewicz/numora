@@ -3,6 +3,17 @@ import { CodeBlock } from '@/components/CodeBlock'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 
 export const Route = createFileRoute('/docs/numora-react/integrations/react-hook-form')({
+  head: () => ({
+    meta: [
+      { title: 'React Hook Form Integration | numora-react' },
+      { name: 'description', content: 'Use NumoraInput with React Hook Form. Validated, formatted numeric fields with full TypeScript support.' },
+      { property: 'og:title', content: 'React Hook Form Integration | numora-react' },
+      { property: 'og:description', content: 'Use NumoraInput with React Hook Form. Validated, formatted numeric fields with full TypeScript support.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/integrations/react-hook-form' },
+      { name: 'twitter:title', content: 'React Hook Form Integration | numora-react' },
+      { name: 'twitter:description', content: 'Use NumoraInput with React Hook Form. Validated, formatted numeric fields with full TypeScript support.' },
+    ],
+  }),
   component: ReactHookFormIntegration,
 })
 

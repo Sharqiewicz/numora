@@ -3,6 +3,17 @@ import { CodeBlock } from '@/components/CodeBlock'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 
 export const Route = createFileRoute('/docs/numora-react/features/decimals')({
+  head: () => ({
+    meta: [
+      { title: 'Decimal Input Validation & Limits | numora-react' },
+      { name: 'description', content: 'Validate decimal inputs and enforce limits using the NumoraInput React component. Set max/min decimal places with full TypeScript support.' },
+      { property: 'og:title', content: 'Decimal Input Validation & Limits | numora-react' },
+      { property: 'og:description', content: 'Validate decimal inputs and enforce limits using the NumoraInput React component. Set max/min decimal places with TypeScript support.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/features/decimals' },
+      { name: 'twitter:title', content: 'Decimal Input Validation & Limits | numora-react' },
+      { name: 'twitter:description', content: 'Validate decimal inputs and enforce limits using the NumoraInput React component.' },
+    ],
+  }),
   component: Decimals,
 })
 

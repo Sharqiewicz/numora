@@ -2,6 +2,17 @@ import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 
 export const Route = createFileRoute('/docs/numora/features/scientific-notation')({
+  head: () => ({
+    meta: [
+      { title: 'Scientific Notation Input (1e-18) | Numora' },
+      { name: 'description', content: 'Handle scientific notation in numeric inputs with Numora. Prevent JavaScript\'s automatic 1e-6 conversion and preserve full expanded strings for DeFi token amounts.' },
+      { property: 'og:title', content: 'Scientific Notation Input (1e-18) | Numora' },
+      { property: 'og:description', content: 'Handle scientific notation in numeric inputs with Numora. Prevent 1e-18 issues and preserve full expanded decimal strings.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora/features/scientific-notation' },
+      { name: 'twitter:title', content: 'Scientific Notation Input (1e-18) | Numora' },
+      { name: 'twitter:description', content: 'Handle scientific notation (1e-18) in numeric inputs with Numora.' },
+    ],
+  }),
   component: ScientificNotation,
 })
 

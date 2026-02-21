@@ -2,6 +2,17 @@ import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 
 export const Route = createFileRoute('/docs/numora-react/features/number-precision-safety')({
+  head: () => ({
+    meta: [
+      { title: 'Number Precision Safety | numora-react' },
+      { name: 'description', content: 'Prevent float precision errors using the NumoraInput React component. Safe integer handling for DeFi token amounts with full TypeScript support.' },
+      { property: 'og:title', content: 'Number Precision Safety | numora-react' },
+      { property: 'og:description', content: 'Prevent float precision errors using the NumoraInput React component. Safe integer handling for DeFi token amounts.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/features/number-precision-safety' },
+      { name: 'twitter:title', content: 'Number Precision Safety | numora-react' },
+      { name: 'twitter:description', content: 'Prevent float precision errors using the NumoraInput React component.' },
+    ],
+  }),
   component: NumberPrecisionSafety,
 })
 

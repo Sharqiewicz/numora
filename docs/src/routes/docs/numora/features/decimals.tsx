@@ -2,6 +2,17 @@ import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 
 export const Route = createFileRoute('/docs/numora/features/decimals')({
+  head: () => ({
+    meta: [
+      { title: 'Decimal Input Validation & Limits | Numora' },
+      { name: 'description', content: 'Enforce decimal place limits and validate decimal inputs with Numora. Set max/min decimal places, choose separators, and prevent invalid decimal entries.' },
+      { property: 'og:title', content: 'Decimal Input Validation & Limits | Numora' },
+      { property: 'og:description', content: 'Enforce decimal place limits and validate decimal inputs with Numora. Set max/min decimal places and prevent invalid entries.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora/features/decimals' },
+      { name: 'twitter:title', content: 'Decimal Input Validation & Limits | Numora' },
+      { name: 'twitter:description', content: 'Enforce decimal place limits and validate decimal inputs with Numora.' },
+    ],
+  }),
   component: Decimals,
 })
 

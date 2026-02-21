@@ -2,6 +2,17 @@ import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 
 export const Route = createFileRoute('/docs/numora/features/formatting')({
+  head: () => ({
+    meta: [
+      { title: 'Number Formatting as You Type | Numora' },
+      { name: 'description', content: 'Add thousand separators and format numbers as you type with Numora. Supports Standard, Lakh, and Wan grouping styles with cursor position preservation.' },
+      { property: 'og:title', content: 'Number Formatting as You Type | Numora' },
+      { property: 'og:description', content: 'Add thousand separators and format numbers as you type with Numora. Supports multiple grouping styles with cursor position preservation.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora/features/formatting' },
+      { name: 'twitter:title', content: 'Number Formatting as You Type | Numora' },
+      { name: 'twitter:description', content: 'Add thousand separators and format numbers as you type with Numora. Cursor position preserved.' },
+    ],
+  }),
   component: Formatting,
 })
 
@@ -190,31 +201,6 @@ const numoraInput = new NumoraInput(container, {
         </div>
       </div>
 
-      <h2>Display Formatting Utilities</h2>
-      <p>
-        Numora also provides utilities for formatting numbers outside of input fields:
-      </p>
-
-      <CodeBlock language="typescript">
-{`import {
-  formatPercent,
-  formatLargePercent,
-  formatLargeNumber,
-  condenseDecimalZeros,
-} from 'numora'
-
-// Format as percentage
-const percent = formatPercent('0.01', 2) // "1.00%"
-const largePercent = formatLargePercent('1000', 2) // "100000%"
-
-// Format large numbers with scale notation
-const large = formatLargeNumber('1234567') // "1.23M"
-const small = formatLargeNumber('1234') // "1.23k"
-
-// Condense decimal zeros
-const condensed = condenseDecimalZeros('0.000001', 8) // "0₆1"
-const condensed2 = condenseDecimalZeros('0.000123', 8) // "0₃123"`}
-      </CodeBlock>
     </div>
   )
 }

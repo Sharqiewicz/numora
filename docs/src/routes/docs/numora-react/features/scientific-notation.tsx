@@ -3,6 +3,17 @@ import { CodeBlock } from '@/components/CodeBlock'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 
 export const Route = createFileRoute('/docs/numora-react/features/scientific-notation')({
+  head: () => ({
+    meta: [
+      { title: 'Scientific Notation Input (1e-18) | numora-react' },
+      { name: 'description', content: 'Handle scientific notation input using the NumoraInput React component. Prevent 1e-18 issues and preserve full expanded decimal strings for token amounts.' },
+      { property: 'og:title', content: 'Scientific Notation Input (1e-18) | numora-react' },
+      { property: 'og:description', content: 'Handle scientific notation input using the NumoraInput React component. Prevent 1e-18 issues for DeFi token amounts.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/features/scientific-notation' },
+      { name: 'twitter:title', content: 'Scientific Notation Input (1e-18) | numora-react' },
+      { name: 'twitter:description', content: 'Handle scientific notation (1e-18) using the NumoraInput React component.' },
+    ],
+  }),
   component: ScientificNotation,
 })
 

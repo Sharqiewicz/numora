@@ -48,7 +48,6 @@ npm install numora-react
 | **Character Equivalence** | Automatic conversion of commas to dots (or custom decimal separator) for easier input |
 | **Sanitization** | Comprehensive input sanitization for security and data integrity |
 | **TypeScript Support** | Full TypeScript definitions included |
-| **Display Formatting Utilities** | Utility functions for formatting numbers for display: `formatPercent`, `formatLargePercent`, `formatLargeNumber`, `condenseDecimalZeros` |
 
 ## 📊 Comparison
 
@@ -59,7 +58,7 @@ npm install numora-react
 | **Raw Value Mode** | ✅ Yes | ⚠️ Limited | ❌ No |
 | **Comma/Dot Conversion** | ✅ Yes | ⚠️ Limited | ❌ No |
 | **Scientific Notation** | ✅ Auto-expand | ❌ No | ❌ No |
-| **Display Formatting Utils** | ✅ Yes | ❌ No | ❌ No |
+| **Display Formatting Utils** | ❌ No | ❌ No | ❌ No |
 | **Compact Notation** | ✅ Auto-expand | ❌ No | ❌ No |
 | **Mobile Support** | ✅ Yes | ✅ Yes | ⚠️ Limited |
 | **Decimal Precision Control** | ✅ Yes | ✅ Yes | ❌ Limited |
@@ -101,7 +100,6 @@ Numora provides:
 ✅ **Mobile-friendly** - Decimal keyboard on mobile devices  
 ✅ **Zero dependencies** - Lightweight and secure  
 ✅ **Framework adapters** - React, Vue (planned), Vanilla JS  
-✅ **Display utilities** - Format percentages, large numbers, and more  
 
 ## 📖 Documentation
 
@@ -149,21 +147,6 @@ function App() {
     />
   );
 }
-```
-
-### Display Formatting Utilities
-
-```typescript
-import { formatPercent, formatLargeNumber, condenseDecimalZeros } from 'numora';
-
-// Format as percentage
-const percent = formatPercent('0.01', 2); // "1.00%"
-
-// Format large numbers
-const large = formatLargeNumber('1234567'); // "1.23M"
-
-// Condense decimal zeros
-const condensed = condenseDecimalZeros('0.000001', 8); // "0₆1"
 ```
 
 ## 🛠️ Use Cases

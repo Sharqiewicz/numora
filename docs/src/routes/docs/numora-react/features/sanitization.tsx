@@ -3,6 +3,17 @@ import { CodeBlock } from '@/components/CodeBlock'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 
 export const Route = createFileRoute('/docs/numora-react/features/sanitization')({
+  head: () => ({
+    meta: [
+      { title: 'Numeric Input Sanitization | numora-react' },
+      { name: 'description', content: 'Sanitize numeric inputs using the NumoraInput React component. Block invalid characters, clean pasted values, and handle all input vectors automatically.' },
+      { property: 'og:title', content: 'Numeric Input Sanitization | numora-react' },
+      { property: 'og:description', content: 'Sanitize numeric inputs using the NumoraInput React component. Block invalid characters and clean pasted values.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/features/sanitization' },
+      { name: 'twitter:title', content: 'Numeric Input Sanitization | numora-react' },
+      { name: 'twitter:description', content: 'Sanitize numeric inputs using the NumoraInput React component.' },
+    ],
+  }),
   component: Sanitization,
 })
 

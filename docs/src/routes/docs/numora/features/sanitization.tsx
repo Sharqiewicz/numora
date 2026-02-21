@@ -2,6 +2,17 @@ import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 
 export const Route = createFileRoute('/docs/numora/features/sanitization')({
+  head: () => ({
+    meta: [
+      { title: 'Numeric Input Sanitization | Numora' },
+      { name: 'description', content: 'Sanitize numeric inputs and block invalid characters with Numora. Clean pasted values from block explorers, prevent invalid keystrokes, handle all input vectors.' },
+      { property: 'og:title', content: 'Numeric Input Sanitization | Numora' },
+      { property: 'og:description', content: 'Sanitize numeric inputs and block invalid characters with Numora. Clean pasted values and prevent invalid keystrokes.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora/features/sanitization' },
+      { name: 'twitter:title', content: 'Numeric Input Sanitization | Numora' },
+      { name: 'twitter:description', content: 'Sanitize numeric inputs and block invalid characters with Numora.' },
+    ],
+  }),
   component: Sanitization,
 })
 

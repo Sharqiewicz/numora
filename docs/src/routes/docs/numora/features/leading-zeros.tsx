@@ -2,6 +2,17 @@ import { createFileRoute } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 
 export const Route = createFileRoute('/docs/numora/features/leading-zeros')({
+  head: () => ({
+    meta: [
+      { title: 'Leading Zero Handling | Numora' },
+      { name: 'description', content: 'Control leading zero behavior in numeric inputs with Numora. Enable or disable leading zeros for clean number entry in financial applications.' },
+      { property: 'og:title', content: 'Leading Zero Handling | Numora' },
+      { property: 'og:description', content: 'Control leading zero behavior in numeric inputs with Numora. Enable or disable leading zeros for financial inputs.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora/features/leading-zeros' },
+      { name: 'twitter:title', content: 'Leading Zero Handling | Numora' },
+      { name: 'twitter:description', content: 'Control leading zero behavior in numeric inputs with Numora.' },
+    ],
+  }),
   component: LeadingZeros,
 })
 
