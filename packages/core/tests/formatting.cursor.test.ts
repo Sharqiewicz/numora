@@ -127,7 +127,7 @@ describe('calculateCursorPositionAfterFormatting', () => {
     });
   });
 
-  describe.skip('thousand style - backspace on separator', () => {
+  describe('thousand style - backspace on separator', () => {
     it('should move cursor backward when separator is deleted (1,|000 -> 1,000)', () => {
       const oldValue = '1,000';
       const newValue = '1,000';
