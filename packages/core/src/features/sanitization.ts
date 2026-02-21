@@ -77,7 +77,7 @@ export const sanitizeNumoraInput = (
   );
 
   // Step 5: Remove extra decimal separators
-  sanitized = removeExtraDecimalSeparators(sanitized, options?.decimalSeparator || DEFAULT_DECIMAL_SEPARATOR);
+  sanitized = removeExtraDecimalSeparators(sanitized, options?.decimalSeparator);
 
   // Step 6: Remove leading zeros (if not allowed)
   if (!options?.enableLeadingZeros) {
