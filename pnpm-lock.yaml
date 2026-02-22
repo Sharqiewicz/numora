@@ -96,11 +96,11 @@ importers:
         specifier: ^12.23.26
         version: 12.23.26(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       numora:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: ^3.1.0
+        version: 3.1.0
       numora-react:
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: ^3.1.0
+        version: 3.1.0(numora@3.1.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       ogl:
         specifier: ^1.0.11
         version: 1.0.11
@@ -232,7 +232,7 @@ importers:
         specifier: ^2.8.1
         version: 2.8.1
       typescript:
-        specifier: ^5.9.3
+        specifier: ^5.8.2
         version: 5.9.3
 
 packages:
@@ -3894,11 +3894,18 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
-  numora-react@3.0.2:
-    resolution: {integrity: sha512-PsWjhFsvk1AxB4C2jA8Lj4pNJ5fvCEIjJtop48gxJjZyPjfOZBqLzdt4UwA6+rogOc/gYeMhCzS9uyjGKQBpjA==}
+  numora-react@3.1.0:
+    resolution: {integrity: sha512-sciWkNh2O1vjkgtg7X0aILGcsj8yyImLOGrp34yMCLsBLrkWxV+VefpXZZiH8OxU/x+66ZqQsFEDM7KLUVFVhA==}
+    peerDependencies:
+      numora: '>=3.0.2'
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
 
-  numora@3.0.2:
-    resolution: {integrity: sha512-L1EQPudBSbX1G1v4vWtbdTaZrhJhexwffslc8TtcKXaN0ZNzo/+oPPyRNtVx3HWlDmRccTxlAiE+A4K5BGsuCQ==}
+  numora@3.1.0:
+    resolution: {integrity: sha512-MQKe1IKhvKjKbA4jRL9Df29vUqxK3Jg/qpuPnVvrh9PgQeJ3VyTsr2EW08fnJ7AQUeZDDcFNqkz0Cpihje0Ojw==}
 
   nwsapi@2.2.22:
     resolution: {integrity: sha512-ujSMe1OWVn55euT1ihwCI1ZcAaAU3nxUiDwfDQldc51ZXaB9m2AyOn6/jh1BLe2t/G8xd6uKG1UBF2aZJeg2SQ==}
@@ -7222,33 +7229,33 @@ snapshots:
       '@types/node': 22.19.1
     optional: true
 
-  '@typescript-eslint/project-service@8.49.0(typescript@5.8.2)':
+  '@typescript-eslint/project-service@8.49.0(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.49.0(typescript@5.8.2)
+      '@typescript-eslint/tsconfig-utils': 8.49.0(typescript@5.9.3)
       '@typescript-eslint/types': 8.49.0
       debug: 4.4.3
-      typescript: 5.8.2
+      typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/tsconfig-utils@8.49.0(typescript@5.8.2)':
+  '@typescript-eslint/tsconfig-utils@8.49.0(typescript@5.9.3)':
     dependencies:
-      typescript: 5.8.2
+      typescript: 5.9.3
 
   '@typescript-eslint/types@8.49.0': {}
 
-  '@typescript-eslint/typescript-estree@8.49.0(typescript@5.8.2)':
+  '@typescript-eslint/typescript-estree@8.49.0(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/project-service': 8.49.0(typescript@5.8.2)
-      '@typescript-eslint/tsconfig-utils': 8.49.0(typescript@5.8.2)
+      '@typescript-eslint/project-service': 8.49.0(typescript@5.9.3)
+      '@typescript-eslint/tsconfig-utils': 8.49.0(typescript@5.9.3)
       '@typescript-eslint/types': 8.49.0
       '@typescript-eslint/visitor-keys': 8.49.0
       debug: 4.4.3
       minimatch: 9.0.5
       semver: 7.7.3
       tinyglobby: 0.2.15
-      ts-api-utils: 2.1.0(typescript@5.8.2)
-      typescript: 5.8.2
+      ts-api-utils: 2.1.0(typescript@5.9.3)
+      typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
@@ -7870,16 +7877,16 @@ snapshots:
 
   detective-stylus@5.0.1: {}
 
-  detective-typescript@14.0.0(typescript@5.8.2):
+  detective-typescript@14.0.0(typescript@5.9.3):
     dependencies:
-      '@typescript-eslint/typescript-estree': 8.49.0(typescript@5.8.2)
+      '@typescript-eslint/typescript-estree': 8.49.0(typescript@5.9.3)
       ast-module-types: 6.0.1
       node-source-walk: 7.0.1
-      typescript: 5.8.2
+      typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
-  detective-vue2@2.2.0(typescript@5.8.2):
+  detective-vue2@2.2.0(typescript@5.9.3):
     dependencies:
       '@dependents/detective-less': 5.0.1
       '@vue/compiler-sfc': 3.5.25
@@ -7887,8 +7894,8 @@ snapshots:
       detective-sass: 6.0.1
       detective-scss: 5.0.1
       detective-stylus: 5.0.1
-      detective-typescript: 14.0.0(typescript@5.8.2)
-      typescript: 5.8.2
+      detective-typescript: 14.0.0(typescript@5.9.3)
+      typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
@@ -8841,9 +8848,14 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  numora-react@3.0.2: {}
+  numora-react@3.1.0(numora@3.1.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      numora: 3.1.0
+      react: 19.2.0
+    optionalDependencies:
+      react-dom: 19.2.0(react@19.2.0)
 
-  numora@3.0.2: {}
+  numora@3.1.0: {}
 
   nwsapi@2.2.22: {}
 
@@ -9013,12 +9025,12 @@ snapshots:
       detective-sass: 6.0.1
       detective-scss: 5.0.1
       detective-stylus: 5.0.1
-      detective-typescript: 14.0.0(typescript@5.8.2)
-      detective-vue2: 2.2.0(typescript@5.8.2)
+      detective-typescript: 14.0.0(typescript@5.9.3)
+      detective-vue2: 2.2.0(typescript@5.9.3)
       module-definition: 6.0.1
       node-source-walk: 7.0.1
       postcss: 8.5.6
-      typescript: 5.8.2
+      typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
 
@@ -9530,9 +9542,9 @@ snapshots:
 
   triple-beam@1.4.1: {}
 
-  ts-api-utils@2.1.0(typescript@5.8.2):
+  ts-api-utils@2.1.0(typescript@5.9.3):
     dependencies:
-      typescript: 5.8.2
+      typescript: 5.9.3
 
   tsconfck@3.1.6(typescript@5.8.2):
     optionalDependencies:
