@@ -1,11 +1,7 @@
-import { HeroBadges } from '@/components/hero-badges';
-import { Button } from '@/components/ui/button';
-import { Link } from '@tanstack/react-router';
-
 export function Hero() {
   return (
     <>
-      <p
+      {/* <p
         className="
           animate-fade-in-out text-center opacity-0 absolute top-14 sm:top-1/12
           left-1/2 -translate-x-1/2 text-lg text-muted-foreground
@@ -23,11 +19,11 @@ export function Hero() {
         "
       >
         just use...
-      </p>
+      </p> */}
       <div
         className="
           absolute top-14 sm:top-1/12 left-1/2 -translate-x-1/2
-          animate-fade-in delay-[2.4s] opacity-0
+          animate-fade-in opacity-0
         "
       >
         <h1
@@ -46,75 +42,14 @@ export function Hero() {
           "
         />
       </div>
-      <h2
-        className="
-          delay-[3s] animate-fade-in opacity-0
-          text-3xl sm:text-4xl text-center
-          leading-tight
-        "
-      >
-        The Standard for <br className="block sm:hidden" />
-        <strong className="text-secondary relative">
-          DeFi Numeric Inputs
-        </strong>
-      </h2>
       <p
         className="
-          text-center delay-[3s] animate-fade-in opacity-0 mt-8
-          text-muted-foreground max-w-xl leading-relaxed
+          text-center animate-fade-in opacity-0
+          text-muted-foreground max-w-lg leading-relaxed
         "
       >
-        Native inputs destroy precision. Regex is fragile.
-        <br />
-        <strong className="font-numora text-foreground">numora</strong> solves the nightmares of
-        building all financial inputs validation, formatting and sanitization.
+        Numeric inputs are broken. <strong className="font-numora text-foreground">numora</strong> fixes them.
       </p>
-
-      <div
-        className="
-          delay-[3.2s] animate-fade-in opacity-0 mb-8
-        "
-      >
-        <HeroBadges />
-      </div>
-
-      <div className="delay-[3.4s] animate-fade-in opacity-0 gap-4 flex">
-        <Link to="/docs/numora">
-          <Button
-            className="
-              min-w-[150px]
-              relative overflow-hidden
-              group
-              hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]
-              transition-shadow duration-300
-            "
-          >
-            <span className="relative z-10">Get Started</span>
-            <span
-              className="
-                absolute inset-0 -translate-x-full
-                bg-gradient-to-r from-transparent via-white/20 to-transparent
-                group-hover:translate-x-full
-                transition-transform duration-500
-              "
-            />
-          </Button>
-        </Link>
-
-        <a href="#tamper-proof-section">
-          <Button
-            variant="secondary"
-            className="
-              min-w-[150px]
-              hover:shadow-[0_0_25px_rgba(167,139,250,0.3)]
-              transition-shadow duration-300
-            "
-          >
-            Try it
-          </Button>
-        </a>
-      </div>
-
     </>
   );
 }

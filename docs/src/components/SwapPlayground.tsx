@@ -1,5 +1,5 @@
-import { Swap } from './Swap';
 import { useScrollReveal } from '@/hooks/use-scroll-reveal';
+import { Swap } from './Swap';
 
 interface SwapPlaygroundProps {
   heading?: string;
@@ -79,13 +79,13 @@ export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {
 
   const defaultHeading = (
     <>
-      Built for the <br className="block sm:hidden" />
-      <span className="text-secondary">Swap Interface</span>
+      Example: <br className="block sm:hidden" />
+      <span className="text-secondary">DeFi Swap Interface</span>
     </>
   );
 
   const defaultDescription =
-    'Handling numeric state in DeFi is deceptively hard. You need to sanitize "bad" keystrokes, handle scientific notation, calculate the caret position and more...';
+    'One example of where numora shines. Handling numeric state in DeFi is deceptively hard - sanitize keystrokes, expand scientific notation, preserve cursor position, and more.';
 
   return (
     <div

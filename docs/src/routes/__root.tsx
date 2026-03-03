@@ -24,7 +24,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
-      { title: 'Numora - Framework agnostic numeric input library' },
+      { title: 'Numora - The Numeric Input Standard' },
+      { name: 'description', content: 'The only framework-agnostic numeric input library. Format numbers as you type, thousand separators, decimal limits, cursor management. Works with React, Vue, Svelte, and Vanilla JS.' },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:site_name', content: 'Numora' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:site', content: '@sharqiewicz' },
     ],
     links: [
       { rel: 'stylesheet', href: stylesCss },

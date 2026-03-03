@@ -94,13 +94,14 @@ function Decimals() {
 
 <NumoraInput
   decimalSeparator=","
-  thousandsGroupStyle={undefined}
+  thousandSeparator="."
   maxDecimals={2}
-  // Comma/dot conversion enabled
+  // Comma/dot conversion enabled - try typing '.' or ','
 />`}
         language="tsx"
         config={{
           decimalSeparator: ',',
+          thousandSeparator: '.',
           maxDecimals: 2,
         }}
         description="Try typing '.' or ',' - both will be converted to ','"

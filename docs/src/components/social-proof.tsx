@@ -36,8 +36,8 @@ export function SocialProof({ heading, description }: SocialProofProps = {}) {
 
   const defaultDescription = (
     <>
-      We didn't guess how to handle money,{' '}
-      <strong className="text-foreground">we analyzed the DeFi leaders.</strong> Numora's core
+      We didn't guess how to handle numbers,{' '}
+      <strong className="text-foreground">we analyzed the industry leaders.</strong> Numora's core
       logic is a unification of the audited, hardened implementations used in the most trusted
       protocols in DeFi. We extracted the logic, removed the framework dependencies, and
       standardized the API.
