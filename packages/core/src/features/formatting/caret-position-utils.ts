@@ -182,7 +182,11 @@ export function updateCursorPosition(
   const cursorOptions: CursorPositionOptions = {
     thousandSeparator: formattingOptions?.thousandSeparator ?? separators.thousandSeparator,
     decimalSeparator: separators.decimalSeparator,
-    isCharacterEquivalent: defaultIsCharacterEquivalent,
+    isCharacterEquivalent: (char1: string, char2: string) => {
+      const sep = formattingOptions?.thousandSeparator ?? separators.thousandSeparator;
+      if (sep && char1 === sep) return false;
+      return char1 === char2;
+    },
     boundary,
   };
 

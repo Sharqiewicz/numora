@@ -3,69 +3,17 @@
 [![npm version](https://img.shields.io/npm/v/numora-react.svg)](https://www.npmjs.com/package/numora-react)
 [![npm downloads](https://img.shields.io/npm/dm/numora-react.svg)](https://www.npmjs.com/package/numora-react)
 
-React component wrapper for [Numora](https://github.com/Sharqiewicz/numora) - a precision-first numeric input library for DeFi and financial applications.
+React component wrapper for [numora](../core/README.md) - a precision-first numeric input library.
 
-## Features
-
-| Feature | Description |
-|---------|-------------|
-| **React Component** | Drop-in replacement for `<input>` with numeric formatting |
-| **Decimal Precision Control** | Configure maximum decimal places with `maxDecimals` prop |
-| **Thousand Separators** | Customizable thousand separators with `thousandSeparator` prop |
-| **Grouping Styles** | Support for different grouping styles (`thousand`, `lakh`, `wan`) |
-| **Format on Blur/Change** | Choose when to apply formatting: on blur or on change |
-| **Compact Notation Expansion** | When enabled via `enableCompactNotation`, expands compact notation during paste (e.g., `"1k"` → `"1000"`, `"1.5m"` → `"1500000"`) |
-| **Scientific Notation Expansion** | Always automatically expands scientific notation (e.g., `"1.5e-7"` → `"0.00000015"`, `"2e+5"` → `"200000"`) |
-| **Paste Event Handling** | Intelligent paste handling with automatic sanitization, formatting, and cursor positioning |
-| **Cursor Position Preservation** | Smart cursor positioning that works with thousand separators, even during formatting |
-| **Thousand Separator Skipping** | On delete/backspace, cursor automatically skips over thousand separators for better UX |
-| **Mobile Keyboard Optimization** | Automatic `inputmode="decimal"` for mobile numeric keyboards |
-| **Mobile Keyboard Filtering** | Automatically filters non-breaking spaces and Unicode whitespace artifacts from mobile keyboards |
-| **Non-numeric Character Filtering** | Automatic removal of invalid characters |
-| **Comma/Dot Conversion** | When `thousandStyle` is not set (or `None`), typing comma or dot automatically converts to the configured decimal separator |
-| **TypeScript Support** | Full TypeScript definitions included |
-| **Ref Forwarding** | Supports React ref forwarding for direct input access |
-| **Standard Input Props** | Accepts all standard HTMLInputElement props |
-
-**Note:** Some advanced features from the core package (like `decimalMinLength`, `enableNegative`, `enableLeadingZeros`, `rawValueMode`) are not yet exposed through the React component props. For full control, consider using the core `numora` package directly.
-
-## Comparison
-
-| Feature | numora-react | react-number-format | Native Number Input |
-|---------|--------------|---------------------|---------------------|
-| **React Component** | ✅ Yes | ✅ Yes | ⚠️ Basic |
-| **Decimal Precision Control** | ✅ Max | ✅ Max | ❌ Limited |
-| **Thousand Separators** | ✅ Customizable | ✅ Yes | ❌ No |
-| **Custom Decimal Separator** | ✅ Yes | ✅ Yes | ❌ No (always `.`) |
-| **Formatting Options** | ✅ Blur/Change modes | ✅ Multiple modes | ❌ No |
-| **Cursor Preservation** | ✅ Advanced | ✅ Basic | ❌ N/A |
-| **Mobile Support** | ✅ Yes | ✅ Yes | ⚠️ Limited |
-| **TypeScript Support** | ✅ Yes | ✅ Yes | ⚠️ Partial |
-| **Dependencies** | ⚠️ React + numora | ⚠️ React required | ✅ None |
-| **Framework Support** | ✅ React | ❌ React only | ✅ All |
-| **Scientific Notation** | ✅ Auto-expand | ⚠️ Limited | ❌ No |
-| **Compact Notation** | ✅ Yes (on paste when enabled) | ❌ No | ❌ No |
-| **Paste Handling** | ✅ Intelligent | ✅ Yes | ⚠️ Basic |
-| **Ref Forwarding** | ✅ Yes | ✅ Yes | ✅ Yes |
-| **Grouping Styles** | ✅ Thousand/Lakh/Wan | ⚠️ Thousand only | ❌ No |
-| **Comma/Dot Conversion** | ✅ Yes | ⚠️ Limited | ❌ No |
-
-## Installation
+## Install
 
 ```bash
 npm install numora-react
-# or
-yarn add numora-react
-# or
-pnpm add numora-react
+# or pnpm add numora-react / yarn add numora-react
 ```
-
-**Note:** `numora-react` depends on `numora` core package, which will be installed automatically.
 
 ## Usage
 
-### Basic Example
-
 ```tsx
 import { NumoraInput } from 'numora-react';
 
@@ -73,304 +21,43 @@ function App() {
   return (
     <NumoraInput
       maxDecimals={2}
-      onChange={(e) => {
-        console.log('Value:', e.target.value);
-      }}
-    />
-  );
-}
-```
-
-### Advanced Example
-
-```tsx
-import { NumoraInput } from 'numora-react';
-import { useRef } from 'react';
-
-function PaymentForm() {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  return (
-    <NumoraInput
-      ref={inputRef}
-      maxDecimals={18}
-      formatOn="change"
       thousandSeparator=","
       thousandStyle="thousand"
-      enableCompactNotation={true} // Enable compact notation expansion on paste
-      placeholder="Enter amount"
-      className="payment-input"
-      onChange={(e) => {
-        const value = e.target.value;
-        console.log('Formatted value:', value);
-      }}
-      onFocus={(e) => {
-        console.log('Input focused');
-      }}
-      onBlur={(e) => {
-        console.log('Input blurred');
-      }}
+      onChange={(e) => console.log(e.target.value)}
     />
   );
 }
 ```
 
-### Compact Notation Example
+## Features
 
-```tsx
-import { NumoraInput } from 'numora-react';
-
-function App() {
-  return (
-    <NumoraInput
-      maxDecimals={18}
-      enableCompactNotation={true} // Enable compact notation expansion
-      onChange={(e) => {
-        console.log('Value:', e.target.value);
-      }}
-    />
-  );
-}
-
-// When user pastes "1.5k", it automatically expands to "1500"
-// Scientific notation like "1.5e-7" is always automatically expanded
-```
-
-### Scientific Notation Example
-
-```tsx
-import { NumoraInput } from 'numora-react';
-
-function App() {
-  return (
-    <NumoraInput
-      maxDecimals={18}
-      onChange={(e) => {
-        console.log('Value:', e.target.value);
-      }}
-    />
-  );
-}
-
-// Scientific notation is ALWAYS automatically expanded
-// User can paste "1.5e-7" and it becomes "0.00000015"
-// User can paste "2e+5" and it becomes "200000"
-```
-
-### With Form Libraries
-
-#### React Hook Form
-
-`NumoraInput` works seamlessly with react-hook-form. The recommended approach is to use the `Controller` component, which is react-hook-form's official pattern for controlled components.
-
-**Recommended: Controller Pattern**
-```tsx
-import { useForm, Controller } from 'react-hook-form';
-import { NumoraInput } from 'numora-react';
-
-function Form() {
-  const { control, handleSubmit, setValue } = useForm();
-
-  return (
-    <form onSubmit={handleSubmit((data) => console.log(data))}>
-      <Controller
-        control={control}
-        name="amount"
-        render={({ field: { onChange, name, value } }) => (
-          <NumoraInput
-            name={name}
-            value={value || ''}
-            onChange={onChange}
-            maxDecimals={2}
-            thousandSeparator=","
-          />
-        )}
-      />
-      <button type="button" onClick={() => setValue('amount', '1000')}>
-        Set to 1000
-      </button>
-      <button type="submit">Submit</button>
-    </form>
-  );
-}
-```
-
-**Storing Raw Values** (for calculations):
-If you need to store raw values (without thousand separators) in your form state:
-
-```tsx
-<Controller
-  control={control}
-  name="amount"
-  render={({ field }) => (
-    <NumoraInput
-      value={field.value || ''}
-      onChange={(e) => {
-        // Store raw value - better for calculations
-        field.onChange((e.target as any).rawValue);
-      }}
-      maxDecimals={2}
-      thousandSeparator=","
-    />
-  )}
-/>
-```
-
-**Alternative: Register Pattern** (uncontrolled, basic forms only):
-```tsx
-import { useForm } from 'react-hook-form';
-import { NumoraInput } from 'numora-react';
-
-function Form() {
-  const { register, handleSubmit } = useForm();
-
-  return (
-    <form onSubmit={handleSubmit((data) => console.log(data))}>
-      <NumoraInput
-        {...register('amount')}
-        maxDecimals={2}
-        thousandSeparator=","
-      />
-      <button type="submit">Submit</button>
-    </form>
-  );
-}
-```
-
-**Note:** 
-- `numora-react` does not require `react-hook-form` as a dependency. It works with react-hook-form when it's present in your project.
-- The `Controller` pattern is recommended because it works seamlessly with `setValue()`, validation, and all react-hook-form features.
-- `NumoraInput` provides both formatted (`e.target.value`) and raw (`e.target.rawValue`) values in the onChange event.
-
-#### Formik
-
-```tsx
-import { useFormik } from 'formik';
-import { NumoraInput } from 'numora-react';
-
-function Form() {
-  const formik = useFormik({
-    initialValues: { amount: '' },
-    onSubmit: (values) => {
-      console.log(values);
-    },
-  });
-
-  return (
-    <form onSubmit={formik.handleSubmit}>
-      <NumoraInput
-        name="amount"
-        value={formik.values.amount}
-        onChange={formik.handleChange}
-        onBlur={formik.handleBlur}
-        maxDecimals={2}
-        thousandSeparator=","
-      />
-      <button type="submit">Submit</button>
-    </form>
-  );
-}
-```
-
-### Controlled Component
-
-```tsx
-import { NumoraInput } from 'numora-react';
-import { useState } from 'react';
-
-function ControlledInput() {
-  const [value, setValue] = useState('');
-
-  return (
-    <NumoraInput
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      maxDecimals={2}
-      thousandSeparator=","
-    />
-  );
-}
-```
-
-### Uncontrolled Component
-
-```tsx
-import { NumoraInput } from 'numora-react';
-import { useRef } from 'react';
-
-function UncontrolledInput() {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleSubmit = () => {
-    const value = inputRef.current?.value;
-    console.log('Value:', value);
-  };
-
-  return (
-    <>
-      <NumoraInput
-        ref={inputRef}
-        maxDecimals={2}
-        thousandSeparator=","
-      />
-      <button onClick={handleSubmit}>Get Value</button>
-    </>
-  );
-}
-```
+- [Sanitization](https://numora.xyz/docs/numora-react/features/sanitization) - filters invalid characters and mobile keyboard artifacts
+- [Formatting](https://numora.xyz/docs/numora-react/features/formatting) - thousand separators (Thousand/Lakh/Wan), format on blur or change
+- [Decimals](https://numora.xyz/docs/numora-react/features/decimals) - configurable max decimal places and custom decimal separator
+- [Compact Notation](https://numora.xyz/docs/numora-react/features/compact-notation) - expands "1k" → "1000" on paste (opt-in)
+- [Scientific Notation](https://numora.xyz/docs/numora-react/features/scientific-notation) - always expands "1.5e-7" → "0.00000015" automatically
+- [Leading Zeros](https://numora.xyz/docs/numora-react/features/leading-zeros) - configurable leading zero behavior
+- [React Hook Form](https://numora.xyz/docs/numora-react/integrations/react-hook-form) - seamless integration via the `Controller` pattern
+- Ref forwarding, controlled and uncontrolled modes, all standard input props
 
 ## Props
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `maxDecimals` | `number` | `2` | Maximum number of decimal places allowed |
-| `formatOn` | `'blur' \| 'change'` | `'blur'` | When to apply formatting: `'blur'` or `'change'` |
-| `thousandSeparator` | `string` | `','` | Character used as thousand separator |
-| `thousandStyle` | `'thousand' \| 'lakh' \| 'wan'` | `'thousand'` | Grouping style for thousand separators |
-| `enableCompactNotation` | `boolean` | `false` | Enable compact notation expansion (e.g., `"1k"` → `"1000"`) on paste |
-| `onChange` | `(e: ChangeEvent<HTMLInputElement> \| ClipboardEvent<HTMLInputElement>) => void` | `undefined` | Callback when value changes |
-| `additionalStyle` | `string` | `undefined` | Additional CSS styles (deprecated, use `style` prop) |
+| `maxDecimals` | `number` | `2` | Maximum decimal places allowed |
+| `formatOn` | `'blur' \| 'change'` | `'blur'` | When to apply formatting |
+| `thousandSeparator` | `string` | `','` | Thousand separator character |
+| `thousandStyle` | `'thousand' \| 'lakh' \| 'wan'` | `'thousand'` | Grouping style |
+| `enableCompactNotation` | `boolean` | `false` | Expand compact notation on paste |
+| `onChange` | `(e: ChangeEvent<HTMLInputElement>) => void` | `undefined` | Called when value changes |
 
-All standard HTMLInputElement props are also supported (e.g., `placeholder`, `className`, `disabled`, `id`, `onFocus`, `onBlur`, etc.), except:
-- `type` - Always set to `'text'` (required for formatting)
-- `inputMode` - Always set to `'decimal'` (for mobile keyboards)
+All standard `HTMLInputElement` props are supported except `type` (always `'text'`) and `inputMode` (always `'decimal'`).
 
-**Note:** Scientific notation expansion (e.g., `"1.5e-7"` → `"0.00000015"`) always happens automatically and is not configurable.
+Both `e.target.value` (formatted) and `e.target.rawValue` (unformatted) are available in `onChange`.
 
-## API Reference
+## Documentation
 
-### NumoraInput
-
-A React component that wraps the core Numora functionality in a React-friendly API.
-
-**Props:** See [Props](#props) section above.
-
-**Ref:** The component forwards refs to the underlying `<input>` element.
-
-## TypeScript
-
-Full TypeScript support is included. The component is typed with proper interfaces:
-
-```tsx
-import { NumoraInput } from 'numora-react';
-
-// All props are fully typed
-const input = (
-  <NumoraInput
-    maxDecimals={18} // ✅ TypeScript knows this is a number
-    formatOn="change" // ✅ TypeScript knows valid values
-    enableCompactNotation={true} // ✅ TypeScript knows this is boolean
-    onChange={(e) => {
-      // ✅ e is properly typed as ChangeEvent<HTMLInputElement>
-      console.log(e.target.value);
-    }}
-  />
-);
-```
-
-## Related Packages
-
-- [`numora`](../core/README.md) - Core framework-agnostic library with full feature set and display formatting utilities
+Full docs and live demo at [numora.xyz/docs/numora-react](https://numora.xyz/docs/numora-react).
 
 ## License
 

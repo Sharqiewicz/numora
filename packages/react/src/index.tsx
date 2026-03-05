@@ -15,6 +15,7 @@ import {
 import {
   FormatOn,
   ThousandStyle,
+  resolveLocaleOptions,
   formatValueForDisplay,
   removeThousandSeparators,
   validateNumoraInputOptions,
@@ -97,9 +98,9 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     onFocus,
     onRawValueChange,
     formatOn = FormatOn.Blur,
-    thousandSeparator = ',',
+    thousandSeparator,
     thousandStyle = ThousandStyle.Thousand,
-    decimalSeparator = '.',
+    decimalSeparator,
     decimalMinLength,
     enableCompactNotation = false,
     enableNegative = false,
@@ -129,17 +130,21 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
 
   // Memoize to give callbacks a stable reference - avoids recreating all
   // useCallback functions on every render when primitive props haven't changed.
-  const formattingOptions: FormattingOptions = useMemo(() => ({
-    formatOn,
-    thousandSeparator,
-    ThousandStyle: thousandStyle,
-    decimalSeparator,
-    decimalMinLength,
-    enableCompactNotation,
-    enableNegative,
-    enableLeadingZeros,
-    rawValueMode,
-  }), [formatOn, thousandSeparator, thousandStyle, decimalSeparator, decimalMinLength,
+  const formattingOptions: FormattingOptions = useMemo(() => {
+    const resolved = resolveLocaleOptions({ thousandSeparator, thousandStyle, decimalSeparator });
+
+    return {
+      formatOn,
+      thousandSeparator: resolved.thousandSeparator,
+      ThousandStyle: resolved.thousandStyle,
+      decimalSeparator: resolved.decimalSeparator,
+      decimalMinLength,
+      enableCompactNotation,
+      enableNegative,
+      enableLeadingZeros,
+      rawValueMode,
+    };
+  }, [formatOn, thousandSeparator, thousandStyle, decimalSeparator, decimalMinLength,
     enableCompactNotation, enableNegative, enableLeadingZeros, rawValueMode]);
 
   const getInitialValue = (): string => {
@@ -216,6 +221,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     caretInfoRef.current = undefined;
 
     (e.target as NumoraHTMLInputElement).rawValue = rawValue;
+
     onRawValueChange?.(rawValue);
 
     setDisplayValue(value);
@@ -252,6 +258,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
 
     lastCaretPosRef.current = (e.target as HTMLInputElement).selectionStart;
     (e.target as NumoraHTMLInputElement).rawValue = rawValue;
+
     onRawValueChange?.(rawValue);
 
     setDisplayValue(value);
@@ -292,6 +299,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     });
 
     (e.target as NumoraHTMLInputElement).rawValue = rawValue;
+
     onRawValueChange?.(rawValue);
     setDisplayValue(value);
 

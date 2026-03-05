@@ -7,8 +7,8 @@ import { formatWithSeparators } from '@/features/formatting';
 import { removeThousandSeparators } from '@/features/sanitization';
 import { escapeRegExp } from '@/utils/escape-reg-exp';
 import { getNumoraPattern } from '@/utils/input-pattern';
-import { getSeparatorsFromLocale } from '@/utils/locale';
-import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_DECIMAL_MIN_LENGTH, DEFAULT_RAW_VALUE_MODE, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_THOUSAND_STYLE } from './config';
+import { resolveLocaleOptions } from '@/utils/locale';
+import { DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_DECIMAL_MIN_LENGTH, DEFAULT_RAW_VALUE_MODE, DEFAULT_THOUSAND_STYLE } from './config';
 import { FormatOn, ThousandStyle, FormattingOptions } from './types';
 import { validateNumoraInputOptions } from './validation';
 
@@ -203,35 +203,19 @@ export class NumoraInput {
   }
 
   private getResolvedOptions(options: NumoraInputOptions): ResolvedNumoraOptions {
-    let thousandSeparator = options.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR;
-    let decimalSeparator  = options.decimalSeparator  ?? DEFAULT_DECIMAL_SEPARATOR;
-    let thousandStyle     = options.thousandStyle     ?? DEFAULT_THOUSAND_STYLE;
-
-    const needsLocale =
-      options.thousandStyle === ThousandStyle.Locale ||
-      options.decimalSeparator === 'auto';
-
-    if (needsLocale) {
-      const localeSeps = getSeparatorsFromLocale();
-      if (options.thousandStyle === ThousandStyle.Locale) {
-        thousandSeparator = options.thousandSeparator ?? localeSeps.thousandSeparator;
-        decimalSeparator  = options.decimalSeparator === 'auto' || options.decimalSeparator === undefined
-          ? localeSeps.decimalSeparator
-          : options.decimalSeparator;
-        thousandStyle = ThousandStyle.Thousand;
-      }
-      if (options.decimalSeparator === 'auto') {
-        decimalSeparator = localeSeps.decimalSeparator;
-      }
-    }
+    const resolved = resolveLocaleOptions({
+      thousandSeparator: options.thousandSeparator,
+      thousandStyle: options.thousandStyle,
+      decimalSeparator: options.decimalSeparator,
+    });
 
     return {
       decimalMaxLength: options.decimalMaxLength ?? DEFAULT_DECIMAL_MAX_LENGTH,
       decimalMinLength: options.decimalMinLength ?? DEFAULT_DECIMAL_MIN_LENGTH,
       formatOn: options.formatOn ?? DEFAULT_FORMAT_ON,
-      thousandSeparator,
-      thousandStyle,
-      decimalSeparator,
+      thousandSeparator: resolved.thousandSeparator,
+      thousandStyle: resolved.thousandStyle,
+      decimalSeparator: resolved.decimalSeparator,
       enableCompactNotation: options.enableCompactNotation ?? DEFAULT_ENABLE_COMPACT_NOTATION,
       enableNegative: options.enableNegative ?? DEFAULT_ENABLE_NEGATIVE,
       enableLeadingZeros: options.enableLeadingZeros ?? DEFAULT_ENABLE_LEADING_ZEROS,

@@ -155,7 +155,7 @@ function validateThousandStyle(value: ThousandStyle | undefined): void {
 }
 
 function validateDecimalSeparator(value: string | undefined): void {
-  if (value === undefined) {
+  if (value === undefined || value === 'auto') {
     return;
   }
 
@@ -186,6 +186,10 @@ function validateSeparatorConflict(
   decimalSeparator: string | undefined
 ): void {
   if (thousandSeparator === undefined || decimalSeparator === undefined) {
+    return;
+  }
+
+  if (decimalSeparator === 'auto') {
     return;
   }
 

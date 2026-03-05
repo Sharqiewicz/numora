@@ -722,6 +722,28 @@ describe('calculateCursorPositionAfterFormatting', () => {
     });
   });
 
+  describe('character-mapping path - deletion with misplaced thousand separators (real browser intermediate)', () => {
+    const skipSepFn = (sep: string) => (c1: string, c2: string) =>
+      c1 === sep ? false : c1 === c2;
+
+    it('should place cursor after "1" when deleting "2" from "1,234,567.89"', () => {
+      // After browser Backspace on '2': oldValue='1,34,567.89' cursor=2
+      // Numora re-formats to '134,567.89'
+      // Expected cursor: 1 (after '1')
+      const newCursor = calculateCursorPositionAfterFormatting(
+        '1,34,567.89',
+        '134,567.89',
+        2,
+        ',',
+        'thousand',
+        undefined,
+        '.',
+        { isCharacterEquivalent: skipSepFn(',') }
+      );
+      expect(newCursor).toBe(1);
+    });
+  });
+
   describe('prefix and suffix scenarios (from react-number-format)', () => {
     it('should maintain cursor with prefix when value decreases ($10000 -> $1000)', () => {
       const oldValue = '$10000';
