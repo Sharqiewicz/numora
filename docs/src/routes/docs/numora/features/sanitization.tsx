@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 
 export const Route = createFileRoute('/docs/numora/features/sanitization')({
@@ -21,73 +21,11 @@ function Sanitization() {
     <div className="prose prose-invert max-w-none">
       <h1>Sanitization</h1>
       <p className="text-lg text-muted-foreground">
-        Numora provides comprehensive input sanitization to ensure data integrity and prevent
-        tampering. The sanitization pipeline processes user input through multiple stages to clean
-        and normalize numeric values.
+        Numora sanitizes every value through a sequential pipeline before formatting is applied.
+        For the full architecture and pipeline diagram, see{' '}
+        <Link to="/docs/numora/how-it-works">How It Works</Link>. The sections below cover each
+        configurable sanitization feature.
       </p>
-
-      <h2>Sanitization Pipeline</h2>
-      <p>
-        Numora's sanitization process follows a specific order to handle various input scenarios:
-      </p>
-
-      <ol>
-        <li>
-          <strong>Mobile Keyboard Filtering</strong> - Removes non-breaking spaces and Unicode
-          whitespace artifacts from mobile keyboards
-        </li>
-        <li>
-          <strong>Thousand Separator Removal</strong> - Strips formatting characters (thousand
-          separators) that are not part of the actual numeric value
-        </li>
-        <li>
-          <strong>Compact Notation Expansion</strong> - Expands shorthand notation like "1k" to
-          "1000" (if enabled)
-        </li>
-        <li>
-          <strong>Scientific Notation Expansion</strong> - Always expands scientific notation
-          like "1.5e-7" to "0.00000015"
-        </li>
-        <li>
-          <strong>Non-numeric Character Removal</strong> - Filters out invalid characters while
-          preserving valid numeric characters, decimal separators, and optionally negative signs
-        </li>
-        <li>
-          <strong>Extra Decimal Separator Removal</strong> - Ensures only one decimal separator
-          exists in the value
-        </li>
-        <li>
-          <strong>Leading Zero Removal</strong> - Removes leading zeros (if not enabled) to
-          normalize values like "007" to "7"
-        </li>
-      </ol>
-
-      <h2>Mobile Keyboard Filtering</h2>
-      <p>
-        Mobile keyboards often insert non-breaking spaces (U+00A0) and other Unicode whitespace
-        variants that can cause issues. Numora automatically filters these artifacts:
-      </p>
-
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
-
-const numoraInput = new NumoraInput(container, {
-  decimalMaxLength: 2,
-  // Mobile keyboard artifacts are automatically filtered
-  // Try typing with spaces or special characters - they'll be automatically filtered
-})`}
-      </CodeBlock>
-
-      <h3>Filtered Characters</h3>
-      <ul>
-        <li>Non-breaking space (U+00A0)</li>
-        <li>En quad, em quad (U+2000-U+2003)</li>
-        <li>Zero-width space (U+200B)</li>
-        <li>Narrow no-break space (U+202F)</li>
-        <li>Medium mathematical space (U+205F)</li>
-        <li>Ideographic space (U+3000)</li>
-        <li>All regular whitespace characters</li>
-      </ul>
 
       <h2>Non-numeric Character Filtering</h2>
       <p>
@@ -96,7 +34,7 @@ const numoraInput = new NumoraInput(container, {
       <ul>
         <li>Digits (0-9)</li>
         <li>Decimal separator (configured via <code>decimalSeparator</code>)</li>
-        <li>Negative sign (-) if <code>enableNegative</code> is true</li>
+        <li>Negative sign (<code>-</code>) if <code>enableNegative</code> is true</li>
       </ul>
 
       <CodeBlock language="typescript">
@@ -111,8 +49,24 @@ const numoraInput = new NumoraInput(container, {
 
       <h2>Decimal Separator Handling</h2>
       <p>
-        Numora ensures only one decimal separator exists in the value. If multiple decimal
-        separators are entered, only the first one is kept:
+        Numora uses two complementary layers to prevent multiple decimal separators:
+      </p>
+      <ul>
+        <li>
+          <strong>Keydown prevention</strong> - When a user types a second decimal separator,
+          it is blocked immediately before the value changes. This is the primary guard for
+          keyboard input.
+        </li>
+        <li>
+          <strong>Sanitization cleanup</strong> - If multiple separators reach the value anyway
+          (e.g., via paste), only the first is kept and the rest are removed. This is the
+          fallback for pasted input.
+        </li>
+      </ul>
+      <p>
+        Note: comma/dot conversion (typing <code>.</code> when the separator is{' '}
+        <code>,</code>) is also handled at keydown time, not in the sanitization pipeline.
+        This prevents accidental conversion of thousand separators during paste.
       </p>
 
       <CodeBlock language="typescript">
@@ -121,62 +75,31 @@ const numoraInput = new NumoraInput(container, {
 const numoraInput = new NumoraInput(container, {
   decimalSeparator: '.',
   decimalMaxLength: 2,
-  // Try typing multiple decimal points - only the first one will be kept
+  // Keydown: typing '.' a second time does nothing
+  // Paste: "12.34.56" → "12.3456" (sanitization removes extras)
 })`}
       </CodeBlock>
 
       <h2>Leading Zeros</h2>
       <p>
         By default, Numora removes leading zeros to normalize values. You can enable leading zeros
-        if needed:
+        if needed. <Link to="/docs/numora/how-it-works" className="underline">Leading zeros docs</Link>
       </p>
 
-      <div className="space-y-4">
-        <div>
-          <h4 className="text-lg font-semibold">Default: Leading Zeros Removed</h4>
-          <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+      <h2>removeThousandSeparators</h2>
+      <p>
+        Numora exports a standalone <code>removeThousandSeparators</code> utility for stripping
+        thousand separators from a formatted string. Useful when you need to extract a raw
+        numeric value from a display string.
+      </p>
+      <p>(You can also access the raw value of the input by <code>e.target.rawValue</code> when <code>rawValueMode</code> is <code>true</code>)</p>
 
-const numoraInput = new NumoraInput(container, {
-  enableLeadingZeros: false,
-  decimalMaxLength: 2,
-  // Default: Leading zeros removed
-  // Try typing '007' - it will become '7'
-})`}
-          </CodeBlock>
-        </div>
-        <div>
-          <h4 className="text-lg font-semibold">Leading Zeros Enabled</h4>
-          <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
-
-const numoraInput = new NumoraInput(container, {
-  enableLeadingZeros: true,
-  decimalMaxLength: 2,
-  // Leading zeros preserved
-  // Try typing '007' - it will be preserved
-})`}
-          </CodeBlock>
-        </div>
-      </div>
-
-      <h2>Complete Example</h2>
       <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+{`import { removeThousandSeparators } from 'numora'
 
-const numoraInput = new NumoraInput(container, {
-  decimalMaxLength: 2,
-  decimalSeparator: '.',
-  thousandSeparator: ',',
-  enableCompactNotation: true,
-  enableNegative: false,
-  enableLeadingZeros: false,
-  onChange: (value) => {
-    // Value is always sanitized before this callback
-    console.log('Sanitized value:', value)
-  },
-})
-// Try pasting ' 1,234.56.78abc' - it will be sanitized and formatted`}
+removeThousandSeparators('1,234,567.89', ',') // → '1234567.89'
+removeThousandSeparators('1.234.567,89', '.') // → '1234567,89'
+removeThousandSeparators('1 234 567', ' ')    // → '1234567'`}
       </CodeBlock>
     </div>
   )

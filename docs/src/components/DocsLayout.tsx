@@ -31,16 +31,18 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // Start exit (opacity fade-out, 120ms) - no translate to avoid layout mismatch with sidebar
     setIsTransitioning(true);
 
-    // Short delay for exit animation
+    // Wait for exit to finish before swapping content (exit duration = 120ms)
     const exitTimer = setTimeout(() => {
       setDisplayChildren(children);
       setIsTransitioning(false);
-    }, 150);
+    }, 130);
 
     return () => clearTimeout(exitTimer);
-  }, [location.pathname, children]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   return (
     <PackageProvider>
@@ -51,11 +53,11 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
               <h2
                 className="
                   text-4xl font-numora
-                  transition-all duration-300
-                  hover:text-secondary hover:drop-shadow-[0_0_10px_rgba(167,139,250,0.5)]
+                  transition-[color,filter] duration-300
+                  [@media(hover:hover)]:hover:drop-shadow-[0_2px_20px_rgba(167,139,250,0.5)]
                 "
               >
-                numora
+                numora.
               </h2>
             </Link>
           </SidebarHeader>
@@ -72,10 +74,10 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
             <div
               className={`
                 container mx-auto max-w-3xl px-4 py-8
-                transition-all duration-300 ease-out
+                transition-opacity ease-out
                 ${isTransitioning
-                  ? 'opacity-0 translate-y-2'
-                  : 'opacity-100 translate-y-0'
+                  ? 'opacity-0 duration-[120ms]'
+                  : 'opacity-100 duration-200'
                 }
               `}
             >

@@ -29,7 +29,7 @@ export function ExampleWithDemo({
         <NumoraInput
           {...config}
           placeholder={placeholder}
-          className="w-full"
+          className="w-full outline-none"
         />
       </div>
     </div>

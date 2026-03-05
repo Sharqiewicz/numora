@@ -21,6 +21,16 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://numora.xyz/docs/numora/features/value-types</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://numora.xyz/docs/numora/features/mobile</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://numora.xyz/docs/numora/features/decimals</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -51,11 +61,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora/features/number-precision-safety</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://numora.xyz/docs/numora/features/subscript-notation</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -72,6 +77,16 @@
   </url>
   <url>
     <loc>https://numora.xyz/docs/numora-react/features/formatting</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://numora.xyz/docs/numora-react/features/value-types</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://numora.xyz/docs/numora-react/features/mobile</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -102,11 +117,6 @@
   </url>
   <url>
     <loc>https://numora.xyz/docs/numora-react/features/leading-zeros</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://numora.xyz/docs/numora-react/features/number-precision-safety</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

@@ -28,7 +28,7 @@ export function TokenSelector({
   }
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full min-w-[110px]">
       <button
         type="button"
         className={`flex w-full items-center rounded-lg p-1.5 cursor-pointer focus:outline-none relative z-40 bg-black hover:bg-[#23272b] border border-[#23272b] hover:border-[#363b3f] focus:border-[#5b2ff5] focus:shadow-[0_0_0_3px_rgba(91,47,245,0.1)] text-white ${
@@ -39,11 +39,11 @@ export function TokenSelector({
         <img
           src={selectedToken.logoImg}
           alt={selectedToken.symbol}
-          className="w-7 h-7 rounded-full mr-3"
+          className="w-6 h-6 sm:w-7 sm:h-7 rounded-full mr-3"
         />
-        <span className="font-semibold text-base text-white mr-1 text-gray-900">
+        <p className="font-semibold sm:text-base text-sm text-white mr-1 text-gray-900">
           {selectedToken.symbol}
-        </span>
+        </p>
         <svg
           width="20"
           height="20"
@@ -87,7 +87,7 @@ export function TokenSelector({
               alt={token.symbol}
               className="w-5 h-5 rounded-full mr-2"
             />
-            <span className="font-semibold text-base text-white mr-1 text-gray-900">
+            <span className="font-semibold text-sm sm:text-base text-white mr-1 text-gray-900">
               {token.symbol}
             </span>
           </button>

@@ -1,4 +1,4 @@
-import { createPublicClient, http, formatUnits } from 'viem';
+import { createPublicClient, http, formatUnits, getAddress } from 'viem';
 import { mainnet, base } from 'viem/chains';
 import { PRICE_FEEDS, PRICE_FEED_ABI, type NetworkName } from '../constants/priceFeeds';
 import type { TokenSymbol } from '../constants/tokens';
@@ -22,6 +22,20 @@ const clients = {
   }),
 };
 
+const WSTETH_CONTRACT = {
+  mainnet: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
+} as const;
+
+const WSTETH_ABI = [
+  {
+    inputs: [],
+    name: 'stEthPerToken',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const;
+
 export async function fetchPrice(symbol: TokenSymbol, network: NetworkName): Promise<number> {
   try {
     const feedAddress = PRICE_FEEDS[network][symbol];
@@ -29,7 +43,7 @@ export async function fetchPrice(symbol: TokenSymbol, network: NetworkName): Pro
 
     const client = clients[network];
     const data = await client.readContract({
-      address: feedAddress as `0x${string}`,
+      address: getAddress(feedAddress),
       abi: PRICE_FEED_ABI,
       functionName: 'latestRoundData',
     });
@@ -42,15 +56,37 @@ export async function fetchPrice(symbol: TokenSymbol, network: NetworkName): Pro
   }
 }
 
+async function fetchWstETHPrice(ethPrice: number, network: NetworkName): Promise<number> {
+  try {
+    if (network === 'base') {
+      return fetchPrice('wstETH', network);
+    }
+
+    const client = clients.mainnet;
+    const stEthPerToken = await client.readContract({
+      address: getAddress(WSTETH_CONTRACT.mainnet),
+      abi: WSTETH_ABI,
+      functionName: 'stEthPerToken',
+    });
+
+    const ratio = Number(formatUnits(stEthPerToken, 18));
+    return ethPrice * ratio;
+  } catch (err) {
+    console.error(`Error fetching wstETH price on ${network}:`, err);
+    return 0;
+  }
+}
+
 export async function fetchAllTokenPrices(network: NetworkName): Promise<PriceData> {
-  const [ethPrice, usdcPrice, cbBTCPrice, wstETHPrice, eurcPrice] =
+  const [ethPrice, usdcPrice, cbBTCPrice, eurcPrice] =
     await Promise.all([
       fetchPrice('ETH', network),
       fetchPrice('USDC', network),
       fetchPrice('cbBTC', network),
-      fetchPrice('wstETH', network),
       fetchPrice('EURC', network),
     ]);
+
+  const wstETHPrice = await fetchWstETHPrice(ethPrice, network);
 
   return {
     ETH: ethPrice,

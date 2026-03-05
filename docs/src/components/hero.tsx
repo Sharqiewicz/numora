@@ -1,31 +1,23 @@
-export function Hero() {
-  return (
-    <>
-      {/* <p
-        className="
-          animate-fade-in-out text-center opacity-0 absolute top-14 sm:top-1/12
-          left-1/2 -translate-x-1/2 text-lg text-muted-foreground
-          tracking-wide
-        "
-      >
-        Stop reinventing the wheel.
-      </p>
+interface HeroProps {
+  delay?: number;
+  skipIntro?: boolean;
+}
 
-      <p
-        className="
-          animate-fade-in-out delay-[1.2s] text-center opacity-0 absolute top-14 sm:top-1/12
-          left-1/2 -translate-x-1/2 text-lg text-muted-foreground
-          tracking-wide
-        "
-      >
-        just use...
-      </p> */}
-      <div
-        className="
-          absolute top-14 sm:top-1/12 left-1/2 -translate-x-1/2
-          animate-fade-in opacity-0
-        "
-      >
+export function Hero({ delay = 0, skipIntro = false }: HeroProps) {
+  const outerStyle = skipIntro
+    ? { animation: 'none', opacity: 1 }
+    : { animationDelay: `${delay}ms` };
+
+  const underlineStyle = skipIntro
+    ? { transform: 'scaleX(1)', transformOrigin: 'center' }
+    : { animationDelay: '0.5s' };
+
+  return (
+    <div
+      className="flex flex-col items-center gap-3 text-center animate-fade-in opacity-0"
+      style={outerStyle}
+    >
+      <div>
         <h1
           className="
             font-numora text-5xl text-white
@@ -36,21 +28,21 @@ export function Hero() {
         </h1>
         <div
           className="
-            h-[2px] w-0 mx-auto mt-1
+            h-[2px] w-full mx-auto mt-1
             bg-gradient-to-r from-transparent via-secondary to-transparent
-            animate-[expand_0.6s_ease-out_3s_forwards]
+            animate-expand-line
           "
+          style={underlineStyle}
         />
       </div>
       <p
         className="
-          text-center animate-fade-in opacity-0
-          text-muted-foreground max-w-lg leading-relaxed
+          [text-wrap:balance] text-muted-foreground max-w-lg leading-relaxed
         "
       >
         Numeric inputs are broken. <strong className="font-numora text-foreground">numora</strong> fixes them.
       </p>
-    </>
+    </div>
   );
 }
 

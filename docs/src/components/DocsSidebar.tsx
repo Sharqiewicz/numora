@@ -4,12 +4,14 @@ import {
   Download,
   Shield,
   Type,
-  Lock,
   Dot,
   Minimize2,
   FunctionSquare,
   Hash,
   Plug,
+  Workflow,
+  FileDigit,
+  Smartphone,
 } from 'lucide-react'
 import {
   SidebarContent,
@@ -38,6 +40,11 @@ const navigation = [
         href: '/docs/installation',
         icon: Download,
       },
+      {
+        title: 'How it works',
+        href: '/docs/numora/how-it-works',
+        icon: Workflow,
+      },
     ],
   },
   {
@@ -54,9 +61,9 @@ const navigation = [
         icon: Type,
       },
       {
-        title: 'Number Precision Safety',
-        href: '/docs/features/number-precision-safety',
-        icon: Lock,
+        title: 'Value Types',
+        href: '/docs/features/value-types',
+        icon: FileDigit,
       },
       {
         title: 'Decimals',

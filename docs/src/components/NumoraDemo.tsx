@@ -1,8 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { FormatOn, ThousandStyle } from 'numora';
 import { NumoraInput } from 'numora-react';
-import { useEffect, useRef, useState } from 'react';
-import { useScrollReveal } from '@/hooks/use-scroll-reveal';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 
 const SLIDE_DURATION = 4000;
 const TYPING_DELAY = 80;
@@ -17,33 +16,56 @@ interface Slide {
   demoValue: string;
   description: string;
   isPaste?: boolean;
-  typingSequence?: string[]; // overrides char-by-char demoValue typing; '\b' = backspace
+  typingSequence?: string[];
   video?: string;
   videoLabel?: string;
 }
 
 const SLIDES: Slide[] = [
   {
+    id: 'scientific',
+    category: 'prevents',
+    label: 'Scientific Notation',
+    demoValue: '10000000000000000000000000000000000',
+    description: 'Keeps large numbers in decimal - no 1e+21 surprises',
+    video: '/videos/scientific-notation.mp4',
+    videoLabel: 'scientific notation bug',
+  },
+  {
+    id: 'cursor',
+    category: 'prevents',
+    label: 'Cursor Jumping',
+    demoValue: '1234567.89',
+    description: 'Cursor stays where you type - never jumps randomly.',
+    video: '/videos/cursor-jump.mp4',
+    videoLabel: 'cursor jump',
+  },
+  {
+    id: 'paste',
+    category: 'prevents',
+    label: 'Paste Sanitization',
+    demoValue: '',
+    description: 'Dirty copy-paste values are cleaned automatically.',
+    video: '/videos/paste.mp4',
+    videoLabel: 'unhandled paste',
+  },
+  {
     id: 'thousands',
     category: 'features',
     label: 'Thousand Format',
-    demoValue: '1234567.89',
+    demoValue: '12345',
     description: 'Format on every keystroke or on blur - your choice',
+    video: '/videos/format.mp4',
+    videoLabel: 'format on change or on blur',
   },
   {
     id: 'compact',
     category: 'features',
     label: 'Compact Notation',
-    demoValue: '100000',
-    typingSequence: [
-      '0','.','0','0','0','1',  // type 0.0001
-      'k',                       // 0.0001k → 0.1
-      '\b',                      // back to 0.0001
-      'm',                       // 0.0001m → 100
-      '\b',                      // back to 0.0001
-      'b',                       // 0.0001b → 100,000
-    ],
-    description: 'Type 1k, 1.5m or 2b — compact notation expands automatically',
+    demoValue: '1',
+    description: 'Type 1k, 1.5m or 2b - compact notation expands automatically',
+    video: '/videos/compact.mp4',
+    videoLabel: 'compact notation',
   },
   {
     id: 'regional',
@@ -57,50 +79,21 @@ const SLIDES: Slide[] = [
     category: 'features',
     label: 'Locale Auto-Detection',
     demoValue: '1234567.89',
-    description: 'Separators auto-resolved from browser locale via Intl.NumberFormat',
+    description: 'Separators auto-resolved via Intl.NumberFormat',
   },
-  {
-    id: 'paste',
-    category: 'prevents',
-    label: 'Paste Sanitization',
-    demoValue: '1 234 567.89',
-    description: 'Dirty copy-paste values are cleaned automatically',
-    isPaste: true,
-    video: '/videos/paste.mp4',
-    videoLabel: 'DeFi dApp - unhandled paste',
-  },
-  {
-    id: 'scientific',
-    category: 'prevents',
-    label: 'Scientific Notation',
-    demoValue: '1000000000000000000000',
-    description: 'Keeps large numbers in decimal - no 1e+21 surprises',
-    video: '/videos/scientific-notation.mp4',
-    videoLabel: 'DeFi dApp - scientific notation bug',
-  },
-  {
-    id: 'cursor',
-    category: 'prevents',
-    label: 'Cursor Jumping',
-    demoValue: '1234567',
-    typingSequence: ['1','2','3','4','5','6','7','\b','\b','\b','8','9','0'],
-    description: 'Cursor stays where you type - never sent to the end',
-    video: '/videos/cursor-jump.mp4',
-    videoLabel: 'DeFi dApp - cursor jump',
-  },
+
 ];
 
 const inputClass =
   'w-full bg-transparent text-xl font-mono text-white placeholder-[#383c41] focus:outline-none text-right py-3 tracking-wide';
 
-export function NumoraDemo() {
+export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const { ref: sectionRef, isVisible } = useScrollReveal({ threshold: 0.1 });
   const shouldReduceMotion = useReducedMotion();
 
   const slide = SLIDES[activeSlide];
@@ -180,14 +173,11 @@ export function NumoraDemo() {
     setIsPlaying(true);
   };
 
-  const isPreventsSlide = slide.category === 'prevents';
+  const hasVideo = !!slide.video;
 
   return (
-    <div ref={sectionRef} className="pt-4 pb-8 w-full max-w-sm mx-auto">
-      <div
-        className={`space-y-3 scroll-reveal ${isVisible ? 'is-visible' : ''}`}
-        style={{ transitionDelay: '0.1s' }}
-      >
+    <div className="pt-4 pb-8 w-full max-w-lg mx-auto animate-fade-in opacity-0" style={style}>
+      <div className="space-y-3">
         {/* Input card */}
         <div className="rounded-2xl border border-[#23272b] bg-[#181a1b] overflow-hidden px-4 py-0">
           <NumoraInput
@@ -222,10 +212,9 @@ export function NumoraDemo() {
           );
         })()}
 
-        {/* Video card (prevents slides only) */}
         <div
           className={`transition-opacity transition-[max-height] duration-300 overflow-hidden ${
-            isPreventsSlide ? 'opacity-100 h-52 rounded-lg' : 'opacity-0 max-h-0'
+            hasVideo ? 'opacity-100 h-52 sm:h-72 rounded-lg' : 'opacity-0 max-h-0'
           }`}
         >
           {slide.video ? (
@@ -236,7 +225,7 @@ export function NumoraDemo() {
               muted
               playsInline
               onLoadedMetadata={(e) => setVideoDuration(Math.round(e.currentTarget.duration * 1000))}
-              className="w-full"
+              className="w-full sm:w-auto mx-auto sm:h-full"
             >
               <source src={slide.video} type="video/mp4" />
             </video>
@@ -265,13 +254,12 @@ export function NumoraDemo() {
                 {isActive && (
                   <motion.div
                     layoutId="slide-active-bg"
-                    className="absolute inset-0 rounded-xl bg-[#23272b]"
+                    className="absolute inset-0 rounded-xl bg-[#23272b] z-[3]"
                     transition={{ duration: 0.22, ease: [0.215, 0.61, 0.355, 1] }}
                   />
                 )}
 
-                <div className="relative flex items-center gap-2">
-                  {/* Icon crossfade between active/inactive */}
+                <div className="relative flex items-center gap-2 z-[5]">
                   <span className="relative w-3 h-3.5 shrink-0 flex items-center justify-center">
                     <AnimatePresence mode="wait" initial={false}>
                       <motion.span
@@ -289,20 +277,20 @@ export function NumoraDemo() {
                     </AnimatePresence>
                   </span>
 
-                  <span
-                    className={`text-sm flex-1 ${isActive ? 'text-white' : 'text-muted-foreground/60'}`}
+                  <p
+                    className={`text-sm  z-[5] flex-1 ${isActive ? 'text-white' : 'text-muted-foreground/60'}`}
                   >
                     {s.label}
-                  </span>
-                  <span
-                    className={`text-xs px-1.5 py-0.5 rounded-full ${
+                  </p>
+                  <div
+                    className={`text-xs px-1.5 py-0.5  z-[5] rounded-full ${
                       s.category === 'prevents'
                         ? 'text-yellow-400/70 bg-yellow-400/10'
                         : 'text-secondary/70 bg-secondary/10'
                     }`}
                   >
                     {s.category}
-                  </span>
+                  </div>
                 </div>
 
                 {/* Description animates in/out - popLayout pops it from flow on exit
@@ -315,7 +303,7 @@ export function NumoraDemo() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={shouldReduceMotion ? {} : { opacity: 0, y: -4 }}
                       transition={{ duration: 0.18, ease: [0.215, 0.61, 0.355, 1] }}
-                      className="relative text-xs text-muted-foreground/60 mt-1 pl-5"
+                      className="relative text-xs text-muted-foreground/60 mt-1 pl-5 z-[5]"
                     >
                       {s.description}
                     </motion.p>
@@ -356,7 +344,7 @@ export function NumoraDemo() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={shouldReduceMotion ? {} : { opacity: 0, scale: 0.6 }}
                 transition={{ duration: 0.15, ease: [0.215, 0.61, 0.355, 1] }}
-                className="text-[10px] leading-none select-none"
+                className={`text-[10px] leading-none select-none ${isPlaying ? 'ml-0': 'ml-0.5'}`}
               >
                 {isPlaying ? '⏸' : '▶'}
               </motion.span>

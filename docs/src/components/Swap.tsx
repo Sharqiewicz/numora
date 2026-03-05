@@ -1,4 +1,4 @@
-import { NumoraInput } from 'numora-react';
+import { NumoraHTMLInputElement, NumoraInput } from 'numora-react';
 import { FormatOn, ThousandStyle } from 'numora';
 import { useEffect, useState } from 'react';
 import { useTRPC } from '@/integrations/trpc/react';
@@ -27,48 +27,20 @@ export function Swap() {
 
   const effectiveFromDecimals = fromToken.decimals;
   const effectiveToDecimals = toToken.decimals;
-  const effectiveFromPlaceholder = '0.0';
-  const effectiveToPlaceholder = '0.0';
 
   useEffect(() => {
     if (!prices || !fromToken || !toToken) return;
 
-    if (lastEdited === 'from' && fromAmount && +fromAmount > 0) {
-      const calculated = calculateSwapAmount(
-        fromAmount,
-        fromToken.symbol as any,
-        toToken.symbol as any,
-        prices,
-        effectiveToDecimals
-      );
-      setToAmount(limitDecimals(calculated, effectiveToDecimals));
+    if (lastEdited !== 'to' && fromAmount && +fromAmount > 0) {
+      setToAmount(calculateSwapAmount(fromAmount, fromToken.symbol as any, toToken.symbol as any, prices, effectiveToDecimals));
     } else if (lastEdited === 'to' && toAmount && +toAmount > 0) {
-      const calculated = calculateReverseSwapAmount(
-        toAmount,
-        fromToken.symbol as any,
-        toToken.symbol as any,
-        prices,
-        effectiveFromDecimals
-      );
-      setFromAmount(limitDecimals(calculated, effectiveFromDecimals));
-    } else if (!lastEdited && fromAmount && +fromAmount > 0) {
-      const calculated = calculateSwapAmount(
-        fromAmount,
-        fromToken.symbol as any,
-        toToken.symbol as any,
-        prices,
-        effectiveToDecimals
-      );
-      setToAmount(limitDecimals(calculated, effectiveToDecimals));
-    } else if (!fromAmount && !toAmount) {
-      setFromAmount('');
-      setToAmount('');
+      setFromAmount(calculateReverseSwapAmount(toAmount, fromToken.symbol as any, toToken.symbol as any, prices, effectiveFromDecimals));
     }
   }, [fromAmount, toAmount, lastEdited, prices, fromToken, toToken, effectiveFromDecimals, effectiveToDecimals]);
 
   const priceInfo =
     isLoading
-      ? 'Loading prices...'
+      ? 'Loading prices…'
       : !prices
         ? 'Failed to fetch prices'
         : fromAmount && +fromAmount > 0
@@ -95,33 +67,13 @@ export function Swap() {
     }
   }
 
-  function limitDecimals(value: string, maxDecimals: number): string {
-    if (!value || value === '') return '';
-
-    const numValue = parseFloat(value);
-    if (isNaN(numValue)) return '';
-
-    const parts = value.split('.');
-    if (parts.length === 1) {
-      return value;
-    }
-
-    const decimalPart = parts[1];
-
-    if (decimalPart.length <= maxDecimals) {
-      return value;
-    }
-
-    return numValue.toFixed(maxDecimals);
-  }
-
-  function handleFromInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setFromAmount(e.target.value);
+  function handleFromInputChange(e: React.ChangeEvent<NumoraHTMLInputElement>) {
+    setFromAmount(e.target.rawValue ?? '');
     setLastEdited('from');
   }
 
-  function handleToInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setToAmount(e.target.value);
+  function handleToInputChange(e: React.ChangeEvent<NumoraHTMLInputElement>) {
+    setToAmount(e.target.rawValue ?? '');
     setLastEdited('to');
   }
 
@@ -141,11 +93,11 @@ export function Swap() {
   }
 
   return (
-    <div className="flex items-center flex-col justify-center sm:w-[460px]">
+    <div className="flex items-center flex-col justify-center sm:w-[460px] px-4 sm:p-0">
       <div className="relative p-4 rounded-xl sm:border bg-[#181a1b] border-[#23272b] w-full">
         <div className="w-full flex justify-end">
           <button
-            className="px-3 py-1 rounded-xl mb-2 cursor-pointer transition-transform duration-200 border active:scale-105 bg-[#181a1b] border-[#23272b] hover:bg-[#23272b] border-[#363b3f]hover:bg-gray-200"
+            className="px-3 py-1 rounded-xl mb-2 cursor-pointer transition-transform duration-200 border active:scale-105 bg-[#181a1b] border-[#23272b] hover:bg-[#23272b] border-[#363b3f] focus-visible:ring-2 focus-visible:ring-[#5b2ff5] focus-visible:outline-none"
             aria-label="Slippage settings"
           >
             <svg
@@ -154,6 +106,7 @@ export function Swap() {
               height="24"
               viewBox="0 0 24 24"
               fill="none"
+              aria-hidden="true"
             >
               <path
                 d="M11.0195 3.55153C11.6283 3.20907 12.3717 3.20907 12.9805 3.55153L18.9805 6.92649C19.6103 7.28073 20 7.9471 20 8.66965V15.3302C20 16.0528 19.6103 16.7192 18.9805 17.0734L12.9805 20.4484C12.3717 20.7908 11.6283 20.7908 11.0195 20.4484L5.01954 17.0737C4.38975 16.7195 4 16.0531 4 15.3305L4 8.66963C4 7.94707 4.38973 7.2807 5.01949 6.92647L11.0195 3.55153Z"
@@ -173,18 +126,21 @@ export function Swap() {
           </button>
         </div>
 
-        <div className="!mt-0 flex items-center gap-2 p-2 border rounded-t-xl bg-[#23272b] border-[#363b3f] hover:bg-[#34383b]">
+        <div className="group !mt-0 flex items-center gap-2 p-2 border rounded-t-xl bg-[#23272b] border-[#363b3f] hover:bg-[#34383b] [&:has(:focus-visible)]:ring-2 [&:has(:focus-visible)]:ring-[#5b2ff5]">
+          <label htmlFor="fromAmount" className="sr-only">From amount</label>
           <NumoraInput
             id="fromAmount"
             name="fromAmount"
             className="flex bg-transparent text-2xl my-3 focus:outline-none text-white placeholder-[#a0a3c4]"
-            placeholder={effectiveFromPlaceholder}
+            placeholder="0.0"
             value={fromAmount}
-            onChange={(e) => handleFromInputChange(e as React.ChangeEvent<HTMLInputElement>)}
+            onChange={(e) => handleFromInputChange(e as React.ChangeEvent<NumoraHTMLInputElement>)}
             maxDecimals={effectiveFromDecimals}
             formatOn={FormatOn.Change}
-            thousandStyle={ThousandStyle.None}
+            thousandStyle={ThousandStyle.Thousand}
             enableCompactNotation={true}
+            rawValueMode
+
           />
           <TokenSelector
             label="From"
@@ -196,12 +152,12 @@ export function Swap() {
           />
         </div>
 
-        <div className="absolute border rounded-full border-[#363b3f] left-1/2 top-[37%] -translate-x-1/2 -translate-y-1/2 flex justify-center my-2">
+        <div className="absolute border rounded-full border-[#363b3f] left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 flex justify-center my-2">
           <button
-            className="p-2 rounded-full border cursor-pointer transition-transform duration-200 bg-[#181a1b] border-[#23272b] text-[#a0a3c4] hover:bg-[#30363b] hover:border-[#484e54] hover:rotate-180"
+            className="p-2 rounded-full border cursor-pointer transition-transform duration-200 bg-[#181a1b] border-[#23272b] text-[#a0a3c4] hover:bg-[#30363b] hover:border-[#484e54] motion-safe:hover:rotate-180 focus-visible:ring-2 focus-visible:ring-[#5b2ff5] focus-visible:outline-none"
             onClick={flipTokens}
             type="button"
-            aria-label="Swap tokens"
+            aria-label="Flip tokens"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -209,6 +165,7 @@ export function Swap() {
               height="24"
               viewBox="0 0 24 25"
               fill="none"
+              aria-hidden="true"
             >
               <path
                 d="M18 14.5L12 20.5L6 14.5M12 19.5V4.5"
@@ -221,19 +178,20 @@ export function Swap() {
           </button>
         </div>
 
-        <div className="!mt-0 flex items-center gap-2 p-2 border border-t-0 rounded-b-xl bg-[#23272b] border-[#363b3f] hover:bg-[#34383b]">
+        <div className="group mt-0.5  flex items-center gap-2 p-2 border  rounded-b-xl bg-[#23272b] border-[#363b3f] hover:bg-[#34383b] [&:has(:focus-visible)]:ring-2 [&:has(:focus-visible)]:ring-[#5b2ff5]">
+          <label htmlFor="toAmount" className="sr-only">To amount</label>
           <NumoraInput
             id="toAmount"
             name="toAmount"
             className="flex bg-transparent border-none text-2xl my-3 focus:outline-none text-white placeholder-[#a0a3c4]"
-            placeholder={effectiveToPlaceholder}
+            placeholder="0.0"
             value={toAmount}
             onChange={(e) => handleToInputChange(e as React.ChangeEvent<HTMLInputElement>)}
             maxDecimals={effectiveToDecimals}
             formatOn={FormatOn.Change}
-            thousandSeparator=","
             thousandStyle={ThousandStyle.Thousand}
             enableCompactNotation={true}
+            rawValueMode
           />
           <TokenSelector
             label="To"
@@ -245,15 +203,20 @@ export function Swap() {
           />
         </div>
 
-        <div className="mt-2 text-sm text-center text-[#a0a3c4] text-gray-500 mb-6">
+        <div
+          className="mt-2 text-sm text-center text-[#a0a3c4] text-gray-500 mb-6"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           {priceInfo}
         </div>
         <button
-          type='button'
-          className=" active:scale-102 w-full py-3 font-bold rounded-xl text-base text-white border-none cursor-pointer transition-transform duration-200 bg-[#5b2ff5] disabled:bg-[#c4b5fd] disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#4520b4] disabled:bg-[#3b1f7a] disabled:text-white disabled:opacity-100"
+          type="button"
+          className="active:scale-95 w-full py-3 font-bold rounded-xl text-base text-white border-none cursor-pointer transition-transform duration-200 bg-[#5b2ff5] disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#4520b4] disabled:bg-[#3b1f7a] disabled:text-white disabled:opacity-100 focus-visible:ring-2 focus-visible:ring-[#5b2ff5] focus-visible:ring-offset-2 focus-visible:ring-offset-[#181a1b] focus-visible:outline-none"
           onClick={handleSwap}
+          disabled={isLoading}
         >
-          {isLoading ? 'Loading...' : 'Swap'}
+          {isLoading ? 'Loading…' : 'Swap'}
         </button>
       </div>
       <p className="w-full text-center text-sm mt-4">
