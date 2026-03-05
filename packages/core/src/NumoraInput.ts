@@ -7,6 +7,7 @@ import { formatWithSeparators } from '@/features/formatting';
 import { removeThousandSeparators } from '@/features/sanitization';
 import { escapeRegExp } from '@/utils/escape-reg-exp';
 import { getNumoraPattern } from '@/utils/input-pattern';
+import { getSeparatorsFromLocale } from '@/utils/locale';
 import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_DECIMAL_MIN_LENGTH, DEFAULT_RAW_VALUE_MODE, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_THOUSAND_STYLE } from './config';
 import { FormatOn, ThousandStyle, FormattingOptions } from './types';
 import { validateNumoraInputOptions } from './validation';
@@ -56,8 +57,6 @@ export interface NumoraInputOptions extends Partial<Omit<HTMLInputElement, 'valu
 export class NumoraInput {
   private element!: HTMLInputElement;
 
-  private options: NumoraInputOptions;
-
   private resolvedOptions: ResolvedNumoraOptions;
 
   private rawValue: string = '';
@@ -74,9 +73,9 @@ export class NumoraInput {
       decimalMaxLength = DEFAULT_DECIMAL_MAX_LENGTH,
       decimalMinLength = DEFAULT_DECIMAL_MIN_LENGTH,
       formatOn = DEFAULT_FORMAT_ON,
-      thousandSeparator = DEFAULT_THOUSAND_SEPARATOR,
+      thousandSeparator,
       thousandStyle = DEFAULT_THOUSAND_STYLE,
-      decimalSeparator = DEFAULT_DECIMAL_SEPARATOR,
+      decimalSeparator,
       enableCompactNotation = DEFAULT_ENABLE_COMPACT_NOTATION,
       enableNegative = DEFAULT_ENABLE_NEGATIVE,
       enableLeadingZeros = DEFAULT_ENABLE_LEADING_ZEROS,
@@ -100,7 +99,7 @@ export class NumoraInput {
       onChange,
     });
 
-    this.options = {
+    const options: NumoraInputOptions = {
       decimalMaxLength,
       decimalMinLength,
       onChange,
@@ -115,9 +114,9 @@ export class NumoraInput {
       ...rest,
     };
 
-    this.resolvedOptions = this.getResolvedOptions();
+    this.resolvedOptions = this.getResolvedOptions(options);
 
-    this.createInputElement(container);
+    this.createInputElement(container, options);
     this.setupEventListeners();
 
     // Initialize raw value if rawValueMode is enabled and element has initial value
@@ -138,7 +137,7 @@ export class NumoraInput {
     }
   }
 
-  private createInputElement(container: HTMLElement): void {
+  private createInputElement(container: HTMLElement, options: NumoraInputOptions): void {
     this.element = document.createElement('input');
 
     // These attributes are REQUIRED for Numora to work correctly and must not be overridden:
@@ -176,7 +175,7 @@ export class NumoraInput {
       spellcheck,
       autocomplete,
       ...nativeProps
-    } = this.options;
+    } = options;
 
     Object.assign(this.element, nativeProps);
 
@@ -203,19 +202,41 @@ export class NumoraInput {
     }
   }
 
-  private getResolvedOptions(): ResolvedNumoraOptions {
+  private getResolvedOptions(options: NumoraInputOptions): ResolvedNumoraOptions {
+    let thousandSeparator = options.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR;
+    let decimalSeparator  = options.decimalSeparator  ?? DEFAULT_DECIMAL_SEPARATOR;
+    let thousandStyle     = options.thousandStyle     ?? DEFAULT_THOUSAND_STYLE;
+
+    const needsLocale =
+      options.thousandStyle === ThousandStyle.Locale ||
+      options.decimalSeparator === 'auto';
+
+    if (needsLocale) {
+      const localeSeps = getSeparatorsFromLocale();
+      if (options.thousandStyle === ThousandStyle.Locale) {
+        thousandSeparator = options.thousandSeparator ?? localeSeps.thousandSeparator;
+        decimalSeparator  = options.decimalSeparator === 'auto' || options.decimalSeparator === undefined
+          ? localeSeps.decimalSeparator
+          : options.decimalSeparator;
+        thousandStyle = ThousandStyle.Thousand;
+      }
+      if (options.decimalSeparator === 'auto') {
+        decimalSeparator = localeSeps.decimalSeparator;
+      }
+    }
+
     return {
-      decimalMaxLength: this.options.decimalMaxLength ?? DEFAULT_DECIMAL_MAX_LENGTH,
-      decimalMinLength: this.options.decimalMinLength ?? DEFAULT_DECIMAL_MIN_LENGTH,
-      formatOn: this.options.formatOn ?? DEFAULT_FORMAT_ON,
-      thousandSeparator: this.options.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR,
-      thousandStyle: this.options.thousandStyle ?? DEFAULT_THOUSAND_STYLE,
-      decimalSeparator: this.options.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
-      enableCompactNotation: this.options.enableCompactNotation ?? DEFAULT_ENABLE_COMPACT_NOTATION,
-      enableNegative: this.options.enableNegative ?? DEFAULT_ENABLE_NEGATIVE,
-      enableLeadingZeros: this.options.enableLeadingZeros ?? DEFAULT_ENABLE_LEADING_ZEROS,
-      rawValueMode: this.options.rawValueMode ?? DEFAULT_RAW_VALUE_MODE,
-      onChange: this.options.onChange,
+      decimalMaxLength: options.decimalMaxLength ?? DEFAULT_DECIMAL_MAX_LENGTH,
+      decimalMinLength: options.decimalMinLength ?? DEFAULT_DECIMAL_MIN_LENGTH,
+      formatOn: options.formatOn ?? DEFAULT_FORMAT_ON,
+      thousandSeparator,
+      thousandStyle,
+      decimalSeparator,
+      enableCompactNotation: options.enableCompactNotation ?? DEFAULT_ENABLE_COMPACT_NOTATION,
+      enableNegative: options.enableNegative ?? DEFAULT_ENABLE_NEGATIVE,
+      enableLeadingZeros: options.enableLeadingZeros ?? DEFAULT_ENABLE_LEADING_ZEROS,
+      rawValueMode: options.rawValueMode ?? DEFAULT_RAW_VALUE_MODE,
+      onChange: options.onChange,
     };
   }
 
