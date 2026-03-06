@@ -340,9 +340,20 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={shouldReduceMotion ? {} : { opacity: 0, scale: 0.6 }}
                 transition={{ duration: 0.15, ease: [0.215, 0.61, 0.355, 1] }}
-                className={`text-[10px] leading-none select-none ${isPlaying ? 'ml-0': 'ml-0.5'}`}
+                className="leading-none select-none flex items-center justify-center"
               >
-                {isPlaying ? '⏸' : '▶'}
+                {isPlaying ? (
+
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                    <rect x="1" y="1" width="3" height="8" rx="0.5" />
+                    <rect x="6" y="1" width="3" height="8" rx="0.5" />
+                  </svg>
+                ) : ( <div className="ml-0.5">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                    <path d="M2 1.5 L9 5 L2 8.5 Z" />
+                  </svg>
+                  </div>
+                )}
               </motion.span>
             </AnimatePresence>
           </button>
