@@ -31,15 +31,14 @@ function LeadingZeros() {
           title="Removed (default)"
           description={'Try typing "007" - it becomes "7"'}
           language="tsx"
-          code={`<NumoraInput enableLeadingZeros={false} />`}
-          config={{ enableLeadingZeros: false, maxDecimals: 2 }}
+          code={`<NumoraInput />`}
         />
         <ExampleWithDemo
           title="Preserved"
           description={'Try typing "007" - it stays "007"'}
           language="tsx"
-          code={`<NumoraInput enableLeadingZeros={true} />`}
-          config={{ enableLeadingZeros: true, maxDecimals: 2 }}
+          code={`<NumoraInput enableLeadingZeros />`}
+          config={{ enableLeadingZeros: true }}
         />
       </div>
 

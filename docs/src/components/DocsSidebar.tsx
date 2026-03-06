@@ -12,6 +12,7 @@ import {
   Workflow,
   FileDigit,
   Smartphone,
+  Globe,
 } from 'lucide-react'
 import {
   SidebarContent,
@@ -69,6 +70,11 @@ const navigation = [
         title: 'Decimals',
         href: '/docs/features/decimals',
         icon: Dot,
+      },
+      {
+        title: 'Locale',
+        href: '/docs/features/locale',
+        icon: Globe,
       },
       {
         title: 'Compact Notation',

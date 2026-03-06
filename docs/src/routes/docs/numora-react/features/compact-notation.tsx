@@ -44,7 +44,7 @@ function CompactNotation() {
       <ExampleWithDemo
         description={'Paste "1k", "1.5m", "2B", or "2.5T" to see expansion'}
         language="tsx"
-        code={`<NumoraInput enableCompactNotation={true} maxDecimals={18} />`}
+        code={`<NumoraInput enableCompactNotation maxDecimals={18} />`}
         config={{ enableCompactNotation: true, maxDecimals: 18 }}
       />
 

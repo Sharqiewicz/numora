@@ -178,11 +178,12 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
   return (
     <div className="pt-4 pb-8 w-full max-w-lg mx-auto animate-fade-in opacity-0" style={style}>
       <div className="space-y-3">
-        {/* Input card */}
+
         <div className="rounded-2xl border border-[#23272b] bg-[#181a1b] overflow-hidden px-4 py-0">
           <NumoraInput
             ref={inputRef}
-            thousandSeparator=","
+            locale={slide.id === "locale" ? true : undefined}
+            thousandSeparator={slide.id === "locale" ? undefined : ","}
             thousandStyle={slide.id === 'regional' ? ThousandStyle.Lakh : ThousandStyle.Thousand}
             formatOn={FormatOn.Change}
             maxDecimals={2}
@@ -192,7 +193,6 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
           />
         </div>
 
-        {/* Progress bar */}
         {(() => {
           const progressDuration = slide.video ? videoDuration : SLIDE_DURATION;
           return (
@@ -236,7 +236,6 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
           )}
         </div>
 
-        {/* Slide list */}
         <div className="space-y-0.5">
           {SLIDES.map((s, index) => {
             const isActive = index === activeSlide;
@@ -293,8 +292,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                   </div>
                 </div>
 
-                {/* Description animates in/out - popLayout pops it from flow on exit
-                    so motion.button immediately measures its new (smaller) height */}
+
                 <AnimatePresence mode="popLayout" initial={false}>
                   {isActive && (
                     <motion.p
@@ -314,7 +312,6 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
           })}
         </div>
 
-        {/* Dot navigation + pause/play */}
         <div className="flex items-center justify-center gap-3 pt-1">
           <div className="flex items-center gap-1.5">
             {SLIDES.map((_, index) => (
@@ -331,7 +328,6 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
             ))}
           </div>
 
-          {/* Icon-only pause/play button */}
           <button
             onClick={() => setIsPlaying((prev) => !prev)}
             aria-label={isPlaying ? 'Pause' : 'Play'}

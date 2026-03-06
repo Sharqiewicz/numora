@@ -47,45 +47,6 @@ const numoraInput = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2>Decimal Separator Handling</h2>
-      <p>
-        Numora uses two complementary layers to prevent multiple decimal separators:
-      </p>
-      <ul>
-        <li>
-          <strong>Keydown prevention</strong> - When a user types a second decimal separator,
-          it is blocked immediately before the value changes. This is the primary guard for
-          keyboard input.
-        </li>
-        <li>
-          <strong>Sanitization cleanup</strong> - If multiple separators reach the value anyway
-          (e.g., via paste), only the first is kept and the rest are removed. This is the
-          fallback for pasted input.
-        </li>
-      </ul>
-      <p>
-        Note: comma/dot conversion (typing <code>.</code> when the separator is{' '}
-        <code>,</code>) is also handled at keydown time, not in the sanitization pipeline.
-        This prevents accidental conversion of thousand separators during paste.
-      </p>
-
-      <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
-
-const numoraInput = new NumoraInput(container, {
-  decimalSeparator: '.',
-  decimalMaxLength: 2,
-  // Keydown: typing '.' a second time does nothing
-  // Paste: "12.34.56" → "12.3456" (sanitization removes extras)
-})`}
-      </CodeBlock>
-
-      <h2>Leading Zeros</h2>
-      <p>
-        By default, Numora removes leading zeros to normalize values. You can enable leading zeros
-        if needed. <Link to="/docs/numora/how-it-works" className="underline">Leading zeros docs</Link>
-      </p>
-
       <h2>removeThousandSeparators</h2>
       <p>
         Numora exports a standalone <code>removeThousandSeparators</code> utility for stripping

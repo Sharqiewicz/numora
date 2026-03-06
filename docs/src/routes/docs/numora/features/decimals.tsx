@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
 
 export const Route = createFileRoute('/docs/numora/features/decimals')({
@@ -43,41 +43,23 @@ const input = new NumoraInput(container, {
 
       <h2>Separators</h2>
       <CodeBlock language="typescript">
-{`import { NumoraInput, ThousandStyle } from 'numora'
+{`import { NumoraInput } from 'numora'
 
 // European format
 const input = new NumoraInput(container, {
   decimalSeparator: ',',
   thousandSeparator: '.',
   // "1234.56" → "1.234,56"
-})
-
-// Locale auto-detection - resolves both separators from the browser locale
-const input = new NumoraInput(container, {
-  thousandStyle: ThousandStyle.Locale,
-  // de-DE → thousandSeparator: '.', decimalSeparator: ','
-  // en-US → thousandSeparator: ',', decimalSeparator: '.'
-  // fr-FR → thousandSeparator: ' ', decimalSeparator: ','
-})
-
-// Auto-detect only the decimal separator
-const input = new NumoraInput(container, {
-  decimalSeparator: 'auto',
 })`}
       </CodeBlock>
 
       <p>
-        Use <code>getSeparatorsFromLocale</code> to pre-compute separators for a specific locale:
+        For locale-aware separator detection, see{' '}
+        <Link to="/docs/numora/features/locale" className="text-primary underline">
+          Locale
+        </Link>
+        .
       </p>
-
-      <CodeBlock language="typescript">
-{`import { NumoraInput, getSeparatorsFromLocale } from 'numora'
-
-const { thousandSeparator, decimalSeparator } = getSeparatorsFromLocale('de-DE')
-// → { thousandSeparator: '.', decimalSeparator: ',' }
-
-const input = new NumoraInput(container, { thousandSeparator, decimalSeparator })`}
-      </CodeBlock>
 
       <h2>Automatic behaviors</h2>
       <ul>

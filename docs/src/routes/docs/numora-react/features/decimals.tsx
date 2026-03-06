@@ -1,6 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { CodeBlock } from '@/components/CodeBlock'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
+import { FormatOn } from 'numora'
 
 export const Route = createFileRoute('/docs/numora-react/features/decimals')({
   head: () => ({
@@ -44,36 +44,23 @@ function Decimals() {
       </div>
 
       <h2>Separators</h2>
-      <CodeBlock language="tsx">
-{`import { NumoraInput, ThousandStyle } from 'numora-react'
-
-// European format
-<NumoraInput decimalSeparator="," thousandSeparator="." />
-// "1234.56" → "1.234,56"
-
-// Locale auto-detection - resolves both separators from the browser locale
-<NumoraInput thousandStyle={ThousandStyle.Locale} />
-// de-DE → thousandSeparator: '.', decimalSeparator: ','
-// en-US → thousandSeparator: ',', decimalSeparator: '.'
-
-// Auto-detect only the decimal separator
-<NumoraInput decimalSeparator="auto" />`}
-      </CodeBlock>
+      <div className="space-y-4">
+        <ExampleWithDemo
+          title="European format"
+          description='Type a number - displayed as "1.234,56"'
+          language="tsx"
+          code={`<NumoraInput decimalSeparator="," thousandSeparator="." formatOn={FormatOn.Change} />`}
+          config={{ decimalSeparator: ',', thousandSeparator: '.', formatOn: FormatOn.Change }}
+        />
+      </div>
 
       <p>
-        Use <code>getSeparatorsFromLocale</code> from <code>numora</code> to pre-compute separators
-        for a specific locale:
+        For locale-aware separator detection, see{' '}
+        <Link to="/docs/numora-react/features/locale" className="text-primary underline">
+          Locale
+        </Link>
+        .
       </p>
-
-      <CodeBlock language="tsx">
-{`import { NumoraInput } from 'numora-react'
-import { getSeparatorsFromLocale } from 'numora'
-
-const { thousandSeparator, decimalSeparator } = getSeparatorsFromLocale('de-DE')
-// → { thousandSeparator: '.', decimalSeparator: ',' }
-
-<NumoraInput thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} />`}
-      </CodeBlock>
 
       <h2>Automatic behaviors</h2>
       <ul>

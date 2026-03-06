@@ -138,7 +138,7 @@ export function Swap() {
             maxDecimals={effectiveFromDecimals}
             formatOn={FormatOn.Change}
             thousandStyle={ThousandStyle.Thousand}
-            enableCompactNotation={true}
+            enableCompactNotation
             rawValueMode
 
           />
@@ -190,7 +190,7 @@ export function Swap() {
             maxDecimals={effectiveToDecimals}
             formatOn={FormatOn.Change}
             thousandStyle={ThousandStyle.Thousand}
-            enableCompactNotation={true}
+            enableCompactNotation
             rawValueMode
           />
           <TokenSelector
