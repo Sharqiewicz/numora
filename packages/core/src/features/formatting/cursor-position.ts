@@ -124,7 +124,7 @@ export function calculateCursorPositionAfterFormatting(
   decimalSeparator: string = '.',
   options: CursorPositionOptions = {}
 ): number {
-  // === GUARD CLAUSES: Handle edge cases ===
+
   if (oldCursorPosition < 0) {
     return 0;
   }
@@ -139,7 +139,6 @@ export function calculateCursorPositionAfterFormatting(
 
   // === SPECIAL CASE: Compact notation expansion ===
   // When compact notation expands (e.g., "1k" → "1000"), if cursor was at/near end, place at end
-  // Only match if old value matches compact notation pattern (number + suffix) and new value is expanded
   if (
     COMPACT_NOTATION_CURSOR_RE.test(oldFormattedValue) &&
     !COMPACT_NOTATION_CURSOR_RE.test(newFormattedValue) &&
@@ -152,7 +151,6 @@ export function calculateCursorPositionAfterFormatting(
   // === DETERMINE: Operation type (insertion vs deletion) ===
   const isDeletion = newFormattedValue.length < oldFormattedValue.length;
 
-  // === CAPTURE: Cursor state before change ===
   const wasOnSeparator = isPositionOnSeparator(
     oldFormattedValue,
     oldCursorPosition,
@@ -162,19 +160,22 @@ export function calculateCursorPositionAfterFormatting(
   const oldDecimalIndex = oldFormattedValue.indexOf(decimalSeparator);
   const newDecimalIndex = newFormattedValue.indexOf(decimalSeparator);
 
-  // Use character mapping approach if raw input is available and character equivalence is defined
   const useCharacterMapping =
     options.isCharacterEquivalent &&
     oldFormattedValue !== newFormattedValue;
 
   if (useCharacterMapping) {
+    const mergedOptions: CursorPositionOptions = {
+      thousandSeparator: separator || undefined,
+      ...options,
+    };
     const mappedPosition = calculateCursorPositionWithCharacterMapping(
       oldFormattedValue,
       newFormattedValue,
       oldCursorPosition,
       options.isCharacterEquivalent || defaultIsCharacterEquivalent,
       changeRange,
-      options
+      mergedOptions
     );
     if (mappedPosition !== undefined) {
       return mappedPosition;
@@ -291,15 +292,61 @@ function calculateCursorPositionWithCharacterMapping(
 
   if (startIndex > endIndex) return endIndex;
 
-  // Choose position closer to original cursor
-  const newPosition =
-    oldCursorPosition - startIndex < endIndex - oldCursorPosition
-      ? startIndex
-      : endIndex;
+  // Determine if this is a backspace/deletion or insertion/delete-key.
+  // newFormattedValue shorter = something was deleted. changeRange.isDelete===false = Backspace key.
+  const isDeletion =
+    newFormattedValue.length < oldFormattedValue.length ||
+    (changeRange !== undefined && changeRange.isDelete === false);
 
-  // Apply boundary correction if available
+  let newPosition: number;
+  let crossedSeparator = false;
+  let bypassBoundary = false;
+
+  if (isDeletion) {
+    newPosition = startIndex;
+    const sep = options.thousandSeparator;
+    const decSep = options.decimalSeparator ?? '.';
+    const charAtPos = newPosition < newFormattedValue.length ? newFormattedValue[newPosition] : '';
+
+    if (sep && charAtPos === sep) {
+      // Landed on a thousand separator.
+      const charBeforeCursor = oldCursorPosition > 0 ? oldFormattedValue[oldCursorPosition - 1] : '';
+      if (charBeforeCursor === sep) {
+        // Backspace crossed a separator (cursor was right after it) → use endIndex.
+        newPosition = endIndex;
+        crossedSeparator = true;
+      } else {
+        // Normal deletion of adjacent digit → stay before the separator.
+        bypassBoundary = true;
+      }
+    } else if (charAtPos === decSep) {
+      // Landed before decimal separator → stay there.
+      bypassBoundary = true;
+    }
+  } else {
+    // Insertion or Delete key: cursor moves right past any separator.
+    newPosition =
+      oldCursorPosition - startIndex < endIndex - oldCursorPosition
+        ? startIndex
+        : endIndex;
+  }
+
+  const direction = isDeletion && !crossedSeparator ? 'left' : 'right';
   if (options.boundary) {
-    return getCaretPosInBoundary(newFormattedValue, newPosition, options.boundary);
+    if (bypassBoundary) {
+      return newPosition;
+    }
+    return getCaretPosInBoundary(newFormattedValue, newPosition, options.boundary, direction);
+  }
+
+  // No boundary provided: manually skip over any thousand separator in the right direction.
+  const sep = options.thousandSeparator;
+  if (!bypassBoundary && sep && newPosition >= 0 && newPosition < newFormattedValue.length && newFormattedValue[newPosition] === sep) {
+    if (isDeletion && !crossedSeparator) {
+      while (newPosition > 0 && newFormattedValue[newPosition] === sep) newPosition--;
+    } else {
+      while (newPosition < newFormattedValue.length && newFormattedValue[newPosition] === sep) newPosition++;
+    }
   }
 
   return newPosition;
@@ -321,7 +368,6 @@ function handleDeletion(
   options: CursorPositionOptions = {},
   countFn: CountFn = countMeaningfulDigitsBeforePosition
 ): number {
-  // === SPECIAL CASE: Cursor was on separator ===
   if (wasOnSeparator) {
     return handleSeparatorDeletion(
       oldFormattedValue,
@@ -333,7 +379,6 @@ function handleDeletion(
     );
   }
 
-  // === CALCULATE: Digit counts before and after ===
   const meaningfulDigitsBeforeCursor = countFn(oldFormattedValue, oldCursorPosition, separator);
 
   const totalDigitsInOld = countFn(oldFormattedValue, oldFormattedValue.length, separator);
@@ -342,7 +387,6 @@ function handleDeletion(
 
   const digitsRemoved = totalDigitsInOld - totalDigitsInNew;
 
-  // === DETERMINE: Target digit count ===
   const targetDigitCount = calculateTargetDigitCountForDeletion(
     oldFormattedValue,
     oldCursorPosition,
@@ -354,7 +398,6 @@ function handleDeletion(
     countFn
   );
 
-  // === FIND: New cursor position ===
   const wasInIntegerPart = oldDecimalIndex === -1 || oldCursorPosition <= oldDecimalIndex;
   const position = findCursorPositionAfterDeletion(
     newFormattedValue,
@@ -367,7 +410,6 @@ function handleDeletion(
     countFn
   );
 
-  // Apply boundary correction if available
   if (options.boundary) {
     return getCaretPosInBoundary(newFormattedValue, position, options.boundary);
   }
@@ -528,7 +570,6 @@ function handleInsertion(
   wasOnSeparator: boolean,
   countFn: CountFn = countMeaningfulDigitsBeforePosition
 ): number {
-  // === SPECIAL CASE: Cursor at end of input ===
   const wasAtEnd = oldCursorPosition >= oldFormattedValue.length;
 
   const meaningfulDigitsBeforeCursor = countFn(oldFormattedValue, oldCursorPosition, separator);
@@ -537,12 +578,10 @@ function handleInsertion(
 
   const totalDigitsInNew = countFn(newFormattedValue, newFormattedValue.length, separator);
 
-  // Cursor was at end or at last digit position
   if (wasAtEnd || meaningfulDigitsBeforeCursor === totalDigitsInOld) {
     return newFormattedValue.length;
   }
 
-  // === CALCULATE: Target digit count after insertion ===
   const digitsAdded = totalDigitsInNew - totalDigitsInOld;
   let targetDigitCount = meaningfulDigitsBeforeCursor;
 
@@ -550,14 +589,12 @@ function handleInsertion(
     targetDigitCount = meaningfulDigitsBeforeCursor + 1;
   }
 
-  // === FIND: New cursor position ===
   const newPosition = findPositionWithMeaningfulDigitCount(
     newFormattedValue,
     targetDigitCount,
     separator
   );
 
-  // === ADJUSTMENT: Handle separator edge case ===
   if (wasOnSeparator && !isPositionOnSeparator(newFormattedValue, newPosition, separator)) {
     return Math.max(0, newPosition - 1);
   }

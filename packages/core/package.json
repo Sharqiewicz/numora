@@ -1,6 +1,6 @@
 {
   "name": "numora",
-  "version": "3.1.0",
+  "version": "3.3.0",
   "description": "Framework-agnostic numeric input library for DeFi and financial apps",
   "homepage": "https://numora.xyz/",
   "main": "dist/index.js",
