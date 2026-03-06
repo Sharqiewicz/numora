@@ -15,7 +15,7 @@ import {
 import {
   FormatOn,
   ThousandStyle,
-  resolveLocaleOptions,
+  applyLocale,
   formatValueForDisplay,
   removeThousandSeparators,
   validateNumoraInputOptions,
@@ -76,6 +76,7 @@ export interface NumoraInputProps
   /** Called with the raw (unformatted) numeric string on every value change. */
   onRawValueChange?: (rawValue: string | undefined) => void;
 
+  locale?: string | true;
   formatOn?: FormatOn;
   thousandSeparator?: string;
   thousandStyle?: ThousandStyle;
@@ -97,6 +98,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     onKeyDown,
     onFocus,
     onRawValueChange,
+    locale,
     formatOn = FormatOn.Blur,
     thousandSeparator,
     thousandStyle = ThousandStyle.Thousand,
@@ -131,20 +133,20 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   // Memoize to give callbacks a stable reference - avoids recreating all
   // useCallback functions on every render when primitive props haven't changed.
   const formattingOptions: FormattingOptions = useMemo(() => {
-    const resolved = resolveLocaleOptions({ thousandSeparator, thousandStyle, decimalSeparator });
+    const separators = applyLocale(locale, { thousandSeparator, decimalSeparator });
 
     return {
       formatOn,
-      thousandSeparator: resolved.thousandSeparator,
-      ThousandStyle: resolved.thousandStyle,
-      decimalSeparator: resolved.decimalSeparator,
+      thousandSeparator: separators.thousandSeparator,
+      ThousandStyle: thousandStyle,
+      decimalSeparator: separators.decimalSeparator,
       decimalMinLength,
       enableCompactNotation,
       enableNegative,
       enableLeadingZeros,
       rawValueMode,
     };
-  }, [formatOn, thousandSeparator, thousandStyle, decimalSeparator, decimalMinLength,
+  }, [locale, formatOn, thousandSeparator, thousandStyle, decimalSeparator, decimalMinLength,
     enableCompactNotation, enableNegative, enableLeadingZeros, rawValueMode]);
 
   const getInitialValue = (): string => {

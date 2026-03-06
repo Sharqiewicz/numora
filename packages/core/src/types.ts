@@ -9,7 +9,6 @@ export enum ThousandStyle {
     Thousand = 'thousand',
     Lakh = 'lakh',
     Wan = 'wan',
-    Locale = 'locale',
 }
 
 

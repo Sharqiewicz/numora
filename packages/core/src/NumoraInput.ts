@@ -7,8 +7,8 @@ import { formatWithSeparators } from '@/features/formatting';
 import { removeThousandSeparators } from '@/features/sanitization';
 import { escapeRegExp } from '@/utils/escape-reg-exp';
 import { getNumoraPattern } from '@/utils/input-pattern';
-import { resolveLocaleOptions } from '@/utils/locale';
-import { DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_DECIMAL_MIN_LENGTH, DEFAULT_RAW_VALUE_MODE, DEFAULT_THOUSAND_STYLE } from './config';
+import { applyLocale } from '@/utils/locale';
+import { DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_DECIMAL_MIN_LENGTH, DEFAULT_RAW_VALUE_MODE, DEFAULT_THOUSAND_STYLE, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_DECIMAL_SEPARATOR } from './config';
 import { FormatOn, ThousandStyle, FormattingOptions } from './types';
 import { validateNumoraInputOptions } from './validation';
 
@@ -39,6 +39,9 @@ export interface NumoraInputOptions extends Partial<Omit<HTMLInputElement, 'valu
   decimalSeparator?: string;
   decimalMaxLength?: number;
   decimalMinLength?: number;
+
+  // Locale
+  locale?: string | true;
 
   // Parsing options
   enableCompactNotation?: boolean;
@@ -76,6 +79,7 @@ export class NumoraInput {
       thousandSeparator,
       thousandStyle = DEFAULT_THOUSAND_STYLE,
       decimalSeparator,
+      locale,
       enableCompactNotation = DEFAULT_ENABLE_COMPACT_NOTATION,
       enableNegative = DEFAULT_ENABLE_NEGATIVE,
       enableLeadingZeros = DEFAULT_ENABLE_LEADING_ZEROS,
@@ -107,6 +111,7 @@ export class NumoraInput {
       thousandSeparator,
       thousandStyle,
       decimalSeparator,
+      locale,
       enableCompactNotation,
       enableNegative,
       enableLeadingZeros,
@@ -163,6 +168,7 @@ export class NumoraInput {
       thousandSeparator,
       thousandStyle,
       decimalSeparator,
+      locale,
       enableCompactNotation,
       enableNegative,
       enableLeadingZeros,
@@ -203,9 +209,8 @@ export class NumoraInput {
   }
 
   private getResolvedOptions(options: NumoraInputOptions): ResolvedNumoraOptions {
-    const resolved = resolveLocaleOptions({
+    const separators = applyLocale(options.locale, {
       thousandSeparator: options.thousandSeparator,
-      thousandStyle: options.thousandStyle,
       decimalSeparator: options.decimalSeparator,
     });
 
@@ -213,9 +218,9 @@ export class NumoraInput {
       decimalMaxLength: options.decimalMaxLength ?? DEFAULT_DECIMAL_MAX_LENGTH,
       decimalMinLength: options.decimalMinLength ?? DEFAULT_DECIMAL_MIN_LENGTH,
       formatOn: options.formatOn ?? DEFAULT_FORMAT_ON,
-      thousandSeparator: resolved.thousandSeparator,
-      thousandStyle: resolved.thousandStyle,
-      decimalSeparator: resolved.decimalSeparator,
+      thousandSeparator: separators.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR,
+      thousandStyle: options.thousandStyle ?? DEFAULT_THOUSAND_STYLE,
+      decimalSeparator: separators.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
       enableCompactNotation: options.enableCompactNotation ?? DEFAULT_ENABLE_COMPACT_NOTATION,
       enableNegative: options.enableNegative ?? DEFAULT_ENABLE_NEGATIVE,
       enableLeadingZeros: options.enableLeadingZeros ?? DEFAULT_ENABLE_LEADING_ZEROS,

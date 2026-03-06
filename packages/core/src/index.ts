@@ -1,6 +1,6 @@
 export * from './NumoraInput';
 export { ThousandStyle, FormatOn } from './types';
-export { getSeparatorsFromLocale, resolveLocaleOptions } from './utils/locale';
+export { getSeparatorsFromLocale, applyLocale } from './utils/locale';
 export {
   handleOnChangeNumoraInput,
   handleOnPasteNumoraInput,
