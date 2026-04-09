@@ -94,10 +94,10 @@ export function Swap() {
 
   return (
     <div className="flex items-center flex-col justify-center sm:w-[460px] px-4 sm:p-0">
-      <div className="relative p-4 rounded-xl sm:border bg-[#181a1b] border-[#23272b] w-full">
+      <div className="relative p-4 rounded-xl sm:border bg-surface-1 border-surface-3 w-full">
         <div className="w-full flex justify-end">
           <button
-            className="px-3 py-1 rounded-xl mb-2 cursor-pointer transition-transform duration-200 border active:scale-105 bg-[#181a1b] border-[#23272b] hover:bg-[#23272b] border-[#363b3f] focus-visible:ring-2 focus-visible:ring-[#5b2ff5] focus-visible:outline-none"
+            className="px-3 py-1 rounded-xl mb-2 cursor-pointer transition-transform duration-200 border active:scale-105 bg-surface-1 border-surface-5 hover:bg-surface-3 focus-visible:ring-2 focus-visible:ring-brand focus-visible:outline-none"
             aria-label="Slippage settings"
           >
             <svg
@@ -126,12 +126,12 @@ export function Swap() {
           </button>
         </div>
 
-        <div className="group !mt-0 flex items-center gap-2 p-2 border rounded-t-xl bg-[#23272b] border-[#363b3f] hover:bg-[#34383b] [&:has(:focus-visible)]:ring-2 [&:has(:focus-visible)]:ring-[#5b2ff5]">
+        <div className="group !mt-0 flex items-center gap-2 p-2 border rounded-t-xl bg-surface-3 border-surface-5 hover:bg-surface-5 [&:has(:focus-visible)]:ring-2 [&:has(:focus-visible)]:ring-brand">
           <label htmlFor="fromAmount" className="sr-only">From amount</label>
           <NumoraInput
             id="fromAmount"
             name="fromAmount"
-            className="flex bg-transparent text-2xl my-3 focus:outline-none text-white placeholder-[#a0a3c4]"
+            className="flex bg-transparent text-2xl my-3 focus:outline-none text-white placeholder-muted-icon"
             placeholder="0.0"
             value={fromAmount}
             onChange={(e) => handleFromInputChange(e as React.ChangeEvent<NumoraHTMLInputElement>)}
@@ -152,9 +152,9 @@ export function Swap() {
           />
         </div>
 
-        <div className="absolute border rounded-full border-[#363b3f] left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 flex justify-center my-2">
+        <div className="absolute border rounded-full border-surface-5 left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 flex justify-center my-2">
           <button
-            className="p-2 rounded-full border cursor-pointer transition-transform duration-200 bg-[#181a1b] border-[#23272b] text-[#a0a3c4] hover:bg-[#30363b] hover:border-[#484e54] motion-safe:hover:rotate-180 focus-visible:ring-2 focus-visible:ring-[#5b2ff5] focus-visible:outline-none"
+            className="p-2 rounded-full border cursor-pointer transition-transform duration-200 bg-surface-1 border-surface-3 text-muted-icon hover:bg-surface-4 hover:border-surface-7 motion-safe:hover:rotate-180 focus-visible:ring-2 focus-visible:ring-brand focus-visible:outline-none"
             onClick={flipTokens}
             type="button"
             aria-label="Flip tokens"
@@ -178,12 +178,12 @@ export function Swap() {
           </button>
         </div>
 
-        <div className="group mt-0.5  flex items-center gap-2 p-2 border  rounded-b-xl bg-[#23272b] border-[#363b3f] hover:bg-[#34383b] [&:has(:focus-visible)]:ring-2 [&:has(:focus-visible)]:ring-[#5b2ff5]">
+        <div className="group mt-0.5  flex items-center gap-2 p-2 border  rounded-b-xl bg-surface-3 border-surface-5 hover:bg-surface-5 [&:has(:focus-visible)]:ring-2 [&:has(:focus-visible)]:ring-brand">
           <label htmlFor="toAmount" className="sr-only">To amount</label>
           <NumoraInput
             id="toAmount"
             name="toAmount"
-            className="flex bg-transparent border-none text-2xl my-3 focus:outline-none text-white placeholder-[#a0a3c4]"
+            className="flex bg-transparent border-none text-2xl my-3 focus:outline-none text-white placeholder-muted-icon"
             placeholder="0.0"
             value={toAmount}
             onChange={(e) => handleToInputChange(e as React.ChangeEvent<HTMLInputElement>)}
@@ -204,7 +204,7 @@ export function Swap() {
         </div>
 
         <div
-          className="mt-2 text-sm text-center text-[#a0a3c4] text-gray-500 mb-6"
+          className="mt-2 text-sm text-center text-muted-icon mb-6"
           aria-live="polite"
           aria-atomic="true"
         >
@@ -212,7 +212,7 @@ export function Swap() {
         </div>
         <button
           type="button"
-          className="active:scale-95 w-full py-3 font-bold rounded-xl text-base text-white border-none cursor-pointer transition-transform duration-200 bg-[#5b2ff5] disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#4520b4] disabled:bg-[#3b1f7a] disabled:text-white disabled:opacity-100 focus-visible:ring-2 focus-visible:ring-[#5b2ff5] focus-visible:ring-offset-2 focus-visible:ring-offset-[#181a1b] focus-visible:outline-none"
+          className="active:scale-95 w-full py-3 font-bold rounded-xl text-base text-white border-none cursor-pointer transition-transform duration-200 bg-brand disabled:opacity-60 disabled:cursor-not-allowed hover:bg-brand-hover disabled:bg-brand-disabled disabled:text-white disabled:opacity-100 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-1 focus-visible:outline-none"
           onClick={handleSwap}
           disabled={isLoading}
         >

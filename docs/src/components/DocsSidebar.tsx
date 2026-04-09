@@ -11,7 +11,6 @@ import {
   Plug,
   Workflow,
   FileDigit,
-  Smartphone,
   Globe,
 } from 'lucide-react'
 import {
@@ -43,7 +42,7 @@ const navigation = [
       },
       {
         title: 'How it works',
-        href: '/docs/numora/how-it-works',
+        href: '/docs/how-it-works',
         icon: Workflow,
       },
     ],

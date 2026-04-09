@@ -21,7 +21,7 @@ export function Hero({ delay = 0, skipIntro = false }: HeroProps) {
         <h1
           className="
             font-numora text-5xl text-white
-            drop-shadow-[0_0_30px_rgba(167,139,250,0.4)]
+            drop-shadow-[0_0_30px_oklch(0.694_0.131_276.5_/_0.4)]
           "
         >
           numora.

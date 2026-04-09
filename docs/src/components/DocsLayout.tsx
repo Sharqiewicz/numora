@@ -54,7 +54,7 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
                 className="
                   text-4xl font-numora
                   transition-[color,filter] duration-300
-                  [@media(hover:hover)]:hover:drop-shadow-[0_2px_20px_rgba(167,139,250,0.5)]
+                  [@media(hover:hover)]:hover:drop-shadow-[0_2px_20px_oklch(0.694_0.131_276.5_/_0.5)]
                 "
               >
                 numora.

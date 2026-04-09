@@ -85,7 +85,7 @@ const SLIDES: Slide[] = [
 ];
 
 const inputClass =
-  'w-full bg-transparent text-xl font-mono text-white placeholder-[#383c41] focus:outline-none text-right py-3 tracking-wide';
+  'w-full bg-transparent text-xl font-mono text-white placeholder-surface-6 focus:outline-none text-right py-3 tracking-wide';
 
 export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
   const [activeSlide, setActiveSlide] = useState(0);
@@ -125,10 +125,39 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
     const currentSlide = SLIDES[activeSlide];
 
     // Use the native setter to bypass React's internal value tracking so the
-    // controlled NumoraInput's onChange handler actually fires on synthetic events.
+    // uncontrolled NumoraInput's onChange handler fires on synthetic events.
     const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
-    const setInputValue = (value: string) => {
-      nativeSetter?.call(input, value);
+
+    // Simulate a single character typed by the user. Dispatches the real
+    // beforeinput → (input) sequence so Numora's formatting code path is exercised.
+    const simulateChar = (char: string) => {
+      // Ensure cursor is at the end before each simulated keypress.
+      input.setSelectionRange(input.value.length, input.value.length);
+
+      if (char === '\b') {
+        const beforeInput = new InputEvent('beforeinput', {
+          bubbles: true, cancelable: true, inputType: 'deleteContentBackward',
+        });
+        input.dispatchEvent(beforeInput);
+        if (!beforeInput.defaultPrevented) {
+          nativeSetter?.call(input, input.value.slice(0, -1));
+          input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'deleteContentBackward' }));
+        }
+      } else {
+        const beforeInput = new InputEvent('beforeinput', {
+          bubbles: true, cancelable: true, inputType: 'insertText', data: char,
+        });
+        input.dispatchEvent(beforeInput);
+        if (!beforeInput.defaultPrevented) {
+          nativeSetter?.call(input, input.value + char);
+          input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+        }
+      }
+    };
+
+    // Clear the input programmatically (not via beforeinput — just reset).
+    const clearInput = () => {
+      nativeSetter?.call(input, '');
       input.dispatchEvent(new Event('input', { bubbles: true }));
     };
 
@@ -137,20 +166,19 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
 
     clearTimer = setTimeout(() => {
       if (!input) return;
-      setInputValue('');
+      clearInput();
 
       if (currentSlide.isPaste) {
         pasteTimer = setTimeout(() => {
-          setInputValue(currentSlide.demoValue);
+          // Paste path: set value directly (paste handler is separate).
+          nativeSetter?.call(input, currentSlide.demoValue);
+          input.dispatchEvent(new Event('input', { bubbles: true }));
         }, 200);
       } else {
         const sequence = currentSlide.typingSequence ?? currentSlide.demoValue.split('');
-        let rawValue = '';
         let i = 0;
         typingRef.current = setInterval(() => {
-          const char = sequence[i];
-          rawValue = char === '\b' ? rawValue.slice(0, -1) : rawValue + char;
-          setInputValue(rawValue);
+          simulateChar(sequence[i]);
           i++;
           if (i >= sequence.length) {
             if (typingRef.current) clearInterval(typingRef.current);
@@ -179,7 +207,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
     <div className="pt-4 pb-8 w-full max-w-lg mx-auto animate-fade-in opacity-0" style={style}>
       <div className="space-y-3">
 
-        <div className="rounded-2xl border border-[#23272b] bg-[#181a1b] overflow-hidden px-4 py-0">
+        <div className="rounded-2xl border border-surface-3 bg-surface-1 overflow-hidden px-4 py-0">
           <NumoraInput
             ref={inputRef}
             locale={slide.id === "locale" ? true : undefined}
@@ -196,7 +224,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
         {(() => {
           const progressDuration = slide.video ? videoDuration : SLIDE_DURATION;
           return (
-            <div className="relative h-px bg-[#23272b] overflow-hidden rounded-full">
+            <div className="relative h-px bg-surface-3 overflow-hidden rounded-full">
               <div
                 key={`${activeSlide}-${isPlaying}-${progressDuration}`}
                 className={`h-px bg-secondary/60 ${isPlaying && progressDuration !== null ? '' : 'hidden'}`}
@@ -230,7 +258,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
               <source src={slide.video} type="video/mp4" />
             </video>
           ) : (
-            <div className="rounded-2xl border border-dashed border-[#23272b] bg-[#181a1b] px-4 py-6 text-center">
+            <div className="rounded-2xl border border-dashed border-surface-3 bg-surface-1 px-4 py-6 text-center">
               <span className="text-xs text-muted-foreground/40">{slide.videoLabel}</span>
             </div>
           )}
@@ -246,14 +274,14 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                 transition={{ layout: { duration: 0.22, ease: [0.215, 0.61, 0.355, 1] } }}
                 onClick={() => handleSlideClick(index)}
                 className={`relative w-full text-left rounded-xl px-3 py-2.5 cursor-pointer ${
-                  !isActive ? 'hover:bg-[#1e2124]' : ''
+                  !isActive ? 'hover:bg-surface-2' : ''
                 }`}
               >
                 {/* Sliding active background */}
                 {isActive && (
                   <motion.div
                     layoutId="slide-active-bg"
-                    className="absolute inset-0 rounded-xl bg-[#23272b] z-[3]"
+                    className="absolute inset-0 rounded-xl bg-surface-3 z-[3]"
                     transition={{ duration: 0.22, ease: [0.215, 0.61, 0.355, 1] }}
                   />
                 )}
@@ -322,7 +350,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                 className={`rounded-full transition-all cursor-pointer ${
                   index === activeSlide
                     ? 'w-2 h-2 bg-secondary/80'
-                    : 'w-1.5 h-1.5 bg-[#23272b] hover:bg-[#383c41]'
+                    : 'w-1.5 h-1.5 bg-surface-3 hover:bg-surface-6'
                 }`}
               />
             ))}
@@ -331,7 +359,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
           <button
             onClick={() => setIsPlaying((prev) => !prev)}
             aria-label={isPlaying ? 'Pause' : 'Play'}
-            className="w-8 h-8 rounded-full border border-[#2d3136] bg-[#1e2124] flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground/90 hover:border-[#383c41] hover:bg-[#23272b] transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full border border-[oklch(0.232_0.008_255)] bg-surface-2 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground/90 hover:border-surface-6 hover:bg-surface-3 transition-colors cursor-pointer"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.span

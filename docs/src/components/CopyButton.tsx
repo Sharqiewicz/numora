@@ -32,7 +32,7 @@ const getButtonClasses = (noBorder: boolean, className: string) => {
   const baseClasses = "active:scale-105 transition-transform duration-200 m-0 flex justify-center items-center inline-flex items-center break-all rounded transition-colors cursor-pointer px-2 py-3";
   const borderClasses = noBorder
     ? "border-none bg-transparent hover:bg-gray-900"
-    : "bg-[#181a1b] hover:bg-[#212324] shadow-secondary/50 shadow-xs hover:shadow-secondary/80";
+    : "bg-surface-1 hover:bg-surface-2 shadow-secondary/50 shadow-xs hover:shadow-secondary/80";
 
   return `${baseClasses} ${borderClasses} ${className}`;
 };

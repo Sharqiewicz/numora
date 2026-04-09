@@ -51,7 +51,7 @@ export function ExploreHero() {
               min-w-[150px]
               relative overflow-hidden
               group
-              hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]
+              hover:shadow-[0_0_30px_oklch(1_0_0_/_0.2)]
               transition-shadow duration-300
             "
           >
@@ -72,7 +72,7 @@ export function ExploreHero() {
             variant="secondary"
             className="
               min-w-[150px]
-              hover:shadow-[0_0_25px_rgba(167,139,250,0.3)]
+              hover:shadow-[0_0_25px_oklch(0.694_0.131_276.5_/_0.3)]
               transition-shadow duration-300
             "
           >

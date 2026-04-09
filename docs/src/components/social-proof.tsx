@@ -47,7 +47,7 @@ export function SocialProof({ heading, description }: SocialProofProps = {}) {
   return (
     <div
       ref={ref}
-      className="py-12 sm:py-16 px-4 sm:px-16 my-16 border rounded-xl border-[#23272b] bg-[#181a1b]"
+      className="py-12 sm:py-16 px-4 sm:px-16 my-16 border rounded-xl border-surface-3 bg-surface-1"
     >
       <div
         className={`

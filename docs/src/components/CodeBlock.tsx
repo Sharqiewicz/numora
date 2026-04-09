@@ -15,7 +15,7 @@ export function CodeBlock({ children, className, language = 'typescript' }: Code
   return (
     <div className="relative my-6 overflow-hidden rounded-lg border border-muted/50">
       {language && (
-        <div className="border-b border-muted bg-[#171717] px-4 py-2 text-xs font-medium text-muted-foreground">
+        <div className="border-b border-muted bg-[oklch(0.130_0_0)] px-4 py-2 text-xs font-medium text-muted-foreground">
           {language}
         </div>
       )}
@@ -25,7 +25,7 @@ export function CodeBlock({ children, className, language = 'typescript' }: Code
         customStyle={{
           margin: 0,
           padding: '1rem',
-          background: '#282828',
+          background: 'oklch(0.210 0 0)',
           fontSize: '0.875rem',
           lineHeight: '1.5',
         }}

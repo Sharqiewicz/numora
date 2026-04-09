@@ -31,7 +31,7 @@ export function TokenSelector({
     <div className="relative w-full min-w-[110px]">
       <button
         type="button"
-        className={`flex w-full items-center rounded-lg p-1.5 cursor-pointer focus:outline-none relative z-40 bg-black hover:bg-[#23272b] border border-[#23272b] hover:border-[#363b3f] focus:border-[#5b2ff5] focus:shadow-[0_0_0_3px_rgba(91,47,245,0.1)] text-white ${
+        className={`flex w-full items-center rounded-lg p-1.5 cursor-pointer focus:outline-none relative z-40 bg-black hover:bg-surface-3 border border-surface-3 hover:border-surface-5 focus:border-brand focus:shadow-[0_0_0_3px_oklch(0.460_0.277_278_/_0.1)] text-white ${
           isOpen ? 'border-b-0 rounded-bl-none rounded-br-none' : ''
         }`}
         onClick={() => onToggle(!isOpen)}
@@ -48,7 +48,7 @@ export function TokenSelector({
           width="20"
           height="20"
           fill="none"
-          className={`ml-auto text-[#a0a3c4] transition-transform duration-300 text-gray-500 ${
+          className={`ml-auto text-muted-icon transition-transform duration-300 ${
             isOpen ? 'rotate-180' : ''
           }`}
         >
@@ -61,7 +61,7 @@ export function TokenSelector({
         </svg>
       </button>
       <ul
-        className={`w-full !mt-0 no-scrollbar absolute left-0 right-0 top-full w-full rounded-xl rounded-tl-none rounded-tr-none shadow-lg overflow-hidden z-100 transition-all duration-300 ease-out border-t-0 bg-[#181a1b] border border-[#5b2ff5] ${
+        className={`w-full !mt-0 no-scrollbar absolute left-0 right-0 top-full w-full rounded-xl rounded-tl-none rounded-tr-none shadow-lg overflow-hidden z-100 transition-all duration-300 ease-out border-t-0 bg-surface-1 border border-brand ${
           isOpen
             ? 'max-h-64 opacity-100 translate-y-0'
             : 'max-h-0 opacity-0 transform translate-y-0'
@@ -70,7 +70,7 @@ export function TokenSelector({
         {TOKENS.filter((t) => t.symbol !== selectedToken.symbol).map((token) => (
           <li key={token.symbol}>
             <button
-            className={`w-full !mt-0 flex items-center px-3 py-2 cursor-pointer transition-colors duration-200 hover:bg-[#23272b] ${
+            className={`w-full !mt-0 flex items-center px-3 py-2 cursor-pointer transition-colors duration-200 hover:bg-surface-3 ${
               disabledToken && token.symbol === disabledToken.symbol
                 ? 'opacity-50 cursor-not-allowed'
                 : ''
