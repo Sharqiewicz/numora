@@ -13,6 +13,12 @@ export const Route = createFileRoute('/docs/numora-react/features/formatting')({
       { name: 'twitter:title', content: 'Number Formatting as You Type | numora-react' },
       { name: 'twitter:description', content: 'Format numbers as you type using the NumoraInput React component.' },
     ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react/features/formatting' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora-react/features" }, { "@type": "ListItem", "position": 4, "name": "Formatting", "item": "https://numora.xyz/docs/numora-react/features/formatting" }] }) },
+    ],
   }),
   component: Formatting,
 })

@@ -14,6 +14,12 @@ export const Route = createFileRoute('/docs/numora-react/features/locale')({
       { name: 'twitter:title', content: 'Locale-Aware Separator Detection | numora-react' },
       { name: 'twitter:description', content: 'Auto-detect separators from the browser locale with numora-react.' },
     ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react/features/locale' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora-react/features" }, { "@type": "ListItem", "position": 4, "name": "Locale", "item": "https://numora.xyz/docs/numora-react/features/locale" }] }) },
+    ],
   }),
   component: Locale,
 })

@@ -16,13 +16,19 @@ import {
 export const Route = createFileRoute('/explore')({
   head: () => ({
     meta: [
-      { title: 'Why Number Inputs Break - Interactive Demos | Numora' },
+      { title: 'Why Numeric Input & Number Input Break - Interactive Demos | Numora' },
       { name: 'description', content: 'See 7 ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal dilemmas, mobile keyboard chaos, and more. Interactive live demos.' },
-      { property: 'og:title', content: 'Why Number Inputs Break - Interactive Demos | Numora' },
+      { property: 'og:title', content: 'Why Numeric Input & Number Input Break - Interactive Demos | Numora' },
       { property: 'og:description', content: 'See 7 ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal dilemmas, mobile keyboard chaos, and more.' },
       { property: 'og:url', content: 'https://numora.xyz/explore' },
-      { name: 'twitter:title', content: 'Why Number Inputs Break - Interactive Demos | Numora' },
+      { name: 'twitter:title', content: 'Why Numeric Input & Number Input Break - Interactive Demos | Numora' },
       { name: 'twitter:description', content: 'See 7 ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal dilemmas, and more.' },
+    ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/explore' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{ "@type": "Question", "name": "Why does pasting into a number input cause chaos?", "acceptedAnswer": { "@type": "Answer", "text": "When pasting formatted numbers (like '1,234.56' or numbers with currency symbols), <input type=\"number\"> strips the value entirely or shows NaN because it only accepts raw numeric strings. Numora sanitizes pasted content before it reaches the input, extracting the numeric value correctly." } }, { "@type": "Question", "name": "Why does the cursor jump when typing in a formatted number input?", "acceptedAnswer": { "@type": "Answer", "text": "When a numeric input reformats its value (e.g. adding thousand separators), the cursor position resets to the end. Numora tracks and restores the correct cursor position after every reformat, so the cursor stays exactly where you typed." } }, { "@type": "Question", "name": "Why does <input type=\"number\"> accept scientific notation like 1e5?", "acceptedAnswer": { "@type": "Answer", "text": "The HTML number input spec allows scientific notation (e.g. 1e5 = 100000) even when you only want plain integers. This can corrupt financial or form data. Numora blocks scientific notation characters unless you explicitly enable them." } }, { "@type": "Question", "name": "Why do mobile keyboards cause problems with number inputs?", "acceptedAnswer": { "@type": "Answer", "text": "Mobile keyboards on iOS and Android insert OS-specific characters, use different decimal separators, and sometimes send input events with unexpected key codes. Numora normalises all mobile keyboard input to ensure consistent numeric values across devices." } }, { "@type": "Question", "name": "What is the decimal dilemma with number inputs?", "acceptedAnswer": { "@type": "Answer", "text": "Different locales use different decimal separators — a period in the US (1.5) but a comma in Germany (1,5). <input type=\"number\"> ignores locale and always expects a period, breaking inputs for international users. Numora supports locale-aware decimal separators." } }, { "@type": "Question", "name": "Why do thousand separators make number inputs unreliable?", "acceptedAnswer": { "@type": "Answer", "text": "When you display '1,234' in an <input type=\"number\">, the browser treats the comma as invalid and clears the value. Numora uses a text input internally, formatting visually while exposing a clean raw numeric value." } }, { "@type": "Question", "name": "Why does <input type=\"number\"> lie about its value?", "acceptedAnswer": { "@type": "Answer", "text": "If the user types an invalid number, <input type=\"number\"> returns an empty string for .value instead of the actual text — silently hiding the bad input. Numora always gives you the real raw value so you can validate and handle it correctly." } }] }) },
     ],
   }),
   component: ExplorePage,

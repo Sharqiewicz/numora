@@ -12,6 +12,12 @@ export const Route = createFileRoute('/docs/numora/features/compact-notation')({
       { name: 'twitter:title', content: 'Compact Notation (1k, 1m, 1b) | Numora' },
       { name: 'twitter:description', content: 'Enable compact number notation in inputs with Numora. Type "1k" for 1,000.' },
     ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/features/compact-notation' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora/features" }, { "@type": "ListItem", "position": 4, "name": "Compact Notation", "item": "https://numora.xyz/docs/numora/features/compact-notation" }] }) },
+    ],
   }),
   component: CompactNotation,
 })

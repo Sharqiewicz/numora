@@ -13,6 +13,10 @@ export function getPackageHref(basePath: string, packagePrefix: PackageRoutePref
     return `/docs/${packagePrefix}/installation`
   }
 
+  if (basePath === '/docs/how-it-works') {
+    return `/docs/${packagePrefix}/how-it-works`
+  }
+
   if (basePath.startsWith('/docs/features/')) {
     const feature = basePath.replace('/docs/features/', '')
     return `/docs/${packagePrefix}/features/${feature}`

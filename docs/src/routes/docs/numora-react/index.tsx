@@ -5,13 +5,19 @@ import { Button } from '@/components/ui/button'
 export const Route = createFileRoute('/docs/numora-react/')({
   head: () => ({
     meta: [
-      { title: 'Numora - React Numeric Input Library' },
-      { name: 'description', content: 'Install and configure numora - the zero-dependency numeric input library for React.' },
-      { property: 'og:title', content: 'Numora - React Numeric Input Library' },
-      { property: 'og:description', content: 'Install and configure numora - the zero-dependency numeric input library for React.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora' },
-      { name: 'twitter:title', content: 'Numora - React Numeric Input Library' },
-      { name: 'twitter:description', content: 'Install and configure numora - the zero-dependency numeric input library for React.' },
+      { title: 'Numora React - React Numeric Input & Number Input Component' },
+      { name: 'description', content: 'Install and configure numora-react - the zero-dependency numeric input and number input component for React. Format numbers as you type with full cursor control.' },
+      { property: 'og:title', content: 'Numora React - React Numeric Input & Number Input Component' },
+      { property: 'og:description', content: 'Install and configure numora-react - the zero-dependency numeric input and number input component for React.' },
+      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react' },
+      { name: 'twitter:title', content: 'Numora React - React Numeric Input & Number Input Component' },
+      { name: 'twitter:description', content: 'Install and configure numora-react - the zero-dependency numeric input and number input component for React.' },
+    ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" }] }) },
     ],
   }),
   component: GetStarted,

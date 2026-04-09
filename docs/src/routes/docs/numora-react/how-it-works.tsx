@@ -15,6 +15,9 @@ export const Route = createFileRoute('/docs/numora-react/how-it-works')({
     links: [
       { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react/how-it-works' },
     ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "How It Works", "item": "https://numora.xyz/docs/numora-react/how-it-works" }] }) },
+    ],
   }),
   component: HowItWorks,
 })
@@ -302,15 +305,6 @@ function App() {
     └─ blur ─────────────── formatValueForDisplay (FormatOn.Blur only)
                             → input.value`}
       </CodeBlock>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" },
-          { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" },
-          { "@type": "ListItem", "position": 3, "name": "How It Works", "item": "https://numora.xyz/docs/numora-react/how-it-works" }
-        ]
-      }) }} />
     </div>
   )
 }

@@ -5,13 +5,19 @@ import { Button } from '@/components/ui/button'
 export const Route = createFileRoute('/docs/numora/')({
   head: () => ({
     meta: [
-      { title: 'Numora - Core JavaScript Numeric Input Library' },
-      { name: 'description', content: 'Install and configure numora - the zero-dependency numeric input library for JavaScript. Works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.' },
-      { property: 'og:title', content: 'Numora - Core JavaScript Numeric Input Library' },
-      { property: 'og:description', content: 'Install and configure numora - the zero-dependency numeric input library for JavaScript. Works with React, Vue, Svelte, Angular, and Vanilla JS.' },
+      { title: 'Numora - JavaScript Numeric Input & Number Input Library' },
+      { name: 'description', content: 'Install and configure numora - the zero-dependency numeric input and number input library for JavaScript. Works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.' },
+      { property: 'og:title', content: 'Numora - JavaScript Numeric Input & Number Input Library' },
+      { property: 'og:description', content: 'Install and configure numora - the zero-dependency numeric input and number input library for JavaScript. Works with React, Vue, Svelte, Angular, and Vanilla JS.' },
       { property: 'og:url', content: 'https://numora.xyz/docs/numora' },
-      { name: 'twitter:title', content: 'Numora - Core JavaScript Numeric Input Library' },
-      { name: 'twitter:description', content: 'Install and configure numora - the zero-dependency numeric input library for JavaScript. Works with any framework.' },
+      { name: 'twitter:title', content: 'Numora - JavaScript Numeric Input & Number Input Library' },
+      { name: 'twitter:description', content: 'Install and configure numora - the zero-dependency numeric input and number input library for JavaScript. Works with any framework.' },
+    ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }] }) },
     ],
   }),
   component: GetStarted,

@@ -12,6 +12,12 @@ export const Route = createFileRoute('/docs/numora/features/decimals')({
       { name: 'twitter:title', content: 'Decimal Input Validation & Limits | Numora' },
       { name: 'twitter:description', content: 'Enforce decimal place limits and validate decimal inputs with Numora.' },
     ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/features/decimals' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora/features" }, { "@type": "ListItem", "position": 4, "name": "Decimals", "item": "https://numora.xyz/docs/numora/features/decimals" }] }) },
+    ],
   }),
   component: Decimals,
 })

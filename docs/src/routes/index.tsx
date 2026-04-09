@@ -9,10 +9,28 @@ import { Socials } from '@/components/socials'
 import { Button } from '@/components/ui/button'
 
 
-export const Route = createFileRoute('/')({ component: App })
+export const Route = createFileRoute('/')({
+  head: () => ({
+    meta: [
+      { title: 'Numora - Numeric Input & Number Input Library for JavaScript and React' },
+      { name: 'description', content: 'Numora is the standard numeric input and number input library for JavaScript and React. Format numbers as you type, thousand separators, decimal limits, cursor management. Zero dependencies, 6.4kb gzipped.' },
+      { property: 'og:title', content: 'Numora - Numeric Input & Number Input Library for JavaScript and React' },
+      { property: 'og:description', content: 'The only framework-agnostic numeric input and number input library. Format numbers as you type, thousand separators, decimal limits, cursor management.' },
+      { property: 'og:url', content: 'https://numora.xyz' },
+    ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Numora", "applicationCategory": "DeveloperApplication", "operatingSystem": "Web", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }, "url": "https://numora.xyz", "downloadUrl": "https://www.npmjs.com/package/numora", "keywords": "numeric input, number input, javascript number input, react number input" }, { "@context": "https://schema.org", "@type": "WebSite", "name": "Numora", "url": "https://numora.xyz" }]) },
+    ],
+  }),
+  component: App,
+})
 
 function App() {
   const [skipIntro] = useState(() => {
+    if (typeof sessionStorage === 'undefined') return false;
     const seen = sessionStorage.getItem('numora_intro_v1');
     if (!seen) sessionStorage.setItem('numora_intro_v1', 'true');
     return !!seen;
@@ -45,7 +63,7 @@ function App() {
                 min-w-[150px]
                 relative overflow-hidden
                 group
-                hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]
+                hover:shadow-[0_0_30px_oklch(1_0_0_/_0.2)]
                 transition-shadow duration-300
               "
             >
@@ -65,7 +83,7 @@ function App() {
               variant="secondary"
               className="
                 min-w-[150px]
-                hover:shadow-[0_0_25px_rgba(167,139,250,0.3)]
+                hover:shadow-[0_0_25px_oklch(0.694_0.131_276.5_/_0.3)]
                 transition-shadow duration-300
               "
             >

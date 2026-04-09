@@ -12,6 +12,12 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
       { name: 'twitter:title', content: 'Value Types | Numora' },
       { name: 'twitter:description', content: 'Numora always emits strings from onChange. Learn about rawValueMode and the valueAsNumber escape hatch.' },
     ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/features/value-types' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora/features" }, { "@type": "ListItem", "position": 4, "name": "Value Types", "item": "https://numora.xyz/docs/numora/features/value-types" }] }) },
+    ],
   }),
   component: ValueTypes,
 })

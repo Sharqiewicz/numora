@@ -12,6 +12,12 @@ export const Route = createFileRoute('/docs/numora/features/scientific-notation'
       { name: 'twitter:title', content: 'Scientific Notation Input (1e-18) | Numora' },
       { name: 'twitter:description', content: 'Handle scientific notation (1e-18) in numeric inputs with Numora.' },
     ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/features/scientific-notation' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora/features" }, { "@type": "ListItem", "position": 4, "name": "Scientific Notation", "item": "https://numora.xyz/docs/numora/features/scientific-notation" }] }) },
+    ],
   }),
   component: ScientificNotation,
 })

@@ -14,6 +14,12 @@ export const Route = createFileRoute('/docs/numora-react/installation')({
       { name: 'twitter:title', content: 'Installation - numora-react | React Numeric Input Component' },
       { name: 'twitter:description', content: 'Install numora-react and start using NumoraInput, the React wrapper for the numora core library.' },
     ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react/installation' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Installation", "item": "https://numora.xyz/docs/numora-react/installation" }] }) },
+    ],
   }),
   component: Installation,
 })
@@ -51,7 +57,6 @@ function App() {
         }}
         description="Try typing a number to see formatting in action"
       />
-
     </div>
   )
 }

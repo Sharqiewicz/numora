@@ -12,6 +12,12 @@ export const Route = createFileRoute('/docs/numora-react/features/value-types')(
       { name: 'twitter:title', content: 'Value Types | numora-react' },
       { name: 'twitter:description', content: 'numora-react always emits formatted strings via e.target.value. Access raw values via e.target.rawValue on NumoraHTMLInputElement.' },
     ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react/features/value-types' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora-react/features" }, { "@type": "ListItem", "position": 4, "name": "Value Types", "item": "https://numora.xyz/docs/numora-react/features/value-types" }] }) },
+    ],
   }),
   component: ValueTypes,
 })

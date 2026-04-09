@@ -4,9 +4,6 @@ import {
   HeadContent,
   Scripts,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import type { QueryClient } from '@tanstack/react-query'
 import type { TRPCRouter } from '@/integrations/trpc/router'
@@ -24,10 +21,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
-      { title: 'Numora - The Numeric Input Standard' },
+      { title: 'Numora - Numeric Input & Number Input Library' },
       { name: 'description', content: 'The only framework-agnostic numeric input library. Format numbers as you type, thousand separators, decimal limits, cursor management. Works with React, Vue, Svelte, and Vanilla JS.' },
       { property: 'og:type', content: 'website' },
       { property: 'og:site_name', content: 'Numora' },
+      { property: 'og:title', content: 'Numora - Numeric Input & Number Input Library' },
+      { property: 'og:description', content: 'The only framework-agnostic numeric input library. Format numbers as you type, thousand separators, decimal limits, cursor management. Works with React, Vue, Svelte, and Vanilla JS.' },
+      { property: 'og:url', content: 'https://numora.xyz' },
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:site', content: '@sharqiewicz' },
     ],
@@ -51,18 +51,6 @@ function RootDocument() {
       </head>
       <body>
         <Outlet />
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-            TanStackQueryDevtools,
-          ]}
-        />
         <Scripts />
       </body>
     </html>

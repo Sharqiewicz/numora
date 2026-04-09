@@ -12,6 +12,12 @@ export const Route = createFileRoute('/docs/numora/features/sanitization')({
       { name: 'twitter:title', content: 'Numeric Input Sanitization | Numora' },
       { name: 'twitter:description', content: 'Sanitize numeric inputs and block invalid characters with Numora.' },
     ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/features/sanitization' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora/features" }, { "@type": "ListItem", "position": 4, "name": "Sanitization", "item": "https://numora.xyz/docs/numora/features/sanitization" }] }) },
+    ],
   }),
   component: Sanitization,
 })

@@ -13,6 +13,12 @@ export const Route = createFileRoute('/docs/numora/installation')({
       { name: 'twitter:title', content: 'Installation - Numora Core | JavaScript Numeric Input' },
       { name: 'twitter:description', content: 'How to install numora in your JavaScript project. Zero dependencies, works with any framework.' },
     ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/installation' },
+    ],
+    scripts: [
+      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Installation", "item": "https://numora.xyz/docs/numora/installation" }] }) },
+    ],
   }),
   component: Installation,
 })
