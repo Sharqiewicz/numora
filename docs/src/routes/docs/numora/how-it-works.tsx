@@ -12,6 +12,9 @@ export const Route = createFileRoute('/docs/numora/how-it-works')({
       { name: 'twitter:title', content: 'How It Works - Numora Core | JavaScript Numeric Input' },
       { name: 'twitter:description', content: 'Understand the internal pipeline of numora: event interception, sanitization, formatting, and value emission.' },
     ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/how-it-works' },
+    ],
   }),
   component: HowItWorks,
 })
@@ -30,25 +33,72 @@ function HowItWorks() {
 
       <h3>keydown</h3>
       <p>
-        Before the DOM mutation occurs, <code>keydown</code> handles two special cases and
-        captures the current caret position so the input handler can restore it after formatting:
+        <code>keydown</code> handles one special case before any DOM mutation occurs:
       </p>
       <ul>
-        <li>Blocks a second decimal separator from being typed (only one is ever allowed).</li>
         <li>
           Skips the cursor over thousand separators on <kbd>Delete</kbd> / <kbd>Backspace</kbd>{' '}
           so the user never has to manually navigate past a formatting character.
         </li>
       </ul>
 
+      <h3>beforeinput</h3>
+      <p>
+        <code>beforeinput</code> is the primary formatting hook. It fires after the browser has
+        resolved what the input <em>will</em> be, but before the DOM is mutated — making it the
+        correct place to intercept and reformat. Numora calls{' '}
+        <code>e.preventDefault()</code> to suppress the native mutation, computes the intended
+        value, runs the full sanitize → format pipeline, then writes the result via{' '}
+        <code>setRangeText</code> (which preserves the browser's undo/redo stack).
+      </p>
+      <p>The handler covers:</p>
+      <ul>
+        <li>
+          <strong>Decimal separator key</strong> — converts <code>,</code> or <code>.</code> to
+          the configured separator; blocks a second decimal if one already exists.
+        </li>
+        <li>
+          <strong>Character insertion</strong> (<code>insertText</code>) — inserts at cursor,
+          formats the result.
+        </li>
+        <li>
+          <strong>Deletions</strong> (<code>deleteContentBackward</code>,{' '}
+          <code>deleteContentForward</code>, <code>deleteByCut</code>,{' '}
+          <code>deleteByDrag</code>) — removes the correct range, formats the result.
+        </li>
+        <li>
+          <strong>Undo/redo</strong> (<code>historyUndo</code>, <code>historyRedo</code>) —
+          not intercepted; the browser handles these natively against its own undo stack.
+        </li>
+        <li>
+          <strong>Paste/drop</strong> — deferred to the dedicated <code>paste</code> handler.
+        </li>
+      </ul>
+
       <h3>input</h3>
       <p>
-        Every keystroke that produces a character fires the <code>input</code> event.
-        Numora captures the pre-mutation cursor position, runs the full sanitize → format
-        pipeline on the new raw value, writes the formatted result back to{' '}
-        <code>input.value</code>, then restores the cursor to the correct position
-        accounting for any characters added or removed by formatting.
+        <code>handleChange</code> is the single place <code>onChange</code> is emitted — it
+        always runs the full sanitize → format pipeline via{' '}
+        <code>handleOnChangeNumoraInput</code>. Three paths lead here:
       </p>
+      <ul>
+        <li>
+          <strong>After <code>beforeinput</code></strong> — <code>setRangeText</code> fires a
+          synchronous <code>input</code> event in real browsers (jsdom skips this; tests
+          dispatch it manually). <code>formatInputValue</code> is idempotent on the
+          already-formatted value so the pipeline is a no-op and <code>onChange</code> is
+          emitted.
+        </li>
+        <li>
+          <strong>After paste</strong> — <code>handlePaste</code> sets the value directly
+          then dispatches a synthetic <code>input</code> event. Same idempotent run.
+        </li>
+        <li>
+          <strong>Undo/redo and programmatic changes</strong> — the browser (or external
+          code) sets the value and fires <code>input</code>; the pipeline formats the new
+          value and emits <code>onChange</code>.
+        </li>
+      </ul>
 
       <h3>paste</h3>
       <p>
@@ -176,32 +226,48 @@ const numoraInput = new NumoraInput(container, {
       <CodeBlock language="text">
 {`user action
     │
-    ├─ keydown ──────────── block duplicate decimal / skip over thousand separator
+    ├─ keydown ──────────── skip cursor over thousand separator (Delete/Backspace only)
     │
-    ├─ input  ──┐
-    │            ├─ sanitize (7 steps)
-    ├─ paste  ──┘        │
-                         ▼
-                  trimToDecimalMaxLength
-                         │
-                         ▼
-                   ensureMinDecimals
-                         │
-                         ▼
-               formatNumoraInput (thousand grouping)
-               [FormatOn.Change only; skipped on input/paste in FormatOn.Blur]
-                         │
-                   ┌─────┴──────┐
-                   ▼            ▼
-              formatted        raw
-            → input.value   → onChange (if rawValueMode)
-                         │
-                         ▼
-               updateCursorPosition
-
-    └─ blur ─── formatValueForDisplay (FormatOn.Blur only)
-                → input.value`}
+    ├─ beforeinput ─────── decimal separator handling          (primary path)
+    │                      character insertion / deletion
+    │                      e.preventDefault() + setRangeText
+    │                      ↓ fires synchronous 'input' (real browsers)
+    │                        or dispatched manually in tests (jsdom gap)
+    │
+    ├─ paste ────────────── splice clipboard into selection    (dedicated handler)
+    │                      sanitize + format + cursor reposition
+    │                      ↓ dispatches synthetic 'input'
+    │
+    ├─ input ────────────── always runs full pipeline          (single onChange emitter)
+    │   (handleChange)     covers all paths above + undo/redo + programmatic changes
+    │                      formatInputValue is idempotent: no-op when already formatted
+    │                      ▼
+    │             trimToDecimalMaxLength
+    │                      │
+    │                      ▼
+    │                ensureMinDecimals
+    │                      │
+    │                      ▼
+    │            formatNumoraInput (thousand grouping)
+    │            [FormatOn.Change only; skipped in FormatOn.Blur]
+    │                      │
+    │                ┌─────┴──────┐
+    │                ▼            ▼
+    │           formatted        raw
+    │         → input.value   → onChange (if rawValueMode)
+    │
+    └─ blur ─────────────── formatValueForDisplay (FormatOn.Blur only)
+                            → input.value`}
       </CodeBlock>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" },
+          { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" },
+          { "@type": "ListItem", "position": 3, "name": "How It Works", "item": "https://numora.xyz/docs/numora/how-it-works" }
+        ]
+      }) }} />
     </div>
   )
 }

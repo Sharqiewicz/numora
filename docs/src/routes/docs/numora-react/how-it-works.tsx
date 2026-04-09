@@ -12,6 +12,9 @@ export const Route = createFileRoute('/docs/numora-react/how-it-works')({
       { name: 'twitter:title', content: 'How It Works - numora-react | React Numeric Input' },
       { name: 'twitter:description', content: 'Understand the internal pipeline of numora-react: event interception, sanitization, formatting, and value emission.' },
     ],
+    links: [
+      { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react/how-it-works' },
+    ],
   }),
   component: HowItWorks,
 })
@@ -54,11 +57,9 @@ function App() {
 
       <h3>keydown</h3>
       <p>
-        Before the DOM mutation occurs, <code>keydown</code> handles two special cases and
-        captures the current caret position so the input handler can restore it after formatting:
+        <code>keydown</code> handles one special case before any DOM mutation occurs:
       </p>
       <ul>
-        <li>Blocks a second decimal separator from being typed (only one is ever allowed).</li>
         <li>
           Skips the cursor over thousand separators on <kbd>Delete</kbd> / <kbd>Backspace</kbd>{' '}
           so the user never has to manually navigate past a formatting character.
@@ -70,13 +71,53 @@ function App() {
 // result: "1234" after the next input event`}
       </CodeBlock>
 
-      <h3>input</h3>
+      <h3>beforeinput</h3>
       <p>
-        Every keystroke that produces a character fires the <code>input</code> event.
-        The pipeline captures the pre-mutation cursor position, runs the full sanitize →
-        format pipeline on the new raw value, writes the formatted result back to the DOM
-        input, then restores the cursor accounting for characters added or removed by
-        formatting. Finally, the React <code>onChange</code> fires.
+        <code>beforeinput</code> is the primary formatting hook, registered via native{' '}
+        <code>addEventListener</code> directly on the element — not through React's synthetic
+        event system. React delegates events from the root, which means{' '}
+        <code>preventDefault()</code> would be a no-op by the time it runs; a native listener
+        fires synchronously at the element, before the browser commits the mutation.
+      </p>
+      <p>
+        The handler calls <code>e.preventDefault()</code>, computes the intended value, runs
+        the full sanitize → format pipeline, and writes the result via{' '}
+        <code>setRangeText</code> — which preserves the browser's undo/redo stack. This fires
+        a synchronous <code>input</code> event, which React catches as <code>onChange</code>.
+      </p>
+      <p>The handler covers:</p>
+      <ul>
+        <li>
+          <strong>Decimal separator key</strong> — converts <code>,</code> or <code>.</code> to
+          the configured separator; blocks a second decimal if one already exists.
+        </li>
+        <li>
+          <strong>Character insertion</strong> (<code>insertText</code>) — inserts at cursor,
+          formats the result.
+        </li>
+        <li>
+          <strong>Deletions</strong> (<code>deleteContentBackward</code>,{' '}
+          <code>deleteContentForward</code>, <code>deleteByCut</code>,{' '}
+          <code>deleteByDrag</code>) — removes the correct range, formats the result.
+        </li>
+        <li>
+          <strong>Undo/redo</strong> (<code>historyUndo</code>, <code>historyRedo</code>) —
+          not intercepted; the browser handles these natively.
+        </li>
+        <li>
+          <strong>Paste/drop</strong> — deferred to the dedicated <code>paste</code> handler.
+        </li>
+      </ul>
+
+      <h3>input / onChange</h3>
+      <p>
+        The synchronous <code>input</code> event fired by <code>setRangeText</code> inside{' '}
+        <code>beforeinput</code> is caught by React as <code>onChange</code>.{' '}
+        <code>handleChange</code> is a pure emitter — it reads the already-formatted value
+        from the DOM, strips thousand separators to compute <code>rawValue</code>, and fires
+        the <code>onChange</code> and <code>onRawValueChange</code> callbacks. It does not
+        reformat. The same handler fires for paste (via synthetic event) and undo/redo (via
+        native browser event).
       </p>
       <CodeBlock language="tsx">
 {`<NumoraInput
@@ -224,33 +265,52 @@ function App() {
       <CodeBlock language="text">
 {`user action
     │
-    ├─ keydown ──────────── block duplicate decimal / skip over thousand separator
+    ├─ keydown ──────────── skip cursor over thousand separator (Delete/Backspace only)
     │
-    ├─ input  ──┐
-    │            ├─ sanitize (7 steps)
-    ├─ paste  ──┘        │
-                         ▼
-                  trimToDecimalMaxLength
-                         │
-                         ▼
-                   ensureMinDecimals
-                         │
-                         ▼
-               formatNumoraInput (thousand grouping)
-               [FormatOn.Change only; skipped on input/paste in FormatOn.Blur]
-                         │
-                   ┌─────┴──────────────────────┐
-                   ▼                             ▼
-              formatted                         raw
-            → input.value                     → e.target.rawValue
-            → e.target.value (onChange)        → onRawValueChange
-                         │
-                         ▼
-               updateCursorPosition
-
-    └─ blur ─── formatValueForDisplay (FormatOn.Blur only)
-                → input.value`}
+    ├─ beforeinput ─────── decimal separator handling        [native addEventListener]
+    │                      character insertion / deletion     (primary path)
+    │                      e.preventDefault() + setRangeText
+    │                      ↓ fires synchronous 'input' → React onChange (handleChange)
+    │
+    ├─ paste ────────────── splice clipboard into selection    (dedicated handler)
+    │                      sanitize + format + cursor reposition
+    │                      ↓ synthetic ChangeEvent → onChange directly
+    │
+    ├─ input / onChange ─── pure emitter                      (handleChange)
+    │                      reads already-formatted value from DOM
+    │                      strips separators → rawValue
+    │                      fires onChange + onRawValueChange
+    │                      (also fires for undo/redo via native browser input event)
+    │
+    │   (beforeinput pipeline produces:)
+    │                      ▼
+    │             trimToDecimalMaxLength
+    │                      │
+    │                      ▼
+    │                ensureMinDecimals
+    │                      │
+    │                      ▼
+    │            formatNumoraInput (thousand grouping)
+    │            [FormatOn.Change only; skipped in FormatOn.Blur]
+    │                      │
+    │                ┌─────┴──────────────────────┐
+    │                ▼                             ▼
+    │           formatted                         raw
+    │         → input.value                     → e.target.rawValue
+    │         → e.target.value (onChange)        → onRawValueChange
+    │
+    └─ blur ─────────────── formatValueForDisplay (FormatOn.Blur only)
+                            → input.value`}
       </CodeBlock>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" },
+          { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" },
+          { "@type": "ListItem", "position": 3, "name": "How It Works", "item": "https://numora.xyz/docs/numora-react/how-it-works" }
+        ]
+      }) }} />
     </div>
   )
 }
