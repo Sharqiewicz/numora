@@ -3,6 +3,74 @@ import { NumoraInput } from '../src/NumoraInput';
 import { handleOnPasteNumoraInput } from '../src/utils/event-handlers';
 import { FormatOn, ThousandStyle } from '../src/types';
 
+// ---------------------------------------------------------------------------
+// Test helpers — simulate the real browser event sequence for an <input>.
+//
+// The browser fires:  keydown → beforeinput (cancelable) → input → keyup
+//
+// All formatting logic lives in the beforeinput handler. Tests that dispatch
+// a plain `new Event('input')` bypass it entirely and only exercise the
+// handleChange fallback path — leaving the beforeinput path untested.
+//
+// Use simulateTyping / simulateDelete for tests that should exercise the
+// actual formatting code path. Use the plain `value = x` + Event('input')
+// pattern only when explicitly testing programmatic / fallback behaviour.
+// ---------------------------------------------------------------------------
+
+function simulateTyping(el: HTMLInputElement, char: string): void {
+  const beforeInput = new InputEvent('beforeinput', {
+    bubbles: true,
+    cancelable: true,
+    inputType: 'insertText',
+    data: char,
+  });
+  el.dispatchEvent(beforeInput);
+
+  if (beforeInput.defaultPrevented) {
+    // setRangeText was called inside handleBeforeInput. Real browsers fire a synchronous
+    // 'input' event from setRangeText; jsdom does not, so we dispatch one manually.
+    el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+    return;
+  }
+
+  // Otherwise simulate the browser's native character insertion.
+  const start = el.selectionStart ?? el.value.length;
+  const end = el.selectionEnd ?? start;
+  el.value = el.value.slice(0, start) + char + el.value.slice(end);
+  el.setSelectionRange(start + char.length, start + char.length);
+  el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+}
+
+function simulateDelete(el: HTMLInputElement, direction: 'backward' | 'forward' = 'backward'): void {
+  const inputType = direction === 'backward' ? 'deleteContentBackward' : 'deleteContentForward';
+  const beforeInput = new InputEvent('beforeinput', {
+    bubbles: true,
+    cancelable: true,
+    inputType,
+  });
+  el.dispatchEvent(beforeInput);
+
+  if (beforeInput.defaultPrevented) {
+    // Same as simulateTyping: jsdom's setRangeText doesn't fire 'input', so we do it manually.
+    el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType }));
+    return;
+  }
+
+  const start = el.selectionStart ?? 0;
+  const end = el.selectionEnd ?? 0;
+  if (start !== end) {
+    el.value = el.value.slice(0, start) + el.value.slice(end);
+    el.setSelectionRange(start, start);
+  } else if (direction === 'backward' && start > 0) {
+    el.value = el.value.slice(0, start - 1) + el.value.slice(start);
+    el.setSelectionRange(start - 1, start - 1);
+  } else if (direction === 'forward') {
+    el.value = el.value.slice(0, start) + el.value.slice(start + 1);
+    el.setSelectionRange(start, start);
+  }
+  el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType }));
+}
+
 describe('NumoraInput Component', () => {
   let container: HTMLElement;
   let onChangeMock: ReturnType<typeof vi.fn>;
@@ -77,39 +145,25 @@ describe('NumoraInput Component', () => {
     createInputWithPlaceholder({ decimalSeparator: '.', thousandStyle: ThousandStyle.Thousand });
     const inputElement = getInputElement();
 
-    inputElement.value = '1';
-    inputElement.setSelectionRange(1, 1);
+    simulateTyping(inputElement, '1');
+    simulateTyping(inputElement, ','); // comma → converted to configured decimal separator '.'
+    expect(inputElement.value).toBe('1.');
 
-    // Event cycle when user types comma:
-    // 1. keydown fires → handleDecimalSeparatorKey converts ',' to '.' and prevents default
-    // 2. Since preventDefault() was called, browser doesn't insert comma and doesn't fire input automatically
-    // 3. We manually dispatch input to trigger formatting, validation, and onChange callback
-    const commaKeydownEvent = new KeyboardEvent('keydown', { key: ',', bubbles: true, cancelable: true });
-    inputElement.dispatchEvent(commaKeydownEvent);
-    inputElement.dispatchEvent(new Event('input', { bubbles: true }));
-
-    inputElement.setSelectionRange(2, 2);
-    inputElement.value = '1.2';
-    inputElement.dispatchEvent(new Event('input', { bubbles: true }));
-
-    // Try to type '.' again - should be prevented (already has decimal separator)
-    inputElement.setSelectionRange(3, 3);
-    const periodKeydownEvent = new KeyboardEvent('keydown', { key: '.', bubbles: true, cancelable: true });
-    inputElement.dispatchEvent(periodKeydownEvent);
-    inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+    simulateTyping(inputElement, '2');
     expect(inputElement.value).toBe('1.2');
 
-    inputElement.setSelectionRange(3, 3);
-    inputElement.value = '1.23';
-    inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+    // Typing '.' again should be blocked — decimal already present
+    simulateTyping(inputElement, '.');
+    expect(inputElement.value).toBe('1.2');
 
-    // Try to type '.' again - should be prevented (already has decimal separator)
-    inputElement.setSelectionRange(4, 4);
-    inputElement.dispatchEvent(periodKeydownEvent);
-    inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+    simulateTyping(inputElement, '3');
+    expect(inputElement.value).toBe('1.23');
+
+    // Typing ',' again should also be blocked
+    simulateTyping(inputElement, ',');
+    expect(inputElement.value).toBe('1.23');
 
     expect(onChangeMock).toHaveBeenCalled();
-    expect(inputElement.value).toBe('1.23');
   });
 
   it('should work with readOnly property', () => {
@@ -228,6 +282,584 @@ describe('Paste handler sanitization cases', () => {
   );
 });
 
+describe('beforeinput event path', () => {
+  let container: HTMLElement;
+  let onChangeMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    onChangeMock = vi.fn();
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  function getInputElement() {
+    return container.querySelector('input') as HTMLInputElement;
+  }
+
+  describe('digit insertion', () => {
+    it('should insert a digit via beforeinput', () => {
+      new NumoraInput(container, { onChange: onChangeMock });
+      const el = getInputElement();
+
+      simulateTyping(el, '5');
+
+      expect(el.value).toBe('5');
+      expect(onChangeMock).toHaveBeenCalledWith('5');
+    });
+
+    it('should build a number character by character', () => {
+      new NumoraInput(container, { onChange: onChangeMock });
+      const el = getInputElement();
+
+      simulateTyping(el, '1');
+      simulateTyping(el, '2');
+      simulateTyping(el, '3');
+
+      expect(el.value).toBe('123');
+    });
+
+    it('should ignore non-numeric characters', () => {
+      new NumoraInput(container, { onChange: onChangeMock });
+      const el = getInputElement();
+
+      simulateTyping(el, '1');
+      simulateTyping(el, 'a');
+      simulateTyping(el, '2');
+
+      expect(el.value).toBe('12');
+    });
+  });
+
+  describe('decimal separator', () => {
+    it('should insert decimal separator', () => {
+      new NumoraInput(container, { onChange: onChangeMock, decimalMaxLength: 2 });
+      const el = getInputElement();
+
+      simulateTyping(el, '1');
+      simulateTyping(el, '.');
+      simulateTyping(el, '5');
+
+      expect(el.value).toBe('1.5');
+    });
+
+    it('should convert comma to configured decimal separator', () => {
+      new NumoraInput(container, { onChange: onChangeMock, decimalSeparator: '.', decimalMaxLength: 2 });
+      const el = getInputElement();
+
+      simulateTyping(el, '1');
+      simulateTyping(el, ',');
+
+      expect(el.value).toBe('1.');
+    });
+
+    it('should block a second decimal separator', () => {
+      new NumoraInput(container, { onChange: onChangeMock, decimalMaxLength: 2 });
+      const el = getInputElement();
+
+      simulateTyping(el, '1');
+      simulateTyping(el, '.');
+      simulateTyping(el, '5');
+      simulateTyping(el, '.'); // second dot — should be blocked
+      simulateTyping(el, '2');
+
+      expect(el.value).toBe('1.52');
+    });
+
+    it('should block second decimal when comma is typed', () => {
+      new NumoraInput(container, { onChange: onChangeMock, decimalSeparator: '.', decimalMaxLength: 2 });
+      const el = getInputElement();
+
+      simulateTyping(el, '1');
+      simulateTyping(el, '.');
+      simulateTyping(el, ','); // already has '.', comma should also be blocked
+
+      expect(el.value).toBe('1.');
+    });
+  });
+
+  describe('delete', () => {
+    it('should delete the last character with Backspace', () => {
+      new NumoraInput(container, { onChange: onChangeMock });
+      const el = getInputElement();
+
+      simulateTyping(el, '1');
+      simulateTyping(el, '2');
+      simulateTyping(el, '3');
+      simulateDelete(el, 'backward');
+
+      expect(el.value).toBe('12');
+    });
+
+    it('should delete a character forward with Delete', () => {
+      new NumoraInput(container, { onChange: onChangeMock });
+      const el = getInputElement();
+
+      simulateTyping(el, '1');
+      simulateTyping(el, '2');
+      simulateTyping(el, '3');
+      // Move cursor to position 0
+      el.setSelectionRange(0, 0);
+      simulateDelete(el, 'forward');
+
+      expect(el.value).toBe('23');
+    });
+  });
+
+  describe('FormatOn.Change — thousand separator', () => {
+    it('should add thousand separator when typing 4th digit', () => {
+      new NumoraInput(container, {
+        onChange: onChangeMock,
+        formatOn: FormatOn.Change,
+        thousandSeparator: ',',
+        thousandStyle: ThousandStyle.Thousand,
+      });
+      const el = getInputElement();
+
+      simulateTyping(el, '1');
+      simulateTyping(el, '2');
+      simulateTyping(el, '3');
+      simulateTyping(el, '4');
+
+      expect(el.value).toBe('1,234');
+    });
+
+    it('should not select all text when thousand separator is inserted', () => {
+      // Regression: setRangeText with 'preserve' mode selected the entire value
+      // when the formatted result was longer than the raw input (e.g. 1234 → 1,234).
+      new NumoraInput(container, {
+        onChange: onChangeMock,
+        formatOn: FormatOn.Change,
+        thousandSeparator: ',',
+        thousandStyle: ThousandStyle.Thousand,
+      });
+      const el = getInputElement();
+
+      simulateTyping(el, '1');
+      simulateTyping(el, '2');
+      simulateTyping(el, '3');
+      simulateTyping(el, '4');
+
+      expect(el.value).toBe('1,234');
+      // Selection should NOT be the whole string
+      expect(el.selectionStart === 0 && el.selectionEnd === el.value.length).toBe(false);
+    });
+
+    it('should correctly emit raw value without thousand separators', () => {
+      new NumoraInput(container, {
+        onChange: onChangeMock,
+        formatOn: FormatOn.Change,
+        thousandSeparator: ',',
+        thousandStyle: ThousandStyle.Thousand,
+        rawValueMode: true,
+      });
+      const el = getInputElement();
+
+      simulateTyping(el, '1');
+      simulateTyping(el, '2');
+      simulateTyping(el, '3');
+      simulateTyping(el, '4');
+
+      expect(el.value).toBe('1,234');
+      expect(onChangeMock).toHaveBeenLastCalledWith('1234');
+    });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// keydown event coverage
+// ---------------------------------------------------------------------------
+
+describe('keydown — skipOverThousandSeparatorOnDelete', () => {
+  let container: HTMLElement;
+  let onChangeMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    onChangeMock = vi.fn();
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  function getInputElement() {
+    return container.querySelector('input') as HTMLInputElement;
+  }
+
+  function simulateKeyDown(el: HTMLInputElement, key: string): void {
+    el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+  }
+
+  it('should skip cursor over thousand separator on Backspace', () => {
+    // In FormatOn.Change mode, "1,234" has a comma at index 1.
+    // If cursor is at position 2 (right after the comma) and user presses Backspace,
+    // the keydown handler should reposition the cursor to position 1 (before the comma)
+    // so the subsequent beforeinput deletes the digit '1' instead of the separator.
+    new NumoraInput(container, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Change,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    simulateTyping(el, '1');
+    simulateTyping(el, '2');
+    simulateTyping(el, '3');
+    simulateTyping(el, '4');
+    expect(el.value).toBe('1,234');
+
+    // Place cursor immediately after the comma (position 2)
+    el.setSelectionRange(2, 2);
+    simulateKeyDown(el, 'Backspace');
+
+    // Cursor should have been moved to position 1 (before the comma)
+    expect(el.selectionStart).toBe(1);
+    expect(el.selectionEnd).toBe(1);
+  });
+
+  it('should skip cursor over thousand separator on Delete', () => {
+    // Place cursor immediately before the comma (position 1) and press Delete.
+    // The keydown handler should move cursor to position 2 (past the comma) so
+    // the subsequent beforeinput deletes the digit '2' instead of the separator.
+    new NumoraInput(container, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Change,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    simulateTyping(el, '1');
+    simulateTyping(el, '2');
+    simulateTyping(el, '3');
+    simulateTyping(el, '4');
+    expect(el.value).toBe('1,234');
+
+    // Place cursor immediately before the comma (position 1)
+    el.setSelectionRange(1, 1);
+    simulateKeyDown(el, 'Delete');
+
+    // Cursor should have moved past the comma to position 2
+    expect(el.selectionStart).toBe(2);
+    expect(el.selectionEnd).toBe(2);
+  });
+
+  it('should not skip in FormatOn.Blur mode', () => {
+    // skipOverThousandSeparatorOnDelete only applies in FormatOn.Change mode.
+    new NumoraInput(container, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    el.value = '1,234';
+    el.setSelectionRange(2, 2);
+    simulateKeyDown(el, 'Backspace');
+
+    // Cursor should NOT have moved — Blur mode doesn't skip separators
+    expect(el.selectionStart).toBe(2);
+  });
+
+  it('should not skip when cursor is not adjacent to separator', () => {
+    new NumoraInput(container, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Change,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    simulateTyping(el, '1');
+    simulateTyping(el, '2');
+    simulateTyping(el, '3');
+    simulateTyping(el, '4');
+    expect(el.value).toBe('1,234');
+
+    // Cursor at position 5 (end) — not adjacent to a separator
+    el.setSelectionRange(5, 5);
+    simulateKeyDown(el, 'Backspace');
+
+    expect(el.selectionStart).toBe(5);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// beforeinput — deletion with active selection + cut/drag
+// ---------------------------------------------------------------------------
+
+describe('beforeinput — selection and cut/drag deletion', () => {
+  let container: HTMLElement;
+  let onChangeMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    onChangeMock = vi.fn();
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  function getInputElement() {
+    return container.querySelector('input') as HTMLInputElement;
+  }
+
+  function dispatchBeforeInput(el: HTMLInputElement, init: InputEventInit): boolean {
+    const ev = new InputEvent('beforeinput', { bubbles: true, cancelable: true, ...init });
+    el.dispatchEvent(ev);
+    return ev.defaultPrevented;
+  }
+
+  it('deleteContentBackward with selection removes the selected range', () => {
+    new NumoraInput(container, { onChange: onChangeMock });
+    const el = getInputElement();
+
+    simulateTyping(el, '1');
+    simulateTyping(el, '2');
+    simulateTyping(el, '3');
+    simulateTyping(el, '4');
+    simulateTyping(el, '5');
+    expect(el.value).toBe('12345');
+
+    // Select "234"
+    el.setSelectionRange(1, 4);
+    dispatchBeforeInput(el, { inputType: 'deleteContentBackward' });
+
+    expect(el.value).toBe('15');
+  });
+
+  it('deleteContentForward with selection removes the selected range', () => {
+    new NumoraInput(container, { onChange: onChangeMock });
+    const el = getInputElement();
+
+    simulateTyping(el, '1');
+    simulateTyping(el, '2');
+    simulateTyping(el, '3');
+    expect(el.value).toBe('123');
+
+    // Select "12"
+    el.setSelectionRange(0, 2);
+    dispatchBeforeInput(el, { inputType: 'deleteContentForward' });
+
+    expect(el.value).toBe('3');
+  });
+
+  it('deleteByCut removes the selected range', () => {
+    new NumoraInput(container, { onChange: onChangeMock });
+    const el = getInputElement();
+
+    simulateTyping(el, '1');
+    simulateTyping(el, '2');
+    simulateTyping(el, '3');
+    simulateTyping(el, '4');
+    expect(el.value).toBe('1234');
+
+    // Select "23"
+    el.setSelectionRange(1, 3);
+    dispatchBeforeInput(el, { inputType: 'deleteByCut' });
+
+    expect(el.value).toBe('14');
+  });
+
+  it('deleteByDrag removes the selected range', () => {
+    new NumoraInput(container, { onChange: onChangeMock });
+    const el = getInputElement();
+
+    simulateTyping(el, '9');
+    simulateTyping(el, '8');
+    simulateTyping(el, '7');
+    expect(el.value).toBe('987');
+
+    // Select "87"
+    el.setSelectionRange(1, 3);
+    dispatchBeforeInput(el, { inputType: 'deleteByDrag' });
+
+    expect(el.value).toBe('9');
+  });
+
+  it('deleteByCut on formatted value re-formats the remainder', () => {
+    new NumoraInput(container, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Change,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    // Build "12,345"
+    '123456'.split('').forEach(c => simulateTyping(el, c));
+    expect(el.value).toBe('123,456');
+
+    // Cut the leading "123" (positions 0–3 include the comma)
+    el.setSelectionRange(0, 4); // "123,"
+    dispatchBeforeInput(el, { inputType: 'deleteByCut' });
+
+    expect(el.value).toBe('456');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// beforeinput — pass-through events (undo/redo, paste delegation)
+// ---------------------------------------------------------------------------
+
+describe('beforeinput — pass-through events', () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  function getInputElement() {
+    return container.querySelector('input') as HTMLInputElement;
+  }
+
+  function dispatchBeforeInput(el: HTMLInputElement, inputType: string): InputEvent {
+    const ev = new InputEvent('beforeinput', { bubbles: true, cancelable: true, inputType });
+    el.dispatchEvent(ev);
+    return ev;
+  }
+
+  it('historyUndo is NOT prevented — browser handles undo natively', () => {
+    new NumoraInput(container, {});
+    const el = getInputElement();
+    const ev = dispatchBeforeInput(el, 'historyUndo');
+    expect(ev.defaultPrevented).toBe(false);
+  });
+
+  it('historyRedo is NOT prevented — browser handles redo natively', () => {
+    new NumoraInput(container, {});
+    const el = getInputElement();
+    const ev = dispatchBeforeInput(el, 'historyRedo');
+    expect(ev.defaultPrevented).toBe(false);
+  });
+
+  it('insertFromPaste is NOT prevented — delegated to paste handler', () => {
+    new NumoraInput(container, {});
+    const el = getInputElement();
+    const ev = dispatchBeforeInput(el, 'insertFromPaste');
+    expect(ev.defaultPrevented).toBe(false);
+  });
+
+  it('insertFromDrop is NOT prevented — delegated to paste handler', () => {
+    new NumoraInput(container, {});
+    const el = getInputElement();
+    const ev = dispatchBeforeInput(el, 'insertFromDrop');
+    expect(ev.defaultPrevented).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// focus / blur events — FormatOn.Blur mode
+// ---------------------------------------------------------------------------
+
+describe('focus/blur — FormatOn.Blur mode', () => {
+  let container: HTMLElement;
+  let onChangeMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    onChangeMock = vi.fn();
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  function getInputElement() {
+    return container.querySelector('input') as HTMLInputElement;
+  }
+
+  it('focus strips thousand separators so the user edits raw digits', () => {
+    new NumoraInput(container, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    // Pre-load a formatted value
+    el.value = '1,234,567';
+    el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+
+    expect(el.value).toBe('1234567');
+  });
+
+  it('blur re-applies thousand separators and emits onChange', () => {
+    new NumoraInput(container, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    el.value = '1234567';
+    el.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+
+    expect(el.value).toBe('1,234,567');
+    expect(onChangeMock).toHaveBeenCalledWith('1,234,567');
+  });
+
+  it('focus → type → blur round-trip formats correctly', () => {
+    new NumoraInput(container, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    // Simulate a full editing cycle
+    el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+    simulateTyping(el, '1');
+    simulateTyping(el, '2');
+    simulateTyping(el, '3');
+    simulateTyping(el, '4');
+    simulateTyping(el, '5');
+    el.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+
+    expect(el.value).toBe('12,345');
+    expect(onChangeMock).toHaveBeenLastCalledWith('12,345');
+  });
+
+  it('focus on already-formatted value strips and blur re-adds', () => {
+    new NumoraInput(container, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    el.value = '9,876';
+    el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+    expect(el.value).toBe('9876');
+
+    el.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    expect(el.value).toBe('9,876');
+  });
+});
+
 describe('NumoraInput edge cases', () => {
   let container: HTMLElement;
   let inputInstance: NumoraInput;
@@ -247,13 +879,10 @@ describe('NumoraInput edge cases', () => {
     inputInstance = new NumoraInput(container, { decimalMaxLength: 3 });
     const inputElement = container.querySelector('input') as HTMLInputElement;
 
-    for (let i = 0; i < 10; i++) {
-      const event = new KeyboardEvent('keydown', { key: '.' });
-      inputElement.dispatchEvent(event);
-      if (i === 0) {
-        inputElement.value += '.';
-      }
-      inputElement.dispatchEvent(new Event('input'));
+    simulateTyping(inputElement, '1');
+    simulateTyping(inputElement, '.'); // first decimal — allowed
+    for (let i = 0; i < 9; i++) {
+      simulateTyping(inputElement, '.'); // subsequent decimals — all blocked
     }
 
     expect(inputElement.value.split('.').length - 1).toBe(1);

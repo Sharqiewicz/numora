@@ -22,7 +22,7 @@
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly",
     "test": "vitest run",
-    "dev": "vite build --watch"
+    "dev": "vite build --watch & tsc --watch --emitDeclarationOnly --preserveWatchOutput"
   },
   "keywords": [
     "numeric input",

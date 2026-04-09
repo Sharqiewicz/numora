@@ -1,4 +1,5 @@
 import {
+  handleOnBeforeInputNumoraInput,
   handleOnChangeNumoraInput,
   handleOnKeyDownNumoraInput,
   handleOnPasteNumoraInput,
@@ -197,6 +198,11 @@ export class NumoraInput {
   }
 
   private setupEventListeners(): void {
+    // beforeinput fires before the browser applies the user's action and is cancelable,
+    // which lets us apply the formatted value via setRangeText and preserve undo history.
+    this.element.addEventListener('beforeinput', this.handleBeforeInput.bind(this));
+    // The input listener stays as a fallback for programmatic value changes in tests or
+    // environments that dispatch 'input' without a preceding 'beforeinput'.
     this.element.addEventListener('input', this.handleChange.bind(this));
     this.element.addEventListener('keydown', this.handleKeyDown.bind(this));
     this.element.addEventListener('paste', this.handlePaste.bind(this));
@@ -272,6 +278,17 @@ export class NumoraInput {
     }
 
     return value;
+  }
+
+  private handleBeforeInput(e: InputEvent): void {
+    // handleOnBeforeInputNumoraInput calls e.preventDefault() + setRangeText for handled
+    // input types. The synchronous 'input' event fired by setRangeText will be picked up
+    // by handleChange, which is the single place handleValueChange is called.
+    handleOnBeforeInputNumoraInput(
+      e,
+      this.resolvedOptions.decimalMaxLength,
+      this.buildFormattingOptions()
+    );
   }
 
   private handleChange(e: Event): void {
