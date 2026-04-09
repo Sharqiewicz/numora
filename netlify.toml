@@ -1,0 +1,4 @@
+[build]
+  base    = "."
+  command = "pnpm --filter docs build"
+  publish = "docs/dist/client"

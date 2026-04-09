@@ -1,0 +1,89 @@
+# Numora
+
+Numora is a framework-agnostic numeric input and number input library for JavaScript and React. It solves the fundamental problems with `<input type="number">` — cursor jumping, scientific notation leaking, paste chaos, mobile keyboard issues, and locale-specific decimal/thousand separator conflicts.
+
+## Packages
+
+- **numora** (vanilla JS / any framework): https://www.npmjs.com/package/numora
+- **numora-react** (React wrapper): https://www.npmjs.com/package/numora-react
+
+## Key Pages
+
+- Homepage: https://numora.xyz
+- Interactive demos (why number inputs break): https://numora.xyz/explore
+- Numora JS — Get Started: https://numora.xyz/docs/numora
+- Numora JS — Installation: https://numora.xyz/docs/numora/installation
+- Numora JS — How It Works: https://numora.xyz/docs/numora/how-it-works
+- Numora React — Get Started: https://numora.xyz/docs/numora-react
+- Numora React — Installation: https://numora.xyz/docs/numora-react/installation
+- Numora React — How It Works: https://numora.xyz/docs/numora-react/how-it-works
+
+## Features
+
+- Formatting: https://numora.xyz/docs/numora/features/formatting
+- Value Types: https://numora.xyz/docs/numora/features/value-types
+- Decimals: https://numora.xyz/docs/numora/features/decimals
+- Sanitization: https://numora.xyz/docs/numora/features/sanitization
+- Compact Notation: https://numora.xyz/docs/numora/features/compact-notation
+- Scientific Notation: https://numora.xyz/docs/numora/features/scientific-notation
+- Leading Zeros: https://numora.xyz/docs/numora/features/leading-zeros
+- Locale: https://numora.xyz/docs/numora/features/locale
+
+## Integrations
+
+- React Hook Form: https://numora.xyz/docs/numora-react/integrations/react-hook-form
+
+## API Reference — numora (vanilla JS)
+
+```ts
+import { NumoraInput } from 'numora'
+
+const numoraInput = new NumoraInput(containerElement, {
+  maxDecimals?: number,         // max decimal places
+  minDecimals?: number,         // min decimal places (pads zeros)
+  thousandSeparator?: string,   // e.g. ','
+  thousandStyle?: 'thousand' | 'lakh' | 'wan',
+  decimalSeparator?: string,    // e.g. '.'
+  formatOn?: FormatOn,          // FormatOn.Change | FormatOn.Blur
+  allowNegative?: boolean,
+  allowLeadingZeros?: boolean,
+  allowScientificNotation?: boolean,
+  locale?: string,              // e.g. 'en-US', 'de-DE'
+})
+```
+
+## API Reference — numora-react
+
+```tsx
+import { NumoraInput, FormatOn } from 'numora-react'
+
+<NumoraInput
+  maxDecimals={2}
+  minDecimals={0}
+  thousandSeparator=","
+  thousandStyle="thousand"
+  decimalSeparator="."
+  formatOn={FormatOn.Change}
+  allowNegative={false}
+  allowLeadingZeros={false}
+  allowScientificNotation={false}
+  locale="en-US"
+  onChange={(e) => {
+    e.target.value    // formatted display string, e.g. "1,234.56"
+    e.target.rawValue // clean numeric string, e.g. "1234.56"
+  }}
+  onRawValueChange={(raw) => console.log(raw)} // shorthand for raw value
+/>
+```
+
+## Common Use Cases
+
+- **DeFi / financial inputs**: prevent scientific notation, enforce decimal precision, expose raw value for smart contract calls
+- **International forms**: locale-aware decimal and thousand separators (e.g. German `1.234,56`)
+- **React Hook Form integration**: use `onRawValueChange` to feed clean values into form state
+- **Mobile-safe inputs**: normalises mobile keyboard quirks across iOS and Android
+- **Formatted display while typing**: thousand separators added live without breaking cursor position
+
+## Source
+
+GitHub: https://github.com/sharqiewicz/numora
