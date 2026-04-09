@@ -14,7 +14,8 @@
     "lint": "pnpm --filter \"./packages/*\" lint",
     "clean": "pnpm --filter \"./packages/*\" clean && pnpm --filter \"./docs\" clean && pnpm --filter \"./docsv0\" clean",
     "docs:dev": "pnpm --filter \"./docs\" dev",
-    "docs:build": "pnpm --filter \"./docs\" build"
+    "docs:build": "pnpm --filter \"./docs\" build",
+    "dev:all": "pnpm --filter numora build && pnpm --parallel --filter \"./packages/*\" --filter \"./docs\" dev"
   },
   "devDependencies": {
     "typescript": "^5.8.2"

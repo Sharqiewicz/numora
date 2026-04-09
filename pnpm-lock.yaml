@@ -96,11 +96,11 @@ importers:
         specifier: ^12.23.26
         version: 12.35.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       numora:
-        specifier: ^3.4.0
-        version: 3.4.0
+        specifier: workspace:^
+        version: link:../packages/core
       numora-react:
-        specifier: ^3.4.0
-        version: 3.4.0(numora@3.4.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: workspace:^
+        version: link:../packages/react
       ogl:
         specifier: ^1.0.11
         version: 1.0.11
@@ -4297,19 +4297,6 @@ packages:
 
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
-
-  numora-react@3.4.0:
-    resolution: {integrity: sha512-+k6xy10F0N6TGgg34biJ3oXt82HUjQWI4x38x2KyxmmDXFEiY6l9zPsjsCPi/q40C0bjeDYVDrjdWdEKg9fXUw==}
-    peerDependencies:
-      numora: '>=3.4.0'
-      react: '>=16.8.0'
-      react-dom: '>=16.8.0'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
-
-  numora@3.4.0:
-    resolution: {integrity: sha512-V3D41Kqol8i8Mf8mC20O9EszPzlpvhRnLObhPA6YZtIrDoqx7VmEAq+QUMR0QM/gAUQjshBTaifgb0fPMsdXng==}
 
   nwsapi@2.2.23:
     resolution: {integrity: sha512-7wfH4sLbt4M0gCDzGE6vzQBo0bfTKjU7Sfpqy/7gs1qBfYz2vEJH6vXcBKpO3+6Yu1telwd0t9HpyOoLEQQbIQ==}
@@ -9759,15 +9746,6 @@ snapshots:
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
-
-  numora-react@3.4.0(numora@3.4.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
-    dependencies:
-      numora: 3.4.0
-      react: 19.2.4
-    optionalDependencies:
-      react-dom: 19.2.4(react@19.2.4)
-
-  numora@3.4.0: {}
 
   nwsapi@2.2.23: {}
 
