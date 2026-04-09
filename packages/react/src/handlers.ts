@@ -1,5 +1,6 @@
 import type React from 'react';
 import {
+  handleOnBeforeInputNumoraInput,
   handleOnChangeNumoraInput,
   handleOnKeyDownNumoraInput,
   handleOnPasteNumoraInput,
@@ -22,6 +23,19 @@ type BaseOptions = {
   caretPositionBeforeChange?: CaretPositionInfo;
   formattingOptions: FormattingOptions & { rawValueMode?: boolean };
 };
+
+export function handleNumoraOnBeforeInput(
+  e: InputEvent,
+  options: Omit<BaseOptions, 'caretPositionBeforeChange'>
+): ChangeResult | null {
+  const result = handleOnBeforeInputNumoraInput(
+    e,
+    options.decimalMaxLength,
+    options.formattingOptions
+  );
+  if (result === null) return null;
+  return { value: result.formatted, rawValue: result.raw };
+}
 
 export function handleNumoraOnChange(
   e: React.ChangeEvent<HTMLInputElement>,

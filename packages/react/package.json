@@ -14,8 +14,8 @@
     }
   },
   "peerDependencies": {
-    "react": ">=16.8.0",
-    "react-dom": ">=16.8.0",
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0",
     "numora": ">=3.4.0"
   },
   "peerDependenciesMeta": {
@@ -28,7 +28,8 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "watch": "rollup -c -w"
+    "watch": "rollup -c -w",
+    "dev": "rollup -c -w"
   },
   "keywords": [
     "numeric input",

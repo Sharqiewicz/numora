@@ -10,7 +10,7 @@ import {
   ChangeEvent,
   FocusEvent,
   KeyboardEvent,
-  InputHTMLAttributes
+  InputHTMLAttributes,
 } from 'react';
 import {
   FormatOn,
@@ -19,12 +19,11 @@ import {
   formatValueForDisplay,
   removeThousandSeparators,
   validateNumoraInputOptions,
-  type CaretPositionInfo,
   type FormattingOptions,
 } from 'numora';
 import {
+  handleNumoraOnBeforeInput,
   handleNumoraOnBlur,
-  handleNumoraOnChange,
   handleNumoraOnKeyDown,
   handleNumoraOnPaste,
 } from './handlers';
@@ -37,11 +36,6 @@ export type NumoraInputChangeEvent = Omit<ChangeEvent<HTMLInputElement>, 'target
   target: NumoraHTMLInputElement;
 };
 
-/**
- * Creates a complete synthetic change event from a real HTMLInputElement.
- * Used when a change needs to be signalled without an actual DOM change event
- * (e.g. after paste with preventDefault, or after a controlled-value reformat).
- */
 function createSyntheticChangeEvent(input: HTMLInputElement): NumoraInputChangeEvent {
   const nativeEvent = new Event('change', { bubbles: true, cancelable: false });
   return {
@@ -61,7 +55,7 @@ function createSyntheticChangeEvent(input: HTMLInputElement): NumoraInputChangeE
     preventDefault: () => {},
     stopPropagation: () => {},
     stopImmediatePropagation: () => {},
-  } as unknown as NumoraInputChangeEvent;
+  } as NumoraInputChangeEvent;
 }
 
 export interface NumoraInputProps
@@ -87,6 +81,11 @@ export interface NumoraInputProps
   enableNegative?: boolean;
   enableLeadingZeros?: boolean;
   rawValueMode?: boolean;
+}
+
+/** Extract the raw value from a formatted display value by stripping thousand separators. */
+function toRawValue(formatted: string, thousandSeparator?: string): string {
+  return thousandSeparator ? removeThousandSeparators(formatted, thousandSeparator) : formatted;
 }
 
 const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) => {
@@ -127,14 +126,9 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   });
 
   const internalInputRef = useRef<HTMLInputElement>(null);
-  const caretInfoRef = useRef<CaretPositionInfo | undefined>(undefined);
-  const lastCaretPosRef = useRef<number | null>(null);
 
-  // Memoize to give callbacks a stable reference - avoids recreating all
-  // useCallback functions on every render when primitive props haven't changed.
   const formattingOptions: FormattingOptions = useMemo(() => {
     const separators = applyLocale(locale, { thousandSeparator, decimalSeparator });
-
     return {
       formatOn,
       thousandSeparator: separators.thousandSeparator,
@@ -149,172 +143,160 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   }, [locale, formatOn, thousandSeparator, thousandStyle, decimalSeparator, decimalMinLength,
     enableCompactNotation, enableNegative, enableLeadingZeros, rawValueMode]);
 
-  const getInitialValue = (): string => {
+  // Compute initial formatted value once at mount. Using uncontrolled defaultValue means
+  // React never overwrites the DOM value on re-renders, which is what allows undo to work.
+  const [initialDisplayValue] = useState<string>(() => {
     const valueToFormat = controlledValue !== undefined ? controlledValue : defaultValue;
     if (valueToFormat !== undefined) {
       const { formatted } = formatValueForDisplay(String(valueToFormat), maxDecimals, formattingOptions);
       return formatted;
     }
     return '';
-  };
+  });
 
-  const [displayValue, setDisplayValue] = useState<string>(getInitialValue);
-
-  // Track the current displayValue via a ref so the controlled-value useEffect
-  // can compare against it without adding displayValue as a dependency (which
-  // would cause the effect to re-run on every keystroke).
-  const displayValueRef = useRef<string>(displayValue);
-  displayValueRef.current = displayValue;
-
-  // Sync external ref with internal ref
+  // Sync external ref
   useLayoutEffect(() => {
     if (!ref) return;
-    if (typeof ref === 'function') {
-      ref(internalInputRef.current);
-    } else {
-      ref.current = internalInputRef.current;
-    }
+    if (typeof ref === 'function') ref(internalInputRef.current);
+    else ref.current = internalInputRef.current;
   }, [ref]);
 
-  // When the controlled value or formatting options change, reformat the display.
-  // Uses displayValueRef (not displayValue in deps) to avoid re-running on every keystroke.
-  // Does NOT call onChange - that would create a circular loop with react-hook-form Controller.
+  // Set the initial rawValue on the element after mount so consumers that read it
+  // synchronously from the ref always see a defined value.
   useEffect(() => {
-    if (controlledValue !== undefined) {
-      const { formatted, raw } = formatValueForDisplay(String(controlledValue), maxDecimals, formattingOptions);
-      if (formatted !== displayValueRef.current) {
-        setDisplayValue(formatted);
+    const input = internalInputRef.current;
+    if (!input) return;
+    (input as NumoraHTMLInputElement).rawValue = toRawValue(input.value, formattingOptions.thousandSeparator);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally runs once on mount only
 
-        if (internalInputRef.current) {
-          (internalInputRef.current as NumoraHTMLInputElement).rawValue = raw;
-        }
-        onRawValueChange?.(raw);
-      }
+  // Sync controlled value prop changes and formatting option changes (locale switch, separator
+  // change, maxDecimals change, etc.). Direct assignment is fine — programmatic changes don't
+  // need undo history. We compare formatted against input.value (not a prev-value ref) so the
+  // effect correctly reformats when formattingOptions changes even if controlledValue is the same.
+  useEffect(() => {
+    if (controlledValue === undefined) return;
+    const input = internalInputRef.current;
+    if (!input) return;
+
+    const { formatted, raw } = formatValueForDisplay(String(controlledValue), maxDecimals, formattingOptions);
+    if (formatted !== input.value) {
+      input.value = formatted;
+      (input as NumoraHTMLInputElement).rawValue = raw;
+      onRawValueChange?.(raw);
     }
   }, [controlledValue, maxDecimals, formattingOptions, onRawValueChange]);
 
-  // Restore cursor position after render.
-  // No dependency array is intentional: this must run after every render so it catches
-  // the re-render triggered by setDisplayValue in handleChange/handlePaste.
-  // lastCaretPosRef is a ref (not reactive), so it cannot be a dependency.
+  // Keep refs in sync so the beforeinput handler always sees the latest options without
+  // needing to re-register the listener on every render. useLayoutEffect ensures the refs
+  // are updated before the browser can fire a beforeinput event after a commit.
+  const formattingOptionsRef = useRef(formattingOptions);
+  const maxDecimalsRef = useRef(maxDecimals);
   useLayoutEffect(() => {
-    if (internalInputRef.current && lastCaretPosRef.current !== null) {
-      const input = internalInputRef.current;
-      const pos = lastCaretPosRef.current;
-      input.setSelectionRange(pos, pos);
-      lastCaretPosRef.current = null;
-    }
+    formattingOptionsRef.current = formattingOptions;
+    maxDecimalsRef.current = maxDecimals;
   });
 
-  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const { value, rawValue } = handleNumoraOnChange(e, {
-      decimalMaxLength: maxDecimals,
-      caretPositionBeforeChange: caretInfoRef.current,
-      formattingOptions,
-    });
+  // Native beforeinput listener attached directly to the input element (not via React's
+  // synthetic event delegation). React's onBeforeInput fires at the root during bubbling —
+  // by that point the browser has already committed the mutation, so e.preventDefault() is
+  // a no-op. A direct listener on the element fires synchronously before the browser decides
+  // whether to apply the mutation, which is the only way cancellation works correctly.
+  // Registered once at mount; options are read via refs to avoid re-registration churn.
+  useEffect(() => {
+    const input = internalInputRef.current;
+    if (!input) return;
 
-    if (internalInputRef.current) {
-      const cursorPos = internalInputRef.current.selectionStart;
-      if (cursorPos !== null && cursorPos !== undefined) {
-        lastCaretPosRef.current = cursorPos;
+    const handler = (e: InputEvent) => {
+      const result = handleNumoraOnBeforeInput(e, {
+        decimalMaxLength: maxDecimalsRef.current,
+        formattingOptions: formattingOptionsRef.current,
+      });
+      if (result !== null) {
+        (input as NumoraHTMLInputElement).rawValue = result.rawValue;
       }
-    }
+    };
 
-    caretInfoRef.current = undefined;
+    input.addEventListener('beforeinput', handler);
+    return () => input.removeEventListener('beforeinput', handler);
+  }, []);
+
+  // handleChange fires after every native input event:
+  //   • from setRangeText (typing path) — rawValue already set by beforeinput handler
+  //   • from the input fallback path    — rawValue recomputed from current value
+  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const formatted = e.target.value;
+    // Always recompute from the current display value so stale rawValue (e.g. after undo)
+    // is never used. removeThousandSeparators(formatted) == raw for all formatting modes.
+    const rawValue = toRawValue(formatted, formattingOptions.thousandSeparator);
 
     (e.target as NumoraHTMLInputElement).rawValue = rawValue;
-
     onRawValueChange?.(rawValue);
 
-    setDisplayValue(value);
+    if (onChange) onChange(e as NumoraInputChangeEvent);
+  }, [formattingOptions.thousandSeparator, onChange, onRawValueChange]);
 
-    if (onChange) {
-      onChange(e as unknown as NumoraInputChangeEvent);
-    }
-  }, [maxDecimals, formattingOptions, onChange, onRawValueChange]);
-
+  // handleKeyDown is still needed for skipOverThousandSeparatorOnDelete (moves the cursor
+  // past separators before beforeinput fires). caretInfoRef is no longer needed because
+  // handleOnBeforeInputNumoraInput derives its own caret info from the InputEvent.
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
-    const coreCaretInfo = handleNumoraOnKeyDown(e, formattingOptions);
-
-    if (!coreCaretInfo && internalInputRef.current) {
-      const selectionStart = internalInputRef.current.selectionStart ?? 0;
-      const selectionEnd = internalInputRef.current.selectionEnd ?? 0;
-      caretInfoRef.current = {
-        selectionStart,
-        selectionEnd,
-      };
-    } else {
-      caretInfoRef.current = coreCaretInfo;
-    }
-
-    if (onKeyDown) {
-      onKeyDown(e);
-    }
+    handleNumoraOnKeyDown(e, formattingOptions);
+    if (onKeyDown) onKeyDown(e);
   }, [formattingOptions, onKeyDown]);
 
   const handlePaste = useCallback((e: ClipboardEvent<HTMLInputElement>) => {
-    const { value, rawValue } = handleNumoraOnPaste(e, {
-      decimalMaxLength: maxDecimals,
-      formattingOptions,
-    });
+    const { value, rawValue } = handleNumoraOnPaste(e, { decimalMaxLength: maxDecimals, formattingOptions });
 
-    lastCaretPosRef.current = (e.target as HTMLInputElement).selectionStart;
-    (e.target as NumoraHTMLInputElement).rawValue = rawValue;
+    const input = e.target as HTMLInputElement;
+    input.value = value;
+    (input as NumoraHTMLInputElement).rawValue = rawValue;
 
     onRawValueChange?.(rawValue);
 
-    setDisplayValue(value);
+    if (onPaste) onPaste(e);
 
-    if (onPaste) {
-      onPaste(e);
-    }
-
-    // Paste calls e.preventDefault() internally, so React's onChange never fires.
-    // We synthesise a proper change event so consumers see a typed ChangeEvent.
-    if (onChange) {
-      onChange(createSyntheticChangeEvent(e.target as HTMLInputElement));
-    }
+    // handleOnPasteNumoraInput calls e.preventDefault(), so no native input/change fires.
+    // Synthesise a change event so consumers see the same API as typing.
+    if (onChange) onChange(createSyntheticChangeEvent(input));
   }, [maxDecimals, formattingOptions, onPaste, onChange, onRawValueChange]);
 
   const handleFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
+    // In Blur mode we strip separators while the user is editing, then re-apply on blur.
     if (
       formattingOptions.formatOn === FormatOn.Blur &&
       formattingOptions.thousandSeparator &&
       formattingOptions.ThousandStyle !== ThousandStyle.None
     ) {
-      // Read directly from the DOM element to avoid a stale displayValue closure
-      // and to eliminate displayValue from the deps array (which would recreate
-      // this callback on every keystroke).
-      const currentValue = (e.target as HTMLInputElement).value;
-      setDisplayValue(removeThousandSeparators(currentValue, formattingOptions.thousandSeparator!));
+      const input = e.target as HTMLInputElement;
+      input.value = removeThousandSeparators(input.value, formattingOptions.thousandSeparator!);
+      // rawValue doesn't change — it was already separator-free
     }
-
-    if (onFocus) {
-      onFocus(e);
-    }
+    if (onFocus) onFocus(e);
   }, [formattingOptions, onFocus]);
 
   const handleBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
-    const { value, rawValue } = handleNumoraOnBlur(e, {
-      decimalMaxLength: maxDecimals,
-      formattingOptions,
-    });
+    const { value, rawValue } = handleNumoraOnBlur(e, { decimalMaxLength: maxDecimals, formattingOptions });
 
-    (e.target as NumoraHTMLInputElement).rawValue = rawValue;
+    const input = e.target as HTMLInputElement;
+    input.value = value;
 
-    onRawValueChange?.(rawValue);
-    setDisplayValue(value);
-
-    if (onBlur) {
-      onBlur(e);
+    // rawValue is only defined when handleNumoraOnBlur applied formatting (Blur mode).
+    // In Change mode it returns undefined — don't overwrite or emit in that case.
+    if (rawValue !== undefined) {
+      (input as NumoraHTMLInputElement).rawValue = rawValue;
+      onRawValueChange?.(rawValue);
+      // Notify onChange so consumers see the formatted-on-blur value.
+      if (onChange) onChange(createSyntheticChangeEvent(input));
     }
-  }, [maxDecimals, formattingOptions, onBlur, onRawValueChange]);
+
+    if (onBlur) onBlur(e);
+  }, [maxDecimals, formattingOptions, onBlur, onChange, onRawValueChange]);
 
   return (
     <input
       {...rest}
       ref={internalInputRef}
-      value={displayValue}
+      defaultValue={initialDisplayValue}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
       onPaste={handlePaste}
