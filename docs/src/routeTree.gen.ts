@@ -10,8 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SwapRouteImport } from './routes/swap'
-import { Route as Presentation2RouteImport } from './routes/presentation-2'
-import { Route as PresentationRouteImport } from './routes/presentation'
 import { Route as NumoraReactRouteImport } from './routes/numora-react'
 import { Route as NumoraRouteImport } from './routes/numora'
 import { Route as ExploreRouteImport } from './routes/explore'
@@ -45,16 +43,6 @@ import { Route as DocsNumoraReactFeaturesCompactNotationRouteImport } from './ro
 const SwapRoute = SwapRouteImport.update({
   id: '/swap',
   path: '/swap',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Presentation2Route = Presentation2RouteImport.update({
-  id: '/presentation-2',
-  path: '/presentation-2',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PresentationRoute = PresentationRouteImport.update({
-  id: '/presentation',
-  path: '/presentation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NumoraReactRoute = NumoraReactRouteImport.update({
@@ -228,8 +216,6 @@ export interface FileRoutesByFullPath {
   '/explore': typeof ExploreRoute
   '/numora': typeof NumoraRoute
   '/numora-react': typeof NumoraReactRoute
-  '/presentation': typeof PresentationRoute
-  '/presentation-2': typeof Presentation2Route
   '/swap': typeof SwapRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/docs/numora-react/how-it-works': typeof DocsNumoraReactHowItWorksRoute
@@ -262,8 +248,6 @@ export interface FileRoutesByTo {
   '/explore': typeof ExploreRoute
   '/numora': typeof NumoraRoute
   '/numora-react': typeof NumoraReactRoute
-  '/presentation': typeof PresentationRoute
-  '/presentation-2': typeof Presentation2Route
   '/swap': typeof SwapRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/docs/numora-react/how-it-works': typeof DocsNumoraReactHowItWorksRoute
@@ -297,8 +281,6 @@ export interface FileRoutesById {
   '/explore': typeof ExploreRoute
   '/numora': typeof NumoraRoute
   '/numora-react': typeof NumoraReactRoute
-  '/presentation': typeof PresentationRoute
-  '/presentation-2': typeof Presentation2Route
   '/swap': typeof SwapRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
   '/docs/numora-react/how-it-works': typeof DocsNumoraReactHowItWorksRoute
@@ -333,8 +315,6 @@ export interface FileRouteTypes {
     | '/explore'
     | '/numora'
     | '/numora-react'
-    | '/presentation'
-    | '/presentation-2'
     | '/swap'
     | '/api/trpc/$'
     | '/docs/numora-react/how-it-works'
@@ -367,8 +347,6 @@ export interface FileRouteTypes {
     | '/explore'
     | '/numora'
     | '/numora-react'
-    | '/presentation'
-    | '/presentation-2'
     | '/swap'
     | '/api/trpc/$'
     | '/docs/numora-react/how-it-works'
@@ -401,8 +379,6 @@ export interface FileRouteTypes {
     | '/explore'
     | '/numora'
     | '/numora-react'
-    | '/presentation'
-    | '/presentation-2'
     | '/swap'
     | '/api/trpc/$'
     | '/docs/numora-react/how-it-works'
@@ -436,8 +412,6 @@ export interface RootRouteChildren {
   ExploreRoute: typeof ExploreRoute
   NumoraRoute: typeof NumoraRoute
   NumoraReactRoute: typeof NumoraReactRoute
-  PresentationRoute: typeof PresentationRoute
-  Presentation2Route: typeof Presentation2Route
   SwapRoute: typeof SwapRoute
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
 }
@@ -449,20 +423,6 @@ declare module '@tanstack/react-router' {
       path: '/swap'
       fullPath: '/swap'
       preLoaderRoute: typeof SwapRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/presentation-2': {
-      id: '/presentation-2'
-      path: '/presentation-2'
-      fullPath: '/presentation-2'
-      preLoaderRoute: typeof Presentation2RouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/presentation': {
-      id: '/presentation'
-      path: '/presentation'
-      fullPath: '/presentation'
-      preLoaderRoute: typeof PresentationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/numora-react': {
@@ -740,8 +700,6 @@ const rootRouteChildren: RootRouteChildren = {
   ExploreRoute: ExploreRoute,
   NumoraRoute: NumoraRoute,
   NumoraReactRoute: NumoraReactRoute,
-  PresentationRoute: PresentationRoute,
-  Presentation2Route: Presentation2Route,
   SwapRoute: SwapRoute,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,
 }
