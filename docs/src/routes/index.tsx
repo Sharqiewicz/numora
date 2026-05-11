@@ -16,13 +16,18 @@ export const Route = createFileRoute('/')({
       { name: 'description', content: 'Numora is the standard numeric input and number input library for JavaScript and React. Format numbers as you type, thousand separators, decimal limits, cursor management. Zero dependencies, 6.4kb gzipped.' },
       { property: 'og:title', content: 'Numora - Numeric Input & Number Input Library for JavaScript and React' },
       { property: 'og:description', content: 'The only framework-agnostic numeric input and number input library. Format numbers as you type, thousand separators, decimal limits, cursor management.' },
-      { property: 'og:url', content: 'https://numora.xyz' },
+      { property: 'og:url', content: 'https://numeric-input.com' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz' },
+      { rel: 'canonical', href: 'https://numeric-input.com' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Numora", "applicationCategory": "DeveloperApplication", "operatingSystem": "Web", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }, "url": "https://numora.xyz", "downloadUrl": "https://www.npmjs.com/package/numora", "keywords": "numeric input, number input, javascript number input, react number input" }, { "@context": "https://schema.org", "@type": "WebSite", "name": "Numora", "url": "https://numora.xyz" }]) },
+      { type: 'application/ld+json', children: JSON.stringify([
+        { "@context": "https://schema.org", "@type": "SoftwareApplication", "name": "numora", "applicationCategory": "DeveloperApplication", "operatingSystem": "Web", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }, "url": "https://numeric-input.com", "downloadUrl": "https://www.npmjs.com/package/numora", "description": "Precision-first numeric input library for financial and DeFi apps. Zero dependencies, 6.4kb gzipped. Works with React, Vue, Svelte, and Vanilla JS.", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" }, "codeRepository": "https://github.com/sharqiewicz/numora", "keywords": "numeric input, number input, javascript number input, react number input" },
+        { "@context": "https://schema.org", "@type": "SoftwareApplication", "name": "numora-react", "applicationCategory": "DeveloperApplication", "operatingSystem": "Web", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }, "url": "https://numeric-input.com/docs/numora-react", "downloadUrl": "https://www.npmjs.com/package/numora-react", "description": "React component wrapper for numora. Drop-in NumoraInput component with full TypeScript support and React Hook Form integration.", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" }, "codeRepository": "https://github.com/sharqiewicz/numora" },
+        { "@context": "https://schema.org", "@type": "Organization", "name": "Numora", "url": "https://numeric-input.com", "sameAs": ["https://github.com/sharqiewicz/numora"] },
+        { "@context": "https://schema.org", "@type": "WebSite", "name": "Numora", "url": "https://numeric-input.com", "potentialAction": { "@type": "SearchAction", "target": "https://numeric-input.com/docs/numora?q={search_term_string}", "query-input": "required name=search_term_string" } }
+      ]) },
     ],
   }),
   component: App,

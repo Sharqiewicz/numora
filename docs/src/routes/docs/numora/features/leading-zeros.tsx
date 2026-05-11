@@ -8,15 +8,15 @@ export const Route = createFileRoute('/docs/numora/features/leading-zeros')({
       { name: 'description', content: 'Control leading zero behavior in numeric inputs with Numora. Enable or disable leading zeros for clean number entry in financial applications.' },
       { property: 'og:title', content: 'Leading Zero Handling | Numora' },
       { property: 'og:description', content: 'Control leading zero behavior in numeric inputs with Numora. Enable or disable for financial inputs.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora/features/leading-zeros' },
+      { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/leading-zeros' },
       { name: 'twitter:title', content: 'Leading Zero Handling | Numora' },
       { name: 'twitter:description', content: 'Control leading zero behavior in numeric inputs with Numora.' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/features/leading-zeros' },
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora/features/leading-zeros' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora/features" }, { "@type": "ListItem", "position": 4, "name": "Leading Zeros", "item": "https://numora.xyz/docs/numora/features/leading-zeros" }] }) },
+      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Leading Zero Control in Numora - Numeric Input Leading Zero Handling", "description": "Control leading zero behaviour in JavaScript numeric inputs with Numora. Strip leading zeros automatically or preserve them based on your use case.", "url": "https://numeric-input.com/docs/numora/features/leading-zeros", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numeric-input.com/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Leading Zeros", "item": "https://numeric-input.com/docs/numora/features/leading-zeros" }] }]) },
     ],
   }),
   component: LeadingZeros,

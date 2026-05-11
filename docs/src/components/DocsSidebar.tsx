@@ -12,6 +12,7 @@ import {
   Workflow,
   FileDigit,
   Globe,
+  Layers,
 } from 'lucide-react'
 import {
   SidebarContent,
@@ -44,6 +45,11 @@ const navigation = [
         title: 'How it works',
         href: '/docs/how-it-works',
         icon: Workflow,
+      },
+      {
+        title: 'Anatomy',
+        href: '/docs/anatomy',
+        icon: Layers,
       },
     ],
   },

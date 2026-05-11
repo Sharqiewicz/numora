@@ -9,15 +9,15 @@ export const Route = createFileRoute('/docs/numora-react/integrations/react-hook
       { name: 'description', content: 'Use NumoraInput with React Hook Form. Validated, formatted numeric fields with full TypeScript support.' },
       { property: 'og:title', content: 'React Hook Form Integration | numora-react' },
       { property: 'og:description', content: 'Use NumoraInput with React Hook Form. Validated, formatted numeric fields with full TypeScript support.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/integrations/react-hook-form' },
+      { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/integrations/react-hook-form' },
       { name: 'twitter:title', content: 'React Hook Form Integration | numora-react' },
       { name: 'twitter:description', content: 'Use NumoraInput with React Hook Form. Validated, formatted numeric fields with full TypeScript support.' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react/integrations/react-hook-form' },
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/integrations/react-hook-form' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Integrations", "item": "https://numora.xyz/docs/numora-react/integrations" }, { "@type": "ListItem", "position": 4, "name": "React Hook Form", "item": "https://numora.xyz/docs/numora-react/integrations/react-hook-form" }] }) },
+      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "React Hook Form Integration - NumoraInput with React Numeric Input and RHF", "description": "Use NumoraInput with React Hook Form via Controller. Validate numeric inputs, integrate with form state, and access raw values for precision math libraries.", "url": "https://numeric-input.com/docs/numora-react/integrations/react-hook-form", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numeric-input.com/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "React Hook Form", "item": "https://numeric-input.com/docs/numora-react/integrations/react-hook-form" }] }]) },
     ],
   }),
   component: ReactHookFormIntegration,
@@ -35,7 +35,7 @@ function ReactHookFormIntegration() {
       <p>
         <code>NumoraInput</code> manages its own DOM value directly (via an uncontrolled <code>defaultValue</code> internally),
         but supports a controlled-style <code>value</code> prop that syncs programmatic changes into the input.
-        React Hook Form's <code>Controller</code> component is the recommended integration pattern — it handles
+        React Hook Form's <code>Controller</code> component is the recommended integration pattern - it handles
         the <code>value</code>, <code>onChange</code>, <code>onBlur</code>, <code>ref</code>, and <code>disabled</code> wiring automatically.
       </p>
 
@@ -46,7 +46,7 @@ function ReactHookFormIntegration() {
 
       <h2>Controller Pattern (recommended)</h2>
       <p>
-        Always forward all four field properties — <code>onChange</code>, <code>onBlur</code>, <code>ref</code>,
+        Always forward all four field properties - <code>onChange</code>, <code>onBlur</code>, <code>ref</code>,
         and <code>disabled</code>. Omitting <code>onBlur</code> breaks touched-state tracking;
         omitting <code>ref</code> breaks auto-focus on validation errors.
       </p>
@@ -118,53 +118,13 @@ function Form() {
 />`}
       </CodeBlock>
 
-      <h3>Storing raw values</h3>
-      <p>
-        By default, <code>field.onChange</code> reads <code>e.target.value</code> — the formatted display value
-        (e.g. <code>"1,000.50"</code>). To store the raw numeric string instead (e.g. <code>"1000.50"</code>),
-        use the <code>onRawValueChange</code> prop:
-      </p>
-
-      <CodeBlock language="tsx">
-{`import { NumoraInput, type NumoraHTMLInputElement } from 'numora-react'
-
-<Controller
-  control={control}
-  name="amount"
-  render={({ field: { onBlur, value, ref, disabled } }) => (
-    <NumoraInput
-      ref={ref}
-      value={value || ''}
-      onBlur={onBlur}
-      disabled={disabled}
-      maxDecimals={2}
-      thousandSeparator=","
-      // onRawValueChange receives the clean numeric string on every change
-      onRawValueChange={(raw) => field.onChange(raw)}
-    />
-  )}
-/>`}
-      </CodeBlock>
-
-      <p>
-        Alternatively, access <code>e.target.rawValue</code> via the typed <code>NumoraHTMLInputElement</code> export:
-      </p>
-
-      <CodeBlock language="tsx">
-{`import { NumoraInput, type NumoraHTMLInputElement } from 'numora-react'
-
-onChange={(e) => {
-  field.onChange((e.target as NumoraHTMLInputElement).rawValue)
-}}`}
-      </CodeBlock>
-
       <div className="bg-muted/50 border border-border rounded-lg p-4 my-4">
         <p className="text-sm m-0">
-          <strong>💡 Tip:</strong> <code>NumoraInput</code> provides both formatted and raw values:
+          <strong>💡 Tip:</strong> <code>NumoraInput</code>'s <code>onChange</code> always exposes the raw
+          (unformatted) numeric string - no post-processing required:
           <ul className="mt-2 mb-0">
-            <li><code>e.target.value</code> — formatted display value (e.g. <code>"1,000.50"</code>)</li>
-            <li><code>e.target.rawValue</code> — raw numeric string (e.g. <code>"1000.50"</code>)</li>
-            <li><code>onRawValueChange</code> prop — called with the raw value on every change</li>
+            <li><code>e.target.value</code> - raw numeric string (e.g. <code>"1000.50"</code>) - separators stripped</li>
+            <li><code>e.target.formattedValue</code> - formatted display string (e.g. <code>"1,000.50"</code>), typed via <code>NumoraHTMLInputElement</code></li>
           </ul>
         </p>
       </div>
@@ -233,7 +193,7 @@ function SwapForm() {
       <p>
         For basic forms that don't need programmatic updates or <code>setValue()</code>, you can use
         the <code>register</code> pattern. Spread the register result and leave <code>NumoraInput</code> to
-        manage its own value — do not also pass a <code>value</code> prop:
+        manage its own value - do not also pass a <code>value</code> prop:
       </p>
 
       <CodeBlock language="tsx">
@@ -267,7 +227,7 @@ function Form() {
       <ul>
         <li>
           <strong>Always forward <code>onBlur</code>, <code>ref</code>, and <code>disabled</code></strong> from the
-          Controller field — these are required for touched-state tracking, focus management on errors, and
+          Controller field - these are required for touched-state tracking, focus management on errors, and
           disabled-field support.
         </li>
         <li>
@@ -275,13 +235,14 @@ function Form() {
           all react-hook-form features.
         </li>
         <li>
-          <strong>Register pattern</strong>: works for basic form submission only — <code>setValue()</code> won't
+          <strong>Register pattern</strong>: works for basic form submission only - <code>setValue()</code> won't
           update the UI.
         </li>
         <li>
-          <strong>Raw vs formatted values:</strong> <code>field.onChange</code> stores the formatted display value
-          by default. Use <code>onRawValueChange</code> or <code>e.target.rawValue</code> to store raw numeric
-          strings instead.
+          <strong>Raw values by default:</strong> <code>e.target.value</code> in <code>onChange</code> always
+          returns the raw numeric string (separators stripped). <code>field.onChange(e.target.value)</code> stores
+          the clean value - no extra handling needed. The formatted display string is available as{' '}
+          <code>e.target.formattedValue</code> via <code>NumoraHTMLInputElement</code>.
         </li>
         <li>
           <strong>No extra dependencies:</strong> <code>numora-react</code> doesn't require react-hook-form.

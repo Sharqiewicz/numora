@@ -8,15 +8,15 @@ export const Route = createFileRoute('/docs/numora/features/decimals')({
       { name: 'description', content: 'Enforce decimal place limits and validate decimal inputs with Numora. Set max/min decimal places, choose separators, and prevent invalid decimal entries.' },
       { property: 'og:title', content: 'Decimal Input Validation & Limits | Numora' },
       { property: 'og:description', content: 'Enforce decimal place limits and validate decimal inputs with Numora. Set max/min decimal places and prevent invalid entries.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora/features/decimals' },
+      { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/decimals' },
       { name: 'twitter:title', content: 'Decimal Input Validation & Limits | Numora' },
       { name: 'twitter:description', content: 'Enforce decimal place limits and validate decimal inputs with Numora.' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/features/decimals' },
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora/features/decimals' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora/features" }, { "@type": "ListItem", "position": 4, "name": "Decimals", "item": "https://numora.xyz/docs/numora/features/decimals" }] }) },
+      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Decimal Handling in Numora - Numeric Input Decimal Precision", "description": "Configure decimal precision in the numora JavaScript numeric input library. Control decimal separator, max decimals, minimum decimal padding, and trailing zero behaviour.", "url": "https://numeric-input.com/docs/numora/features/decimals", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numeric-input.com/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Decimals", "item": "https://numeric-input.com/docs/numora/features/decimals" }] }]) },
     ],
   }),
   component: Decimals,

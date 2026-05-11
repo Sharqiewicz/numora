@@ -8,15 +8,15 @@ export const Route = createFileRoute('/docs/numora/features/compact-notation')({
       { name: 'description', content: 'Enable compact number notation in inputs with Numora. Let users type "1k" for 1,000 or "1m" for 1,000,000. Shorthand number input for financial UIs.' },
       { property: 'og:title', content: 'Compact Notation (1k, 1m, 1b) | Numora' },
       { property: 'og:description', content: 'Enable compact number notation in inputs with Numora. Let users type "1k", "1m", "1b" for shorthand number input.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora/features/compact-notation' },
+      { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/compact-notation' },
       { name: 'twitter:title', content: 'Compact Notation (1k, 1m, 1b) | Numora' },
       { name: 'twitter:description', content: 'Enable compact number notation in inputs with Numora. Type "1k" for 1,000.' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/features/compact-notation' },
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora/features/compact-notation' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora/features" }, { "@type": "ListItem", "position": 4, "name": "Compact Notation", "item": "https://numora.xyz/docs/numora/features/compact-notation" }] }) },
+      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Compact Notation Expansion in Numora - 1k → 1000 in Numeric Input", "description": "Expand compact notation in numeric input fields with Numora. Type 1k, 1.5m, or 2b and have it automatically expand to the full numeric value.", "url": "https://numeric-input.com/docs/numora/features/compact-notation", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numeric-input.com/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Compact Notation", "item": "https://numeric-input.com/docs/numora/features/compact-notation" }] }]) },
     ],
   }),
   component: CompactNotation,

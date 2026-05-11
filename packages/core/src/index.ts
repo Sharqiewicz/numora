@@ -12,6 +12,12 @@ export {
   formatInputValue,
 } from './utils/format-utils';
 export type { FormattingOptions, CaretPositionInfo } from './types';
-export { removeThousandSeparators } from './features/sanitization';
+export { removeThousandSeparators, sanitizeNumoraInput } from './features/sanitization';
+export { filterMobileKeyboardArtifacts } from './features/mobile-keyboard-filtering';
+export { expandCompactNotation } from './features/compact-notation';
+export { expandScientificNotation } from './features/scientific-notation';
+export { removeNonNumericCharacters } from './features/non-numeric-characters';
+export { removeExtraDecimalSeparators } from './features/decimals';
+export { removeLeadingZeros } from './features/leading-zeros';
 export { validateNumoraInputOptions } from './validation';
 export { getNumoraPattern } from './utils/input-pattern';

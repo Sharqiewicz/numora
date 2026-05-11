@@ -19,8 +19,10 @@ import { Route as DocsNumoraIndexRouteImport } from './routes/docs/numora/index'
 import { Route as DocsNumoraReactIndexRouteImport } from './routes/docs/numora-react/index'
 import { Route as DocsNumoraInstallationRouteImport } from './routes/docs/numora/installation'
 import { Route as DocsNumoraHowItWorksRouteImport } from './routes/docs/numora/how-it-works'
+import { Route as DocsNumoraAnatomyRouteImport } from './routes/docs/numora/anatomy'
 import { Route as DocsNumoraReactInstallationRouteImport } from './routes/docs/numora-react/installation'
 import { Route as DocsNumoraReactHowItWorksRouteImport } from './routes/docs/numora-react/how-it-works'
+import { Route as DocsNumoraReactAnatomyRouteImport } from './routes/docs/numora-react/anatomy'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 import { Route as DocsNumoraFeaturesValueTypesRouteImport } from './routes/docs/numora/features/value-types'
 import { Route as DocsNumoraFeaturesScientificNotationRouteImport } from './routes/docs/numora/features/scientific-notation'
@@ -90,6 +92,11 @@ const DocsNumoraHowItWorksRoute = DocsNumoraHowItWorksRouteImport.update({
   path: '/numora/how-it-works',
   getParentRoute: () => DocsRoute,
 } as any)
+const DocsNumoraAnatomyRoute = DocsNumoraAnatomyRouteImport.update({
+  id: '/numora/anatomy',
+  path: '/numora/anatomy',
+  getParentRoute: () => DocsRoute,
+} as any)
 const DocsNumoraReactInstallationRoute =
   DocsNumoraReactInstallationRouteImport.update({
     id: '/numora-react/installation',
@@ -102,6 +109,11 @@ const DocsNumoraReactHowItWorksRoute =
     path: '/numora-react/how-it-works',
     getParentRoute: () => DocsRoute,
   } as any)
+const DocsNumoraReactAnatomyRoute = DocsNumoraReactAnatomyRouteImport.update({
+  id: '/numora-react/anatomy',
+  path: '/numora-react/anatomy',
+  getParentRoute: () => DocsRoute,
+} as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   id: '/api/trpc/$',
   path: '/api/trpc/$',
@@ -218,8 +230,10 @@ export interface FileRoutesByFullPath {
   '/numora-react': typeof NumoraReactRoute
   '/swap': typeof SwapRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/docs/numora-react/anatomy': typeof DocsNumoraReactAnatomyRoute
   '/docs/numora-react/how-it-works': typeof DocsNumoraReactHowItWorksRoute
   '/docs/numora-react/installation': typeof DocsNumoraReactInstallationRoute
+  '/docs/numora/anatomy': typeof DocsNumoraAnatomyRoute
   '/docs/numora/how-it-works': typeof DocsNumoraHowItWorksRoute
   '/docs/numora/installation': typeof DocsNumoraInstallationRoute
   '/docs/numora-react/': typeof DocsNumoraReactIndexRoute
@@ -250,8 +264,10 @@ export interface FileRoutesByTo {
   '/numora-react': typeof NumoraReactRoute
   '/swap': typeof SwapRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/docs/numora-react/anatomy': typeof DocsNumoraReactAnatomyRoute
   '/docs/numora-react/how-it-works': typeof DocsNumoraReactHowItWorksRoute
   '/docs/numora-react/installation': typeof DocsNumoraReactInstallationRoute
+  '/docs/numora/anatomy': typeof DocsNumoraAnatomyRoute
   '/docs/numora/how-it-works': typeof DocsNumoraHowItWorksRoute
   '/docs/numora/installation': typeof DocsNumoraInstallationRoute
   '/docs/numora-react': typeof DocsNumoraReactIndexRoute
@@ -283,8 +299,10 @@ export interface FileRoutesById {
   '/numora-react': typeof NumoraReactRoute
   '/swap': typeof SwapRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/docs/numora-react/anatomy': typeof DocsNumoraReactAnatomyRoute
   '/docs/numora-react/how-it-works': typeof DocsNumoraReactHowItWorksRoute
   '/docs/numora-react/installation': typeof DocsNumoraReactInstallationRoute
+  '/docs/numora/anatomy': typeof DocsNumoraAnatomyRoute
   '/docs/numora/how-it-works': typeof DocsNumoraHowItWorksRoute
   '/docs/numora/installation': typeof DocsNumoraInstallationRoute
   '/docs/numora-react/': typeof DocsNumoraReactIndexRoute
@@ -317,8 +335,10 @@ export interface FileRouteTypes {
     | '/numora-react'
     | '/swap'
     | '/api/trpc/$'
+    | '/docs/numora-react/anatomy'
     | '/docs/numora-react/how-it-works'
     | '/docs/numora-react/installation'
+    | '/docs/numora/anatomy'
     | '/docs/numora/how-it-works'
     | '/docs/numora/installation'
     | '/docs/numora-react/'
@@ -349,8 +369,10 @@ export interface FileRouteTypes {
     | '/numora-react'
     | '/swap'
     | '/api/trpc/$'
+    | '/docs/numora-react/anatomy'
     | '/docs/numora-react/how-it-works'
     | '/docs/numora-react/installation'
+    | '/docs/numora/anatomy'
     | '/docs/numora/how-it-works'
     | '/docs/numora/installation'
     | '/docs/numora-react'
@@ -381,8 +403,10 @@ export interface FileRouteTypes {
     | '/numora-react'
     | '/swap'
     | '/api/trpc/$'
+    | '/docs/numora-react/anatomy'
     | '/docs/numora-react/how-it-works'
     | '/docs/numora-react/installation'
+    | '/docs/numora/anatomy'
     | '/docs/numora/how-it-works'
     | '/docs/numora/installation'
     | '/docs/numora-react/'
@@ -488,6 +512,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsNumoraHowItWorksRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/docs/numora/anatomy': {
+      id: '/docs/numora/anatomy'
+      path: '/numora/anatomy'
+      fullPath: '/docs/numora/anatomy'
+      preLoaderRoute: typeof DocsNumoraAnatomyRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/docs/numora-react/installation': {
       id: '/docs/numora-react/installation'
       path: '/numora-react/installation'
@@ -500,6 +531,13 @@ declare module '@tanstack/react-router' {
       path: '/numora-react/how-it-works'
       fullPath: '/docs/numora-react/how-it-works'
       preLoaderRoute: typeof DocsNumoraReactHowItWorksRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora-react/anatomy': {
+      id: '/docs/numora-react/anatomy'
+      path: '/numora-react/anatomy'
+      fullPath: '/docs/numora-react/anatomy'
+      preLoaderRoute: typeof DocsNumoraReactAnatomyRouteImport
       parentRoute: typeof DocsRoute
     }
     '/api/trpc/$': {
@@ -632,8 +670,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface DocsRouteChildren {
+  DocsNumoraReactAnatomyRoute: typeof DocsNumoraReactAnatomyRoute
   DocsNumoraReactHowItWorksRoute: typeof DocsNumoraReactHowItWorksRoute
   DocsNumoraReactInstallationRoute: typeof DocsNumoraReactInstallationRoute
+  DocsNumoraAnatomyRoute: typeof DocsNumoraAnatomyRoute
   DocsNumoraHowItWorksRoute: typeof DocsNumoraHowItWorksRoute
   DocsNumoraInstallationRoute: typeof DocsNumoraInstallationRoute
   DocsNumoraReactIndexRoute: typeof DocsNumoraReactIndexRoute
@@ -658,8 +698,10 @@ interface DocsRouteChildren {
 }
 
 const DocsRouteChildren: DocsRouteChildren = {
+  DocsNumoraReactAnatomyRoute: DocsNumoraReactAnatomyRoute,
   DocsNumoraReactHowItWorksRoute: DocsNumoraReactHowItWorksRoute,
   DocsNumoraReactInstallationRoute: DocsNumoraReactInstallationRoute,
+  DocsNumoraAnatomyRoute: DocsNumoraAnatomyRoute,
   DocsNumoraHowItWorksRoute: DocsNumoraHowItWorksRoute,
   DocsNumoraInstallationRoute: DocsNumoraInstallationRoute,
   DocsNumoraReactIndexRoute: DocsNumoraReactIndexRoute,

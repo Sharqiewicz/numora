@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Numora Core - Manual Test Page</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 0 20px;
+      background: #f8f9fa;
+      color: #212529;
+    }
+
+    h1 { margin-bottom: 4px; }
+    .build-note {
+      font-family: monospace;
+      font-size: 0.9em;
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin-bottom: 32px;
+    }
+
+    .scenario {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .scenario h3 {
+      margin: 0 0 4px;
+      font-size: 1rem;
+    }
+
+    .scenario .description {
+      font-size: 0.82em;
+      color: #6c757d;
+      margin-bottom: 12px;
+    }
+
+    .scenario input {
+      display: block;
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 1rem;
+      border: 1px solid #adb5bd;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    .scenario input:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+    }
+
+    .readout {
+      font-family: monospace;
+      font-size: 0.82em;
+      margin-top: 8px;
+      color: #495057;
+    }
+
+    .readout span {
+      display: inline-block;
+      background: #e9ecef;
+      border-radius: 3px;
+      padding: 1px 6px;
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+<!-- Scenario 1 -->
+<div class="scenario">
+  <h3>1. Format on Change - 3+ Thousand Groups</h3>
+  <p class="description">Primary cursor test. Pre-filled with 1234567890. Type digits or backspace near separators - cursor must not jump to the wrong position.</p>
+  <div id="s1"></div>
+  <div class="readout">formatted: <span id="s1-fmt">-</span> &nbsp; raw: <span id="s1-raw">-</span></div>
+</div>
+
+
+<script type="module">
+  import { NumoraInput } from './dist/index.mjs';
+  console.log('install')
+
+  function readout(fmtId, rawId) {
+    return (value) => {
+      document.getElementById(fmtId).textContent = value || '(empty)';
+      document.getElementById(rawId).textContent = value || '(empty)';
+    };
+  }
+
+  const s1 = new NumoraInput(document.getElementById('s1'), {
+    formatOn: 'change',
+    thousandSeparator: ',',
+    thousandStyle: 'lakh',
+    decimalMaxLength: 2,
+    onChange(value) {
+      document.getElementById('s1-fmt').textContent = value || '(empty)';
+    },
+  });
+  document.getElementById('s1-raw').textContent = s1.getValue();
+
+</script>
+
+</body>
+</html>
+
+
+
+Possible regression: If there's a prefix and the cursor somehow lands at startIndex=0 landing on a separator - impossible in practice since
+separators appear after at least one digit.
+
+Possible regression: No-boundary path previously did while pos > 0 && new[pos]===sep: pos--. This moved from position 6 (,) to position 5 (digit
+'5'). Now returns 6. The change is from 5 → 6 for the no-boundary path. Any no-boundary test currently expecting position 5 for this scenario would
+ fail. Looking at the tests, the no-boundary path is tested in formatting.cursor.test.ts but none of those tests hit this specific sub-case (they
+use values without isCharacterEquivalent). ✓

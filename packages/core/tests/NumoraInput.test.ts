@@ -4,13 +4,13 @@ import { handleOnPasteNumoraInput } from '../src/utils/event-handlers';
 import { FormatOn, ThousandStyle } from '../src/types';
 
 // ---------------------------------------------------------------------------
-// Test helpers — simulate the real browser event sequence for an <input>.
+// Test helpers - simulate the real browser event sequence for an <input>.
 //
 // The browser fires:  keydown → beforeinput (cancelable) → input → keyup
 //
 // All formatting logic lives in the beforeinput handler. Tests that dispatch
 // a plain `new Event('input')` bypass it entirely and only exercise the
-// handleChange fallback path — leaving the beforeinput path untested.
+// handleChange fallback path - leaving the beforeinput path untested.
 //
 // Use simulateTyping / simulateDelete for tests that should exercise the
 // actual formatting code path. Use the plain `value = x` + Event('input')
@@ -152,7 +152,7 @@ describe('NumoraInput Component', () => {
     simulateTyping(inputElement, '2');
     expect(inputElement.value).toBe('1.2');
 
-    // Typing '.' again should be blocked — decimal already present
+    // Typing '.' again should be blocked - decimal already present
     simulateTyping(inputElement, '.');
     expect(inputElement.value).toBe('1.2');
 
@@ -364,7 +364,7 @@ describe('beforeinput event path', () => {
       simulateTyping(el, '1');
       simulateTyping(el, '.');
       simulateTyping(el, '5');
-      simulateTyping(el, '.'); // second dot — should be blocked
+      simulateTyping(el, '.'); // second dot - should be blocked
       simulateTyping(el, '2');
 
       expect(el.value).toBe('1.52');
@@ -410,7 +410,7 @@ describe('beforeinput event path', () => {
     });
   });
 
-  describe('FormatOn.Change — thousand separator', () => {
+  describe('FormatOn.Change - thousand separator', () => {
     it('should add thousand separator when typing 4th digit', () => {
       new NumoraInput(container, {
         onChange: onChangeMock,
@@ -474,7 +474,7 @@ describe('beforeinput event path', () => {
 // keydown event coverage
 // ---------------------------------------------------------------------------
 
-describe('keydown — skipOverThousandSeparatorOnDelete', () => {
+describe('keydown - skipOverThousandSeparatorOnDelete', () => {
   let container: HTMLElement;
   let onChangeMock: ReturnType<typeof vi.fn>;
 
@@ -566,7 +566,7 @@ describe('keydown — skipOverThousandSeparatorOnDelete', () => {
     el.setSelectionRange(2, 2);
     simulateKeyDown(el, 'Backspace');
 
-    // Cursor should NOT have moved — Blur mode doesn't skip separators
+    // Cursor should NOT have moved - Blur mode doesn't skip separators
     expect(el.selectionStart).toBe(2);
   });
 
@@ -585,7 +585,7 @@ describe('keydown — skipOverThousandSeparatorOnDelete', () => {
     simulateTyping(el, '4');
     expect(el.value).toBe('1,234');
 
-    // Cursor at position 5 (end) — not adjacent to a separator
+    // Cursor at position 5 (end) - not adjacent to a separator
     el.setSelectionRange(5, 5);
     simulateKeyDown(el, 'Backspace');
 
@@ -594,10 +594,10 @@ describe('keydown — skipOverThousandSeparatorOnDelete', () => {
 });
 
 // ---------------------------------------------------------------------------
-// beforeinput — deletion with active selection + cut/drag
+// beforeinput - deletion with active selection + cut/drag
 // ---------------------------------------------------------------------------
 
-describe('beforeinput — selection and cut/drag deletion', () => {
+describe('beforeinput - selection and cut/drag deletion', () => {
   let container: HTMLElement;
   let onChangeMock: ReturnType<typeof vi.fn>;
 
@@ -711,10 +711,10 @@ describe('beforeinput — selection and cut/drag deletion', () => {
 });
 
 // ---------------------------------------------------------------------------
-// beforeinput — pass-through events (undo/redo, paste delegation)
+// beforeinput - pass-through events (undo/redo, paste delegation)
 // ---------------------------------------------------------------------------
 
-describe('beforeinput — pass-through events', () => {
+describe('beforeinput - pass-through events', () => {
   let container: HTMLElement;
 
   beforeEach(() => {
@@ -736,28 +736,28 @@ describe('beforeinput — pass-through events', () => {
     return ev;
   }
 
-  it('historyUndo is NOT prevented — browser handles undo natively', () => {
+  it('historyUndo is NOT prevented - browser handles undo natively', () => {
     new NumoraInput(container, {});
     const el = getInputElement();
     const ev = dispatchBeforeInput(el, 'historyUndo');
     expect(ev.defaultPrevented).toBe(false);
   });
 
-  it('historyRedo is NOT prevented — browser handles redo natively', () => {
+  it('historyRedo is NOT prevented - browser handles redo natively', () => {
     new NumoraInput(container, {});
     const el = getInputElement();
     const ev = dispatchBeforeInput(el, 'historyRedo');
     expect(ev.defaultPrevented).toBe(false);
   });
 
-  it('insertFromPaste is NOT prevented — delegated to paste handler', () => {
+  it('insertFromPaste is NOT prevented - delegated to paste handler', () => {
     new NumoraInput(container, {});
     const el = getInputElement();
     const ev = dispatchBeforeInput(el, 'insertFromPaste');
     expect(ev.defaultPrevented).toBe(false);
   });
 
-  it('insertFromDrop is NOT prevented — delegated to paste handler', () => {
+  it('insertFromDrop is NOT prevented - delegated to paste handler', () => {
     new NumoraInput(container, {});
     const el = getInputElement();
     const ev = dispatchBeforeInput(el, 'insertFromDrop');
@@ -766,10 +766,10 @@ describe('beforeinput — pass-through events', () => {
 });
 
 // ---------------------------------------------------------------------------
-// focus / blur events — FormatOn.Blur mode
+// focus / blur events - FormatOn.Blur mode
 // ---------------------------------------------------------------------------
 
-describe('focus/blur — FormatOn.Blur mode', () => {
+describe('focus/blur - FormatOn.Blur mode', () => {
   let container: HTMLElement;
   let onChangeMock: ReturnType<typeof vi.fn>;
 
@@ -880,9 +880,9 @@ describe('NumoraInput edge cases', () => {
     const inputElement = container.querySelector('input') as HTMLInputElement;
 
     simulateTyping(inputElement, '1');
-    simulateTyping(inputElement, '.'); // first decimal — allowed
+    simulateTyping(inputElement, '.'); // first decimal - allowed
     for (let i = 0; i < 9; i++) {
-      simulateTyping(inputElement, '.'); // subsequent decimals — all blocked
+      simulateTyping(inputElement, '.'); // subsequent decimals - all blocked
     }
 
     expect(inputElement.value.split('.').length - 1).toBe(1);

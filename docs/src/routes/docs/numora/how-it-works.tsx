@@ -4,19 +4,22 @@ import { CodeBlock } from '@/components/CodeBlock'
 export const Route = createFileRoute('/docs/numora/how-it-works')({
   head: () => ({
     meta: [
-      { title: 'How It Works - Numora Core | JavaScript Numeric Input' },
+      { title: 'How Numora Works - JavaScript Numeric Input Pipeline Explained' },
       { name: 'description', content: 'Understand the internal pipeline of numora: event interception, sanitization, formatting, and value emission on every keystroke, paste, and blur.' },
-      { property: 'og:title', content: 'How It Works - Numora Core | JavaScript Numeric Input' },
+      { property: 'og:title', content: 'How Numora Works - JavaScript Numeric Input Pipeline Explained' },
       { property: 'og:description', content: 'Understand the internal pipeline of numora: event interception, sanitization, formatting, and value emission on every keystroke, paste, and blur.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora/how-it-works' },
-      { name: 'twitter:title', content: 'How It Works - Numora Core | JavaScript Numeric Input' },
+      { property: 'og:url', content: 'https://numeric-input.com/docs/numora/how-it-works' },
+      { name: 'twitter:title', content: 'How Numora Works - JavaScript Numeric Input Pipeline Explained' },
       { name: 'twitter:description', content: 'Understand the internal pipeline of numora: event interception, sanitization, formatting, and value emission.' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/how-it-works' },
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora/how-it-works' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "How It Works", "item": "https://numora.xyz/docs/numora/how-it-works" }] }) },
+      { type: 'application/ld+json', children: JSON.stringify([
+        { "@context": "https://schema.org", "@type": "TechArticle", "headline": "How Numora Works - JavaScript Numeric Input Pipeline", "description": "Understand the internal pipeline of numora: event interception via beforeinput, sanitization, formatting, and value emission on every keystroke, paste, and blur.", "url": "https://numeric-input.com/docs/numora/how-it-works", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } },
+        { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numeric-input.com/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "How It Works", "item": "https://numeric-input.com/docs/numora/how-it-works" }] }
+      ]) },
     ],
   }),
   component: HowItWorks,
@@ -48,7 +51,7 @@ function HowItWorks() {
       <h3>beforeinput</h3>
       <p>
         <code>beforeinput</code> is the primary formatting hook. It fires after the browser has
-        resolved what the input <em>will</em> be, but before the DOM is mutated — making it the
+        resolved what the input <em>will</em> be, but before the DOM is mutated - making it the
         correct place to intercept and reformat. Numora calls{' '}
         <code>e.preventDefault()</code> to suppress the native mutation, computes the intended
         value, runs the full sanitize → format pipeline, then writes the result via{' '}
@@ -57,47 +60,47 @@ function HowItWorks() {
       <p>The handler covers:</p>
       <ul>
         <li>
-          <strong>Decimal separator key</strong> — converts <code>,</code> or <code>.</code> to
+          <strong>Decimal separator key</strong> - converts <code>,</code> or <code>.</code> to
           the configured separator; blocks a second decimal if one already exists.
         </li>
         <li>
-          <strong>Character insertion</strong> (<code>insertText</code>) — inserts at cursor,
+          <strong>Character insertion</strong> (<code>insertText</code>) - inserts at cursor,
           formats the result.
         </li>
         <li>
           <strong>Deletions</strong> (<code>deleteContentBackward</code>,{' '}
           <code>deleteContentForward</code>, <code>deleteByCut</code>,{' '}
-          <code>deleteByDrag</code>) — removes the correct range, formats the result.
+          <code>deleteByDrag</code>) - removes the correct range, formats the result.
         </li>
         <li>
-          <strong>Undo/redo</strong> (<code>historyUndo</code>, <code>historyRedo</code>) —
+          <strong>Undo/redo</strong> (<code>historyUndo</code>, <code>historyRedo</code>) -
           not intercepted; the browser handles these natively against its own undo stack.
         </li>
         <li>
-          <strong>Paste/drop</strong> — deferred to the dedicated <code>paste</code> handler.
+          <strong>Paste/drop</strong> - deferred to the dedicated <code>paste</code> handler.
         </li>
       </ul>
 
       <h3>input</h3>
       <p>
-        <code>handleChange</code> is the single place <code>onChange</code> is emitted — it
+        <code>handleChange</code> is the single place <code>onChange</code> is emitted - it
         always runs the full sanitize → format pipeline via{' '}
         <code>handleOnChangeNumoraInput</code>. Three paths lead here:
       </p>
       <ul>
         <li>
-          <strong>After <code>beforeinput</code></strong> — <code>setRangeText</code> fires a
+          <strong>After <code>beforeinput</code></strong> - <code>setRangeText</code> fires a
           synchronous <code>input</code> event in real browsers (jsdom skips this; tests
           dispatch it manually). <code>formatInputValue</code> is idempotent on the
           already-formatted value so the pipeline is a no-op and <code>onChange</code> is
           emitted.
         </li>
         <li>
-          <strong>After paste</strong> — <code>handlePaste</code> sets the value directly
+          <strong>After paste</strong> - <code>handlePaste</code> sets the value directly
           then dispatches a synthetic <code>input</code> event. Same idempotent run.
         </li>
         <li>
-          <strong>Undo/redo and programmatic changes</strong> — the browser (or external
+          <strong>Undo/redo and programmatic changes</strong> - the browser (or external
           code) sets the value and fires <code>input</code>; the pipeline formats the new
           value and emits <code>onChange</code>.
         </li>

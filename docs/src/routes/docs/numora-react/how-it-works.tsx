@@ -4,19 +4,22 @@ import { CodeBlock } from '@/components/CodeBlock'
 export const Route = createFileRoute('/docs/numora-react/how-it-works')({
   head: () => ({
     meta: [
-      { title: 'How It Works - numora-react | React Numeric Input' },
+      { title: 'How numora-react Works - React Numeric Input Component Internals' },
       { name: 'description', content: 'Understand the internal pipeline of numora-react: event interception, sanitization, formatting, and value emission on every keystroke, paste, and blur.' },
-      { property: 'og:title', content: 'How It Works - numora-react | React Numeric Input' },
+      { property: 'og:title', content: 'How numora-react Works - React Numeric Input Component Internals' },
       { property: 'og:description', content: 'Understand the internal pipeline of numora-react: event interception, sanitization, formatting, and value emission on every keystroke, paste, and blur.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/how-it-works' },
-      { name: 'twitter:title', content: 'How It Works - numora-react | React Numeric Input' },
+      { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/how-it-works' },
+      { name: 'twitter:title', content: 'How numora-react Works - React Numeric Input Component Internals' },
       { name: 'twitter:description', content: 'Understand the internal pipeline of numora-react: event interception, sanitization, formatting, and value emission.' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react/how-it-works' },
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/how-it-works' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "How It Works", "item": "https://numora.xyz/docs/numora-react/how-it-works" }] }) },
+      { type: 'application/ld+json', children: JSON.stringify([
+        { "@context": "https://schema.org", "@type": "TechArticle", "headline": "How numora-react Works - React Numeric Input Component Internals", "description": "Understand the React-specific event pipeline: how NumoraInput intercepts beforeinput natively, emits raw and formatted values via onChange, and integrates with React's synthetic event system.", "url": "https://numeric-input.com/docs/numora-react/how-it-works", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } },
+        { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numeric-input.com/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "How It Works", "item": "https://numeric-input.com/docs/numora-react/how-it-works" }] }
+      ]) },
     ],
   }),
   component: HowItWorks,
@@ -77,7 +80,7 @@ function App() {
       <h3>beforeinput</h3>
       <p>
         <code>beforeinput</code> is the primary formatting hook, registered via native{' '}
-        <code>addEventListener</code> directly on the element — not through React's synthetic
+        <code>addEventListener</code> directly on the element - not through React's synthetic
         event system. React delegates events from the root, which means{' '}
         <code>preventDefault()</code> would be a no-op by the time it runs; a native listener
         fires synchronously at the element, before the browser commits the mutation.
@@ -85,30 +88,30 @@ function App() {
       <p>
         The handler calls <code>e.preventDefault()</code>, computes the intended value, runs
         the full sanitize → format pipeline, and writes the result via{' '}
-        <code>setRangeText</code> — which preserves the browser's undo/redo stack. This fires
+        <code>setRangeText</code> - which preserves the browser's undo/redo stack. This fires
         a synchronous <code>input</code> event, which React catches as <code>onChange</code>.
       </p>
       <p>The handler covers:</p>
       <ul>
         <li>
-          <strong>Decimal separator key</strong> — converts <code>,</code> or <code>.</code> to
+          <strong>Decimal separator key</strong> - converts <code>,</code> or <code>.</code> to
           the configured separator; blocks a second decimal if one already exists.
         </li>
         <li>
-          <strong>Character insertion</strong> (<code>insertText</code>) — inserts at cursor,
+          <strong>Character insertion</strong> (<code>insertText</code>) - inserts at cursor,
           formats the result.
         </li>
         <li>
           <strong>Deletions</strong> (<code>deleteContentBackward</code>,{' '}
           <code>deleteContentForward</code>, <code>deleteByCut</code>,{' '}
-          <code>deleteByDrag</code>) — removes the correct range, formats the result.
+          <code>deleteByDrag</code>) - removes the correct range, formats the result.
         </li>
         <li>
-          <strong>Undo/redo</strong> (<code>historyUndo</code>, <code>historyRedo</code>) —
+          <strong>Undo/redo</strong> (<code>historyUndo</code>, <code>historyRedo</code>) -
           not intercepted; the browser handles these natively.
         </li>
         <li>
-          <strong>Paste/drop</strong> — deferred to the dedicated <code>paste</code> handler.
+          <strong>Paste/drop</strong> - deferred to the dedicated <code>paste</code> handler.
         </li>
       </ul>
 
@@ -116,11 +119,10 @@ function App() {
       <p>
         The synchronous <code>input</code> event fired by <code>setRangeText</code> inside{' '}
         <code>beforeinput</code> is caught by React as <code>onChange</code>.{' '}
-        <code>handleChange</code> is a pure emitter — it reads the already-formatted value
-        from the DOM, strips thousand separators to compute <code>rawValue</code>, and fires
-        the <code>onChange</code> and <code>onRawValueChange</code> callbacks. It does not
-        reformat. The same handler fires for paste (via synthetic event) and undo/redo (via
-        native browser event).
+        <code>handleChange</code> is a pure emitter - it reads the already-formatted value
+        from the DOM, strips thousand separators to compute the raw value, and fires
+        the <code>onChange</code> callback. It does not reformat. The same handler fires for
+        paste (via synthetic event) and undo/redo (via native browser event).
       </p>
       <CodeBlock language="tsx">
 {`<NumoraInput
@@ -128,7 +130,7 @@ function App() {
   thousandSeparator=","
   onChange={(e) => {
     // fires after every sanitize + format cycle
-    console.log(e.target.value) // e.g. "1,234.56"
+    console.log(e.target.value) // e.g. "1234.56" - raw, separators stripped
   }}
 />`}
       </CodeBlock>
@@ -240,14 +242,14 @@ function App() {
       </p>
       <ul>
         <li>
-          <strong>formatted</strong> - the display string including thousand separators.
-          Always written to the DOM input and always available as <code>e.target.value</code>{' '}
-          in <code>onChange</code>.
+          <strong>raw</strong> - the value after sanitization but before thousand grouping
+          (e.g. <code>"1234.56"</code>). Always returned as <code>e.target.value</code>{' '}
+          in <code>onChange</code> - safe to pass directly to form libraries.
         </li>
         <li>
-          <strong>raw</strong> - the value after sanitization but before thousand grouping
-          (e.g. <code>"1234.56"</code>). Available as <code>e.target.rawValue</code> and via
-          the <code>onRawValueChange</code> callback.
+          <strong>formatted</strong> - the display string including thousand separators
+          (e.g. <code>"1,234.56"</code>). Written to the DOM and available as{' '}
+          <code>e.target.formattedValue</code> via <code>NumoraHTMLInputElement</code>.
         </li>
       </ul>
       <CodeBlock language="tsx">
@@ -255,11 +257,8 @@ function App() {
   maxDecimals={2}
   thousandSeparator=","
   onChange={(e) => {
-    console.log(e.target.value)    // always "1,234.56" - the formatted display string
-    console.log(e.target.rawValue) // "1234.56" - no thousand separators
-  }}
-  onRawValueChange={(raw) => {
-    console.log(raw) // "1234.56" - convenient shorthand for the raw value
+    console.log(e.target.value)             // "1234.56" - raw, no thousand separators
+    console.log(e.target.formattedValue)    // "1,234.56" - formatted display string
   }}
 />`}
       </CodeBlock>
@@ -281,8 +280,8 @@ function App() {
     │
     ├─ input / onChange ─── pure emitter                      (handleChange)
     │                      reads already-formatted value from DOM
-    │                      strips separators → rawValue
-    │                      fires onChange + onRawValueChange
+    │                      strips separators → raw value
+    │                      fires onChange (e.target.value = raw)
     │                      (also fires for undo/redo via native browser input event)
     │
     │   (beforeinput pipeline produces:)
@@ -299,8 +298,8 @@ function App() {
     │                ┌─────┴──────────────────────┐
     │                ▼                             ▼
     │           formatted                         raw
-    │         → input.value                     → e.target.rawValue
-    │         → e.target.value (onChange)        → onRawValueChange
+    │         → input.value                     → e.target.value (onChange)
+    │         → e.target.formattedValue
     │
     └─ blur ─────────────── formatValueForDisplay (FormatOn.Blur only)
                             → input.value`}

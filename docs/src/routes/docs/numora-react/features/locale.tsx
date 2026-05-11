@@ -10,15 +10,15 @@ export const Route = createFileRoute('/docs/numora-react/features/locale')({
       { name: 'description', content: 'Auto-detect thousand and decimal separators from the browser locale using the locale prop and getSeparatorsFromLocale.' },
       { property: 'og:title', content: 'Locale-Aware Separator Detection | numora-react' },
       { property: 'og:description', content: 'Auto-detect separators from the browser locale with numora-react.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/features/locale' },
+      { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/features/locale' },
       { name: 'twitter:title', content: 'Locale-Aware Separator Detection | numora-react' },
       { name: 'twitter:description', content: 'Auto-detect separators from the browser locale with numora-react.' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react/features/locale' },
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/features/locale' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora-react/features" }, { "@type": "ListItem", "position": 4, "name": "Locale", "item": "https://numora.xyz/docs/numora-react/features/locale" }] }) },
+      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Locale Support in numora-react - International React Numeric Input", "description": "Locale-aware separator detection in the numora-react React numeric input component. Support comma decimals, dot thousand separators, and international grouping.", "url": "https://numeric-input.com/docs/numora-react/features/locale", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numeric-input.com/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Locale", "item": "https://numeric-input.com/docs/numora-react/features/locale" }] }]) },
     ],
   }),
   component: Locale,
@@ -55,7 +55,7 @@ function Locale() {
 
       <h2>Specific locale tag</h2>
       <p>
-        Pass a BCP 47 locale tag to pin separators to a specific locale — useful for SSR or
+        Pass a BCP 47 locale tag to pin separators to a specific locale - useful for SSR or
         server-driven locale handling.
       </p>
       <div className="space-y-4">

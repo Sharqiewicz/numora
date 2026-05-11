@@ -36,7 +36,7 @@ export function handleOnBeforeInputNumoraInput(
   let inputData = e.data ?? '';
 
   // Decimal separator handling: convert ',' or '.' to the configured separator and
-  // prevent duplicate separators — previously handled in keydown, now lives here so
+  // prevent duplicate separators - previously handled in keydown, now lives here so
   // that undo history is preserved via the setRangeText path.
   if (e.inputType === 'insertText' && (e.data === ',' || e.data === '.')) {
     const decimalSep = separators.decimalSeparator;
@@ -89,7 +89,7 @@ export function handleOnBeforeInputNumoraInput(
       break;
     }
     default:
-      // Unknown input type — let the browser handle it natively.
+      // Unknown input type - let the browser handle it natively.
       return null;
   }
 

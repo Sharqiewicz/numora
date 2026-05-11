@@ -2,3 +2,9 @@
   base    = "."
   command = "pnpm --filter numora build && pnpm --filter numora-react build && pnpm --filter docs build"
   publish = "docs/dist/client"
+
+[[redirects]]
+  from   = "https://numora.xyz/*"
+  to     = "https://numeric-input.com/:splat"
+  status = 301
+  force  = true
