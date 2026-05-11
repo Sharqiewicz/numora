@@ -68,12 +68,12 @@ export function Swap() {
   }
 
   function handleFromInputChange(e: React.ChangeEvent<NumoraHTMLInputElement>) {
-    setFromAmount(e.target.rawValue ?? '');
+    setFromAmount(e.target.value);
     setLastEdited('from');
   }
 
   function handleToInputChange(e: React.ChangeEvent<NumoraHTMLInputElement>) {
-    setToAmount(e.target.rawValue ?? '');
+    setToAmount(e.target.value);
     setLastEdited('to');
   }
 

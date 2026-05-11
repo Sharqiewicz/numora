@@ -4,19 +4,19 @@ import { CodeBlock } from '@/components/CodeBlock'
 export const Route = createFileRoute('/docs/numora/features/value-types')({
   head: () => ({
     meta: [
-      { title: 'Value Types | Numora' },
+      { title: 'Raw vs Formatted Value - JavaScript Numeric Input Output Types | Numora' },
       { name: 'description', content: 'Learn how Numora always emits string values from onChange, what rawValueMode does, and when to use valueAsNumber as an escape hatch.' },
-      { property: 'og:title', content: 'Value Types | Numora' },
+      { property: 'og:title', content: 'Raw vs Formatted Value - JavaScript Numeric Input Output Types | Numora' },
       { property: 'og:description', content: 'Learn how Numora always emits string values from onChange, what rawValueMode does, and when to use valueAsNumber.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora/features/value-types' },
-      { name: 'twitter:title', content: 'Value Types | Numora' },
+      { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/value-types' },
+      { name: 'twitter:title', content: 'Raw vs Formatted Value - JavaScript Numeric Input Output Types | Numora' },
       { name: 'twitter:description', content: 'Numora always emits strings from onChange. Learn about rawValueMode and the valueAsNumber escape hatch.' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/features/value-types' },
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora/features/value-types' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora/features" }, { "@type": "ListItem", "position": 4, "name": "Value Types", "item": "https://numora.xyz/docs/numora/features/value-types" }] }) },
+      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Value Types in Numora - Raw vs Formatted Numeric Input Values", "description": "Understand value types in the Numora JavaScript numeric input library. Raw string values for math operations, formatted display strings for the UI.", "url": "https://numeric-input.com/docs/numora/features/value-types", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numeric-input.com/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Value Types", "item": "https://numeric-input.com/docs/numora/features/value-types" }] }]) },
     ],
   }),
   component: ValueTypes,

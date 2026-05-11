@@ -46,7 +46,7 @@ code {
   --sidebar-border: oklch(0.274 0.006 286.033);
   --sidebar-ring: oklch(0 0 0);
 
-  /* Surface tokens — component-level dark surfaces */
+  /* Surface tokens - component-level dark surfaces */
   --surface-1: oklch(0.145 0.005 255);
   --surface-2: oklch(0.188 0.006 255);
   --surface-3: oklch(0.200 0.007 255);

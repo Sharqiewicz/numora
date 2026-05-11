@@ -9,15 +9,15 @@ export const Route = createFileRoute('/docs/numora-react/features/sanitization')
       { name: 'description', content: 'Sanitize numeric inputs using the NumoraInput React component. Block invalid characters, clean pasted values, and handle all input vectors automatically.' },
       { property: 'og:title', content: 'Numeric Input Sanitization | numora-react' },
       { property: 'og:description', content: 'Sanitize numeric inputs using the NumoraInput React component. Block invalid characters and clean pasted values.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/features/sanitization' },
+      { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/features/sanitization' },
       { name: 'twitter:title', content: 'Numeric Input Sanitization | numora-react' },
       { name: 'twitter:description', content: 'Sanitize numeric inputs using the NumoraInput React component.' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react/features/sanitization' },
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/features/sanitization' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora-react/features" }, { "@type": "ListItem", "position": 4, "name": "Sanitization", "item": "https://numora.xyz/docs/numora-react/features/sanitization" }] }) },
+      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Numeric Input Sanitization in numora-react - React Component Input Cleaning", "description": "Sanitize numeric inputs in React using the NumoraInput component. Block invalid characters, clean pasted values, and handle all input vectors automatically.", "url": "https://numeric-input.com/docs/numora-react/features/sanitization", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numeric-input.com/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Sanitization", "item": "https://numeric-input.com/docs/numora-react/features/sanitization" }] }]) },
     ],
   }),
   component: Sanitization,
@@ -61,7 +61,7 @@ function Sanitization() {
         package for stripping thousand separators from a formatted string. Useful when you need
         to extract a raw numeric value from a display string.
       </p>
-      <p>(You can also access the raw value of the input by <code>e.target.rawValue</code> when <code>rawValueMode</code> is <code>true</code>)</p>
+      <p>(You can also access the raw value directly via <code>e.target.value</code> in <code>onChange</code> - separators are always stripped.)</p>
 
 
       <CodeBlock language="tsx">

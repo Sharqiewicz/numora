@@ -5,19 +5,19 @@ import { FormatOn, ThousandStyle } from 'numora'
 export const Route = createFileRoute('/docs/numora-react/features/formatting')({
   head: () => ({
     meta: [
-      { title: 'Number Formatting as You Type | numora-react' },
+      { title: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react' },
       { name: 'description', content: 'Format numbers as you type using the NumoraInput React component. Thousand separators, multiple grouping styles, real-time formatting with cursor position preservation.' },
-      { property: 'og:title', content: 'Number Formatting as You Type | numora-react' },
+      { property: 'og:title', content: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react' },
       { property: 'og:description', content: 'Format numbers as you type using the NumoraInput React component. Thousand separators and cursor position preservation.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/features/formatting' },
-      { name: 'twitter:title', content: 'Number Formatting as You Type | numora-react' },
+      { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/features/formatting' },
+      { name: 'twitter:title', content: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react' },
       { name: 'twitter:description', content: 'Format numbers as you type using the NumoraInput React component.' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react/features/formatting' },
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/features/formatting' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora-react/features" }, { "@type": "ListItem", "position": 4, "name": "Formatting", "item": "https://numora.xyz/docs/numora-react/features/formatting" }] }) },
+      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Number Formatting in numora-react - React Numeric Input Thousand Separators", "description": "Format numbers as you type in a React numeric input. numora-react supports Standard, Indian Lakh, and East Asian Wan grouping with automatic cursor preservation.", "url": "https://numeric-input.com/docs/numora-react/features/formatting", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numeric-input.com/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Number Formatting", "item": "https://numeric-input.com/docs/numora-react/features/formatting" }] }]) },
     ],
   }),
   component: Formatting,

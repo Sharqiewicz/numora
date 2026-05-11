@@ -8,15 +8,15 @@ export const Route = createFileRoute('/docs/numora-react/features/compact-notati
       { name: 'description', content: 'Enable compact number notation using the NumoraInput React component. Let users type "1k", "1m", "1b" for compact shorthand number input.' },
       { property: 'og:title', content: 'Compact Notation (1k, 1m, 1b) | numora-react' },
       { property: 'og:description', content: 'Enable compact number notation using the NumoraInput React component. Type "1k", "1m", "1b" for shorthand input.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora-react/features/compact-notation' },
+      { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/features/compact-notation' },
       { name: 'twitter:title', content: 'Compact Notation (1k, 1m, 1b) | numora-react' },
       { name: 'twitter:description', content: 'Enable compact number notation using the NumoraInput React component.' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz/docs/numora-react/features/compact-notation' },
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/features/compact-notation' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numora.xyz/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora-react/features" }, { "@type": "ListItem", "position": 4, "name": "Compact Notation", "item": "https://numora.xyz/docs/numora-react/features/compact-notation" }] }) },
+      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Compact Notation in numora-react - React Numeric Input 1k → 1000", "description": "Expand compact notation in React numeric input fields. Type 1k, 1.5m, or 2b and numora-react automatically expands to the full numeric value.", "url": "https://numeric-input.com/docs/numora-react/features/compact-notation", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numeric-input.com/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Compact Notation", "item": "https://numeric-input.com/docs/numora-react/features/compact-notation" }] }]) },
     ],
   }),
   component: CompactNotation,

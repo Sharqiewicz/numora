@@ -16,21 +16,21 @@ interface PackageContextType {
 const PackageContext = createContext<PackageContextType | undefined>(undefined)
 
 export function PackageProvider({ children }: { children: ReactNode }) {
-  const [selectedPackage, setSelectedPackageState] = useState<PackageTab>(() => {
-    if (typeof window === 'undefined') {
-      return DEFAULT_PACKAGE
-    }
-    const stored = localStorage.getItem(STORAGE_KEY) as PackageTab | null
-    return (stored && ['react', 'core'].includes(stored))
-      ? stored
-      : DEFAULT_PACKAGE
-  })
+  const [selectedPackage, setSelectedPackageState] = useState<PackageTab>(DEFAULT_PACKAGE)
+  const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, selectedPackage)
+    const stored = localStorage.getItem(STORAGE_KEY) as PackageTab | null
+    if (stored && ['react', 'core'].includes(stored)) {
+      setSelectedPackageState(stored)
     }
-  }, [selectedPackage])
+    setHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!hydrated) return
+    localStorage.setItem(STORAGE_KEY, selectedPackage)
+  }, [selectedPackage, hydrated])
 
   const setSelectedPackage = (pkg: PackageTab) => {
     setSelectedPackageState(pkg)

@@ -4,6 +4,11 @@ import { Socials } from '@/components/socials';
 import { SwapPlayground } from '@/components/SwapPlayground';
 
 export const Route = createFileRoute('/swap')({
+  head: () => ({
+    meta: [
+      { name: 'robots', content: 'noindex, nofollow' },
+    ],
+  }),
   component: SwapPage,
 });
 

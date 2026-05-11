@@ -1,4 +1,4 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Disallow:
-Sitemap: https://numora.xyz/sitemap.xml
+Sitemap: https://numeric-input.com/sitemap.xml

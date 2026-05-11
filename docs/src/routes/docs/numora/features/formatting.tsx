@@ -4,19 +4,19 @@ import { CodeBlock } from '@/components/CodeBlock'
 export const Route = createFileRoute('/docs/numora/features/formatting')({
   head: () => ({
     meta: [
-      { title: 'Number Formatting as You Type | Numora' },
+      { title: 'Numeric Input Formatting - Thousand Separators, Lakh, Wan | Numora' },
       { name: 'description', content: 'Add thousand separators and format numbers as you type with Numora. Supports Standard, Lakh, and Wan grouping styles with cursor position preservation.' },
-      { property: 'og:title', content: 'Number Formatting as You Type | Numora' },
+      { property: 'og:title', content: 'Numeric Input Formatting - Thousand Separators, Lakh, Wan | Numora' },
       { property: 'og:description', content: 'Add thousand separators and format numbers as you type with Numora. Supports multiple grouping styles with cursor position preservation.' },
-      { property: 'og:url', content: 'https://numora.xyz/docs/numora/features/formatting' },
-      { name: 'twitter:title', content: 'Number Formatting as You Type | Numora' },
+      { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/formatting' },
+      { name: 'twitter:title', content: 'Numeric Input Formatting - Thousand Separators, Lakh, Wan | Numora' },
       { name: 'twitter:description', content: 'Add thousand separators and format numbers as you type with Numora. Cursor position preserved.' },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numora.xyz/docs/numora/features/formatting' },
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora/features/formatting' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify({ "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numora.xyz" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numora.xyz/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Features", "item": "https://numora.xyz/docs/numora/features" }, { "@type": "ListItem", "position": 4, "name": "Formatting", "item": "https://numora.xyz/docs/numora/features/formatting" }] }) },
+      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Number Formatting in Numora - Thousand Separators, Lakh, and Wan Grouping", "description": "Format numbers as you type in any JavaScript numeric input. Supports Standard (1,234,567), Indian Lakh (12,34,567), and East Asian Wan (123,4567) grouping with automatic cursor preservation.", "url": "https://numeric-input.com/docs/numora/features/formatting", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numeric-input.com/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Number Formatting", "item": "https://numeric-input.com/docs/numora/features/formatting" }] }]) },
     ],
   }),
   component: Formatting,

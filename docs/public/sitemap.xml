@@ -1,152 +1,164 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://numora.xyz/</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/explore</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/explore</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora/installation</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora/installation</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora/how-it-works</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora/how-it-works</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora/features/formatting</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora/anatomy</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora/features/value-types</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora/features/formatting</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora/features/decimals</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora/features/value-types</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora/features/sanitization</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora/features/decimals</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora/features/compact-notation</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora/features/sanitization</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora/features/scientific-notation</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora/features/compact-notation</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora/features/leading-zeros</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora/features/scientific-notation</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora/features/locale</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora/features/leading-zeros</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora-react</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora/features/locale</loc>
+    <lastmod>2026-05-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://numeric-input.com/docs/numora-react</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora-react/installation</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora-react/installation</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora-react/how-it-works</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora-react/how-it-works</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora-react/features/formatting</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora-react/anatomy</loc>
+    <lastmod>2026-05-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora-react/features/value-types</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora-react/features/formatting</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora-react/features/decimals</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora-react/features/value-types</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora-react/features/sanitization</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora-react/features/decimals</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora-react/features/compact-notation</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora-react/features/sanitization</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora-react/features/scientific-notation</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora-react/features/compact-notation</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora-react/features/leading-zeros</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora-react/features/scientific-notation</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora-react/features/locale</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora-react/features/leading-zeros</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://numora.xyz/docs/numora-react/integrations/react-hook-form</loc>
-    <lastmod>2026-03-12</lastmod>
+    <loc>https://numeric-input.com/docs/numora-react/features/locale</loc>
+    <lastmod>2026-05-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://numeric-input.com/docs/numora-react/integrations/react-hook-form</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

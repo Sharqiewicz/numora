@@ -155,7 +155,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
       }
     };
 
-    // Clear the input programmatically (not via beforeinput — just reset).
+    // Clear the input programmatically (not via beforeinput - just reset).
     const clearInput = () => {
       nativeSetter?.call(input, '');
       input.dispatchEvent(new Event('input', { bubbles: true }));
