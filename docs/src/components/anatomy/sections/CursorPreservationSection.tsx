@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { FormatOn, ThousandStyle } from 'numora'
 import { NumoraInput } from 'numora-react'
 import { InputPair } from '../InputPair'
+import { CursorAnchorDiagram } from '../diagrams'
 
 const inputClass =
   'w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring'
@@ -34,6 +35,7 @@ export function CursorPreservationSection() {
         to insert a digit, the formatter rebuilds the string with a new comma in a
         different place, and the cursor lands several characters away from where it should be.
       </p>
+      <CursorAnchorDiagram />
       <p>
         Numora's <code>updateCursorPosition</code> anchors on <em>meaningful digits</em>{' '}
         rather than character index.{' '}

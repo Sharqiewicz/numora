@@ -4,12 +4,12 @@ import { CodeBlock } from '@/components/CodeBlock'
 export const Route = createFileRoute('/docs/numora/how-it-works')({
   head: () => ({
     meta: [
-      { title: 'How Numora Works - JavaScript Numeric Input Pipeline Explained' },
+      { title: 'How Numora Works - Numeric Input Pipeline Explained' },
       { name: 'description', content: 'Understand the internal pipeline of numora: event interception, sanitization, formatting, and value emission on every keystroke, paste, and blur.' },
-      { property: 'og:title', content: 'How Numora Works - JavaScript Numeric Input Pipeline Explained' },
+      { property: 'og:title', content: 'How Numora Works - Numeric Input Pipeline Explained' },
       { property: 'og:description', content: 'Understand the internal pipeline of numora: event interception, sanitization, formatting, and value emission on every keystroke, paste, and blur.' },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/how-it-works' },
-      { name: 'twitter:title', content: 'How Numora Works - JavaScript Numeric Input Pipeline Explained' },
+      { name: 'twitter:title', content: 'How Numora Works - Numeric Input Pipeline Explained' },
       { name: 'twitter:description', content: 'Understand the internal pipeline of numora: event interception, sanitization, formatting, and value emission.' },
     ],
     links: [
@@ -17,7 +17,7 @@ export const Route = createFileRoute('/docs/numora/how-it-works')({
     ],
     scripts: [
       { type: 'application/ld+json', children: JSON.stringify([
-        { "@context": "https://schema.org", "@type": "TechArticle", "headline": "How Numora Works - JavaScript Numeric Input Pipeline", "description": "Understand the internal pipeline of numora: event interception via beforeinput, sanitization, formatting, and value emission on every keystroke, paste, and blur.", "url": "https://numeric-input.com/docs/numora/how-it-works", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } },
+        { "@context": "https://schema.org", "@type": "TechArticle", "headline": "How Numora Works - Numeric Input Pipeline", "description": "Understand the internal pipeline of numora: event interception via beforeinput, sanitization, formatting, and value emission on every keystroke, paste, and blur.", "url": "https://numeric-input.com/docs/numora/how-it-works", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } },
         { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numeric-input.com/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "How It Works", "item": "https://numeric-input.com/docs/numora/how-it-works" }] }
       ]) },
     ],

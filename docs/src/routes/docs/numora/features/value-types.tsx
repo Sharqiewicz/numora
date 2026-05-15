@@ -4,12 +4,12 @@ import { CodeBlock } from '@/components/CodeBlock'
 export const Route = createFileRoute('/docs/numora/features/value-types')({
   head: () => ({
     meta: [
-      { title: 'Raw vs Formatted Value - JavaScript Numeric Input Output Types | Numora' },
+      { title: 'Raw vs Formatted Value - Numeric Input Output Types | Numora' },
       { name: 'description', content: 'Learn how Numora always emits string values from onChange, what rawValueMode does, and when to use valueAsNumber as an escape hatch.' },
-      { property: 'og:title', content: 'Raw vs Formatted Value - JavaScript Numeric Input Output Types | Numora' },
+      { property: 'og:title', content: 'Raw vs Formatted Value - Numeric Input Output Types | Numora' },
       { property: 'og:description', content: 'Learn how Numora always emits string values from onChange, what rawValueMode does, and when to use valueAsNumber.' },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/value-types' },
-      { name: 'twitter:title', content: 'Raw vs Formatted Value - JavaScript Numeric Input Output Types | Numora' },
+      { name: 'twitter:title', content: 'Raw vs Formatted Value - Numeric Input Output Types | Numora' },
       { name: 'twitter:description', content: 'Numora always emits strings from onChange. Learn about rawValueMode and the valueAsNumber escape hatch.' },
     ],
     links: [

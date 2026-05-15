@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { SanitizationStepper } from '../SanitizationStepper'
+import { SanitizationPipelineDiagram } from '../diagrams'
 import type { SectionProps } from './types'
 
 export function SanitizationSection({ pkg }: SectionProps) {
@@ -15,6 +16,7 @@ export function SanitizationSection({ pkg }: SectionProps) {
         one job and runs in a fixed order; the output of step N is the input of step N+1.
         The whole pipeline runs on every keystroke.
       </p>
+      <SanitizationPipelineDiagram />
       <p>
         Type below and watch the value transform step by step. Greyed-out rows are steps
         that didn't change the value:

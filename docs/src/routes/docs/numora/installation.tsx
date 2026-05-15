@@ -7,12 +7,12 @@ import { Button } from '@/components/ui/button'
 export const Route = createFileRoute('/docs/numora/installation')({
   head: () => ({
     meta: [
-      { title: 'Install Numora - JavaScript Numeric Input Library Setup Guide' },
+      { title: 'Install Numora - Numeric Input Library Setup Guide' },
       { name: 'description', content: 'Install the Numora JavaScript numeric input library with npm, pnpm, yarn, or bun. Zero dependencies, TypeScript-ready, works with any framework. Live number formatting in minutes.' },
-      { property: 'og:title', content: 'Install Numora - JavaScript Numeric Input Library Setup Guide' },
+      { property: 'og:title', content: 'Install Numora - Numeric Input Library Setup Guide' },
       { property: 'og:description', content: 'Install the Numora JavaScript numeric input library. Zero dependencies, TypeScript-ready, works with any framework.' },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/installation' },
-      { name: 'twitter:title', content: 'Install Numora - JavaScript Numeric Input Library Setup Guide' },
+      { name: 'twitter:title', content: 'Install Numora - Numeric Input Library Setup Guide' },
       { name: 'twitter:description', content: 'Install the Numora JavaScript numeric input library. Zero dependencies, works with any framework.' },
     ],
     links: [
@@ -20,7 +20,7 @@ export const Route = createFileRoute('/docs/numora/installation')({
     ],
     scripts: [
       { type: 'application/ld+json', children: JSON.stringify([
-        { "@context": "https://schema.org", "@type": "TechArticle", "headline": "Install Numora - JavaScript Numeric Input Library Setup", "description": "Step-by-step installation guide for the numora JavaScript numeric input library. Works with npm, pnpm, yarn, and bun.", "url": "https://numeric-input.com/docs/numora/installation", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } },
+        { "@context": "https://schema.org", "@type": "TechArticle", "headline": "Install Numora - Numeric Input Library Setup", "description": "Step-by-step installation guide for the numora JavaScript numeric input library. Works with npm, pnpm, yarn, and bun.", "url": "https://numeric-input.com/docs/numora/installation", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } },
         { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numeric-input.com/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Installation", "item": "https://numeric-input.com/docs/numora/installation" }] }
       ]) },
     ],
@@ -33,7 +33,7 @@ function Installation() {
 
   return (
     <div className="prose prose-invert max-w-none">
-      <h1>Install Numora - JavaScript Numeric Input</h1>
+      <h1>Install Numora - Numeric Input</h1>
       <p className="text-lg text-muted-foreground">
         Add the numora JavaScript numeric input library to any project - no framework required.
       </p>

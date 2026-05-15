@@ -1,5 +1,6 @@
 import { FormatOn, ThousandStyle } from 'numora'
 import { NumoraInput } from 'numora-react'
+import { GroupingStylesDiagram } from '../diagrams'
 
 const inputClass =
   'w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring'
@@ -34,6 +35,7 @@ export function GroupingStylesSection() {
         styles, each producing a different visual rhythm for the same underlying value.
         Type <code>10000000</code> in all three to see them diverge:
       </p>
+      <GroupingStylesDiagram />
       <div className="my-6 grid gap-4 rounded-lg border bg-muted/30 p-4 md:grid-cols-3">
         {styles.map((s) => (
           <div key={s.label} className="space-y-2">

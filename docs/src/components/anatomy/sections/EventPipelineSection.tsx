@@ -1,5 +1,6 @@
 import { CodeBlock } from '@/components/CodeBlock'
 import { EventPipelineDemo } from '../EventPipelineDemo'
+import { EventPipelineDiagram } from '../diagrams'
 
 export function EventPipelineSection() {
   return (
@@ -11,6 +12,7 @@ export function EventPipelineSection() {
         for a different reason:
       </p>
       <CodeBlock language="text">{`keydown  →  beforeinput  →  [DOM mutation]  →  input  →  keyup`}</CodeBlock>
+      <EventPipelineDiagram />
       <ul>
         <li>
           <strong><code>keydown</code> (1996)</strong> - fires first, before anything

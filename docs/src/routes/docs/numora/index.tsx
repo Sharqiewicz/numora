@@ -6,12 +6,12 @@ import { CodeBlock } from '@/components/CodeBlock'
 export const Route = createFileRoute('/docs/numora/')({
   head: () => ({
     meta: [
-      { title: 'Numora - JavaScript Numeric Input Library | Docs' },
+      { title: 'Numora - Numeric Input Library | Docs' },
       { name: 'description', content: 'Get started with numora, the zero-dependency JavaScript numeric input library. Attach to any input element - works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.' },
-      { property: 'og:title', content: 'Numora - JavaScript Numeric Input Library | Docs' },
+      { property: 'og:title', content: 'Numora - Numeric Input Library | Docs' },
       { property: 'og:description', content: 'Get started with numora, the zero-dependency JavaScript numeric input library. Framework-agnostic - works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.' },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora' },
-      { name: 'twitter:title', content: 'Numora - JavaScript Numeric Input Library | Docs' },
+      { name: 'twitter:title', content: 'Numora - Numeric Input Library | Docs' },
       { name: 'twitter:description', content: 'Zero-dependency JavaScript numeric input library. Framework-agnostic - works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.' },
     ],
     links: [
@@ -30,7 +30,7 @@ export const Route = createFileRoute('/docs/numora/')({
 function GetStarted() {
   return (
     <div className="prose prose-invert max-w-none text-muted-foreground!">
-      <h1>Numora - JavaScript Numeric Input Library</h1>
+      <h1>Numora - Numeric Input Library</h1>
       <p>
         <strong className="font-numora">numora</strong> is a zero-dependency TypeScript library that turns any{' '}
         <code>{'<input>'}</code> element into a precision numeric input. Unlike{' '}
