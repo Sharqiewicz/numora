@@ -2,7 +2,6 @@ import {
   useRef,
   useState,
   useEffect,
-  useLayoutEffect,
   forwardRef,
   useCallback,
   useMemo,
@@ -12,6 +11,7 @@ import {
   KeyboardEvent,
   InputHTMLAttributes,
 } from 'react';
+import { useIsomorphicLayoutEffect } from './use-isomorphic-layout-effect';
 import {
   FormatOn,
   ThousandStyle,
@@ -140,26 +140,20 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     ...rest
   } = props;
 
-  validateNumoraInputOptions({
-    decimalMaxLength: maxDecimals,
-    decimalMinLength,
-    formatOn,
-    thousandSeparator,
-    thousandStyle,
-    decimalSeparator,
-    enableCompactNotation,
-    enableNegative,
-    enableLeadingZeros,
-    rawValueMode,
-  });
-
-  const internalInputRef = useRef<HTMLInputElement>(null);
-  const onChangeRef = useRef(onChange);
-  // Flag used to prevent handleChange from double-calling onChange on the typing path.
-  // Set to true immediately before the programmatic input dispatch (which is synchronous),
-  // so it is still true when handleChange runs, then cleared after dispatch returns.
-  const isHandledByBeforeInputRef = useRef(false);
-  const maxDecimalsRef = useRef(maxDecimals);
+  if (process.env.NODE_ENV !== 'production') {
+    validateNumoraInputOptions({
+      decimalMaxLength: maxDecimals,
+      decimalMinLength,
+      formatOn,
+      thousandSeparator,
+      thousandStyle,
+      decimalSeparator,
+      enableCompactNotation,
+      enableNegative,
+      enableLeadingZeros,
+      rawValueMode,
+    });
+  }
 
   const formattingOptions: FormattingOptions = useMemo(() => {
     const separators = applyLocale(locale, { thousandSeparator, decimalSeparator });
@@ -177,32 +171,52 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   }, [locale, formatOn, thousandSeparator, thousandStyle, decimalSeparator, decimalMinLength,
     enableCompactNotation, enableNegative, enableLeadingZeros, rawValueMode]);
 
-  // Compute initial formatted value once at mount. Using uncontrolled defaultValue means
-  // React never overwrites the DOM value on re-renders, which is what allows undo to work.
-  const [initialDisplayValue] = useState<string>(() => {
+  const internalInputRef = useRef<HTMLInputElement>(null);
+  const onChangeRef = useRef(onChange);
+  // Flag used to prevent handleChange from double-calling onChange on the typing path.
+  // Set to true immediately before the programmatic input dispatch (which is synchronous),
+  // so it is still true when handleChange runs, then cleared after dispatch returns.
+  const isHandledByBeforeInputRef = useRef(false);
+  const maxDecimalsRef = useRef(maxDecimals);
+  const formattingOptionsRef = useRef(formattingOptions);
+
+  // Computed once on mount. Uncontrolled defaultValue lets React leave the DOM value alone
+  // on re-renders, which is what allows undo to work.
+  const [initialDisplayValue] = useState(() => {
     const valueToFormat = controlledValue !== undefined ? controlledValue : defaultValue;
-    if (valueToFormat !== undefined) {
-      const { formatted } = formatValueForDisplay(String(valueToFormat), maxDecimals, formattingOptions);
-      return formatted;
-    }
-    return '';
+    if (valueToFormat === undefined) return '';
+    return formatValueForDisplay(String(valueToFormat), maxDecimals, formattingOptions).formatted;
   });
 
-  // Sync external ref
-  useLayoutEffect(() => {
+  // Sync external ref → internal input element.
+  useIsomorphicLayoutEffect(() => {
     if (!ref) return;
-    if (typeof ref === 'function') ref(internalInputRef.current);
-    else ref.current = internalInputRef.current;
+    if (typeof ref === 'function') {
+      ref(internalInputRef.current);
+      return () => ref(null);
+    }
+    ref.current = internalInputRef.current;
+    return () => {
+      ref.current = null;
+    };
   }, [ref]);
 
-  // Set formattedValue on the element after mount so consumers that read it synchronously
-  // from the ref always see a defined value.
+  // Keep refs in sync so the native beforeinput listener (registered once at mount) always
+  // sees the latest options/callbacks without needing to re-register. Intentionally no deps —
+  // must run after every render to stay current.
+  useIsomorphicLayoutEffect(() => {
+    formattingOptionsRef.current = formattingOptions;
+    maxDecimalsRef.current = maxDecimals;
+    onChangeRef.current = onChange;
+  });
+
+  // Mount-only DOM init: set formattedValue on the element so consumers reading it
+  // synchronously from the ref always see a defined value. No reactive inputs to track.
   useEffect(() => {
     const input = internalInputRef.current;
     if (!input) return;
     (input as NumoraHTMLInputElement).formattedValue = input.value;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // intentionally runs once on mount only
+  }, []);
 
   // Sync controlled value prop changes and formatting option changes (locale switch, separator
   // change, maxDecimals change, etc.). Direct assignment is fine - programmatic changes don't
@@ -224,19 +238,6 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       (input as NumoraHTMLInputElement).formattedValue = formatted;
     }
   }, [controlledValue, maxDecimals, formattingOptions]);
-
-  // Keep refs in sync so the beforeinput handler always sees the latest options and callbacks
-  // without needing to re-register the listener on every render. useLayoutEffect ensures the
-  // refs are updated before the browser can fire a beforeinput event after a commit.
-  // Dependency array intentionally omitted - must run after every render to stay current.
-  // formattingOptionsRef is declared here (not with the other refs at the top) because it
-  // must be initialised with the useMemo result above.
-  const formattingOptionsRef = useRef(formattingOptions);
-  useLayoutEffect(() => {
-    formattingOptionsRef.current = formattingOptions;
-    maxDecimalsRef.current = maxDecimals;
-    onChangeRef.current = onChange;
-  });
 
   // Native beforeinput listener attached directly to the input element (not via React's
   // synthetic event delegation). React's onBeforeInput fires at the root during bubbling -
@@ -328,7 +329,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       formattingOptions.ThousandStyle !== ThousandStyle.None
     ) {
       const input = e.target as HTMLInputElement;
-      input.value = removeThousandSeparators(input.value, formattingOptions.thousandSeparator!);
+      input.value = removeThousandSeparators(input.value, formattingOptions.thousandSeparator);
       // formattedValue doesn't change - rawValue was already separator-free
     }
     if (onFocus) onFocus(e);
