@@ -17,16 +17,13 @@ import {
   ThousandStyle,
   applyLocale,
   formatValueForDisplay,
+  handleOnBeforeInputNumoraInput,
+  handleOnKeyDownNumoraInput,
+  handleOnPasteNumoraInput,
   removeThousandSeparators,
   validateNumoraInputOptions,
   type FormattingOptions,
 } from 'numora';
-import {
-  handleNumoraOnBeforeInput,
-  handleNumoraOnBlur,
-  handleNumoraOnKeyDown,
-  handleNumoraOnPaste,
-} from './handlers';
 
 export interface NumoraHTMLInputElement extends HTMLInputElement {
   /** The formatted display string - the same value shown in the input, including thousand separators. */
@@ -253,28 +250,29 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       // Paste/drop are handled by the React onPaste handler which already calls onChange.
       if (e.inputType === 'insertFromPaste' || e.inputType === 'insertFromDrop') return;
 
-      const result = handleNumoraOnBeforeInput(e, {
-        decimalMaxLength: maxDecimalsRef.current,
-        formattingOptions: formattingOptionsRef.current,
-      });
-      if (result !== null) {
-        const numInput = input as NumoraHTMLInputElement;
-        numInput.formattedValue = result.value;
-        // Call onChange directly - guaranteed delivery, no dependency on React's
-        // value-tracker diff or synthetic event pipeline (which can silently drop onChange
-        // when the tracker and input.value happen to match after concurrent renders).
-        if (onChangeRef.current) {
-          onChangeRef.current(createSyntheticChangeEvent(numInput, result.rawValue ?? ''));
-        }
-        // Dispatch input only to keep React's internal value tracker in sync.
-        // Required for undo detection: when the user undoes, the browser fires a real input
-        // event and handleChange needs the tracker to reflect the current value.
-        // dispatchEvent is synchronous - isHandledByBeforeInputRef is true throughout
-        // handleChange's execution and cleared immediately after dispatch returns.
-        isHandledByBeforeInputRef.current = true;
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-        isHandledByBeforeInputRef.current = false;
+      const result = handleOnBeforeInputNumoraInput(
+        e,
+        maxDecimalsRef.current,
+        formattingOptionsRef.current
+      );
+      if (result === null) return;
+
+      const numInput = input as NumoraHTMLInputElement;
+      numInput.formattedValue = result.formatted;
+      // Call onChange directly - guaranteed delivery, no dependency on React's
+      // value-tracker diff or synthetic event pipeline (which can silently drop onChange
+      // when the tracker and input.value happen to match after concurrent renders).
+      if (onChangeRef.current) {
+        onChangeRef.current(createSyntheticChangeEvent(numInput, result.raw ?? ''));
       }
+      // Dispatch input only to keep React's internal value tracker in sync.
+      // Required for undo detection: when the user undoes, the browser fires a real input
+      // event and handleChange needs the tracker to reflect the current value.
+      // dispatchEvent is synchronous - isHandledByBeforeInputRef is true throughout
+      // handleChange's execution and cleared immediately after dispatch returns.
+      isHandledByBeforeInputRef.current = true;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      isHandledByBeforeInputRef.current = false;
     };
 
     input.addEventListener('beforeinput', handler);
@@ -303,22 +301,22 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   // past separators before beforeinput fires). caretInfoRef is no longer needed because
   // handleOnBeforeInputNumoraInput derives its own caret info from the InputEvent.
   const handleKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
-    handleNumoraOnKeyDown(e, formattingOptions);
+    handleOnKeyDownNumoraInput(e.nativeEvent, formattingOptions);
     if (onKeyDown) onKeyDown(e);
   }, [formattingOptions, onKeyDown]);
 
   const handlePaste = useCallback((e: ClipboardEvent<HTMLInputElement>) => {
-    const { value, rawValue } = handleNumoraOnPaste(e, { decimalMaxLength: maxDecimals, formattingOptions });
+    const { formatted, raw } = handleOnPasteNumoraInput(e.nativeEvent, maxDecimals, formattingOptions);
 
     const numInput = e.target as NumoraHTMLInputElement;
-    numInput.value = value;
-    numInput.formattedValue = value;
+    numInput.value = formatted;
+    numInput.formattedValue = formatted;
 
     if (onPaste) onPaste(e);
 
     // handleOnPasteNumoraInput calls e.preventDefault(), so no native input/change fires.
     // Synthesise a change event so consumers see the same API as typing.
-    if (onChange) onChange(createSyntheticChangeEvent(numInput, rawValue ?? ''));
+    if (onChange) onChange(createSyntheticChangeEvent(numInput, raw ?? ''));
   }, [maxDecimals, formattingOptions, onPaste, onChange]);
 
   const handleFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
@@ -336,17 +334,18 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   }, [formattingOptions, onFocus]);
 
   const handleBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
-    const { value, rawValue } = handleNumoraOnBlur(e, { decimalMaxLength: maxDecimals, formattingOptions });
-
-    const numInput = e.target as NumoraHTMLInputElement;
-    numInput.value = value;
-
-    // rawValue is only defined when handleNumoraOnBlur applied formatting (Blur mode).
-    // In Change mode it returns undefined - don't overwrite or emit in that case.
-    if (rawValue !== undefined) {
-      numInput.formattedValue = value;
-      // Notify onChange so consumers see the formatted-on-blur value.
-      if (onChange) onChange(createSyntheticChangeEvent(numInput, rawValue));
+    // In Blur mode, re-apply separators on blur and notify onChange. In Change mode the
+    // value is already formatted and stable, so we leave it alone.
+    if (formattingOptions.formatOn === FormatOn.Blur) {
+      const { formatted, raw } = formatValueForDisplay(
+        e.target.value,
+        maxDecimals,
+        { ...formattingOptions, formatOn: FormatOn.Change }
+      );
+      const numInput = e.target as NumoraHTMLInputElement;
+      numInput.value = formatted;
+      numInput.formattedValue = formatted;
+      if (onChange) onChange(createSyntheticChangeEvent(numInput, raw));
     }
 
     if (onBlur) onBlur(e);
