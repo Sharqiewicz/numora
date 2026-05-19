@@ -21,35 +21,14 @@ import type { FormattingOptions, CaretPositionInfo, Separators } from '@/types';
  *
  * @param el - The input element
  * @param caretPos - The desired caret position
- * @returns True if successful, false otherwise
  */
-export function setCaretPosition(el: HTMLInputElement, caretPos: number): boolean {
-  // This assignment is used to ensure focus and deselect any existing selection
-  // (fixes Chrome issue where selection interferes with caret positioning)
+export function setCaretPosition(el: HTMLInputElement, caretPos: number): void {
+  // Self-assign forces Chrome/Safari to clear any text selection before we set the caret;
+  // without it, an existing selection interferes with setSelectionRange.
+  // biome-ignore lint/correctness/noSelfAssign: required to clear selection in WebKit
   el.value = el.value;
-
-  if (el === null) {
-    return false;
-  }
-
-  // IE/Edge support
-  if ((el as any).createTextRange) {
-    const range = (el as any).createTextRange();
-    range.move('character', caretPos);
-    range.select();
-    return true;
-  }
-
-  // Modern browsers (selectionStart === 0 check is for Firefox bug)
-  if (el.selectionStart !== null || el.selectionStart === 0) {
-    el.focus();
-    el.setSelectionRange(caretPos, caretPos);
-    return true;
-  }
-
-  // Fallback
   el.focus();
-  return false;
+  el.setSelectionRange(caretPos, caretPos);
 }
 
 /**
@@ -75,7 +54,7 @@ export function setCaretPositionWithRetry(
   // Set immediately (for normal browsers, avoids flickering)
   setCaretPosition(el, caretPos);
 
-  // Retry for mobile Chrome (required because browser resets caret position)
+  // Mobile Chrome resets the caret after setSelectionRange returns; retry on next tick.
   const timeoutId = setTimeout(() => {
     if (el.value === currentValue && el.selectionStart !== caretPos) {
       setCaretPosition(el, caretPos);
