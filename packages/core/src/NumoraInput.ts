@@ -9,13 +9,23 @@ import { removeThousandSeparators } from '@/features/sanitization';
 import { escapeRegExp } from '@/utils/escape-reg-exp';
 import { getNumoraPattern } from '@/utils/input-pattern';
 import { applyLocale } from '@/utils/locale';
-import { DEFAULT_ENABLE_COMPACT_NOTATION, DEFAULT_ENABLE_LEADING_ZEROS, DEFAULT_ENABLE_NEGATIVE, DEFAULT_FORMAT_ON, DEFAULT_DECIMAL_MAX_LENGTH, DEFAULT_DECIMAL_MIN_LENGTH, DEFAULT_RAW_VALUE_MODE, DEFAULT_THOUSAND_STYLE, DEFAULT_THOUSAND_SEPARATOR, DEFAULT_DECIMAL_SEPARATOR } from './config';
+import {
+  DEFAULT_DECIMAL_MAX_LENGTH,
+  DEFAULT_DECIMAL_MIN_LENGTH,
+  DEFAULT_DECIMAL_SEPARATOR,
+  DEFAULT_ENABLE_COMPACT_NOTATION,
+  DEFAULT_ENABLE_LEADING_ZEROS,
+  DEFAULT_ENABLE_NEGATIVE,
+  DEFAULT_FORMAT_ON,
+  DEFAULT_RAW_VALUE_MODE,
+  DEFAULT_THOUSAND_SEPARATOR,
+  DEFAULT_THOUSAND_STYLE,
+} from './config';
 import { FormatOn, ThousandStyle, FormattingOptions } from './types';
 import { validateNumoraInputOptions } from './validation';
 
 
 type ResolvedNumoraOptions = Required<FormattingOptions> & {
-  decimalMaxLength: number;
   onChange?: (value: string) => void;
 };
 
@@ -62,9 +72,10 @@ export class NumoraInput {
     endOffset?: number;
   };
 
-  constructor(
-    container: HTMLElement,
-    {
+  constructor(container: HTMLElement, options: NumoraInputOptions) {
+    validateNumoraInputOptions(options);
+
+    const {
       decimalMaxLength = DEFAULT_DECIMAL_MAX_LENGTH,
       decimalMinLength = DEFAULT_DECIMAL_MIN_LENGTH,
       formatOn = DEFAULT_FORMAT_ON,
@@ -77,60 +88,36 @@ export class NumoraInput {
       enableLeadingZeros = DEFAULT_ENABLE_LEADING_ZEROS,
       rawValueMode = DEFAULT_RAW_VALUE_MODE,
       onChange,
-      ...rest
-    }: NumoraInputOptions
-  ) {
+    } = options;
 
-    validateNumoraInputOptions({
+    const separators = applyLocale(locale, { thousandSeparator, decimalSeparator });
+
+    this.resolvedOptions = {
       decimalMaxLength,
       decimalMinLength,
       formatOn,
-      thousandSeparator,
+      thousandSeparator: separators.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR,
       thousandStyle,
-      decimalSeparator,
+      decimalSeparator: separators.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
       enableCompactNotation,
       enableNegative,
       enableLeadingZeros,
       rawValueMode,
       onChange,
-    });
-
-    const options: NumoraInputOptions = {
-      decimalMaxLength,
-      decimalMinLength,
-      onChange,
-      formatOn,
-      thousandSeparator,
-      thousandStyle,
-      decimalSeparator,
-      locale,
-      enableCompactNotation,
-      enableNegative,
-      enableLeadingZeros,
-      rawValueMode,
-      ...rest,
     };
-
-    this.resolvedOptions = this.getResolvedOptions(options);
 
     this.createInputElement(container, options);
     this.setupEventListeners();
 
-    // Initialize raw value if rawValueMode is enabled and element has initial value
-    if (this.resolvedOptions.rawValueMode && this.element.value) {
-      // If initial value is set, extract raw value and format for display
+    if (this.element.value) {
       const initialValue = this.element.value;
       const raw = this.resolvedOptions.thousandSeparator
         ? removeThousandSeparators(initialValue, this.resolvedOptions.thousandSeparator)
         : initialValue;
-      this.rawValue = raw;
-
-      // Format for display if needed
+      if (this.resolvedOptions.rawValueMode) {
+        this.rawValue = raw;
+      }
       this.element.value = this.formatValueForDisplay(raw);
-    } else if (this.element.value) {
-      // If has initial value, apply formatting if needed
-      const initialValue = this.element.value;
-      this.element.value = this.formatValueForDisplay(initialValue);
     }
   }
 
@@ -205,27 +192,6 @@ export class NumoraInput {
     }
   }
 
-  private getResolvedOptions(options: NumoraInputOptions): ResolvedNumoraOptions {
-    const separators = applyLocale(options.locale, {
-      thousandSeparator: options.thousandSeparator,
-      decimalSeparator: options.decimalSeparator,
-    });
-
-    return {
-      decimalMaxLength: options.decimalMaxLength ?? DEFAULT_DECIMAL_MAX_LENGTH,
-      decimalMinLength: options.decimalMinLength ?? DEFAULT_DECIMAL_MIN_LENGTH,
-      formatOn: options.formatOn ?? DEFAULT_FORMAT_ON,
-      thousandSeparator: separators.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR,
-      ThousandStyle: options.thousandStyle ?? DEFAULT_THOUSAND_STYLE,
-      decimalSeparator: separators.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
-      enableCompactNotation: options.enableCompactNotation ?? DEFAULT_ENABLE_COMPACT_NOTATION,
-      enableNegative: options.enableNegative ?? DEFAULT_ENABLE_NEGATIVE,
-      enableLeadingZeros: options.enableLeadingZeros ?? DEFAULT_ENABLE_LEADING_ZEROS,
-      rawValueMode: options.rawValueMode ?? DEFAULT_RAW_VALUE_MODE,
-      onChange: options.onChange,
-    };
-  }
-
   private handleValueChange(formattedValue: string, rawValue?: string): void {
     if (this.resolvedOptions.rawValueMode && rawValue !== undefined) {
       this.rawValue = rawValue;
@@ -242,13 +208,13 @@ export class NumoraInput {
       return value;
     }
 
-    const { thousandSeparator, ThousandStyle: style, enableLeadingZeros, decimalSeparator } = this.resolvedOptions;
+    const { thousandSeparator, thousandStyle, enableLeadingZeros, decimalSeparator } = this.resolvedOptions;
 
-    if (thousandSeparator && style !== ThousandStyle.None) {
+    if (thousandSeparator && thousandStyle !== ThousandStyle.None) {
       return formatWithSeparators(
         value,
         thousandSeparator,
-        style,
+        thousandStyle,
         enableLeadingZeros,
         decimalSeparator
       );
@@ -328,8 +294,8 @@ export class NumoraInput {
   private handleBlur(e: FocusEvent): void {
     const target = e.target as HTMLInputElement;
     // Add separators back in 'blur' mode
-    const { thousandSeparator, ThousandStyle: style } = this.resolvedOptions;
-    if (thousandSeparator && style !== ThousandStyle.None && target.value) {
+    const { thousandSeparator, thousandStyle } = this.resolvedOptions;
+    if (thousandSeparator && thousandStyle !== ThousandStyle.None && target.value) {
       const formatted = this.formatValueForDisplay(target.value);
       target.value = formatted;
 

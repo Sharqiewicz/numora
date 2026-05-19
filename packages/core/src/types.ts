@@ -15,11 +15,12 @@ export enum ThousandStyle {
 export interface FormattingOptions {
     formatOn?: FormatOn;
     thousandSeparator?: string;
-    ThousandStyle?: ThousandStyle;
+    thousandStyle?: ThousandStyle;
     enableCompactNotation?: boolean;
     enableNegative?: boolean;
     enableLeadingZeros?: boolean;
     decimalSeparator?: string;
+    decimalMaxLength?: number;
     decimalMinLength?: number;
     rawValueMode?: boolean;
 }
