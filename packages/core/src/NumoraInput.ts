@@ -14,19 +14,10 @@ import { FormatOn, ThousandStyle, FormattingOptions } from './types';
 import { validateNumoraInputOptions } from './validation';
 
 
-interface ResolvedNumoraOptions {
+type ResolvedNumoraOptions = Required<FormattingOptions> & {
   decimalMaxLength: number;
-  decimalMinLength: number;
-  formatOn: FormatOn;
-  thousandSeparator: string;
-  thousandStyle: ThousandStyle;
-  decimalSeparator: string;
-  enableCompactNotation: boolean;
-  enableNegative: boolean;
-  enableLeadingZeros: boolean;
-  rawValueMode: boolean;
   onChange?: (value: string) => void;
-}
+};
 
 export interface NumoraInputOptions extends Partial<Omit<HTMLInputElement, 'value' | 'defaultValue' | 'onChange'>> {
   // Formatting options
@@ -225,27 +216,13 @@ export class NumoraInput {
       decimalMinLength: options.decimalMinLength ?? DEFAULT_DECIMAL_MIN_LENGTH,
       formatOn: options.formatOn ?? DEFAULT_FORMAT_ON,
       thousandSeparator: separators.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR,
-      thousandStyle: options.thousandStyle ?? DEFAULT_THOUSAND_STYLE,
+      ThousandStyle: options.thousandStyle ?? DEFAULT_THOUSAND_STYLE,
       decimalSeparator: separators.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
       enableCompactNotation: options.enableCompactNotation ?? DEFAULT_ENABLE_COMPACT_NOTATION,
       enableNegative: options.enableNegative ?? DEFAULT_ENABLE_NEGATIVE,
       enableLeadingZeros: options.enableLeadingZeros ?? DEFAULT_ENABLE_LEADING_ZEROS,
       rawValueMode: options.rawValueMode ?? DEFAULT_RAW_VALUE_MODE,
       onChange: options.onChange,
-    };
-  }
-
-  private buildFormattingOptions(): FormattingOptions {
-    return {
-      formatOn: this.resolvedOptions.formatOn,
-      thousandSeparator: this.resolvedOptions.thousandSeparator,
-      ThousandStyle: this.resolvedOptions.thousandStyle,
-      enableCompactNotation: this.resolvedOptions.enableCompactNotation,
-      enableNegative: this.resolvedOptions.enableNegative,
-      enableLeadingZeros: this.resolvedOptions.enableLeadingZeros,
-      decimalSeparator: this.resolvedOptions.decimalSeparator,
-      decimalMinLength: this.resolvedOptions.decimalMinLength,
-      rawValueMode: this.resolvedOptions.rawValueMode,
     };
   }
 
@@ -265,13 +242,13 @@ export class NumoraInput {
       return value;
     }
 
-    const { thousandSeparator, thousandStyle, enableLeadingZeros, decimalSeparator } = this.resolvedOptions;
+    const { thousandSeparator, ThousandStyle: style, enableLeadingZeros, decimalSeparator } = this.resolvedOptions;
 
-    if (thousandSeparator && thousandStyle !== ThousandStyle.None) {
+    if (thousandSeparator && style !== ThousandStyle.None) {
       return formatWithSeparators(
         value,
         thousandSeparator,
-        thousandStyle,
+        style,
         enableLeadingZeros,
         decimalSeparator
       );
@@ -287,7 +264,7 @@ export class NumoraInput {
     handleOnBeforeInputNumoraInput(
       e,
       this.resolvedOptions.decimalMaxLength,
-      this.buildFormattingOptions()
+      this.resolvedOptions
     );
   }
 
@@ -296,7 +273,7 @@ export class NumoraInput {
       e,
       this.resolvedOptions.decimalMaxLength,
       this.caretPositionBeforeChange,
-      this.buildFormattingOptions()
+      this.resolvedOptions
     );
 
     // Clear caret position captured in handleKeyDown after it's used to restore cursor position after formatting.
@@ -312,13 +289,7 @@ export class NumoraInput {
     const inputElement = e.target as HTMLInputElement;
     const { selectionStart, selectionEnd } = inputElement;
 
-    const formattingOptions = this.buildFormattingOptions();
-    const caretInfo = handleOnKeyDownNumoraInput(e, {
-      formatOn: formattingOptions.formatOn,
-      thousandSeparator: formattingOptions.thousandSeparator,
-      ThousandStyle: formattingOptions.ThousandStyle,
-      decimalSeparator: formattingOptions.decimalSeparator,
-    });
+    const caretInfo = handleOnKeyDownNumoraInput(e, this.resolvedOptions);
 
     if (caretInfo) {
       this.caretPositionBeforeChange = {
@@ -335,7 +306,7 @@ export class NumoraInput {
   }
 
   private handlePaste(e: ClipboardEvent): void {
-    const { formatted, raw } = handleOnPasteNumoraInput(e, this.resolvedOptions.decimalMaxLength, this.buildFormattingOptions());
+    const { formatted, raw } = handleOnPasteNumoraInput(e, this.resolvedOptions.decimalMaxLength, this.resolvedOptions);
 
     this.handleValueChange(formatted, raw);
 
@@ -357,8 +328,8 @@ export class NumoraInput {
   private handleBlur(e: FocusEvent): void {
     const target = e.target as HTMLInputElement;
     // Add separators back in 'blur' mode
-    const { thousandSeparator, thousandStyle } = this.resolvedOptions;
-    if (thousandSeparator && thousandStyle !== ThousandStyle.None && target.value) {
+    const { thousandSeparator, ThousandStyle: style } = this.resolvedOptions;
+    if (thousandSeparator && style !== ThousandStyle.None && target.value) {
       const formatted = this.formatValueForDisplay(target.value);
       target.value = formatted;
 
@@ -440,6 +411,12 @@ export class NumoraInput {
   /**
    * Gets the value as a number, similar to HTMLInputElement.valueAsNumber.
    * Returns NaN if the value cannot be converted to a number.
+   *
+   * **Precision warning**: this getter returns a JavaScript `number` (IEEE 754 double).
+   * Values beyond ~15 significant digits will lose precision. Numora is designed around
+   * string values for this reason — prefer {@link getValue} when exact precision matters.
+   * Treat `valueAsNumber` strictly as an escape hatch for arithmetic that you already know
+   * is safe at float precision.
    */
   public get valueAsNumber(): number {
     const value = this.getValue();
