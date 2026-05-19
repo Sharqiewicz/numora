@@ -169,7 +169,7 @@ export function updateCursorPosition(
   };
 
   const thousandSeparator = formattingOptions?.thousandSeparator ?? separators.thousandSeparator ?? ',';
-  const thousandStyle = formattingOptions?.ThousandStyle ?? ThousandStyle.None;
+  const thousandStyle = formattingOptions?.thousandStyle ?? ThousandStyle.None;
 
   const newCursorPosition = calculateCursorPositionAfterFormatting(
     oldValue,

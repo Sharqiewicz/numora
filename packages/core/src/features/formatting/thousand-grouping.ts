@@ -168,7 +168,7 @@ export function formatNumoraInput(
     const formattedValue = formatWithSeparators(
       sanitizedAndTrimmedValue,
       formattingOptions.thousandSeparator,
-      formattingOptions.ThousandStyle ?? ThousandStyle.None,
+      formattingOptions.thousandStyle ?? ThousandStyle.None,
       formattingOptions.enableLeadingZeros,
       separators?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR
     );

@@ -6,7 +6,6 @@ import { removeLeadingZeros } from './leading-zeros';
 import { filterMobileKeyboardArtifacts } from './mobile-keyboard-filtering';
 import { getCachedSeparatorRegex } from '../utils/regex-cache';
 import type { FormattingOptions, Separators } from '@/types';
-import { DEFAULT_DECIMAL_SEPARATOR } from '@/config';
 
 /**
  * Removes all occurrences of thousand separator from a string.
