@@ -2,7 +2,7 @@ import { InputGallery } from '../InputGallery'
 
 export function UserInputSection() {
   return (
-    <section className="space-y-4">
+    <section id="user-input" className="space-y-4 scroll-mt-24">
       <h2>What users actually type</h2>
       <p>
         The usual fix is <code>&lt;input type="text"&gt;</code> plus a regex like{' '}

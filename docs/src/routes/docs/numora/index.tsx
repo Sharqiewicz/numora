@@ -101,7 +101,7 @@ container.addEventListener('change', (e) => {
       <h2>Next Steps</h2>
       <p>
         Follow the <Link to="/docs/numora/installation">Installation</Link> guide to add numora to your project, or
-        read <Link to="/docs/numora/how-it-works">How It Works</Link> to understand the <code>beforeinput</code>-based
+        read <Link to="/docs/numora/anatomy">Anatomy</Link> to understand the <code>beforeinput</code>-based
         architecture.
       </p>
       <div className="flex justify-between items-center gap-2 my-8">

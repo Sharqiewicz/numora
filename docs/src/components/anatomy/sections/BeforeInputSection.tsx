@@ -4,7 +4,7 @@ import { NumoraInput } from 'numora-react'
 
 export function BeforeInputSection() {
   return (
-    <section className="space-y-4">
+    <section id="before-input" className="space-y-4 scroll-mt-24">
       <h2><code>beforeinput</code> + undo/redo</h2>
       <p>
         <code>beforeinput</code> was added to the DOM spec in 2016 specifically because

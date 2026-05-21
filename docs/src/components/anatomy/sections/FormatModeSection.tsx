@@ -7,7 +7,7 @@ const inputClass =
 
 export function FormatModeSection() {
   return (
-    <section className="space-y-4">
+    <section id="format-mode" className="space-y-4 scroll-mt-24">
       <h2>Format on change vs format on blur</h2>
       <p>
         Numora applies thousand separators in one of two modes. <code>FormatOn.Change</code>{' '}

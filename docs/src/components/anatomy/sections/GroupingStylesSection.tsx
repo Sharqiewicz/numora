@@ -28,7 +28,7 @@ const styles: { label: string; style: ThousandStyle; example: string; descriptio
 
 export function GroupingStylesSection() {
   return (
-    <section className="space-y-4">
+    <section id="grouping-styles" className="space-y-4 scroll-mt-24">
       <h2>Thousand grouping styles</h2>
       <p>
         Different writing systems group large numbers differently. Numora ships three

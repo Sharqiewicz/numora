@@ -2,7 +2,7 @@ import { CodeBlock } from '@/components/CodeBlock'
 
 export function DefaultVsValueSection() {
   return (
-    <section className="space-y-4">
+    <section id="default-vs-value" className="space-y-4 scroll-mt-24">
       <h2><code>defaultValue</code> vs <code>value</code></h2>
       <p>
         <code>NumoraInput</code> renders the underlying <code>&lt;input&gt;</code> with{' '}

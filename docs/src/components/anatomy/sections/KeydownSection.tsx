@@ -1,6 +1,6 @@
 export function KeydownSection() {
   return (
-    <section className="space-y-4">
+    <section id="keydown" className="space-y-4 scroll-mt-24">
       <h2><code>keydown</code> stays out of the way</h2>
       <p>
         Most input-mask libraries put their formatting logic in <code>keydown</code>{' '}

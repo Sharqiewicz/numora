@@ -7,7 +7,7 @@ export function PlainVsNumoraSection() {
   const [plainValue, setPlainValue] = useState('')
 
   return (
-    <section className="space-y-4">
+    <section id="plain-vs-numora" className="space-y-4 scroll-mt-24">
       <h2>Plain <code>&lt;input&gt;</code> vs Numora</h2>
       <p>
         Type the same thing into both inputs below - for example{' '}

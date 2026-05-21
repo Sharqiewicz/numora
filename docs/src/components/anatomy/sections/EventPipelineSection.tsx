@@ -4,7 +4,7 @@ import { EventPipelineDiagram } from '../diagrams'
 
 export function EventPipelineSection() {
   return (
-    <section className="space-y-4">
+    <section id="event-pipeline" className="space-y-4 scroll-mt-24">
       <h2>The event pipeline</h2>
       <p>
         A single keystroke fires four events on a focused <code>&lt;input&gt;</code> in a

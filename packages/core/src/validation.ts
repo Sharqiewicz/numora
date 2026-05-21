@@ -147,7 +147,7 @@ function validateThousandStyle(value: ThousandStyle | undefined): void {
 
   if (!Object.values(ThousandStyle).includes(value)) {
     throw new Error(
-      `ThousandStyle must be one of: ${Object.values(ThousandStyle).map(s => `'${s}'`).join(', ')}. ` +
+      `thousandStyle must be one of: ${Object.values(ThousandStyle).map(s => `'${s}'`).join(', ')}. ` +
       `Received: ${JSON.stringify(value)}`
     );
   }

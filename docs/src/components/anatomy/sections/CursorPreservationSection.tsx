@@ -28,7 +28,7 @@ function NaiveFormattedInput() {
 
 export function CursorPreservationSection() {
   return (
-    <section className="space-y-4">
+    <section id="cursor-preservation" className="space-y-4 scroll-mt-24">
       <h2>Cursor preservation</h2>
       <p>
         The classic input-mask bug: a user clicks into the middle of <code>1,234,567</code>{' '}

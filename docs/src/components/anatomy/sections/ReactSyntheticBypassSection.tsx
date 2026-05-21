@@ -32,7 +32,7 @@ const code = `useEffect(() => {
 
 export function ReactSyntheticBypassSection() {
   return (
-    <section className="space-y-4">
+    <section id="react-synthetic-bypass" className="space-y-4 scroll-mt-24">
       <h2>Why <code>beforeinput</code> bypasses React's synthetic event system</h2>
       <p>
         React's event system uses <strong>delegation</strong>: a single listener at the

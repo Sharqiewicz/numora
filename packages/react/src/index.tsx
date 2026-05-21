@@ -12,6 +12,8 @@ import {
   InputHTMLAttributes,
 } from 'react';
 import { useIsomorphicLayoutEffect } from './use-isomorphic-layout-effect';
+
+declare const process: { env: { NODE_ENV?: string } };
 import {
   FormatOn,
   ThousandStyle,
@@ -137,36 +139,26 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     ...rest
   } = props;
 
-  if (process.env.NODE_ENV !== 'production') {
-    validateNumoraInputOptions({
-      decimalMaxLength: maxDecimals,
-      decimalMinLength,
-      formatOn,
-      thousandSeparator,
-      thousandStyle,
-      decimalSeparator,
-      enableCompactNotation,
-      enableNegative,
-      enableLeadingZeros,
-      rawValueMode,
-    });
-  }
-
   const formattingOptions: FormattingOptions = useMemo(() => {
     const separators = applyLocale(locale, { thousandSeparator, decimalSeparator });
     return {
       formatOn,
       thousandSeparator: separators.thousandSeparator,
-      ThousandStyle: thousandStyle,
+      thousandStyle,
       decimalSeparator: separators.decimalSeparator,
+      decimalMaxLength: maxDecimals,
       decimalMinLength,
       enableCompactNotation,
       enableNegative,
       enableLeadingZeros,
       rawValueMode,
     };
-  }, [locale, formatOn, thousandSeparator, thousandStyle, decimalSeparator, decimalMinLength,
+  }, [locale, formatOn, thousandSeparator, thousandStyle, decimalSeparator, maxDecimals, decimalMinLength,
     enableCompactNotation, enableNegative, enableLeadingZeros, rawValueMode]);
+
+  if (process.env.NODE_ENV !== 'production') {
+    validateNumoraInputOptions(formattingOptions);
+  }
 
   const internalInputRef = useRef<HTMLInputElement>(null);
   const onChangeRef = useRef(onChange);
@@ -185,7 +177,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     return formatValueForDisplay(String(valueToFormat), maxDecimals, formattingOptions).formatted;
   });
 
-  // Sync external ref → internal input element.
+  // Effect 1/5 — ref-sync (layout): external ref → internal input.
   useIsomorphicLayoutEffect(() => {
     if (!ref) return;
     if (typeof ref === 'function') {
@@ -198,29 +190,28 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     };
   }, [ref]);
 
-  // Keep refs in sync so the native beforeinput listener (registered once at mount) always
-  // sees the latest options/callbacks without needing to re-register. Intentionally no deps —
-  // must run after every render to stay current.
+  // Effect 2/5 — ref-refresh (layout, no deps): keep closure-captured refs current so the
+  // mount-only beforeinput listener (effect 4) always sees the latest options/callbacks
+  // without re-registering.
   useIsomorphicLayoutEffect(() => {
     formattingOptionsRef.current = formattingOptions;
     maxDecimalsRef.current = maxDecimals;
     onChangeRef.current = onChange;
   });
 
-  // Mount-only DOM init: set formattedValue on the element so consumers reading it
-  // synchronously from the ref always see a defined value. No reactive inputs to track.
+  // Effect 3/5 — mount-only DOM init: set formattedValue on the element so consumers
+  // reading it synchronously from the ref always see a defined value.
   useEffect(() => {
     const input = internalInputRef.current;
     if (!input) return;
     (input as NumoraHTMLInputElement).formattedValue = input.value;
   }, []);
 
-  // Sync controlled value prop changes and formatting option changes (locale switch, separator
-  // change, maxDecimals change, etc.). Direct assignment is fine - programmatic changes don't
-  // need undo history. We compare formatted against input.value (not a prev-value ref) so the
-  // effect correctly reformats when formattingOptions changes even if controlledValue is the same.
-  // Always format with separators regardless of formatOn - the formatOn setting only controls
-  // real-time typing behaviour, not how a programmatically-set value is displayed.
+  // Effect 4/5 — controlled-value sync: reformat input.value when the value prop or any
+  // formatting option changes (locale switch, separator change, maxDecimals change, etc.).
+  // Direct assignment is fine — programmatic changes don't need undo history. Always format
+  // with separators regardless of formatOn (formatOn governs real-time typing only, not how
+  // a programmatically-set value is displayed).
   useEffect(() => {
     if (controlledValue === undefined) return;
     const input = internalInputRef.current;
@@ -236,12 +227,11 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     }
   }, [controlledValue, maxDecimals, formattingOptions]);
 
-  // Native beforeinput listener attached directly to the input element (not via React's
-  // synthetic event delegation). React's onBeforeInput fires at the root during bubbling -
-  // by that point the browser has already committed the mutation, so e.preventDefault() is
-  // a no-op. A direct listener on the element fires synchronously before the browser decides
-  // whether to apply the mutation, which is the only way cancellation works correctly.
-  // Registered once at mount; options are read via refs to avoid re-registration churn.
+  // Effect 5/5 — mount-only native beforeinput listener. Attached directly to the DOM node
+  // (not via React's synthetic event delegation) because React's onBeforeInput fires at the
+  // root during bubbling — by then the browser has already committed the mutation, so
+  // e.preventDefault() is a no-op. A direct listener fires before commit, the only way
+  // cancellation works correctly. Options are read via refs (kept current by effect 2).
   useEffect(() => {
     const input = internalInputRef.current;
     if (!input) return;
@@ -324,7 +314,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     if (
       formattingOptions.formatOn === FormatOn.Blur &&
       formattingOptions.thousandSeparator &&
-      formattingOptions.ThousandStyle !== ThousandStyle.None
+      formattingOptions.thousandStyle !== ThousandStyle.None
     ) {
       const input = e.target as HTMLInputElement;
       input.value = removeThousandSeparators(input.value, formattingOptions.thousandSeparator);

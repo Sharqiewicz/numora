@@ -32,7 +32,7 @@ export function DropInUsageSection({ pkg }: SectionProps) {
   const installCmd = pkg === 'numora-react' ? 'pnpm add numora-react numora' : 'pnpm add numora'
 
   return (
-    <section className="space-y-4">
+    <section id="drop-in-usage" className="space-y-4 scroll-mt-24">
       <h2>Drop-in usage</h2>
       <p>
         Everything above is one component (or one class) and a handful of options.

@@ -16,7 +16,7 @@ ref.current?.value           // → "1,234.56"  (DOM value, formatted - no Proxy
 
 export function ProxyTargetSection() {
   return (
-    <section className="space-y-4">
+    <section id="proxy-target" className="space-y-4 scroll-mt-24">
       <h2>The Proxy on <code>e.target</code></h2>
       <p>
         Every formatting cycle produces two strings: a formatted display value and a

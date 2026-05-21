@@ -13,7 +13,7 @@ const samples = [
 
 export function PasteSection() {
   return (
-    <section className="space-y-4">
+    <section id="paste" className="space-y-4 scroll-mt-24">
       <h2>Paste from a foreign locale</h2>
       <p>
         When the user pastes, <code>beforeinput</code> fires first with{' '}

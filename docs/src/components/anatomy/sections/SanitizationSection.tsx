@@ -1,12 +1,7 @@
-import { Link } from '@tanstack/react-router'
 import { SanitizationStepper } from '../SanitizationStepper'
 import { SanitizationPipelineDiagram } from '../diagrams'
-import type { SectionProps } from './types'
 
-export function SanitizationSection({ pkg }: SectionProps) {
-  const howItWorksPath =
-    pkg === 'numora-react' ? '/docs/numora-react/how-it-works' : '/docs/numora/how-it-works'
-
+export function SanitizationSection() {
   return (
     <section id="sanitization" className="space-y-4 scroll-mt-24">
       <h2>The sanitization pipeline</h2>
@@ -22,10 +17,6 @@ export function SanitizationSection({ pkg }: SectionProps) {
         that didn't change the value:
       </p>
       <SanitizationStepper />
-      <p>
-        For the deeper write-up of each function and why the order matters, see{' '}
-        <Link to={howItWorksPath}>How It Works</Link>.
-      </p>
     </section>
   )
 }

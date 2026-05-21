@@ -116,14 +116,14 @@ const options: FormattingOptions = {
 
       <h2>Next Steps</h2>
       <p>
-        Learn how the <code>beforeinput</code>-based event architecture works in{' '}
-        <Link to="/docs/numora/how-it-works">How It Works</Link>, or jump to the{' '}
+        Learn how the <code>beforeinput</code>-based event architecture works in the{' '}
+        <Link to="/docs/numora/anatomy">Anatomy</Link> guide, or jump to the{' '}
         <Link to="/docs/numora/features/formatting">Formatting</Link> feature docs.
       </p>
       <div className="flex items-center gap-2 my-8">
-        <Link to="/docs/numora/how-it-works">
+        <Link to="/docs/numora/anatomy">
           <Button variant="default">
-            How It Works <img src={CHEVRON_RIGHT} alt="Chevron Right" className="w-4 h-4" />
+            Anatomy <img src={CHEVRON_RIGHT} alt="Chevron Right" className="w-4 h-4" />
           </Button>
         </Link>
         <Link to="/docs/numora/features/formatting">

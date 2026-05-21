@@ -1,3 +1,4 @@
+// Adding a section? See ./types.ts for the required <section id="…" scroll-mt-24> contract.
 export { Hero } from './Hero'
 export { NativeInputSection } from './NativeInputSection'
 export { EventPipelineSection } from './EventPipelineSection'

@@ -27,7 +27,7 @@ new NumoraInput(container, {
 
 export function RawVsFormattedSection({ pkg }: SectionProps) {
   return (
-    <section className="space-y-4">
+    <section id="raw-vs-formatted" className="space-y-4 scroll-mt-24">
       <h2>Raw value vs formatted value</h2>
       <p>
         Every formatting cycle produces two strings: the formatted display string

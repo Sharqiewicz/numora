@@ -2,7 +2,7 @@ import { FloatVsString } from '../FloatVsString'
 
 export function FloatVsStringSection() {
   return (
-    <section className="space-y-4">
+    <section id="float-vs-string" className="space-y-4 scroll-mt-24">
       <h2>Why <code>Number</code> is the enemy</h2>
       <p>
         JavaScript stores all numbers as 64-bit IEEE 754 floats. The decimals you reach

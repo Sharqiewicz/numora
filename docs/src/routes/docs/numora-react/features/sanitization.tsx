@@ -30,8 +30,8 @@ function Sanitization() {
       <p className="text-lg text-muted-foreground">
         Numora sanitizes every value through a sequential pipeline before formatting is applied.
         For the full architecture and pipeline diagram, see{' '}
-        <Link to="/docs/numora/how-it-works">How It Works</Link>. The sections below cover each
-        configurable sanitization feature.
+        <Link to="/docs/numora/anatomy" hash="sanitization">Anatomy: Sanitization</Link>. The
+        sections below cover each configurable sanitization feature.
       </p>
 
       <h2>Non-numeric Character Filtering</h2>
