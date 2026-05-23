@@ -129,7 +129,7 @@ function TorphIntegration() {
 
       <TorphVanillaBlurDemo />
       <p className="text-center text-sm text-muted-foreground -mt-12 mb-12">
-        <code>FormatOn.Blur</code> - separators animate out on focus, back in on blur.
+        <code>FormatOn.Blur</code> - separators animate out on focus, back in on blur. <strong>in progress... (cursor jumping)</strong>
       </p>
 
       <p className="text-sm text-muted-foreground">
