@@ -4,7 +4,7 @@ import {
   updateCursorPosition,
   skipOverThousandSeparatorOnDelete,
 } from '@/features/formatting';
-import { type FormattingOptions, type CaretPositionInfo, FormatOn } from '@/types';
+import { type FormattingOptions, type CaretPositionInfo, FormatOn, InputType } from '@/types';
 import { formatInputValue } from './format-utils';
 
 /**
@@ -23,7 +23,7 @@ export function handleOnBeforeInputNumoraInput(
   formattingOptions?: FormattingOptions
 ): { formatted: string; raw: string } | null {
   // Paste is handled by the dedicated paste event handler.
-  if (e.inputType === 'insertFromPaste' || e.inputType === 'insertFromDrop') {
+  if (e.inputType === InputType.InsertFromPaste || e.inputType === InputType.InsertFromDrop) {
     return null;
   }
 
@@ -38,7 +38,7 @@ export function handleOnBeforeInputNumoraInput(
   // Decimal separator handling: convert ',' or '.' to the configured separator and
   // prevent duplicate separators - previously handled in keydown, now lives here so
   // that undo history is preserved via the setRangeText path.
-  if (e.inputType === 'insertText' && (e.data === ',' || e.data === '.')) {
+  if (e.inputType === InputType.InsertText && (e.data === ',' || e.data === '.')) {
     const decimalSep = separators.decimalSeparator;
     // The part of the value outside the current selection (will remain after typing)
     const valueOutsideSelection = currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
@@ -51,17 +51,34 @@ export function handleOnBeforeInputNumoraInput(
     inputData = decimalSep;
   }
 
+  // Preventive decimal-cap check: when inserting a digit into the fractional part and the
+  // fractional length would exceed decimalMaxLength, reject the keystroke. The post-hoc
+  // truncation in formatInputValue still works as a safety net for paste/scientific/compact
+  // expansion; this guard exists to avoid a brief overflow-then-trim flicker on plain typing.
+  if (e.inputType === InputType.InsertText && /^\d$/.test(inputData)) {
+    const decimalSep = separators.decimalSeparator;
+    const decimalSepPos = currentValue.indexOf(decimalSep);
+    if (decimalSepPos !== -1 && selectionStart > decimalSepPos) {
+      const fractionalLength = currentValue.length - decimalSepPos - 1;
+      const selectionLength = selectionEnd - selectionStart;
+      if (fractionalLength - selectionLength + 1 > decimalMaxLength) {
+        e.preventDefault();
+        return null;
+      }
+    }
+  }
+
   // Compute what the value would be after the browser applies the user's action.
   let intendedValue: string;
   let intendedCursorPos: number;
 
   switch (e.inputType) {
-    case 'insertText': {
+    case InputType.InsertText: {
       intendedValue = currentValue.slice(0, selectionStart) + inputData + currentValue.slice(selectionEnd);
       intendedCursorPos = selectionStart + inputData.length;
       break;
     }
-    case 'deleteContentBackward': {
+    case InputType.DeleteContentBackward: {
       if (selectionStart !== selectionEnd) {
         intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
         intendedCursorPos = selectionStart;
@@ -72,7 +89,7 @@ export function handleOnBeforeInputNumoraInput(
       }
       break;
     }
-    case 'deleteContentForward': {
+    case InputType.DeleteContentForward: {
       if (selectionStart !== selectionEnd) {
         intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
         intendedCursorPos = selectionStart;
@@ -82,9 +99,25 @@ export function handleOnBeforeInputNumoraInput(
       }
       break;
     }
-    case 'deleteByCut':
-    case 'deleteByDrag': {
+    case InputType.DeleteByCut:
+    case InputType.DeleteByDrag: {
       intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
+      intendedCursorPos = selectionStart;
+      break;
+    }
+    case InputType.DeleteSoftLineBackward:
+    case InputType.DeleteHardLineBackward: {
+      // Cmd/Ctrl+Backspace: delete from line start to selectionEnd (or selection range).
+      const deleteFrom = selectionStart !== selectionEnd ? selectionStart : 0;
+      intendedValue = currentValue.slice(0, deleteFrom) + currentValue.slice(selectionEnd);
+      intendedCursorPos = deleteFrom;
+      break;
+    }
+    case InputType.DeleteSoftLineForward:
+    case InputType.DeleteHardLineForward: {
+      // Cmd/Ctrl+Delete: delete from selectionStart to end of line (or selection range).
+      const deleteTo = selectionStart !== selectionEnd ? selectionEnd : currentValue.length;
+      intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(deleteTo);
       intendedCursorPos = selectionStart;
       break;
     }
@@ -110,8 +143,16 @@ export function handleOnBeforeInputNumoraInput(
   target.setRangeText(newValue, 0, currentValue.length, 'end');
 
   // Build a synthetic caretPositionBeforeChange so updateCursorPosition can determine
-  // the changed range between intendedValue and newValue.
-  const endOffset = e.inputType === 'deleteContentForward' ? 1 : 0;
+  // the changed range between intendedValue and newValue. endOffset = number of chars
+  // deleted forward from the cursor (the Delete-key path in findChangedRangeFromCaretPositions).
+  // Only relevant when there's no selection; the selection branch uses selectionEnd - selectionStart.
+  let endOffset = 0;
+  if (selectionStart === selectionEnd) {
+    if (e.inputType === InputType.DeleteContentForward) endOffset = 1;
+    else if (e.inputType === InputType.DeleteSoftLineForward || e.inputType === InputType.DeleteHardLineForward) {
+      endOffset = currentValue.length - selectionStart;
+    }
+  }
   const syntheticCaretInfo: CaretPositionInfo = {
     selectionStart,
     selectionEnd,

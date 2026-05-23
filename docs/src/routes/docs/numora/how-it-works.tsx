@@ -24,7 +24,7 @@ export const Route = createFileRoute('/docs/numora/how-it-works')({
   component: HowItWorks,
 })
 
-// Mirrors /docs/numora-react/how-it-works.tsx — keep the section structure aligned.
+// Mirrors /docs/numora-react/how-it-works.tsx - keep the section structure aligned.
 const ANATOMY = '/docs/numora/anatomy'
 
 function HowItWorks() {

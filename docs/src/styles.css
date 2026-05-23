@@ -564,10 +564,10 @@ body {
   }
 
   .prose pre[class*="language-"] {
-    @apply m-0;
+    @apply m-0 mb-0 bg-transparent p-0;
   }
 
   .prose code[class*="language-"] {
-    @apply text-sm;
+    @apply bg-transparent p-0 rounded-none text-sm font-mono shadow-none;
   }
 }

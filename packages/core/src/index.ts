@@ -1,5 +1,5 @@
 export * from './NumoraInput';
-export { ThousandStyle, FormatOn } from './types';
+export { ThousandStyle, FormatOn, InputType } from './types';
 export { getSeparatorsFromLocale, applyLocale } from './utils/locale';
 export {
   handleOnBeforeInputNumoraInput,
@@ -14,6 +14,7 @@ export {
 export type { FormattingOptions, CaretPositionInfo } from './types';
 export { removeThousandSeparators, sanitizeNumoraInput } from './features/sanitization';
 export { filterMobileKeyboardArtifacts } from './features/mobile-keyboard-filtering';
+export { normalizeFullWidthDigits } from './features/fullwidth-digits';
 export { expandCompactNotation } from './features/compact-notation';
 export { expandScientificNotation } from './features/scientific-notation';
 export { removeNonNumericCharacters } from './features/non-numeric-characters';

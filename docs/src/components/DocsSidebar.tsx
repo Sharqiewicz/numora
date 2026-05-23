@@ -9,6 +9,7 @@ import {
   FunctionSquare,
   Hash,
   Plug,
+  Wand2,
   Workflow,
   FileDigit,
   Globe,
@@ -105,6 +106,12 @@ const navigation = [
         title: 'React Hook Form',
         href: '/docs/integrations/react-hook-form',
         icon: Plug,
+        packages: ['react'] as PackageTab[],
+      },
+      {
+        title: 'Torph',
+        href: '/docs/integrations/torph',
+        icon: Wand2,
       },
     ],
   },
@@ -143,17 +150,18 @@ export function DocsSidebar() {
         onChange={handlePackageChange}
       />
       {navigation.map((group) => {
-        // Only show Integrations section for react package
-        if (group.title === 'Integrations' && selectedPackage !== 'react') {
-          return null
-        }
+        // Filter items by selected package (items with no `packages` field are shown for all)
+        const visibleItems = group.items.filter(
+          (item) => !('packages' in item) || (item as { packages?: PackageTab[] }).packages?.includes(selectedPackage),
+        )
+        if (visibleItems.length === 0) return null
 
         return (
           <SidebarGroup key={group.title}>
             <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map((item) => {
+                {visibleItems.map((item) => {
                   const packageHref = getPackageHref(item.href, packagePrefix)
                   const isActive =
                     currentPath === packageHref ||

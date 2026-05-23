@@ -40,54 +40,6 @@ function splitNumber(value: string, decimalSeparator: string): NumberParts {
 }
 
 /**
- * Checks if input already has a decimal separator that isn't currently selected.
- */
-function shouldPreventMultipleDecimals(input: HTMLInputElement, decimalSeparator: string): boolean {
-  if (!input.value.includes(decimalSeparator)) return false;
-
-  const { selectionStart, selectionEnd, value } = input;
-  const selectedText = value.slice(selectionStart ?? 0, selectionEnd ?? 0);
-
-  // If the decimal separator is within the selection, it will be overwritten, so don't prevent.
-  return !selectedText.includes(decimalSeparator);
-}
-
-/**
- * Handles keyboard events for decimal separators, converting comma/dot and preventing duplicates.
- */
-export function handleDecimalSeparatorKey(
-  e: KeyboardEvent,
-  inputElement: HTMLInputElement,
-  decimalSeparator: string
-): boolean {
-  const { key } = e;
-
-  // Only handle comma or dot
-  if (key !== ',' && key !== '.') return false;
-
-  if (shouldPreventMultipleDecimals(inputElement, decimalSeparator)) {
-    return true;
-  }
-
-  // If typed key differs from configured separator, convert it
-  // This works even when thousand separators are enabled because we're handling the keydown
-  // event before the value is formatted with thousand separators.
-  if (key !== decimalSeparator) {
-    const { selectionStart, selectionEnd, value } = inputElement;
-    const start = selectionStart ?? 0;
-    const end = selectionEnd ?? start;
-
-    inputElement.value = value.slice(0, start) + decimalSeparator + value.slice(end);
-    const newPos = start + 1;
-    inputElement.setSelectionRange(newPos, newPos);
-
-    return true;
-  }
-
-  return false;
-}
-
-/**
  * Trims decimals to a maximum length.
  */
 export const trimToDecimalMaxLength = (

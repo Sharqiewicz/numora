@@ -1953,3 +1953,176 @@ describe('Raw Value Mode', () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// beforeinput - preventive decimal-cap keystroke check
+// ---------------------------------------------------------------------------
+
+describe('beforeinput - preventive decimal-cap', () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  function getInputElement() {
+    return container.querySelector('input') as HTMLInputElement;
+  }
+
+  function dispatchInsert(el: HTMLInputElement, data: string): InputEvent {
+    const ev = new InputEvent('beforeinput', { bubbles: true, cancelable: true, inputType: 'insertText', data });
+    el.dispatchEvent(ev);
+    return ev;
+  }
+
+  it('rejects a digit appended past decimalMaxLength', () => {
+    new NumoraInput(container, { decimalMaxLength: 2 });
+    const el = getInputElement();
+    el.value = '1.23';
+    el.setSelectionRange(4, 4);
+
+    const ev = dispatchInsert(el, '4');
+
+    expect(ev.defaultPrevented).toBe(true);
+    expect(el.value).toBe('1.23');
+  });
+
+  it('rejects a digit inserted into the middle of a full fractional part', () => {
+    new NumoraInput(container, { decimalMaxLength: 2 });
+    const el = getInputElement();
+    el.value = '1.23';
+    el.setSelectionRange(3, 3);
+
+    const ev = dispatchInsert(el, '5');
+
+    expect(ev.defaultPrevented).toBe(true);
+    expect(el.value).toBe('1.23');
+  });
+
+  it('allows a digit that replaces a selected fractional digit', () => {
+    new NumoraInput(container, { decimalMaxLength: 2 });
+    const el = getInputElement();
+    el.value = '1.23';
+    el.setSelectionRange(3, 4);
+
+    dispatchInsert(el, '9');
+
+    expect(el.value).toBe('1.29');
+  });
+
+  it('allows a digit typed in the integer part even when fractional is full', () => {
+    new NumoraInput(container, { decimalMaxLength: 2 });
+    const el = getInputElement();
+    el.value = '1.23';
+    el.setSelectionRange(1, 1);
+
+    dispatchInsert(el, '9');
+
+    expect(el.value).toBe('19.23');
+  });
+
+  it('does not interfere when no decimal separator is present', () => {
+    new NumoraInput(container, { decimalMaxLength: 2 });
+    const el = getInputElement();
+    el.value = '123';
+    el.setSelectionRange(3, 3);
+
+    dispatchInsert(el, '4');
+
+    expect(el.value).toBe('1234');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// beforeinput - whole-line delete inputTypes (Cmd/Ctrl+Backspace, Cmd/Ctrl+Delete)
+// ---------------------------------------------------------------------------
+
+describe('beforeinput - whole-line deletes', () => {
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(container);
+  });
+
+  function getInputElement() {
+    return container.querySelector('input') as HTMLInputElement;
+  }
+
+  function dispatchDelete(el: HTMLInputElement, inputType: string): InputEvent {
+    const ev = new InputEvent('beforeinput', { bubbles: true, cancelable: true, inputType });
+    el.dispatchEvent(ev);
+    if (ev.defaultPrevented) {
+      el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType }));
+    }
+    return ev;
+  }
+
+  it('deleteSoftLineBackward removes everything before the cursor', () => {
+    new NumoraInput(container, { formatOn: FormatOn.Change, thousandSeparator: ',', thousandStyle: ThousandStyle.Thousand });
+    const el = getInputElement();
+    el.value = '1,234,567';
+    el.setSelectionRange(5, 5); // between '3' and '4' in formatted
+
+    const ev = dispatchDelete(el, 'deleteSoftLineBackward');
+
+    expect(ev.defaultPrevented).toBe(true);
+    expect(el.value).toBe('567');
+  });
+
+  it('deleteHardLineBackward behaves the same as deleteSoftLineBackward', () => {
+    new NumoraInput(container, {});
+    const el = getInputElement();
+    el.value = '123456';
+    el.setSelectionRange(3, 3);
+
+    const ev = dispatchDelete(el, 'deleteHardLineBackward');
+
+    expect(ev.defaultPrevented).toBe(true);
+    expect(el.value).toBe('456');
+  });
+
+  it('deleteSoftLineForward removes everything after the cursor', () => {
+    new NumoraInput(container, {});
+    const el = getInputElement();
+    el.value = '123456';
+    el.setSelectionRange(3, 3);
+
+    const ev = dispatchDelete(el, 'deleteSoftLineForward');
+
+    expect(ev.defaultPrevented).toBe(true);
+    expect(el.value).toBe('123');
+  });
+
+  it('deleteHardLineForward behaves the same as deleteSoftLineForward', () => {
+    new NumoraInput(container, {});
+    const el = getInputElement();
+    el.value = '123456';
+    el.setSelectionRange(2, 2);
+
+    const ev = dispatchDelete(el, 'deleteHardLineForward');
+
+    expect(ev.defaultPrevented).toBe(true);
+    expect(el.value).toBe('12');
+  });
+
+  it('deleteSoftLineBackward with selection deletes the selection only', () => {
+    new NumoraInput(container, {});
+    const el = getInputElement();
+    el.value = '123456';
+    el.setSelectionRange(2, 4);
+
+    dispatchDelete(el, 'deleteSoftLineBackward');
+
+    expect(el.value).toBe('1256');
+  });
+});

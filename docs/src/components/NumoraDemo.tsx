@@ -130,7 +130,14 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
 
     // Simulate a single character typed by the user. Dispatches the real
     // beforeinput → (input) sequence so Numora's formatting code path is exercised.
+    const preserveScroll = (fn: () => void) => {
+      const { scrollX, scrollY } = window;
+      fn();
+      window.scrollTo(scrollX, scrollY);
+    };
+
     const simulateChar = (char: string) => {
+      preserveScroll(() => {
       // Ensure cursor is at the end before each simulated keypress.
       input.setSelectionRange(input.value.length, input.value.length);
 
@@ -153,6 +160,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
           input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
         }
       }
+      });
     };
 
     // Clear the input programmatically (not via beforeinput - just reset).

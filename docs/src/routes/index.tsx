@@ -1,8 +1,9 @@
 
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { type CSSProperties, useState } from 'react'
+import { type CSSProperties, useEffect, useState } from 'react'
 import { Hero } from '@/components/hero'
 import { HeroBadges } from '@/components/hero-badges'
+import { IntegrationsSection } from '@/components/IntegrationsSection'
 import LightRays from '@/components/LightRays'
 import { NumoraDemo } from '@/components/NumoraDemo'
 import { Socials } from '@/components/socials'
@@ -34,12 +35,19 @@ export const Route = createFileRoute('/')({
 })
 
 function App() {
-  const [skipIntro] = useState(() => {
-    if (typeof sessionStorage === 'undefined') return false;
+  // SSR renders with intro animations. After hydration we check sessionStorage;
+  // on a repeat visit we skip the intro on the next render. Reading sessionStorage
+  // during render would mismatch hydration (server returns false, client returns true).
+  const [skipIntro, setSkipIntro] = useState(false);
+
+  useEffect(() => {
     const seen = sessionStorage.getItem('numora_intro_v1');
-    if (!seen) sessionStorage.setItem('numora_intro_v1', 'true');
-    return !!seen;
-  });
+    if (seen) {
+      setSkipIntro(true);
+    } else {
+      sessionStorage.setItem('numora_intro_v1', 'true');
+    }
+  }, []);
 
   const d = (ms: number): CSSProperties =>
     skipIntro ? { animation: 'none', opacity: 1 } : { animationDelay: `${ms}ms` };
@@ -97,6 +105,7 @@ function App() {
           </Link>
         </div>
       </section>
+      <IntegrationsSection style={d(900)} />
     </main>
     <footer className="mt-16 text-sm text-center pb-16">
         &copy; {new Date().getFullYear()} Numora. Built with  <span className="text-secondary">❤</span> by <a href="https://x.com/sharqiewicz" target="_blank" rel="noopener noreferrer" className="font-numora text-secondary">Kacper Szarkiewicz</a>.

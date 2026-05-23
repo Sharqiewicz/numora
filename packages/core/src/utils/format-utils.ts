@@ -3,7 +3,7 @@ import {
   ensureMinDecimals,
   getSeparators,
 } from '@/features/decimals';
-import { sanitizeNumoraInput, buildSanitizationOptions } from '@/features/sanitization';
+import { sanitizeNumoraInput } from '@/features/sanitization';
 import { formatNumoraInput } from '@/features/formatting';
 import { type FormattingOptions, FormatOn } from '@/types';
 
@@ -31,10 +31,12 @@ export function formatInputValue(
     shouldRemoveThousandSeparators ??
     (formattingOptions?.formatOn === FormatOn.Change);
 
-  const sanitizedValue = sanitizeNumoraInput(
-    rawValue,
-    buildSanitizationOptions(formattingOptions, separators, shouldRemove)
-  );
+  // sanitizeNumoraInput treats `thousandSeparator` as the flag for separator removal:
+  // pass undefined to keep separators (e.g. typing path in blur mode).
+  const sanitizeOptions = shouldRemove
+    ? formattingOptions
+    : { ...formattingOptions, thousandSeparator: undefined };
+  const sanitizedValue = sanitizeNumoraInput(rawValue, sanitizeOptions);
 
   const sanitizedAndTrimmedValue = trimToDecimalMaxLength(
     sanitizedValue,

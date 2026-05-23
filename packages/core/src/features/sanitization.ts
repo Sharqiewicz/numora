@@ -4,8 +4,9 @@ import { expandScientificNotation } from './scientific-notation';
 import { expandCompactNotation } from './compact-notation';
 import { removeLeadingZeros } from './leading-zeros';
 import { filterMobileKeyboardArtifacts } from './mobile-keyboard-filtering';
+import { normalizeFullWidthDigits } from './fullwidth-digits';
 import { getCachedSeparatorRegex } from '../utils/regex-cache';
-import type { FormattingOptions, Separators } from '@/types';
+import type { FormattingOptions } from '@/types';
 
 /**
  * Removes all occurrences of thousand separator from a string.
@@ -20,90 +21,53 @@ export function removeThousandSeparators(value: string, thousandSeparator: strin
   return value.replace(regex, '');
 }
 
-export interface SanitizationOptions {
-  enableCompactNotation?: boolean;
-  enableNegative?: boolean;
-  enableLeadingZeros?: boolean;
-  decimalSeparator?: string;
-  thousandSeparator?: string;
-}
-
 /**
  * Sanitizes numeric input by:
  * 0. Filter mobile keyboard artifacts (non-breaking spaces, Unicode whitespace)
- * 1. Remove thousand separators (formatting, not data)
- * 2. (Optional) Expanding compact notation (e.g., 1k → 1000)
- * 3. Expanding scientific notation (e.g., 1.5e-5 → 0.000015)
- * 4. Removing non-numeric characters
- * 5. Removing extra decimal points
- * 6. (Optional) Removing leading zeros
+ * 1. Remove thousand separators (formatting, not data) - only when `thousandSeparator` is set
+ * 2. Normalizing fullwidth digits (e.g., １２３ → 123)
+ * 3. (Optional) Expanding compact notation (e.g., 1k → 1000)
+ * 4. Expanding scientific notation (e.g., 1.5e-5 → 0.000015)
+ * 5. Removing non-numeric characters
+ * 6. Removing extra decimal points
+ * 7. (Optional) Removing leading zeros
  *
- * Note: Decimal separator conversion (comma ↔ dot) is handled in the keydown event
- * (handleDecimalSeparatorKey), not here, to avoid converting thousand separators.
+ * Note: Decimal separator conversion (comma ↔ dot) is handled in the beforeinput event
+ * (handleOnBeforeInputNumoraInput), not here, to avoid converting thousand separators.
  *
- * @param value - The string value to sanitize
- * @param options - Optional sanitization configuration
- * @returns The sanitized numeric string
+ * `formattingOptions.thousandSeparator` doubles as a flag: pass it to strip separators,
+ * leave it undefined to keep them. Callers that want to short-circuit removal (e.g.
+ * formatOn === 'blur' on the typing path) should set thousandSeparator to undefined.
  */
 export const sanitizeNumoraInput = (
   value: string,
-  options?: SanitizationOptions
+  formattingOptions?: FormattingOptions
 ): string => {
-
-  // Step 0: Filter mobile keyboard artifacts (non-breaking spaces, Unicode whitespace)
   let sanitized = filterMobileKeyboardArtifacts(value);
 
-  // Step 1: Remove thousand separators (they're formatting, not data)
-  // Note: Decimal separator conversion is handled in keydown event (handleDecimalSeparatorKey),
-  // not here, to avoid converting thousand separators that were added by formatting.
-  if (options?.thousandSeparator) {
-    sanitized = removeThousandSeparators(sanitized, options.thousandSeparator);
+  if (formattingOptions?.thousandSeparator) {
+    sanitized = removeThousandSeparators(sanitized, formattingOptions.thousandSeparator);
   }
 
-  // Step 2: Expand compact notation FIRST (if enabled)
-  if (options?.enableCompactNotation) {
+  sanitized = normalizeFullWidthDigits(sanitized);
+
+  if (formattingOptions?.enableCompactNotation) {
     sanitized = expandCompactNotation(sanitized);
   }
 
-  // Step 3: Expand scientific notation
   sanitized = expandScientificNotation(sanitized);
 
-  // Step 4: Remove non-numeric characters
   sanitized = removeNonNumericCharacters(
     sanitized,
-    options?.enableNegative,
-    options?.decimalSeparator
+    formattingOptions?.enableNegative,
+    formattingOptions?.decimalSeparator
   );
 
-  // Step 5: Remove extra decimal separators
-  sanitized = removeExtraDecimalSeparators(sanitized, options?.decimalSeparator);
+  sanitized = removeExtraDecimalSeparators(sanitized, formattingOptions?.decimalSeparator);
 
-  // Step 6: Remove leading zeros (if not allowed)
-  if (!options?.enableLeadingZeros) {
+  if (!formattingOptions?.enableLeadingZeros) {
     sanitized = removeLeadingZeros(sanitized);
   }
 
   return sanitized;
 };
-
-/**
- * Builds sanitization options from formatting options and separators.
- *
- * @param formattingOptions - Optional formatting options
- * @param separators - Separator configuration
- * @param shouldRemoveThousandSeparators - Whether to remove thousand separators
- * @returns Sanitization options
- */
-export function buildSanitizationOptions(
-  formattingOptions: FormattingOptions | undefined,
-  separators: Separators,
-  shouldRemoveThousandSeparators: boolean
-): SanitizationOptions {
-  return {
-    enableCompactNotation: formattingOptions?.enableCompactNotation,
-    enableNegative: formattingOptions?.enableNegative,
-    enableLeadingZeros: formattingOptions?.enableLeadingZeros,
-    decimalSeparator: separators.decimalSeparator,
-    thousandSeparator: shouldRemoveThousandSeparators ? separators.thousandSeparator : undefined,
-  };
-}

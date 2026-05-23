@@ -16,6 +16,7 @@ import { useIsomorphicLayoutEffect } from './use-isomorphic-layout-effect';
 declare const process: { env: { NODE_ENV?: string } };
 import {
   FormatOn,
+  InputType,
   ThousandStyle,
   applyLocale,
   formatValueForDisplay,
@@ -26,6 +27,9 @@ import {
   validateNumoraInputOptions,
   type FormattingOptions,
 } from 'numora';
+
+const isHistoryInputType = (inputType: string | undefined): boolean =>
+  inputType === InputType.HistoryUndo || inputType === InputType.HistoryRedo;
 
 export interface NumoraHTMLInputElement extends HTMLInputElement {
   /** The formatted display string - the same value shown in the input, including thousand separators. */
@@ -156,6 +160,15 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   }, [locale, formatOn, thousandSeparator, thousandStyle, decimalSeparator, maxDecimals, decimalMinLength,
     enableCompactNotation, enableNegative, enableLeadingZeros, rawValueMode]);
 
+  // When displaying a programmatically-set or restored value we always want separators applied,
+  // regardless of whether the user configured Blur mode (which suppresses separators during typing).
+  const displayFormattingOptions = useMemo(
+    () => formattingOptions.formatOn === FormatOn.Blur
+      ? { ...formattingOptions, formatOn: FormatOn.Change }
+      : formattingOptions,
+    [formattingOptions]
+  );
+
   if (process.env.NODE_ENV !== 'production') {
     validateNumoraInputOptions(formattingOptions);
   }
@@ -177,7 +190,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     return formatValueForDisplay(String(valueToFormat), maxDecimals, formattingOptions).formatted;
   });
 
-  // Effect 1/5 — ref-sync (layout): external ref → internal input.
+  // Effect 1/5 - ref-sync (layout): external ref → internal input.
   useIsomorphicLayoutEffect(() => {
     if (!ref) return;
     if (typeof ref === 'function') {
@@ -190,7 +203,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     };
   }, [ref]);
 
-  // Effect 2/5 — ref-refresh (layout, no deps): keep closure-captured refs current so the
+  // Effect 2/5 - ref-refresh (layout, no deps): keep closure-captured refs current so the
   // mount-only beforeinput listener (effect 4) always sees the latest options/callbacks
   // without re-registering.
   useIsomorphicLayoutEffect(() => {
@@ -199,7 +212,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     onChangeRef.current = onChange;
   });
 
-  // Effect 3/5 — mount-only DOM init: set formattedValue on the element so consumers
+  // Effect 3/5 - mount-only DOM init: set formattedValue on the element so consumers
   // reading it synchronously from the ref always see a defined value.
   useEffect(() => {
     const input = internalInputRef.current;
@@ -207,29 +220,27 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     (input as NumoraHTMLInputElement).formattedValue = input.value;
   }, []);
 
-  // Effect 4/5 — controlled-value sync: reformat input.value when the value prop or any
+  // Effect 4/5 - controlled-value sync: reformat input.value when the value prop or any
   // formatting option changes (locale switch, separator change, maxDecimals change, etc.).
-  // Direct assignment is fine — programmatic changes don't need undo history. Always format
+  // Direct assignment is fine - programmatic changes don't need undo history. Always format
   // with separators regardless of formatOn (formatOn governs real-time typing only, not how
-  // a programmatically-set value is displayed).
-  useEffect(() => {
+  // a programmatically-set value is displayed). useIsomorphicLayoutEffect avoids a paint
+  // with the stale value between React commit and the controlled-value sync running.
+  useIsomorphicLayoutEffect(() => {
     if (controlledValue === undefined) return;
     const input = internalInputRef.current;
     if (!input) return;
 
-    const displayOptions = formattingOptions.formatOn === FormatOn.Blur
-      ? { ...formattingOptions, formatOn: FormatOn.Change }
-      : formattingOptions;
-    const { formatted } = formatValueForDisplay(String(controlledValue), maxDecimals, displayOptions);
+    const { formatted } = formatValueForDisplay(String(controlledValue), maxDecimals, displayFormattingOptions);
     if (formatted !== input.value) {
       input.value = formatted;
       (input as NumoraHTMLInputElement).formattedValue = formatted;
     }
-  }, [controlledValue, maxDecimals, formattingOptions]);
+  }, [controlledValue, maxDecimals, displayFormattingOptions]);
 
-  // Effect 5/5 — mount-only native beforeinput listener. Attached directly to the DOM node
+  // Effect 5/5 - mount-only native beforeinput listener. Attached directly to the DOM node
   // (not via React's synthetic event delegation) because React's onBeforeInput fires at the
-  // root during bubbling — by then the browser has already committed the mutation, so
+  // root during bubbling - by then the browser has already committed the mutation, so
   // e.preventDefault() is a no-op. A direct listener fires before commit, the only way
   // cancellation works correctly. Options are read via refs (kept current by effect 2).
   useEffect(() => {
@@ -238,7 +249,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
 
     const handler = (e: InputEvent) => {
       // Paste/drop are handled by the React onPaste handler which already calls onChange.
-      if (e.inputType === 'insertFromPaste' || e.inputType === 'insertFromDrop') return;
+      if (e.inputType === InputType.InsertFromPaste || e.inputType === InputType.InsertFromDrop) return;
 
       const result = handleOnBeforeInputNumoraInput(
         e,
@@ -276,16 +287,30 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     if (isHandledByBeforeInputRef.current) return;
 
-    const formatted = e.target.value;
+    const numInput = e.target as NumoraHTMLInputElement;
+    const inputType = (e.nativeEvent as InputEvent).inputType;
+
+    // Undo/redo restores the literal previous DOM string. That string was previously set by
+    // setRangeText (so it's normally canonical), but option changes since the original edit
+    // can invalidate it (e.g. thousandSeparator changed). Re-run the formatter; only mutate
+    // if the result actually differs to avoid a cursor jump on the common path.
+    if (isHistoryInputType(inputType)) {
+      const { formatted, raw } = formatValueForDisplay(numInput.value, maxDecimals, displayFormattingOptions);
+      if (formatted !== numInput.value) numInput.value = formatted;
+      numInput.formattedValue = formatted;
+      if (onChange) onChange(createSyntheticChangeEvent(numInput, raw));
+      return;
+    }
+
+    const formatted = numInput.value;
     // Always recompute from the current display value so stale values (e.g. after undo)
     // are never used. removeThousandSeparators(formatted) == raw for all formatting modes.
     const rawValue = toRawValue(formatted, formattingOptions.thousandSeparator);
 
-    const numInput = e.target as NumoraHTMLInputElement;
     numInput.formattedValue = formatted;
 
     if (onChange) onChange(createSyntheticChangeEvent(numInput, rawValue));
-  }, [formattingOptions.thousandSeparator, onChange]);
+  }, [formattingOptions, displayFormattingOptions, maxDecimals, onChange]);
 
   // handleKeyDown is still needed for skipOverThousandSeparatorOnDelete (moves the cursor
   // past separators before beforeinput fires). caretInfoRef is no longer needed because
@@ -327,11 +352,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // In Blur mode, re-apply separators on blur and notify onChange. In Change mode the
     // value is already formatted and stable, so we leave it alone.
     if (formattingOptions.formatOn === FormatOn.Blur) {
-      const { formatted, raw } = formatValueForDisplay(
-        e.target.value,
-        maxDecimals,
-        { ...formattingOptions, formatOn: FormatOn.Change }
-      );
+      const { formatted, raw } = formatValueForDisplay(e.target.value, maxDecimals, displayFormattingOptions);
       const numInput = e.target as NumoraHTMLInputElement;
       numInput.value = formatted;
       numInput.formattedValue = formatted;
@@ -339,7 +360,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     }
 
     if (onBlur) onBlur(e);
-  }, [maxDecimals, formattingOptions, onBlur, onChange]);
+  }, [maxDecimals, formattingOptions, displayFormattingOptions, onBlur, onChange]);
 
   return (
     <input
@@ -362,5 +383,5 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
 NumoraInput.displayName = 'NumoraInput';
 
 export { NumoraInput };
-export { FormatOn, ThousandStyle } from 'numora';
+export { FormatOn, ThousandStyle, InputType } from 'numora';
 export type { FormattingOptions, CaretPositionInfo } from 'numora';

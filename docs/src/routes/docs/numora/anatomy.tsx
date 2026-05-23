@@ -89,26 +89,26 @@ function Anatomy() {
     <div className="prose prose-invert max-w-none">
       <Hero pkg={pkg} />
       <div className="space-y-16">
-        {/* Act 1 — Why this exists */}
+        {/* Act 1 - Why this exists */}
         <NativeInputSection />
         <FloatVsStringSection />
         <UserInputSection />
         <PlainVsNumoraSection />
 
-        {/* Act 2 — How Numora intercepts (events) */}
+        {/* Act 2 - How Numora intercepts (events) */}
         <EventPipelineSection />
         <KeydownSection />
         <BeforeInputSection />
         <PasteSection />
 
-        {/* Act 3 — What Numora does with the value */}
+        {/* Act 3 - What Numora does with the value */}
         <SanitizationSection />
         <FormatModeSection />
         <GroupingStylesSection />
         <CursorPreservationSection />
         <RawVsFormattedSection pkg={pkg} />
 
-        {/* Act 4 — Using it */}
+        {/* Act 4 - Using it */}
         <DropInUsageSection pkg={pkg} />
       </div>
     </div>

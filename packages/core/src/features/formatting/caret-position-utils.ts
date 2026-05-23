@@ -27,8 +27,10 @@ export function setCaretPosition(el: HTMLInputElement, caretPos: number): void {
   // without it, an existing selection interferes with setSelectionRange.
   // biome-ignore lint/correctness/noSelfAssign: required to clear selection in WebKit
   el.value = el.value;
-  el.focus();
+  const { scrollX, scrollY } = window;
+  el.focus({ preventScroll: true });
   el.setSelectionRange(caretPos, caretPos);
+  window.scrollTo(scrollX, scrollY);
 }
 
 /**

@@ -25,7 +25,7 @@ export const Route = createFileRoute('/docs/numora-react/how-it-works')({
   component: HowItWorks,
 })
 
-// Mirrors /docs/numora/how-it-works.tsx — keep the section structure aligned.
+// Mirrors /docs/numora/how-it-works.tsx - keep the section structure aligned.
 const ANATOMY = '/docs/numora-react/anatomy'
 
 function HowItWorks() {
@@ -143,8 +143,8 @@ function HowItWorks() {
 
       <h2>Full pipeline</h2>
       {/*
-        React-only block. The React event flow has a step the vanilla flow doesn't —
-        native addEventListener('beforeinput') bypassing React's synthetic system —
+        React-only block. The React event flow has a step the vanilla flow doesn't -
+        native addEventListener('beforeinput') bypassing React's synthetic system -
         which is awkward to convey through bullets alone. Vanilla how-it-works deliberately
         does not have an equivalent diagram.
       */}

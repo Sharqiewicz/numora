@@ -26,6 +26,7 @@ import { Route as DocsNumoraReactInstallationRouteImport } from './routes/docs/n
 import { Route as DocsNumoraReactHowItWorksRouteImport } from './routes/docs/numora-react/how-it-works'
 import { Route as DocsNumoraReactAnatomyRouteImport } from './routes/docs/numora-react/anatomy'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
+import { Route as DocsNumoraIntegrationsTorphRouteImport } from './routes/docs/numora/integrations/torph'
 import { Route as DocsNumoraFeaturesValueTypesRouteImport } from './routes/docs/numora/features/value-types'
 import { Route as DocsNumoraFeaturesScientificNotationRouteImport } from './routes/docs/numora/features/scientific-notation'
 import { Route as DocsNumoraFeaturesSanitizationRouteImport } from './routes/docs/numora/features/sanitization'
@@ -34,7 +35,9 @@ import { Route as DocsNumoraFeaturesLeadingZerosRouteImport } from './routes/doc
 import { Route as DocsNumoraFeaturesFormattingRouteImport } from './routes/docs/numora/features/formatting'
 import { Route as DocsNumoraFeaturesDecimalsRouteImport } from './routes/docs/numora/features/decimals'
 import { Route as DocsNumoraFeaturesCompactNotationRouteImport } from './routes/docs/numora/features/compact-notation'
+import { Route as DocsNumoraReactIntegrationsTorphRouteImport } from './routes/docs/numora-react/integrations/torph'
 import { Route as DocsNumoraReactIntegrationsReactHookFormRouteImport } from './routes/docs/numora-react/integrations/react-hook-form'
+import { Route as DocsNumoraReactIntegrationsNumberFlowRouteImport } from './routes/docs/numora-react/integrations/number-flow'
 import { Route as DocsNumoraReactFeaturesValueTypesRouteImport } from './routes/docs/numora-react/features/value-types'
 import { Route as DocsNumoraReactFeaturesScientificNotationRouteImport } from './routes/docs/numora-react/features/scientific-notation'
 import { Route as DocsNumoraReactFeaturesSanitizationRouteImport } from './routes/docs/numora-react/features/sanitization'
@@ -131,6 +134,12 @@ const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   path: '/api/trpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsNumoraIntegrationsTorphRoute =
+  DocsNumoraIntegrationsTorphRouteImport.update({
+    id: '/numora/integrations/torph',
+    path: '/numora/integrations/torph',
+    getParentRoute: () => DocsRoute,
+  } as any)
 const DocsNumoraFeaturesValueTypesRoute =
   DocsNumoraFeaturesValueTypesRouteImport.update({
     id: '/numora/features/value-types',
@@ -179,10 +188,22 @@ const DocsNumoraFeaturesCompactNotationRoute =
     path: '/numora/features/compact-notation',
     getParentRoute: () => DocsRoute,
   } as any)
+const DocsNumoraReactIntegrationsTorphRoute =
+  DocsNumoraReactIntegrationsTorphRouteImport.update({
+    id: '/numora-react/integrations/torph',
+    path: '/numora-react/integrations/torph',
+    getParentRoute: () => DocsRoute,
+  } as any)
 const DocsNumoraReactIntegrationsReactHookFormRoute =
   DocsNumoraReactIntegrationsReactHookFormRouteImport.update({
     id: '/numora-react/integrations/react-hook-form',
     path: '/numora-react/integrations/react-hook-form',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraReactIntegrationsNumberFlowRoute =
+  DocsNumoraReactIntegrationsNumberFlowRouteImport.update({
+    id: '/numora-react/integrations/number-flow',
+    path: '/numora-react/integrations/number-flow',
     getParentRoute: () => DocsRoute,
   } as any)
 const DocsNumoraReactFeaturesValueTypesRoute =
@@ -260,7 +281,9 @@ export interface FileRoutesByFullPath {
   '/docs/numora-react/features/sanitization': typeof DocsNumoraReactFeaturesSanitizationRoute
   '/docs/numora-react/features/scientific-notation': typeof DocsNumoraReactFeaturesScientificNotationRoute
   '/docs/numora-react/features/value-types': typeof DocsNumoraReactFeaturesValueTypesRoute
+  '/docs/numora-react/integrations/number-flow': typeof DocsNumoraReactIntegrationsNumberFlowRoute
   '/docs/numora-react/integrations/react-hook-form': typeof DocsNumoraReactIntegrationsReactHookFormRoute
+  '/docs/numora-react/integrations/torph': typeof DocsNumoraReactIntegrationsTorphRoute
   '/docs/numora/features/compact-notation': typeof DocsNumoraFeaturesCompactNotationRoute
   '/docs/numora/features/decimals': typeof DocsNumoraFeaturesDecimalsRoute
   '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
@@ -269,6 +292,7 @@ export interface FileRoutesByFullPath {
   '/docs/numora/features/sanitization': typeof DocsNumoraFeaturesSanitizationRoute
   '/docs/numora/features/scientific-notation': typeof DocsNumoraFeaturesScientificNotationRoute
   '/docs/numora/features/value-types': typeof DocsNumoraFeaturesValueTypesRoute
+  '/docs/numora/integrations/torph': typeof DocsNumoraIntegrationsTorphRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -296,7 +320,9 @@ export interface FileRoutesByTo {
   '/docs/numora-react/features/sanitization': typeof DocsNumoraReactFeaturesSanitizationRoute
   '/docs/numora-react/features/scientific-notation': typeof DocsNumoraReactFeaturesScientificNotationRoute
   '/docs/numora-react/features/value-types': typeof DocsNumoraReactFeaturesValueTypesRoute
+  '/docs/numora-react/integrations/number-flow': typeof DocsNumoraReactIntegrationsNumberFlowRoute
   '/docs/numora-react/integrations/react-hook-form': typeof DocsNumoraReactIntegrationsReactHookFormRoute
+  '/docs/numora-react/integrations/torph': typeof DocsNumoraReactIntegrationsTorphRoute
   '/docs/numora/features/compact-notation': typeof DocsNumoraFeaturesCompactNotationRoute
   '/docs/numora/features/decimals': typeof DocsNumoraFeaturesDecimalsRoute
   '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
@@ -305,6 +331,7 @@ export interface FileRoutesByTo {
   '/docs/numora/features/sanitization': typeof DocsNumoraFeaturesSanitizationRoute
   '/docs/numora/features/scientific-notation': typeof DocsNumoraFeaturesScientificNotationRoute
   '/docs/numora/features/value-types': typeof DocsNumoraFeaturesValueTypesRoute
+  '/docs/numora/integrations/torph': typeof DocsNumoraIntegrationsTorphRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -333,7 +360,9 @@ export interface FileRoutesById {
   '/docs/numora-react/features/sanitization': typeof DocsNumoraReactFeaturesSanitizationRoute
   '/docs/numora-react/features/scientific-notation': typeof DocsNumoraReactFeaturesScientificNotationRoute
   '/docs/numora-react/features/value-types': typeof DocsNumoraReactFeaturesValueTypesRoute
+  '/docs/numora-react/integrations/number-flow': typeof DocsNumoraReactIntegrationsNumberFlowRoute
   '/docs/numora-react/integrations/react-hook-form': typeof DocsNumoraReactIntegrationsReactHookFormRoute
+  '/docs/numora-react/integrations/torph': typeof DocsNumoraReactIntegrationsTorphRoute
   '/docs/numora/features/compact-notation': typeof DocsNumoraFeaturesCompactNotationRoute
   '/docs/numora/features/decimals': typeof DocsNumoraFeaturesDecimalsRoute
   '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
@@ -342,6 +371,7 @@ export interface FileRoutesById {
   '/docs/numora/features/sanitization': typeof DocsNumoraFeaturesSanitizationRoute
   '/docs/numora/features/scientific-notation': typeof DocsNumoraFeaturesScientificNotationRoute
   '/docs/numora/features/value-types': typeof DocsNumoraFeaturesValueTypesRoute
+  '/docs/numora/integrations/torph': typeof DocsNumoraIntegrationsTorphRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -371,7 +401,9 @@ export interface FileRouteTypes {
     | '/docs/numora-react/features/sanitization'
     | '/docs/numora-react/features/scientific-notation'
     | '/docs/numora-react/features/value-types'
+    | '/docs/numora-react/integrations/number-flow'
     | '/docs/numora-react/integrations/react-hook-form'
+    | '/docs/numora-react/integrations/torph'
     | '/docs/numora/features/compact-notation'
     | '/docs/numora/features/decimals'
     | '/docs/numora/features/formatting'
@@ -380,6 +412,7 @@ export interface FileRouteTypes {
     | '/docs/numora/features/sanitization'
     | '/docs/numora/features/scientific-notation'
     | '/docs/numora/features/value-types'
+    | '/docs/numora/integrations/torph'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -407,7 +440,9 @@ export interface FileRouteTypes {
     | '/docs/numora-react/features/sanitization'
     | '/docs/numora-react/features/scientific-notation'
     | '/docs/numora-react/features/value-types'
+    | '/docs/numora-react/integrations/number-flow'
     | '/docs/numora-react/integrations/react-hook-form'
+    | '/docs/numora-react/integrations/torph'
     | '/docs/numora/features/compact-notation'
     | '/docs/numora/features/decimals'
     | '/docs/numora/features/formatting'
@@ -416,6 +451,7 @@ export interface FileRouteTypes {
     | '/docs/numora/features/sanitization'
     | '/docs/numora/features/scientific-notation'
     | '/docs/numora/features/value-types'
+    | '/docs/numora/integrations/torph'
   id:
     | '__root__'
     | '/'
@@ -443,7 +479,9 @@ export interface FileRouteTypes {
     | '/docs/numora-react/features/sanitization'
     | '/docs/numora-react/features/scientific-notation'
     | '/docs/numora-react/features/value-types'
+    | '/docs/numora-react/integrations/number-flow'
     | '/docs/numora-react/integrations/react-hook-form'
+    | '/docs/numora-react/integrations/torph'
     | '/docs/numora/features/compact-notation'
     | '/docs/numora/features/decimals'
     | '/docs/numora/features/formatting'
@@ -452,6 +490,7 @@ export interface FileRouteTypes {
     | '/docs/numora/features/sanitization'
     | '/docs/numora/features/scientific-notation'
     | '/docs/numora/features/value-types'
+    | '/docs/numora/integrations/torph'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -587,6 +626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTrpcSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs/numora/integrations/torph': {
+      id: '/docs/numora/integrations/torph'
+      path: '/numora/integrations/torph'
+      fullPath: '/docs/numora/integrations/torph'
+      preLoaderRoute: typeof DocsNumoraIntegrationsTorphRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/docs/numora/features/value-types': {
       id: '/docs/numora/features/value-types'
       path: '/numora/features/value-types'
@@ -643,11 +689,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsNumoraFeaturesCompactNotationRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/docs/numora-react/integrations/torph': {
+      id: '/docs/numora-react/integrations/torph'
+      path: '/numora-react/integrations/torph'
+      fullPath: '/docs/numora-react/integrations/torph'
+      preLoaderRoute: typeof DocsNumoraReactIntegrationsTorphRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/docs/numora-react/integrations/react-hook-form': {
       id: '/docs/numora-react/integrations/react-hook-form'
       path: '/numora-react/integrations/react-hook-form'
       fullPath: '/docs/numora-react/integrations/react-hook-form'
       preLoaderRoute: typeof DocsNumoraReactIntegrationsReactHookFormRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora-react/integrations/number-flow': {
+      id: '/docs/numora-react/integrations/number-flow'
+      path: '/numora-react/integrations/number-flow'
+      fullPath: '/docs/numora-react/integrations/number-flow'
+      preLoaderRoute: typeof DocsNumoraReactIntegrationsNumberFlowRouteImport
       parentRoute: typeof DocsRoute
     }
     '/docs/numora-react/features/value-types': {
@@ -726,7 +786,9 @@ interface DocsRouteChildren {
   DocsNumoraReactFeaturesSanitizationRoute: typeof DocsNumoraReactFeaturesSanitizationRoute
   DocsNumoraReactFeaturesScientificNotationRoute: typeof DocsNumoraReactFeaturesScientificNotationRoute
   DocsNumoraReactFeaturesValueTypesRoute: typeof DocsNumoraReactFeaturesValueTypesRoute
+  DocsNumoraReactIntegrationsNumberFlowRoute: typeof DocsNumoraReactIntegrationsNumberFlowRoute
   DocsNumoraReactIntegrationsReactHookFormRoute: typeof DocsNumoraReactIntegrationsReactHookFormRoute
+  DocsNumoraReactIntegrationsTorphRoute: typeof DocsNumoraReactIntegrationsTorphRoute
   DocsNumoraFeaturesCompactNotationRoute: typeof DocsNumoraFeaturesCompactNotationRoute
   DocsNumoraFeaturesDecimalsRoute: typeof DocsNumoraFeaturesDecimalsRoute
   DocsNumoraFeaturesFormattingRoute: typeof DocsNumoraFeaturesFormattingRoute
@@ -735,6 +797,7 @@ interface DocsRouteChildren {
   DocsNumoraFeaturesSanitizationRoute: typeof DocsNumoraFeaturesSanitizationRoute
   DocsNumoraFeaturesScientificNotationRoute: typeof DocsNumoraFeaturesScientificNotationRoute
   DocsNumoraFeaturesValueTypesRoute: typeof DocsNumoraFeaturesValueTypesRoute
+  DocsNumoraIntegrationsTorphRoute: typeof DocsNumoraIntegrationsTorphRoute
 }
 
 const DocsRouteChildren: DocsRouteChildren = {
@@ -760,8 +823,11 @@ const DocsRouteChildren: DocsRouteChildren = {
     DocsNumoraReactFeaturesScientificNotationRoute,
   DocsNumoraReactFeaturesValueTypesRoute:
     DocsNumoraReactFeaturesValueTypesRoute,
+  DocsNumoraReactIntegrationsNumberFlowRoute:
+    DocsNumoraReactIntegrationsNumberFlowRoute,
   DocsNumoraReactIntegrationsReactHookFormRoute:
     DocsNumoraReactIntegrationsReactHookFormRoute,
+  DocsNumoraReactIntegrationsTorphRoute: DocsNumoraReactIntegrationsTorphRoute,
   DocsNumoraFeaturesCompactNotationRoute:
     DocsNumoraFeaturesCompactNotationRoute,
   DocsNumoraFeaturesDecimalsRoute: DocsNumoraFeaturesDecimalsRoute,
@@ -772,6 +838,7 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsNumoraFeaturesScientificNotationRoute:
     DocsNumoraFeaturesScientificNotationRoute,
   DocsNumoraFeaturesValueTypesRoute: DocsNumoraFeaturesValueTypesRoute,
+  DocsNumoraIntegrationsTorphRoute: DocsNumoraIntegrationsTorphRoute,
 }
 
 const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)

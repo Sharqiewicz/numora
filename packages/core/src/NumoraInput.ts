@@ -108,17 +108,21 @@ export class NumoraInput {
 
     this.createInputElement(container, options);
     this.setupEventListeners();
+    this.setDefaultValue();
+  }
 
-    if (this.element.value) {
-      const initialValue = this.element.value;
-      const raw = this.resolvedOptions.thousandSeparator
-        ? removeThousandSeparators(initialValue, this.resolvedOptions.thousandSeparator)
-        : initialValue;
-      if (this.resolvedOptions.rawValueMode) {
-        this.rawValue = raw;
-      }
-      this.element.value = this.formatValueForDisplay(raw);
+  private setDefaultValue(): void {
+    if (!this.element.value) return;
+
+    const raw = this.resolvedOptions.thousandSeparator
+      ? removeThousandSeparators(this.element.value, this.resolvedOptions.thousandSeparator)
+      : this.element.value;
+
+    if (this.resolvedOptions.rawValueMode) {
+      this.rawValue = raw;
     }
+
+    this.element.value = this.formatValueForDisplay(raw);
   }
 
   private createInputElement(container: HTMLElement, options: NumoraInputOptions): void {
@@ -129,7 +133,6 @@ export class NumoraInput {
     // - inputmode='decimal': Ensures mobile keyboards show numeric keypad
     // - spellcheck='false': Prevents spellcheck from interfering with numeric input
     // - autocomplete='off': Prevents browser autocomplete from interfering with formatting
-    // - autoCapitalize='off': Prevents iOS Safari auto-capitalization from interfering with numeric input
     this.element.setAttribute('type', 'text');
     this.element.setAttribute('inputmode', 'decimal');
     this.element.setAttribute('spellcheck', 'false');
@@ -380,7 +383,7 @@ export class NumoraInput {
    *
    * **Precision warning**: this getter returns a JavaScript `number` (IEEE 754 double).
    * Values beyond ~15 significant digits will lose precision. Numora is designed around
-   * string values for this reason — prefer {@link getValue} when exact precision matters.
+   * string values for this reason - prefer {@link getValue} when exact precision matters.
    * Treat `valueAsNumber` strictly as an escape hatch for arithmetic that you already know
    * is safe at float precision.
    */
