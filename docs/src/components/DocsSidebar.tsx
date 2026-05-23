@@ -14,6 +14,8 @@ import {
   FileDigit,
   Globe,
   Layers,
+  Ruler,
+  CheckCircle,
 } from 'lucide-react'
 import {
   SidebarContent,
@@ -97,6 +99,16 @@ const navigation = [
         href: '/docs/features/leading-zeros',
         icon: Hash,
       },
+      {
+        title: 'Max Length',
+        href: '/docs/features/max-length',
+        icon: Ruler,
+      },
+      {
+        title: 'Validation',
+        href: '/docs/features/validation',
+        icon: CheckCircle,
+      },
     ],
   },
   {
@@ -112,6 +124,35 @@ const navigation = [
         title: 'Torph',
         href: '/docs/integrations/torph',
         icon: Wand2,
+      },
+    ],
+  },
+  {
+    title: 'Frameworks',
+    items: [
+      {
+        title: 'Svelte',
+        href: '/docs/frameworks/svelte',
+        icon: Layers,
+        packages: ['core'] as PackageTab[],
+      },
+      {
+        title: 'Vue',
+        href: '/docs/frameworks/vue',
+        icon: Globe,
+        packages: ['core'] as PackageTab[],
+      },
+      {
+        title: 'Angular',
+        href: '/docs/frameworks/angular',
+        icon: Workflow,
+        packages: ['core'] as PackageTab[],
+      },
+      {
+        title: 'Solid',
+        href: '/docs/frameworks/solid',
+        icon: Plug,
+        packages: ['core'] as PackageTab[],
       },
     ],
   },

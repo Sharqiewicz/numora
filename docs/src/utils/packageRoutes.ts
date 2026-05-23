@@ -31,6 +31,11 @@ export function getPackageHref(basePath: string, packagePrefix: PackageRoutePref
     return `/docs/${packagePrefix}/integrations/${integration}`
   }
 
+  if (basePath.startsWith('/docs/frameworks/')) {
+    const framework = basePath.replace('/docs/frameworks/', '')
+    return `/docs/${packagePrefix}/frameworks/${framework}`
+  }
+
   return basePath
 }
 

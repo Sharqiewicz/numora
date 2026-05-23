@@ -5,7 +5,7 @@ export const Route = createFileRoute('/docs/numora/features/leading-zeros')({
   head: () => ({
     meta: [
       { title: 'Leading Zero Handling | Numora' },
-      { name: 'description', content: 'Control leading zero behavior in numeric inputs with Numora. Enable or disable leading zeros for clean number entry in financial applications.' },
+      { name: 'description', content: 'Control leading zero behavior in numeric inputs with Numora. Strip or preserve integer leading zeros, and auto-prepend "0" before bare decimal points like ".5" → "0.5".' },
       { property: 'og:title', content: 'Leading Zero Handling | Numora' },
       { property: 'og:description', content: 'Control leading zero behavior in numeric inputs with Numora. Enable or disable for financial inputs.' },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/leading-zeros' },
@@ -58,6 +58,32 @@ const input = new NumoraInput(container, {
       <ul>
         <li><strong>Removed (default)</strong> - currency and general numeric inputs where leading zeros are meaningless</li>
         <li><strong>Preserved</strong> - product codes, IDs, or any format where zero-padding is significant</li>
+      </ul>
+
+      <h2>Auto-prepend leading zero</h2>
+      <p>
+        Set <code>autoAddLeadingZero: true</code> to automatically prepend <code>0</code>
+        before a bare decimal separator. Useful when you want <code>.5</code> stored as
+        <code>0.5</code> so the value is unambiguously parseable downstream.
+      </p>
+
+      <CodeBlock language="typescript">
+{`import { NumoraInput } from 'numora'
+
+const input = new NumoraInput(container, {
+  autoAddLeadingZero: true,
+})
+
+// Typing ".5"        → "0.5"
+// Typing "-.5"       → "-0.5"  (requires enableNegative: true)
+// Typing "."         → "0."
+// Typing "1.5"       → "1.5"   (unchanged)`}
+      </CodeBlock>
+
+      <ul>
+        <li>Runs as the last sanitization step, after <code>enableLeadingZeros</code> trimming - safe to combine</li>
+        <li>Respects <code>decimalSeparator</code> (e.g. <code>","</code> for European format)</li>
+        <li>Off by default</li>
       </ul>
     </div>
   )

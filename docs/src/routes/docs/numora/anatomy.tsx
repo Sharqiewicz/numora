@@ -20,7 +20,7 @@ import {
 const TITLE =
   'Anatomy of a Numeric Input - How HTML Inputs, Float Math, and Numora Actually Work'
 const DESCRIPTION =
-  "A guided dissection of the HTML input element, the keydown/beforeinput/input/paste lifecycle, IEEE 754 float pitfalls, the seven-step sanitization pipeline, and how the numora JavaScript library rebuilds it all for reliable formatting, undo, and cursor preservation."
+  "A guided dissection of the HTML input element, the keydown/beforeinput/input/paste lifecycle, IEEE 754 float pitfalls, the nine-step sanitization pipeline, and how the numora JavaScript library rebuilds it all for reliable formatting, undo, and cursor preservation."
 
 export const Route = createFileRoute('/docs/numora/anatomy')({
   head: () => ({

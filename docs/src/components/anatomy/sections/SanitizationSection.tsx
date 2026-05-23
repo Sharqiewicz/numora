@@ -7,7 +7,7 @@ export function SanitizationSection() {
       <h2>The sanitization pipeline</h2>
       <p>
         Every value Numora touches - typed character, pasted clipboard, programmatic
-        write - passes through a single pipeline of seven pure functions. Each one has
+        write - passes through a single pipeline of nine pure functions. Each one has
         one job and runs in a fixed order; the output of step N is the input of step N+1.
         The whole pipeline runs on every keystroke.
       </p>
@@ -17,6 +17,12 @@ export function SanitizationSection() {
         that didn't change the value:
       </p>
       <SanitizationStepper />
+      <p className="text-sm text-muted-foreground">
+        The last two stages - <code>prependLeadingZero</code> and{' '}
+        <code>truncateToMaxLength</code> - only run when their options
+        (<code>autoAddLeadingZero</code>, <code>maxLength</code>) are configured, so the
+        live demo above omits them.
+      </p>
     </section>
   )
 }

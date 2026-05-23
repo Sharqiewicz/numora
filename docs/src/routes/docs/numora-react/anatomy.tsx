@@ -23,7 +23,7 @@ import {
 const TITLE =
   'Anatomy of NumoraInput - React Numeric Input Internals, beforeinput Bypass, and Proxy Targets'
 const DESCRIPTION =
-  "A guided dissection of the React NumoraInput component: the HTML input primitive, the four native events, IEEE 754 pitfalls, the seven-step sanitization pipeline, why beforeinput cannot use React's synthetic event delegation, defaultValue vs value, and the Proxy on e.target."
+  "A guided dissection of the React NumoraInput component: the HTML input primitive, the four native events, IEEE 754 pitfalls, the nine-step sanitization pipeline, why beforeinput cannot use React's synthetic event delegation, defaultValue vs value, and the Proxy on e.target."
 
 export const Route = createFileRoute('/docs/numora-react/anatomy')({
   head: () => ({

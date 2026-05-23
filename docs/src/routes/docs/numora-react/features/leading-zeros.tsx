@@ -6,7 +6,7 @@ export const Route = createFileRoute('/docs/numora-react/features/leading-zeros'
   head: () => ({
     meta: [
       { title: 'Leading Zero Handling | numora-react' },
-      { name: 'description', content: 'Control leading zeros using the NumoraInput React component. Enable or disable leading zero input for financial forms with full React support.' },
+      { name: 'description', content: 'Control leading zeros using the NumoraInput React component. Strip or preserve integer leading zeros, and auto-prepend "0" before bare decimal points like ".5" → "0.5".' },
       { property: 'og:title', content: 'Leading Zero Handling | numora-react' },
       { property: 'og:description', content: 'Control leading zeros using the NumoraInput React component. Enable or disable for financial forms.' },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/features/leading-zeros' },
@@ -59,6 +59,35 @@ function LeadingZeros() {
       <ul>
         <li><strong>Removed (default)</strong> - currency and general numeric inputs where leading zeros are meaningless</li>
         <li><strong>Preserved</strong> - product codes, IDs, or any format where zero-padding is significant</li>
+      </ul>
+
+      <h2>Auto-prepend leading zero</h2>
+      <p>
+        Set <code>autoAddLeadingZero</code> to automatically prepend <code>0</code> before a
+        bare decimal separator. Useful when you want <code>.5</code> stored as <code>0.5</code>
+        so the value is unambiguously parseable downstream.
+      </p>
+
+      <div className="space-y-4">
+        <ExampleWithDemo
+          title="Off (default)"
+          description={'Type ".5" - it stays ".5"'}
+          language="tsx"
+          code={`<NumoraInput />`}
+        />
+        <ExampleWithDemo
+          title="On"
+          description={'Type ".5" - it becomes "0.5"'}
+          language="tsx"
+          code={`<NumoraInput autoAddLeadingZero />`}
+          config={{ autoAddLeadingZero: true }}
+        />
+      </div>
+
+      <ul>
+        <li>Runs as the last sanitization step, after <code>enableLeadingZeros</code> trimming - safe to combine</li>
+        <li>Respects <code>decimalSeparator</code> (e.g. <code>","</code> for European format)</li>
+        <li>Off by default</li>
       </ul>
     </div>
   )

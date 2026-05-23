@@ -6,6 +6,8 @@ const steps = [
   'Remove non-numeric',
   'Strip extra decimals',
   'Trim leading zeros',
+  'Prepend leading zero',
+  'Truncate to max length',
 ]
 
 export function SanitizationPipelineDiagram() {
@@ -19,7 +21,7 @@ export function SanitizationPipelineDiagram() {
       <svg
         viewBox={`0 0 360 ${lastY + 24}`}
         role="img"
-        aria-label="Seven ordered sanitization stages, line saturation rises as the value gets cleaner"
+        aria-label="Nine ordered sanitization stages, line saturation rises as the value gets cleaner"
         className="mx-auto block w-full max-w-sm"
       >
         <line x1={lineX} x2={lineX} y1={firstY} y2={lastY} className="stroke-border" strokeWidth="1.25" />

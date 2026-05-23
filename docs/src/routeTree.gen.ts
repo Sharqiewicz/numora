@@ -27,9 +27,16 @@ import { Route as DocsNumoraReactHowItWorksRouteImport } from './routes/docs/num
 import { Route as DocsNumoraReactAnatomyRouteImport } from './routes/docs/numora-react/anatomy'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 import { Route as DocsNumoraIntegrationsTorphRouteImport } from './routes/docs/numora/integrations/torph'
+import { Route as DocsNumoraIntegrationsNumberFlowRouteImport } from './routes/docs/numora/integrations/number-flow'
+import { Route as DocsNumoraFrameworksVueRouteImport } from './routes/docs/numora/frameworks/vue'
+import { Route as DocsNumoraFrameworksSvelteRouteImport } from './routes/docs/numora/frameworks/svelte'
+import { Route as DocsNumoraFrameworksSolidRouteImport } from './routes/docs/numora/frameworks/solid'
+import { Route as DocsNumoraFrameworksAngularRouteImport } from './routes/docs/numora/frameworks/angular'
 import { Route as DocsNumoraFeaturesValueTypesRouteImport } from './routes/docs/numora/features/value-types'
+import { Route as DocsNumoraFeaturesValidationRouteImport } from './routes/docs/numora/features/validation'
 import { Route as DocsNumoraFeaturesScientificNotationRouteImport } from './routes/docs/numora/features/scientific-notation'
 import { Route as DocsNumoraFeaturesSanitizationRouteImport } from './routes/docs/numora/features/sanitization'
+import { Route as DocsNumoraFeaturesMaxLengthRouteImport } from './routes/docs/numora/features/max-length'
 import { Route as DocsNumoraFeaturesLocaleRouteImport } from './routes/docs/numora/features/locale'
 import { Route as DocsNumoraFeaturesLeadingZerosRouteImport } from './routes/docs/numora/features/leading-zeros'
 import { Route as DocsNumoraFeaturesFormattingRouteImport } from './routes/docs/numora/features/formatting'
@@ -39,8 +46,10 @@ import { Route as DocsNumoraReactIntegrationsTorphRouteImport } from './routes/d
 import { Route as DocsNumoraReactIntegrationsReactHookFormRouteImport } from './routes/docs/numora-react/integrations/react-hook-form'
 import { Route as DocsNumoraReactIntegrationsNumberFlowRouteImport } from './routes/docs/numora-react/integrations/number-flow'
 import { Route as DocsNumoraReactFeaturesValueTypesRouteImport } from './routes/docs/numora-react/features/value-types'
+import { Route as DocsNumoraReactFeaturesValidationRouteImport } from './routes/docs/numora-react/features/validation'
 import { Route as DocsNumoraReactFeaturesScientificNotationRouteImport } from './routes/docs/numora-react/features/scientific-notation'
 import { Route as DocsNumoraReactFeaturesSanitizationRouteImport } from './routes/docs/numora-react/features/sanitization'
+import { Route as DocsNumoraReactFeaturesMaxLengthRouteImport } from './routes/docs/numora-react/features/max-length'
 import { Route as DocsNumoraReactFeaturesLocaleRouteImport } from './routes/docs/numora-react/features/locale'
 import { Route as DocsNumoraReactFeaturesLeadingZerosRouteImport } from './routes/docs/numora-react/features/leading-zeros'
 import { Route as DocsNumoraReactFeaturesFormattingRouteImport } from './routes/docs/numora-react/features/formatting'
@@ -140,10 +149,45 @@ const DocsNumoraIntegrationsTorphRoute =
     path: '/numora/integrations/torph',
     getParentRoute: () => DocsRoute,
   } as any)
+const DocsNumoraIntegrationsNumberFlowRoute =
+  DocsNumoraIntegrationsNumberFlowRouteImport.update({
+    id: '/numora/integrations/number-flow',
+    path: '/numora/integrations/number-flow',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFrameworksVueRoute = DocsNumoraFrameworksVueRouteImport.update({
+  id: '/numora/frameworks/vue',
+  path: '/numora/frameworks/vue',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsNumoraFrameworksSvelteRoute =
+  DocsNumoraFrameworksSvelteRouteImport.update({
+    id: '/numora/frameworks/svelte',
+    path: '/numora/frameworks/svelte',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFrameworksSolidRoute =
+  DocsNumoraFrameworksSolidRouteImport.update({
+    id: '/numora/frameworks/solid',
+    path: '/numora/frameworks/solid',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFrameworksAngularRoute =
+  DocsNumoraFrameworksAngularRouteImport.update({
+    id: '/numora/frameworks/angular',
+    path: '/numora/frameworks/angular',
+    getParentRoute: () => DocsRoute,
+  } as any)
 const DocsNumoraFeaturesValueTypesRoute =
   DocsNumoraFeaturesValueTypesRouteImport.update({
     id: '/numora/features/value-types',
     path: '/numora/features/value-types',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFeaturesValidationRoute =
+  DocsNumoraFeaturesValidationRouteImport.update({
+    id: '/numora/features/validation',
+    path: '/numora/features/validation',
     getParentRoute: () => DocsRoute,
   } as any)
 const DocsNumoraFeaturesScientificNotationRoute =
@@ -156,6 +200,12 @@ const DocsNumoraFeaturesSanitizationRoute =
   DocsNumoraFeaturesSanitizationRouteImport.update({
     id: '/numora/features/sanitization',
     path: '/numora/features/sanitization',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraFeaturesMaxLengthRoute =
+  DocsNumoraFeaturesMaxLengthRouteImport.update({
+    id: '/numora/features/max-length',
+    path: '/numora/features/max-length',
     getParentRoute: () => DocsRoute,
   } as any)
 const DocsNumoraFeaturesLocaleRoute =
@@ -212,6 +262,12 @@ const DocsNumoraReactFeaturesValueTypesRoute =
     path: '/numora-react/features/value-types',
     getParentRoute: () => DocsRoute,
   } as any)
+const DocsNumoraReactFeaturesValidationRoute =
+  DocsNumoraReactFeaturesValidationRouteImport.update({
+    id: '/numora-react/features/validation',
+    path: '/numora-react/features/validation',
+    getParentRoute: () => DocsRoute,
+  } as any)
 const DocsNumoraReactFeaturesScientificNotationRoute =
   DocsNumoraReactFeaturesScientificNotationRouteImport.update({
     id: '/numora-react/features/scientific-notation',
@@ -222,6 +278,12 @@ const DocsNumoraReactFeaturesSanitizationRoute =
   DocsNumoraReactFeaturesSanitizationRouteImport.update({
     id: '/numora-react/features/sanitization',
     path: '/numora-react/features/sanitization',
+    getParentRoute: () => DocsRoute,
+  } as any)
+const DocsNumoraReactFeaturesMaxLengthRoute =
+  DocsNumoraReactFeaturesMaxLengthRouteImport.update({
+    id: '/numora-react/features/max-length',
+    path: '/numora-react/features/max-length',
     getParentRoute: () => DocsRoute,
   } as any)
 const DocsNumoraReactFeaturesLocaleRoute =
@@ -278,8 +340,10 @@ export interface FileRoutesByFullPath {
   '/docs/numora-react/features/formatting': typeof DocsNumoraReactFeaturesFormattingRoute
   '/docs/numora-react/features/leading-zeros': typeof DocsNumoraReactFeaturesLeadingZerosRoute
   '/docs/numora-react/features/locale': typeof DocsNumoraReactFeaturesLocaleRoute
+  '/docs/numora-react/features/max-length': typeof DocsNumoraReactFeaturesMaxLengthRoute
   '/docs/numora-react/features/sanitization': typeof DocsNumoraReactFeaturesSanitizationRoute
   '/docs/numora-react/features/scientific-notation': typeof DocsNumoraReactFeaturesScientificNotationRoute
+  '/docs/numora-react/features/validation': typeof DocsNumoraReactFeaturesValidationRoute
   '/docs/numora-react/features/value-types': typeof DocsNumoraReactFeaturesValueTypesRoute
   '/docs/numora-react/integrations/number-flow': typeof DocsNumoraReactIntegrationsNumberFlowRoute
   '/docs/numora-react/integrations/react-hook-form': typeof DocsNumoraReactIntegrationsReactHookFormRoute
@@ -289,9 +353,16 @@ export interface FileRoutesByFullPath {
   '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
   '/docs/numora/features/leading-zeros': typeof DocsNumoraFeaturesLeadingZerosRoute
   '/docs/numora/features/locale': typeof DocsNumoraFeaturesLocaleRoute
+  '/docs/numora/features/max-length': typeof DocsNumoraFeaturesMaxLengthRoute
   '/docs/numora/features/sanitization': typeof DocsNumoraFeaturesSanitizationRoute
   '/docs/numora/features/scientific-notation': typeof DocsNumoraFeaturesScientificNotationRoute
+  '/docs/numora/features/validation': typeof DocsNumoraFeaturesValidationRoute
   '/docs/numora/features/value-types': typeof DocsNumoraFeaturesValueTypesRoute
+  '/docs/numora/frameworks/angular': typeof DocsNumoraFrameworksAngularRoute
+  '/docs/numora/frameworks/solid': typeof DocsNumoraFrameworksSolidRoute
+  '/docs/numora/frameworks/svelte': typeof DocsNumoraFrameworksSvelteRoute
+  '/docs/numora/frameworks/vue': typeof DocsNumoraFrameworksVueRoute
+  '/docs/numora/integrations/number-flow': typeof DocsNumoraIntegrationsNumberFlowRoute
   '/docs/numora/integrations/torph': typeof DocsNumoraIntegrationsTorphRoute
 }
 export interface FileRoutesByTo {
@@ -317,8 +388,10 @@ export interface FileRoutesByTo {
   '/docs/numora-react/features/formatting': typeof DocsNumoraReactFeaturesFormattingRoute
   '/docs/numora-react/features/leading-zeros': typeof DocsNumoraReactFeaturesLeadingZerosRoute
   '/docs/numora-react/features/locale': typeof DocsNumoraReactFeaturesLocaleRoute
+  '/docs/numora-react/features/max-length': typeof DocsNumoraReactFeaturesMaxLengthRoute
   '/docs/numora-react/features/sanitization': typeof DocsNumoraReactFeaturesSanitizationRoute
   '/docs/numora-react/features/scientific-notation': typeof DocsNumoraReactFeaturesScientificNotationRoute
+  '/docs/numora-react/features/validation': typeof DocsNumoraReactFeaturesValidationRoute
   '/docs/numora-react/features/value-types': typeof DocsNumoraReactFeaturesValueTypesRoute
   '/docs/numora-react/integrations/number-flow': typeof DocsNumoraReactIntegrationsNumberFlowRoute
   '/docs/numora-react/integrations/react-hook-form': typeof DocsNumoraReactIntegrationsReactHookFormRoute
@@ -328,9 +401,16 @@ export interface FileRoutesByTo {
   '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
   '/docs/numora/features/leading-zeros': typeof DocsNumoraFeaturesLeadingZerosRoute
   '/docs/numora/features/locale': typeof DocsNumoraFeaturesLocaleRoute
+  '/docs/numora/features/max-length': typeof DocsNumoraFeaturesMaxLengthRoute
   '/docs/numora/features/sanitization': typeof DocsNumoraFeaturesSanitizationRoute
   '/docs/numora/features/scientific-notation': typeof DocsNumoraFeaturesScientificNotationRoute
+  '/docs/numora/features/validation': typeof DocsNumoraFeaturesValidationRoute
   '/docs/numora/features/value-types': typeof DocsNumoraFeaturesValueTypesRoute
+  '/docs/numora/frameworks/angular': typeof DocsNumoraFrameworksAngularRoute
+  '/docs/numora/frameworks/solid': typeof DocsNumoraFrameworksSolidRoute
+  '/docs/numora/frameworks/svelte': typeof DocsNumoraFrameworksSvelteRoute
+  '/docs/numora/frameworks/vue': typeof DocsNumoraFrameworksVueRoute
+  '/docs/numora/integrations/number-flow': typeof DocsNumoraIntegrationsNumberFlowRoute
   '/docs/numora/integrations/torph': typeof DocsNumoraIntegrationsTorphRoute
 }
 export interface FileRoutesById {
@@ -357,8 +437,10 @@ export interface FileRoutesById {
   '/docs/numora-react/features/formatting': typeof DocsNumoraReactFeaturesFormattingRoute
   '/docs/numora-react/features/leading-zeros': typeof DocsNumoraReactFeaturesLeadingZerosRoute
   '/docs/numora-react/features/locale': typeof DocsNumoraReactFeaturesLocaleRoute
+  '/docs/numora-react/features/max-length': typeof DocsNumoraReactFeaturesMaxLengthRoute
   '/docs/numora-react/features/sanitization': typeof DocsNumoraReactFeaturesSanitizationRoute
   '/docs/numora-react/features/scientific-notation': typeof DocsNumoraReactFeaturesScientificNotationRoute
+  '/docs/numora-react/features/validation': typeof DocsNumoraReactFeaturesValidationRoute
   '/docs/numora-react/features/value-types': typeof DocsNumoraReactFeaturesValueTypesRoute
   '/docs/numora-react/integrations/number-flow': typeof DocsNumoraReactIntegrationsNumberFlowRoute
   '/docs/numora-react/integrations/react-hook-form': typeof DocsNumoraReactIntegrationsReactHookFormRoute
@@ -368,9 +450,16 @@ export interface FileRoutesById {
   '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
   '/docs/numora/features/leading-zeros': typeof DocsNumoraFeaturesLeadingZerosRoute
   '/docs/numora/features/locale': typeof DocsNumoraFeaturesLocaleRoute
+  '/docs/numora/features/max-length': typeof DocsNumoraFeaturesMaxLengthRoute
   '/docs/numora/features/sanitization': typeof DocsNumoraFeaturesSanitizationRoute
   '/docs/numora/features/scientific-notation': typeof DocsNumoraFeaturesScientificNotationRoute
+  '/docs/numora/features/validation': typeof DocsNumoraFeaturesValidationRoute
   '/docs/numora/features/value-types': typeof DocsNumoraFeaturesValueTypesRoute
+  '/docs/numora/frameworks/angular': typeof DocsNumoraFrameworksAngularRoute
+  '/docs/numora/frameworks/solid': typeof DocsNumoraFrameworksSolidRoute
+  '/docs/numora/frameworks/svelte': typeof DocsNumoraFrameworksSvelteRoute
+  '/docs/numora/frameworks/vue': typeof DocsNumoraFrameworksVueRoute
+  '/docs/numora/integrations/number-flow': typeof DocsNumoraIntegrationsNumberFlowRoute
   '/docs/numora/integrations/torph': typeof DocsNumoraIntegrationsTorphRoute
 }
 export interface FileRouteTypes {
@@ -398,8 +487,10 @@ export interface FileRouteTypes {
     | '/docs/numora-react/features/formatting'
     | '/docs/numora-react/features/leading-zeros'
     | '/docs/numora-react/features/locale'
+    | '/docs/numora-react/features/max-length'
     | '/docs/numora-react/features/sanitization'
     | '/docs/numora-react/features/scientific-notation'
+    | '/docs/numora-react/features/validation'
     | '/docs/numora-react/features/value-types'
     | '/docs/numora-react/integrations/number-flow'
     | '/docs/numora-react/integrations/react-hook-form'
@@ -409,9 +500,16 @@ export interface FileRouteTypes {
     | '/docs/numora/features/formatting'
     | '/docs/numora/features/leading-zeros'
     | '/docs/numora/features/locale'
+    | '/docs/numora/features/max-length'
     | '/docs/numora/features/sanitization'
     | '/docs/numora/features/scientific-notation'
+    | '/docs/numora/features/validation'
     | '/docs/numora/features/value-types'
+    | '/docs/numora/frameworks/angular'
+    | '/docs/numora/frameworks/solid'
+    | '/docs/numora/frameworks/svelte'
+    | '/docs/numora/frameworks/vue'
+    | '/docs/numora/integrations/number-flow'
     | '/docs/numora/integrations/torph'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -437,8 +535,10 @@ export interface FileRouteTypes {
     | '/docs/numora-react/features/formatting'
     | '/docs/numora-react/features/leading-zeros'
     | '/docs/numora-react/features/locale'
+    | '/docs/numora-react/features/max-length'
     | '/docs/numora-react/features/sanitization'
     | '/docs/numora-react/features/scientific-notation'
+    | '/docs/numora-react/features/validation'
     | '/docs/numora-react/features/value-types'
     | '/docs/numora-react/integrations/number-flow'
     | '/docs/numora-react/integrations/react-hook-form'
@@ -448,9 +548,16 @@ export interface FileRouteTypes {
     | '/docs/numora/features/formatting'
     | '/docs/numora/features/leading-zeros'
     | '/docs/numora/features/locale'
+    | '/docs/numora/features/max-length'
     | '/docs/numora/features/sanitization'
     | '/docs/numora/features/scientific-notation'
+    | '/docs/numora/features/validation'
     | '/docs/numora/features/value-types'
+    | '/docs/numora/frameworks/angular'
+    | '/docs/numora/frameworks/solid'
+    | '/docs/numora/frameworks/svelte'
+    | '/docs/numora/frameworks/vue'
+    | '/docs/numora/integrations/number-flow'
     | '/docs/numora/integrations/torph'
   id:
     | '__root__'
@@ -476,8 +583,10 @@ export interface FileRouteTypes {
     | '/docs/numora-react/features/formatting'
     | '/docs/numora-react/features/leading-zeros'
     | '/docs/numora-react/features/locale'
+    | '/docs/numora-react/features/max-length'
     | '/docs/numora-react/features/sanitization'
     | '/docs/numora-react/features/scientific-notation'
+    | '/docs/numora-react/features/validation'
     | '/docs/numora-react/features/value-types'
     | '/docs/numora-react/integrations/number-flow'
     | '/docs/numora-react/integrations/react-hook-form'
@@ -487,9 +596,16 @@ export interface FileRouteTypes {
     | '/docs/numora/features/formatting'
     | '/docs/numora/features/leading-zeros'
     | '/docs/numora/features/locale'
+    | '/docs/numora/features/max-length'
     | '/docs/numora/features/sanitization'
     | '/docs/numora/features/scientific-notation'
+    | '/docs/numora/features/validation'
     | '/docs/numora/features/value-types'
+    | '/docs/numora/frameworks/angular'
+    | '/docs/numora/frameworks/solid'
+    | '/docs/numora/frameworks/svelte'
+    | '/docs/numora/frameworks/vue'
+    | '/docs/numora/integrations/number-flow'
     | '/docs/numora/integrations/torph'
   fileRoutesById: FileRoutesById
 }
@@ -633,11 +749,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsNumoraIntegrationsTorphRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/docs/numora/integrations/number-flow': {
+      id: '/docs/numora/integrations/number-flow'
+      path: '/numora/integrations/number-flow'
+      fullPath: '/docs/numora/integrations/number-flow'
+      preLoaderRoute: typeof DocsNumoraIntegrationsNumberFlowRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/frameworks/vue': {
+      id: '/docs/numora/frameworks/vue'
+      path: '/numora/frameworks/vue'
+      fullPath: '/docs/numora/frameworks/vue'
+      preLoaderRoute: typeof DocsNumoraFrameworksVueRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/frameworks/svelte': {
+      id: '/docs/numora/frameworks/svelte'
+      path: '/numora/frameworks/svelte'
+      fullPath: '/docs/numora/frameworks/svelte'
+      preLoaderRoute: typeof DocsNumoraFrameworksSvelteRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/frameworks/solid': {
+      id: '/docs/numora/frameworks/solid'
+      path: '/numora/frameworks/solid'
+      fullPath: '/docs/numora/frameworks/solid'
+      preLoaderRoute: typeof DocsNumoraFrameworksSolidRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/frameworks/angular': {
+      id: '/docs/numora/frameworks/angular'
+      path: '/numora/frameworks/angular'
+      fullPath: '/docs/numora/frameworks/angular'
+      preLoaderRoute: typeof DocsNumoraFrameworksAngularRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/docs/numora/features/value-types': {
       id: '/docs/numora/features/value-types'
       path: '/numora/features/value-types'
       fullPath: '/docs/numora/features/value-types'
       preLoaderRoute: typeof DocsNumoraFeaturesValueTypesRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/features/validation': {
+      id: '/docs/numora/features/validation'
+      path: '/numora/features/validation'
+      fullPath: '/docs/numora/features/validation'
+      preLoaderRoute: typeof DocsNumoraFeaturesValidationRouteImport
       parentRoute: typeof DocsRoute
     }
     '/docs/numora/features/scientific-notation': {
@@ -652,6 +810,13 @@ declare module '@tanstack/react-router' {
       path: '/numora/features/sanitization'
       fullPath: '/docs/numora/features/sanitization'
       preLoaderRoute: typeof DocsNumoraFeaturesSanitizationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora/features/max-length': {
+      id: '/docs/numora/features/max-length'
+      path: '/numora/features/max-length'
+      fullPath: '/docs/numora/features/max-length'
+      preLoaderRoute: typeof DocsNumoraFeaturesMaxLengthRouteImport
       parentRoute: typeof DocsRoute
     }
     '/docs/numora/features/locale': {
@@ -717,6 +882,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsNumoraReactFeaturesValueTypesRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/docs/numora-react/features/validation': {
+      id: '/docs/numora-react/features/validation'
+      path: '/numora-react/features/validation'
+      fullPath: '/docs/numora-react/features/validation'
+      preLoaderRoute: typeof DocsNumoraReactFeaturesValidationRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/docs/numora-react/features/scientific-notation': {
       id: '/docs/numora-react/features/scientific-notation'
       path: '/numora-react/features/scientific-notation'
@@ -729,6 +901,13 @@ declare module '@tanstack/react-router' {
       path: '/numora-react/features/sanitization'
       fullPath: '/docs/numora-react/features/sanitization'
       preLoaderRoute: typeof DocsNumoraReactFeaturesSanitizationRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/numora-react/features/max-length': {
+      id: '/docs/numora-react/features/max-length'
+      path: '/numora-react/features/max-length'
+      fullPath: '/docs/numora-react/features/max-length'
+      preLoaderRoute: typeof DocsNumoraReactFeaturesMaxLengthRouteImport
       parentRoute: typeof DocsRoute
     }
     '/docs/numora-react/features/locale': {
@@ -783,8 +962,10 @@ interface DocsRouteChildren {
   DocsNumoraReactFeaturesFormattingRoute: typeof DocsNumoraReactFeaturesFormattingRoute
   DocsNumoraReactFeaturesLeadingZerosRoute: typeof DocsNumoraReactFeaturesLeadingZerosRoute
   DocsNumoraReactFeaturesLocaleRoute: typeof DocsNumoraReactFeaturesLocaleRoute
+  DocsNumoraReactFeaturesMaxLengthRoute: typeof DocsNumoraReactFeaturesMaxLengthRoute
   DocsNumoraReactFeaturesSanitizationRoute: typeof DocsNumoraReactFeaturesSanitizationRoute
   DocsNumoraReactFeaturesScientificNotationRoute: typeof DocsNumoraReactFeaturesScientificNotationRoute
+  DocsNumoraReactFeaturesValidationRoute: typeof DocsNumoraReactFeaturesValidationRoute
   DocsNumoraReactFeaturesValueTypesRoute: typeof DocsNumoraReactFeaturesValueTypesRoute
   DocsNumoraReactIntegrationsNumberFlowRoute: typeof DocsNumoraReactIntegrationsNumberFlowRoute
   DocsNumoraReactIntegrationsReactHookFormRoute: typeof DocsNumoraReactIntegrationsReactHookFormRoute
@@ -794,9 +975,16 @@ interface DocsRouteChildren {
   DocsNumoraFeaturesFormattingRoute: typeof DocsNumoraFeaturesFormattingRoute
   DocsNumoraFeaturesLeadingZerosRoute: typeof DocsNumoraFeaturesLeadingZerosRoute
   DocsNumoraFeaturesLocaleRoute: typeof DocsNumoraFeaturesLocaleRoute
+  DocsNumoraFeaturesMaxLengthRoute: typeof DocsNumoraFeaturesMaxLengthRoute
   DocsNumoraFeaturesSanitizationRoute: typeof DocsNumoraFeaturesSanitizationRoute
   DocsNumoraFeaturesScientificNotationRoute: typeof DocsNumoraFeaturesScientificNotationRoute
+  DocsNumoraFeaturesValidationRoute: typeof DocsNumoraFeaturesValidationRoute
   DocsNumoraFeaturesValueTypesRoute: typeof DocsNumoraFeaturesValueTypesRoute
+  DocsNumoraFrameworksAngularRoute: typeof DocsNumoraFrameworksAngularRoute
+  DocsNumoraFrameworksSolidRoute: typeof DocsNumoraFrameworksSolidRoute
+  DocsNumoraFrameworksSvelteRoute: typeof DocsNumoraFrameworksSvelteRoute
+  DocsNumoraFrameworksVueRoute: typeof DocsNumoraFrameworksVueRoute
+  DocsNumoraIntegrationsNumberFlowRoute: typeof DocsNumoraIntegrationsNumberFlowRoute
   DocsNumoraIntegrationsTorphRoute: typeof DocsNumoraIntegrationsTorphRoute
 }
 
@@ -817,10 +1005,13 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsNumoraReactFeaturesLeadingZerosRoute:
     DocsNumoraReactFeaturesLeadingZerosRoute,
   DocsNumoraReactFeaturesLocaleRoute: DocsNumoraReactFeaturesLocaleRoute,
+  DocsNumoraReactFeaturesMaxLengthRoute: DocsNumoraReactFeaturesMaxLengthRoute,
   DocsNumoraReactFeaturesSanitizationRoute:
     DocsNumoraReactFeaturesSanitizationRoute,
   DocsNumoraReactFeaturesScientificNotationRoute:
     DocsNumoraReactFeaturesScientificNotationRoute,
+  DocsNumoraReactFeaturesValidationRoute:
+    DocsNumoraReactFeaturesValidationRoute,
   DocsNumoraReactFeaturesValueTypesRoute:
     DocsNumoraReactFeaturesValueTypesRoute,
   DocsNumoraReactIntegrationsNumberFlowRoute:
@@ -834,10 +1025,17 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsNumoraFeaturesFormattingRoute: DocsNumoraFeaturesFormattingRoute,
   DocsNumoraFeaturesLeadingZerosRoute: DocsNumoraFeaturesLeadingZerosRoute,
   DocsNumoraFeaturesLocaleRoute: DocsNumoraFeaturesLocaleRoute,
+  DocsNumoraFeaturesMaxLengthRoute: DocsNumoraFeaturesMaxLengthRoute,
   DocsNumoraFeaturesSanitizationRoute: DocsNumoraFeaturesSanitizationRoute,
   DocsNumoraFeaturesScientificNotationRoute:
     DocsNumoraFeaturesScientificNotationRoute,
+  DocsNumoraFeaturesValidationRoute: DocsNumoraFeaturesValidationRoute,
   DocsNumoraFeaturesValueTypesRoute: DocsNumoraFeaturesValueTypesRoute,
+  DocsNumoraFrameworksAngularRoute: DocsNumoraFrameworksAngularRoute,
+  DocsNumoraFrameworksSolidRoute: DocsNumoraFrameworksSolidRoute,
+  DocsNumoraFrameworksSvelteRoute: DocsNumoraFrameworksSvelteRoute,
+  DocsNumoraFrameworksVueRoute: DocsNumoraFrameworksVueRoute,
+  DocsNumoraIntegrationsNumberFlowRoute: DocsNumoraIntegrationsNumberFlowRoute,
   DocsNumoraIntegrationsTorphRoute: DocsNumoraIntegrationsTorphRoute,
 }
 

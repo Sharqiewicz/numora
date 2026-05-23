@@ -1,7 +1,8 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { FormatOn, ThousandStyle } from 'numora';
-import { NumoraInput } from 'numora-react';
+import { NumoraInput, type NumoraInputChangeEvent } from 'numora-react';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { TextMorph } from 'torph';
 
 const SLIDE_DURATION = 4000;
 const TYPING_DELAY = 80;
