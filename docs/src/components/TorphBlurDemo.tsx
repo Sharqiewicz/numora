@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { TextMorph } from 'torph';
 
 export function TorphBlurDemo() {
-  const [value, setValue] = useState('1234567');
+  // Uncontrolled: passing `value` would re-trigger the input's controlled-value sync
+  // effect on every keystroke, which in Blur mode reformats raw → formatted mid-typing
+  // and desyncs the Torph overlay. See adr/0002-torph-blur-mode-bug.md.
   const [formatted, setFormatted] = useState('1,234,567');
   const displayRef = useRef<HTMLSpanElement>(null);
   const morphRef = useRef<TextMorph | null>(null);
@@ -39,15 +41,9 @@ export function TorphBlurDemo() {
           0
         </span>
         <NumoraInput
-          value={value}
+          defaultValue="1234567"
           onChange={(e: NumoraInputChangeEvent) => {
-            setValue(e.target.value);
             setFormatted(e.target.formattedValue || '');
-          }}
-          onFocus={(e) => {
-            // FormatOn.Blur silently strips separators on focus without firing
-            // onChange. Mirror the input's new raw display in the overlay.
-            setFormatted(e.currentTarget.value);
           }}
           formatOn={FormatOn.Blur}
           maxDecimals={2}

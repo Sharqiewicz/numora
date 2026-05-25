@@ -61,7 +61,7 @@ export function TokenSelector({
         </svg>
       </button>
       <ul
-        className={`w-full !mt-0 no-scrollbar absolute left-0 right-0 top-full w-full rounded-xl rounded-tl-none rounded-tr-none shadow-lg overflow-hidden z-100 transition-all duration-300 ease-out border-t-0 bg-surface-1 border border-brand ${
+        className={`w-full !mt-0 no-scrollbar absolute left-0 right-0 top-full w-full rounded-xl rounded-tl-none rounded-tr-none shadow-lg overflow-hidden z-100 transition-[opacity,transform,max-height] duration-300 ease-out border-t-0 bg-surface-1 border border-brand ${
           isOpen
             ? 'max-h-64 opacity-100 translate-y-0'
             : 'max-h-0 opacity-0 transform translate-y-0'

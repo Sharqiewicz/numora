@@ -280,9 +280,9 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
               <motion.button
                 key={s.id}
                 layout
-                transition={{ layout: { duration: 0.22, ease: [0.215, 0.61, 0.355, 1] } }}
+                transition={{ layout: { type: "spring", duration: 0.3, bounce: 0 } }}
                 onClick={() => handleSlideClick(index)}
-                className={`relative w-full text-left rounded-xl px-3 py-2.5 cursor-pointer ${
+                className={`relative w-full text-left rounded-lg px-3 py-2.5 cursor-pointer ${
                   !isActive ? 'hover:bg-surface-2' : ''
                 }`}
               >
@@ -290,8 +290,8 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                 {isActive && (
                   <motion.div
                     layoutId="slide-active-bg"
-                    className="absolute inset-0 rounded-xl bg-surface-3 z-[3]"
-                    transition={{ duration: 0.22, ease: [0.215, 0.61, 0.355, 1] }}
+                    className="absolute inset-0 rounded-lg bg-surface-3 z-[3]"
+                    transition={{ type: "spring", duration: 0.3, bounce: 0 }}
                   />
                 )}
 
@@ -303,7 +303,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                         initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.7 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={shouldReduceMotion ? {} : { opacity: 0, scale: 0.7 }}
-                        transition={{ duration: 0.15, ease: [0.215, 0.61, 0.355, 1] }}
+                        transition={{ type: "spring", duration: 0.3, bounce: 0 }}
                         className={`absolute text-xs leading-none ${
                           isActive ? 'text-secondary' : 'text-muted-foreground/30'
                         }`}
@@ -337,7 +337,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                       initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={shouldReduceMotion ? {} : { opacity: 0, y: -4 }}
-                      transition={{ duration: 0.18, ease: [0.215, 0.61, 0.355, 1] }}
+                      transition={{ type: "spring", duration: 0.3, bounce: 0 }}
                       className="relative text-xs text-muted-foreground/60 mt-1 pl-5 z-[5]"
                     >
                       {s.description}
@@ -356,7 +356,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                 key={index}
                 onClick={() => handleSlideClick(index)}
                 aria-label={`Go to slide ${index + 1}`}
-                className={`rounded-full transition-all cursor-pointer ${
+                className={`rounded-full transition-[background-color,width,height] duration-200 cursor-pointer ${
                   index === activeSlide
                     ? 'w-2 h-2 bg-secondary/80'
                     : 'w-1.5 h-1.5 bg-surface-3 hover:bg-surface-6'
@@ -376,7 +376,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                 initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={shouldReduceMotion ? {} : { opacity: 0, scale: 0.6 }}
-                transition={{ duration: 0.15, ease: [0.215, 0.61, 0.355, 1] }}
+                transition={{ type: "spring", duration: 0.3, bounce: 0 }}
                 className="leading-none select-none flex items-center justify-center"
               >
                 {isPlaying ? (

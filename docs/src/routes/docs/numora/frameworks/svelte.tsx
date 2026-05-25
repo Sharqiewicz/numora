@@ -4,14 +4,14 @@ import { CodeBlock } from '@/components/CodeBlock'
 const PAGE_URL = 'https://numeric-input.com/docs/numora/frameworks/svelte'
 const TORPH_PAGE_URL = 'https://numeric-input.com/docs/numora/integrations/torph'
 
-const META_TITLE = 'Numora + Svelte - Numeric Input Library for Svelte'
-const META_DESCRIPTION = 'Use Numora in Svelte with a tiny use:numora action. Format numbers as you type, thousand separators, decimal limits, string precision. Framework-agnostic core, zero dependencies, 6.4kb gzipped.'
+const META_TITLE = 'Svelte Numeric Input – Format Numbers in Svelte with Numora'
+const META_DESCRIPTION = 'Svelte numeric input library with thousand separators, decimal limits, paste sanitisation and cursor preservation. Drop Numora into Svelte or SvelteKit with a 10-line use:numora action – framework-agnostic core, zero dependencies, 6.4 kb gzipped.'
 
 const JSON_LD = [
   {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
-    headline: 'Numora + Svelte - Numeric input formatting with a Svelte action',
+    headline: 'Svelte Numeric Input – Format Numbers in Svelte with a use:numora Action',
     description: META_DESCRIPTION,
     url: PAGE_URL,
     author: { '@type': 'Person', name: 'Kacper Szarkiewicz', url: 'https://x.com/sharqiewicz' },
@@ -35,10 +35,18 @@ const JSON_LD = [
     mainEntity: [
       {
         '@type': 'Question',
-        name: 'Does Numora work with Svelte?',
+        name: 'What is the best Svelte numeric input library?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. The numora core package is framework-agnostic vanilla TypeScript. In Svelte you wrap the NumoraInput class in a small use:numora action that initialises it on mount and lets Svelte clean it up on destroy.',
+          text: 'Numora is the recommended Svelte numeric input library: it is framework-agnostic vanilla TypeScript, weighs 6.4 kb gzipped, has zero runtime dependencies, and ships with thousand separators, decimal limits, paste sanitisation and cursor preservation out of the box. In Svelte you wrap NumoraInput in a tiny use:numora action and mount it directly on an <input> – no wrapping container required.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'How do I add thousand separators to a number input in Svelte?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Pass thousandStyle: ThousandStyle.Thousand to the use:numora action. Numora formats as the user types, repositions the caret through the inserted comma, and emits the raw separator-free string from onChange so your Svelte store stays clean.',
         },
       },
       {
@@ -46,15 +54,31 @@ const JSON_LD = [
         name: 'Is there a dedicated numora-svelte package?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'No - and you do not need one. Numora is intentionally a thin layer over <input>. A 10-line Svelte action is the entire adapter.',
+          text: 'No – and you do not need one. Numora is intentionally a thin layer over <input>. A 10-line Svelte action is the entire adapter; there is nothing a numora-svelte package could meaningfully add.',
         },
       },
       {
         '@type': 'Question',
-        name: 'Can I animate the digits in Svelte?',
+        name: 'Does Numora work with SvelteKit and SSR?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. The Torph integration is also framework-agnostic - the same vanilla TextMorph overlay pattern works inside a Svelte component.',
+          text: 'Yes. NumoraInput touches the DOM, so initialise it inside a use: action or onMount – both only run in the browser. SvelteKit renders an empty host element on the server, and Numora mounts the formatted <input> on hydration. No SSR-specific configuration is required.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Does it support i18n decimal commas and currency formatting in Svelte?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. Pass decimalSeparator: "," and thousandSeparator: "." (or use the locale option) for European locales. Numora keeps the raw value as a string internally, so currency math stays precise – feed the raw value straight into your pricing logic without parseFloat rounding errors.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Can I animate digits in Svelte?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. The Torph integration is also framework-agnostic – the same vanilla TextMorph overlay pattern works inside a Svelte component and respects prefers-reduced-motion by default.',
         },
       },
     ],
@@ -66,7 +90,7 @@ export const Route = createFileRoute('/docs/numora/frameworks/svelte')({
     meta: [
       { title: META_TITLE },
       { name: 'description', content: META_DESCRIPTION },
-      { name: 'keywords', content: 'Numora Svelte, Svelte numeric input, Svelte number input, Svelte input formatting, framework-agnostic numeric input, Svelte action numora' },
+      { name: 'keywords', content: 'svelte numeric input, svelte number input, svelte input formatting, svelte number format, svelte input mask, sveltekit numeric input, svelte thousand separator, svelte currency input, svelte decimal input, numora svelte' },
       { property: 'og:title', content: META_TITLE },
       { property: 'og:description', content: META_DESCRIPTION },
       { property: 'og:url', content: PAGE_URL },
@@ -82,13 +106,15 @@ export const Route = createFileRoute('/docs/numora/frameworks/svelte')({
 function SvelteIntegration() {
   return (
     <div className="prose prose-invert max-w-none">
-      <h1>Numora + Svelte</h1>
+      <h1>Svelte Numeric Input</h1>
       <p className="text-lg text-muted-foreground">
-        Svelte&apos;s <code>use:</code> actions are designed for libraries that own a DOM node and need
-        cleanup on unmount - which is exactly what <code>NumoraInput</code> does. A ten-line action gives
-        you the full lifecycle: instantiate on attach, drop the rendered <code>&lt;input&gt;</code>{' '}
-        on <code>destroy</code>. No <code>numora-svelte</code> wrapper, no peer deps, no SSR
-        special-casing - Numora&apos;s core is framework-agnostic vanilla TypeScript.
+        <strong className="font-numora">Numora</strong> is a precision-first <strong>Svelte numeric input</strong>{' '}
+        library: thousand separators, decimal limits, paste sanitisation, scientific-notation expansion and
+        cursor preservation – all driven by a 10-line <code>use:numora</code> action. Svelte&apos;s{' '}
+        <code>use:</code> actions are designed for libraries that own a DOM node and need cleanup on unmount,
+        which is exactly what <code>NumoraInput</code> does. No <code>numora-svelte</code> wrapper, no peer
+        deps, no SSR special-casing – the core is framework-agnostic vanilla TypeScript, 6.4 kb gzipped, with
+        zero runtime dependencies.
       </p>
 
       <h2>Install</h2>
@@ -100,29 +126,38 @@ npm install numora`}
 
       <h2>Svelte action</h2>
       <p>
-        <code>NumoraInput</code> takes a container element and creates a properly-wired{' '}
-        <code>&lt;input&gt;</code> inside it. A Svelte action is the idiomatic way to bind that lifecycle
-        to a DOM node:
+        <code>NumoraInput</code> attaches directly to an existing <code>&lt;input&gt;</code> element. A
+        Svelte action is the idiomatic way to bind that lifecycle to a DOM node. Drop this five-line
+        helper into your project once and reuse it everywhere.
       </p>
 
-      <CodeBlock language="svelte">
-{`<script lang="ts">
-  import { NumoraInput, ThousandStyle, type NumoraInputOptions } from 'numora';
+      <p className="text-sm text-muted-foreground">
+        <code>src/lib/numora.ts</code>:
+      </p>
+      <CodeBlock language="ts">
+{`import { NumoraInput, type NumoraInputOptions } from 'numora';
 
-  function numora(node: HTMLElement, options: NumoraInputOptions) {
-    const instance = new NumoraInput(node, options);
-    return {
-      // The created <input> is removed when Svelte tears down the host node.
-      destroy: () => instance.getElement().remove(),
-    };
-  }
+export function numora(node: HTMLInputElement, options: NumoraInputOptions) {
+  new NumoraInput(node, options);
+  // No destroy hook needed - listeners die with the <input> when Svelte unmounts it.
+}`}
+      </CodeBlock>
 
-  let value = $state('');
-</script>
+      <p className="text-sm text-muted-foreground">
+        Component <code>&lt;script lang=&quot;ts&quot;&gt;</code>:
+      </p>
+      <CodeBlock language="ts">
+{`import { numora } from '$lib/numora';
+import { ThousandStyle } from 'numora';
 
-<label>
+let value = $state('');`}
+      </CodeBlock>
+
+      <p className="text-sm text-muted-foreground">Component markup:</p>
+      <CodeBlock language="html">
+{`<label>
   Amount
-  <div
+  <input
     use:numora={{
       thousandStyle: ThousandStyle.Thousand,
       decimalMaxLength: 2,
@@ -135,25 +170,118 @@ npm install numora`}
       </CodeBlock>
 
       <p className="text-sm text-muted-foreground">
-        The action receives the host element, calls <code>new NumoraInput(node, options)</code>, and
-        returns a <code>destroy</code> hook that runs when Svelte unmounts. <code>onChange</code> receives
-        the raw, separator-free string - safe to feed into your store or form library.
+        The action receives the <code>&lt;input&gt;</code> Svelte renders and calls{' '}
+        <code>new NumoraInput(node, options)</code> – Numora adopts the element, forces the required
+        attributes (<code>type</code>, <code>inputmode</code>, <code>spellcheck</code>,{' '}
+        <code>autocomplete</code>, <code>pattern</code>) and wires its listeners. <code>onChange</code>{' '}
+        receives the raw, separator-free string – safe to feed into your store or form library.
       </p>
 
       <p className="text-sm text-muted-foreground">
-        The <code>&lt;label&gt;</code> associates with the <code>&lt;input&gt;</code> Numora creates on
-        mount - modern browsers handle the late-arriving descendant correctly. To set attributes like{' '}
-        <code>aria-label</code> programmatically, keep a reference to the <code>NumoraInput</code>{' '}
-        instance and call <code>instance.getElement().setAttribute(&apos;aria-label&apos;, &apos;Amount&apos;)</code>.
+        Because the <code>&lt;input&gt;</code> is yours, set <code>placeholder</code>,{' '}
+        <code>aria-label</code>, <code>name</code> or any other attribute on it directly in the markup.
       </p>
 
-      <h2>Animate digits with Torph</h2>
+      <h2>Animated example: Numora + Torph in Svelte</h2>
       <p>
-        Want animated digit transitions? The{' '}
-        <Link to="/docs/numora/integrations/torph">Torph + Numora overlay</Link>{' '}
-        is framework-agnostic - the same vanilla pattern slots directly into a Svelte component. Render
-        the overlay markup in your template and run the bridge code in <code>onMount</code> (or inside
-        a Svelte action). Torph itself respects <code>prefers-reduced-motion</code> by default.
+        For animated digit transitions, stack a{' '}
+        <a href="https://torph.lochie.dev" target="_blank" rel="noopener noreferrer">Torph</a>{' '}
+        <code>TextMorph</code> on top of a transparent-text <code>NumoraInput</code>. The input owns the
+        keyboard, undo and IME; Torph animates the visible characters. The{' '}
+        <Link to="/docs/numora/integrations/torph">vanilla overlay guide</Link> covers the pattern in
+        depth — below is the idiomatic Svelte 5 adapter.
+      </p>
+
+      <CodeBlock language="bash">
+{`pnpm add numora torph`}
+      </CodeBlock>
+
+      <p className="text-sm text-muted-foreground">
+        Script block (inside <code>&lt;script lang=&quot;ts&quot;&gt;</code>):
+      </p>
+      <CodeBlock language="ts">
+{`import { NumoraInput, FormatOn, ThousandStyle, type NumoraInputOptions } from 'numora';
+import { TextMorph } from 'torph';
+
+// Action: mounts NumoraInput + TextMorph in the same wrapper and bridges them.
+export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
+  const display = node.querySelector<HTMLElement>('.numora-overlay-display')!;
+  const host = node.querySelector<HTMLElement>('.numora-overlay-host')!;
+
+  // SSR placeholder is a text node; Torph only animates element children.
+  display.textContent = '';
+
+  const numora = new NumoraInput(host, {
+    formatOn: FormatOn.Change,
+    thousandStyle: ThousandStyle.Thousand,
+    ...options,
+  });
+  const input = numora.getElement();
+
+  const morph = new TextMorph({
+    element: display,
+    ease: { stiffness: 400, damping: 30 },
+  });
+  morph.update('0');
+
+  const syncMorph = () => morph.update(numora.value || '0');
+  // Numora writes the formatted value in beforeinput; sync after that handler runs.
+  const scheduleSync = () => queueMicrotask(syncMorph);
+
+  input.addEventListener('beforeinput', scheduleSync);
+  input.addEventListener('input', syncMorph);
+
+  return {
+    destroy: () => {
+      input.removeEventListener('beforeinput', scheduleSync);
+      input.removeEventListener('input', syncMorph);
+      input.remove();
+    },
+  };
+}`}
+      </CodeBlock>
+
+      <p className="text-sm text-muted-foreground">Markup:</p>
+      <CodeBlock language="html">
+{`<label
+  class="numora-overlay"
+  use:numoraTorph={{ decimalMaxLength: 2, thousandSeparator: ',' }}
+>
+  <span class="numora-overlay-display" aria-hidden="true">0</span>
+  <div class="numora-overlay-host" />
+</label>`}
+      </CodeBlock>
+
+      <p className="text-sm text-muted-foreground">
+        Styles (inside the component&apos;s <code>&lt;style&gt;</code> block):
+      </p>
+      <CodeBlock language="css">
+{`.numora-overlay {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  font: 2.25rem/1 ui-monospace, SFMono-Regular, monospace;
+  color: white;
+}
+.numora-overlay-display { pointer-events: none; white-space: pre; }
+.numora-overlay-host { position: absolute; inset: 0; }
+
+/* :global(...) escapes Svelte's scoped-class hashing so the rule can reach
+   the <input> NumoraInput creates at runtime. */
+.numora-overlay-host :global(input) {
+  width: 100%; height: 100%;
+  margin: 0; padding: 0; border: 0;
+  background: transparent; color: transparent; caret-color: white;
+  outline: none; font: inherit;
+}
+.numora-overlay-host :global(input::selection) { background: rgba(255, 255, 255, 0.25); }
+.numora-overlay-host :global(input::placeholder) { color: transparent; }`}
+      </CodeBlock>
+
+      <p className="text-sm text-muted-foreground">
+        The <code>beforeinput</code> microtask + <code>input</code> listener combination guarantees
+        Torph stays in sync across typing, paste, undo and redo. Torph respects{' '}
+        <code>prefers-reduced-motion</code> automatically.
       </p>
 
       <h2>FAQ</h2>
@@ -164,11 +292,28 @@ npm install numora`}
         <code>&lt;input&gt;</code>. A ten-line action is the entire Svelte adapter.
       </p>
 
-      <h3>Does it work with SvelteKit?</h3>
+      <h3>Does Numora work with SvelteKit and SSR?</h3>
       <p>
         Yes. <code>NumoraInput</code> touches the DOM, so initialise it inside an action or{' '}
-        <code>onMount</code> - both only run in the browser. No SSR work needed beyond rendering an empty
-        host element on the server.
+        <code>onMount</code> - both only run in the browser. SvelteKit renders an empty host element on the
+        server, and Numora mounts the formatted <code>&lt;input&gt;</code> on hydration. No SSR-specific
+        configuration is needed.
+      </p>
+
+      <h3>How do I add thousand separators to a Svelte number input?</h3>
+      <p>
+        Pass <code>thousandStyle: ThousandStyle.Thousand</code> to the <code>use:numora</code> action.
+        Numora formats as the user types, repositions the caret through the inserted comma, and emits the
+        raw separator-free string from <code>onChange</code> - safe to feed straight into a store or form
+        library.
+      </p>
+
+      <h3>Does it support i18n (decimal commas, currency formatting) in Svelte?</h3>
+      <p>
+        Yes. Set <code>decimalSeparator: &apos;,&apos;</code> and <code>thousandSeparator: &apos;.&apos;</code>{' '}
+        (or use the <code>locale</code> option) for European locales. Numora keeps the raw value as a string
+        end-to-end, so currency math stays precise - no <code>parseFloat</code> rounding errors on amounts
+        like <code>0.1 + 0.2</code>.
       </p>
 
       <h3>Why not use a normal <code>&lt;input&gt;</code> with <code>bind:value</code>?</h3>
@@ -178,6 +323,18 @@ npm install numora`}
         Doing all of that on a plain <code>bind:value</code> means re-implementing the cursor-positioning
         logic by hand - that&apos;s the part Numora exists to solve.
       </p>
+
+      <h2>Numora in other frameworks</h2>
+      <p>
+        Numora&apos;s core is framework-agnostic. The same vanilla{' '}
+        <code>NumoraInput</code> class powers the numeric input across every modern UI framework:
+      </p>
+      <ul className="list-disc list-inside">
+        <li><Link to="/docs/numora/frameworks/vue">Vue numeric input</Link> – Vue 3 <code>v-numora</code> custom directive</li>
+        <li><Link to="/docs/numora/frameworks/angular">Angular numeric input</Link> – standalone directive with <code>ControlValueAccessor</code></li>
+        <li><Link to="/docs/numora/frameworks/solid">SolidJS numeric input</Link> – signal-bound <code>onMount</code> wrapper</li>
+        <li><Link to="/docs/numora-react">React numeric input</Link> – drop-in <code>&lt;NumoraInput /&gt;</code> component (<code>numora-react</code>)</li>
+      </ul>
     </div>
   )
 }

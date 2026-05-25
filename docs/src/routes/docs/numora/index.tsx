@@ -98,6 +98,40 @@ container.addEventListener('change', (e) => {
       </p>
 
       <hr/>
+      <h2>Use Numora in your framework</h2>
+      <p>
+        Numora is a precision-first <strong>numeric input library</strong> that works in every modern
+        JavaScript framework. The core <code>NumoraInput</code> class is vanilla TypeScript and ships with
+        thin, idiomatic adapters for each ecosystem – no separate wrapper packages needed.
+      </p>
+      <ul className="list-disc list-inside">
+        <li>
+          <Link to="/docs/numora/frameworks/svelte"><strong>Svelte numeric input</strong></Link> – a 10-line{' '}
+          <code>use:numora</code> action for Svelte 5 and SvelteKit (SSR-safe).
+        </li>
+        <li>
+          <Link to="/docs/numora/frameworks/vue"><strong>Vue numeric input</strong></Link> – a Vue 3
+          composable bound to a template <code>ref</code>, or a <code>v-numora</code> directive (works
+          with Nuxt 3, VeeValidate, FormKit, Pinia).
+        </li>
+        <li>
+          <Link to="/docs/numora/frameworks/angular"><strong>Angular numeric input</strong></Link> – a
+          standalone directive that composes with <code>ControlValueAccessor</code> and{' '}
+          <code>FormControl&lt;string&gt;</code> for Reactive Forms.
+        </li>
+        <li>
+          <Link to="/docs/numora/frameworks/solid"><strong>SolidJS numeric input</strong></Link> – a tiny{' '}
+          <code>onMount</code> wrapper that writes the raw value into a <code>createSignal</code> (works
+          with SolidStart).
+        </li>
+        <li>
+          <Link to="/docs/numora-react"><strong>React numeric input</strong></Link> – the{' '}
+          <code>numora-react</code> package gives you a drop-in <code>&lt;NumoraInput /&gt;</code>{' '}
+          component with full TypeScript support and React Hook Form integration.
+        </li>
+      </ul>
+
+      <hr/>
       <h2>Next Steps</h2>
       <p>
         Follow the <Link to="/docs/numora/installation">Installation</Link> guide to add numora to your project, or

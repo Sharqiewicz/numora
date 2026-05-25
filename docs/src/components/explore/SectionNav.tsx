@@ -78,7 +78,7 @@ export function SectionNav() {
       className={cn(
         'fixed top-0 left-0 right-0 z-50',
         'bg-background/80 backdrop-blur-lg border-b border-border',
-        'transition-all duration-300',
+        'transition-[opacity,transform,background-color] duration-300',
         isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
       )}
     >

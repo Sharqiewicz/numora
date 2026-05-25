@@ -3,14 +3,14 @@ import { CodeBlock } from '@/components/CodeBlock'
 
 const PAGE_URL = 'https://numeric-input.com/docs/numora/frameworks/vue'
 
-const META_TITLE = 'Numora + Vue - Numeric Input Library for Vue 3'
-const META_DESCRIPTION = 'Use Numora in Vue 3 with a tiny composable or custom directive. Format numbers as you type, thousand separators, decimal limits, string precision. Framework-agnostic core, zero dependencies, 6.4kb gzipped.'
+const META_TITLE = 'Vue Numeric Input – Format Numbers in Vue 3 with Numora'
+const META_DESCRIPTION = 'Vue numeric input library with thousand separators, decimal limits, paste sanitisation and cursor preservation. Drop Numora into Vue 3 or Nuxt with a tiny v-numora directive – framework-agnostic core, zero dependencies, 6.4 kb gzipped.'
 
 const JSON_LD = [
   {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
-    headline: 'Numora + Vue - Numeric input formatting with a Vue 3 composable',
+    headline: 'Vue Numeric Input – Format Numbers in Vue 3 with a v-numora Directive',
     description: META_DESCRIPTION,
     url: PAGE_URL,
     author: { '@type': 'Person', name: 'Kacper Szarkiewicz', url: 'https://x.com/sharqiewicz' },
@@ -34,10 +34,18 @@ const JSON_LD = [
     mainEntity: [
       {
         '@type': 'Question',
-        name: 'Does Numora work with Vue?',
+        name: 'What is the best Vue numeric input library?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. The numora core package is framework-agnostic vanilla TypeScript. In Vue 3 you wrap NumoraInput in a small composable that runs in onMounted and cleans up in onUnmounted.',
+          text: 'Numora is the recommended Vue 3 numeric input library: framework-agnostic vanilla TypeScript, 6.4 kb gzipped, zero runtime dependencies, with thousand separators, decimal limits, paste sanitisation and cursor preservation built in. In Vue you register a six-line v-numora custom directive once, then write <input v-numora="opts" /> anywhere – no wrapping container, no composable, no ref boilerplate.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'How do I format a number input with thousand separators in Vue?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Pass thousandStyle: ThousandStyle.Thousand inside the v-numora binding. Numora formats as the user types, keeps the caret stable through the inserted separator, and emits the raw separator-free string from onChange so your ref or Pinia store stays clean.',
         },
       },
       {
@@ -45,7 +53,23 @@ const JSON_LD = [
         name: 'Is there a numora-vue package?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'No - and you do not need one. Numora is a thin layer over <input>. A short composable or custom directive is the entire Vue adapter.',
+          text: 'No – and you do not need one. Numora is a thin layer over <input>. A six-line v-numora directive is the entire Vue adapter; there is nothing a numora-vue package could meaningfully add.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Does Numora work with Nuxt 3 and SSR?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. NumoraInput touches the DOM, so initialise it inside onMounted – that path only runs in the browser. Nuxt renders an empty host element on the server, and Numora mounts the formatted <input> on hydration. No Nuxt-specific configuration is required.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Does it work with VeeValidate, FormKit or Pinia in Vue?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. Numora\'s onChange emits the raw separator-free string – feed it into VeeValidate, FormKit, Pinia, or any other Vue state library exactly as you would a normal v-model value. The string-end-to-end design avoids parseFloat rounding errors in financial flows.',
         },
       },
       {
@@ -53,7 +77,7 @@ const JSON_LD = [
         name: 'Can I animate digits in Vue?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. The Torph + Numora overlay pattern is vanilla DOM, so it works inside any Vue component.',
+          text: 'Yes. The Torph + Numora overlay pattern is vanilla DOM, so it works inside any Vue component and respects prefers-reduced-motion by default.',
         },
       },
     ],
@@ -65,7 +89,7 @@ export const Route = createFileRoute('/docs/numora/frameworks/vue')({
     meta: [
       { title: META_TITLE },
       { name: 'description', content: META_DESCRIPTION },
-      { name: 'keywords', content: 'Numora Vue, Vue numeric input, Vue 3 number input, Vue input formatting, framework-agnostic numeric input, Vue composable numora, Vue directive numora' },
+      { name: 'keywords', content: 'vue numeric input, vue 3 number input, vue input formatting, vue number format, vue input mask, nuxt numeric input, vue thousand separator, vue currency input, vue decimal input, v-numora directive, numora vue' },
       { property: 'og:title', content: META_TITLE },
       { property: 'og:description', content: META_DESCRIPTION },
       { property: 'og:url', content: PAGE_URL },
@@ -81,13 +105,14 @@ export const Route = createFileRoute('/docs/numora/frameworks/vue')({
 function VueIntegration() {
   return (
     <div className="prose prose-invert max-w-none">
-      <h1>Numora + Vue</h1>
+      <h1>Vue Numeric Input</h1>
       <p className="text-lg text-muted-foreground">
-        In Vue 3, Numora has two equally idiomatic shapes: a <code>&lt;script setup&gt;</code> composable
-        bound to a template <code>ref</code>, or a <code>v-numora</code> directive if you want it
-        declarative. Both are short - Numora&apos;s core is framework-agnostic vanilla TypeScript, and{' '}
-        <code>NumoraInput</code> already does the heavy lifting (formatting, paste sanitisation, cursor
-        preservation). This page shows the composable; the directive form is two extra lines.
+        <strong className="font-numora">Numora</strong> is a precision-first <strong>Vue numeric input</strong>{' '}
+        library: thousand separators, decimal limits, paste sanitisation, scientific-notation expansion and
+        cursor preservation – all driven by a six-line <code>v-numora</code> custom directive that mounts
+        directly on an <code>&lt;input&gt;</code>. The core is framework-agnostic vanilla TypeScript,
+        6.4 kb gzipped, with zero runtime dependencies – the same engine works inside Vue 3, Nuxt 3,
+        VeeValidate, FormKit and Pinia without any wrapper package.
       </p>
 
       <h2>Install</h2>
@@ -97,59 +122,182 @@ function VueIntegration() {
 npm install numora`}
       </CodeBlock>
 
-      <h2>Vue 3 composable</h2>
+      <h2>Vue 3 directive</h2>
       <p>
-        <code>NumoraInput</code> takes a container element and creates a properly-wired{' '}
-        <code>&lt;input&gt;</code> inside it. A composable bound to a template ref is the idiomatic Vue 3
-        adapter:
+        <code>NumoraInput</code> attaches directly to an existing <code>&lt;input&gt;</code> element. A
+        custom directive is the idiomatic Vue 3 adapter – drop this helper into your project once and
+        every <code>&lt;input v-numora=&quot;opts&quot;&gt;</code> works.
       </p>
 
-      <CodeBlock language="vue">
-{`<script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { NumoraInput, ThousandStyle } from 'numora';
+      <p className="text-sm text-muted-foreground">
+        <code>src/directives/numora.ts</code>:
+      </p>
+      <CodeBlock language="ts">
+{`import type { Directive } from 'vue';
+import { NumoraInput, type NumoraInputOptions } from 'numora';
 
-const host = ref<HTMLDivElement | null>(null);
-const value = ref('');
-
-onMounted(() => {
-  if (!host.value) return;
-  new NumoraInput(host.value, {
-    thousandStyle: ThousandStyle.Thousand,
-    decimalMaxLength: 2,
-    onChange: (v) => (value.value = v),
-  });
-});
-</script>
-
-<template>
-  <label>
-    Amount
-    <div ref="host" />
-  </label>
-  <p>Raw value: {{ value }}</p>
-</template>`}
+export const vNumora: Directive<HTMLInputElement, NumoraInputOptions> = {
+  mounted(el, binding) {
+    new NumoraInput(el, binding.value ?? {});
+    // No unmounted hook needed - listeners die with the <input> when Vue removes it.
+  },
+};`}
       </CodeBlock>
 
       <p className="text-sm text-muted-foreground">
-        <code>onChange</code> receives the raw, separator-free string - feed it straight into your reactive
-        state, Pinia store, or form library. Vue automatically removes the host <code>div</code> on unmount;
-        the created <code>&lt;input&gt;</code> goes with it.
+        Register globally in <code>src/main.ts</code> (or import + declare locally in any{' '}
+        <code>&lt;script setup&gt;</code>):
+      </p>
+      <CodeBlock language="ts">
+{`import { createApp } from 'vue';
+import App from './App.vue';
+import { vNumora } from './directives/numora';
+
+createApp(App).directive('numora', vNumora).mount('#app');`}
+      </CodeBlock>
+
+      <p className="text-sm text-muted-foreground">
+        Component <code>&lt;script setup lang=&quot;ts&quot;&gt;</code>:
+      </p>
+      <CodeBlock language="ts">
+{`import { ref } from 'vue';
+import { ThousandStyle } from 'numora';
+
+const value = ref('');`}
+      </CodeBlock>
+
+      <p className="text-sm text-muted-foreground">
+        Component <code>&lt;template&gt;</code>:
+      </p>
+      <CodeBlock language="html">
+{`<label>
+  Amount
+  <input
+    v-numora="{
+      thousandStyle: ThousandStyle.Thousand,
+      decimalMaxLength: 2,
+      onChange: (v) => (value = v),
+    }"
+  />
+</label>
+<p>Raw value: {{ value }}</p>`}
+      </CodeBlock>
+
+      <p className="text-sm text-muted-foreground">
+        The directive receives the <code>&lt;input&gt;</code> Vue renders and calls{' '}
+        <code>new NumoraInput(el, binding.value)</code>. Numora adopts the element, forces the required
+        attributes (<code>type</code>, <code>inputmode</code>, <code>spellcheck</code>,{' '}
+        <code>autocomplete</code>, <code>pattern</code>), and emits the raw, separator-free string from{' '}
+        <code>onChange</code> – safe to feed straight into a ref, Pinia store, or VeeValidate field.
       </p>
 
       <p className="text-sm text-muted-foreground">
-        The <code>&lt;label&gt;</code> associates with the <code>&lt;input&gt;</code> Numora creates on
-        mount - modern browsers handle the late-arriving descendant correctly. To set attributes like{' '}
-        <code>aria-label</code> programmatically, hold the <code>NumoraInput</code> instance in a{' '}
-        <code>ref</code> and call <code>instance.getElement().setAttribute(&apos;aria-label&apos;, &apos;Amount&apos;)</code>.
+        Because the <code>&lt;input&gt;</code> is yours, set <code>placeholder</code>,{' '}
+        <code>aria-label</code>, <code>name</code> or any other attribute on it directly in the template.
       </p>
 
-      <h2>Animate digits with Torph</h2>
+      <h2>Animated example: Numora + Torph in Vue 3</h2>
       <p>
-        For animated digit transitions, the{' '}
-        <Link to="/docs/numora/integrations/torph">Torph + Numora overlay</Link>{' '}
-        is framework-agnostic - the same vanilla pattern slots into a Vue component. Render the overlay
-        markup in your template and run the bridge code in <code>onMounted</code>. Torph respects{' '}
+        For animated digit transitions, stack a{' '}
+        <a href="https://torph.lochie.dev" target="_blank" rel="noopener noreferrer">Torph</a>{' '}
+        <code>TextMorph</code> on top of a transparent-text <code>NumoraInput</code>. The input owns the
+        keyboard, undo and IME; Torph animates the visible characters. The{' '}
+        <Link to="/docs/numora/integrations/torph">vanilla overlay guide</Link> covers the pattern in
+        depth — below is the idiomatic Vue 3 adapter.
+      </p>
+
+      <CodeBlock language="bash">
+{`pnpm add numora torph`}
+      </CodeBlock>
+
+      <p className="text-sm text-muted-foreground">
+        Script block (inside <code>&lt;script setup lang=&quot;ts&quot;&gt;</code>):
+      </p>
+      <CodeBlock language="ts">
+{`import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { NumoraInput, FormatOn, ThousandStyle } from 'numora';
+import { TextMorph } from 'torph';
+
+const display = ref<HTMLSpanElement | null>(null);
+const host = ref<HTMLDivElement | null>(null);
+
+let cleanup: (() => void) | null = null;
+
+onMounted(() => {
+  if (!display.value || !host.value) return;
+
+  // SSR placeholder is a text node; Torph only animates element children.
+  display.value.textContent = '';
+
+  const numora = new NumoraInput(host.value, {
+    formatOn: FormatOn.Change,
+    thousandStyle: ThousandStyle.Thousand,
+    decimalMaxLength: 2,
+    thousandSeparator: ',',
+  });
+  const input = numora.getElement();
+
+  const morph = new TextMorph({
+    element: display.value,
+    ease: { stiffness: 400, damping: 30 },
+  });
+  morph.update('0');
+
+  const syncMorph = () => morph.update(numora.value || '0');
+  // Numora writes the formatted value in beforeinput; sync after that handler runs.
+  const scheduleSync = () => queueMicrotask(syncMorph);
+
+  input.addEventListener('beforeinput', scheduleSync);
+  input.addEventListener('input', syncMorph);
+
+  cleanup = () => {
+    input.removeEventListener('beforeinput', scheduleSync);
+    input.removeEventListener('input', syncMorph);
+  };
+});
+
+onBeforeUnmount(() => cleanup?.());`}
+      </CodeBlock>
+
+      <p className="text-sm text-muted-foreground">
+        Template (inside <code>&lt;template&gt;</code>):
+      </p>
+      <CodeBlock language="html">
+{`<label class="numora-overlay">
+  <span ref="display" class="numora-overlay-display" aria-hidden="true">0</span>
+  <div ref="host" class="numora-overlay-host" />
+</label>`}
+      </CodeBlock>
+
+      <p className="text-sm text-muted-foreground">
+        Styles (inside <code>&lt;style scoped&gt;</code>):
+      </p>
+      <CodeBlock language="css">
+{`.numora-overlay {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  font: 2.25rem/1 ui-monospace, SFMono-Regular, monospace;
+  color: white;
+}
+.numora-overlay-display { pointer-events: none; white-space: pre; }
+.numora-overlay-host { position: absolute; inset: 0; }
+
+/* :deep(...) escapes Vue's scoped-style attribute so the rule can reach
+   the <input> NumoraInput creates at runtime. */
+.numora-overlay-host :deep(input) {
+  width: 100%; height: 100%;
+  margin: 0; padding: 0; border: 0;
+  background: transparent; color: transparent; caret-color: white;
+  outline: none; font: inherit;
+}
+.numora-overlay-host :deep(input::selection) { background: rgba(255, 255, 255, 0.25); }
+.numora-overlay-host :deep(input::placeholder) { color: transparent; }`}
+      </CodeBlock>
+
+      <p className="text-sm text-muted-foreground">
+        The <code>beforeinput</code> microtask + <code>input</code> listener combination keeps Torph in
+        sync across typing, paste, undo and redo. Torph respects{' '}
         <code>prefers-reduced-motion</code> automatically.
       </p>
 
@@ -158,15 +306,31 @@ onMounted(() => {
       <h3>Is there a numora-vue package?</h3>
       <p>
         No - and there does not need to be. Numora is intentionally a thin layer over the native{' '}
-        <code>&lt;input&gt;</code>. A short composable (or a custom directive, if you prefer{' '}
-        <code>v-numora</code>) is the entire Vue adapter.
+        <code>&lt;input&gt;</code>. A six-line <code>v-numora</code> directive is the entire Vue adapter.
       </p>
 
-      <h3>Does it work with Nuxt?</h3>
+      <h3>Does Numora work with Nuxt 3 and SSR?</h3>
       <p>
-        Yes. <code>NumoraInput</code> touches the DOM, so initialise it inside <code>onMounted</code> -
-        that path only runs in the browser. No SSR work beyond rendering an empty host element on the
-        server.
+        Yes. <code>NumoraInput</code> touches the DOM, so the <code>v-numora</code> directive only
+        initialises in the <code>mounted</code> hook – that path only runs in the browser. Nuxt renders
+        the empty <code>&lt;input&gt;</code> on the server and Numora adopts it on hydration. No
+        Nuxt-specific configuration needed.
+      </p>
+
+      <h3>How do I add thousand separators to a Vue number input?</h3>
+      <p>
+        Pass <code>thousandStyle: ThousandStyle.Thousand</code> inside the <code>v-numora</code> binding.
+        Numora formats as the user types, keeps the caret stable through the inserted comma, and emits
+        the raw separator-free string from <code>onChange</code> – safe to feed into <code>ref</code>,
+        Pinia, VeeValidate or FormKit.
+      </p>
+
+      <h3>Does it support i18n (decimal commas, currency formatting) in Vue?</h3>
+      <p>
+        Yes. Set <code>decimalSeparator: &apos;,&apos;</code> and{' '}
+        <code>thousandSeparator: &apos;.&apos;</code> (or use the <code>locale</code> option) for European
+        formats. Numora keeps the raw value as a string end-to-end, so currency math stays precise – no{' '}
+        <code>parseFloat</code> rounding errors.
       </p>
 
       <h3>Why not <code>v-model</code> on a plain <code>&lt;input&gt;</code>?</h3>
@@ -176,6 +340,18 @@ onMounted(() => {
         Doing all of that on a plain <code>v-model</code> means re-implementing cursor-positioning logic
         by hand - that&apos;s the part Numora exists to solve.
       </p>
+
+      <h2>Numora in other frameworks</h2>
+      <p>
+        Numora&apos;s core is framework-agnostic. The same vanilla{' '}
+        <code>NumoraInput</code> class powers the numeric input across every modern UI framework:
+      </p>
+      <ul className="list-disc list-inside">
+        <li><Link to="/docs/numora/frameworks/svelte">Svelte numeric input</Link> – <code>use:numora</code> action for Svelte and SvelteKit</li>
+        <li><Link to="/docs/numora/frameworks/angular">Angular numeric input</Link> – standalone directive with <code>ControlValueAccessor</code></li>
+        <li><Link to="/docs/numora/frameworks/solid">SolidJS numeric input</Link> – signal-bound <code>onMount</code> wrapper</li>
+        <li><Link to="/docs/numora-react">React numeric input</Link> – drop-in <code>&lt;NumoraInput /&gt;</code> component (<code>numora-react</code>)</li>
+      </ul>
     </div>
   )
 }

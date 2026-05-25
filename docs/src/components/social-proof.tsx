@@ -68,7 +68,7 @@ export function SocialProof({ heading, description }: SocialProofProps = {}) {
             rel="noopener noreferrer"
             className={`
               group relative
-              transition-all duration-300 ease-out
+              transition-[opacity,transform,scale] duration-300 ease-out
               hover:scale-110
               ${isVisible ? 'animate-logo-reveal' : 'opacity-0'}
             `}
@@ -93,7 +93,7 @@ export function SocialProof({ heading, description }: SocialProofProps = {}) {
                 h-10 md:h-12 w-auto
                 filter grayscale-[30%]
                 group-hover:grayscale-0
-                transition-all duration-300
+                transition-[filter] duration-300
               "
             />
           </a>
