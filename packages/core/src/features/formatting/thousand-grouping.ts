@@ -4,9 +4,7 @@
  */
 
 import { GROUPING_CONFIG  } from './constants';
-import { DEFAULT_DECIMAL_SEPARATOR } from '@/config';
-import type { FormattingOptions, Separators } from '@/types';
-import { ThousandStyle, FormatOn } from '@/types';
+import { ThousandStyle } from '@/types';
 
 const LEADING_ZEROS_CAPTURE_RE = /^(0+)/;
 
@@ -150,29 +148,3 @@ function groupDigitsFromRight(integerPart: string, separator: string, groupSize:
   return groups.join(separator);
 }
 
-/**
- * Applies formatting to the input element if formatting is enabled.
- *
- * @param target - The input element
- * @param sanitizedAndTrimmedValue - The sanitized value to format
- * @param formattingOptions - Optional formatting options
- * @param separators - Optional separator configuration
- * @returns The formatted value, or the original value if formatting is not needed
- */
-export function formatNumoraInput(
-  sanitizedAndTrimmedValue: string,
-  formattingOptions?: FormattingOptions,
-  separators?: Separators
-): string {
-  if (formattingOptions?.formatOn === FormatOn.Change && formattingOptions.thousandSeparator) {
-    const formattedValue = formatWithSeparators(
-      sanitizedAndTrimmedValue,
-      formattingOptions.thousandSeparator,
-      formattingOptions.thousandStyle ?? ThousandStyle.None,
-      formattingOptions.enableLeadingZeros,
-      separators?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR
-    );
-    return formattedValue;
-  }
-  return sanitizedAndTrimmedValue;
-}

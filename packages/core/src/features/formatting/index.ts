@@ -8,17 +8,16 @@
  */
 
 // === TYPES & CONSTANTS ===
-export type {  ChangeRange } from './constants';
+export type { ChangeRange } from './constants';
 export { GROUPING_CONFIG } from './constants';
 
 // === NUMBER FORMATTING ===
-export { formatWithSeparators, formatNumoraInput } from './thousand-grouping';
+export { formatWithSeparators } from './thousand-grouping';
 
 // === CURSOR POSITION CALCULATION ===
 export {
   calculateCursorPositionAfterFormatting,
   type CursorPositionOptions,
-  type IsCharacterEquivalent,
 } from './cursor-position';
 
 // === CHANGE DETECTION ===
@@ -27,21 +26,16 @@ export { findChangedRangeFromCaretPositions, findChangeRange } from './change-de
 // === CARET BOUNDARY SYSTEM ===
 export { getCaretBoundary, getCaretPosInBoundary } from './cursor-boundary';
 
-
 // === CARET POSITION UTILITIES ===
 export {
-  setCaretPosition,
-  setCaretPositionWithRetry,
-  getInputCaretPosition,
-  updateCursorPosition,
-  skipOverThousandSeparatorOnDelete
+  computeCursorPosition,
+  computeStripSeparatorsResult,
+  skipOverThousandSeparatorOnDelete,
 } from './caret-position-utils';
+export type { StripSeparatorsResult } from './caret-position-utils';
 
-// === DIGIT COUNTING UTILITIES ===
-// These are primarily for internal use but exported for advanced use cases
+// === DOM WRITES (undo-preserving) ===
 export {
-  countMeaningfulDigitsBeforePosition,
-  findPositionForDigitIndex,
-  findPositionWithMeaningfulDigitCount,
-  isPositionOnSeparator,
-} from './digit-counting';
+  writeValuePreservingUndo,
+  writeStripPreservingUndo,
+} from './dom-writes';

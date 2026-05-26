@@ -4,8 +4,8 @@ import {
   getSeparators,
 } from '@/features/decimals';
 import { sanitizeNumoraInput } from '@/features/sanitization';
-import { formatNumoraInput } from '@/features/formatting';
-import { type FormattingOptions, FormatOn } from '@/types';
+import { formatWithSeparators } from '@/features/formatting';
+import { type FormattingOptions, FormatOn, ThousandStyle } from '@/types';
 
 /**
  * Formats a value from user input events (onChange, onBlur) by sanitizing, trimming decimals, and applying formatting.
@@ -51,8 +51,18 @@ export function formatInputValue(
     separators.decimalSeparator
   );
 
-  // Formatted value includes thousand separators if formatting is enabled
-  const formatted = formatNumoraInput(valueWithMinDecimals, formattingOptions, separators);
+  // Apply thousand separators only in Change mode; Blur mode formats on blur, not on every keystroke.
+  const shouldFormat =
+    formattingOptions?.formatOn === FormatOn.Change && !!formattingOptions.thousandSeparator;
+  const formatted = shouldFormat
+    ? formatWithSeparators(
+        valueWithMinDecimals,
+        formattingOptions.thousandSeparator as string,
+        formattingOptions.thousandStyle ?? ThousandStyle.None,
+        formattingOptions.enableLeadingZeros,
+        separators.decimalSeparator
+      )
+    : valueWithMinDecimals;
 
   return { formatted, raw: valueWithMinDecimals };
 }
