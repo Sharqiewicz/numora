@@ -53,7 +53,7 @@ export function TorphDemo() {
           maxDecimals={2}
           thousandSeparator=","
           aria-label="Amount"
-          className="absolute inset-0 w-full h-full m-0 p-0 border-0 bg-transparent text-transparent placeholder-transparent caret-white outline-none focus:outline-none selection:bg-white/25 text-4xl font-mono leading-none"
+          className="absolute inset-0 w-full h-full m-0 p-0 border-0 bg-transparent text-transparent placeholder-transparent caret-secondary outline-none focus:outline-none selection:bg-secondary/40 text-4xl font-mono leading-none"
         />
       </label>
     </div>

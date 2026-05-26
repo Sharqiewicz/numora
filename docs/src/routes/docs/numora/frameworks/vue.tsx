@@ -203,7 +203,7 @@ const value = ref('');`}
         <code>TextMorph</code> on top of a transparent-text <code>NumoraInput</code>. The input owns the
         keyboard, undo and IME; Torph animates the visible characters. The{' '}
         <Link to="/docs/numora/integrations/torph">vanilla overlay guide</Link> covers the pattern in
-        depth — below is the idiomatic Vue 3 adapter.
+        depth - below is the idiomatic Vue 3 adapter.
       </p>
 
       <CodeBlock language="bash">

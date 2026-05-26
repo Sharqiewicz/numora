@@ -63,11 +63,11 @@ export function TorphVanillaDemo() {
           border: 0;
           background: transparent;
           color: transparent;
-          caret-color: white;
+          caret-color: var(--secondary);
           outline: none;
           font: inherit;
         }
-        .torph-vanilla-input-host input::selection { background: rgba(255, 255, 255, 0.25); }
+        .torph-vanilla-input-host input::selection { background: color-mix(in oklch, var(--secondary) 40%, transparent); }
         .torph-vanilla-input-host input::placeholder { color: transparent; }
       `}</style>
       <div className="my-16 py-12 flex justify-center items-center">

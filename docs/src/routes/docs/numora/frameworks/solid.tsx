@@ -200,7 +200,7 @@ export function AmountInput() {
         <code>TextMorph</code> on top of a transparent-text <code>NumoraInput</code>. The input owns the
         keyboard, undo and IME; Torph animates the visible characters. The{' '}
         <Link to="/docs/numora/integrations/torph">vanilla overlay guide</Link> covers the pattern in
-        depth — below is the idiomatic SolidJS adapter.
+        depth - below is the idiomatic SolidJS adapter.
       </p>
 
       <CodeBlock language="bash">
@@ -279,7 +279,7 @@ export function AnimatedAmountInput() {
       </CodeBlock>
 
       <p className="text-sm text-muted-foreground">
-        Solid doesn&apos;t scope CSS by default, so the input selectors work as-is — Numora creates the{' '}
+        Solid doesn&apos;t scope CSS by default, so the input selectors work as-is - Numora creates the{' '}
         <code>&lt;input&gt;</code> at runtime inside the host <code>&lt;div&gt;</code>. The{' '}
         <code>beforeinput</code> microtask + <code>input</code> listener combination keeps Torph in sync
         across typing, paste, undo and redo. Torph respects <code>prefers-reduced-motion</code>{' '}

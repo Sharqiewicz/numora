@@ -117,7 +117,7 @@ function NumberFlowIntegration() {
       </p>
       <p className="text-sm text-muted-foreground">
         Using React? See the{' '}
-        <Link to="/docs/numora-react/integrations/number-flow">Numora React NumberFlow integration</Link> — it wires the overlay through{' '}
+        <Link to="/docs/numora-react/integrations/number-flow">Numora React NumberFlow integration</Link> - it wires the overlay through{' '}
         <code>onChange</code> instead of manual DOM listeners.
       </p>
 

@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { CodeBlock } from '@/components/CodeBlock'
+import { TorphBlurSection } from '@/components/TorphBlurSection'
 import { TorphVanillaBlurDemo } from '@/components/TorphVanillaBlurDemo'
+import { TorphVanillaBlurMinimal } from '@/components/TorphVanillaBlurMinimal'
 import { TorphVanillaDemo } from '@/components/TorphVanillaDemo'
 
 const TORPH_PAGE_URL = 'https://numeric-input.com/docs/numora/integrations/torph'
@@ -118,7 +120,7 @@ function TorphIntegration() {
       </p>
       <p className="text-sm text-muted-foreground">
         Using React? See the{' '}
-        <Link to="/docs/numora-react/integrations/torph">Numora React Torph integration</Link> — it wires the overlay
+        <Link to="/docs/numora-react/integrations/torph">Numora React Torph integration</Link> - it wires the overlay
         through <code>onChange</code> instead of manual DOM listeners.
       </p>
 
@@ -127,10 +129,73 @@ function TorphIntegration() {
         <code>FormatOn.Change</code> - separators animate on every keystroke.
       </p>
 
-      <TorphVanillaBlurDemo />
-      <p className="text-center text-sm text-muted-foreground -mt-12 mb-12">
-        <code>FormatOn.Blur</code> - separators animate out on focus, back in on blur. <strong>in progress... (cursor jumping)</strong>
-      </p>
+      <TorphBlurSection>
+        {(variant) => (
+          <>
+            {variant === 'minimal' ? <TorphVanillaBlurMinimal /> : <TorphVanillaBlurDemo />}
+            <p className="text-center text-sm text-muted-foreground -mt-12 mb-12">
+              <code>FormatOn.Blur</code> -{' '}
+              {variant === 'minimal'
+                ? 'minimal integration; the caret floats during the focus-strip morph.'
+                : 'polished variant that hides the caret during the focus-strip morph.'}
+            </p>
+
+            {variant === 'polished' && (
+              <>
+                <p>
+                  <strong>Hiding the caret during the focus-strip morph.</strong>{' '}
+                  With <code>FormatOn.Blur</code>, focusing the input swaps{' '}
+                  <code>1,234,567</code> to <code>1234567</code> in one DOM call. The caret jumps
+                  to its final index instantly, but Torph takes ~400ms to morph the visible digits
+                  there - making the caret look like it drifts past stationary text. Hide the native
+                  caret on focus and clear it on the next <code>onAnimationComplete</code>; a timeout
+                  fallback covers the case where focus fires but no morph follows (value already
+                  has no separators):
+                </p>
+
+                <CodeBlock language="ts">
+{`let postFocusMorphPending = false
+const updateCaret = (hidden: boolean) => {
+  host.classList.toggle('caret-suppressed', hidden)
+}
+
+const morph = new TextMorph({
+  element: display,
+  ease: { stiffness: 400, damping: 30 },
+  onAnimationComplete: () => {
+    if (postFocusMorphPending) {
+      postFocusMorphPending = false
+      updateCaret(false)
+    }
+  },
+})
+
+input.addEventListener('focus', () => {
+  postFocusMorphPending = true
+  updateCaret(true)
+  window.setTimeout(() => {
+    if (postFocusMorphPending) {
+      postFocusMorphPending = false
+      updateCaret(false)
+    }
+  }, 600)
+})`}
+                </CodeBlock>
+
+                <CodeBlock language="css">
+{`.numora-overlay-host input { caret-color: white; }
+.numora-overlay-host.caret-suppressed input { caret-color: transparent; }`}
+                </CodeBlock>
+
+                <p className="text-sm text-muted-foreground">
+                  The flag gates the toggle so per-keystroke morphs after the strip don't keep
+                  flipping the caret - only the first morph after focus matters.
+                </p>
+              </>
+            )}
+          </>
+        )}
+      </TorphBlurSection>
 
       <p className="text-sm text-muted-foreground">
         The demos above are rendered inside this React docs site, but the code below is plain TypeScript - no React.
@@ -149,19 +214,12 @@ function TorphIntegration() {
       <p>
         Both layers render the same formatted string. The vanilla <code>NumoraInput</code> class applies formatting in{' '}
         <code>beforeinput</code> via <code>setRangeText</code>, but only runs <code>onChange</code> (or your listeners) when
-        an <code>input</code> event follows — which is not guaranteed on every path. The bridge therefore syncs Torph via a{' '}
+        an <code>input</code> event follows - which is not guaranteed on every path. The bridge therefore syncs Torph via a{' '}
         <code>beforeinput</code> microtask (typing) and an <code>input</code> listener (undo/redo; paste, since Numora's paste
         handler dispatches a synthetic <code>input</code> after sanitizing). Each calls <code>morph.update(numora.value)</code>.
         Torph diffs old vs new and animates each digit / separator into place. The input itself never animates - but because its
         text is transparent, you only see the Torph layer.
       </p>
-
-      <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 my-4">
-        <p className="text-sm m-0">
-          <strong>Experimental pattern.</strong> This works well for short, append-mostly numeric fields. It has known caveats around
-          caret precision, mid-string editing, and mobile selection handles - documented below.
-        </p>
-      </div>
 
       <h2>Installation</h2>
       <CodeBlock language="bash">
@@ -170,7 +228,7 @@ function TorphIntegration() {
 npm install numora torph`}
       </CodeBlock>
 
-      <h2 id="pattern-1-overlay">Pattern 1 - Overlay (animated input surface)</h2>
+      <h2 id="overlay">Building the overlay</h2>
       <p>
         Two DOM nodes in a relative-positioned wrapper, one stylesheet, and a small sync bridge between the two libraries.
       </p>
@@ -213,10 +271,6 @@ npm install numora torph`}
   caret-color: white;
   outline: none;
   font: inherit;
-}
-
-.numora-overlay-host input::selection {
-  background: rgba(255, 255, 255, 0.25);
 }
 
 .numora-overlay-host input::placeholder {
@@ -268,70 +322,12 @@ input.addEventListener('beforeinput', scheduleMorphSync)
 input.addEventListener('input', syncMorph)`}
       </CodeBlock>
 
-      <h3>Why each part matters</h3>
+      <h3>Why each line matters</h3>
       <ul>
         <li><strong><code>display.textContent = ''</code></strong> - a placeholder text node (e.g. SSR <code>0</code>) is not an element child. Torph's <code>createTextGroup</code> only replaces element children, so it would append animated spans beside a stuck <code>0</code> instead of owning the span.</li>
-        <li><strong><code>formatOn: FormatOn.Change</code></strong> (used here) - keeps the input's display as the formatted string at all times. Numora applies that string in <code>beforeinput</code>, so mirror it with a <code>beforeinput</code> microtask sync plus an <code>input</code> listener for undo/redo and paste. <code>FormatOn.Blur</code> also works, but the focus event silently strips separators (no <code>input</code> event fires for it) - to use Blur mode also bind a <code>focus</code> listener that calls <code>morph.update(numora.value)</code>.</li>
-        <li><strong><code>color: transparent</code> + <code>caret-color: white</code></strong> - hides the input's text but keeps the browser-rendered caret. The caret is the only thing the user sees from the real input.</li>
-        <li><strong><code>font: inherit</code> on the input</strong> - the caret position is computed from the input's text layout. If the wrapper and input use different font metrics, the caret drifts away from where the visible character renders.</li>
-        <li><strong><code>margin: 0; padding: 0; border: 0</code></strong> on the input - browser defaults shift the text origin. Zero padding aligns the input's text rendering with the overlay span's text rendering.</li>
-        <li><strong><code>::selection {'{ background: rgba(255, 255, 255, 0.25) }'}</code></strong> - the input's text is transparent, so a default opaque selection rect would obscure the morph layer below. A translucent selection lets the morph text show through while still signaling that text is selected.</li>
-        <li><strong><code>aria-hidden</code> on the display span</strong> - screen readers should announce the <code>&lt;input&gt;</code>, not the visible decoration.</li>
+        <li><strong><code>formatOn: FormatOn.Change</code></strong> (used here) - keeps the input's display as the formatted string at all times. Numora applies that string in <code>beforeinput</code>, so mirror it with a <code>beforeinput</code> microtask sync plus an <code>input</code> listener for undo/redo and paste. <code>FormatOn.Blur</code> also works, but the focus event silently strips separators - bind a <code>focus</code> listener that calls <code>morph.update(numora.value)</code> too.</li>
+        <li><strong>Match typography</strong> - <code>font: inherit</code> plus <code>margin: 0; padding: 0; border: 0</code> on the input. The caret is computed from the input's invisible text layout, so any difference in font metrics or text origin shows up as caret drift.</li>
       </ul>
-
-      <h2>Caveats</h2>
-
-      <div className="bg-muted/50 border border-border rounded-lg p-4 my-4">
-        <p className="text-sm m-0">
-          <strong>Caret drift during animation.</strong> The caret's pixel position is computed from the input's invisible text layout,
-          which jumps to the new value instantly. Torph animates characters into that final position over ~150ms. Mid-flight, the caret
-          briefly floats next to characters that haven't arrived yet. With a high-stiffness spring it's barely noticeable; with slow
-          easings it becomes obvious.
-        </p>
-      </div>
-
-      <div className="bg-muted/50 border border-border rounded-lg p-4 my-4">
-        <p className="text-sm m-0">
-          <strong>Mid-string editing is limited.</strong> Clicking the overlay doesn't always position the caret on the visually-correct
-          character - the browser's hit-test runs against the input's invisible text and the overlay's character widths can diverge
-          during animations. For append-only fields this doesn't matter; for fields where users edit mid-number, this pattern isn't a fit.
-        </p>
-      </div>
-
-      <div className="bg-muted/50 border border-border rounded-lg p-4 my-4">
-        <p className="text-sm m-0">
-          <strong>Mobile selection handles.</strong> iOS draws magnifier loupes and selection handles anchored to the input's text. With
-          the text invisible, the loupe shows transparent characters. Test on real devices before shipping.
-        </p>
-      </div>
-
-      <h2>Pattern 2 - Morph a value the user can't edit</h2>
-      <p>
-        For values not bound to an editable input (live prices, balances, oracle feeds), format with{' '}
-        <code>formatValueForDisplay</code> and call <code>morph.update()</code> when the source changes:
-      </p>
-
-      <CodeBlock language="ts">
-{`import { formatValueForDisplay, ThousandStyle } from 'numora'
-import { TextMorph } from 'torph'
-
-const displayEl = document.getElementById('balance')!
-const morph = new TextMorph({
-  element: displayEl,
-  ease: { stiffness: 180, damping: 18 },
-})
-
-function setBalance(rawValue: string) {
-  const formatted = formatValueForDisplay(rawValue, {
-    thousandSeparator: ',',
-    decimalSeparator: '.',
-    thousandStyle: ThousandStyle.Thousand,
-  })
-  morph.update(formatted)
-}
-
-priceFeed.on('update', (raw) => setBalance(raw))`}
-      </CodeBlock>
 
       <h2>Reducing motion</h2>
       <p>
@@ -372,10 +368,6 @@ input.remove()`}
         <li>
           <strong>Match typography.</strong> Use <code>font: inherit</code> on the input so wrapper and input share font metrics. Set{' '}
           <code>margin: 0; padding: 0; border: 0</code> on the input so its text origin aligns with the overlay span.
-        </li>
-        <li>
-          <strong>Not a free upgrade.</strong> The overlay trades caret precision and mid-string editing fidelity for an animated surface.
-          For append-only inputs the trade is reasonable; for general numeric fields, weigh the caveats above against the visual payoff.
         </li>
       </ul>
 

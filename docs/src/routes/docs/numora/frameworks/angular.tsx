@@ -293,7 +293,7 @@ export class AmountFormComponent {
         <code>TextMorph</code> on top of a transparent-text <code>NumoraInput</code>. The input owns the
         keyboard, undo and IME; Torph animates the visible characters. The{' '}
         <Link to="/docs/numora/integrations/torph">vanilla overlay guide</Link> covers the pattern in
-        depth — below is the idiomatic Angular standalone component.
+        depth - below is the idiomatic Angular standalone component.
       </p>
 
       <CodeBlock language="bash">
@@ -385,7 +385,7 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
       </CodeBlock>
 
       <p className="text-sm text-muted-foreground">
-        Note <code>encapsulation: ViewEncapsulation.None</code> — Numora creates the{' '}
+        Note <code>encapsulation: ViewEncapsulation.None</code> - Numora creates the{' '}
         <code>&lt;input&gt;</code> at runtime, so Angular&apos;s default shadow-DOM-style attribute
         scoping can&apos;t reach it. The <code>beforeinput</code> microtask + <code>input</code>{' '}
         listener combination keeps Torph in sync across typing, paste, undo and redo. Torph respects{' '}
