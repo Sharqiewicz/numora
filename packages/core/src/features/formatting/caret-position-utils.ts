@@ -1,6 +1,6 @@
 /**
- * Utility functions for setting and managing caret position.
- * Includes mobile browser workarounds and retry mechanisms.
+ * Pure caret-position math: where the caret should land after a value change, and
+ * helpers for the focus-strip path. DOM writes live in `./dom-writes.ts`.
  */
 
 import {
@@ -12,70 +12,51 @@ import {
   type CursorPositionOptions,
 } from './cursor-position';
 import { getCaretBoundary } from './cursor-boundary';
+import { removeThousandSeparators } from '@/features/sanitization';
 import {ThousandStyle, FormatOn} from '@/types';
 import type { FormattingOptions, CaretPositionInfo, Separators } from '@/types';
 
 /**
- * Sets the caret position in an input element.
- * Includes workaround for Chrome/Safari mobile browser bugs.
- *
- * @param el - The input element
- * @param caretPos - The desired caret position
+ * Result of computing a focus-strip: the raw value with separators removed and the
+ * caret positions mapped from the formatted display indices to the raw indices.
  */
-export function setCaretPosition(el: HTMLInputElement, caretPos: number): void {
-  // Self-assign forces Chrome/Safari to clear any text selection before we set the caret;
-  // without it, an existing selection interferes with setSelectionRange.
-  // biome-ignore lint/correctness/noSelfAssign: required to clear selection in WebKit
-  el.value = el.value;
-  const { scrollX, scrollY } = window;
-  el.focus({ preventScroll: true });
-  el.setSelectionRange(caretPos, caretPos);
-  window.scrollTo(scrollX, scrollY);
+export interface StripSeparatorsResult {
+  raw: string;
+  rawStart: number;
+  rawEnd: number;
 }
 
 /**
- * Sets caret position with retry mechanism for mobile browsers.
- * Mobile Chrome sometimes resets the caret position after we set it,
- * so we retry after a short timeout.
+ * Pure compute for the focus-strip path: takes the current formatted value plus the
+ * user's display caret/selection, returns the stripped value and the equivalent caret
+ * positions in the raw value. Returns `null` when no strip is needed (the value already
+ * contains no separators).
  *
- * @param el - The input element
- * @param caretPos - The desired caret position
- * @param currentValue - The current input value (for validation)
- * @returns Timeout ID that can be cleared if needed
- */
-export function setCaretPositionWithRetry(
-  el: HTMLInputElement,
-  caretPos: number,
-  currentValue: string
-): ReturnType<typeof setTimeout> | null {
-  // Don't reset caret position when the whole input is selected
-  if (el.selectionStart === 0 && el.selectionEnd === el.value.length) {
-    return null;
-  }
-
-  // Set immediately (for normal browsers, avoids flickering)
-  setCaretPosition(el, caretPos);
-
-  // Mobile Chrome resets the caret after setSelectionRange returns; retry on next tick.
-  const timeoutId = setTimeout(() => {
-    if (el.value === currentValue && el.selectionStart !== caretPos) {
-      setCaretPosition(el, caretPos);
-    }
-  }, 0);
-
-  return timeoutId;
-}
-
-/**
- * Gets the current caret position from an input element.
- * Uses max of selectionStart and selectionEnd to handle mobile browser quirks.
+ * The mapping rule: the new caret index equals the count of non-separator characters
+ * in the formatted prefix up to the display caret. The transformation is bijective on
+ * digits, so this exactly preserves which digit the user clicked on.
  *
- * @param el - The input element
- * @returns The current caret position
+ * Does NOT mutate the DOM. Callers own the write and any internal-write/broadcast wrapping.
+ *
+ * @param currentValue - The current (formatted) input value
+ * @param displayStart - selectionStart in the formatted value
+ * @param displayEnd - selectionEnd in the formatted value
+ * @param separator - The thousand separator character to strip
+ * @returns Strip result, or null if no separators present
  */
-export function getInputCaretPosition(el: HTMLInputElement): number {
-  // Max of selectionStart and selectionEnd is taken for mobile device caret bug fix
-  return Math.max(el.selectionStart as number, el.selectionEnd as number);
+export function computeStripSeparatorsResult(
+  currentValue: string,
+  displayStart: number,
+  displayEnd: number,
+  separator: string,
+): StripSeparatorsResult | null {
+  const raw = removeThousandSeparators(currentValue, separator);
+  if (raw === currentValue) return null;
+  return {
+    raw,
+    rawStart: removeThousandSeparators(currentValue.slice(0, displayStart), separator).length,
+    rawEnd: removeThousandSeparators(currentValue.slice(0, displayEnd), separator).length,
+  };
 }
 
 /**
@@ -119,26 +100,19 @@ export function skipOverThousandSeparatorOnDelete(
 }
 
 /**
- * Updates cursor position after value changes, handling both formatted and unformatted values.
- *
- * @param target - The input element
- * @param oldValue - The value before the change
- * @param newValue - The value after the change
- * @param oldCursorPosition - The cursor position before the change
- * @param caretPositionBeforeChange - Optional caret position info from keydown handler
- * @param separators - Separator configuration
- * @param formattingOptions - Optional formatting options
+ * Pure compute version of cursor-position resolution. Returns the cursor position the
+ * caret should land at after a value change, or null when the inputs don't provide enough
+ * signal to compute one. Does NOT mutate the DOM. Callers own the setSelectionRange call.
  */
-export function updateCursorPosition(
-  target: HTMLInputElement,
+export function computeCursorPosition(
   oldValue: string,
   newValue: string,
   oldCursorPosition: number,
   caretPositionBeforeChange: CaretPositionInfo | undefined,
   separators: Separators,
   formattingOptions?: FormattingOptions
-): void {
-  if (!caretPositionBeforeChange) return;
+): number | null {
+  if (!caretPositionBeforeChange) return null;
 
   const { selectionStart = 0, selectionEnd = 0, endOffset = 0 } = caretPositionBeforeChange;
 
@@ -152,7 +126,7 @@ export function updateCursorPosition(
     changeRange = findChangeRange(oldValue, newValue);
   }
 
-  if (!changeRange) return;
+  if (!changeRange) return null;
 
   const boundary = getCaretBoundary(newValue, {
     thousandSeparator: formattingOptions?.thousandSeparator ?? separators.thousandSeparator,
@@ -173,7 +147,7 @@ export function updateCursorPosition(
   const thousandSeparator = formattingOptions?.thousandSeparator ?? separators.thousandSeparator ?? ',';
   const thousandStyle = formattingOptions?.thousandStyle ?? ThousandStyle.None;
 
-  const newCursorPosition = calculateCursorPositionAfterFormatting(
+  return calculateCursorPositionAfterFormatting(
     oldValue,
     newValue,
     oldCursorPosition,
@@ -183,7 +157,6 @@ export function updateCursorPosition(
     separators.decimalSeparator,
     cursorOptions
   );
-
-  setCaretPositionWithRetry(target, newCursorPosition, newValue);
 }
+
 

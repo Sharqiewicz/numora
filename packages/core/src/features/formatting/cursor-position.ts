@@ -67,7 +67,7 @@ import { getCaretPosInBoundary } from './cursor-boundary';
  * Type for character equivalence checking.
  * Returns true if two characters should be considered equivalent for cursor mapping.
  */
-export type IsCharacterEquivalent = (
+type IsCharacterEquivalent = (
   char1: string,
   char2: string,
   context: {
@@ -79,7 +79,7 @@ export type IsCharacterEquivalent = (
   }
 ) => boolean;
 
-export const defaultIsCharacterEquivalent: IsCharacterEquivalent = (char1, char2) => char1 === char2;
+const defaultIsCharacterEquivalent: IsCharacterEquivalent = (char1, char2) => char1 === char2;
 
 /**
  * Options for cursor position calculation.
