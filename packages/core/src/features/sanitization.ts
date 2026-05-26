@@ -3,9 +3,12 @@ import { removeNonNumericCharacters } from './non-numeric-characters';
 import { expandScientificNotation } from './scientific-notation';
 import { expandCompactNotation } from './compact-notation';
 import { removeLeadingZeros } from './leading-zeros';
+import { prependLeadingZero } from './prepend-leading-zero';
+import { truncateToMaxLength } from './max-length';
 import { filterMobileKeyboardArtifacts } from './mobile-keyboard-filtering';
 import { normalizeFullWidthDigits } from './fullwidth-digits';
-import { getCachedSeparatorRegex } from '../utils/regex-cache';
+import { getCachedRegex } from '../utils/regex-cache';
+import { escapeRegExp } from '../utils/escape-reg-exp';
 import type { FormattingOptions } from '@/types';
 
 /**
@@ -17,8 +20,7 @@ import type { FormattingOptions } from '@/types';
  * @returns The string with all thousand separators removed
  */
 export function removeThousandSeparators(value: string, thousandSeparator: string): string {
-  const regex = getCachedSeparatorRegex(thousandSeparator);
-  return value.replace(regex, '');
+  return value.replace(getCachedRegex(escapeRegExp(thousandSeparator)), '');
 }
 
 /**
@@ -31,6 +33,8 @@ export function removeThousandSeparators(value: string, thousandSeparator: strin
  * 5. Removing non-numeric characters
  * 6. Removing extra decimal points
  * 7. (Optional) Removing leading zeros
+ * 8. (Optional) Prepend `0` before a bare leading decimal separator (.5 → 0.5)
+ * 9. (Optional) Truncate raw to `maxLength` characters
  *
  * Note: Decimal separator conversion (comma ↔ dot) is handled in the beforeinput event
  * (handleOnBeforeInputNumoraInput), not here, to avoid converting thousand separators.
@@ -67,6 +71,18 @@ export const sanitizeNumoraInput = (
 
   if (!formattingOptions?.enableLeadingZeros) {
     sanitized = removeLeadingZeros(sanitized);
+  }
+
+  if (formattingOptions?.autoAddLeadingZero) {
+    sanitized = prependLeadingZero(sanitized, formattingOptions?.decimalSeparator);
+  }
+
+  if (formattingOptions?.maxLength !== undefined) {
+    sanitized = truncateToMaxLength(
+      sanitized,
+      formattingOptions.maxLength,
+      formattingOptions?.decimalSeparator
+    );
   }
 
   return sanitized;
