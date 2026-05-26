@@ -3,7 +3,7 @@ import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { createRef, useState } from 'react';
 import { Controller, useController, useForm } from 'react-hook-form';
 import { NumoraInput, type NumoraHTMLInputElement, type NumoraInputChangeEvent } from '../src/index';
-import { FormatOn } from 'numora';
+import { FormatOn, ThousandStyle } from 'numora';
 
 // ---------------------------------------------------------------------------
 // Helpers - simulate the real browser beforeinput → input event sequence.
@@ -20,10 +20,10 @@ function simulateTyping(el: HTMLInputElement, char: string): void {
   });
   el.dispatchEvent(beforeInput);
 
-  if (beforeInput.defaultPrevented) {
-    el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
-    return;
-  }
+  // Real browsers do NOT fire `input` after a preventDefault'd `beforeinput`. The
+  // production handler calls setRangeText (which dispatches `input` synchronously) and
+  // invokes onChange itself, so a synthetic `input` here would cause a double-fire.
+  if (beforeInput.defaultPrevented) return;
 
   const start = el.selectionStart ?? el.value.length;
   const end = el.selectionEnd ?? start;
@@ -85,17 +85,20 @@ describe('NumoraInput', () => {
       expect((screen.getByTestId('input') as HTMLInputElement).value).toBe('9,876');
     });
 
-    it('does not add thousand separators on initial mount in Blur mode', () => {
+    it('formats initial defaultValue with thousand separators in Blur mode (unfocused mount)', () => {
       render(
         <NumoraInput
           data-testid="input"
-          defaultValue="1234"
+          defaultValue="1234567"
           thousandSeparator=","
+          thousandStyle={ThousandStyle.Thousand}
           formatOn={FormatOn.Blur}
         />
       );
-      // In Blur mode separators are added on blur, not on initial render
-      expect((screen.getByTestId('input') as HTMLInputElement).value).toBe('1234');
+      // Initial mount is unfocused, so Blur mode shows separators. Stripping only happens
+      // on focus — without separators on mount, the first focus has nothing to strip
+      // and overlay integrations (Torph etc.) never receive an onChange sync.
+      expect((screen.getByTestId('input') as HTMLInputElement).value).toBe('1,234,567');
     });
 
     it('forwards className and other HTML attributes', () => {
@@ -266,6 +269,76 @@ describe('NumoraInput', () => {
       expect(input.value).toBe('1234');
     });
 
+    it('maps the click caret to its raw equivalent on focus-strip', () => {
+      render(
+        <NumoraInput
+          data-testid="input"
+          thousandSeparator=","
+          thousandStyle={ThousandStyle.Thousand}
+          formatOn={FormatOn.Blur}
+          defaultValue="1234567"
+        />
+      );
+      const input = screen.getByTestId('input') as HTMLInputElement;
+      fireEvent.blur(input);
+      expect(input.value).toBe('1,234,567');
+
+      // Simulate clicking between `2` and `3` (display pos 3) then focusing
+      input.setSelectionRange(3, 3);
+      fireEvent.focus(input);
+
+      expect(input.value).toBe('1234567');
+      // Should land between `2` and `3` in raw (pos 2), not between `3` and `4` (pos 3)
+      expect(input.selectionStart).toBe(2);
+      expect(input.selectionEnd).toBe(2);
+    });
+
+    it('maps click between thousand separator and digit correctly', () => {
+      render(
+        <NumoraInput
+          data-testid="input"
+          thousandSeparator=","
+          thousandStyle={ThousandStyle.Thousand}
+          formatOn={FormatOn.Blur}
+          defaultValue="1234567"
+        />
+      );
+      const input = screen.getByTestId('input') as HTMLInputElement;
+      fireEvent.blur(input);
+      expect(input.value).toBe('1,234,567');
+
+      // Click between `4` and `,` (display pos 5)
+      input.setSelectionRange(5, 5);
+      fireEvent.focus(input);
+
+      expect(input.value).toBe('1234567');
+      // Should land after `4` in raw (pos 4)
+      expect(input.selectionStart).toBe(4);
+    });
+
+    it('preserves a select-all range across focus-strip', () => {
+      render(
+        <NumoraInput
+          data-testid="input"
+          thousandSeparator=","
+          thousandStyle={ThousandStyle.Thousand}
+          formatOn={FormatOn.Blur}
+          defaultValue="1234567"
+        />
+      );
+      const input = screen.getByTestId('input') as HTMLInputElement;
+      fireEvent.blur(input);
+      expect(input.value).toBe('1,234,567');
+
+      // Tab-focus typically select-alls
+      input.setSelectionRange(0, input.value.length);
+      fireEvent.focus(input);
+
+      expect(input.value).toBe('1234567');
+      expect(input.selectionStart).toBe(0);
+      expect(input.selectionEnd).toBe(7);
+    });
+
     it('does not call onChange on blur in Change mode', () => {
       const onChange = vi.fn();
       render(
@@ -316,6 +389,159 @@ describe('NumoraInput', () => {
       // Should be truncated to at most 2 decimal places
       expect(parseFloat(val)).toBeCloseTo(1.99, 2);
       expect(val.replace(/^\d+\./, '').length).toBeLessThanOrEqual(2);
+    });
+  });
+
+  describe('autoAddLeadingZero', () => {
+    it('prepends 0 before a bare leading decimal on typing', async () => {
+      render(
+        <NumoraInput
+          data-testid="input"
+          autoAddLeadingZero
+          formatOn={FormatOn.Change}
+        />
+      );
+      const input = screen.getByTestId('input') as HTMLInputElement;
+
+      await act(async () => {
+        simulateTyping(input, '.');
+        simulateTyping(input, '5');
+      });
+
+      expect(input.value).toBe('0.5');
+    });
+
+    it('leaves leading dot alone when option is off', async () => {
+      render(<NumoraInput data-testid="input" formatOn={FormatOn.Change} />);
+      const input = screen.getByTestId('input') as HTMLInputElement;
+
+      await act(async () => {
+        simulateTyping(input, '.');
+        simulateTyping(input, '5');
+      });
+
+      expect(input.value).toBe('.5');
+    });
+  });
+
+  describe('maxLength', () => {
+    it('rejects keystrokes that would push raw length past the cap', async () => {
+      render(
+        <NumoraInput
+          data-testid="input"
+          maxLength={5}
+          thousandSeparator=","
+          formatOn={FormatOn.Change}
+        />
+      );
+      const input = screen.getByTestId('input') as HTMLInputElement;
+
+      await act(async () => {
+        for (const c of '123456789') simulateTyping(input, c);
+      });
+
+      // Display has separator; raw is exactly 5 digits (not counted toward maxLength).
+      expect(input.value).toBe('12,345');
+    });
+
+    it('truncates pasted value that exceeds the cap', () => {
+      const onChange = vi.fn();
+      render(
+        <NumoraInput
+          data-testid="input"
+          maxLength={5}
+          thousandSeparator=","
+          onChange={onChange}
+          formatOn={FormatOn.Change}
+        />
+      );
+      const input = screen.getByTestId('input') as HTMLInputElement;
+
+      act(() => simulatePaste(input, '1234567890'));
+
+      const event: NumoraInputChangeEvent = onChange.mock.calls.at(-1)![0];
+      expect(event.target.value).toBe('12345');
+      expect(input.value).toBe('12,345');
+    });
+
+    it('does not set the native HTML maxLength attribute', () => {
+      render(<NumoraInput data-testid="input" maxLength={5} />);
+      const input = screen.getByTestId('input') as HTMLInputElement;
+      // Native maxLength reflects -1 (unset) so the browser does not double-count separators.
+      expect(input.maxLength).toBe(-1);
+    });
+  });
+
+  describe('isAllowed', () => {
+    it('rejects keystroke when validator returns false', async () => {
+      // Forbid any raw value greater than 100.
+      const isAllowed = (raw: string) => raw === '' || Number(raw) <= 100;
+      const onChange = vi.fn();
+      render(
+        <NumoraInput
+          data-testid="input"
+          isAllowed={isAllowed}
+          onChange={onChange}
+          formatOn={FormatOn.Change}
+        />
+      );
+      const input = screen.getByTestId('input') as HTMLInputElement;
+
+      await act(async () => {
+        simulateTyping(input, '9');
+        simulateTyping(input, '9');
+        // 999 > 100 → rejected
+        simulateTyping(input, '9');
+      });
+
+      expect(input.value).toBe('99');
+      // No onChange for the rejected 3rd keystroke (only first two fired).
+      expect(onChange).toHaveBeenCalledTimes(2);
+    });
+
+    it('rejects paste when validator returns false', () => {
+      const isAllowed = (raw: string) => raw === '' || Number(raw) <= 100;
+      const onChange = vi.fn();
+      render(
+        <NumoraInput
+          data-testid="input"
+          isAllowed={isAllowed}
+          onChange={onChange}
+        />
+      );
+      const input = screen.getByTestId('input') as HTMLInputElement;
+
+      act(() => simulatePaste(input, '500'));
+
+      // Rejected → no value change, no onChange fired.
+      expect(input.value).toBe('');
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('receives the post-sanitization raw value', async () => {
+      const seen: string[] = [];
+      render(
+        <NumoraInput
+          data-testid="input"
+          isAllowed={(raw) => {
+            seen.push(raw);
+            return true;
+          }}
+          thousandSeparator=","
+          formatOn={FormatOn.Change}
+        />
+      );
+      const input = screen.getByTestId('input') as HTMLInputElement;
+
+      await act(async () => {
+        simulateTyping(input, '1');
+        simulateTyping(input, '2');
+        simulateTyping(input, '3');
+        simulateTyping(input, '4');
+      });
+
+      // Last call must see the raw "1234" without the comma.
+      expect(seen.at(-1)).toBe('1234');
     });
   });
 });
