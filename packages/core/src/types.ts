@@ -45,9 +45,30 @@ export interface FormattingOptions {
     enableCompactNotation?: boolean;
     enableNegative?: boolean;
     enableLeadingZeros?: boolean;
+    /**
+     * When true, a bare leading decimal separator gets a `0` prepended (`.5` → `0.5`,
+     * `-.5` → `-0.5`). Useful for currency-style fields where leading-decimal entry is
+     * common but `0.` form is the canonical representation.
+     */
+    autoAddLeadingZero?: boolean;
     decimalSeparator?: string;
     decimalMaxLength?: number;
     decimalMinLength?: number;
+    /**
+     * Maximum length of the raw (unformatted) value. Counts digits, the decimal separator,
+     * and a leading `-`. Thousand separators are NOT counted. Applied at the end of the
+     * sanitization pipeline and enforced at keystroke time so the user cannot type past it.
+     *
+     * Do not also pass `maxLength` as a native HTML attribute - that one counts formatted
+     * characters (commas included) and would double-count.
+     */
+    maxLength?: number;
+    /**
+     * Custom keystroke/paste validator. Called with the post-sanitization raw value the
+     * input would have after the user's action. Return false to reject the edit (no value
+     * change, no onChange fires, undo history is untouched).
+     */
+    isAllowed?: (rawValue: string) => boolean;
     rawValueMode?: boolean;
 }
 

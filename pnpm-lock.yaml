@@ -98,6 +98,9 @@ importers:
       motion:
         specifier: ^12.23.26
         version: 12.35.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      number-flow:
+        specifier: ^0.6.0
+        version: 0.6.0
       numora:
         specifier: workspace:^
         version: link:../packages/core
