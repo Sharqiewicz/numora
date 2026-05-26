@@ -275,9 +275,11 @@ describe('Paste handler sanitization cases', () => {
         },
       } as unknown as ClipboardEvent;
 
-      const { formatted } = handleOnPasteNumoraInput(mockEvent, decimalMaxLength);
-      expect(formatted).toBe(expected);
-      expect(mockInputElement.value).toBe(expected);
+      const result = handleOnPasteNumoraInput(mockEvent, decimalMaxLength);
+      expect(result.type).toBe('handled');
+      if (result.type === 'handled') {
+        expect(result.formatted).toBe(expected);
+      }
     }
   );
 });
@@ -804,6 +806,59 @@ describe('focus/blur - FormatOn.Blur mode', () => {
     expect(el.value).toBe('1234567');
   });
 
+  it('focus maps the click caret from display to raw position', () => {
+    new NumoraInput(container, {
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    el.value = '1,234,567';
+    // Click between `2` and `3` (display pos 3)
+    el.setSelectionRange(3, 3);
+    el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+
+    expect(el.value).toBe('1234567');
+    // Should land between `2` and `3` in raw (pos 2), not between `3` and `4` (pos 3)
+    expect(el.selectionStart).toBe(2);
+    expect(el.selectionEnd).toBe(2);
+  });
+
+  it('focus maps a click just before a thousand separator to the digit boundary', () => {
+    new NumoraInput(container, {
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    el.value = '1,234,567';
+    // Click between `4` and `,` (display pos 5)
+    el.setSelectionRange(5, 5);
+    el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+
+    expect(el.value).toBe('1234567');
+    expect(el.selectionStart).toBe(4);
+  });
+
+  it('focus preserves a select-all range across the strip', () => {
+    new NumoraInput(container, {
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    el.value = '1,234,567';
+    el.setSelectionRange(0, el.value.length);
+    el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+
+    expect(el.value).toBe('1234567');
+    expect(el.selectionStart).toBe(0);
+    expect(el.selectionEnd).toBe(7);
+  });
+
   it('blur re-applies thousand separators and emits onChange', () => {
     new NumoraInput(container, {
       onChange: onChangeMock,
@@ -857,6 +912,104 @@ describe('focus/blur - FormatOn.Blur mode', () => {
 
     el.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
     expect(el.value).toBe('9,876');
+  });
+
+  // Mouse-driven focus: the browser commits the click→selection mapping AFTER `focus`
+  // fires, using the input's CURRENT value. If we strip in `focus`, the mapping runs
+  // against the shorter (stripped) string and lands +N positions too far right (N =
+  // separators before the click point). The fix defers the strip to `click`, which
+  // fires after the browser has finalised the caret position.
+  it('mousedown → focus does not strip (deferred to click)', () => {
+    new NumoraInput(container, {
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    el.value = '1,234,567';
+    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+
+    // Still formatted - strip is pending until click so the browser can map the
+    // click X-coord against the formatted layout.
+    expect(el.value).toBe('1,234,567');
+  });
+
+  it('click after mousedown strips separators and maps caret', () => {
+    new NumoraInput(container, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    el.value = '1,234,567';
+    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+    // Browser commits the click between `5` and `6` in the FORMATTED value (display pos 7).
+    el.setSelectionRange(7, 7);
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(el.value).toBe('1234567');
+    // Raw pos 5 → between `5` and `6`, not raw pos 7 which would be past the end.
+    expect(el.selectionStart).toBe(5);
+    expect(el.selectionEnd).toBe(5);
+    expect(onChangeMock).toHaveBeenCalledWith('1234567');
+  });
+
+  it('click without preceding mousedown is a no-op', () => {
+    new NumoraInput(container, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    el.value = '1,234,567';
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(el.value).toBe('1,234,567');
+    expect(onChangeMock).not.toHaveBeenCalled();
+  });
+
+  it('keyboard focus (no mousedown) still strips on focus', () => {
+    new NumoraInput(container, {
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    el.value = '1,234,567';
+    el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+
+    expect(el.value).toBe('1234567');
+  });
+
+  it('click strip clears the pending flag so a second click is a no-op', () => {
+    new NumoraInput(container, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Blur,
+      thousandSeparator: ',',
+      thousandStyle: ThousandStyle.Thousand,
+    });
+    const el = getInputElement();
+
+    el.value = '1,234,567';
+    el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+    el.setSelectionRange(3, 3);
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(el.value).toBe('1234567');
+    expect(onChangeMock).toHaveBeenCalledTimes(1);
+
+    // Synthetic spurious click - should not re-broadcast or alter the raw value.
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(onChangeMock).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -1083,9 +1236,10 @@ describe('Negative Number Support', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      handleOnPasteNumoraInput(mockEvent, 2, { enableNegative: true });
+      const result = handleOnPasteNumoraInput(mockEvent, 2, { enableNegative: true });
 
-      expect(inputElement.value).toBe('-123.45');
+      expect(result.type).toBe('handled');
+      if (result.type === 'handled') expect(result.formatted).toBe('-123.45');
     });
 
     it('should handle pasting negative numbers with invalid characters', () => {
@@ -1101,9 +1255,10 @@ describe('Negative Number Support', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      handleOnPasteNumoraInput(mockEvent, 2, { enableNegative: true });
+      const result = handleOnPasteNumoraInput(mockEvent, 2, { enableNegative: true });
 
-      expect(inputElement.value).toBe('-123.45');
+      expect(result.type).toBe('handled');
+      if (result.type === 'handled') expect(result.formatted).toBe('-123.45');
     });
   });
 
@@ -1350,9 +1505,10 @@ describe('Leading Zeros Support', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      handleOnPasteNumoraInput(mockEvent, 2, { enableLeadingZeros: true });
+      const result = handleOnPasteNumoraInput(mockEvent, 2, { enableLeadingZeros: true });
 
-      expect(inputElement.value).toBe('000123');
+      expect(result.type).toBe('handled');
+      if (result.type === 'handled') expect(result.formatted).toBe('000123');
     });
 
     it('should preserve leading zeros with formatting', () => {
@@ -1614,9 +1770,10 @@ describe('Scientific Notation Expansion', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      handleOnPasteNumoraInput(mockEvent, 8, {});
+      const result = handleOnPasteNumoraInput(mockEvent, 8, {});
 
-      expect(inputElement.value).toBe('0.00000015');
+      expect(result.type).toBe('handled');
+      if (result.type === 'handled') expect(result.formatted).toBe('0.00000015');
     });
   });
 });
@@ -2124,5 +2281,74 @@ describe('beforeinput - whole-line deletes', () => {
     dispatchDelete(el, 'deleteSoftLineBackward');
 
     expect(el.value).toBe('1256');
+  });
+});
+
+describe('Adopt existing <input> element', () => {
+  let host: HTMLInputElement;
+
+  beforeEach(() => {
+    host = document.createElement('input');
+    document.body.appendChild(host);
+  });
+
+  afterEach(() => {
+    if (host.parentNode) host.parentNode.removeChild(host);
+  });
+
+  it('adopts the passed input instead of creating a new one', () => {
+    const instance = new NumoraInput(host, {});
+    expect(instance.getElement()).toBe(host);
+  });
+
+  it('does not append a child input when the container is itself an input', () => {
+    new NumoraInput(host, {});
+    expect(host.querySelector('input')).toBeNull();
+  });
+
+  it('forces required attributes on an adopted input', () => {
+    host.setAttribute('type', 'number');
+    host.setAttribute('spellcheck', 'true');
+    host.setAttribute('autocomplete', 'on');
+
+    new NumoraInput(host, {});
+
+    expect(host.getAttribute('type')).toBe('text');
+    expect(host.getAttribute('inputmode')).toBe('decimal');
+    expect(host.getAttribute('spellcheck')).toBe('false');
+    expect(host.getAttribute('autocomplete')).toBe('off');
+  });
+
+  it('preserves pre-set value attribute on adopted input when no options.value is given', () => {
+    host.value = '1000';
+    new NumoraInput(host, { thousandStyle: ThousandStyle.Thousand, formatOn: FormatOn.Change });
+    expect(host.value).toBe('1,000');
+  });
+
+  it('preserves non-numora attributes set on the adopted input', () => {
+    host.setAttribute('placeholder', 'Amount');
+    host.setAttribute('aria-label', 'Price');
+
+    new NumoraInput(host, {});
+
+    expect(host.getAttribute('placeholder')).toBe('Amount');
+    expect(host.getAttribute('aria-label')).toBe('Price');
+  });
+
+  it('formats typed input correctly when attached to existing element', () => {
+    const onChangeMock = vi.fn();
+    new NumoraInput(host, {
+      onChange: onChangeMock,
+      formatOn: FormatOn.Change,
+      thousandStyle: ThousandStyle.Thousand,
+    });
+
+    host.focus();
+    simulateTyping(host, '1');
+    simulateTyping(host, '2');
+    simulateTyping(host, '3');
+    simulateTyping(host, '4');
+
+    expect(host.value).toBe('1,234');
   });
 });

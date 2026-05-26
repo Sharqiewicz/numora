@@ -1,30 +1,45 @@
 import { getSeparators } from '@/features/decimals';
+import { removeThousandSeparators } from '@/features/sanitization';
 import {
-  getInputCaretPosition,
-  updateCursorPosition,
+  computeCursorPosition,
   skipOverThousandSeparatorOnDelete,
 } from '@/features/formatting';
 import { type FormattingOptions, type CaretPositionInfo, FormatOn, InputType } from '@/types';
 import { formatInputValue } from './format-utils';
 
 /**
- * Handles the beforeinput event to format the value before it is applied to the DOM.
+ * Outcome of `handleOnBeforeInputNumoraInput`. Pure: the helper does not mutate the
+ * input or the event. The caller decides what to do based on the variant:
  *
- * Returns null for paste events so the dedicated paste handler can process them.
+ * - `handled`: caller should preventDefault, write `formatted` to the input via an
+ *   undo-preserving write, set caret to `cursorPos`, and notify listeners.
+ * - `reject`: caller should preventDefault. The input value is left untouched.
+ * - `skip`: caller should NOT preventDefault. Includes paste/drop (handled by the
+ *   dedicated paste listener) and any unrecognized inputType.
+ */
+export type BeforeInputResult =
+  | { type: 'handled'; formatted: string; raw: string; cursorPos: number }
+  | { type: 'reject' }
+  | { type: 'skip' };
+
+/**
+ * Computes the formatted value, raw value, and target cursor position for a
+ * `beforeinput` event without mutating the input or the event.
+ *
+ * Callers are responsible for `preventDefault()` and applying the result to the DOM.
  *
  * @param e - The InputEvent (beforeinput)
  * @param decimalMaxLength - The maximum number of decimal places allowed
  * @param formattingOptions - Optional formatting options
- * @returns Object with formatted and raw values, or null if the event should be handled natively
+ * @returns A tagged result describing what the caller should do
  */
 export function handleOnBeforeInputNumoraInput(
   e: InputEvent,
   decimalMaxLength: number,
   formattingOptions?: FormattingOptions
-): { formatted: string; raw: string } | null {
-  // Paste is handled by the dedicated paste event handler.
+): BeforeInputResult {
   if (e.inputType === InputType.InsertFromPaste || e.inputType === InputType.InsertFromDrop) {
-    return null;
+    return { type: 'skip' };
   }
 
   const target = e.target as HTMLInputElement;
@@ -35,26 +50,17 @@ export function handleOnBeforeInputNumoraInput(
 
   let inputData = e.data ?? '';
 
-  // Decimal separator handling: convert ',' or '.' to the configured separator and
-  // prevent duplicate separators - previously handled in keydown, now lives here so
-  // that undo history is preserved via the setRangeText path.
   if (e.inputType === InputType.InsertText && (e.data === ',' || e.data === '.')) {
     const decimalSep = separators.decimalSeparator;
-    // The part of the value outside the current selection (will remain after typing)
     const valueOutsideSelection = currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
     if (valueOutsideSelection.includes(decimalSep)) {
-      // Already has a decimal separator; block the insertion
-      e.preventDefault();
-      return null;
+      return { type: 'reject' };
     }
-    // Convert the typed character to the configured decimal separator
     inputData = decimalSep;
   }
 
-  // Preventive decimal-cap check: when inserting a digit into the fractional part and the
-  // fractional length would exceed decimalMaxLength, reject the keystroke. The post-hoc
-  // truncation in formatInputValue still works as a safety net for paste/scientific/compact
-  // expansion; this guard exists to avoid a brief overflow-then-trim flicker on plain typing.
+  // Preventive decimal-cap check: rejecting up front avoids a brief overflow-then-trim
+  // flicker. The post-hoc truncation in formatInputValue still covers paste/expansion paths.
   if (e.inputType === InputType.InsertText && /^\d$/.test(inputData)) {
     const decimalSep = separators.decimalSeparator;
     const decimalSepPos = currentValue.indexOf(decimalSep);
@@ -62,15 +68,19 @@ export function handleOnBeforeInputNumoraInput(
       const fractionalLength = currentValue.length - decimalSepPos - 1;
       const selectionLength = selectionEnd - selectionStart;
       if (fractionalLength - selectionLength + 1 > decimalMaxLength) {
-        e.preventDefault();
-        return null;
+        return { type: 'reject' };
       }
     }
   }
 
-  // Compute what the value would be after the browser applies the user's action.
+  // intendedValue: what the input would contain if we let the browser apply the action.
+  // intendedCursorPos: where the caret would land in intendedValue.
+  // endOffset: chars deleted forward from the cursor (only matters for Delete-forward
+  // family with no selection). Used downstream by findChangedRangeFromCaretPositions.
   let intendedValue: string;
   let intendedCursorPos: number;
+  let endOffset = 0;
+  const hasSelection = selectionStart !== selectionEnd;
 
   switch (e.inputType) {
     case InputType.InsertText: {
@@ -79,24 +89,17 @@ export function handleOnBeforeInputNumoraInput(
       break;
     }
     case InputType.DeleteContentBackward: {
-      if (selectionStart !== selectionEnd) {
-        intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
-        intendedCursorPos = selectionStart;
-      } else {
-        const deleteFrom = Math.max(0, selectionStart - 1);
-        intendedValue = currentValue.slice(0, deleteFrom) + currentValue.slice(selectionStart);
-        intendedCursorPos = deleteFrom;
-      }
+      const deleteFrom = hasSelection ? selectionStart : Math.max(0, selectionStart - 1);
+      const deleteTo = hasSelection ? selectionEnd : selectionStart;
+      intendedValue = currentValue.slice(0, deleteFrom) + currentValue.slice(deleteTo);
+      intendedCursorPos = deleteFrom;
       break;
     }
     case InputType.DeleteContentForward: {
-      if (selectionStart !== selectionEnd) {
-        intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
-        intendedCursorPos = selectionStart;
-      } else {
-        intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(selectionStart + 1);
-        intendedCursorPos = selectionStart;
-      }
+      const deleteTo = hasSelection ? selectionEnd : selectionStart + 1;
+      intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(deleteTo);
+      intendedCursorPos = selectionStart;
+      if (!hasSelection) endOffset = 1;
       break;
     }
     case InputType.DeleteByCut:
@@ -107,30 +110,36 @@ export function handleOnBeforeInputNumoraInput(
     }
     case InputType.DeleteSoftLineBackward:
     case InputType.DeleteHardLineBackward: {
-      // Cmd/Ctrl+Backspace: delete from line start to selectionEnd (or selection range).
-      const deleteFrom = selectionStart !== selectionEnd ? selectionStart : 0;
+      const deleteFrom = hasSelection ? selectionStart : 0;
       intendedValue = currentValue.slice(0, deleteFrom) + currentValue.slice(selectionEnd);
       intendedCursorPos = deleteFrom;
       break;
     }
     case InputType.DeleteSoftLineForward:
     case InputType.DeleteHardLineForward: {
-      // Cmd/Ctrl+Delete: delete from selectionStart to end of line (or selection range).
-      const deleteTo = selectionStart !== selectionEnd ? selectionEnd : currentValue.length;
+      const deleteTo = hasSelection ? selectionEnd : currentValue.length;
       intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(deleteTo);
       intendedCursorPos = selectionStart;
+      if (!hasSelection) endOffset = currentValue.length - selectionStart;
       break;
     }
     default:
-      // Unknown input type - let the browser handle it natively.
-      return null;
+      return { type: 'skip' };
   }
 
-  // Block the browser's raw insertion; we will apply the formatted value ourselves.
-  e.preventDefault();
+  if (
+    formattingOptions?.maxLength !== undefined &&
+    e.inputType === InputType.InsertText
+  ) {
+    const sep = formattingOptions.thousandSeparator;
+    const intendedRawLength = sep
+      ? removeThousandSeparators(intendedValue, sep).length
+      : intendedValue.length;
+    if (intendedRawLength > formattingOptions.maxLength) {
+      return { type: 'reject' };
+    }
+  }
 
-  // In 'change' mode, formatNumoraInput adds separators back, so we must remove them
-  // first to parse the number (same logic as handleOnChangeNumoraInput).
   const shouldRemoveThousandSeparators = formattingOptions?.formatOn === FormatOn.Change;
   const { formatted: newValue, raw: rawValue } = formatInputValue(
     intendedValue,
@@ -139,30 +148,18 @@ export function handleOnBeforeInputNumoraInput(
     shouldRemoveThousandSeparators
   );
 
-  // Apply the formatted value using setRangeText.
-  target.setRangeText(newValue, 0, currentValue.length, 'end');
-
-  // Build a synthetic caretPositionBeforeChange so updateCursorPosition can determine
-  // the changed range between intendedValue and newValue. endOffset = number of chars
-  // deleted forward from the cursor (the Delete-key path in findChangedRangeFromCaretPositions).
-  // Only relevant when there's no selection; the selection branch uses selectionEnd - selectionStart.
-  let endOffset = 0;
-  if (selectionStart === selectionEnd) {
-    if (e.inputType === InputType.DeleteContentForward) endOffset = 1;
-    else if (e.inputType === InputType.DeleteSoftLineForward || e.inputType === InputType.DeleteHardLineForward) {
-      endOffset = currentValue.length - selectionStart;
-    }
+  if (formattingOptions?.isAllowed && !formattingOptions.isAllowed(rawValue)) {
+    return { type: 'reject' };
   }
-  const syntheticCaretInfo: CaretPositionInfo = {
-    selectionStart,
-    selectionEnd,
-    endOffset,
-  };
 
-  // Restore the cursor to the correct position in the formatted string.
+  let cursorPos: number;
   if (intendedValue !== newValue) {
-    updateCursorPosition(
-      target,
+    const syntheticCaretInfo: CaretPositionInfo = {
+      selectionStart,
+      selectionEnd,
+      endOffset,
+    };
+    const computed = computeCursorPosition(
       intendedValue,
       newValue,
       intendedCursorPos,
@@ -170,107 +167,37 @@ export function handleOnBeforeInputNumoraInput(
       separators,
       formattingOptions
     );
+    cursorPos = computed ?? intendedCursorPos;
   } else {
-    target.setSelectionRange(intendedCursorPos, intendedCursorPos);
+    cursorPos = intendedCursorPos;
   }
 
-  return { formatted: newValue, raw: rawValue };
+  return { type: 'handled', formatted: newValue, raw: rawValue, cursorPos };
 }
 
 /**
- * Calculates the end offset for the caret position.
- * @param key - The key pressed.
- * @param selectionStart - The selection start position.
- * @param selectionEnd - The selection end position.
- * @returns The end offset.
- */
-function calculateEndOffset(key: string, selectionStart: number | null, selectionEnd: number | null) {
-  if (key === 'Backspace' || key === 'Delete') {
-
-    if (key === 'Delete' && selectionStart === selectionEnd) {
-      return {
-        endOffset: 1
-      };
-    }
-
-    return {
-      endOffset: 0
-    };
-
-  }
-}
-
-/**
- * Handles the keydown event to prevent the user from entering a second decimal point.
- * Also tracks selection info for Delete/Backspace keys to enable proper cursor positioning.
- * In 'change' mode with formatting, skips cursor over thousand separators on delete/backspace.
- *
- * @param e - The keyboard event triggered by the input.
- * @param formattingOptions - Optional formatting options for separator skipping
- * @returns Caret position info if Delete/Backspace was pressed, undefined otherwise
+ * Skips the cursor over thousand separators on Delete/Backspace and returns the caret
+ * info the change handler needs to disambiguate Delete-forward (`endOffset: 1`) from
+ * Backspace or non-deletion keys (`endOffset: 0`). Returns undefined for keys that
+ * aren't Delete/Backspace so the caller can null out the stored caret info.
  */
 export function handleOnKeyDownNumoraInput(
   e: KeyboardEvent,
   formattingOptions?: FormattingOptions
 ): CaretPositionInfo | undefined {
   const inputElement = e.target as HTMLInputElement;
-
   skipOverThousandSeparatorOnDelete(e, inputElement, formattingOptions);
 
-  return calculateEndOffset(e.key, inputElement.selectionStart, inputElement.selectionEnd);
+  if (e.key !== 'Backspace' && e.key !== 'Delete') return undefined;
+
+  const selectionStart = inputElement.selectionStart ?? 0;
+  const selectionEnd = inputElement.selectionEnd ?? 0;
+  return {
+    selectionStart,
+    selectionEnd,
+    endOffset: e.key === 'Delete' && selectionStart === selectionEnd ? 1 : 0,
+  };
 }
-
-/**
- * Handles the input change event to ensure the value does not exceed the maximum number of decimal places,
- * replaces commas with dots, and removes invalid non-numeric characters.
- * Also handles cursor positioning for Delete/Backspace keys.
- * Optionally formats with thousand separators in real-time if formatOn is 'change'.
- *
- * @param e - The event triggered by the input.
- * @param decimalMaxLength - The maximum number of decimal places allowed.
- * @param caretPositionBeforeChange - Optional caret position info from keydown handler
- * @param formattingOptions - Optional formatting options for real-time formatting
- * @returns Object with formatted value and raw value
- */
-export function handleOnChangeNumoraInput(
-  e: Event,
-  decimalMaxLength: number,
-  caretPositionBeforeChange?: CaretPositionInfo,
-  formattingOptions?: FormattingOptions
-): { formatted: string; raw: string } {
-  const target = e.target as HTMLInputElement;
-  const oldValue = target.value;
-  const oldCursorPosition = getInputCaretPosition(target);
-  const separators = getSeparators(formattingOptions);
-
-  // In 'change' mode, formatNumoraInput adds separators back, so we must remove them first to parse the number.
-  // In 'blur' mode, formatNumoraInput does nothing during typing, so removing separators would be unnecessary.
-  const shouldRemoveThousandSeparators = formattingOptions?.formatOn === FormatOn.Change;
-
-  const { formatted: newValue, raw: rawValue } = formatInputValue(
-    oldValue,
-    decimalMaxLength,
-    formattingOptions,
-    shouldRemoveThousandSeparators
-  );
-
-  target.value = newValue;
-
-  if (oldValue !== newValue) {
-    updateCursorPosition(
-      target,
-      oldValue,
-      newValue,
-      oldCursorPosition,
-      caretPositionBeforeChange,
-      separators,
-      formattingOptions
-    );
-  }
-
-  return { formatted: newValue, raw: rawValue };
-}
-
 
 /**
  * Calculates the cursor position after paste, accounting for the net change in value length.
@@ -291,14 +218,26 @@ function calculateCursorPositionAfterPaste(
   return selectionStart + clipboardDataLength + netLengthChange;
 }
 
+/**
+ * Outcome of `handleOnPasteNumoraInput`. The caller always calls preventDefault on the
+ * paste event; the variant says whether to apply a write or leave the input untouched.
+ *
+ * - `handled`: write `formatted` via an undo-preserving write, set caret to `cursorPos`.
+ * - `reject`: do nothing further (input is unchanged).
+ */
+export type PasteResult =
+  | { type: 'handled'; formatted: string; raw: string; cursorPos: number }
+  | { type: 'reject' };
+
+/**
+ * Computes the formatted value and cursor position for a paste event without mutating
+ * the input or the event. The caller owns `preventDefault()` and the DOM write.
+ */
 export function handleOnPasteNumoraInput(
   e: ClipboardEvent,
   decimalMaxLength: number,
   formattingOptions?: FormattingOptions
-): { formatted: string; raw: string } {
-  // Prevent default paste to handle it manually with sanitization, formatting, and proper cursor positioning.
-  e.preventDefault();
-
+): PasteResult {
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
 
@@ -306,8 +245,8 @@ export function handleOnPasteNumoraInput(
   const combinedValue =
     value.slice(0, selectionStart || 0) + clipboardData + value.slice(selectionEnd || 0);
 
-  // Always remove thousand separators during paste: pasted content may contain separators, current value may
-  // have separators (blur mode), and we need to parse the combined value correctly.
+  // Always strip thousand separators during paste: pasted content may contain separators
+  // and the current value may have separators (blur mode); both need to be parsed together.
   const { formatted: formattedValue, raw: rawValue } = formatInputValue(
     combinedValue,
     decimalMaxLength,
@@ -315,7 +254,9 @@ export function handleOnPasteNumoraInput(
     true
   );
 
-  inputElement.value = formattedValue;
+  if (formattingOptions?.isAllowed && !formattingOptions.isAllowed(rawValue)) {
+    return { type: 'reject' };
+  }
 
   const newCursorPosition = calculateCursorPositionAfterPaste(
     selectionStart || 0,
@@ -324,7 +265,5 @@ export function handleOnPasteNumoraInput(
     formattedValue.length
   );
 
-  inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
-
-  return { formatted: formattedValue, raw: rawValue };
+  return { type: 'handled', formatted: formattedValue, raw: rawValue, cursorPos: newCursorPosition };
 }
