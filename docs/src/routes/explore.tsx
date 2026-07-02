@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import LightRays from '@/components/LightRays';
+import LightRays from '@/components/LightRaysDeferred';
 import { Socials } from '@/components/socials';
 import {
   ExploreHero,
