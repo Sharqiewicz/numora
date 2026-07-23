@@ -37,15 +37,15 @@ function Decimals() {
           title="Max decimal places"
           description="Try typing more than 2 decimal places - extra digits are truncated"
           language="tsx"
-          code={`<NumoraInput maxDecimals={2} />`}
-          config={{ maxDecimals: 2 }}
+          code={`<NumoraInput decimalMaxLength={2} />`}
+          config={{ decimalMaxLength: 2 }}
         />
         <ExampleWithDemo
           title="Min decimal places"
           description={'Type "1" and blur - it becomes "1.00"'}
           language="tsx"
-          code={`<NumoraInput decimalMinLength={2} maxDecimals={18} />`}
-          config={{ decimalMinLength: 2, maxDecimals: 18 }}
+          code={`<NumoraInput decimalMinLength={2} decimalMaxLength={18} />`}
+          config={{ decimalMinLength: 2, decimalMaxLength: 18 }}
         />
       </div>
 

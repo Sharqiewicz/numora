@@ -46,7 +46,7 @@ const JSON_LD = [
         name: 'How do I add thousand separators to a number input in Svelte?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Pass thousandStyle: ThousandStyle.Thousand to the use:numora action. Numora formats as the user types, repositions the caret through the inserted comma, and emits the raw separator-free string from onChange so your Svelte store stays clean.',
+          text: 'Pass groupingStyle: GroupingStyle.Thousand to the use:numora action. Numora formats as the user types, repositions the caret through the inserted comma, and emits the raw separator-free string from onChange so your Svelte store stays clean.',
         },
       },
       {
@@ -148,7 +148,7 @@ export function numora(node: HTMLInputElement, options: NumoraInputOptions) {
       </p>
       <CodeBlock language="ts">
 {`import { numora } from '$lib/numora';
-import { ThousandStyle } from 'numora';
+import { GroupingStyle } from 'numora';
 
 let value = $state('');`}
       </CodeBlock>
@@ -159,7 +159,7 @@ let value = $state('');`}
   Amount
   <input
     use:numora={{
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
       decimalMaxLength: 2,
       onChange: (v) => (value = v),
     }}
@@ -200,7 +200,7 @@ let value = $state('');`}
         Script block (inside <code>&lt;script lang=&quot;ts&quot;&gt;</code>):
       </p>
       <CodeBlock language="ts">
-{`import { NumoraInput, FormatOn, ThousandStyle, type NumoraInputOptions } from 'numora';
+{`import { NumoraInput, FormatOn, GroupingStyle, type NumoraInputOptions } from 'numora';
 import { TextMorph } from 'torph';
 
 // Action: mounts NumoraInput + TextMorph in the same wrapper and bridges them.
@@ -213,7 +213,7 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
 
   const numora = new NumoraInput(host, {
     formatOn: FormatOn.Change,
-    thousandStyle: ThousandStyle.Thousand,
+    groupingStyle: GroupingStyle.Thousand,
     ...options,
   });
   const input = numora.getElement();
@@ -302,7 +302,7 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
 
       <h3>How do I add thousand separators to a Svelte number input?</h3>
       <p>
-        Pass <code>thousandStyle: ThousandStyle.Thousand</code> to the <code>use:numora</code> action.
+        Pass <code>groupingStyle: GroupingStyle.Thousand</code> to the <code>use:numora</code> action.
         Numora formats as the user types, repositions the caret through the inserted comma, and emits the
         raw separator-free string from <code>onChange</code> - safe to feed straight into a store or form
         library.

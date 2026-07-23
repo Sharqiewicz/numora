@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FormatOn, ThousandStyle } from 'numora'
+import { FormatOn, GroupingStyle } from 'numora'
 import {
   type NumoraHTMLInputElement,
   NumoraInput,
@@ -25,8 +25,8 @@ export function ValueReadout() {
         <NumoraInput
           formatOn={FormatOn.Change}
           thousandSeparator=","
-          thousandStyle={ThousandStyle.Thousand}
-          maxDecimals={2}
+          groupingStyle={GroupingStyle.Thousand}
+          decimalMaxLength={2}
           enableCompactNotation
           onChange={handleChange}
           placeholder="Try 1234567.89 or 2.5k…"

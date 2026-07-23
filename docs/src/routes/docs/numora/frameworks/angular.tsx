@@ -45,7 +45,7 @@ const JSON_LD = [
         name: 'How do I add thousand separators to an Angular number input?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Pass thousandStyle: ThousandStyle.Thousand through the directive\'s @Input. Numora formats as the user types, repositions the caret through the inserted comma, and emits the raw separator-free string from onChange – feed it straight into a signal or FormControl<string>.',
+          text: 'Pass groupingStyle: GroupingStyle.Thousand through the directive\'s @Input. Numora formats as the user types, repositions the caret through the inserted comma, and emits the raw separator-free string from onChange – feed it straight into a signal or FormControl<string>.',
         },
       },
       {
@@ -216,7 +216,7 @@ export class NumoraDirective implements ControlValueAccessor, OnInit {
       <CodeBlock language="ts">
 {`import { Component, signal } from '@angular/core';
 import { NumoraDirective } from './numora.directive';
-import { ThousandStyle } from 'numora';
+import { GroupingStyle } from 'numora';
 
 @Component({
   selector: 'app-amount',
@@ -227,7 +227,7 @@ import { ThousandStyle } from 'numora';
       Amount
       <input
         [numora]="{
-          thousandStyle: ThousandStyle.Thousand,
+          groupingStyle: GroupingStyle.Thousand,
           decimalMaxLength: 2,
           onChange: handleChange,
         }"
@@ -237,7 +237,7 @@ import { ThousandStyle } from 'numora';
   \`,
 })
 export class AmountComponent {
-  protected readonly ThousandStyle = ThousandStyle;
+  protected readonly GroupingStyle = GroupingStyle;
   protected readonly value = signal('');
   protected readonly handleChange = (v: string) => this.value.set(v);
 }`}
@@ -249,7 +249,7 @@ export class AmountComponent {
 {`import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { NumoraDirective } from './numora.directive';
-import { ThousandStyle } from 'numora';
+import { GroupingStyle } from 'numora';
 
 @Component({
   selector: 'app-amount-form',
@@ -260,14 +260,14 @@ import { ThousandStyle } from 'numora';
       Amount
       <input
         [formControl]="amount"
-        [numora]="{ thousandStyle: ThousandStyle.Thousand, decimalMaxLength: 2 }"
+        [numora]="{ groupingStyle: GroupingStyle.Thousand, decimalMaxLength: 2 }"
       />
     </label>
     <p>Raw value: {{ amount.value }}</p>
   \`,
 })
 export class AmountFormComponent {
-  protected readonly ThousandStyle = ThousandStyle;
+  protected readonly GroupingStyle = GroupingStyle;
   protected readonly amount = new FormControl('0', { nonNullable: true });
 }`}
       </CodeBlock>
@@ -309,7 +309,7 @@ export class AmountFormComponent {
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
-import { NumoraInput, FormatOn, ThousandStyle } from 'numora';
+import { NumoraInput, FormatOn, GroupingStyle } from 'numora';
 import { TextMorph } from 'torph';
 
 @Component({
@@ -357,7 +357,7 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
 
     this.numora = new NumoraInput(this.host.nativeElement, {
       formatOn: FormatOn.Change,
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
       decimalMaxLength: 2,
       thousandSeparator: ',',
     });
@@ -411,7 +411,7 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
 
       <h3>How do I add thousand separators to an Angular number input?</h3>
       <p>
-        Pass <code>thousandStyle: ThousandStyle.Thousand</code> through the directive&apos;s{' '}
+        Pass <code>groupingStyle: GroupingStyle.Thousand</code> through the directive&apos;s{' '}
         <code>@Input()</code>. Numora formats as the user types, keeps the caret stable through the
         inserted comma, and emits the raw separator-free string from <code>onChange</code> - feed it into
         a signal or <code>FormControl&lt;string&gt;</code>.

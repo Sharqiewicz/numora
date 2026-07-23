@@ -80,7 +80,7 @@ function GetStarted() {
 const container = document.querySelector('#amount-input')
 
 const input = new NumoraInput(container, {
-  maxDecimals: 2,
+  decimalMaxLength: 2,
   thousandSeparator: ',',
   decimalSeparator: '.',
   enableNegative: false,

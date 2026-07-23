@@ -34,7 +34,7 @@ function Locale() {
       <p className="text-lg text-muted-foreground">
         The <code>locale</code> prop auto-detects thousand and decimal separators via{' '}
         <code>Intl.NumberFormat</code>. Grouping style is still controlled separately by{' '}
-        <code>thousandStyle</code>.
+        <code>groupingStyle</code>.
       </p>
 
       <h2>Browser locale (auto-detect)</h2>

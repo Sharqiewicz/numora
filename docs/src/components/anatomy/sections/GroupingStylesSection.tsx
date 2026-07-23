@@ -1,26 +1,26 @@
-import { FormatOn, ThousandStyle } from 'numora'
+import { FormatOn, GroupingStyle } from 'numora'
 import { NumoraInput } from 'numora-react'
 import { GroupingStylesDiagram } from '../diagrams'
 
 const inputClass =
   'w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring'
 
-const styles: { label: string; style: ThousandStyle; example: string; description: string }[] = [
+const styles: { label: string; style: GroupingStyle; example: string; description: string }[] = [
   {
-    label: 'ThousandStyle.Thousand',
-    style: ThousandStyle.Thousand,
+    label: 'GroupingStyle.Thousand',
+    style: GroupingStyle.Thousand,
     example: '1,000,000',
     description: 'Western convention. Group by three digits from the right.',
   },
   {
-    label: 'ThousandStyle.Lakh',
-    style: ThousandStyle.Lakh,
+    label: 'GroupingStyle.Lakh',
+    style: GroupingStyle.Lakh,
     example: '10,00,000',
     description: 'Indian convention. Three on the right, then groups of two.',
   },
   {
-    label: 'ThousandStyle.Wan',
-    style: ThousandStyle.Wan,
+    label: 'GroupingStyle.Wan',
+    style: GroupingStyle.Wan,
     example: '100,0000',
     description: 'CJK convention. Four-digit groups (myriad / 万).',
   },
@@ -43,8 +43,8 @@ export function GroupingStylesSection() {
             <NumoraInput
               formatOn={FormatOn.Change}
               thousandSeparator=","
-              thousandStyle={s.style}
-              maxDecimals={2}
+              groupingStyle={s.style}
+              decimalMaxLength={2}
               placeholder={s.example}
               className={inputClass}
             />

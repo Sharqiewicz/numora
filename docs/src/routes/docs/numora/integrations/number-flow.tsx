@@ -221,7 +221,7 @@ npm install numora number-flow`}
       </CodeBlock>
 
       <CodeBlock language="ts">
-{`import { FormatOn, NumoraInput, ThousandStyle } from 'numora'
+{`import { FormatOn, NumoraInput, GroupingStyle } from 'numora'
 import 'number-flow' // registers the <number-flow> custom element
 
 const display = document.querySelector<HTMLSpanElement>('.numora-overlay-display')!
@@ -235,7 +235,7 @@ const numora = new NumoraInput(host, {
   decimalMaxLength: 2,
   thousandSeparator: ',',
   value: '1234567',
-  thousandStyle: ThousandStyle.Thousand,
+  groupingStyle: GroupingStyle.Thousand,
 })
 const input = numora.getElement()
 input.setAttribute('aria-label', 'Amount')
@@ -265,7 +265,7 @@ input.addEventListener('input', syncFlow)`}
         <li><strong><code>import 'number-flow'</code></strong> - the side-effect import registers <code>&lt;number-flow&gt;</code> as a custom element on <code>customElements</code>. The library guards the registration call so it's safe to import in SSR bundles.</li>
         <li><strong><code>formatOn: FormatOn.Change</code></strong> - keeps the input's display as the formatted string at all times, matching what NumberFlow shows.</li>
         <li><strong>Dynamic <code>minimumFractionDigits</code></strong> - <code>Number("1.20") = 1.2</code>, so without this NumberFlow renders <code>"1.2"</code> while the input contains <code>"1.20"</code>. Computing <code>decimals</code> from the raw string and feeding it to NumberFlow keeps the visible width and the caret aligned.</li>
-        <li><strong><code>useGrouping: true</code></strong> - NumberFlow's grouping must match the input's thousand separator. The default en-US locale uses <code>","</code>, lining up with <code>thousandSeparator=","</code> and <code>ThousandStyle.Thousand</code>.</li>
+        <li><strong><code>useGrouping: true</code></strong> - NumberFlow's grouping must match the input's thousand separator. The default en-US locale uses <code>","</code>, lining up with <code>thousandSeparator=","</code> and <code>GroupingStyle.Thousand</code>.</li>
         <li><strong><code>beforeinput</code> microtask sync</strong> - numora applies its formatted value inside <code>beforeinput</code> via <code>setRangeText</code>. By the next microtask <code>numora.value</code> reflects the post-format string. An <code>input</code> listener alone misses some paths (notably native browser cancellation cases on certain devices).</li>
         <li><strong>Transparent text + visible caret on the input</strong> - hides the input's own rendering while letting the caret show. The caret is the only thing the user sees from the real input.</li>
         <li><strong>Matching typography on both layers</strong> - the caret position is computed from the input's text layout. If fonts differ between the input and the NumberFlow output, the caret drifts.</li>

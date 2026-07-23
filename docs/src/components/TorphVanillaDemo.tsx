@@ -1,4 +1,4 @@
-import { FormatOn, NumoraInput, ThousandStyle } from 'numora';
+import { FormatOn, NumoraInput, GroupingStyle } from 'numora';
 import { useEffect, useRef } from 'react';
 import { TextMorph } from 'torph';
 
@@ -19,7 +19,7 @@ export function TorphVanillaDemo() {
       decimalMaxLength: 2,
       thousandSeparator: ',',
       value: '1234567',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const input = numora.getElement();
     input.setAttribute('aria-label', 'Amount');

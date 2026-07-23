@@ -130,7 +130,7 @@ function HowItWorks() {
         </li>
         <li>
           <strong>raw</strong> - the sanitized string without separators; emitted via{' '}
-          <code>onChange</code> when <code>rawValueMode: true</code>.
+          <code>onChange</code> when <code>emitRawValue: true</code>.
         </li>
       </ul>
     </div>

@@ -45,7 +45,7 @@ const JSON_LD = [
         name: 'How do I add thousand separators to a Solid number input?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Pass thousandStyle: ThousandStyle.Thousand inside the use:numora binding. Numora formats as the user types, repositions the caret through the inserted comma, and emits the raw separator-free string from onChange – write it directly into a createSignal setter.',
+          text: 'Pass groupingStyle: GroupingStyle.Thousand inside the use:numora binding. Numora formats as the user types, repositions the caret through the inserted comma, and emits the raw separator-free string from onChange – write it directly into a createSignal setter.',
         },
       },
       {
@@ -155,7 +155,7 @@ declare module 'solid-js' {
       <p className="text-sm text-muted-foreground">Component:</p>
       <CodeBlock language="tsx">
 {`import { createSignal } from 'solid-js';
-import { ThousandStyle } from 'numora';
+import { GroupingStyle } from 'numora';
 import { numora } from './directives/numora';
 // Solid's compiler must see the 'numora' import to keep it - the directive
 // looks unused otherwise and tree-shaking would drop it.
@@ -169,7 +169,7 @@ export function AmountInput() {
       Amount
       <input
         use:numora={{
-          thousandStyle: ThousandStyle.Thousand,
+          groupingStyle: GroupingStyle.Thousand,
           decimalMaxLength: 2,
           onChange: (v) => setValue(v),
         }}
@@ -209,7 +209,7 @@ export function AmountInput() {
 
       <CodeBlock language="tsx">
 {`import { onCleanup, onMount } from 'solid-js';
-import { NumoraInput, FormatOn, ThousandStyle } from 'numora';
+import { NumoraInput, FormatOn, GroupingStyle } from 'numora';
 import { TextMorph } from 'torph';
 import './numora-overlay.css';
 
@@ -223,7 +223,7 @@ export function AnimatedAmountInput() {
 
     const numora = new NumoraInput(host, {
       formatOn: FormatOn.Change,
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
       decimalMaxLength: 2,
       thousandSeparator: ',',
     });
@@ -303,7 +303,7 @@ export function AnimatedAmountInput() {
 
       <h3>How do I add thousand separators to a Solid number input?</h3>
       <p>
-        Pass <code>thousandStyle: ThousandStyle.Thousand</code> inside the <code>use:numora</code>{' '}
+        Pass <code>groupingStyle: GroupingStyle.Thousand</code> inside the <code>use:numora</code>{' '}
         binding. Numora formats as the user types, keeps the caret stable through the inserted comma,
         and emits the raw separator-free string from <code>onChange</code> – write it straight into your{' '}
         <code>createSignal</code> setter.

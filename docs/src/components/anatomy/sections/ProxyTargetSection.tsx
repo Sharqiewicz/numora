@@ -21,7 +21,7 @@ export function ProxyTargetSection() {
       <p>
         Every formatting cycle produces two strings: a formatted display value and a
         raw numeric value. The vanilla <code>NumoraInput</code> class emits one or the
-        other through <code>onChange</code> based on <code>rawValueMode</code>. The
+        other through <code>onChange</code> based on <code>emitRawValue</code>. The
         React component does something different: it always exposes both on the change
         event's <code>target</code>.
       </p>

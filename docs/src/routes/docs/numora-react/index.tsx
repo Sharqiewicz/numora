@@ -57,7 +57,7 @@ function Amount() {
   return (
     <NumoraInput
       formatOn={FormatOn.Change}
-      maxDecimals={2}
+      decimalMaxLength={2}
       thousandSeparator=","
       onChange={(e) => {
         console.log(e.target.value)          // "1234.56" - raw

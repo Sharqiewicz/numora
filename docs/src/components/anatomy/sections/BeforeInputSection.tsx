@@ -1,5 +1,5 @@
 import { CodeBlock } from '@/components/CodeBlock'
-import { FormatOn, ThousandStyle } from 'numora'
+import { FormatOn, GroupingStyle } from 'numora'
 import { NumoraInput } from 'numora-react'
 
 export function BeforeInputSection() {
@@ -56,7 +56,7 @@ export function BeforeInputSection() {
 6. formatInputValue(intendedValue)   → sanitize → trim → apply separators
 7. target.setRangeText(formatted, 0, currentValue.length, 'end')
                                      → atomic replace, single undo entry
-8. updateCursorPosition(...)         → restore caret based on digit count
+8. computeCursorPosition(...)        → select(new, rank(old, caret)) restores the caret
 9. Return { formatted, raw }`}
       </CodeBlock>
       <p>
@@ -67,8 +67,8 @@ export function BeforeInputSection() {
         <NumoraInput
           formatOn={FormatOn.Change}
           thousandSeparator=","
-          thousandStyle={ThousandStyle.Thousand}
-          maxDecimals={2}
+          groupingStyle={GroupingStyle.Thousand}
+          decimalMaxLength={2}
           placeholder="Type 1234567, then Ctrl+Z"
           className="w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring"
         />

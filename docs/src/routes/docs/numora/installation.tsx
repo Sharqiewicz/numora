@@ -70,7 +70,7 @@ function Installation() {
 const container = document.querySelector('#my-input-container')
 
 const numoraInput = new NumoraInput(container, {
-  maxDecimals: 2,
+  decimalMaxLength: 2,
   thousandSeparator: ',',
   decimalSeparator: '.',
 })`}
@@ -83,12 +83,12 @@ const numoraInput = new NumoraInput(container, {
       <ul className="list-disc list-inside">
         <li><code>decimalSeparator</code> - character separating integer from decimal part (default <code>'.'</code>)</li>
         <li><code>thousandSeparator</code> - character inserted between digit groups (default <code>','</code>)</li>
-        <li><code>thousandStyle</code> - <code>None</code>, <code>Thousand</code>, <code>Lakh</code>, or <code>Wan</code></li>
+        <li><code>groupingStyle</code> - <code>None</code>, <code>Thousand</code>, <code>Lakh</code>, or <code>Wan</code></li>
         <li><code>formatOn</code> - when separators are applied: <code>FormatOn.Blur</code> (default) or <code>FormatOn.Change</code></li>
         <li><code>decimalMinLength</code> - pad decimals to a minimum number of digits on blur</li>
         <li><code>enableNegative</code> - allow negative values (default <code>false</code>)</li>
         <li><code>enableCompactNotation</code> - expand <code>1k → 1000</code> on input</li>
-        <li><code>rawValueMode</code> - emit raw values without separators in <code>onChange</code></li>
+        <li><code>emitRawValue</code> - emit raw values without separators in <code>onChange</code></li>
       </ul>
       <p>
         See the <Link to="/docs/numora/features/formatting">Formatting</Link> and{' '}
@@ -101,13 +101,13 @@ const numoraInput = new NumoraInput(container, {
         directly:
       </p>
       <CodeBlock language="typescript">
-{`import { NumoraInput, FormatOn, ThousandStyle } from 'numora'
+{`import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
 import type { FormattingOptions } from 'numora'
 
 const options: FormattingOptions = {
-  maxDecimals: 6,
+  decimalMaxLength: 6,
   formatOn: FormatOn.Change,
-  thousandStyle: ThousandStyle.Thousand,
+  groupingStyle: GroupingStyle.Thousand,
   thousandSeparator: ',',
 }`}
       </CodeBlock>

@@ -44,7 +44,7 @@ function ValueTypes() {
 
 <NumoraInput
   thousandSeparator=","
-  maxDecimals={2}
+  decimalMaxLength={2}
   onChange={(e) => {
     console.log(e.target.value) // "1234.56" - no separators
   }}
@@ -61,7 +61,7 @@ function ValueTypes() {
 
 <NumoraInput
   thousandSeparator=","
-  maxDecimals={2}
+  decimalMaxLength={2}
   onChange={(e) => {
     console.log(e.target.value)                                   // "1234.56" - raw
     console.log((e.target as NumoraHTMLInputElement).formattedValue) // "1,234.56" - formatted
@@ -85,7 +85,7 @@ function App() {
     <NumoraInput
       ref={ref}
       thousandSeparator=","
-      maxDecimals={2}
+      decimalMaxLength={2}
       onChange={() => {
         console.log((ref.current as NumoraHTMLInputElement).formattedValue) // "1,234.56"
       }}
@@ -110,7 +110,7 @@ function App() {
     console.log((ref.current as any).valueAsNumber) // 1234.56
   }
 
-  return <NumoraInput ref={ref} thousandSeparator="," maxDecimals={2} />
+  return <NumoraInput ref={ref} thousandSeparator="," decimalMaxLength={2} />
 }`}
       </CodeBlock>
       <p>

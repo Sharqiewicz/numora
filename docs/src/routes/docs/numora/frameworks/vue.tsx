@@ -45,7 +45,7 @@ const JSON_LD = [
         name: 'How do I format a number input with thousand separators in Vue?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Pass thousandStyle: ThousandStyle.Thousand inside the v-numora binding. Numora formats as the user types, keeps the caret stable through the inserted separator, and emits the raw separator-free string from onChange so your ref or Pinia store stays clean.',
+          text: 'Pass groupingStyle: GroupingStyle.Thousand inside the v-numora binding. Numora formats as the user types, keeps the caret stable through the inserted separator, and emits the raw separator-free string from onChange so your ref or Pinia store stays clean.',
         },
       },
       {
@@ -161,7 +161,7 @@ createApp(App).directive('numora', vNumora).mount('#app');`}
       </p>
       <CodeBlock language="ts">
 {`import { ref } from 'vue';
-import { ThousandStyle } from 'numora';
+import { GroupingStyle } from 'numora';
 
 const value = ref('');`}
       </CodeBlock>
@@ -174,7 +174,7 @@ const value = ref('');`}
   Amount
   <input
     v-numora="{
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
       decimalMaxLength: 2,
       onChange: (v) => (value = v),
     }"
@@ -215,7 +215,7 @@ const value = ref('');`}
       </p>
       <CodeBlock language="ts">
 {`import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { NumoraInput, FormatOn, ThousandStyle } from 'numora';
+import { NumoraInput, FormatOn, GroupingStyle } from 'numora';
 import { TextMorph } from 'torph';
 
 const display = ref<HTMLSpanElement | null>(null);
@@ -231,7 +231,7 @@ onMounted(() => {
 
   const numora = new NumoraInput(host.value, {
     formatOn: FormatOn.Change,
-    thousandStyle: ThousandStyle.Thousand,
+    groupingStyle: GroupingStyle.Thousand,
     decimalMaxLength: 2,
     thousandSeparator: ',',
   });
@@ -319,7 +319,7 @@ onBeforeUnmount(() => cleanup?.());`}
 
       <h3>How do I add thousand separators to a Vue number input?</h3>
       <p>
-        Pass <code>thousandStyle: ThousandStyle.Thousand</code> inside the <code>v-numora</code> binding.
+        Pass <code>groupingStyle: GroupingStyle.Thousand</code> inside the <code>v-numora</code> binding.
         Numora formats as the user types, keeps the caret stable through the inserted comma, and emits
         the raw separator-free string from <code>onChange</code> – safe to feed into <code>ref</code>,
         Pinia, VeeValidate or FormKit.

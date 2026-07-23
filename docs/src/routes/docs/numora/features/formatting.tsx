@@ -33,30 +33,30 @@ function Formatting() {
 
       <h2>Grouping styles</h2>
       <CodeBlock language="typescript">
-{`import { NumoraInput, ThousandStyle } from 'numora'
+{`import { NumoraInput, GroupingStyle } from 'numora'
 
 // Standard: 1,234,567
 const input = new NumoraInput(container, {
   thousandSeparator: ',',
-  thousandStyle: ThousandStyle.Thousand,
+  groupingStyle: GroupingStyle.Thousand,
 })
 
 // Indian (Lakh): 12,34,567
 const input = new NumoraInput(container, {
   thousandSeparator: ',',
-  thousandStyle: ThousandStyle.Lakh,
+  groupingStyle: GroupingStyle.Lakh,
 })
 
 // Chinese (Wan): 123,4567
 const input = new NumoraInput(container, {
   thousandSeparator: ',',
-  thousandStyle: ThousandStyle.Wan,
+  groupingStyle: GroupingStyle.Wan,
 })
 
 // None: 1234567
 const input = new NumoraInput(container, {
   thousandSeparator: ',',
-  thousandStyle: ThousandStyle.None,
+  groupingStyle: GroupingStyle.None,
 })`}
       </CodeBlock>
 

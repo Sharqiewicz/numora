@@ -59,7 +59,7 @@ const numoraInput = new NumoraInput(container, {
         thousand separators from a formatted string. Useful when you need to extract a raw
         numeric value from a display string.
       </p>
-      <p>(You can also access the raw value of the input by <code>e.target.rawValue</code> when <code>rawValueMode</code> is <code>true</code>)</p>
+      <p>(You can also access the raw value of the input by <code>e.target.rawValue</code> when <code>emitRawValue</code> is <code>true</code>)</p>
 
       <CodeBlock language="typescript">
 {`import { removeThousandSeparators } from 'numora'

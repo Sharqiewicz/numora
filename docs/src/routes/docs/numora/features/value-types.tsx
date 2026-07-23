@@ -5,12 +5,12 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
   head: () => ({
     meta: [
       { title: 'Raw vs Formatted Value - Numeric Input Output Types | Numora' },
-      { name: 'description', content: 'Learn how Numora always emits string values from onChange, what rawValueMode does, and when to use valueAsNumber as an escape hatch.' },
+      { name: 'description', content: 'Learn how Numora always emits string values from onChange, what emitRawValue does, and when to use valueAsNumber as an escape hatch.' },
       { property: 'og:title', content: 'Raw vs Formatted Value - Numeric Input Output Types | Numora' },
-      { property: 'og:description', content: 'Learn how Numora always emits string values from onChange, what rawValueMode does, and when to use valueAsNumber.' },
+      { property: 'og:description', content: 'Learn how Numora always emits string values from onChange, what emitRawValue does, and when to use valueAsNumber.' },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/value-types' },
       { name: 'twitter:title', content: 'Raw vs Formatted Value - Numeric Input Output Types | Numora' },
-      { name: 'twitter:description', content: 'Numora always emits strings from onChange. Learn about rawValueMode and the valueAsNumber escape hatch.' },
+      { name: 'twitter:description', content: 'Numora always emits strings from onChange. Learn about emitRawValue and the valueAsNumber escape hatch.' },
     ],
     links: [
       { rel: 'canonical', href: 'https://numeric-input.com/docs/numora/features/value-types' },
@@ -47,9 +47,9 @@ const numoraInput = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2>rawValueMode: raw string</h2>
+      <h2>emitRawValue: raw string</h2>
       <p>
-        Set <code>rawValueMode: true</code> and <code>onChange</code> receives the plain
+        Set <code>emitRawValue: true</code> and <code>onChange</code> receives the plain
         numeric string with thousand separators stripped. The input still displays the
         formatted value. <code>instance.value</code> also returns the raw string in this
         mode.
@@ -59,7 +59,7 @@ const numoraInput = new NumoraInput(container, {
 
 const numoraInput = new NumoraInput(container, {
   thousandSeparator: ',',
-  rawValueMode: true,
+  emitRawValue: true,
   onChange: (value) => {
     console.log(value)                    // "1234.56" ← no separators
     console.log(numoraInput.getElement().value) // "1,234.56" ← display value

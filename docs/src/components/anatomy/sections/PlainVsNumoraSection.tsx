@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FormatOn, ThousandStyle } from 'numora'
+import { FormatOn, GroupingStyle } from 'numora'
 import { NumoraInput } from 'numora-react'
 import { InputPair } from '../InputPair'
 
@@ -37,8 +37,8 @@ export function PlainVsNumoraSection() {
             <NumoraInput
               formatOn={FormatOn.Change}
               thousandSeparator=","
-              thousandStyle={ThousandStyle.Thousand}
-              maxDecimals={2}
+              groupingStyle={GroupingStyle.Thousand}
+              decimalMaxLength={2}
               enableCompactNotation
               placeholder="Try $1,234.56abc"
               className="w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring"

@@ -47,10 +47,10 @@ function Sanitization() {
       <ExampleWithDemo
         code={`import { NumoraInput } from 'numora-react'
 
-<NumoraInput maxDecimals={2} />`}
+<NumoraInput decimalMaxLength={2} />`}
         language="tsx"
         config={{
-          maxDecimals: 2,
+          decimalMaxLength: 2,
         }}
         description="Try typing letters or special characters - only numbers will be kept"
       />

@@ -71,7 +71,7 @@ function Form() {
             onChange={onChange}
             onBlur={onBlur}
             disabled={disabled}
-            maxDecimals={2}
+            decimalMaxLength={2}
             thousandSeparator=","
           />
         )}
@@ -85,7 +85,7 @@ function Form() {
 }`}
         language="tsx"
         config={{
-          maxDecimals: 2,
+          decimalMaxLength: 2,
           thousandSeparator: ',',
         }}
         description="Basic form with Controller pattern - works with setValue() automatically"
@@ -109,7 +109,7 @@ function Form() {
         onChange={onChange}
         onBlur={onBlur}
         disabled={disabled}
-        maxDecimals={2}
+        decimalMaxLength={2}
         thousandSeparator=","
       />
       {error && <span>{error.message}</span>}
@@ -171,7 +171,7 @@ function SwapForm() {
               onChange={onChange}
               onBlur={onBlur}
               disabled={disabled}
-              maxDecimals={6}
+              decimalMaxLength={6}
               thousandSeparator=","
               placeholder="0.0"
             />
@@ -207,7 +207,7 @@ function Form() {
     <form onSubmit={handleSubmit((data) => console.log(data))}>
       <NumoraInput
         {...register('amount')}
-        maxDecimals={2}
+        decimalMaxLength={2}
         thousandSeparator=","
       />
       <button type="submit">Submit</button>

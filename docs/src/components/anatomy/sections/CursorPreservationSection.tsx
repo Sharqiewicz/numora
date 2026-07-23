@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FormatOn, ThousandStyle } from 'numora'
+import { FormatOn, GroupingStyle } from 'numora'
 import { NumoraInput } from 'numora-react'
 import { InputPair } from '../InputPair'
 import { CursorAnchorDiagram } from '../diagrams'
@@ -37,14 +37,16 @@ export function CursorPreservationSection() {
       </p>
       <CursorAnchorDiagram />
       <p>
-        Numora's <code>updateCursorPosition</code> anchors on <em>meaningful digits</em>{' '}
-        rather than character index.{' '}
-        <code>countMeaningfulDigitsBeforePosition</code> walks the intended string from
-        the start to the caret, counting only digits and the decimal separator while
-        skipping thousand separators. It then walks the formatted string until it has
-        counted the same number, and parks the cursor there. The user feels the caret
-        stay "between the same two digits" no matter how the separators rearranged
-        around it.
+        Numora's <code>computeCursorPosition</code> anchors on <em>significant characters</em>{' '}
+        rather than character index — the classic <strong>rank/select</strong> pair.{' '}
+        <code>significantCharRank</code> walks the intended string from the start to the
+        caret, counting everything that belongs to the raw value (digits, the decimal
+        separator, a leading minus) while skipping injected thousand separators.{' '}
+        <code>positionAfterRank</code> then walks the formatted string until it has counted
+        the same number, and parks the cursor there. The user feels the caret stay "between
+        the same two digits" no matter how the separators rearranged around it — and because
+        the grouping style only changes <em>where</em> the separators sit, Thousand, Lakh and
+        Wan all fall out of the same two functions with no per-style code.
       </p>
       <p>
         Click between the <code>3</code> and the <code>4</code> in both inputs below and
@@ -64,8 +66,8 @@ export function CursorPreservationSection() {
             <NumoraInput
               formatOn={FormatOn.Change}
               thousandSeparator=","
-              thousandStyle={ThousandStyle.Thousand}
-              maxDecimals={2}
+              groupingStyle={GroupingStyle.Thousand}
+              decimalMaxLength={2}
               defaultValue="1234567"
               className={inputClass}
             />

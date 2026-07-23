@@ -279,7 +279,7 @@ npm install numora torph`}
       </CodeBlock>
 
       <CodeBlock language="ts">
-{`import { NumoraInput, FormatOn, ThousandStyle } from 'numora'
+{`import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
 import { TextMorph } from 'torph'
 
 const wrap = document.querySelector<HTMLElement>('.numora-overlay')!
@@ -293,7 +293,7 @@ const numora = new NumoraInput(host, {
   formatOn: FormatOn.Change,
   decimalMaxLength: 2,
   thousandSeparator: ',',
-  thousandStyle: ThousandStyle.Thousand,
+  groupingStyle: GroupingStyle.Thousand,
 })
 const input = numora.getElement()
 input.setAttribute('aria-label', 'Amount')

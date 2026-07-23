@@ -197,7 +197,7 @@ function AnimatedInput() {
         value={value}
         onChange={(e: NumoraInputChangeEvent) => setValue(e.target.value)}
         formatOn={FormatOn.Change}
-        maxDecimals={2}
+        decimalMaxLength={2}
         thousandSeparator=","
         aria-label="Amount"
         className="absolute inset-0 w-full h-full m-0 p-0 border-0 bg-transparent
@@ -287,7 +287,7 @@ function SwapForm() {
         <NumoraInput
           value={amount}
           onChange={(e: NumoraInputChangeEvent) => setAmount(e.target.value)}
-          maxDecimals={6}
+          decimalMaxLength={6}
           thousandSeparator=","
           placeholder="0.0"
         />
@@ -334,7 +334,7 @@ function AnimatedField() {
         onChange={(e) => setAmount(e.target.value)}
         onBlur={() => setEditing(false)}
         formatOn={FormatOn.Blur}
-        maxDecimals={2}
+        decimalMaxLength={2}
         thousandSeparator=","
       />
     )

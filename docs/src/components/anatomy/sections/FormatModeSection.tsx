@@ -1,4 +1,4 @@
-import { FormatOn, ThousandStyle } from 'numora'
+import { FormatOn, GroupingStyle } from 'numora'
 import { NumoraInput } from 'numora-react'
 import { InputPair } from '../InputPair'
 
@@ -24,8 +24,8 @@ export function FormatModeSection() {
             <NumoraInput
               formatOn={FormatOn.Change}
               thousandSeparator=","
-              thousandStyle={ThousandStyle.Thousand}
-              maxDecimals={2}
+              groupingStyle={GroupingStyle.Thousand}
+              decimalMaxLength={2}
               placeholder="1234567.89"
               className={inputClass}
             />
@@ -38,8 +38,8 @@ export function FormatModeSection() {
             <NumoraInput
               formatOn={FormatOn.Blur}
               thousandSeparator=","
-              thousandStyle={ThousandStyle.Thousand}
-              maxDecimals={2}
+              groupingStyle={GroupingStyle.Thousand}
+              decimalMaxLength={2}
               placeholder="1234567.89"
               className={inputClass}
             />

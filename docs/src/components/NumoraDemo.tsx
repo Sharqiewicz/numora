@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { FormatOn, ThousandStyle } from 'numora';
+import { FormatOn, GroupingStyle } from 'numora';
 import { NumoraInput, type NumoraInputChangeEvent } from 'numora-react';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { TextMorph } from 'torph';
@@ -221,9 +221,9 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
             ref={inputRef}
             locale={slide.id === "locale" ? true : undefined}
             thousandSeparator={slide.id === "locale" ? undefined : ","}
-            thousandStyle={slide.id === 'regional' ? ThousandStyle.Lakh : ThousandStyle.Thousand}
+            groupingStyle={slide.id === 'regional' ? GroupingStyle.Lakh : GroupingStyle.Thousand}
             formatOn={FormatOn.Change}
-            maxDecimals={2}
+            decimalMaxLength={2}
             enableCompactNotation
             placeholder="0.00"
             className={inputClass}

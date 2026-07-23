@@ -76,7 +76,7 @@ function Installation() {
 function App() {
   return (
     <NumoraInput
-      maxDecimals={2}
+      decimalMaxLength={2}
       formatOn={FormatOn.Change}
     />
   )
@@ -84,7 +84,7 @@ function App() {
         language="tsx"
         config={{
           formatOn: FormatOn.Change,
-          maxDecimals: 2,
+          decimalMaxLength: 2,
         }}
         description="Try typing a number to see formatting in action"
       />
@@ -106,7 +106,7 @@ function AmountField() {
       <NumoraInput
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
-        maxDecimals={6}
+        decimalMaxLength={6}
         formatOn={FormatOn.Change}
       />
       <p>Raw value: {amount}</p>

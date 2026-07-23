@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NumoraInput } from 'numora-react';
-import { FormatOn, ThousandStyle } from 'numora';
+import { FormatOn, GroupingStyle } from 'numora';
 import { ProblemSection } from '../ProblemSection';
 import { InputComparison } from '../InputComparison';
 import { BrokenInput } from '../BrokenInput';
@@ -10,22 +10,22 @@ type GroupingStyle = 'thousand' | 'lakh' | 'wan';
 
 const GROUPING_STYLES: Record<
   GroupingStyle,
-  { label: string; example: string; style: ThousandStyle }
+  { label: string; example: string; style: GroupingStyle }
 > = {
   thousand: {
     label: 'Thousand (1,234,567)',
     example: '1,234,567',
-    style: ThousandStyle.Thousand,
+    style: GroupingStyle.Thousand,
   },
   lakh: {
     label: 'Lakh (12,34,567)',
     example: '12,34,567',
-    style: ThousandStyle.Lakh,
+    style: GroupingStyle.Lakh,
   },
   wan: {
     label: 'Wan (123,4567)',
     example: '123,4567',
-    style: ThousandStyle.Wan,
+    style: GroupingStyle.Wan,
   },
 };
 
@@ -109,7 +109,7 @@ export function ThousandSeparatorDemo() {
               onChange={(e) => setNumoraValue(e.target.value)}
               formatOn={FormatOn.Change}
               thousandSeparator=","
-              thousandStyle={currentStyle.style}
+              groupingStyle={currentStyle.style}
               placeholder="Type 1234567..."
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />

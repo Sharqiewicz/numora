@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { NumoraInput } from 'numora-react';
-import { FormatOn, ThousandStyle } from 'numora';
+import { FormatOn, GroupingStyle } from 'numora';
 import { ProblemSection } from '../ProblemSection';
 import { InputComparison } from '../InputComparison';
 import { BrokenInput } from '../BrokenInput';
@@ -84,7 +84,7 @@ export function CursorPositionDemo() {
               onClick={handleNumoraSelect}
               formatOn={FormatOn.Change}
               thousandSeparator=","
-              thousandStyle={ThousandStyle.Thousand}
+              groupingStyle={GroupingStyle.Thousand}
               placeholder="Type 1234567..."
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />

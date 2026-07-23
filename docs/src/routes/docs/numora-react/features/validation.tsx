@@ -81,7 +81,7 @@ function Validation() {
         <li>Fires for both typing and paste paths</li>
         <li>Always allow the intermediate strings users need to type their way to a valid value (empty string, lone <code>-</code> or decimal separator)</li>
         <li>Keep the predicate cheap - it runs on every keystroke</li>
-        <li>Combine with <code>maxLength</code> for length caps and <code>maxDecimals</code> for decimal-precision caps; <code>isAllowed</code> is for everything else</li>
+        <li>Combine with <code>maxLength</code> for length caps and <code>decimalMaxLength</code> for decimal-precision caps; <code>isAllowed</code> is for everything else</li>
       </ul>
     </div>
   )

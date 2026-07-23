@@ -1,5 +1,5 @@
 import { NumoraHTMLInputElement, NumoraInput } from 'numora-react';
-import { FormatOn, ThousandStyle } from 'numora';
+import { FormatOn, GroupingStyle } from 'numora';
 import { useEffect, useState } from 'react';
 import { useTRPC } from '@/integrations/trpc/react';
 import { TOKENS, type TokenInfo } from '@/lib/constants/tokens';
@@ -135,11 +135,10 @@ export function Swap() {
             placeholder="0.0"
             value={fromAmount}
             onChange={(e) => handleFromInputChange(e as React.ChangeEvent<NumoraHTMLInputElement>)}
-            maxDecimals={effectiveFromDecimals}
+            decimalMaxLength={effectiveFromDecimals}
             formatOn={FormatOn.Change}
-            thousandStyle={ThousandStyle.Thousand}
+            groupingStyle={GroupingStyle.Thousand}
             enableCompactNotation
-            rawValueMode
 
           />
           <TokenSelector
@@ -187,11 +186,10 @@ export function Swap() {
             placeholder="0.0"
             value={toAmount}
             onChange={(e) => handleToInputChange(e as React.ChangeEvent<HTMLInputElement>)}
-            maxDecimals={effectiveToDecimals}
+            decimalMaxLength={effectiveToDecimals}
             formatOn={FormatOn.Change}
-            thousandStyle={ThousandStyle.Thousand}
+            groupingStyle={GroupingStyle.Thousand}
             enableCompactNotation
-            rawValueMode
           />
           <TokenSelector
             label="To"

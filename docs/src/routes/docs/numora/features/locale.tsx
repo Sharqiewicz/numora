@@ -29,7 +29,7 @@ function Locale() {
       <p className="text-lg text-muted-foreground">
         The <code>locale</code> prop auto-detects thousand and decimal separators via{' '}
         <code>Intl.NumberFormat</code>. Grouping style is still controlled separately by{' '}
-        <code>thousandStyle</code>.
+        <code>groupingStyle</code>.
       </p>
 
       <h2>Browser locale (auto-detect)</h2>
@@ -39,7 +39,7 @@ function Locale() {
         priority over locale-detected ones.
       </p>
       <CodeBlock language="typescript">
-{`import { NumoraInput, ThousandStyle } from 'numora'
+{`import { NumoraInput, GroupingStyle } from 'numora'
 
 // Both separators auto-detected from browser locale
 // de-DE → thousandSeparator: '.', decimalSeparator: ','
@@ -47,13 +47,13 @@ function Locale() {
 // fr-FR → thousandSeparator: '\\u202f', decimalSeparator: ','
 const input = new NumoraInput(container, {
   locale: true,
-  thousandStyle: ThousandStyle.Thousand,
+  groupingStyle: GroupingStyle.Thousand,
 })
 
 // Override decimal separator while keeping locale thousand separator
 const input2 = new NumoraInput(container, {
   locale: true,
-  thousandStyle: ThousandStyle.Thousand,
+  groupingStyle: GroupingStyle.Thousand,
   decimalSeparator: '.',
 })`}
       </CodeBlock>
@@ -64,12 +64,12 @@ const input2 = new NumoraInput(container, {
         server-driven locale handling.
       </p>
       <CodeBlock language="typescript">
-{`import { NumoraInput, ThousandStyle } from 'numora'
+{`import { NumoraInput, GroupingStyle } from 'numora'
 
 // Pinned to German locale: thousandSeparator '.', decimalSeparator ','
 const input = new NumoraInput(container, {
   locale: 'de-DE',
-  thousandStyle: ThousandStyle.Thousand,
+  groupingStyle: GroupingStyle.Thousand,
 })`}
       </CodeBlock>
 

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
-import { FormatOn, ThousandStyle } from 'numora'
+import { FormatOn, GroupingStyle } from 'numora'
 
 export const Route = createFileRoute('/docs/numora-react/features/formatting')({
   head: () => ({
@@ -38,29 +38,29 @@ function Formatting() {
           title="Standard: 1,234,567"
           description="Type a large number to see standard grouping"
           language="tsx"
-          code={`<NumoraInput thousandSeparator="," thousandStyle={ThousandStyle.Thousand} />`}
-          config={{ thousandSeparator: ',', thousandStyle: ThousandStyle.Thousand, maxDecimals: 2 }}
+          code={`<NumoraInput thousandSeparator="," groupingStyle={GroupingStyle.Thousand} />`}
+          config={{ thousandSeparator: ',', groupingStyle: GroupingStyle.Thousand, decimalMaxLength: 2 }}
         />
         <ExampleWithDemo
           title="Indian (Lakh): 12,34,567"
           description="Type a large number to see Indian numbering"
           language="tsx"
-          code={`<NumoraInput thousandSeparator="," thousandsStyle={ThousandStyle.Lakh} />`}
-          config={{ thousandSeparator: ',', thousandStyle: ThousandStyle.Lakh, maxDecimals: 2 }}
+          code={`<NumoraInput thousandSeparator="," thousandsStyle={GroupingStyle.Lakh} />`}
+          config={{ thousandSeparator: ',', groupingStyle: GroupingStyle.Lakh, decimalMaxLength: 2 }}
         />
         <ExampleWithDemo
           title="Chinese (Wan): 123,4567"
           description="Type a large number to see Chinese numbering"
           language="tsx"
-          code={`<NumoraInput thousandSeparator="," thousandsGroupStyle={ThousandStyle.Wan} />`}
-          config={{ thousandSeparator: ',', thousandStyle: ThousandStyle.Wan, maxDecimals: 2 }}
+          code={`<NumoraInput thousandSeparator="," thousandsGroupStyle={GroupingStyle.Wan} />`}
+          config={{ thousandSeparator: ',', groupingStyle: GroupingStyle.Wan, decimalMaxLength: 2 }}
         />
         <ExampleWithDemo
           title="None"
           description="Type a large number to see none grouping"
           language="tsx"
-          code={`<NumoraInput thousandSeparator="," thousandsGroupStyle={ThousandStyle.None} />`}
-          config={{ thousandSeparator: ',', thousandStyle: ThousandStyle.None, maxDecimals: 2 }}
+          code={`<NumoraInput thousandSeparator="," thousandsGroupStyle={GroupingStyle.None} />`}
+          config={{ thousandSeparator: ',', groupingStyle: GroupingStyle.None, decimalMaxLength: 2 }}
         />
       </div>
 
@@ -71,14 +71,14 @@ function Formatting() {
           description="Type a number and click away to see formatting applied"
           language="tsx"
           code={`<NumoraInput formatOn={FormatOn.Blur} thousandSeparator="," />`}
-          config={{ formatOn: FormatOn.Blur, thousandSeparator: ',', maxDecimals: 2 }}
+          config={{ formatOn: FormatOn.Blur, thousandSeparator: ',', decimalMaxLength: 2 }}
         />
         <ExampleWithDemo
           title="Change"
           description="Formatting is applied on every keystroke"
           language="tsx"
           code={`<NumoraInput formatOn={FormatOn.Change} thousandSeparator="," />`}
-          config={{ formatOn: FormatOn.Change, thousandSeparator: ',', maxDecimals: 2 }}
+          config={{ formatOn: FormatOn.Change, thousandSeparator: ',', decimalMaxLength: 2 }}
         />
       </div>
 

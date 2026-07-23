@@ -1,26 +1,26 @@
 import { Link } from '@tanstack/react-router'
-import { FormatOn, ThousandStyle } from 'numora'
+import { FormatOn, GroupingStyle } from 'numora'
 import { CodeBlock } from '@/components/CodeBlock'
 import { ExampleWithDemo } from '@/components/ExampleWithDemo'
 import type { SectionProps } from './types'
 
-const reactExample = `import { NumoraInput, FormatOn, ThousandStyle } from 'numora-react'
+const reactExample = `import { NumoraInput, FormatOn, GroupingStyle } from 'numora-react'
 
 <NumoraInput
   formatOn={FormatOn.Change}
   thousandSeparator=","
-  thousandStyle={ThousandStyle.Thousand}
-  maxDecimals={2}
+  groupingStyle={GroupingStyle.Thousand}
+  decimalMaxLength={2}
   enableCompactNotation
   onChange={(e) => console.log(e.target.value)}
 />`
 
-const vanillaExample = `import { NumoraInput, FormatOn, ThousandStyle } from 'numora'
+const vanillaExample = `import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
 
 new NumoraInput(container, {
   formatOn: FormatOn.Change,
   thousandSeparator: ',',
-  thousandStyle: ThousandStyle.Thousand,
+  groupingStyle: GroupingStyle.Thousand,
   decimalMaxLength: 2,
   enableCompactNotation: true,
   onChange: (value) => console.log(value),
@@ -46,8 +46,8 @@ export function DropInUsageSection({ pkg }: SectionProps) {
         config={{
           formatOn: FormatOn.Change,
           thousandSeparator: ',',
-          thousandStyle: ThousandStyle.Thousand,
-          maxDecimals: 2,
+          groupingStyle: GroupingStyle.Thousand,
+          decimalMaxLength: 2,
           enableCompactNotation: true,
         }}
         placeholder="Try $1,234.56abc, then Ctrl+Z…"

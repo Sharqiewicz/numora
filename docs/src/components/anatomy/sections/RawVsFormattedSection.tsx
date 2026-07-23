@@ -6,7 +6,7 @@ const reactCode = `import { NumoraInput, type NumoraInputChangeEvent } from 'num
 
 <NumoraInput
   thousandSeparator=","
-  maxDecimals={2}
+  decimalMaxLength={2}
   onChange={(e: NumoraInputChangeEvent) => {
     e.target.value           // → "1234.56"   (raw, no separators)
     e.target.formattedValue  // → "1,234.56"  (display string)
@@ -19,8 +19,8 @@ const vanillaCode = `import { NumoraInput } from 'numora'
 new NumoraInput(container, {
   thousandSeparator: ',',
   decimalMaxLength: 2,
-  rawValueMode: true,
-  // When rawValueMode is true, onChange receives the raw value.
+  emitRawValue: true,
+  // When emitRawValue is true, onChange receives the raw value.
   // When false (the default), it receives the formatted value.
   onChange: (value) => console.log(value),
 })`
@@ -50,7 +50,7 @@ export function RawVsFormattedSection({ pkg }: SectionProps) {
         <>
           <p>
             The vanilla <code>NumoraInput</code> class emits one or the other through{' '}
-            <code>onChange</code>, controlled by <code>rawValueMode</code>:
+            <code>onChange</code>, controlled by <code>emitRawValue</code>:
           </p>
           <CodeBlock language="typescript">{vanillaCode}</CodeBlock>
         </>

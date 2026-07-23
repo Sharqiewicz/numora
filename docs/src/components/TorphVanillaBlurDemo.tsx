@@ -1,4 +1,4 @@
-import { FormatOn, NumoraInput, ThousandStyle } from 'numora';
+import { FormatOn, NumoraInput, GroupingStyle } from 'numora';
 import { useEffect, useRef } from 'react';
 import { TextMorph } from 'torph';
 
@@ -37,7 +37,7 @@ export function TorphVanillaBlurDemo() {
       formatOn: FormatOn.Blur,
       decimalMaxLength: 2,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
       value: '1234567',
       onChange: (value) => morph.update(value || '0'),
     });

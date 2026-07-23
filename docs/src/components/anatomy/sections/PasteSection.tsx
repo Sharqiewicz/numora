@@ -1,4 +1,4 @@
-import { FormatOn, ThousandStyle } from 'numora'
+import { FormatOn, GroupingStyle } from 'numora'
 import { NumoraInput } from 'numora-react'
 
 const inputClass =
@@ -54,8 +54,8 @@ export function PasteSection() {
         <NumoraInput
           formatOn={FormatOn.Change}
           thousandSeparator=","
-          thousandStyle={ThousandStyle.Thousand}
-          maxDecimals={2}
+          groupingStyle={GroupingStyle.Thousand}
+          decimalMaxLength={2}
           enableCompactNotation
           placeholder="Paste a foreign-locale number here…"
           className={inputClass}

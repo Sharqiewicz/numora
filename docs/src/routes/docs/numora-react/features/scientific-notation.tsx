@@ -34,8 +34,8 @@ function ScientificNotation() {
       <ExampleWithDemo
         description={'Try pasting "1.5e-7", "2e+5", or "1.5e-18" - all are expanded automatically'}
         language="tsx"
-        code={`<NumoraInput maxDecimals={18} />`}
-        config={{ maxDecimals: 18 }}
+        code={`<NumoraInput decimalMaxLength={18} />`}
+        config={{ decimalMaxLength: 18 }}
       />
 
       <p>

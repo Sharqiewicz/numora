@@ -97,7 +97,7 @@ export function ScientificNotationDemo() {
               value={numoraValue}
               onChange={(e) => setNumoraValue(e.target.value)}
               enableCompactNotation
-              maxDecimals={18}
+              decimalMaxLength={18}
               placeholder="Paste scientific notation..."
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
