@@ -72,13 +72,12 @@ features/
   non-numeric-characters.ts
   mobile-keyboard-filtering.ts
   formatting/
-    index.ts             - Re-exports + formatWithSeparators, updateCursorPosition, skipOverThousandSeparatorOnDelete
-    thousand-grouping.ts - formatWithSeparators (Thousand/Lakh/Wan grouping styles)
-    cursor-position.ts   - updateCursorPosition (most complex module - cursor preservation after formatting)
-    change-detection.ts  - findChangedRangeFromCaretPositions
-    digit-counting.ts    - countMeaningfulDigitsBeforePosition
-    cursor-boundary.ts   - skipOverThousandSeparatorOnDelete
-    constants.ts         - GROUPING_CONFIG
+    index.ts               - Re-exports (formatWithSeparators, computeCursorPosition, skipOverThousandSeparatorOnDelete, undo-preserving DOM writes)
+    thousand-grouping.ts   - formatWithSeparators (Thousand/Lakh/Wan grouping styles)
+    rank-select.ts         - rank/select caret mapping between raw and formatted offsets (caret-preservation core, replaces the old cursor-position engine)
+    caret-position-utils.ts- computeCursorPosition, computeStripSeparatorsResult, skipOverThousandSeparatorOnDelete
+    dom-writes.ts          - writeValuePreservingUndo, writeStripPreservingUndo (undo-preserving setRangeText writes)
+    constants.ts           - GROUPING_CONFIG
 ```
 
 ### React Package (`packages/react/src/`)
