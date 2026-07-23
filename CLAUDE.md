@@ -53,10 +53,10 @@ Path alias `@` maps to `packages/core/src/` in both packages' Vite/Rollup config
 NumoraInput.ts           - Vanilla TS class: creates <input>, attaches listeners, public API
 index.ts                 - Public exports
 config.ts                - Default option values
-types.ts                 - FormatOn, ThousandStyle enums; FormattingOptions interface
+types.ts                 - FormatOn, GroupingStyle (as-const unions); FormattingOptions, LocaleTag
 validation.ts            - Options validation (throws on invalid config)
 utils/
-  event-handlers.ts      - handleOnBeforeInputNumoraInput, handleOnChangeNumoraInput,
+  event-handlers.ts      - handleOnBeforeInputNumoraInput,
                            handleOnKeyDownNumoraInput, handleOnPasteNumoraInput
   format-utils.ts        - formatInputValue, formatValueForDisplay (entry points for pipeline)
   locale.ts              - applyLocale, getSeparatorsFromLocale
@@ -83,12 +83,12 @@ features/
 
 ### React Package (`packages/react/src/`)
 
-The React `NumoraInput` component does **not** instantiate the vanilla `NumoraInput` class. It is a `forwardRef` component that directly calls the same core event-handler functions via its own React-aware wrappers in `handlers.ts`.
+The React `NumoraInput` component does **not** instantiate the vanilla `NumoraInput` class. It is a `forwardRef` component that directly calls the same core event-handler functions through inline React wrappers in `index.tsx`.
 
 `index.tsx` exports:
 - `NumoraInput` - the React component
 - `NumoraInputChangeEvent` / `NumoraHTMLInputElement` - types for the synthetic change event
-- Re-exports `FormatOn`, `ThousandStyle`, `FormattingOptions`, `CaretPositionInfo` from `numora`
+- Re-exports `FormatOn`, `GroupingStyle`, `FormattingOptions`, `LocaleTag` from `numora`
 
 ### Data Flow & Event Architecture
 
@@ -109,23 +109,40 @@ The primary input path goes through `beforeinput`, **not** `input`. This is inte
 `FormattingOptions` (passed through the call stack to all formatting functions):
 - `formatOn`: `FormatOn.Blur` (default) | `FormatOn.Change`
 - `thousandSeparator`: string (default `','`)
-- `ThousandStyle`: `ThousandStyle.None` (default) | `Thousand` | `Lakh` | `Wan`
+- `groupingStyle`: `GroupingStyle.Thousand` (default) | `Lakh` | `Wan` | `None`
 - `decimalSeparator`: string (default `'.'`)
-- `decimalMinLength`, `enableCompactNotation`, `enableNegative`, `enableLeadingZeros`, `rawValueMode`
+- `decimalMaxLength` (default `18`, DeFi-safe), `decimalMinLength`, `enableCompactNotation`, `enableNegative`, `enableLeadingZeros`, `emitRawValue`
 
-`rawValueMode`: when true, `onChange` emits the raw value without separators. In React, `e.target.value` always returns the raw value; `e.target.formattedValue` is the display string with separators.
+`emitRawValue` (vanilla core only): when true, `onChange` emits the raw value without separators. In React there is NO such toggle - `e.target.value` ALWAYS returns the raw value and `e.target.formattedValue` is the display string. Cross-package plumbing (event handlers, undo-preserving writes) lives at `numora/internal`; the pure utilities stay on the `numora` root.
 
 ### Sanitization Pipeline (order matters)
 
-`sanitizeNumoraInput` in `features/sanitization.ts`:
+`sanitizeNumoraInput` in `features/sanitization.ts`. See the file-level doc-comment in that file for the authoritative list; the steps are:
 1. Filter mobile keyboard artifacts
-2. Remove thousand separators (if configured)
-3. Expand compact notation (if `enableCompactNotation`)
-4. Expand scientific notation
-5. Remove non-numeric characters
-6. Remove extra decimal separators
-7. Remove leading zeros (if `!enableLeadingZeros`)
+2. Remove thousand separators (only when `thousandSeparator` is set)
+3. Normalize fullwidth digits (e.g. `１２３` → `123`)
+4. Expand compact notation (only when `enableCompactNotation`)
+5. Expand scientific notation
+6. Remove non-numeric characters
+7. Remove extra decimal separators
+8. Remove leading zeros (unless `enableLeadingZeros`)
+9. Prepend leading zero (only when `autoAddLeadingZero`) — runs after step 8, so it can reverse `0.5` → `.5` back to `0.5`
+10. Truncate to `maxLength` (only when `maxLength !== undefined`)
 
 ### Adding Features
 
 New features in `packages/core/src/features/` should be pure functions with no side effects. Wire them into `sanitization.ts` (for input sanitization) or `utils/format-utils.ts` (for formatting). Export from `packages/core/src/index.ts`. Tests go in `packages/core/tests/`.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as local markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five canonical triage roles (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
