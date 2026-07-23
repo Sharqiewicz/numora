@@ -10,14 +10,3 @@ export const GROUPING_CONFIG = {
   lakh: { firstGroup: 3, restGroup: 2 },
   wan: { size: 4 },
 } as const;
-
-/**
- * Interface representing a change range in the input value.
- * Used to distinguish between Delete and Backspace operations.
- */
-export interface ChangeRange {
-  start: number;
-  end: number;
-  deletedLength: number;
-  isDelete?: boolean;
-}

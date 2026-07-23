@@ -135,5 +135,76 @@ describe('expandScientificNotation', () => {
       expect(result).toBe('value 0.00000015 here');
     });
   });
+
+  describe('Custom decimal separator', () => {
+    it('should expand 1,5e-7 to 0,00000015 when comma is the decimal separator', () => {
+      expect(expandScientificNotation('1,5e-7', ',')).toBe('0,00000015');
+    });
+
+    it('should expand 1,5e3 to 1500 with comma separator', () => {
+      expect(expandScientificNotation('1,5e3', ',')).toBe('1500');
+    });
+
+    it('should expand 1,23e-4 to 0,000123 with comma separator', () => {
+      expect(expandScientificNotation('1,23e-4', ',')).toBe('0,000123');
+    });
+
+    it('should expand 2e-3 to 0,002 with comma separator', () => {
+      expect(expandScientificNotation('2e-3', ',')).toBe('0,002');
+    });
+
+    it('should leave the input unchanged when no e/E present', () => {
+      expect(expandScientificNotation('1,5', ',')).toBe('1,5');
+    });
+
+    it('should preserve negative sign with comma separator', () => {
+      expect(expandScientificNotation('-1,5e3', ',')).toBe('-1500');
+    });
+  });
+
+  describe('Regression: bare leading decimal mantissa (#2)', () => {
+    it('should expand ".5e3" to "500" (not ".5000")', () => {
+      expect(expandScientificNotation('.5e3')).toBe('500');
+    });
+
+    it('should expand "-.5e3" to "-500"', () => {
+      expect(expandScientificNotation('-.5e3')).toBe('-500');
+    });
+
+    it('should expand ".5e-1" to "0.05"', () => {
+      expect(expandScientificNotation('.5e-1')).toBe('0.05');
+    });
+
+    it('should handle a bare leading decimal with a comma separator', () => {
+      expect(expandScientificNotation(',5e3', ',')).toBe('500');
+    });
+  });
+
+  describe('Regression: negative-zero magnitude (#9)', () => {
+    it('should expand "-0e5" to "0" (not "-0")', () => {
+      expect(expandScientificNotation('-0e5')).toBe('0');
+    });
+
+    it('should expand "-0.0e5" to "0"', () => {
+      expect(expandScientificNotation('-0.0e5')).toBe('0');
+    });
+  });
+
+  describe('Regression: unbounded exponent is bounded (#1)', () => {
+    it('should not throw or allocate a huge string for a massive positive exponent', () => {
+      const out = expandScientificNotation('1e600000000');
+      // Left unexpanded (token untouched) rather than crashing or allocating ~600MB.
+      expect(out).toBe('1e600000000');
+    });
+
+    it('should not throw for a massive negative exponent', () => {
+      const out = expandScientificNotation('1e-600000000');
+      expect(out).toBe('1e-600000000');
+    });
+
+    it('should still expand exponents within the bound', () => {
+      expect(expandScientificNotation('1e3')).toBe('1000');
+    });
+  });
 });
 

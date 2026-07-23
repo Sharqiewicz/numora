@@ -84,7 +84,7 @@ describe('BeforeInputResult contract', () => {
     expect(result).toEqual({ type: 'reject' });
   });
 
-  it('returns reject when typed digit would overflow maxDecimals', () => {
+  it('returns reject when typed digit would overflow decimalMaxLength', () => {
     const input = makeInput('1.99', 4, 4);
     const result = handleOnBeforeInputNumoraInput(
       makeBeforeInput(input, InputType.InsertText, '9'),

@@ -2,10 +2,10 @@ import {
   trimToDecimalMaxLength,
   ensureMinDecimals,
   getSeparators,
-} from '@/features/decimals';
-import { sanitizeNumoraInput } from '@/features/sanitization';
-import { formatWithSeparators } from '@/features/formatting';
-import { type FormattingOptions, FormatOn, ThousandStyle } from '@/types';
+} from '../features/decimals';
+import { sanitizeNumoraInput } from '../features/sanitization';
+import { formatWithSeparators } from '../features/formatting';
+import { type FormattingOptions, FormatOn, GroupingStyle } from '../types';
 
 /**
  * Formats a value from user input events (onChange, onBlur) by sanitizing, trimming decimals, and applying formatting.
@@ -58,7 +58,7 @@ export function formatInputValue(
     ? formatWithSeparators(
         valueWithMinDecimals,
         formattingOptions.thousandSeparator as string,
-        formattingOptions.thousandStyle ?? ThousandStyle.None,
+        formattingOptions.groupingStyle ?? GroupingStyle.None,
         formattingOptions.enableLeadingZeros,
         separators.decimalSeparator
       )

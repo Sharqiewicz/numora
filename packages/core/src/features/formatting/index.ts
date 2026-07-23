@@ -8,23 +8,10 @@
  */
 
 // === TYPES & CONSTANTS ===
-export type { ChangeRange } from './constants';
 export { GROUPING_CONFIG } from './constants';
 
 // === NUMBER FORMATTING ===
 export { formatWithSeparators } from './thousand-grouping';
-
-// === CURSOR POSITION CALCULATION ===
-export {
-  calculateCursorPositionAfterFormatting,
-  type CursorPositionOptions,
-} from './cursor-position';
-
-// === CHANGE DETECTION ===
-export { findChangedRangeFromCaretPositions, findChangeRange } from './change-detection';
-
-// === CARET BOUNDARY SYSTEM ===
-export { getCaretBoundary, getCaretPosInBoundary } from './cursor-boundary';
 
 // === CARET POSITION UTILITIES ===
 export {

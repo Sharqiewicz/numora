@@ -1,10 +1,10 @@
-import { getSeparators } from '@/features/decimals';
-import { removeThousandSeparators } from '@/features/sanitization';
+import { getSeparators } from '../features/decimals';
+import { removeThousandSeparators } from '../features/sanitization';
 import {
   computeCursorPosition,
   skipOverThousandSeparatorOnDelete,
-} from '@/features/formatting';
-import { type FormattingOptions, type CaretPositionInfo, FormatOn, InputType } from '@/types';
+} from '../features/formatting';
+import { type FormattingOptions, type CaretPositionInfo, FormatOn, InputType } from '../types';
 import { formatInputValue } from './format-utils';
 
 /**
@@ -14,8 +14,10 @@ import { formatInputValue } from './format-utils';
  * - `handled`: caller should preventDefault, write `formatted` to the input via an
  *   undo-preserving write, set caret to `cursorPos`, and notify listeners.
  * - `reject`: caller should preventDefault. The input value is left untouched.
- * - `skip`: caller should NOT preventDefault. Includes paste/drop (handled by the
- *   dedicated paste listener) and any unrecognized inputType.
+ * - `skip`: caller should NOT preventDefault. Includes paste (handled by the dedicated
+ *   paste listener), native drop (no dedicated listener - it falls through to the
+ *   browser's own insertion and the generic `input`/handleChange fallback), and any
+ *   unrecognized inputType.
  */
 export type BeforeInputResult =
   | { type: 'handled'; formatted: string; raw: string; cursorPos: number }
@@ -74,9 +76,11 @@ export function handleOnBeforeInputNumoraInput(
   }
 
   // intendedValue: what the input would contain if we let the browser apply the action.
-  // intendedCursorPos: where the caret would land in intendedValue.
-  // endOffset: chars deleted forward from the cursor (only matters for Delete-forward
-  // family with no selection). Used downstream by findChangedRangeFromCaretPositions.
+  // intendedCursorPos: where the caret would land in intendedValue. The caret math
+  // (computeCursorPosition) maps this through separator reflow, so intendedCursorPos
+  // already encodes the post-edit position for every action below (including Delete).
+  // endOffset is retained on the caret-info payload for back-compat but no longer drives
+  // the caret computation.
   let intendedValue: string;
   let intendedCursorPos: number;
   let endOffset = 0;
@@ -124,6 +128,13 @@ export function handleOnBeforeInputNumoraInput(
       break;
     }
     default:
+      // Everything else — most notably IME composition (`insertCompositionText`) — is left to
+      // the browser. Skipping means no preventDefault, so the composition commits natively and
+      // the generic `input`/handleChange path re-derives the value from the committed DOM
+      // string. The VALUE stays correct (sanitization still runs); the CARET is best-effort
+      // during an active composition, because there is no pre-edit caret to map from. Known
+      // limit, not an oversight: intercepting composition would require buffering the
+      // composing text and is out of scope for a numeric field.
       return { type: 'skip' };
   }
 
@@ -200,25 +211,6 @@ export function handleOnKeyDownNumoraInput(
 }
 
 /**
- * Calculates the cursor position after paste, accounting for the net change in value length.
- *
- * @param selectionStart - The selection start position before paste
- * @param clipboardDataLength - Length of the pasted clipboard data
- * @param combinedValueLength - Length of the combined value (current + pasted)
- * @param formattedLength - Length after sanitization and formatting
- * @returns The new cursor position
- */
-function calculateCursorPositionAfterPaste(
-  selectionStart: number,
-  clipboardDataLength: number,
-  combinedValueLength: number,
-  formattedLength: number
-): number {
-  const netLengthChange = formattedLength - combinedValueLength;
-  return selectionStart + clipboardDataLength + netLengthChange;
-}
-
-/**
  * Outcome of `handleOnPasteNumoraInput`. The caller always calls preventDefault on the
  * paste event; the variant says whether to apply a write or leave the input untouched.
  *
@@ -240,10 +232,12 @@ export function handleOnPasteNumoraInput(
 ): PasteResult {
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
+  const separators = getSeparators(formattingOptions);
 
   const clipboardData = e.clipboardData?.getData('text/plain') || '';
-  const combinedValue =
-    value.slice(0, selectionStart || 0) + clipboardData + value.slice(selectionEnd || 0);
+  const selStart = selectionStart ?? 0;
+  const selEnd = selectionEnd ?? 0;
+  const combinedValue = value.slice(0, selStart) + clipboardData + value.slice(selEnd);
 
   // Always strip thousand separators during paste: pasted content may contain separators
   // and the current value may have separators (blur mode); both need to be parsed together.
@@ -258,12 +252,32 @@ export function handleOnPasteNumoraInput(
     return { type: 'reject' };
   }
 
-  const newCursorPosition = calculateCursorPositionAfterPaste(
-    selectionStart || 0,
-    clipboardData.length,
-    combinedValue.length,
-    formattedValue.length
-  );
+  // Paste is the same shape as a keystroke: `combinedValue` is the post-edit value with
+  // stale separators and `intendedCursorPos` is the post-edit caret (just after the pasted
+  // text). Route both through the same rank/select mapping the typing path uses, so that a
+  // length change occurring away from the paste point (e.g. a decimal trim at the tail) is
+  // not misattributed to the insertion point.
+  const intendedCursorPos = selStart + clipboardData.length;
 
-  return { type: 'handled', formatted: formattedValue, raw: rawValue, cursorPos: newCursorPosition };
+  let cursorPos: number;
+  if (combinedValue !== formattedValue) {
+    const syntheticCaretInfo: CaretPositionInfo = {
+      selectionStart: selStart,
+      selectionEnd: selEnd,
+      endOffset: 0,
+    };
+    const computed = computeCursorPosition(
+      combinedValue,
+      formattedValue,
+      intendedCursorPos,
+      syntheticCaretInfo,
+      separators,
+      formattingOptions
+    );
+    cursorPos = computed ?? intendedCursorPos;
+  } else {
+    cursorPos = intendedCursorPos;
+  }
+
+  return { type: 'handled', formatted: formattedValue, raw: rawValue, cursorPos };
 }

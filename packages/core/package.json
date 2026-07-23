@@ -1,6 +1,6 @@
 {
   "name": "numora",
-  "version": "3.5.0",
+  "version": "5.0.0",
   "description": "Framework-agnostic numeric input library for DeFi and financial apps",
   "homepage": "https://numora.xyz/",
   "main": "dist/index.js",
@@ -13,6 +13,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./internal": {
+      "types": "./dist/internal.d.ts",
+      "import": "./dist/internal.mjs",
+      "require": "./dist/internal.js"
     }
   },
   "repository": {
@@ -22,7 +27,10 @@
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly",
     "test": "vitest run",
-    "dev": "vite build --watch & tsc --watch --emitDeclarationOnly --preserveWatchOutput"
+    "dev": "vite build --watch & tsc --watch --emitDeclarationOnly --preserveWatchOutput",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "lint": "biome lint ./src"
   },
   "keywords": [
     "numeric input",

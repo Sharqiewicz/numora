@@ -144,4 +144,28 @@ describe('✅ expandCompactNotation', () => {
       expect(expandCompactNotation('111222333444555666777.8888K')).toBe('111222333444555666777888.8');
     });
   });
+
+  describe('Custom decimal separator', () => {
+    it('should expand 1,5k to 1500 when comma is the decimal separator', () => {
+      expect(expandCompactNotation('1,5k', ',')).toBe('1500');
+    });
+
+    it('should expand 2,5m to 2500000 with comma separator', () => {
+      expect(expandCompactNotation('2,5m', ',')).toBe('2500000');
+    });
+
+    it('should handle decimal expansions that need trimming with comma separator', () => {
+      expect(expandCompactNotation('1,234k', ',')).toBe('1234');
+    });
+
+    it('should emit comma in result when overflow happens (1,234567k)', () => {
+      expect(expandCompactNotation('1,234567k', ',')).toBe('1234,567');
+    });
+
+    it('should leave dot-prefixed scientific-style values alone when comma is decimal', () => {
+      // "1.5k" with comma as decimal separator: the literal "." is not the decimal
+      // separator, so the regex sees "5k" and expands only that.
+      expect(expandCompactNotation('1.5k', ',')).toBe('1.5000');
+    });
+  });
 });

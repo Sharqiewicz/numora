@@ -2,9 +2,8 @@
  * Static regex patterns for compact notation processing.
  * Defined at module level to avoid recompilation on each function call.
  */
-
-// Match compact notation patterns: number followed by scale suffix (case-insensitive)
-const COMPACT_NOTATION_REGEX = /(\d+\.?\d*)\s*([kmbt])/gi;
+import { escapeRegExp } from '../utils/escape-reg-exp';
+import { getCachedRegex } from '../utils/regex-cache';
 
 // Remove leading zeros from integer part
 const LEADING_ZEROS_REGEX = /^0+/;
@@ -14,9 +13,6 @@ const LEADING_ZERO_REPLACE_REGEX = /^(-?)0+([1-9])/;
 
 // Match strings that are all zeros (with optional sign)
 const ALL_ZEROS_REGEX = /^-?0+$/;
-
-// Trim trailing zeros from decimal part (including optional decimal point)
-const TRAILING_ZEROS_REGEX = /\.?0+$/;
 
 /**
  * Scale suffix to zero count mapping.
@@ -45,8 +41,12 @@ const ZERO_COUNTS: Record<string, number> = {
  * expandCompactNotation("2.5T")   // "2500000000000"
  * expandCompactNotation("0.5k")   // "500"
  */
-export function expandCompactNotation(value: string): string {
-  return value.replace(COMPACT_NOTATION_REGEX, (match, number, suffix) => {
+export function expandCompactNotation(value: string, decimalSeparator: string = '.'): string {
+  const escapedSep = escapeRegExp(decimalSeparator);
+  const compactRegex = getCachedRegex(`(\\d+${escapedSep}?\\d*)\\s*([kmbt])`, 'gi');
+  const trailingZerosRegex = getCachedRegex(`${escapedSep}?0+$`, '');
+
+  return value.replace(compactRegex, (match, number, suffix) => {
     // Normalize suffix to lowercase for lookup
     const suffixLower = suffix.toLowerCase();
     const zerosToAdd = ZERO_COUNTS[suffixLower];
@@ -55,7 +55,7 @@ export function expandCompactNotation(value: string): string {
       return match;
     }
 
-    const [integerPart, decimalPart = ''] = number.split('.');
+    const [integerPart, decimalPart = ''] = number.split(decimalSeparator);
 
     // Remove leading zeros from integer part (but keep at least one digit if it's all zeros)
     const cleanedInteger = integerPart.replace(LEADING_ZEROS_REGEX, '') || '0';
@@ -73,7 +73,7 @@ export function expandCompactNotation(value: string): string {
       // Decimal part is longer: split it
       const decimalToMove = decimalPart.slice(0, zerosToAdd);
       const remainingDecimal = decimalPart.slice(zerosToAdd);
-      result = cleanedInteger + decimalToMove + '.' + remainingDecimal;
+      result = cleanedInteger + decimalToMove + decimalSeparator + remainingDecimal;
     }
 
     // Remove leading zeros from the final result (but keep at least one digit)
@@ -84,9 +84,9 @@ export function expandCompactNotation(value: string): string {
       result = '0';
     }
 
-    // Trim trailing zeros from decimal part only (if decimal point exists)
-    if (result.includes('.')) {
-      result = result.replace(TRAILING_ZEROS_REGEX, '');
+    // Trim trailing zeros from decimal part only (if decimal separator exists)
+    if (result.includes(decimalSeparator)) {
+      result = result.replace(trailingZerosRegex, '');
     }
 
     return result;

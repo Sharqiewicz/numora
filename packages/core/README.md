@@ -15,13 +15,13 @@ npm install numora
 ## Usage
 
 ```typescript
-import { NumoraInput, FormatOn, ThousandStyle } from 'numora';
+import { NumoraInput, FormatOn, GroupingStyle } from 'numora';
 
 const input = new NumoraInput(document.querySelector('#amount'), {
   decimalMaxLength: 2,
   decimalMinLength: 2,
   thousandSeparator: ',',
-  thousandStyle: ThousandStyle.Thousand,
+  groupingStyle: GroupingStyle.Thousand,
   formatOn: FormatOn.Blur,
   onChange: (value) => console.log(value),
 });
@@ -44,16 +44,20 @@ console.log(input.valueAsNumber); // 1234.56
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `decimalMaxLength` | `number` | `2` | Maximum decimal places allowed |
+| `decimalMaxLength` | `number` | `18` | Maximum decimal places allowed |
 | `decimalMinLength` | `number` | `0` | Minimum decimal places (pads with zeros) |
 | `decimalSeparator` | `string` | `'.'` | Decimal separator character |
 | `thousandSeparator` | `string` | `','` | Thousand separator character |
-| `thousandStyle` | `ThousandStyle` | `ThousandStyle.None` | Grouping style: `Thousand`, `Lakh`, `Wan`, or `None` |
+| `groupingStyle` | `GroupingStyle` | `GroupingStyle.Thousand` | Grouping style: `Thousand`, `Lakh`, `Wan`, or `None` |
 | `formatOn` | `FormatOn` | `FormatOn.Blur` | When to apply formatting: `Blur` or `Change` |
 | `enableCompactNotation` | `boolean` | `false` | Expand compact notation on paste/setValue |
 | `enableNegative` | `boolean` | `false` | Allow negative numbers |
 | `enableLeadingZeros` | `boolean` | `false` | Allow leading zeros |
-| `rawValueMode` | `boolean` | `false` | Return unformatted values in `onChange` |
+| `autoAddLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |
+| `maxLength` | `number` | `undefined` | Max raw length (digits + decimal separator + leading `-`; thousand separators not counted) |
+| `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject a keystroke/paste when it returns false (called with the post-sanitization raw value) |
+| `locale` | `string \| true` | `undefined` | Derive separators from `Intl.NumberFormat`; `true` uses the runtime default locale |
+| `emitRawValue` | `boolean` | `false` | Return unformatted (raw) values in `onChange` |
 | `onChange` | `(value: string) => void` | `undefined` | Called when value changes |
 | `value` | `string` | `undefined` | Initial value (controlled) |
 | `defaultValue` | `string` | `undefined` | Initial value (uncontrolled) |

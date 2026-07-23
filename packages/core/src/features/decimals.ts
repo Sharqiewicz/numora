@@ -1,7 +1,7 @@
 import { DEFAULT_DECIMAL_SEPARATOR } from "@/config";
-import type { SeparatorOptions, Separators, FormattingOptions } from '@/types';
-import { getCachedRegex } from '@/utils/regex-cache';
-import { escapeRegExp } from '@/utils/escape-reg-exp';
+import type { SeparatorOptions, Separators, FormattingOptions } from '../types';
+import { getCachedRegex } from '../utils/regex-cache';
+import { escapeRegExp } from '../utils/escape-reg-exp';
 
 // Pre-compiled regex for the common case: decimal separator is '.' or ','.
 // The character class [.,] covers both hardcoded removals in a single pass.

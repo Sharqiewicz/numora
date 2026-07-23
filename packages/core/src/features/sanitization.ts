@@ -7,9 +7,10 @@ import { prependLeadingZero } from './prepend-leading-zero';
 import { truncateToMaxLength } from './max-length';
 import { filterMobileKeyboardArtifacts } from './mobile-keyboard-filtering';
 import { normalizeFullWidthDigits } from './fullwidth-digits';
+import { normalizeUnicodeMinus } from './unicode-minus';
 import { getCachedRegex } from '../utils/regex-cache';
 import { escapeRegExp } from '../utils/escape-reg-exp';
-import type { FormattingOptions } from '@/types';
+import type { FormattingOptions } from '../types';
 
 /**
  * Removes all occurrences of thousand separator from a string.
@@ -27,7 +28,7 @@ export function removeThousandSeparators(value: string, thousandSeparator: strin
  * Sanitizes numeric input by:
  * 0. Filter mobile keyboard artifacts (non-breaking spaces, Unicode whitespace)
  * 1. Remove thousand separators (formatting, not data) - only when `thousandSeparator` is set
- * 2. Normalizing fullwidth digits (e.g., １２３ → 123)
+ * 2. Normalizing fullwidth digits (e.g., １２３ → 123) and non-ASCII minus signs (e.g., − → -)
  * 3. (Optional) Expanding compact notation (e.g., 1k → 1000)
  * 4. Expanding scientific notation (e.g., 1.5e-5 → 0.000015)
  * 5. Removing non-numeric characters
@@ -47,42 +48,56 @@ export const sanitizeNumoraInput = (
   value: string,
   formattingOptions?: FormattingOptions
 ): string => {
+  // Step 1 also strips NBSP-family whitespace (incl. U+202F, the French thousand separator
+  // from Intl.NumberFormat). For NBSP-using locales this means step 2 may already be a
+  // no-op by the time it runs - benign, but worth knowing when debugging locale output.
   let sanitized = filterMobileKeyboardArtifacts(value);
 
-  if (formattingOptions?.thousandSeparator) {
-    sanitized = removeThousandSeparators(sanitized, formattingOptions.thousandSeparator);
-  }
+  // Defense-in-depth: sanitization runs synchronously inside beforeinput/paste handlers
+  // that have already called preventDefault(). An unexpected throw here (e.g. an
+  // adversarial expansion the individual guards didn't anticipate) would propagate out of
+  // the event handler and leave the input in an undefined state. Fall back to the
+  // best-effort value computed so far rather than crashing the keystroke.
+  try {
+    if (formattingOptions?.thousandSeparator) {
+      sanitized = removeThousandSeparators(sanitized, formattingOptions.thousandSeparator);
+    }
 
-  sanitized = normalizeFullWidthDigits(sanitized);
+    sanitized = normalizeFullWidthDigits(sanitized);
+    sanitized = normalizeUnicodeMinus(sanitized);
 
-  if (formattingOptions?.enableCompactNotation) {
-    sanitized = expandCompactNotation(sanitized);
-  }
+    if (formattingOptions?.enableCompactNotation) {
+      sanitized = expandCompactNotation(sanitized, formattingOptions?.decimalSeparator);
+    }
 
-  sanitized = expandScientificNotation(sanitized);
+    sanitized = expandScientificNotation(sanitized, formattingOptions?.decimalSeparator);
 
-  sanitized = removeNonNumericCharacters(
-    sanitized,
-    formattingOptions?.enableNegative,
-    formattingOptions?.decimalSeparator
-  );
-
-  sanitized = removeExtraDecimalSeparators(sanitized, formattingOptions?.decimalSeparator);
-
-  if (!formattingOptions?.enableLeadingZeros) {
-    sanitized = removeLeadingZeros(sanitized);
-  }
-
-  if (formattingOptions?.autoAddLeadingZero) {
-    sanitized = prependLeadingZero(sanitized, formattingOptions?.decimalSeparator);
-  }
-
-  if (formattingOptions?.maxLength !== undefined) {
-    sanitized = truncateToMaxLength(
+    sanitized = removeNonNumericCharacters(
       sanitized,
-      formattingOptions.maxLength,
+      formattingOptions?.enableNegative,
       formattingOptions?.decimalSeparator
     );
+
+    sanitized = removeExtraDecimalSeparators(sanitized, formattingOptions?.decimalSeparator);
+
+    if (!formattingOptions?.enableLeadingZeros) {
+      sanitized = removeLeadingZeros(sanitized, formattingOptions?.decimalSeparator);
+    }
+
+    if (formattingOptions?.autoAddLeadingZero) {
+      sanitized = prependLeadingZero(sanitized, formattingOptions?.decimalSeparator);
+    }
+
+    if (formattingOptions?.maxLength !== undefined) {
+      sanitized = truncateToMaxLength(
+        sanitized,
+        formattingOptions.maxLength,
+        formattingOptions?.decimalSeparator
+      );
+    }
+  } catch {
+    // `sanitized` holds the last successfully-completed step's output.
+    return sanitized;
   }
 
   return sanitized;

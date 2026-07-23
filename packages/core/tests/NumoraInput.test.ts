@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NumoraInput } from '../src/NumoraInput';
 import { handleOnPasteNumoraInput } from '../src/utils/event-handlers';
-import { FormatOn, ThousandStyle } from '../src/types';
+import { FormatOn, GroupingStyle } from '../src/types';
 
 // ---------------------------------------------------------------------------
 // Test helpers - simulate the real browser event sequence for an <input>.
@@ -142,7 +142,7 @@ describe('NumoraInput Component', () => {
   });
 
   it('should replace comma with period when user types comma', () => {
-    createInputWithPlaceholder({ decimalSeparator: '.', thousandStyle: ThousandStyle.Thousand });
+    createInputWithPlaceholder({ decimalSeparator: '.', groupingStyle: GroupingStyle.Thousand });
     const inputElement = getInputElement();
 
     simulateTyping(inputElement, '1');
@@ -418,7 +418,7 @@ describe('beforeinput event path', () => {
         onChange: onChangeMock,
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.Thousand,
+        groupingStyle: GroupingStyle.Thousand,
       });
       const el = getInputElement();
 
@@ -437,7 +437,7 @@ describe('beforeinput event path', () => {
         onChange: onChangeMock,
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.Thousand,
+        groupingStyle: GroupingStyle.Thousand,
       });
       const el = getInputElement();
 
@@ -456,8 +456,8 @@ describe('beforeinput event path', () => {
         onChange: onChangeMock,
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.Thousand,
-        rawValueMode: true,
+        groupingStyle: GroupingStyle.Thousand,
+        emitRawValue: true,
       });
       const el = getInputElement();
 
@@ -508,7 +508,7 @@ describe('keydown - skipOverThousandSeparatorOnDelete', () => {
       onChange: onChangeMock,
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -535,7 +535,7 @@ describe('keydown - skipOverThousandSeparatorOnDelete', () => {
       onChange: onChangeMock,
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -560,7 +560,7 @@ describe('keydown - skipOverThousandSeparatorOnDelete', () => {
       onChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -577,7 +577,7 @@ describe('keydown - skipOverThousandSeparatorOnDelete', () => {
       onChange: onChangeMock,
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -696,7 +696,7 @@ describe('beforeinput - selection and cut/drag deletion', () => {
       onChange: onChangeMock,
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -795,7 +795,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
       onChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -810,7 +810,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
     new NumoraInput(container, {
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -829,7 +829,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
     new NumoraInput(container, {
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -846,7 +846,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
     new NumoraInput(container, {
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -864,7 +864,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
       onChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -880,7 +880,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
       onChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -902,7 +902,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
       onChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -923,7 +923,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
     new NumoraInput(container, {
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -941,7 +941,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
       onChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -964,7 +964,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
       onChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -979,7 +979,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
     new NumoraInput(container, {
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -994,7 +994,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
       onChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
     const el = getInputElement();
 
@@ -1211,7 +1211,7 @@ describe('Negative Number Support', () => {
       createInputWithNegatives({
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.Thousand,
+        groupingStyle: GroupingStyle.Thousand,
       });
       const inputElement = getInputElement();
 
@@ -1267,7 +1267,7 @@ describe('Negative Number Support', () => {
       createInputWithNegatives({
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.Thousand,
+        groupingStyle: GroupingStyle.Thousand,
       });
       const inputElement = getInputElement();
 
@@ -1281,7 +1281,7 @@ describe('Negative Number Support', () => {
       createInputWithNegatives({
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.Thousand,
+        groupingStyle: GroupingStyle.Thousand,
         decimalMaxLength: 2,
       });
       const inputElement = getInputElement();
@@ -1296,7 +1296,7 @@ describe('Negative Number Support', () => {
       createInputWithNegatives({
         formatOn: FormatOn.Blur,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.Thousand,
+        groupingStyle: GroupingStyle.Thousand,
       });
       const inputElement = getInputElement();
 
@@ -1515,14 +1515,17 @@ describe('Leading Zeros Support', () => {
       createInputWithLeadingZeros({
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.Thousand,
+        groupingStyle: GroupingStyle.Thousand,
       });
       const inputElement = getInputElement();
 
       inputElement.value = '0001234';
       inputElement.dispatchEvent(new Event('input'));
 
-      expect(inputElement.value).toBe('0001,234');
+      // Leading zeros are grouped as part of the full integer ("0,001,234"), not left
+      // ungrouped in front of a separately-grouped remainder ("0001,234"). The latter
+      // applied thousand grouping inconsistently across the same integer.
+      expect(inputElement.value).toBe('0,001,234');
     });
   });
 
@@ -1797,13 +1800,13 @@ describe('Raw Value Mode', () => {
     const input = new NumoraInput(container, {
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
       decimalSeparator: '.',
       decimalMaxLength: 8,
       enableCompactNotation: false,
       enableNegative: false,
       enableLeadingZeros: false,
-      rawValueMode: true,
+      emitRawValue: true,
       onChange: onChangeMock,
       ...options,
     });
@@ -1830,7 +1833,7 @@ describe('Raw Value Mode', () => {
       expect(onChangeMock).toHaveBeenCalledWith('1234');
     });
 
-    it('should return raw value from getValue() when rawValueMode is enabled', () => {
+    it('should return raw value from getValue() when emitRawValue is enabled', () => {
       const input = createInputWithRawValueMode();
       const inputElement = getInputElement();
 
@@ -1841,17 +1844,17 @@ describe('Raw Value Mode', () => {
       expect(input.getValue()).toBe('1234567');
     });
 
-    it('should return formatted value from getValue() when rawValueMode is disabled', () => {
+    it('should return formatted value from getValue() when emitRawValue is disabled', () => {
       const input = new NumoraInput(container, {
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.Thousand,
+        groupingStyle: GroupingStyle.Thousand,
         decimalSeparator: '.',
         decimalMaxLength: 8,
         enableCompactNotation: false,
         enableNegative: false,
         enableLeadingZeros: false,
-        rawValueMode: false,
+        emitRawValue: false,
         onChange: onChangeMock,
       });
       const inputElement = getInputElement();
@@ -1980,13 +1983,13 @@ describe('Raw Value Mode', () => {
       const input = new NumoraInput(container, {
         formatOn: FormatOn.Blur,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.Thousand,
+        groupingStyle: GroupingStyle.Thousand,
         decimalSeparator: '.',
         decimalMaxLength: 8,
         enableCompactNotation: false,
         enableNegative: false,
         enableLeadingZeros: false,
-        rawValueMode: true,
+        emitRawValue: true,
         onChange: onChangeMock,
       });
       const inputElement = getInputElement();
@@ -1996,7 +1999,7 @@ describe('Raw Value Mode', () => {
       // Simulate blur by using setValue which formats the value and updates internal state
       // In test environments, blur events don't always trigger handlers properly
       // This tests that the formatting and rawValue extraction work correctly
-      // setValue in rawValueMode will format the raw value for display and store it internally
+      // setValue in emitRawValue will format the raw value for display and store it internally
       input.setValue('1234567');
 
       expect(inputElement.value).toBe('1,234,567');
@@ -2044,13 +2047,13 @@ describe('Raw Value Mode', () => {
       const input = new NumoraInput(container, {
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.None,
+        groupingStyle: GroupingStyle.None,
         decimalSeparator: '.',
         decimalMaxLength: 8,
         enableCompactNotation: false,
         enableNegative: false,
         enableLeadingZeros: false,
-        rawValueMode: true,
+        emitRawValue: true,
         onChange: onChangeMock,
       });
       const inputElement = getInputElement();
@@ -2064,17 +2067,17 @@ describe('Raw Value Mode', () => {
   });
 
   describe('Backward compatibility', () => {
-    it('should maintain current behavior when rawValueMode is false', () => {
+    it('should maintain current behavior when emitRawValue is false', () => {
       const input = new NumoraInput(container, {
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.Thousand,
+        groupingStyle: GroupingStyle.Thousand,
         decimalSeparator: '.',
         decimalMaxLength: 8,
         enableCompactNotation: false,
         enableNegative: false,
         enableLeadingZeros: false,
-        rawValueMode: false,
+        emitRawValue: false,
         onChange: onChangeMock,
       });
       const inputElement = getInputElement();
@@ -2092,13 +2095,13 @@ describe('Raw Value Mode', () => {
       const input = new NumoraInput(container, {
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
-        thousandStyle: ThousandStyle.Thousand,
+        groupingStyle: GroupingStyle.Thousand,
         decimalSeparator: '.',
         decimalMaxLength: 8,
         enableCompactNotation: false,
         enableNegative: false,
         enableLeadingZeros: false,
-        // rawValueMode not specified - should default to false
+        // emitRawValue not specified - should default to false
         onChange: onChangeMock,
       });
       const inputElement = getInputElement();
@@ -2225,7 +2228,7 @@ describe('beforeinput - whole-line deletes', () => {
   }
 
   it('deleteSoftLineBackward removes everything before the cursor', () => {
-    new NumoraInput(container, { formatOn: FormatOn.Change, thousandSeparator: ',', thousandStyle: ThousandStyle.Thousand });
+    new NumoraInput(container, { formatOn: FormatOn.Change, thousandSeparator: ',', groupingStyle: GroupingStyle.Thousand });
     const el = getInputElement();
     el.value = '1,234,567';
     el.setSelectionRange(5, 5); // between '3' and '4' in formatted
@@ -2321,7 +2324,7 @@ describe('Adopt existing <input> element', () => {
 
   it('preserves pre-set value attribute on adopted input when no options.value is given', () => {
     host.value = '1000';
-    new NumoraInput(host, { thousandStyle: ThousandStyle.Thousand, formatOn: FormatOn.Change });
+    new NumoraInput(host, { groupingStyle: GroupingStyle.Thousand, formatOn: FormatOn.Change });
     expect(host.value).toBe('1,000');
   });
 
@@ -2340,7 +2343,7 @@ describe('Adopt existing <input> element', () => {
     new NumoraInput(host, {
       onChange: onChangeMock,
       formatOn: FormatOn.Change,
-      thousandStyle: ThousandStyle.Thousand,
+      groupingStyle: GroupingStyle.Thousand,
     });
 
     host.focus();

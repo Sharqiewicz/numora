@@ -3,42 +3,41 @@
  * Run with: npx vitest bench
  */
 import { bench, describe } from 'vitest';
-import { formatWithSeparators } from '../src/features/formatting';
+import { formatWithSeparators, computeCursorPosition } from '../src/features/formatting';
 import { removeThousandSeparators, sanitizeNumoraInput } from '../src/features/sanitization';
 import { removeNonNumericCharacters } from '../src/features/non-numeric-characters';
 import { expandCompactNotation } from '../src/features/compact-notation';
 import { expandScientificNotation } from '../src/features/scientific-notation';
-import { calculateCursorPositionAfterFormatting } from '../src/features/formatting/cursor-position';
-import { ThousandStyle } from '../src/types';
+import { GroupingStyle, FormatOn } from '../src/types';
 
 describe('Formatting Benchmarks', () => {
   describe('formatWithSeparators', () => {
     bench('small number (1234)', () => {
-      formatWithSeparators('1234', ',', ThousandStyle.Thousand);
+      formatWithSeparators('1234', ',', GroupingStyle.Thousand);
     });
 
     bench('medium number (1234567)', () => {
-      formatWithSeparators('1234567', ',', ThousandStyle.Thousand);
+      formatWithSeparators('1234567', ',', GroupingStyle.Thousand);
     });
 
     bench('large number (1234567890123)', () => {
-      formatWithSeparators('1234567890123', ',', ThousandStyle.Thousand);
+      formatWithSeparators('1234567890123', ',', GroupingStyle.Thousand);
     });
 
     bench('very large number (19 digits)', () => {
-      formatWithSeparators('1234567890123456789', ',', ThousandStyle.Thousand);
+      formatWithSeparators('1234567890123456789', ',', GroupingStyle.Thousand);
     });
 
     bench('with decimals (1234567.89)', () => {
-      formatWithSeparators('1234567.89', ',', ThousandStyle.Thousand, false, '.');
+      formatWithSeparators('1234567.89', ',', GroupingStyle.Thousand, false, '.');
     });
 
     bench('lakh style (1234567)', () => {
-      formatWithSeparators('1234567', ',', ThousandStyle.Lakh);
+      formatWithSeparators('1234567', ',', GroupingStyle.Lakh);
     });
 
     bench('wan style (12345678)', () => {
-      formatWithSeparators('12345678', ',', ThousandStyle.Wan);
+      formatWithSeparators('12345678', ',', GroupingStyle.Wan);
     });
   });
 
@@ -177,56 +176,41 @@ describe('Formatting Benchmarks', () => {
   });
 
   describe('Cursor Position Calculation', () => {
-    bench('insertion - no separator change', () => {
-      calculateCursorPositionAfterFormatting(
-        '123',
-        '1234',
-        3,
-        ',',
-        ThousandStyle.Thousand
+    const seps = { thousandSeparator: ',', decimalSeparator: '.' };
+    const fopts = {
+      thousandSeparator: ',',
+      groupingStyle: GroupingStyle.Thousand,
+      formatOn: FormatOn.Change,
+      decimalSeparator: '.',
+    };
+    const cc = (oldV: string, newV: string, cur: number) =>
+      computeCursorPosition(
+        oldV,
+        newV,
+        cur,
+        { selectionStart: cur, selectionEnd: cur, endOffset: 0 },
+        seps,
+        fopts
       );
+
+    bench('insertion - no separator change', () => {
+      cc('123', '1234', 3);
     });
 
     bench('insertion - separator added', () => {
-      calculateCursorPositionAfterFormatting(
-        '999',
-        '1,000',
-        3,
-        ',',
-        ThousandStyle.Thousand
-      );
+      cc('999', '1,000', 3);
     });
 
     bench('deletion - separator removed', () => {
-      calculateCursorPositionAfterFormatting(
-        '1,000',
-        '100',
-        2,
-        ',',
-        ThousandStyle.Thousand
-      );
+      cc('1,000', '100', 2);
     });
 
     bench('large number insertion', () => {
-      calculateCursorPositionAfterFormatting(
-        '123,456,789',
-        '1,234,567,890',
-        11,
-        ',',
-        ThousandStyle.Thousand
-      );
+      cc('123,456,789', '1,234,567,890', 11);
     });
 
     bench('with decimal values', () => {
-      calculateCursorPositionAfterFormatting(
-        '1,234.5',
-        '12,345.5',
-        5,
-        ',',
-        ThousandStyle.Thousand,
-        undefined,
-        '.'
-      );
+      cc('1,234.5', '12,345.5', 5);
     });
   });
 
@@ -238,7 +222,7 @@ describe('Formatting Benchmarks', () => {
         thousandSeparator: ',',
         decimalSeparator: '.',
       });
-      formatWithSeparators(sanitized, ',', ThousandStyle.Thousand, false, '.');
+      formatWithSeparators(sanitized, ',', GroupingStyle.Thousand, false, '.');
     });
 
     bench('paste with compact notation', () => {
@@ -248,7 +232,7 @@ describe('Formatting Benchmarks', () => {
         decimalSeparator: '.',
         enableCompactNotation: true,
       });
-      formatWithSeparators(sanitized, ',', ThousandStyle.Thousand, false, '.');
+      formatWithSeparators(sanitized, ',', GroupingStyle.Thousand, false, '.');
     });
 
     bench('paste with scientific notation', () => {
@@ -257,7 +241,7 @@ describe('Formatting Benchmarks', () => {
         thousandSeparator: ',',
         decimalSeparator: '.',
       });
-      formatWithSeparators(sanitized, ',', ThousandStyle.Thousand, false, '.');
+      formatWithSeparators(sanitized, ',', GroupingStyle.Thousand, false, '.');
     });
   });
 });

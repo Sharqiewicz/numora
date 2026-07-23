@@ -2,15 +2,18 @@
  * Static regex patterns for scientific notation processing.
  * Defined at module level to avoid recompilation on each function call.
  */
-
-// Match scientific notation: number with optional sign, optional decimal, followed by e/E and exponent
-const SCIENTIFIC_NOTATION_REGEX = /([+-]?\d+\.?\d*)[eE]([+-]?\d+)/g;
+import { escapeRegExp } from '../utils/escape-reg-exp';
+import { getCachedRegex } from '../utils/regex-cache';
 
 // Match strings that are all zeros
 const ALL_ZEROS_REGEX = /^0+$/;
 
-// Trim trailing zeros from decimal part (including optional decimal point)
-const TRAILING_ZEROS_REGEX = /\.?0+$/;
+// Upper bound on the number of digits a single exponent may introduce. A larger
+// exponent is left unexpanded: `'0'.repeat(n)` allocates ~n bytes and throws a
+// RangeError past ~2^28 chars, so an unbounded exponent from paste/typing (e.g.
+// "1e600000000") is an uncaught crash / multi-hundred-MB allocation on one keystroke.
+// Financial inputs never legitimately need this magnitude.
+const MAX_EXPANSION_DIGITS = 1000;
 
 /**
  * Expands scientific notation to decimal notation using string manipulation only.
@@ -20,28 +23,43 @@ const TRAILING_ZEROS_REGEX = /\.?0+$/;
  * @param value - The string value that may contain scientific notation
  * @returns The expanded decimal string, or original value if not scientific notation
  */
-export function expandScientificNotation(value: string): string {
+export function expandScientificNotation(value: string, decimalSeparator: string = '.'): string {
   // Fast early-exit for the dominant case (no scientific notation present)
   if (!value.includes('e') && !value.includes('E')) return value;
 
+  const escapedSep = escapeRegExp(decimalSeparator);
+  // The mantissa alternation accepts both a normal number (`\d+sep?\d*`) and a bare
+  // leading-decimal number (`sep\d+`, e.g. ".5"). Without the second branch, ".5e3"
+  // matched only "5e3" and left the "." dangling, silently yielding ".5000" (a 1000x
+  // error) instead of "500".
+  const scientificRegex = getCachedRegex(
+    `([+-]?(?:\\d+${escapedSep}?\\d*|${escapedSep}\\d+))[eE]([+-]?\\d+)`,
+    'g'
+  );
+  const trailingZerosRegex = getCachedRegex(`${escapedSep}?0+$`, '');
+
   // Single-pass replacement: String.replace() with a callback eliminates the
   // per-call new RegExp() compilation and the two-phase collect+replace loop.
-  // String.replace() resets lastIndex to 0 before each global replace, so
-  // SCIENTIFIC_NOTATION_REGEX can be reused safely as a module-level constant.
-  return value.replace(SCIENTIFIC_NOTATION_REGEX, (_full, base, exp) => {
+  return value.replace(scientificRegex, (_full, base, exp) => {
     const exponent = parseInt(exp, 10);
 
     if (exponent === 0) return base;
 
+    // Bail out (leave the token untouched) rather than allocate/crash on a huge exponent.
+    // Downstream `removeNonNumericCharacters` strips the stray 'e', so the input degrades
+    // gracefully to its digits instead of throwing out of the beforeinput/paste handler.
+    if (Math.abs(exponent) > MAX_EXPANSION_DIGITS) return _full;
+
     const isNegative = base.startsWith('-');
     const baseWithoutSign = isNegative ? base.slice(1) : base;
-    const [integerPart, decimalPart = ''] = baseWithoutSign.split('.');
+    const [integerPart, decimalPart = ''] = baseWithoutSign.split(decimalSeparator);
 
     const expanded = exponent > 0
-      ? expandPositiveExponent(integerPart, decimalPart, exponent)
-      : expandNegativeExponent(integerPart, decimalPart, Math.abs(exponent));
+      ? expandPositiveExponent(integerPart, decimalPart, exponent, decimalSeparator)
+      : expandNegativeExponent(integerPart, decimalPart, Math.abs(exponent), decimalSeparator, trailingZerosRegex);
 
-    return isNegative ? '-' + expanded : expanded;
+    // Don't carry the sign onto a magnitude that collapsed to zero: "-0e5" is 0, not "-0".
+    return isNegative && expanded !== '0' ? '-' + expanded : expanded;
   });
 }
 
@@ -49,6 +67,7 @@ function expandPositiveExponent(
   integerPart: string,
   decimalPart: string,
   exponent: number,
+  decimalSeparator: string,
 ): string {
   const allDigits = integerPart + decimalPart;
 
@@ -61,7 +80,7 @@ function expandPositiveExponent(
   if (exponent <= currentDecimalPosition) {
     const newIntegerPart = allDigits.slice(0, integerPart.length + exponent);
     const newDecimalPart = allDigits.slice(integerPart.length + exponent);
-    return newDecimalPart ? `${newIntegerPart}.${newDecimalPart}` : newIntegerPart;
+    return newDecimalPart ? `${newIntegerPart}${decimalSeparator}${newDecimalPart}` : newIntegerPart;
   }
 
   const zerosToAdd = exponent - currentDecimalPosition;
@@ -72,6 +91,8 @@ function expandNegativeExponent(
   integerPart: string,
   decimalPart: string,
   exponent: number,
+  decimalSeparator: string,
+  trailingZerosRegex: RegExp,
 ): string {
   const allDigits = integerPart + decimalPart;
 
@@ -85,41 +106,44 @@ function expandNegativeExponent(
 
   if (newDecimalPosition <= 0) {
     const leadingZeros = Math.abs(newDecimalPosition);
-    const result = `0.${'0'.repeat(leadingZeros)}${allDigits}`;
-    return trimTrailingZeros(result);
+    const result = `0${decimalSeparator}${'0'.repeat(leadingZeros)}${allDigits}`;
+    return trimTrailingZeros(result, decimalSeparator, trailingZerosRegex);
   }
 
   if (newDecimalPosition < integerPart.length) {
     const newIntegerPart = allDigits.slice(0, newDecimalPosition);
     const newDecimalPart = allDigits.slice(newDecimalPosition);
-    const result = `${newIntegerPart}.${newDecimalPart}`;
-    return trimTrailingZeros(result);
+    const result = `${newIntegerPart}${decimalSeparator}${newDecimalPart}`;
+    return trimTrailingZeros(result, decimalSeparator, trailingZerosRegex);
   }
 
-  return trimTrailingZeros(allDigits);
+  return trimTrailingZeros(allDigits, decimalSeparator, trailingZerosRegex);
 }
 
-function trimTrailingZeros(value: string): string {
-  if (!value.includes('.')) {
+function trimTrailingZeros(value: string, decimalSeparator: string, trailingZerosRegex: RegExp): string {
+  if (!value.includes(decimalSeparator)) {
     return value;
   }
 
-  if (value === '0.') {
+  const zeroSep = '0' + decimalSeparator;
+  const negZeroSep = '-0' + decimalSeparator;
+
+  if (value === zeroSep) {
     return '0';
   }
 
-  if (value.startsWith('0.')) {
-    const trimmed = value.replace(TRAILING_ZEROS_REGEX, '');
+  if (value.startsWith(zeroSep)) {
+    const trimmed = value.replace(trailingZerosRegex, '');
     return trimmed === '0' ? '0' : trimmed || '0';
   }
 
-  if (value.startsWith('-0.')) {
-    const trimmed = value.replace(TRAILING_ZEROS_REGEX, '');
+  if (value.startsWith(negZeroSep)) {
+    const trimmed = value.replace(trailingZerosRegex, '');
     if (trimmed === '-0' || trimmed === '0') {
       return '0';
     }
     return trimmed || '0';
   }
 
-  return value.replace(TRAILING_ZEROS_REGEX, '') || value;
+  return value.replace(trailingZerosRegex, '') || value;
 }

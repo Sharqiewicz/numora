@@ -1,21 +1,10 @@
-import { FormatOn, ThousandStyle } from './types';
+import { FormatOn, GroupingStyle, type FormattingOptions } from './types';
 
-export interface NumoraInputValidationOptions {
-  decimalMaxLength?: number;
-  decimalMinLength?: number;
-  formatOn?: FormatOn;
-  thousandSeparator?: string;
-  thousandStyle?: ThousandStyle;
-  decimalSeparator?: string;
-  enableCompactNotation?: boolean;
-  enableNegative?: boolean;
-  enableLeadingZeros?: boolean;
-  autoAddLeadingZero?: boolean;
-  maxLength?: number;
-  isAllowed?: (rawValue: string) => boolean;
-  rawValueMode?: boolean;
+// Derived from FormattingOptions so adding a new field to that interface automatically
+// flows into validation - no more drift between the option surface and the validator.
+export type NumoraInputValidationOptions = FormattingOptions & {
   onChange?: (value: string) => void;
-}
+};
 
 /**
  * Validates all NumoraInput constructor parameters.
@@ -26,15 +15,19 @@ export function validateNumoraInputOptions(options: NumoraInputValidationOptions
   assertNonNegativeInt('decimalMinLength', options.decimalMinLength);
   assertDecimalLengths(options.decimalMinLength, options.decimalMaxLength);
   assertEnumValue('formatOn', options.formatOn, [FormatOn.Blur, FormatOn.Change]);
-  assertSingleChar('thousandSeparator', options.thousandSeparator);
-  assertEnumValue('thousandStyle', options.thousandStyle, Object.values(ThousandStyle));
+  // Empty string is a valid thousandSeparator: runtime treats a falsy separator as
+  // "grouping disabled" (applyDisplaySeparators / sanitization both gate on truthiness).
+  assertSingleChar('thousandSeparator', options.thousandSeparator, true);
+  assertSeparatorNotDigit('thousandSeparator', options.thousandSeparator);
+  assertEnumValue('groupingStyle', options.groupingStyle, Object.values(GroupingStyle));
   assertSingleChar('decimalSeparator', options.decimalSeparator);
+  assertSeparatorNotDigit('decimalSeparator', options.decimalSeparator);
   assertSeparatorConflict(options.thousandSeparator, options.decimalSeparator);
   assertBoolean('enableCompactNotation', options.enableCompactNotation);
   assertBoolean('enableNegative', options.enableNegative);
   assertBoolean('enableLeadingZeros', options.enableLeadingZeros);
   assertBoolean('autoAddLeadingZero', options.autoAddLeadingZero);
-  assertBoolean('rawValueMode', options.rawValueMode);
+  assertBoolean('emitRawValue', options.emitRawValue);
   assertNonNegativeInt('maxLength', options.maxLength);
   assertFunction('isAllowed', options.isAllowed);
   assertFunction('onChange', options.onChange);
@@ -47,10 +40,20 @@ function assertNonNegativeInt(name: string, value: number | undefined): void {
   }
 }
 
-function assertSingleChar(name: string, value: string | undefined): void {
+function assertSingleChar(name: string, value: string | undefined, allowEmpty = false): void {
   if (value === undefined) return;
+  if (allowEmpty && value === '') return;
   if (typeof value !== 'string' || value.length !== 1) {
     throw new Error(`${name} must be a single character. Received: ${JSON.stringify(value)}`);
+  }
+}
+
+function assertSeparatorNotDigit(name: string, value: string | undefined): void {
+  if (value === undefined || value === '') return;
+  // A digit separator is indistinguishable from a real digit at runtime: the strip/insert
+  // logic would treat every matching digit in the value as a separator and scramble it.
+  if (/[0-9]/.test(value)) {
+    throw new Error(`${name} cannot be a digit. Received: ${JSON.stringify(value)}`);
   }
 }
 

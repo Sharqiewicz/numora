@@ -4,11 +4,7 @@
  */
 
 import { GROUPING_CONFIG  } from './constants';
-import { ThousandStyle } from '@/types';
-
-const LEADING_ZEROS_CAPTURE_RE = /^(0+)/;
-
-
+import { GroupingStyle } from '../../types';
 
 /**
  * Formats a numeric string with thousand separators based on the specified group style.
@@ -30,7 +26,7 @@ const LEADING_ZEROS_CAPTURE_RE = /^(0+)/;
 export function formatWithSeparators(
   value: string,
   separator: string,
-  groupStyle: ThousandStyle = ThousandStyle.Thousand,
+  groupStyle: GroupingStyle = GroupingStyle.Thousand,
   enableLeadingZeros = false,
   decimalSeparator: string = '.'
 ): string {
@@ -50,25 +46,9 @@ export function formatWithSeparators(
     return isNegative ? `-${result}` : result;
   }
 
-  // Preserve leading zeros if allowed
-  if (enableLeadingZeros && integerPart.startsWith('0') && integerPart.length > 1) {
-    const leadingZerosMatch = integerPart.match(LEADING_ZEROS_CAPTURE_RE);
-    if (leadingZerosMatch) {
-      const leadingZeros = leadingZerosMatch[1];
-      const significantPart = integerPart.slice(leadingZeros.length);
-      if (significantPart) {
-        const formattedSignificant = formatIntegerPart(significantPart, separator, groupStyle);
-        const formattedInteger = leadingZeros + formattedSignificant;
-        const prefix = isNegative ? '-' : '';
-
-        if (hasDecimalSeparator) {
-          return decimalPart ? `${prefix}${formattedInteger}${decimalSeparator}${decimalPart}` : `${prefix}${formattedInteger}${decimalSeparator}`;
-        }
-        return `${prefix}${formattedInteger}`;
-      }
-    }
-  }
-
+  // Note: leading zeros (when enableLeadingZeros preserves them) are grouped as part of
+  // the full integer, e.g. "0001234" → "0,001,234", not "0001,234". formatIntegerPart
+  // handles the whole string uniformly, so no separate leading-zero branch is needed.
   const formattedInteger = formatIntegerPart(integerPart, separator, groupStyle);
   const prefix = isNegative ? '-' : '';
 
@@ -86,20 +66,20 @@ export function formatWithSeparators(
 function formatIntegerPart(
   integerPart: string,
   separator: string,
-  groupStyle: ThousandStyle
+  groupStyle: GroupingStyle
 ): string {
   if (integerPart === '0' || integerPart === '') {
     return integerPart;
   }
 
   switch (groupStyle) {
-    case ThousandStyle.None:
+    case GroupingStyle.None:
       return integerPart;
-    case ThousandStyle.Thousand:
+    case GroupingStyle.Thousand:
       return groupDigitsFromRight(integerPart, separator, GROUPING_CONFIG.thousand.size);
-    case ThousandStyle.Lakh:
+    case GroupingStyle.Lakh:
       return formatLakhStyle(integerPart, separator);
-    case ThousandStyle.Wan:
+    case GroupingStyle.Wan:
       return groupDigitsFromRight(integerPart, separator, GROUPING_CONFIG.wan.size);
     default:
       return integerPart;

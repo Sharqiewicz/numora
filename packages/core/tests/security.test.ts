@@ -9,7 +9,7 @@ import { removeThousandSeparators } from '../src/features/sanitization';
 import { removeNonNumericCharacters } from '../src/features/non-numeric-characters';
 import { expandCompactNotation } from '../src/features/compact-notation';
 import { expandScientificNotation } from '../src/features/scientific-notation';
-import { ThousandStyle } from '../src/types';
+import { GroupingStyle } from '../src/types';
 
 describe('Security Tests', () => {
   let container: HTMLDivElement;
@@ -88,7 +88,7 @@ describe('Security Tests', () => {
     it('should handle very long numeric strings without hanging', () => {
       const longInput = '1'.repeat(1000);
       const start = performance.now();
-      const result = formatWithSeparators(longInput, ',', ThousandStyle.Thousand);
+      const result = formatWithSeparators(longInput, ',', GroupingStyle.Thousand);
       const duration = performance.now() - start;
 
       expect(result).toBeDefined();
@@ -98,7 +98,7 @@ describe('Security Tests', () => {
     it('should handle extremely long inputs (10000 chars) without crashing', () => {
       const veryLongInput = '1'.repeat(10000);
       const start = performance.now();
-      const result = formatWithSeparators(veryLongInput, ',', ThousandStyle.Thousand);
+      const result = formatWithSeparators(veryLongInput, ',', GroupingStyle.Thousand);
       const duration = performance.now() - start;
 
       expect(result).toBeDefined();
@@ -107,7 +107,7 @@ describe('Security Tests', () => {
 
     it('should handle long decimal parts', () => {
       const longDecimal = '1.' + '9'.repeat(100);
-      const result = formatWithSeparators(longDecimal, ',', ThousandStyle.Thousand);
+      const result = formatWithSeparators(longDecimal, ',', GroupingStyle.Thousand);
       expect(result).toBeDefined();
       expect(result.startsWith('1.')).toBe(true);
     });
