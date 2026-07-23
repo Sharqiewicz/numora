@@ -1,6 +1,6 @@
 {
   "name": "numora-react",
-  "version": "3.5.0",
+  "version": "5.0.0",
   "type": "module",
   "main": "./dist/index.cjs",
   "types": "./dist/index.d.ts",
@@ -13,10 +13,11 @@
       "require": "./dist/index.cjs"
     }
   },
+  "files": ["dist", "README.md"],
   "peerDependencies": {
     "react": ">=17.0.0",
     "react-dom": ">=17.0.0",
-    "numora": ">=3.5.0"
+    "numora": ">=5.0.0"
   },
   "peerDependenciesMeta": {
     "react-dom": { "optional": true }
@@ -30,8 +31,12 @@
     "build": "rollup -c",
     "watch": "rollup -c -w",
     "dev": "rollup -c -w",
+    "pretest": "pnpm --filter numora build",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "lint": "biome lint ./src"
   },
   "keywords": [
     "numeric input",

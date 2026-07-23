@@ -20,9 +20,9 @@ import { NumoraInput } from 'numora-react';
 function App() {
   return (
     <NumoraInput
-      maxDecimals={2}
+      decimalMaxLength={2}
       thousandSeparator=","
-      thousandStyle="thousand"
+      groupingStyle="thousand"
       onChange={(e) => console.log(e.target.value)}
     />
   );
@@ -44,16 +44,27 @@ function App() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `maxDecimals` | `number` | `2` | Maximum decimal places allowed |
+| `decimalMaxLength` | `number` | `18` | Maximum decimal places allowed (DeFi-safe default; set to `2` for fiat) |
+| `decimalSeparator` | `string` | `'.'` | Decimal separator character |
+| `decimalMinLength` | `number` | `0` | Minimum decimal places (pads with zeros) |
 | `formatOn` | `'blur' \| 'change'` | `'blur'` | When to apply formatting |
 | `thousandSeparator` | `string` | `','` | Thousand separator character |
-| `thousandStyle` | `'thousand' \| 'lakh' \| 'wan'` | `'thousand'` | Grouping style |
+| `groupingStyle` | `'thousand' \| 'lakh' \| 'wan'` | `'thousand'` | Grouping style |
 | `enableCompactNotation` | `boolean` | `false` | Expand compact notation on paste |
-| `onChange` | `(e: ChangeEvent<HTMLInputElement>) => void` | `undefined` | Called when value changes |
+| `enableNegative` | `boolean` | `false` | Allow negative numbers |
+| `enableLeadingZeros` | `boolean` | `false` | Allow leading zeros |
+| `autoAddLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |
+| `maxLength` | `number` | `undefined` | Max raw length (digits + decimal separator + leading `-`; thousand separators not counted) |
+| `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject a keystroke/paste when it returns false (called with the post-sanitization raw value) |
+| `locale` | `LocaleTag \| true` | `undefined` | Derive separators from `Intl.NumberFormat`; `true` uses the runtime default locale |
+| `onChange` | `(e: NumoraInputChangeEvent) => void` | `undefined` | Synthetic change event. `e.target.value` is raw; `e.target.formattedValue` is the display string |
+| `onValueChange` | `(values: { value: string; formattedValue: string }) => void` | `undefined` | Plain-object value callback, fired alongside `onChange` |
 
 All standard `HTMLInputElement` props are supported except `type` (always `'text'`) and `inputMode` (always `'decimal'`).
 
-Both `e.target.value` (formatted) and `e.target.rawValue` (unformatted) are available in `onChange`.
+In `onChange`, `e.target.value` is always the **raw** (unformatted) numeric string and `e.target.formattedValue` is the formatted display string (e.g. `"1,234.56"`). There is no `rawValueMode` toggle: the raw value is always available on the event.
+
+> **Note:** `e.target.value` (raw) is the inverse of reading the DOM node directly — `inputRef.current.value` returns the **formatted** string that's rendered. Use the `onChange` event or `onValueChange` for the raw value; read the ref only when you want the displayed text.
 
 ## Documentation
 

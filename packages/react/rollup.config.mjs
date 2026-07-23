@@ -25,5 +25,11 @@ export default {
     commonjs(),
     typescript({ tsconfig: './tsconfig.json' }),
   ],
-  external: ['react', 'react-dom', 'numora'],
+  // Predicate so subpath imports like 'numora/internal' are externalized too (a bare
+  // string only matches the exact id, which would bundle the internal entry).
+  external: (id) =>
+    id === 'react' ||
+    id === 'react-dom' ||
+    id === 'numora' ||
+    id.startsWith('numora/'),
 };

@@ -5,31 +5,37 @@ import {
   forwardRef,
   useCallback,
   useMemo,
-  ClipboardEvent,
-  ChangeEvent,
-  FocusEvent,
-  KeyboardEvent,
-  InputHTMLAttributes,
+  type ClipboardEvent,
+  type ChangeEvent,
+  type FocusEvent,
+  type KeyboardEvent,
+  type InputHTMLAttributes,
 } from 'react';
 import { useIsomorphicLayoutEffect } from './use-isomorphic-layout-effect';
 
-declare const process: { env: { NODE_ENV?: string } };
+// Public types/enums come from the package root; cross-package plumbing (event handlers,
+// undo-preserving writes, sanitization primitives) comes from the internal subpath.
 import {
   FormatOn,
   InputType,
-  ThousandStyle,
+  GroupingStyle,
   applyLocale,
-  computeStripSeparatorsResult,
   formatValueForDisplay,
+  removeThousandSeparators,
+  validateNumoraInputOptions,
+  type FormattingOptions,
+  type LocaleTag,
+} from 'numora';
+import {
+  computeStripSeparatorsResult,
   handleOnBeforeInputNumoraInput,
   handleOnKeyDownNumoraInput,
   handleOnPasteNumoraInput,
-  removeThousandSeparators,
-  validateNumoraInputOptions,
   writeStripPreservingUndo,
   writeValuePreservingUndo,
-  type FormattingOptions,
-} from 'numora';
+  DEFAULT_THOUSAND_SEPARATOR,
+  DEFAULT_DECIMAL_SEPARATOR,
+} from 'numora/internal';
 
 export interface NumoraHTMLInputElement extends HTMLInputElement {
   /** The formatted display string - the same value shown in the input, including thousand separators. */
@@ -46,12 +52,23 @@ export interface NumoraHTMLInputElement extends HTMLInputElement {
  *   the same value visible in the input. Use this when you need to display or store
  *   the formatted representation.
  *
+ * NOTE: `e.target.value` here is the RAW string, which is the inverse of reading the DOM
+ * node directly - `inputRef.current.value` returns the FORMATTED string (what's rendered).
+ *
  * Structurally assignable to `ChangeEvent<HTMLInputElement>`, so react-hook-form's
  * `register.onChange` can be spread directly onto the `onChange` prop.
  */
 export type NumoraInputChangeEvent = Omit<ChangeEvent<HTMLInputElement>, "target"> & {
   target: NumoraHTMLInputElement;
 };
+
+/** Plain value payload passed to `onValueChange`. */
+export interface NumoraValues {
+  /** Raw (unformatted) numeric string, separators stripped. */
+  value: string;
+  /** Formatted display string (e.g. `"1,234.56"`), the value visible in the input. */
+  formattedValue: string;
+}
 
 /**
  * Creates a synthetic change event where `target.value` returns the raw (unformatted)
@@ -92,15 +109,29 @@ export interface NumoraInputProps
     InputHTMLAttributes<HTMLInputElement>,
     "onChange" | "type" | "inputMode" | "onFocus" | "onBlur" | "maxLength"
   > {
-  maxDecimals?: number;
+  /**
+   * Maximum number of decimal places. Defaults to 18 (DeFi-safe: most ERC-20 tokens use
+   * 18 decimals). Fiat/checkout fields typically set this to 2.
+   */
+  decimalMaxLength?: number;
   onChange?: (e: NumoraInputChangeEvent) => void;
+  /**
+   * Plain-object value callback: `{ value, formattedValue }`, fired on every change
+   * alongside `onChange`. An alternative to the synthetic event for consumers who prefer a
+   * data callback (mirrors react-number-format's `onValueChange`).
+   */
+  onValueChange?: (values: NumoraValues) => void;
   onFocus?: (e: FocusEvent<HTMLInputElement>) => void;
   onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
 
-  locale?: string | true;
+  locale?: LocaleTag | true;
   formatOn?: FormatOn;
   thousandSeparator?: string;
-  thousandStyle?: ThousandStyle;
+  /**
+   * Digit-grouping style for the thousand separator.
+   * @defaultValue GroupingStyle.Thousand
+   */
+  groupingStyle?: GroupingStyle;
   decimalSeparator?: string;
   decimalMinLength?: number;
 
@@ -108,7 +139,6 @@ export interface NumoraInputProps
   enableNegative?: boolean;
   enableLeadingZeros?: boolean;
   autoAddLeadingZero?: boolean;
-  rawValueMode?: boolean;
 
   /**
    * Max raw length (digits, decimal separator, and leading `-`). Thousand separators are
@@ -132,8 +162,9 @@ function toRawValue(formatted: string, thousandSeparator?: string): string {
 
 const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) => {
   const {
-    maxDecimals = 2,
+    decimalMaxLength = 18,
     onChange,
+    onValueChange,
     onPaste,
     onBlur,
     onKeyDown,
@@ -141,14 +172,13 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     locale,
     formatOn = FormatOn.Blur,
     thousandSeparator,
-    thousandStyle = ThousandStyle.Thousand,
+    groupingStyle = GroupingStyle.Thousand,
     decimalSeparator,
     decimalMinLength,
     enableCompactNotation = false,
     enableNegative = false,
     enableLeadingZeros = false,
     autoAddLeadingZero = false,
-    rawValueMode = false,
     maxLength,
     isAllowed,
     value: controlledValue,
@@ -158,42 +188,49 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
 
   const formattingOptions: FormattingOptions = useMemo(() => {
     const separators = applyLocale(locale, { thousandSeparator, decimalSeparator });
-    return {
+    // Resolve separator defaults BEFORE validating, exactly as the vanilla class does
+    // (NumoraInput resolves then validates). Validating the unresolved options let a
+    // half-configured locale — e.g. thousandSeparator '.' with decimalSeparator left to
+    // default to '.' — slip past the separator-conflict check and silently swallow the
+    // decimal part at runtime. It also left thousandSeparator undefined, disabling grouping
+    // even though the README documents ',' as the default.
+    const options: FormattingOptions = {
       formatOn,
-      thousandSeparator: separators.thousandSeparator,
-      thousandStyle,
-      decimalSeparator: separators.decimalSeparator,
-      decimalMaxLength: maxDecimals,
+      thousandSeparator: separators.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR,
+      groupingStyle,
+      decimalSeparator: separators.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
+      decimalMaxLength,
       decimalMinLength,
       enableCompactNotation,
       enableNegative,
       enableLeadingZeros,
       autoAddLeadingZero,
-      rawValueMode,
       maxLength,
       isAllowed,
     };
-  }, [locale, formatOn, thousandSeparator, thousandStyle, decimalSeparator, maxDecimals, decimalMinLength,
-    enableCompactNotation, enableNegative, enableLeadingZeros, autoAddLeadingZero, rawValueMode,
-    maxLength, isAllowed]);
+    // Validate inside useMemo so misconfig throws early in both dev and prod, and we
+    // don't re-validate on every render. onChange is included so assertFunction runs.
+    // The cast bridges the signature gap: vanilla's onChange takes a string, React's
+    // takes an event - assertFunction only checks `typeof === 'function'`, so either is fine.
+    validateNumoraInputOptions({ ...options, onChange: onChange as unknown as ((value: string) => void) | undefined });
+    return options;
+  }, [locale, formatOn, thousandSeparator, groupingStyle, decimalSeparator, decimalMaxLength, decimalMinLength,
+    enableCompactNotation, enableNegative, enableLeadingZeros, autoAddLeadingZero,
+    maxLength, isAllowed, onChange]);
 
   // Programmatic / restored values always want separators applied, regardless of whether
   // the user chose Blur mode (which suppresses separators during typing). Inline helper
   // avoids a second formatting-options object that callers would have to track.
-  const formatForDisplay = (raw: string) => formatValueForDisplay(raw, maxDecimals, {
+  const formatForDisplay = (raw: string) => formatValueForDisplay(raw, decimalMaxLength, {
     ...formattingOptions,
     formatOn: FormatOn.Change,
   });
-
-  if (process.env.NODE_ENV !== 'production') {
-    validateNumoraInputOptions(formattingOptions);
-  }
 
   const internalInputRef = useRef<HTMLInputElement>(null);
   // Mirror of props read by mount-only DOM listeners (beforeinput, mousedown/click) that
   // would otherwise capture stale closures. Refreshed every render in the layout effect
   // below so the listeners always see the latest options/callbacks without re-registering.
-  const stateRef = useRef({ onChange, maxDecimals, formattingOptions });
+  const stateRef = useRef({ onChange, onValueChange, decimalMaxLength, formattingOptions });
   // True while we're applying our own setRangeText. The synchronous `input` event that
   // setRangeText fires must NOT re-enter handleChange, or onChange double-fires on the
   // typing path. Also load-bearing for React's value-tracker: see handleChange below.
@@ -219,7 +256,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     if (
       opts.formatOn !== FormatOn.Blur ||
       !opts.thousandSeparator ||
-      opts.thousandStyle === ThousandStyle.None
+      opts.groupingStyle === GroupingStyle.None
     ) {
       return;
     }
@@ -239,6 +276,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     numInput.formattedValue = result.raw;
     const cb = stateRef.current.onChange;
     if (cb) cb(createSyntheticChangeEvent(numInput, result.raw));
+    const vcb = stateRef.current.onValueChange;
+    if (vcb) vcb({ value: result.raw, formattedValue: result.raw });
   }, [withInternalWrite]);
 
   // Computed once on mount. Uncontrolled defaultValue lets React leave the DOM value alone
@@ -272,13 +311,26 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   // render. Equality guard short-circuits the common echo-back case. When the value
   // differs, route through writeValuePreservingUndo so external updates don't wipe undo.
   useIsomorphicLayoutEffect(() => {
-    stateRef.current = { onChange, maxDecimals, formattingOptions };
+    stateRef.current = { onChange, onValueChange, decimalMaxLength, formattingOptions };
 
     if (controlledValue === undefined) return;
     const input = internalInputRef.current;
     if (!input) return;
 
-    const { formatted } = formatForDisplay(String(controlledValue));
+    // In Blur mode the DOM value carries no thousand separators while the field is being
+    // edited (they're only added on blur). Formatting the controlled echo-back WITH
+    // separators here - the single most common controlled pattern, where onChange feeds
+    // the parent's value prop straight back - would inject commas mid-typing and snap the
+    // caret to the end, defeating Blur mode. So while the input is focused in Blur mode,
+    // format for editing (no separators, via the real formatOn); otherwise format for the
+    // resting display (forced Change, with separators).
+    const isEditingInBlurMode =
+      formattingOptions.formatOn === FormatOn.Blur &&
+      typeof document !== 'undefined' &&
+      document.activeElement === input;
+    const { formatted } = isEditingInBlurMode
+      ? formatValueForDisplay(String(controlledValue), decimalMaxLength, formattingOptions)
+      : formatForDisplay(String(controlledValue));
     const numInput = input as NumoraHTMLInputElement;
     if (formatted === input.value) {
       numInput.formattedValue = formatted;
@@ -303,7 +355,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     const onBeforeInput = (e: InputEvent) => {
       const result = handleOnBeforeInputNumoraInput(
         e,
-        stateRef.current.maxDecimals,
+        stateRef.current.decimalMaxLength,
         stateRef.current.formattingOptions
       );
 
@@ -323,17 +375,23 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
           // and input.value happen to align after concurrent renders).
           const cb = stateRef.current.onChange;
           if (cb) cb(createSyntheticChangeEvent(numInput, result.raw));
+          const vcb = stateRef.current.onValueChange;
+          if (vcb) vcb({ value: result.raw, formattedValue: result.formatted });
           break;
         }
       }
     };
 
-    const onMouseDown = () => {
+    const onMouseDown = (e: MouseEvent) => {
+      // Only the primary (left) button dispatches a following `click`; a right/middle
+      // button would set the flag with no `click` to clear it, wedging pendingMouseStrip
+      // true so every later focus skips the separator strip.
+      if (e.button !== 0) return;
       const opts = stateRef.current.formattingOptions;
       if (
         opts.formatOn !== FormatOn.Blur ||
         !opts.thousandSeparator ||
-        opts.thousandStyle === ThousandStyle.None
+        opts.groupingStyle === GroupingStyle.None
       ) {
         return;
       }
@@ -373,13 +431,17 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       const raw = toRawValue(numInput.value, formattingOptions.thousandSeparator);
       numInput.formattedValue = numInput.value;
       if (onChange) onChange(createSyntheticChangeEvent(numInput, raw));
+      if (onValueChange) onValueChange({ value: raw, formattedValue: numInput.value });
       return;
     }
 
-    const formatted = numInput.value;
-    const rawValue = toRawValue(formatted, formattingOptions.thousandSeparator);
+    const { formatted, raw } = formatValueForDisplay(numInput.value, decimalMaxLength, formattingOptions);
+    if (formatted !== numInput.value) {
+      withInternalWrite(() => writeValuePreservingUndo(numInput, formatted, formatted.length));
+    }
     numInput.formattedValue = formatted;
-    if (onChange) onChange(createSyntheticChangeEvent(numInput, rawValue));
+    if (onChange) onChange(createSyntheticChangeEvent(numInput, raw));
+    if (onValueChange) onValueChange({ value: raw, formattedValue: formatted });
   };
 
   // skipOverThousandSeparatorOnDelete moves the cursor past separators before beforeinput
@@ -391,7 +453,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
 
   const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
     e.nativeEvent.preventDefault();
-    const result = handleOnPasteNumoraInput(e.nativeEvent, maxDecimals, formattingOptions);
+    const result = handleOnPasteNumoraInput(e.nativeEvent, decimalMaxLength, formattingOptions);
     if (result.type === 'reject') {
       if (onPaste) onPaste(e);
       return;
@@ -401,6 +463,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     numInput.formattedValue = result.formatted;
     if (onPaste) onPaste(e);
     if (onChange) onChange(createSyntheticChangeEvent(numInput, result.raw));
+    if (onValueChange) onValueChange({ value: result.raw, formattedValue: result.formatted });
   };
 
   const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
@@ -413,14 +476,19 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   };
 
   const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
+    // Clear any pending mouse-strip so a deferred strip that never got its `click` (drag
+    // released outside the input, suppressed click) can't carry over to the next focus.
+    pendingMouseStripRef.current = false;
     if (formattingOptions.formatOn === FormatOn.Blur) {
       const { formatted, raw } = formatForDisplay(e.target.value);
       const numInput = e.target as NumoraHTMLInputElement;
-      if (formatted !== numInput.value) {
+      const valueChanged = formatted !== numInput.value;
+      if (valueChanged) {
         withInternalWrite(() => writeValuePreservingUndo(numInput, formatted, formatted.length));
       }
       numInput.formattedValue = formatted;
-      if (onChange) onChange(createSyntheticChangeEvent(numInput, raw));
+      if (valueChanged && onChange) onChange(createSyntheticChangeEvent(numInput, raw));
+      if (valueChanged && onValueChange) onValueChange({ value: raw, formattedValue: formatted });
     }
     if (onBlur) onBlur(e);
   };
@@ -446,5 +514,5 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
 NumoraInput.displayName = 'NumoraInput';
 
 export { NumoraInput };
-export { FormatOn, ThousandStyle, InputType } from 'numora';
-export type { FormattingOptions } from 'numora';
+export { FormatOn, GroupingStyle, InputType } from 'numora';
+export type { FormattingOptions, LocaleTag } from 'numora';
