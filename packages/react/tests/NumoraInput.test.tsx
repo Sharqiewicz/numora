@@ -973,6 +973,31 @@ describe('locale', () => {
     const event: NumoraInputChangeEvent = onChange.mock.calls.at(-1)![0];
     expect(event.target.value).toBe('1234');
   });
+
+  it('derives lakh grouping from an Indic locale', () => {
+    render(<NumoraInput data-testid="input" locale="hi-IN" defaultValue="12345678" />);
+    const input = screen.getByTestId('input') as HTMLInputElement;
+    expect(input.value).toBe('1,23,45,678');
+  });
+
+  it('lets an explicit groupingStyle win over the locale-derived one', () => {
+    render(
+      <NumoraInput
+        data-testid="input"
+        locale="hi-IN"
+        groupingStyle={GroupingStyle.Thousand}
+        defaultValue="12345678"
+      />
+    );
+    const input = screen.getByTestId('input') as HTMLInputElement;
+    expect(input.value).toBe('12,345,678');
+  });
+
+  it('keeps Thousand grouping for a Western locale', () => {
+    render(<NumoraInput data-testid="input" locale="de-DE" defaultValue="12345678" />);
+    const input = screen.getByTestId('input') as HTMLInputElement;
+    expect(input.value).toBe('12.345.678');
+  });
 });
 
 describe('blur onChange guard', () => {

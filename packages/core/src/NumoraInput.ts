@@ -133,7 +133,10 @@ export class NumoraInput {
       decimalMinLength = DEFAULT_DECIMAL_MIN_LENGTH,
       formatOn = DEFAULT_FORMAT_ON,
       thousandSeparator,
-      groupingStyle = DEFAULT_GROUPING_STYLE,
+      // Deliberately NOT defaulted here: `applyLocale` can derive the grouping style from
+      // the locale (Indic locales -> Lakh), and a pre-applied default would always win the
+      // `?? ` below and swallow the derived value. Defaulted after locale resolution.
+      groupingStyle,
       decimalSeparator,
       locale,
       enableCompactNotation = DEFAULT_ENABLE_COMPACT_NOTATION,
@@ -146,14 +149,14 @@ export class NumoraInput {
       onChange,
     } = options;
 
-    const separators = applyLocale(locale, { thousandSeparator, decimalSeparator });
+    const separators = applyLocale(locale, { thousandSeparator, decimalSeparator, groupingStyle });
 
     this.resolvedOptions = {
       decimalMaxLength,
       decimalMinLength,
       formatOn,
       thousandSeparator: separators.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR,
-      groupingStyle,
+      groupingStyle: separators.groupingStyle ?? DEFAULT_GROUPING_STYLE,
       decimalSeparator: separators.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
       enableCompactNotation,
       enableNegative,
@@ -608,11 +611,23 @@ export class NumoraInput {
    * Sets the value from a number, similar to HTMLInputElement.valueAsNumber.
    */
   public set valueAsNumber(num: number) {
-    if (isNaN(num)) {
+    // `Number.isNaN(Number(num))` is the exact equivalent of the global `isNaN(num)`, kept
+    // deliberately rather than simplified to `Number.isNaN(num)`. Untyped JS callers can
+    // pass a non-number here; the global form coerced first, so `valueAsNumber = 'abc'`
+    // cleared the input. Bare `Number.isNaN` would let that string through to `toString()`.
+    if (Number.isNaN(Number(num))) {
       this.setValue('');
       return;
     }
+    // `num.toString()` always emits a dot as the decimal mark. Where the configured
+    // decimal separator differs - e.g. de-DE, where `.` is the *thousand* separator -
+    // passing the dot through unchanged makes sanitization strip it as grouping and
+    // concatenate the digits: 1234567.89 would land as 123456789, a silent 100x error.
+    // Mirror of the conversion the getter applies in the opposite direction.
+    const { decimalSeparator } = this.resolvedOptions;
     const stringValue = num.toString();
-    this.setValue(stringValue);
+    this.setValue(
+      decimalSeparator === '.' ? stringValue : stringValue.replace('.', decimalSeparator)
+    );
   }
 }

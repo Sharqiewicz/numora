@@ -27,9 +27,9 @@ function Locale() {
     <div className="prose prose-invert max-w-none">
       <h1>Locale</h1>
       <p className="text-lg text-muted-foreground">
-        The <code>locale</code> prop auto-detects thousand and decimal separators via{' '}
-        <code>Intl.NumberFormat</code>. Grouping style is still controlled separately by{' '}
-        <code>groupingStyle</code>.
+        The <code>locale</code> prop auto-detects thousand and decimal separators - and the
+        digit-grouping style - via <code>Intl.NumberFormat</code>. An explicit{' '}
+        <code>groupingStyle</code> always overrides the detected one.
       </p>
 
       <h2>Browser locale (auto-detect)</h2>
@@ -73,6 +73,30 @@ const input = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
+      <h2>Grouping style detection</h2>
+      <p>
+        Indic locales group as 3-2-2 (lakh/crore) rather than 3-3-3. When{' '}
+        <code>groupingStyle</code> is left unset, it is derived from the locale, so{' '}
+        <code>hi-IN</code> and <code>en-IN</code> get <code>GroupingStyle.Lakh</code>{' '}
+        automatically.
+      </p>
+      <CodeBlock language="typescript">
+{`// locale-derived grouping: 12345678 → "1,23,45,678"
+const input = new NumoraInput(container, { locale: 'en-IN' })
+
+// an explicit groupingStyle always wins: 12345678 → "12,345,678"
+const input2 = new NumoraInput(container, {
+  locale: 'en-IN',
+  groupingStyle: GroupingStyle.Thousand,
+})`}
+      </CodeBlock>
+      <p>
+        Only <code>Thousand</code> and <code>Lakh</code> are inferrable.{' '}
+        <code>GroupingStyle.Wan</code> (4-4-4) is not derivable from{' '}
+        <code>Intl.NumberFormat</code> - <code>zh-CN</code> and <code>ja-JP</code> both report
+        Western 3-3-3 grouping - so Wan must be passed explicitly.
+      </p>
+
       <h2>getSeparatorsFromLocale</h2>
       <p>
         For pre-computing separators and passing them explicitly:
@@ -81,13 +105,16 @@ const input = new NumoraInput(container, {
 {`import { NumoraInput, getSeparatorsFromLocale } from 'numora'
 
 const { thousandSeparator, decimalSeparator } = getSeparatorsFromLocale('de-DE')
-// → { thousandSeparator: '.', decimalSeparator: ',' }
+// → { thousandSeparator: '.', decimalSeparator: ',', groupingStyle: GroupingStyle.Thousand }
 
 getSeparatorsFromLocale('en-US')
-// → { thousandSeparator: ',', decimalSeparator: '.' }
+// → { thousandSeparator: ',', decimalSeparator: '.', groupingStyle: GroupingStyle.Thousand }
 
 getSeparatorsFromLocale('fr-FR')
-// → { thousandSeparator: '\\u202f', decimalSeparator: ',' }
+// → { thousandSeparator: '\\u202f', decimalSeparator: ',', groupingStyle: GroupingStyle.Thousand }
+
+getSeparatorsFromLocale('en-IN')
+// → { thousandSeparator: ',', decimalSeparator: '.', groupingStyle: GroupingStyle.Lakh }
 
 const input = new NumoraInput(container, { thousandSeparator, decimalSeparator })`}
       </CodeBlock>

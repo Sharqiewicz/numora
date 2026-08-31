@@ -2355,3 +2355,82 @@ describe('Adopt existing <input> element', () => {
     expect(host.value).toBe('1,234');
   });
 });
+
+describe('valueAsNumber - separator round-trip', () => {
+  let host: HTMLInputElement;
+
+  beforeEach(() => {
+    host = document.createElement('input');
+    document.body.appendChild(host);
+  });
+
+  afterEach(() => {
+    if (host.parentNode) host.parentNode.removeChild(host);
+  });
+
+  // Regression: the setter used `num.toString()` (always dot-decimal) unchanged, so under
+  // separator sets where `.` is the *thousand* separator the dot was stripped as grouping
+  // and the digits concatenated - 1234567.89 came back as 123456789, a silent 100x error.
+  it.each([
+    ['en-US style', ',', '.', '1,234,567.89'],
+    ['de-DE style', '.', ',', '1.234.567,89'],
+    ['fr-FR style', ' ', ',', '1 234 567,89'],
+    ['ch style', "'", '.', "1'234'567.89"],
+  ])(
+    'round-trips 1234567.89 through %s separators',
+    (_label, thousandSeparator, decimalSeparator, expectedDisplay) => {
+      const instance = new NumoraInput(host, {
+        decimalMaxLength: 18,
+        thousandSeparator,
+        decimalSeparator,
+        groupingStyle: GroupingStyle.Thousand,
+        formatOn: FormatOn.Change,
+      });
+
+      instance.valueAsNumber = 1234567.89;
+
+      expect(instance.getValue()).toBe(expectedDisplay);
+      expect(instance.valueAsNumber).toBe(1234567.89);
+    }
+  );
+
+  it('round-trips a negative value under comma-decimal separators', () => {
+    const instance = new NumoraInput(host, {
+      decimalMaxLength: 18,
+      thousandSeparator: '.',
+      decimalSeparator: ',',
+      enableNegative: true,
+      groupingStyle: GroupingStyle.Thousand,
+      formatOn: FormatOn.Change,
+    });
+
+    instance.valueAsNumber = -1234.5;
+
+    expect(instance.valueAsNumber).toBe(-1234.5);
+  });
+
+  it('round-trips an integer (no decimal mark) under comma-decimal separators', () => {
+    const instance = new NumoraInput(host, {
+      decimalMaxLength: 18,
+      thousandSeparator: '.',
+      decimalSeparator: ',',
+      groupingStyle: GroupingStyle.Thousand,
+      formatOn: FormatOn.Change,
+    });
+
+    instance.valueAsNumber = 1234567;
+
+    expect(instance.getValue()).toBe('1.234.567');
+    expect(instance.valueAsNumber).toBe(1234567);
+  });
+
+  it('clears the value when set to NaN', () => {
+    const instance = new NumoraInput(host, { decimalSeparator: ',', thousandSeparator: '.' });
+
+    instance.valueAsNumber = 1234.5;
+    instance.valueAsNumber = NaN;
+
+    expect(instance.getValue()).toBe('');
+    expect(instance.valueAsNumber).toBeNaN();
+  });
+});

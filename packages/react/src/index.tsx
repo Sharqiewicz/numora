@@ -35,6 +35,7 @@ import {
   writeValuePreservingUndo,
   DEFAULT_THOUSAND_SEPARATOR,
   DEFAULT_DECIMAL_SEPARATOR,
+  DEFAULT_GROUPING_STYLE,
 } from 'numora/internal';
 
 export interface NumoraHTMLInputElement extends HTMLInputElement {
@@ -128,7 +129,8 @@ export interface NumoraInputProps
   formatOn?: FormatOn;
   thousandSeparator?: string;
   /**
-   * Digit-grouping style for the thousand separator.
+   * Digit-grouping style for the thousand separator. When `locale` is set and this is
+   * left unset, the style is derived from the locale (Indic locales -> `Lakh`).
    * @defaultValue GroupingStyle.Thousand
    */
   groupingStyle?: GroupingStyle;
@@ -172,7 +174,10 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     locale,
     formatOn = FormatOn.Blur,
     thousandSeparator,
-    groupingStyle = GroupingStyle.Thousand,
+    // Deliberately NOT defaulted here: `applyLocale` can derive the grouping style from
+    // the locale (Indic locales -> Lakh), and a pre-applied default would always win the
+    // `?? ` below and swallow the derived value. Defaulted after locale resolution.
+    groupingStyle,
     decimalSeparator,
     decimalMinLength,
     enableCompactNotation = false,
@@ -187,7 +192,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   } = props;
 
   const formattingOptions: FormattingOptions = useMemo(() => {
-    const separators = applyLocale(locale, { thousandSeparator, decimalSeparator });
+    const separators = applyLocale(locale, { thousandSeparator, decimalSeparator, groupingStyle });
     // Resolve separator defaults BEFORE validating, exactly as the vanilla class does
     // (NumoraInput resolves then validates). Validating the unresolved options let a
     // half-configured locale — e.g. thousandSeparator '.' with decimalSeparator left to
@@ -197,7 +202,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     const options: FormattingOptions = {
       formatOn,
       thousandSeparator: separators.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR,
-      groupingStyle,
+      groupingStyle: separators.groupingStyle ?? DEFAULT_GROUPING_STYLE,
       decimalSeparator: separators.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
       decimalMaxLength,
       decimalMinLength,
