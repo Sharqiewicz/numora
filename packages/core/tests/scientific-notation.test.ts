@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { expandScientificNotation } from '../src/features/scientific-notation';
+import { sanitizeNumoraInput } from '../src/features/sanitization';
 
 describe('expandScientificNotation', () => {
   describe('Negative exponents (small numbers)', () => {
@@ -192,18 +193,43 @@ describe('expandScientificNotation', () => {
 
   describe('Regression: unbounded exponent is bounded (#1)', () => {
     it('should not throw or allocate a huge string for a massive positive exponent', () => {
-      const out = expandScientificNotation('1e600000000');
-      // Left unexpanded (token untouched) rather than crashing or allocating ~600MB.
-      expect(out).toBe('1e600000000');
+      // Rejected (dropped) rather than crashing or allocating ~600MB.
+      expect(expandScientificNotation('1e600000000')).toBe('');
     });
 
     it('should not throw for a massive negative exponent', () => {
-      const out = expandScientificNotation('1e-600000000');
-      expect(out).toBe('1e-600000000');
+      expect(expandScientificNotation('1e-600000000')).toBe('');
     });
 
     it('should still expand exponents within the bound', () => {
       expect(expandScientificNotation('1e3')).toBe('1000');
+    });
+
+    it('should expand at the bound and reject one past it', () => {
+      expect(expandScientificNotation('1e1000')).toHaveLength(1001);
+      expect(expandScientificNotation('1e1001')).toBe('');
+      expect(expandScientificNotation('1e-1000')).toHaveLength(1002);
+      expect(expandScientificNotation('1e-1001')).toBe('');
+    });
+
+    it('should drop the sign along with a rejected token', () => {
+      expect(expandScientificNotation('-1e999999')).toBe('');
+    });
+  });
+
+  describe('Regression: over-range exponent must not fabricate a magnitude (#2)', () => {
+    it('should not concatenate the digits of a rejected token through sanitization', () => {
+      // Before the fix the token was returned untouched, `removeNonNumericCharacters`
+      // stripped the stray 'e', and the user saw a fabricated 1,600,000,000.
+      expect(sanitizeNumoraInput('1e600000000')).not.toBe('1600000000');
+      expect(sanitizeNumoraInput('1e600000000')).toBe('');
+      expect(sanitizeNumoraInput('1e1001')).toBe('');
+      expect(sanitizeNumoraInput('1e-1001')).toBe('');
+    });
+
+    it('should still sanitize in-range scientific notation normally', () => {
+      expect(sanitizeNumoraInput('1.5e-7')).toBe('0.00000015');
+      expect(sanitizeNumoraInput('2e5')).toBe('200000');
     });
   });
 });

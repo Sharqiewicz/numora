@@ -5,7 +5,8 @@ import {
 } from '../features/decimals';
 import { sanitizeNumoraInput } from '../features/sanitization';
 import { formatWithSeparators } from '../features/formatting';
-import { type FormattingOptions, FormatOn, GroupingStyle } from '../types';
+import { type FormattingOptions, FormatOn } from '../types';
+import { DEFAULT_GROUPING_STYLE } from '../config';
 
 /**
  * Formats a value from user input events (onChange, onBlur) by sanitizing, trimming decimals, and applying formatting.
@@ -58,7 +59,10 @@ export function formatInputValue(
     ? formatWithSeparators(
         valueWithMinDecimals,
         formattingOptions.thousandSeparator as string,
-        formattingOptions.groupingStyle ?? GroupingStyle.None,
+        // Must mirror `config.ts`, not hardcode `None`. This function is exported from the
+        // package root, so a direct caller passing only `{ thousandSeparator: ',' }` and
+        // relying on the documented Thousand default silently got no grouping at all.
+        formattingOptions.groupingStyle ?? DEFAULT_GROUPING_STYLE,
         formattingOptions.enableLeadingZeros,
         separators.decimalSeparator
       )

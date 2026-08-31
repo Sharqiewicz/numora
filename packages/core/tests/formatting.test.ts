@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { formatWithSeparators } from '../src/features/formatting';
+import { formatValueForDisplay } from '../src/utils/format-utils';
+import { FormatOn, GroupingStyle } from '../src/types';
+import { DEFAULT_GROUPING_STYLE } from '../src/config';
 
 
 describe('✅ formatWithSeparators', () => {
@@ -257,5 +260,49 @@ describe('✅ formatWithSeparators', () => {
         expect(formatWithSeparators('-12345.67', ',', 'wan', false, '.')).toBe('-1,2345.67');
       });
     });
+  });
+});
+
+describe('✅ formatValueForDisplay - grouping style default', () => {
+  // Regression for known-bugs/03: the public export hardcoded `?? GroupingStyle.None`,
+  // so a caller relying on the documented Thousand default silently got no grouping.
+  it('should group by thousands when groupingStyle is omitted', () => {
+    expect(
+      formatValueForDisplay('1234567', 18, {
+        formatOn: FormatOn.Change,
+        thousandSeparator: ',',
+      }).formatted
+    ).toBe('1,234,567');
+  });
+
+  it('should match DEFAULT_GROUPING_STYLE exactly when omitted', () => {
+    const omitted = formatValueForDisplay('1234567', 18, {
+      formatOn: FormatOn.Change,
+      thousandSeparator: ',',
+    }).formatted;
+    const explicit = formatValueForDisplay('1234567', 18, {
+      formatOn: FormatOn.Change,
+      thousandSeparator: ',',
+      groupingStyle: DEFAULT_GROUPING_STYLE,
+    }).formatted;
+    expect(omitted).toBe(explicit);
+  });
+
+  it('should still honour an explicit groupingStyle', () => {
+    expect(
+      formatValueForDisplay('1234567', 18, {
+        formatOn: FormatOn.Change,
+        thousandSeparator: ',',
+        groupingStyle: GroupingStyle.None,
+      }).formatted
+    ).toBe('1234567');
+
+    expect(
+      formatValueForDisplay('1234567', 18, {
+        formatOn: FormatOn.Change,
+        thousandSeparator: ',',
+        groupingStyle: GroupingStyle.Lakh,
+      }).formatted
+    ).toBe('12,34,567');
   });
 });

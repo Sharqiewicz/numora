@@ -45,10 +45,12 @@ export function expandScientificNotation(value: string, decimalSeparator: string
 
     if (exponent === 0) return base;
 
-    // Bail out (leave the token untouched) rather than allocate/crash on a huge exponent.
-    // Downstream `removeNonNumericCharacters` strips the stray 'e', so the input degrades
-    // gracefully to its digits instead of throwing out of the beforeinput/paste handler.
-    if (Math.abs(exponent) > MAX_EXPANSION_DIGITS) return _full;
+    // Reject the whole token rather than allocate/crash on a huge exponent. Returning the
+    // token untouched is NOT safe: downstream `removeNonNumericCharacters` strips the stray
+    // 'e' and concatenates what is left, so "1e600000000" would surface as 1600000000 - a
+    // fabricated magnitude the user never typed. Dropping it yields an empty (or shorter)
+    // value, which is visibly wrong rather than plausibly wrong.
+    if (Math.abs(exponent) > MAX_EXPANSION_DIGITS) return '';
 
     const isNegative = base.startsWith('-');
     const baseWithoutSign = isNegative ? base.slice(1) : base;
