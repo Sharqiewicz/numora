@@ -178,15 +178,15 @@ During composition, the browser owns the input - it shows intermediate phonetic 
 
 ### How Numora uses it
 
-`handleChange` is the single place `handleValueChange` (and therefore `onChange`) is called. It always runs the full `handleOnChangeNumoraInput` pipeline:
+`handleChange` is **not** a single uniform pipeline. It branches three ways, and only the last branch reformats:
 
-- **After `beforeinput` (typed input):** `setRangeText` fires a synchronous `input` event in real browsers (jsdom skips this; tests dispatch it manually). `formatInputValue` is idempotent on the already-formatted value so `oldValue === newValue`, meaning `target.value` is re-assigned the same string and `updateCursorPosition` is a no-op. `handleValueChange` then emits `onChange`.
+- **After `beforeinput` / `paste` / `focus` / `blur` (internal writes):** these handlers apply their own value via `withInternalWrite`, which sets `suppressNextInputEvent` for the duration of the write. The synchronous `input` event that `setRangeText` fires (real browsers; jsdom skips it, so tests dispatch it manually) therefore hits an early `return`. The originating handler has already called `handleValueChange`, so returning here is what prevents `onChange` from double-firing.
 
-- **After `paste`:** `handlePaste` sets the value and dispatches a synthetic `input` event. Same idempotent pipeline runs; `handleValueChange` emits `onChange`.
+- **After undo/redo:** `beforeinput` returns `{ type: 'skip' }` without `preventDefault`, so the browser applies the restore natively and fires `input` with `inputType` `historyUndo`/`historyRedo`. `handleChange` **deliberately does not reformat** — it just broadcasts the restored value. Re-formatting here would push another `setRangeText` step onto the undo stack and break the natural Ctrl+Z walk-back. This is the core of the undo-preservation design.
 
-- **After undo/redo:** `beforeinput` returns `null` without calling `preventDefault`, so the browser applies the undo natively and fires `input`. `handleChange` picks up the restored value, runs the pipeline, and emits `onChange`.
+- **Programmatic changes:** external code sets `input.value` and dispatches `new Event('input')`. This is the only branch that runs `formatInputValue`, and when the value changes it routes the write through `writeValuePreservingUndo` rather than assigning `target.value` directly — so even a programmatic write keeps undo history intact.
 
-- **Programmatic changes:** External code sets `input.value` and dispatches `new Event('input')`. `handleChange` formats the value and emits `onChange`.
+`handleValueChange` (and therefore `onChange`) is reached from every branch except the suppressed one.
 
 ### Missing anything?
 The vanilla `handleChange` reformats on every `input` event. This is intentional - it's the correct fallback for any path that doesn't go through `beforeinput`.
@@ -414,8 +414,8 @@ The `numora-react` package wraps the core event handlers in a React component. T
 
 | Handler | Attachment | Type | What Numora does |
 |---|---|---|---|
-| `beforeinput` | native `addEventListener` on element | `InputEvent` (DOM) | Format + apply via `setRangeText`; store `rawValue` on element |
-| `onChange` | React JSX prop | `ChangeEvent<HTMLInputElement>` | Read already-formatted value; emit `onChange` / `onRawValueChange` |
+| `beforeinput` | native `addEventListener` on element | `InputEvent` (DOM) | Format + apply via `setRangeText`; store `formattedValue` on element |
+| `onChange` | React JSX prop | `ChangeEvent<HTMLInputElement>` | Skip internal writes; pass undo/redo through; reformat programmatic writes. Emits `onChange` / `onValueChange` |
 | `onKeyDown` | React JSX prop | `KeyboardEvent<HTMLInputElement>` | `skipOverThousandSeparatorOnDelete`; forward to consumer |
 | `onPaste` | React JSX prop | `ClipboardEvent<HTMLInputElement>` | Sanitize clipboard; set value; synthesise change event |
 | `onFocus` | React JSX prop | `FocusEvent<HTMLInputElement>` | Blur mode: strip thousand separators for editing |
@@ -430,36 +430,57 @@ This was verified empirically: switching to React's `onBeforeInput` prop caused 
 A listener attached directly to the element fires **synchronously at the element**, before the browser decides whether to apply the mutation. This is the only position where `preventDefault()` works for `beforeinput`. It is also why ProseMirror, Slate, and Lexical all use native `addEventListener` for `beforeinput`.
 
 ```typescript
-// Registered once at mount. Options read via refs - no re-registration needed.
+// Registered once at mount. Options read via stateRef - no re-registration needed.
 useEffect(() => {
   const input = internalInputRef.current;
   if (!input) return;
 
-  const handler = (e: InputEvent) => {
-    const result = handleNumoraOnBeforeInput(e, {
-      decimalMaxLength: maxDecimalsRef.current,
-      formattingOptions: formattingOptionsRef.current,
-    });
-    if (result !== null) {
-      (input as NumoraHTMLInputElement).rawValue = result.rawValue;
+  const onBeforeInput = (e: InputEvent) => {
+    const result = handleOnBeforeInputNumoraInput(
+      e,
+      stateRef.current.decimalMaxLength,
+      stateRef.current.formattingOptions
+    );
+
+    switch (result.type) {
+      case 'skip':
+        return;                       // let the browser apply it natively (e.g. undo)
+      case 'reject':
+        e.preventDefault();           // no write, no onChange, undo untouched
+        return;
+      case 'handled': {
+        e.preventDefault();
+        withInternalWrite(() =>
+          writeValuePreservingUndo(input, result.formatted, result.cursorPos)
+        );
+        (input as NumoraHTMLInputElement).formattedValue = result.formatted;
+        stateRef.current.onChange?.(createSyntheticChangeEvent(input, result.raw));
+        stateRef.current.onValueChange?.({
+          value: result.raw,
+          formattedValue: result.formatted,
+        });
+        break;
+      }
     }
   };
 
-  input.addEventListener('beforeinput', handler);
-  return () => input.removeEventListener('beforeinput', handler);
-}, []);
+  input.addEventListener('beforeinput', onBeforeInput);
+  return () => input.removeEventListener('beforeinput', onBeforeInput);
+}, [withInternalWrite]);
 ```
+
+`onChange` is invoked **directly** here rather than left to React's synthetic
+dispatch: React's value-tracker diff can silently drop `onChange` when the
+tracker and `input.value` happen to align after concurrent renders.
 
 ### Keeping options current without re-registering
 
-`formattingOptions` (locale, separators, etc.) and `maxDecimals` can change after mount. Re-registering the listener every time they change would leave a one-render window with no listener. Instead, refs are updated via `useLayoutEffect` (which runs synchronously after each commit, before paint) so the handler always reads the latest values:
+`formattingOptions` (locale, separators, etc.), `decimalMaxLength`, and the callbacks can all change after mount. Re-registering the listener every time they change would leave a one-render window with no listener. Instead a single `stateRef` mirror is refreshed via `useLayoutEffect` (which runs synchronously after each commit, before paint) so the handler always reads the latest values:
 
 ```typescript
-const formattingOptionsRef = useRef(formattingOptions);
-const maxDecimalsRef = useRef(maxDecimals);
+const stateRef = useRef({ onChange, onValueChange, decimalMaxLength, formattingOptions });
 useLayoutEffect(() => {
-  formattingOptionsRef.current = formattingOptions;
-  maxDecimalsRef.current = maxDecimals;
+  stateRef.current = { onChange, onValueChange, decimalMaxLength, formattingOptions };
 });
 ```
 
@@ -480,43 +501,73 @@ When a `value` prop is passed, a `useEffect` syncs changes directly into the DOM
 ```typescript
 useEffect(() => {
   if (controlledValue === undefined) return;
-  const { formatted, raw } = formatValueForDisplay(String(controlledValue), maxDecimals, formattingOptions);
+  const { formatted, raw } = formatValueForDisplay(
+    String(controlledValue),
+    decimalMaxLength,
+    formattingOptions
+  );
   if (formatted !== input.value) {
     input.value = formatted;
-    (input as NumoraHTMLInputElement).rawValue = raw;
-    onRawValueChange?.(raw);
+    (input as NumoraHTMLInputElement).formattedValue = formatted;
+    onValueChange?.({ value: raw, formattedValue: formatted });
   }
-}, [controlledValue, maxDecimals, formattingOptions, onRawValueChange]);
+}, [controlledValue, decimalMaxLength, formattingOptions, onValueChange]);
 ```
 
 No events fire. This is correct - programmatic value changes do not need undo history or cursor management.
 
-### `handleChange` is a pure emitter - no formatting fallback
+### `handleChange` mirrors the vanilla three-way branch
 
-Unlike the vanilla `NumoraInput` class (which runs the full `handleOnChangeNumoraInput` pipeline on every `input` event), `handleChange` in the React component never reformats:
+The React `handleChange` has the same shape as the vanilla class's:
 
 ```typescript
-const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-  const rawValue = toRawValue(e.target.value, formattingOptions.thousandSeparator);
-  (e.target as NumoraHTMLInputElement).rawValue = rawValue;
-  onRawValueChange?.(rawValue);
-  if (onChange) onChange(e as NumoraInputChangeEvent);
-}, [...]);
+const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  if (suppressNextInputEventRef.current) return;          // 1. our own setRangeText
+
+  const numInput = e.target as NumoraHTMLInputElement;
+  const inputType = (e.nativeEvent as InputEvent).inputType;
+
+  if (inputType === InputType.HistoryUndo || inputType === InputType.HistoryRedo) {
+    // 2. Undo/redo: broadcast the restored string, never re-format. Re-formatting
+    //    would push another undo step and break the natural Ctrl+Z walk-back.
+    const raw = toRawValue(numInput.value, formattingOptions.thousandSeparator);
+    numInput.formattedValue = numInput.value;
+    onChange?.(createSyntheticChangeEvent(numInput, raw));
+    onValueChange?.({ value: raw, formattedValue: numInput.value });
+    return;
+  }
+
+  // 3. Programmatic write: format, and route the write through
+  //    writeValuePreservingUndo rather than assigning .value directly.
+  const { formatted, raw } = formatValueForDisplay(numInput.value, decimalMaxLength, formattingOptions);
+  if (formatted !== numInput.value) {
+    withInternalWrite(() => writeValuePreservingUndo(numInput, formatted, formatted.length));
+  }
+  numInput.formattedValue = formatted;
+  onChange?.(createSyntheticChangeEvent(numInput, raw));
+  onValueChange?.({ value: raw, formattedValue: formatted });
+};
 ```
 
-It reads the value `setRangeText` already placed in the DOM and emits callbacks. If `beforeinput` never fires (programmatic changes), the value passes through unformatted - there is no React-side fallback.
+### `formattedValue` stored on the DOM element; `e.target.value` is raw
 
-### `rawValue` stored on the DOM element
-
-The vanilla class keeps `rawValue` as an internal instance variable. The React component stores it as `input.rawValue` - a custom property on the DOM element, typed via the exported `NumoraHTMLInputElement` interface. This keeps it in sync with the DOM without triggering re-renders, and lets consumers read it off the forwarded `ref` at any time.
+There is no `emitRawValue` toggle in React. The synthetic change event's `target` is a
+`Proxy` whose `value` getter returns the **raw** value, while the display string is
+exposed as `formattedValue` — a custom property on the DOM element, typed via the
+exported `NumoraHTMLInputElement` interface. It stays in sync with the DOM without
+triggering re-renders, and consumers can read it off the forwarded `ref` at any time.
 
 ```typescript
-// Access via the exported type:
-import { type NumoraHTMLInputElement } from 'numora-react'
-(e.target as NumoraHTMLInputElement).rawValue  // → "1234.56"
+// In an onChange handler:
+e.target.value           // → "1234.56"   (raw, always)
+e.target.formattedValue  // → "1,234.56"  (display string)
 
-// Or use the dedicated prop:
-<NumoraInput onRawValueChange={(raw) => console.log(raw)} />
+// Access the element property via the exported type:
+import { type NumoraHTMLInputElement } from 'numora-react'
+(ref.current as NumoraHTMLInputElement).formattedValue  // → "1,234.56"
+
+// Or use the dedicated data callback:
+<NumoraInput onValueChange={({ value, formattedValue }) => console.log(value, formattedValue)} />
 ```
 
 ### Paste and blur synthesise a `ChangeEvent`
@@ -534,25 +585,27 @@ keydown: key='4'
   → consumer onKeyDown forwarded
 
 beforeinput: inputType='insertText', data='4'  [native listener, fires AT the element]
-  → handleNumoraOnBeforeInput(e, { maxDecimals, formattingOptions })
+  → handleOnBeforeInputNumoraInput(e, decimalMaxLength, formattingOptions)
       currentValue = "1,234", selectionStart = 5
       intendedValue = "1,2344"
+      → { type: 'handled', formatted: "12,344", raw: "12344", cursorPos: 6 }
       e.preventDefault()  ← browser mutation suppressed
-      formatInputValue("1,2344") → "12,344"
-      setRangeText("12,344", 0, 5, 'end')
-        ↳ [synchronous] native 'input' fires
-            → React root sees 'input' → onChange → handleChange
-                e.target.value = "12,344"
-                rawValue = "12344"
-                input.rawValue = "12344"
-                onRawValueChange?.("12344")
-                onChange?.(e)
-      cursor positioned after '4'
-  → input.rawValue = "12344"  (also set by native handler result)
+      withInternalWrite(() => writeValuePreservingUndo(input, "12,344", 6))
+        ↳ suppressNextInputEventRef = true for the duration of the write
+        ↳ setRangeText("12,344", 0, 5, 'end')
+            ↳ [synchronous] native 'input' fires
+                → React root sees 'input' → handleChange
+                → early return (suppressNextInputEventRef is true)  ← no double-fire
+        ↳ cursor positioned after '4'
+      input.formattedValue = "12,344"
+      onChange?.(createSyntheticChangeEvent(input, "12344"))   ← called directly
+      onValueChange?.({ value: "12344", formattedValue: "12,344" })
 
-input: (already processed above - React handleChange already ran synchronously)
+input: (fired synchronously above and suppressed - handleChange did not emit)
 
 keyup: key='4' → ignored
 ```
 
-**Result:** DOM shows `12,344`. Consumer receives `onChange` with `e.target.value = "12,344"` and `onRawValueChange("12344")`.
+**Result:** DOM shows `12,344`. The consumer's `onChange` receives `e.target.value === "12344"` (raw — the synthetic event's `target` proxies `value` to the raw string) and `e.target.formattedValue === "12,344"`. `onValueChange` receives `{ value: "12344", formattedValue: "12,344" }`.
+
+Note that `onChange` is invoked **directly from the `beforeinput` handler**, not via React's synthetic dispatch of the `input` event — that path is deliberately suppressed to prevent double-firing.

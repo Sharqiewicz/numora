@@ -37,7 +37,7 @@ const input = new NumoraInput(document.querySelector('#amount'), {
 ```tsx
 import { NumoraInput } from 'numora-react';
 
-<NumoraInput maxDecimals={2} thousandSeparator="," onChange={(e) => console.log(e.target.value)} />
+<NumoraInput decimalMaxLength={2} thousandSeparator="," onChange={(e) => console.log(e.target.value)} />
 ```
 
 ## Features

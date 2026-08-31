@@ -167,7 +167,7 @@ User Input ("1.5e-7")
               ↓
 ┌─────────────────────────────────┐
 │  Step 3: Decimal Control        │
-│  - Trim to maxDecimals          │
+│  - Trim to decimalMaxLength     │
 │  - Replace commas with dots     │
 └─────────────┬───────────────────┘
               ↓
@@ -257,34 +257,58 @@ private caretPositionBeforeChange?: {
 
 **Three Main Handlers:**
 
-```typescript
-// 1. onChange - Main input processing
-handleOnChangeNumoraInput(
-  e: Event,
-  decimalMaxLength: number,
-  caretPositionBeforeChange?: CaretPositionInfo
-): void
+All three are **pure**: they compute a result and mutate neither the input nor
+the event. The caller owns `preventDefault()` and the DOM write.
 
-// 2. onKeyDown - Track caret & prevent invalid input
+```typescript
+// 1. onBeforeInput - Main input processing
+handleOnBeforeInputNumoraInput(
+  e: InputEvent,
+  decimalMaxLength: number,
+  formattingOptions?: FormattingOptions
+): BeforeInputResult
+
+// 2. onKeyDown - Track caret & skip over separators
 handleOnKeyDownNumoraInput(
-  e: KeyboardEvent
+  e: KeyboardEvent,
+  formattingOptions?: FormattingOptions
 ): CaretPositionInfo | undefined
 
 // 3. onPaste - Handle clipboard data
 handleOnPasteNumoraInput(
   e: ClipboardEvent,
-  decimalMaxLength: number
-): string
+  decimalMaxLength: number,
+  formattingOptions?: FormattingOptions
+): PasteResult
+```
+
+Both result types are tagged unions telling the caller what to do:
+
+```typescript
+type BeforeInputResult =
+  | { type: 'handled'; formatted: string; raw: string; cursorPos: number }
+  | { type: 'reject' }   // caller calls preventDefault(), writes nothing
+  | { type: 'skip' };    // caller lets the browser apply the edit natively
+
+type PasteResult =
+  | { type: 'handled'; formatted: string; raw: string; cursorPos: number }
+  | { type: 'reject' };
 ```
 
 **Flow:**
 ```
 keydown → handleOnKeyDownNumoraInput()
             ↓ (returns caret info)
-input → handleOnChangeNumoraInput(event, decimalMaxLength, caretInfo)
-            ↓ (sanitize → format → position cursor)
-paste → handleOnPasteNumoraInput(event, decimalMaxLength)
+beforeinput → handleOnBeforeInputNumoraInput(event, decimalMaxLength, options)
+            ↓ (sanitize → format → compute caret)
+            ↓ caller: preventDefault() + writeValuePreservingUndo()
+paste → handleOnPasteNumoraInput(event, decimalMaxLength, options)
 ```
+
+Formatting happens on **`beforeinput`**, not `input` - see the "Event
+architecture" notes below and `packages/core/INPUT_EVENTS.md`. Intercepting
+before the browser commits the mutation is what lets `setRangeText` preserve
+native undo history.
 
 ---
 
@@ -448,10 +472,10 @@ handleOnKeyDownNumoraInput(e)
   - Captures: selectionStart=4, selectionEnd=4
   - Returns: { selectionStart: 4, selectionEnd: 4 }
   ────────────────────────────────────────────────
-Step 2: input event triggered (value now "10004")
+Step 2: beforeinput event fires (value still "1000" - not yet committed)
     ↓
-handleOnChangeNumoraInput(e, decimalMaxLength=2, caretInfo)
-  Input: "10004"
+handleOnBeforeInputNumoraInput(e, decimalMaxLength=2, options)
+  Intended value: "10004"
     ↓
   sanitizeNumoraInput("10004", options)    → "10004"
   trimToDecimalMaxLength("10004", 2)     → "10004"
@@ -840,13 +864,16 @@ handleOnKeyDownNumoraInput(e: KeyboardEvent) {
    → Capture caret position
    → Store selectionStart, selectionEnd, endOffset
    ↓
-3. input event fires (value already changed by browser)
-   → handleOnChangeNumoraInput()
+3. beforeinput event fires (value NOT yet changed - still cancelable)
+   → handleOnBeforeInputNumoraInput()
+   → Compute intended value from the pending edit
    → Sanitize value
    → Format value
    → Calculate new cursor position using stored caret info
-   → Update input.value
-   → Update cursor position
+   → Return { type: 'handled', formatted, raw, cursorPos }
+   ↓
+   Caller: preventDefault() + writeValuePreservingUndo(el, formatted, cursorPos)
+   (setRangeText, so native undo history survives)
    ↓
 4. User sees formatted value with cursor in correct position
 ```
@@ -941,7 +968,7 @@ console.log('Change range:', changeRange);
 
 ### Issue: Decimal Places Not Enforced
 
-**Symptoms:** Input allows more decimals than `maxDecimals`.
+**Symptoms:** Input allows more decimals than `decimalMaxLength`.
 
 **Check:**
 1. Is `trimToDecimalMaxLength()` being called?
