@@ -40,10 +40,18 @@ const ZERO_COUNTS: Record<string, number> = {
  * expandCompactNotation("1M")     // "1000000"
  * expandCompactNotation("2.5T")   // "2500000000000"
  * expandCompactNotation("0.5k")   // "500"
+ * expandCompactNotation(".5k")    // "500"
  */
 export function expandCompactNotation(value: string, decimalSeparator: string = '.'): string {
   const escapedSep = escapeRegExp(decimalSeparator);
-  const compactRegex = getCachedRegex(`(\\d+${escapedSep}?\\d*)\\s*([kmbt])`, 'gi');
+  // The mantissa alternation accepts both a normal number (`\d+sep?\d*`) and a bare
+  // leading-decimal number (`sep\d+`, e.g. ".5"), mirroring `scientific-notation.ts`.
+  // Without the second branch, ".5k" matched only "5k" and left the "." dangling,
+  // silently yielding ".5000" (a 1000x error) instead of "500".
+  const compactRegex = getCachedRegex(
+    `((?:\\d+${escapedSep}?\\d*|${escapedSep}\\d+))\\s*([kmbt])`,
+    'gi'
+  );
   const trailingZerosRegex = getCachedRegex(`${escapedSep}?0+$`, '');
 
   return value.replace(compactRegex, (match, number, suffix) => {

@@ -20,6 +20,10 @@ describe('✅ expandCompactNotation', () => {
       expect(expandCompactNotation('0.5k')).toBe('500');
     });
 
+    it('should handle bare-decimal mantissas (.5k)', () => {
+      expect(expandCompactNotation('.5k')).toBe('500');
+    });
+
     it('should handle 100k', () => {
       expect(expandCompactNotation('100k')).toBe('100000');
     });
@@ -41,6 +45,10 @@ describe('✅ expandCompactNotation', () => {
 
     it('should handle 0.5m', () => {
       expect(expandCompactNotation('0.5m')).toBe('500000');
+    });
+
+    it('should handle bare-decimal mantissas (.5m)', () => {
+      expect(expandCompactNotation('.5m')).toBe('500000');
     });
   });
 
@@ -148,6 +156,10 @@ describe('✅ expandCompactNotation', () => {
   describe('Custom decimal separator', () => {
     it('should expand 1,5k to 1500 when comma is the decimal separator', () => {
       expect(expandCompactNotation('1,5k', ',')).toBe('1500');
+    });
+
+    it('should expand a bare-decimal mantissa (,5k) with comma separator', () => {
+      expect(expandCompactNotation(',5k', ',')).toBe('500');
     });
 
     it('should expand 2,5m to 2500000 with comma separator', () => {
