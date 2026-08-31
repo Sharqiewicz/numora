@@ -26,5 +26,19 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # Includes packages/core/tests/perf.gate.test.ts, which fails if grouping returns to
+      # quadratic (the 905ms-on-a-160k-paste regression that shipped undetected).
       - name: Test
         run: pnpm test
+
+      - name: Lint
+        run: pnpm lint
+
+      # Runs after Build - reads dist/. Budgets both packages AND the React consumer total,
+      # since numora-react externalizes numora and the per-package figure understates real
+      # install cost by ~2x.
+      - name: Bundle size
+        run: pnpm size
+
+      - name: Docs drift
+        run: pnpm docs:drift

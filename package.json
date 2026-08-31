@@ -13,6 +13,8 @@
     "test": "pnpm --filter \"./packages/*\" test",
     "typecheck": "pnpm --filter \"./packages/*\" typecheck",
     "lint": "pnpm --filter \"./packages/*\" lint",
+    "size": "node scripts/check-bundle-size.mjs",
+    "docs:drift": "node scripts/check-docs-drift.mjs",
     "clean": "pnpm --filter \"./packages/*\" clean && pnpm --filter \"./docs\" clean",
     "docs:dev": "pnpm --filter \"./docs\" dev",
     "docs:build": "pnpm --filter \"./docs\" build",

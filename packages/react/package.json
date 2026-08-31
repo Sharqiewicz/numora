@@ -13,14 +13,19 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "peerDependencies": {
     "react": ">=17.0.0",
     "react-dom": ">=17.0.0",
     "numora": ">=5.0.0"
   },
   "peerDependenciesMeta": {
-    "react-dom": { "optional": true }
+    "react-dom": {
+      "optional": true
+    }
   },
   "sideEffects": false,
   "repository": {
@@ -36,7 +41,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "lint": "biome lint ./src"
+    "lint": "biome lint --error-on-warnings ./src"
   },
   "keywords": [
     "numeric input",

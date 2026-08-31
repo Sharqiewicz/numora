@@ -27,10 +27,11 @@
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly",
     "test": "vitest run",
+    "bench": "vitest bench --run",
     "dev": "vite build --watch & tsc --watch --emitDeclarationOnly --preserveWatchOutput",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "lint": "biome lint ./src"
+    "lint": "biome lint --error-on-warnings ./src"
   },
   "keywords": [
     "numeric input",
