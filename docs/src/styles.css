@@ -18,11 +18,11 @@ code {
   --font-satoshi: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-righteous: 'Righteous', sans-serif;
 
-  --background: oklch(0.141 0.005 285.823);
+  --background: #0c0a09;
   --foreground: oklch(0.885 0 0);
-  --card: oklch(0.141 0.005 285.823);
+  --card: #0c0a09;
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.141 0.005 285.823);
+  --popover: #0c0a09;
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.985 0 0);
   --primary-foreground: oklch(0.21 0.006 285.885);
@@ -37,7 +37,7 @@ code {
   --border: oklch(0.274 0.006 286.033);
   --input: oklch(0.274 0.006 286.033);
   --ring: oklch(0.442 0.017 285.786);
-  --sidebar: oklch(0.141 0.005 285.823);;
+  --sidebar: #0c0a09;
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -81,7 +81,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  background-color: black;
+  background-color: #0c0a09;
   background-image:
     radial-gradient(circle at 20% 30%, var(--gradient-1-color) 0%, transparent 50%),
     radial-gradient(circle at 80% 70%, var(--gradient-2-color) 0%, transparent 50%),
@@ -323,6 +323,11 @@ body {
   --color-brand-hover: var(--brand-hover);
   --color-brand-disabled: var(--brand-disabled);
   --color-muted-icon: var(--muted-icon);
+  /* Motion easing tokens (generate `ease-out-expo` / `ease-drawer` utilities) */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Shadow-as-border token (dark-mode single ring; site is dark-only) */
+  --shadow-border: 0 0 0 1px oklch(1 0 0 / 0.08);
   --animate-fade-in-out: fade-in-out 1.5s ease forwards;
   --animate-fade-in: fade-in 1.5s ease forwards;
   --animate-fade-in-fast: fade-in 0.6s ease forwards;
@@ -478,6 +483,15 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+  }
+  p, li, blockquote, figcaption {
+    text-wrap: pretty;
   }
 }
 

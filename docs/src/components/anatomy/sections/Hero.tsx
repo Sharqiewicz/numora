@@ -18,13 +18,13 @@ export function Hero({ pkg }: SectionProps) {
       <div className="flex flex-wrap gap-3 pt-2">
         <a
           href="#sanitization"
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-[background-color,scale] duration-150 ease-out hover:bg-primary/90 active:scale-[0.96]"
         >
           See the pipeline →
         </a>
         <Link
           to={installPath}
-          className="rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/50"
+          className="rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-[background-color,scale] duration-150 ease-out hover:bg-muted/50 active:scale-[0.96]"
         >
           Install
         </Link>

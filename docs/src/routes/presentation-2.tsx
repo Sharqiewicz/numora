@@ -11,7 +11,7 @@ export const Route = createFileRoute('/presentation-2')({
   component: Presentation2,
 });
 
-const ease = [0.215, 0.61, 0.355, 1] as const;
+const ease = [0.16, 1, 0.3, 1] as const;
 
 function Presentation2() {
   const reduced = useReducedMotion();

@@ -97,7 +97,7 @@ export function Swap() {
       <div className="relative p-4 rounded-xl sm:border bg-surface-1 border-surface-3 w-full">
         <div className="w-full flex justify-end">
           <button
-            className="px-3 py-1 rounded-xl mb-2 cursor-pointer transition-[background-color,border-color,transform,scale] duration-200 border active:scale-[0.96] bg-surface-1 border-surface-5 hover:bg-surface-3 focus-visible:ring-2 focus-visible:ring-brand focus-visible:outline-none"
+            className="px-3 py-1 rounded-xl mb-2 cursor-pointer transition-[background-color,scale] duration-200 border active:scale-[0.96] bg-surface-1 border-surface-5 hover:bg-surface-3 focus-visible:ring-2 focus-visible:ring-brand focus-visible:outline-none"
             aria-label="Slippage settings"
           >
             <svg
@@ -154,7 +154,7 @@ export function Swap() {
 
         <div className="absolute border rounded-full border-surface-5 left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 flex justify-center my-2">
           <button
-            className="p-2 rounded-full border cursor-pointer transition-transform duration-200 bg-surface-1 border-surface-3 text-muted-icon hover:bg-surface-4 hover:border-surface-7 motion-safe:hover:rotate-180 focus-visible:ring-2 focus-visible:ring-brand focus-visible:outline-none"
+            className="p-2 rounded-full border cursor-pointer transition-[background-color,border-color,rotate,scale] duration-200 active:scale-[0.96] bg-surface-1 border-surface-3 text-muted-icon hover:bg-surface-4 hover:border-surface-7 motion-safe:hover:rotate-180 focus-visible:ring-2 focus-visible:ring-brand focus-visible:outline-none"
             onClick={flipTokens}
             type="button"
             aria-label="Flip tokens"
@@ -212,7 +212,7 @@ export function Swap() {
         </div>
         <button
           type="button"
-          className="active:scale-[0.96] w-full py-3 font-bold rounded-xl text-base text-white border-none cursor-pointer transition-[background-color,transform,scale,opacity] duration-200 bg-brand disabled:opacity-60 disabled:cursor-not-allowed hover:bg-brand-hover disabled:bg-brand-disabled disabled:text-white disabled:opacity-100 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-1 focus-visible:outline-none"
+          className="active:scale-[0.96] w-full py-3 font-bold rounded-xl text-base text-white border-none cursor-pointer transition-[background-color,scale,opacity] duration-200 bg-brand disabled:opacity-60 disabled:cursor-not-allowed hover:bg-brand-hover disabled:bg-brand-disabled disabled:text-white disabled:opacity-100 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-1 focus-visible:outline-none"
           onClick={handleSwap}
           disabled={isLoading}
         >

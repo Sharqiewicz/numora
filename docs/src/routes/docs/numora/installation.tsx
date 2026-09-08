@@ -41,23 +41,23 @@ function Installation() {
       <h2>Install</h2>
       <p>numora has zero runtime dependencies. Pick your package manager:</p>
 
-      <Tabs defaultValue="pnpm">
+      <Tabs defaultValue="pnpm" className="min-h-[5.5rem]">
         <TabsList>
           <TabsTrigger value="pnpm">pnpm</TabsTrigger>
           <TabsTrigger value="npm">npm</TabsTrigger>
           <TabsTrigger value="yarn">yarn</TabsTrigger>
           <TabsTrigger value="bun">bun</TabsTrigger>
         </TabsList>
-        <TabsContent value="pnpm">
+        <TabsContent value="pnpm" className="data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:duration-150 data-[state=active]:ease-out-expo motion-reduce:animate-none">
           <CodeBlock language="bash">{`pnpm add numora`}</CodeBlock>
         </TabsContent>
-        <TabsContent value="npm">
+        <TabsContent value="npm" className="data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:duration-150 data-[state=active]:ease-out-expo motion-reduce:animate-none">
           <CodeBlock language="bash">{`npm install numora`}</CodeBlock>
         </TabsContent>
-        <TabsContent value="yarn">
+        <TabsContent value="yarn" className="data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:duration-150 data-[state=active]:ease-out-expo motion-reduce:animate-none">
           <CodeBlock language="bash">{`yarn add numora`}</CodeBlock>
         </TabsContent>
-        <TabsContent value="bun">
+        <TabsContent value="bun" className="data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:duration-150 data-[state=active]:ease-out-expo motion-reduce:animate-none">
           <CodeBlock language="bash">{`bun add numora`}</CodeBlock>
         </TabsContent>
       </Tabs>

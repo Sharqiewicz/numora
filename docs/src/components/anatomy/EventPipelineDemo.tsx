@@ -61,10 +61,15 @@ export function EventPipelineDemo() {
       />
       <div className="max-h-48 overflow-y-auto rounded bg-background p-3 font-mono text-xs">
         {log.length === 0 ? (
-          <div className="text-muted-foreground">// event log - start typing</div>
+          <div className="text-muted-foreground transition-[opacity,transform] duration-150 ease-out-expo starting:opacity-0 starting:-translate-y-1 motion-reduce:transition-none">
+            {'// event log - start typing'}
+          </div>
         ) : (
           log.map((entry) => (
-            <div key={entry.id} className="leading-relaxed">
+            <div
+              key={entry.id}
+              className="leading-relaxed transition-[opacity,transform] duration-150 ease-out-expo starting:opacity-0 starting:-translate-y-1 motion-reduce:transition-none"
+            >
               <span className="text-muted-foreground">
                 +{String(entry.t).padStart(4, ' ')}ms{' '}
               </span>
