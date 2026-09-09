@@ -25,7 +25,7 @@ export function ExploreHero() {
             className="
               absolute -bottom-2 left-0 right-0 h-[3px]
               bg-gradient-to-r from-secondary/0 via-secondary to-secondary/0
-              animate-[shimmer_2s_ease-in-out_infinite]
+              animate-[shimmer_2s_ease-in-out_infinite] motion-reduce:animate-none
               opacity-50
             "
           />
@@ -61,7 +61,7 @@ export function ExploreHero() {
                 absolute inset-0 -translate-x-full
                 bg-gradient-to-r from-transparent via-white/20 to-transparent
                 group-hover:translate-x-full
-                transition-transform duration-500
+                transition-transform duration-300
               "
             />
           </Button>
@@ -100,7 +100,7 @@ export function ExploreHero() {
           <svg
             className="
               w-5 h-5
-              animate-[bounce_1.5s_ease-in-out_infinite]
+              animate-[bounce_1.5s_ease-in-out_infinite] motion-reduce:animate-none
               group-hover:text-secondary
               transition-colors duration-300
             "

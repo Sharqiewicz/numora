@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { NumoraInput } from 'numora-react';
 import { FormatOn, ThousandStyle } from 'numora';
 import { ProblemSection } from '../ProblemSection';
@@ -110,13 +111,20 @@ export function NumberTypeLieDemo() {
                 placeholder="Type a number..."
                 className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
               />
-              {scrollWarning && (
-                <div className="absolute -top-10 left-0 right-0 flex justify-center">
-                  <div className="px-3 py-1 rounded bg-red-500 text-white text-xs font-medium animate-bounce">
-                    Value changed by scroll!
-                  </div>
-                </div>
-              )}
+              <AnimatePresence>
+                {scrollWarning && (
+                  <motion.div
+                    className="absolute -top-10 left-0 right-0 flex justify-center"
+                    initial={{ opacity: 0, y: -4, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: 0.18, ease: [0.16, 1, 0.3, 1] } }}
+                    exit={{ opacity: 0, y: -2, scale: 0.97, transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] } }}
+                  >
+                    <div className="px-3 py-1 rounded bg-red-500 text-white text-xs font-medium motion-safe:animate-bounce">
+                      Value changed by scroll!
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm">
               <div className="flex items-center gap-2 mb-2">

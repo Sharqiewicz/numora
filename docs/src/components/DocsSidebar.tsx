@@ -1,4 +1,5 @@
 import { Link, useRouterState, useNavigate } from '@tanstack/react-router'
+import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
 import {
   Rocket,
   Download,
@@ -170,6 +171,7 @@ export function DocsSidebar() {
   const currentPath = router.location.pathname
   const { selectedPackage, setSelectedPackage, getPackageRoutePrefix } = usePackage()
   const packagePrefix = getPackageRoutePrefix()
+  const shouldReduceMotion = useReducedMotion()
 
   const handlePackageChange = (tab: string) => {
     const newPackage = tab as typeof selectedPackage
@@ -190,6 +192,7 @@ export function DocsSidebar() {
         activeTab={selectedPackage}
         onChange={handlePackageChange}
       />
+      <LayoutGroup>
       {navigation.map((group) => {
         // Filter items by selected package (items with no `packages` field are shown for all)
         const visibleItems = group.items.filter(
@@ -210,7 +213,25 @@ export function DocsSidebar() {
                   const Icon = item.icon
                   return (
                     <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton asChild isActive={isActive}>
+                      {isActive &&
+                        (shouldReduceMotion ? (
+                          <span
+                            aria-hidden
+                            className="absolute inset-0 -z-10 rounded-xl bg-sidebar-accent"
+                          />
+                        ) : (
+                          <motion.span
+                            aria-hidden
+                            layoutId="docs-nav-active"
+                            className="absolute inset-0 -z-10 rounded-xl bg-sidebar-accent"
+                            transition={{ type: 'tween', duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                          />
+                        ))}
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive}
+                        className="data-[active=true]:bg-transparent"
+                      >
                         <Link to={packageHref}>
                           <Icon />
                           <span>{item.title}</span>
@@ -224,6 +245,7 @@ export function DocsSidebar() {
           </SidebarGroup>
         )
       })}
+      </LayoutGroup>
     </SidebarContent>
   )
 }

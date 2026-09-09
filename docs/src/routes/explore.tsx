@@ -72,7 +72,7 @@ function ExplorePage() {
             <div className="flex gap-4 justify-center flex-wrap">
               <a
                 href="/docs/numora"
-                className="px-6 py-3 rounded-lg bg-secondary text-secondary-foreground font-medium hover:opacity-90 transition-opacity"
+                className="px-6 py-3 rounded-lg bg-secondary text-secondary-foreground font-medium hover:opacity-90 active:scale-[0.96] transition-[opacity,scale] duration-150 ease-out-expo"
               >
                 Get Started
               </a>
@@ -80,7 +80,7 @@ function ExplorePage() {
                 href="https://github.com/sharqiewicz/numora"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted/50 transition-colors"
+                className="px-6 py-3 rounded-lg border border-border text-foreground font-medium hover:bg-muted/50 active:scale-[0.96] transition-[background-color,scale] duration-150 ease-out-expo"
               >
                 View on GitHub
               </a>

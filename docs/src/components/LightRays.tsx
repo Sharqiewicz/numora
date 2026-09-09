@@ -266,6 +266,8 @@ void main() {
   gl_FragColor  = color;
 }`;
 
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
       const uniforms: Uniforms = {
         iTime: { value: 0 },
         iResolution: { value: [1, 1] },
@@ -274,10 +276,10 @@ void main() {
         rayDir: { value: [0, 1] },
 
         raysColor: { value: hexToRgb(raysColor) },
-        raysSpeed: { value: raysSpeed },
+        raysSpeed: { value: reducedMotion ? raysSpeed * 0.2 : raysSpeed },
         lightSpread: { value: lightSpread },
         rayLength: { value: rayLength },
-        pulsating: { value: pulsating ? 1.0 : 0.0 },
+        pulsating: { value: reducedMotion ? 0.0 : pulsating ? 1.0 : 0.0 },
         fadeDistance: { value: fadeDistance },
         saturation: { value: saturation },
         mousePos: { value: [0.5, 0.5] },
@@ -425,11 +427,13 @@ void main() {
     const u = uniformsRef.current;
     const renderer = rendererRef.current;
 
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     u.raysColor.value = hexToRgb(raysColor);
-    u.raysSpeed.value = raysSpeed;
+    u.raysSpeed.value = reducedMotion ? raysSpeed * 0.2 : raysSpeed;
     u.lightSpread.value = lightSpread;
     u.rayLength.value = rayLength;
-    u.pulsating.value = pulsating ? 1.0 : 0.0;
+    u.pulsating.value = reducedMotion ? 0.0 : pulsating ? 1.0 : 0.0;
     u.fadeDistance.value = fadeDistance;
     u.saturation.value = saturation;
     u.mouseInfluence.value = mouseInfluence;
@@ -464,7 +468,10 @@ void main() {
       mouseRef.current = { x, y };
     };
 
-    if (followMouse) {
+    const isHoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (followMouse && isHoverCapable && !reducedMotion) {
       window.addEventListener('mousemove', handleMouseMove);
       return () => window.removeEventListener('mousemove', handleMouseMove);
     }

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { CodeBlock } from '@/components/CodeBlock'
 import { TorphBlurDemo } from '@/components/TorphBlurDemo'
 import { TorphBlurMinimal } from '@/components/TorphBlurMinimal'
@@ -109,6 +110,8 @@ export const Route = createFileRoute('/docs/numora-react/integrations/torph')({
 })
 
 function TorphIntegration() {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <div className="prose prose-invert max-w-none">
       <h1>Torph Library Integration with Numora React</h1>
@@ -132,16 +135,44 @@ function TorphIntegration() {
       <TorphBlurSection>
         {(variant) => (
           <>
-            {variant === 'minimal' ? <TorphBlurMinimal /> : <TorphBlurDemo />}
-            <p className="text-center text-sm text-muted-foreground -mt-12 mb-12">
-              <code>FormatOn.Blur</code> -{' '}
-              {variant === 'minimal'
-                ? 'minimal integration; the caret floats during the focus-strip morph.'
-                : 'polished variant that hides the caret during the focus-strip morph.'}
-            </p>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={variant}
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: 1,
+                  transition: prefersReducedMotion ? { duration: 0.1 } : { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
+                }}
+                exit={{
+                  opacity: 0,
+                  transition: { duration: 0.1 },
+                }}
+              >
+                {variant === 'minimal' ? <TorphBlurMinimal /> : <TorphBlurDemo />}
+                <p className="text-center text-sm text-muted-foreground -mt-12 mb-12">
+                  <code>FormatOn.Blur</code> -{' '}
+                  {variant === 'minimal'
+                    ? 'minimal integration; the caret floats during the focus-strip morph.'
+                    : 'polished variant that hides the caret during the focus-strip morph.'}
+                </p>
+              </motion.div>
+            </AnimatePresence>
 
-            {variant === 'polished' && (
-              <>
+            <AnimatePresence initial={false}>
+              {variant === 'polished' && (
+                <motion.section
+                  key="polished-deep-dive"
+                  initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                    transition: prefersReducedMotion ? { duration: 0.1 } : { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    transition: { duration: 0.12 },
+                  }}
+                >
                 <h2>Hiding the caret during the focus-strip morph.</h2>
                 <p>
                   With <code>FormatOn.Blur</code>, focusing the input swaps{' '}
@@ -188,8 +219,9 @@ const morph = new TextMorph({
                   The flag gates the toggle so per-keystroke morphs after the strip don't keep
                   flipping the caret - only the first morph after focus matters.
                 </p>
-              </>
-            )}
+                </motion.section>
+              )}
+            </AnimatePresence>
           </>
         )}
       </TorphBlurSection>

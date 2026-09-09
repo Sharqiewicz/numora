@@ -67,7 +67,7 @@ export function ScrollIndicator({ target = '#tamper-proof-section' }: { target?:
         <svg
           className="
             w-5 h-5
-            animate-[bounce_1.5s_ease-in-out_infinite]
+            animate-[bounce_1.5s_ease-in-out_infinite] motion-reduce:animate-none
             group-hover:text-secondary
             transition-colors duration-300
           "

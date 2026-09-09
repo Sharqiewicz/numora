@@ -250,7 +250,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
         })()}
 
         <div
-          className={`transition-opacity transition-[max-height] duration-300 overflow-hidden ${
+          className={`transition-[opacity,max-height] duration-300 ease-out-expo overflow-hidden ${
             hasVideo ? 'opacity-100 h-52 sm:h-72 rounded-lg' : 'opacity-0 max-h-0'
           }`}
         >
@@ -280,6 +280,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
               <motion.button
                 key={s.id}
                 layout
+                whileTap={{ scale: 0.96 }}
                 transition={{ layout: { type: "spring", duration: 0.3, bounce: 0 } }}
                 onClick={() => handleSlideClick(index)}
                 className={`relative w-full text-left rounded-lg px-3 py-2.5 cursor-pointer ${
@@ -302,7 +303,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                         key={isActive ? 'active' : 'inactive'}
                         initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.7 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={shouldReduceMotion ? {} : { opacity: 0, scale: 0.7 }}
+                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
                         transition={{ type: "spring", duration: 0.3, bounce: 0 }}
                         className={`absolute text-xs leading-none ${
                           isActive ? 'text-secondary' : 'text-muted-foreground/30'
@@ -336,7 +337,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                       key="description"
                       initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={shouldReduceMotion ? {} : { opacity: 0, y: -4 }}
+                      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
                       transition={{ type: "spring", duration: 0.3, bounce: 0 }}
                       className="relative text-xs text-muted-foreground/60 mt-1 pl-5 z-[5]"
                     >
@@ -368,14 +369,14 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
           <button
             onClick={() => setIsPlaying((prev) => !prev)}
             aria-label={isPlaying ? 'Pause' : 'Play'}
-            className="w-8 h-8 rounded-full border border-[oklch(0.232_0.008_255)] bg-surface-2 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground/90 hover:border-surface-6 hover:bg-surface-3 transition-colors cursor-pointer"
+            className="relative w-8 h-8 rounded-full border border-[oklch(0.232_0.008_255)] bg-surface-2 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground/90 hover:border-surface-6 hover:bg-surface-3 transition-[color,background-color,border-color,scale] duration-150 ease-out active:scale-[0.96] cursor-pointer after:absolute after:top-1/2 after:left-1/2 after:size-10 after:-translate-x-1/2 after:-translate-y-1/2"
           >
             <AnimatePresence mode="wait" initial={false}>
               <motion.span
                 key={isPlaying ? 'pause' : 'play'}
-                initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.6 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={shouldReduceMotion ? {} : { opacity: 0, scale: 0.6 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.25, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.25, filter: 'blur(4px)' }}
                 transition={{ type: "spring", duration: 0.3, bounce: 0 }}
                 className="leading-none select-none flex items-center justify-center"
               >

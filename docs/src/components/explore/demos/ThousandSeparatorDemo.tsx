@@ -61,7 +61,7 @@ export function ThousandSeparatorDemo() {
                 key={key}
                 onClick={() => setGroupingStyle(key)}
                 className={cn(
-                  'px-4 py-2 rounded-lg border font-medium text-sm transition-colors',
+                  'px-4 py-2 rounded-lg border font-medium text-sm active:scale-[0.96] transition-[background-color,border-color,color,scale] duration-150 ease-out-expo',
                   groupingStyle === key
                     ? 'bg-secondary text-secondary-foreground border-secondary'
                     : 'bg-muted/30 text-muted-foreground border-border hover:bg-muted/50'

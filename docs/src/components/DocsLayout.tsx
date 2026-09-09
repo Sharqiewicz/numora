@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useLocation } from '@tanstack/react-router';
+import { useEffect, useRef } from 'react';
+import { Link, useLocation } from '@tanstack/react-router';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   Sidebar,
   SidebarHeader,
@@ -8,7 +9,6 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { DocsSidebar } from '@/components/DocsSidebar';
-import { Link } from '@tanstack/react-router';
 import { Socials } from './socials';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { PackageProvider } from '@/contexts/PackageContext';
@@ -16,33 +16,42 @@ import { PackageProvider } from '@/contexts/PackageContext';
 export function DocsLayout({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
   const location = useLocation();
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [displayChildren, setDisplayChildren] = useState(children);
+  const prefersReducedMotion = useReducedMotion();
 
-  // Handle page transitions
+  // Tracks the previous pathname so we only reset scroll on real page
+  // navigations, never on the first mount and never on hash-only changes
+  // (hash changes don't touch location.pathname, so this effect won't fire).
+  const previousPathnameRef = useRef(location.pathname);
+  const shouldResetScrollRef = useRef(false);
+
   useEffect(() => {
-    // Check for reduced motion preference
-    const prefersReducedMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)'
-    ).matches;
-
-    if (prefersReducedMotion) {
-      setDisplayChildren(children);
-      return;
+    if (previousPathnameRef.current !== location.pathname) {
+      shouldResetScrollRef.current = true;
+      previousPathnameRef.current = location.pathname;
     }
-
-    // Start exit (opacity fade-out, 120ms) - no translate to avoid layout mismatch with sidebar
-    setIsTransitioning(true);
-
-    // Wait for exit to finish before swapping content (exit duration = 120ms)
-    const exitTimer = setTimeout(() => {
-      setDisplayChildren(children);
-      setIsTransitioning(false);
-    }, 130);
-
-    return () => clearTimeout(exitTimer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
+
+  const handleExitComplete = () => {
+    if (shouldResetScrollRef.current) {
+      shouldResetScrollRef.current = false;
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    }
+  };
+
+  const pageVariants = {
+    initial: prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: prefersReducedMotion
+        ? { duration: 0.12, ease: 'easeOut' as const }
+        : { duration: 0.24, ease: [0.16, 1, 0.3, 1] as const },
+    },
+    exit: {
+      opacity: 0,
+      transition: { duration: 0.12, ease: 'easeOut' as const },
+    },
+  } as const;
 
   return (
     <PackageProvider>
@@ -71,18 +80,22 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
             <Socials className="justify-end" />
           </header>
           <main className="flex-1">
-            <div
-              className={`
-                container mx-auto max-w-3xl px-4 py-8
-                transition-opacity ease-out
-                ${isTransitioning
-                  ? 'opacity-0 duration-[120ms]'
-                  : 'opacity-100 duration-200'
-                }
-              `}
+            <AnimatePresence
+              mode="wait"
+              initial={false}
+              onExitComplete={handleExitComplete}
             >
-              {displayChildren}
-            </div>
+              <motion.div
+                key={location.pathname}
+                className="container mx-auto max-w-3xl px-4 py-8"
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
           </main>
         </SidebarInset>
       </SidebarProvider>

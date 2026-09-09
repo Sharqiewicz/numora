@@ -86,7 +86,7 @@ function App() {
                   absolute inset-0 -translate-x-full
                   bg-gradient-to-r from-transparent via-white/20 to-transparent
                   group-hover:translate-x-full
-                  transition-transform duration-500
+                  transition-transform duration-300
                 "
               />
             </Button>
@@ -105,7 +105,7 @@ function App() {
           </Link>
         </div>
       </section>
-      <IntegrationsSection style={d(900)} />
+      <IntegrationsSection skipIntro={skipIntro} baseDelay={900} />
     </main>
     <footer className="mt-16 text-sm text-center pb-16">
         &copy; {new Date().getFullYear()} Numora. Built with  <span className="text-secondary">❤</span> by <a href="https://x.com/sharqiewicz" target="_blank" rel="noopener noreferrer" className="font-numora text-secondary">Kacper Szarkiewicz</a>.

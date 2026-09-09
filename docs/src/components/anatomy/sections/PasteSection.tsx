@@ -42,7 +42,7 @@ export function PasteSection() {
             key={s.label}
             type="button"
             onClick={() => navigator.clipboard?.writeText(s.value)}
-            className="rounded border border-border/60 bg-background/50 px-2.5 py-1 text-xs hover:border-border"
+            className="rounded border border-border/60 bg-background/50 px-2.5 py-1.5 text-xs transition-[border-color,scale] duration-150 ease-out hover:border-border active:scale-[0.96]"
             title={`Copy "${s.value}"`}
           >
             <span className="text-muted-foreground">{s.label}: </span>
