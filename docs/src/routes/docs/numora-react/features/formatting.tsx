@@ -1,27 +1,83 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { ExampleWithDemo } from '@/components/ExampleWithDemo'
-import { FormatOn, GroupingStyle } from 'numora'
+import { createFileRoute } from '@tanstack/react-router';
+import { ExampleWithDemo } from '@/components/ExampleWithDemo';
+import { FormatOn, GroupingStyle } from 'numora';
 
 export const Route = createFileRoute('/docs/numora-react/features/formatting')({
   head: () => ({
     meta: [
       { title: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react' },
-      { name: 'description', content: 'Format numbers as you type using the NumoraInput React component. Thousand separators, multiple grouping styles, real-time formatting with cursor position preservation.' },
-      { property: 'og:title', content: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react' },
-      { property: 'og:description', content: 'Format numbers as you type using the NumoraInput React component. Thousand separators and cursor position preservation.' },
-      { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/features/formatting' },
-      { name: 'twitter:title', content: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react' },
-      { name: 'twitter:description', content: 'Format numbers as you type using the NumoraInput React component.' },
+      {
+        name: 'description',
+        content:
+          'Format numbers as you type using the NumoraInput React component. Thousand separators, multiple grouping styles, real-time formatting with cursor position preservation.',
+      },
+      {
+        property: 'og:title',
+        content: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react',
+      },
+      {
+        property: 'og:description',
+        content:
+          'Format numbers as you type using the NumoraInput React component. Thousand separators and cursor position preservation.',
+      },
+      {
+        property: 'og:url',
+        content: 'https://numeric-input.com/docs/numora-react/features/formatting',
+      },
+      {
+        name: 'twitter:title',
+        content: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react',
+      },
+      {
+        name: 'twitter:description',
+        content: 'Format numbers as you type using the NumoraInput React component.',
+      },
     ],
     links: [
       { rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/features/formatting' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Number Formatting in numora-react - React Numeric Input Thousand Separators", "description": "Format numbers as you type in a React numeric input. numora-react supports Standard, Indian Lakh, and East Asian Wan grouping with automatic cursor preservation.", "url": "https://numeric-input.com/docs/numora-react/features/formatting", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numeric-input.com/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Number Formatting", "item": "https://numeric-input.com/docs/numora-react/features/formatting" }] }]) },
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify([
+          {
+            '@context': 'https://schema.org',
+            '@type': 'TechArticle',
+            headline: 'Number Formatting in numora-react - React Numeric Input Thousand Separators',
+            description:
+              'Format numbers as you type in a React numeric input. numora-react supports Standard, Indian Lakh, and East Asian Wan grouping with automatic cursor preservation.',
+            url: 'https://numeric-input.com/docs/numora-react/features/formatting',
+            author: {
+              '@type': 'Person',
+              name: 'Kacper Szarkiewicz',
+              url: 'https://x.com/sharqiewicz',
+            },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://numeric-input.com' },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Numora React',
+                item: 'https://numeric-input.com/docs/numora-react',
+              },
+              {
+                '@type': 'ListItem',
+                position: 3,
+                name: 'Number Formatting',
+                item: 'https://numeric-input.com/docs/numora-react/features/formatting',
+              },
+            ],
+          },
+        ]),
+      },
     ],
   }),
   component: Formatting,
-})
+});
 
 function Formatting() {
   return (
@@ -39,14 +95,22 @@ function Formatting() {
           description="Type a large number to see standard grouping"
           language="tsx"
           code={`<NumoraInput thousandSeparator="," groupingStyle={GroupingStyle.Thousand} />`}
-          config={{ thousandSeparator: ',', groupingStyle: GroupingStyle.Thousand, decimalMaxLength: 2 }}
+          config={{
+            thousandSeparator: ',',
+            groupingStyle: GroupingStyle.Thousand,
+            decimalMaxLength: 2,
+          }}
         />
         <ExampleWithDemo
           title="Indian (Lakh): 12,34,567"
           description="Type a large number to see Indian numbering"
           language="tsx"
           code={`<NumoraInput thousandSeparator="," thousandsStyle={GroupingStyle.Lakh} />`}
-          config={{ thousandSeparator: ',', groupingStyle: GroupingStyle.Lakh, decimalMaxLength: 2 }}
+          config={{
+            thousandSeparator: ',',
+            groupingStyle: GroupingStyle.Lakh,
+            decimalMaxLength: 2,
+          }}
         />
         <ExampleWithDemo
           title="Chinese (Wan): 123,4567"
@@ -60,7 +124,11 @@ function Formatting() {
           description="Type a large number to see none grouping"
           language="tsx"
           code={`<NumoraInput thousandSeparator="," thousandsGroupStyle={GroupingStyle.None} />`}
-          config={{ thousandSeparator: ',', groupingStyle: GroupingStyle.None, decimalMaxLength: 2 }}
+          config={{
+            thousandSeparator: ',',
+            groupingStyle: GroupingStyle.None,
+            decimalMaxLength: 2,
+          }}
         />
       </div>
 
@@ -84,9 +152,15 @@ function Formatting() {
 
       <h2>Automatic behaviors</h2>
       <ul>
-        <li><strong>Cursor preservation</strong> - the cursor stays in the correct position when separators are added or removed during formatting</li>
-        <li><strong>Separator skipping</strong> - backspace and delete automatically skip over thousand separators so they never need to be deleted manually</li>
+        <li>
+          <strong>Cursor preservation</strong> - the cursor stays in the correct position when
+          separators are added or removed during formatting
+        </li>
+        <li>
+          <strong>Separator skipping</strong> - backspace and delete automatically skip over
+          thousand separators so they never need to be deleted manually
+        </li>
       </ul>
     </div>
-  )
+  );
 }

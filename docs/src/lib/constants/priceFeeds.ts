@@ -44,4 +44,3 @@ export const PRICE_FEED_ABI = [
     type: 'function',
   },
 ] as const;
-

@@ -1,23 +1,23 @@
-import { type ReactNode } from 'react'
+import { type ReactNode } from 'react';
 
 interface PaneProps {
-  label: string
-  tone?: 'neutral' | 'bad' | 'good'
-  input: ReactNode
-  note?: ReactNode
+  label: string;
+  tone?: 'neutral' | 'bad' | 'good';
+  input: ReactNode;
+  note?: ReactNode;
 }
 
 interface InputPairProps {
-  left: PaneProps
-  right: PaneProps
-  caption?: ReactNode
+  left: PaneProps;
+  right: PaneProps;
+  caption?: ReactNode;
 }
 
 const TONE_COLORS: Record<NonNullable<PaneProps['tone']>, string> = {
   neutral: 'text-foreground',
   bad: 'text-red-400',
   good: 'text-emerald-400',
-}
+};
 
 export function InputPair({ left, right, caption }: InputPairProps) {
   return (
@@ -29,9 +29,7 @@ export function InputPair({ left, right, caption }: InputPairProps) {
               {pane.label}
             </div>
             {pane.input}
-            {pane.note && (
-              <div className="text-xs text-muted-foreground">{pane.note}</div>
-            )}
+            {pane.note && <div className="text-xs text-muted-foreground">{pane.note}</div>}
           </div>
         ))}
       </div>
@@ -41,5 +39,5 @@ export function InputPair({ left, right, caption }: InputPairProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

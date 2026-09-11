@@ -38,9 +38,9 @@ export function CursorPositionDemo() {
       subtitle="Formatting destroys cursor position"
       description={
         <p>
-          When you format a number (adding commas), the cursor jumps to the end.
-          Try typing <code className="px-1 py-0.5 rounded bg-muted font-mono">1234567</code> rapidly
-          in both inputs and watch the cursor.
+          When you format a number (adding commas), the cursor jumps to the end. Try typing{' '}
+          <code className="px-1 py-0.5 rounded bg-muted font-mono">1234567</code> rapidly in both
+          inputs and watch the cursor.
         </p>
       }
     >
@@ -59,10 +59,7 @@ export function CursorPositionDemo() {
               onCursorChange={setNaiveCursor}
               placeholder="Type 1234567..."
             />
-            <CursorVisualizer
-              value={formatWithCommas(naiveValue)}
-              cursorPosition={naiveCursor}
-            />
+            <CursorVisualizer value={formatWithCommas(naiveValue)} cursorPosition={naiveCursor} />
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm">
               <p className="text-red-400">
                 The cursor always jumps to the end, making editing impossible.
@@ -88,10 +85,7 @@ export function CursorPositionDemo() {
               placeholder="Type 1234567..."
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
-            <CursorVisualizer
-              value={numoraValue}
-              cursorPosition={numoraCursor}
-            />
+            <CursorVisualizer value={numoraValue} cursorPosition={numoraCursor} />
             <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-sm">
               <p className="text-green-400">
                 Cursor stays where you expect it, even as commas are added.

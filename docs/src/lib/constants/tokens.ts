@@ -12,7 +12,7 @@ export interface TokenInfo {
   decimals: number;
 }
 
-export type TokenSymbol = 'ETH' |  'USDC' |  'cbBTC' | 'wstETH' | 'EURC';
+export type TokenSymbol = 'ETH' | 'USDC' | 'cbBTC' | 'wstETH' | 'EURC';
 
 export const TOKENS: TokenInfo[] = [
   {
@@ -51,4 +51,3 @@ export const TOKENS: TokenInfo[] = [
     decimals: 6,
   },
 ];
-

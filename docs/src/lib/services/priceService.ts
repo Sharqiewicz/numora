@@ -78,13 +78,12 @@ async function fetchWstETHPrice(ethPrice: number, network: NetworkName): Promise
 }
 
 export async function fetchAllTokenPrices(network: NetworkName): Promise<PriceData> {
-  const [ethPrice, usdcPrice, cbBTCPrice, eurcPrice] =
-    await Promise.all([
-      fetchPrice('ETH', network),
-      fetchPrice('USDC', network),
-      fetchPrice('cbBTC', network),
-      fetchPrice('EURC', network),
-    ]);
+  const [ethPrice, usdcPrice, cbBTCPrice, eurcPrice] = await Promise.all([
+    fetchPrice('ETH', network),
+    fetchPrice('USDC', network),
+    fetchPrice('cbBTC', network),
+    fetchPrice('EURC', network),
+  ]);
 
   const wstETHPrice = await fetchWstETHPrice(ethPrice, network);
 
@@ -96,4 +95,3 @@ export async function fetchAllTokenPrices(network: NetworkName): Promise<PriceDa
     EURC: eurcPrice,
   };
 }
-

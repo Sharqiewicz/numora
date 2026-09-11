@@ -1,14 +1,14 @@
-import { NumoraInput } from 'numora-react'
-import type { NumoraInputProps } from 'numora-react'
-import { CodeBlock } from './CodeBlock'
+import { NumoraInput } from 'numora-react';
+import type { NumoraInputProps } from 'numora-react';
+import { CodeBlock } from './CodeBlock';
 
 interface ExampleWithDemoProps {
-  code: string
-  language?: string
-  config: NumoraInputProps
-  title?: string
-  description?: string
-  placeholder?: string
+  code: string;
+  language?: string;
+  config: NumoraInputProps;
+  title?: string;
+  description?: string;
+  placeholder?: string;
 }
 
 export function ExampleWithDemo({
@@ -26,12 +26,8 @@ export function ExampleWithDemo({
       <CodeBlock language={language}>{code}</CodeBlock>
       <div className="rounded-lg border bg-muted/30 p-4">
         <label className="mb-2 block text-sm font-medium">Live Example:</label>
-        <NumoraInput
-          {...config}
-          placeholder={placeholder}
-          className="w-full outline-none"
-        />
+        <NumoraInput {...config} placeholder={placeholder} className="w-full outline-none" />
       </div>
     </div>
-  )
+  );
 }

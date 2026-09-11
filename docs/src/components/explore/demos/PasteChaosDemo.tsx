@@ -35,9 +35,9 @@ export function PasteChaosDemo() {
       subtitle="Users paste numbers in every format imaginable"
       description={
         <p>
-          Real users paste values from spreadsheets, financial reports, different locales,
-          and scientific tools. Native inputs either reject them outright or silently
-          corrupt the data. Click the paste buttons below to see what happens.
+          Real users paste values from spreadsheets, financial reports, different locales, and
+          scientific tools. Native inputs either reject them outright or silently corrupt the data.
+          Click the paste buttons below to see what happens.
         </p>
       }
     >
@@ -46,11 +46,7 @@ export function PasteChaosDemo() {
         rightLabel="Numora Input"
         leftInput={
           <div className="space-y-4">
-            <PasteButtonGroup
-              buttons={PASTE_VALUES}
-              onPaste={handleNativePaste}
-              className="mb-4"
-            />
+            <PasteButtonGroup buttons={PASTE_VALUES} onPaste={handleNativePaste} className="mb-4" />
             <BrokenInput
               mode="native-number"
               value={nativeValue}
@@ -67,11 +63,7 @@ export function PasteChaosDemo() {
         }
         rightInput={
           <div className="space-y-4">
-            <PasteButtonGroup
-              buttons={PASTE_VALUES}
-              onPaste={handleNumoraPaste}
-              className="mb-4"
-            />
+            <PasteButtonGroup buttons={PASTE_VALUES} onPaste={handleNumoraPaste} className="mb-4" />
             <NumoraInput
               value={numoraValue}
               onChange={(e) => setNumoraValue(e.target.value)}
@@ -79,11 +71,7 @@ export function PasteChaosDemo() {
               placeholder="Paste or type..."
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
-            <ResultDisplay
-              label="Numora result"
-              original={lastPasted}
-              result={numoraValue}
-            />
+            <ResultDisplay label="Numora result" original={lastPasted} result={numoraValue} />
           </div>
         }
       />
@@ -114,9 +102,7 @@ function ResultDisplay({ label, original, result, isBroken }: ResultDisplayProps
         <span className="text-muted-foreground">→</span>
         <code
           className={`px-2 py-0.5 rounded ${
-            isBroken && hasError
-              ? 'bg-red-500/20 text-red-400'
-              : 'bg-green-500/20 text-green-400'
+            isBroken && hasError ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'
           }`}
         >
           {isEmpty ? '(empty)' : result}

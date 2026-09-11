@@ -82,7 +82,6 @@ const SLIDES: Slide[] = [
     demoValue: '1234567.89',
     description: 'Separators auto-resolved via Intl.NumberFormat',
   },
-
 ];
 
 const inputClass =
@@ -127,7 +126,10 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
 
     // Use the native setter to bypass React's internal value tracking so the
     // uncontrolled NumoraInput's onChange handler fires on synthetic events.
-    const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
+    const nativeSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      'value'
+    )?.set;
 
     // Simulate a single character typed by the user. Dispatches the real
     // beforeinput → (input) sequence so Numora's formatting code path is exercised.
@@ -139,28 +141,37 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
 
     const simulateChar = (char: string) => {
       preserveScroll(() => {
-      // Ensure cursor is at the end before each simulated keypress.
-      input.setSelectionRange(input.value.length, input.value.length);
+        // Ensure cursor is at the end before each simulated keypress.
+        input.setSelectionRange(input.value.length, input.value.length);
 
-      if (char === '\b') {
-        const beforeInput = new InputEvent('beforeinput', {
-          bubbles: true, cancelable: true, inputType: 'deleteContentBackward',
-        });
-        input.dispatchEvent(beforeInput);
-        if (!beforeInput.defaultPrevented) {
-          nativeSetter?.call(input, input.value.slice(0, -1));
-          input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'deleteContentBackward' }));
+        if (char === '\b') {
+          const beforeInput = new InputEvent('beforeinput', {
+            bubbles: true,
+            cancelable: true,
+            inputType: 'deleteContentBackward',
+          });
+          input.dispatchEvent(beforeInput);
+          if (!beforeInput.defaultPrevented) {
+            nativeSetter?.call(input, input.value.slice(0, -1));
+            input.dispatchEvent(
+              new InputEvent('input', { bubbles: true, inputType: 'deleteContentBackward' })
+            );
+          }
+        } else {
+          const beforeInput = new InputEvent('beforeinput', {
+            bubbles: true,
+            cancelable: true,
+            inputType: 'insertText',
+            data: char,
+          });
+          input.dispatchEvent(beforeInput);
+          if (!beforeInput.defaultPrevented) {
+            nativeSetter?.call(input, input.value + char);
+            input.dispatchEvent(
+              new InputEvent('input', { bubbles: true, inputType: 'insertText' })
+            );
+          }
         }
-      } else {
-        const beforeInput = new InputEvent('beforeinput', {
-          bubbles: true, cancelable: true, inputType: 'insertText', data: char,
-        });
-        input.dispatchEvent(beforeInput);
-        if (!beforeInput.defaultPrevented) {
-          nativeSetter?.call(input, input.value + char);
-          input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
-        }
-      }
       });
     };
 
@@ -215,12 +226,11 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
   return (
     <div className="pt-4 pb-8 w-full max-w-lg mx-auto animate-fade-in opacity-0" style={style}>
       <div className="space-y-3">
-
         <div className="rounded-2xl border border-surface-3 bg-surface-1 overflow-hidden px-4 py-0">
           <NumoraInput
             ref={inputRef}
-            locale={slide.id === "locale" ? true : undefined}
-            thousandSeparator={slide.id === "locale" ? undefined : ","}
+            locale={slide.id === 'locale' ? true : undefined}
+            thousandSeparator={slide.id === 'locale' ? undefined : ','}
             groupingStyle={slide.id === 'regional' ? GroupingStyle.Lakh : GroupingStyle.Thousand}
             formatOn={FormatOn.Change}
             decimalMaxLength={2}
@@ -261,7 +271,9 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
               loop
               muted
               playsInline
-              onLoadedMetadata={(e) => setVideoDuration(Math.round(e.currentTarget.duration * 1000))}
+              onLoadedMetadata={(e) =>
+                setVideoDuration(Math.round(e.currentTarget.duration * 1000))
+              }
               className="w-full sm:w-auto mx-auto sm:h-full"
             >
               <source src={slide.video} type="video/mp4" />
@@ -280,7 +292,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
               <motion.button
                 key={s.id}
                 layout
-                transition={{ layout: { type: "spring", duration: 0.3, bounce: 0 } }}
+                transition={{ layout: { type: 'spring', duration: 0.3, bounce: 0 } }}
                 onClick={() => handleSlideClick(index)}
                 className={`relative w-full text-left rounded-lg px-3 py-2.5 cursor-pointer ${
                   !isActive ? 'hover:bg-surface-2' : ''
@@ -291,7 +303,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                   <motion.div
                     layoutId="slide-active-bg"
                     className="absolute inset-0 rounded-lg bg-surface-3 z-[3]"
-                    transition={{ type: "spring", duration: 0.3, bounce: 0 }}
+                    transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
                   />
                 )}
 
@@ -303,7 +315,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                         initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.7 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={shouldReduceMotion ? {} : { opacity: 0, scale: 0.7 }}
-                        transition={{ type: "spring", duration: 0.3, bounce: 0 }}
+                        transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
                         className={`absolute text-xs leading-none ${
                           isActive ? 'text-secondary' : 'text-muted-foreground/30'
                         }`}
@@ -329,7 +341,6 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                   </div>
                 </div>
 
-
                 <AnimatePresence mode="popLayout" initial={false}>
                   {isActive && (
                     <motion.p
@@ -337,7 +348,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                       initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={shouldReduceMotion ? {} : { opacity: 0, y: -4 }}
-                      transition={{ type: "spring", duration: 0.3, bounce: 0 }}
+                      transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
                       className="relative text-xs text-muted-foreground/60 mt-1 pl-5 z-[5]"
                     >
                       {s.description}
@@ -376,19 +387,19 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                 initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={shouldReduceMotion ? {} : { opacity: 0, scale: 0.6 }}
-                transition={{ type: "spring", duration: 0.3, bounce: 0 }}
+                transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
                 className="leading-none select-none flex items-center justify-center"
               >
                 {isPlaying ? (
-
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
                     <rect x="1" y="1" width="3" height="8" rx="0.5" />
                     <rect x="6" y="1" width="3" height="8" rx="0.5" />
                   </svg>
-                ) : ( <div className="ml-0.5">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
-                    <path d="M2 1.5 L9 5 L2 8.5 Z" />
-                  </svg>
+                ) : (
+                  <div className="ml-0.5">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                      <path d="M2 1.5 L9 5 L2 8.5 Z" />
+                    </svg>
                   </div>
                 )}
               </motion.span>

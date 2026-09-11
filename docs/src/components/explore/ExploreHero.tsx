@@ -39,9 +39,8 @@ export function ExploreHero() {
           text-lg
         "
       >
-        See the 7 most painful problems with numeric inputs in web apps.
-        Try each demo yourself to experience why{' '}
-        <strong className="font-numora text-foreground">numora</strong> exists.
+        See the 7 most painful problems with numeric inputs in web apps. Try each demo yourself to
+        experience why <strong className="font-numora text-foreground">numora</strong> exists.
       </p>
 
       <div className="animate-fade-in opacity-0 delay-[0.8s] flex gap-4 flex-wrap justify-center">

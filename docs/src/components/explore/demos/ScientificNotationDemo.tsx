@@ -32,9 +32,9 @@ export function ScientificNotationDemo() {
       subtitle="1e-18 should expand to 0.000000000000000001"
       description={
         <p>
-          In crypto and DeFi, users frequently deal with very small or very large numbers.
-          Pasting <code className="px-1 py-0.5 rounded bg-muted font-mono">1e-18</code> (1 wei)
-          should display the full decimal representation, not the scientific notation.
+          In crypto and DeFi, users frequently deal with very small or very large numbers. Pasting{' '}
+          <code className="px-1 py-0.5 rounded bg-muted font-mono">1e-18</code> (1 wei) should
+          display the full decimal representation, not the scientific notation.
         </p>
       }
     >
@@ -77,9 +77,7 @@ export function ScientificNotationDemo() {
             />
             <div className="p-3 rounded-lg bg-muted/30 border border-border">
               <p className="text-xs text-muted-foreground mb-1">Native displays:</p>
-              <code className="font-mono text-red-400">
-                {nativeValue || '(empty)'}
-              </code>
+              <code className="font-mono text-red-400">{nativeValue || '(empty)'}</code>
               <p className="text-xs text-red-400 mt-2">
                 Shows scientific notation or loses precision entirely
               </p>
@@ -103,9 +101,7 @@ export function ScientificNotationDemo() {
             />
             <div className="p-3 rounded-lg bg-muted/30 border border-border">
               <p className="text-xs text-muted-foreground mb-1">Numora expands:</p>
-              <code className="font-mono text-green-400 break-all">
-                {numoraValue || '(empty)'}
-              </code>
+              <code className="font-mono text-green-400 break-all">{numoraValue || '(empty)'}</code>
               <p className="text-xs text-green-400 mt-2">
                 Full decimal expansion with precise representation
               </p>

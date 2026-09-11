@@ -1,8 +1,7 @@
-import { useState } from "react";
-import { AnimatedCopyIcon } from "./AnimatedCopyIcon";
+import { useState } from 'react';
+import { AnimatedCopyIcon } from './AnimatedCopyIcon';
 
-
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
 export function useClipboard() {
   return useMemo(
@@ -11,38 +10,43 @@ export function useClipboard() {
         try {
           await navigator.clipboard.writeText(value);
         } catch (error) {
-          console.error("Failed to copy: ", error);
+          console.error('Failed to copy: ', error);
         }
-      }
+      },
     }),
     []
   );
 }
 
-
 interface CopyButtonProps {
   text: string;
   className?: string;
   noBorder?: boolean;
-  iconPosition?: "left" | "right";
+  iconPosition?: 'left' | 'right';
   onClick?: () => void;
 }
 
 const getButtonClasses = (noBorder: boolean, className: string) => {
-  const baseClasses = "active:scale-[0.96] transition-[color,background-color,transform,scale,box-shadow] duration-200 m-0 flex justify-center items-center inline-flex items-center break-all rounded cursor-pointer px-2 py-3";
+  const baseClasses =
+    'active:scale-[0.96] transition-[color,background-color,transform,scale,box-shadow] duration-200 m-0 flex justify-center items-center inline-flex items-center break-all rounded cursor-pointer px-2 py-3';
   const borderClasses = noBorder
-    ? "border-none bg-transparent hover:bg-gray-900"
-    : "bg-surface-1 hover:bg-surface-2 shadow-secondary/50 shadow-xs hover:shadow-secondary/80";
+    ? 'border-none bg-transparent hover:bg-gray-900'
+    : 'bg-surface-1 hover:bg-surface-2 shadow-secondary/50 shadow-xs hover:shadow-secondary/80';
 
   return `${baseClasses} ${borderClasses} ${className}`;
 };
 
-const getIconClasses = (iconPosition: "left" | "right") => {
-  return `h-4 w-4 mt-0.5 ${iconPosition === "left" ? "mr-1" : "ml-1"}`;
+const getIconClasses = (iconPosition: 'left' | 'right') => {
+  return `h-4 w-4 mt-0.5 ${iconPosition === 'left' ? 'mr-1' : 'ml-1'}`;
 };
 
-export const CopyButton = ({ text, className = "", noBorder = false, iconPosition = "right", onClick }: CopyButtonProps) => {
-
+export const CopyButton = ({
+  text,
+  className = '',
+  noBorder = false,
+  iconPosition = 'right',
+  onClick,
+}: CopyButtonProps) => {
   const clipboard = useClipboard();
   const [triggerAnimation, setTriggerAnimation] = useState(false);
 
@@ -60,13 +64,26 @@ export const CopyButton = ({ text, className = "", noBorder = false, iconPositio
   const iconClasses = getIconClasses(iconPosition);
 
   return (
-    <button aria-label="Copy to clipboard" className={buttonClasses} onClick={handleClick} type="button">
-      {iconPosition === "left" && (
-        <AnimatedCopyIcon className={iconClasses} onAnimationComplete={handleAnimationComplete} trigger={triggerAnimation} />
+    <button
+      aria-label="Copy to clipboard"
+      className={buttonClasses}
+      onClick={handleClick}
+      type="button"
+    >
+      {iconPosition === 'left' && (
+        <AnimatedCopyIcon
+          className={iconClasses}
+          onAnimationComplete={handleAnimationComplete}
+          trigger={triggerAnimation}
+        />
       )}
       {text}
-      {iconPosition === "right" && (
-        <AnimatedCopyIcon className={iconClasses} onAnimationComplete={handleAnimationComplete} trigger={triggerAnimation} />
+      {iconPosition === 'right' && (
+        <AnimatedCopyIcon
+          className={iconClasses}
+          onAnimationComplete={handleAnimationComplete}
+          trigger={triggerAnimation}
+        />
       )}
     </button>
   );

@@ -1,10 +1,10 @@
-type Group = { from: number; to: number; color: string }
+type Group = { from: number; to: number; color: string };
 
 interface Style {
-  label: string
-  formatted: string
-  groups: Group[]
-  description?: string
+  label: string;
+  formatted: string;
+  groups: Group[];
+  description?: string;
 }
 
 export function GroupingStylesDiagram() {
@@ -44,15 +44,15 @@ export function GroupingStylesDiagram() {
       ],
       description: 'Four-digit groups, the myriad (CJK)',
     },
-  ]
+  ];
 
-  const cellW = 26
+  const cellW = 26;
   const colorMap: Record<string, string> = {
     emerald: 'fill-emerald-400/15 stroke-emerald-400/70',
     sky: 'fill-sky-400/15 stroke-sky-400/70',
     amber: 'fill-amber-400/15 stroke-amber-400/70',
     violet: 'fill-violet-400/15 stroke-violet-400/70',
-  }
+  };
 
   return (
     <div className="my-10">
@@ -63,11 +63,11 @@ export function GroupingStylesDiagram() {
         className="block w-full"
       >
         {styles.map((s, idx) => {
-          const isRaw = s.groups.length === 0
-          const rowY = 30 + idx * 78
-          const chars = [...s.formatted]
-          const totalW = chars.length * cellW
-          const startX = (720 - totalW) / 2
+          const isRaw = s.groups.length === 0;
+          const rowY = 30 + idx * 78;
+          const chars = [...s.formatted];
+          const totalW = chars.length * cellW;
+          const startX = (720 - totalW) / 2;
 
           return (
             <g key={s.label}>
@@ -88,8 +88,8 @@ export function GroupingStylesDiagram() {
               )}
 
               {s.groups.map((g, gi) => {
-                const x = startX + g.from * cellW
-                const w = (g.to - g.from + 1) * cellW
+                const x = startX + g.from * cellW;
+                const w = (g.to - g.from + 1) * cellW;
                 return (
                   <rect
                     key={gi}
@@ -101,11 +101,11 @@ export function GroupingStylesDiagram() {
                     className={colorMap[g.color]}
                     strokeWidth="1.5"
                   />
-                )
+                );
               })}
 
               {chars.map((ch, i) => {
-                const isSep = ch === ','
+                const isSep = ch === ',';
                 return (
                   <text
                     key={i}
@@ -125,12 +125,12 @@ export function GroupingStylesDiagram() {
                   >
                     {ch}
                   </text>
-                )
+                );
               })}
             </g>
-          )
+          );
         })}
       </svg>
     </div>
-  )
+  );
 }

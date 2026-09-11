@@ -36,11 +36,7 @@ interface PasteButtonGroupProps {
   className?: string;
 }
 
-export function PasteButtonGroup({
-  buttons,
-  onPaste,
-  className,
-}: PasteButtonGroupProps) {
+export function PasteButtonGroup({ buttons, onPaste, className }: PasteButtonGroupProps) {
   return (
     <div className={cn('flex flex-wrap gap-2', className)}>
       {buttons.map((button) => (

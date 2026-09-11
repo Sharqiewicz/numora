@@ -1,6 +1,6 @@
 export function FloatVsString() {
-  const sumAsNumber = 0.1 + 0.2
-  const equality = (0.1 + 0.2) === 0.3
+  const sumAsNumber = 0.1 + 0.2;
+  const equality = 0.1 + 0.2 === 0.3;
 
   return (
     <div className="my-6 grid gap-4 rounded-lg border bg-muted/30 p-4 md:grid-cols-2">
@@ -41,5 +41,5 @@ export function FloatVsString() {
         </pre>
       </div>
     </div>
-  )
+  );
 }

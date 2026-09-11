@@ -1,6 +1,6 @@
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import oneDark from 'react-syntax-highlighter/dist/esm/styles/prism/one-dark'
-import { cn } from '@/lib/utils'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import oneDark from 'react-syntax-highlighter/dist/esm/styles/prism/one-dark';
+import { cn } from '@/lib/utils';
 
 const codeBlockStyle = {
   ...oneDark,
@@ -16,16 +16,16 @@ const codeBlockStyle = {
     margin: 0,
     padding: 0,
   },
-}
+};
 
 interface CodeBlockProps {
-  children: React.ReactNode
-  className?: string
-  language?: string
+  children: React.ReactNode;
+  className?: string;
+  language?: string;
 }
 
 export function CodeBlock({ children, className, language = 'typescript' }: CodeBlockProps) {
-  const codeString = typeof children === 'string' ? children : String(children)
+  const codeString = typeof children === 'string' ? children : String(children);
 
   return (
     <div className="relative my-6 overflow-hidden rounded-lg border border-muted/50 bg-surface-1">
@@ -49,5 +49,5 @@ export function CodeBlock({ children, className, language = 'typescript' }: Code
         {codeString.trim()}
       </SyntaxHighlighter>
     </div>
-  )
+  );
 }

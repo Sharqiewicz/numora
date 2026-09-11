@@ -1,24 +1,24 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react';
 
 export function AnnotatedInput() {
-  const [value, setValue] = useState('1234.56')
-  const [selectionStart, setSelectionStart] = useState(0)
-  const [selectionEnd, setSelectionEnd] = useState(0)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [value, setValue] = useState('1234.56');
+  const [selectionStart, setSelectionStart] = useState(0);
+  const [selectionEnd, setSelectionEnd] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const sync = () => {
-    const input = inputRef.current
-    if (!input) return
-    setSelectionStart(input.selectionStart ?? 0)
-    setSelectionEnd(input.selectionEnd ?? 0)
-  }
+    const input = inputRef.current;
+    if (!input) return;
+    setSelectionStart(input.selectionStart ?? 0);
+    setSelectionEnd(input.selectionEnd ?? 0);
+  };
 
   useEffect(() => {
-    const input = inputRef.current
-    if (!input) return
-    input.addEventListener('selectionchange', sync)
-    return () => input.removeEventListener('selectionchange', sync)
-  }, [])
+    const input = inputRef.current;
+    if (!input) return;
+    input.addEventListener('selectionchange', sync);
+    return () => input.removeEventListener('selectionchange', sync);
+  }, []);
 
   return (
     <div className="my-6 grid gap-4 rounded-lg border bg-muted/30 p-4 md:grid-cols-2">
@@ -31,8 +31,8 @@ export function AnnotatedInput() {
           pattern="[0-9.,-]*"
           value={value}
           onChange={(e) => {
-            setValue(e.target.value)
-            sync()
+            setValue(e.target.value);
+            sync();
           }}
           onSelect={sync}
           onKeyUp={sync}
@@ -69,5 +69,5 @@ export function AnnotatedInput() {
         </div>
       </div>
     </div>
-  )
+  );
 }

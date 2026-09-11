@@ -1,41 +1,92 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { CodeBlock } from '@/components/CodeBlock'
-import { ExampleWithDemo } from '@/components/ExampleWithDemo'
+import { createFileRoute } from '@tanstack/react-router';
+import { CodeBlock } from '@/components/CodeBlock';
+import { ExampleWithDemo } from '@/components/ExampleWithDemo';
 
 export const Route = createFileRoute('/docs/numora-react/features/validation')({
   head: () => ({
     meta: [
       { title: 'Custom Validation with isAllowed | numora-react' },
-      { name: 'description', content: 'Reject numeric input pre-commit with a custom isAllowed validator in the NumoraInput React component. Cap values, enforce business rules, and block invalid keystrokes before they hit React state.' },
+      {
+        name: 'description',
+        content:
+          'Reject numeric input pre-commit with a custom isAllowed validator in the NumoraInput React component. Cap values, enforce business rules, and block invalid keystrokes before they hit React state.',
+      },
       { property: 'og:title', content: 'Custom Validation with isAllowed | numora-react' },
-      { property: 'og:description', content: 'Reject numeric input pre-commit with a custom isAllowed validator. Block keystrokes and pastes before they fire onChange in React.' },
-      { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/features/validation' },
+      {
+        property: 'og:description',
+        content:
+          'Reject numeric input pre-commit with a custom isAllowed validator. Block keystrokes and pastes before they fire onChange in React.',
+      },
+      {
+        property: 'og:url',
+        content: 'https://numeric-input.com/docs/numora-react/features/validation',
+      },
       { name: 'twitter:title', content: 'Custom Validation with isAllowed | numora-react' },
-      { name: 'twitter:description', content: 'Reject numeric input pre-commit with a custom isAllowed validator in numora-react.' },
+      {
+        name: 'twitter:description',
+        content:
+          'Reject numeric input pre-commit with a custom isAllowed validator in numora-react.',
+      },
     ],
     links: [
       { rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/features/validation' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Custom Validation with isAllowed in numora-react", "description": "Use the isAllowed predicate prop to reject invalid numeric input before it commits to React state. Enforce caps, business rules, and other invariants without writing your own keydown handlers.", "url": "https://numeric-input.com/docs/numora-react/features/validation", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numeric-input.com/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Validation", "item": "https://numeric-input.com/docs/numora-react/features/validation" }] }]) },
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify([
+          {
+            '@context': 'https://schema.org',
+            '@type': 'TechArticle',
+            headline: 'Custom Validation with isAllowed in numora-react',
+            description:
+              'Use the isAllowed predicate prop to reject invalid numeric input before it commits to React state. Enforce caps, business rules, and other invariants without writing your own keydown handlers.',
+            url: 'https://numeric-input.com/docs/numora-react/features/validation',
+            author: {
+              '@type': 'Person',
+              name: 'Kacper Szarkiewicz',
+              url: 'https://x.com/sharqiewicz',
+            },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://numeric-input.com' },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Numora React',
+                item: 'https://numeric-input.com/docs/numora-react',
+              },
+              {
+                '@type': 'ListItem',
+                position: 3,
+                name: 'Validation',
+                item: 'https://numeric-input.com/docs/numora-react/features/validation',
+              },
+            ],
+          },
+        ]),
+      },
     ],
   }),
   component: Validation,
-})
+});
 
 function Validation() {
   return (
     <div className="prose prose-invert max-w-none">
       <h1>Custom Validation</h1>
       <p className="text-lg text-muted-foreground">
-        Reject keystrokes and pastes <em>before</em> they commit using an{' '}
-        <code>isAllowed</code> predicate. Useful for enforcing caps, business rules, or
-        format invariants that don't fit one of the built-in props.
+        Reject keystrokes and pastes <em>before</em> they commit using an <code>isAllowed</code>{' '}
+        predicate. Useful for enforcing caps, business rules, or format invariants that don't fit
+        one of the built-in props.
       </p>
 
       <h2>Shape</h2>
       <CodeBlock language="typescript">
-{`type IsAllowed = (rawValue: string) => boolean`}
+        {`type IsAllowed = (rawValue: string) => boolean`}
       </CodeBlock>
 
       <p>
@@ -59,16 +110,16 @@ function Validation() {
 />`}
         config={{
           isAllowed: (raw: string) => {
-            if (raw === '' || raw === '-' || raw === '.') return true
-            const n = parseFloat(raw)
-            return Number.isFinite(n) && n <= 100
+            if (raw === '' || raw === '-' || raw === '.') return true;
+            const n = parseFloat(raw);
+            return Number.isFinite(n) && n <= 100;
           },
         }}
       />
 
       <h2>Example: only multiples of 5</h2>
       <CodeBlock language="tsx">
-{`<NumoraInput
+        {`<NumoraInput
   isAllowed={(raw) =>
     raw === '' || (/^[0-9]+$/.test(raw) && Number(raw) % 5 === 0)
   }
@@ -77,12 +128,21 @@ function Validation() {
 
       <h2>Notes</h2>
       <ul>
-        <li>Runs <em>after</em> sanitization and formatting, but <em>before</em> the DOM is mutated and React state updates</li>
+        <li>
+          Runs <em>after</em> sanitization and formatting, but <em>before</em> the DOM is mutated
+          and React state updates
+        </li>
         <li>Fires for both typing and paste paths</li>
-        <li>Always allow the intermediate strings users need to type their way to a valid value (empty string, lone <code>-</code> or decimal separator)</li>
+        <li>
+          Always allow the intermediate strings users need to type their way to a valid value (empty
+          string, lone <code>-</code> or decimal separator)
+        </li>
         <li>Keep the predicate cheap - it runs on every keystroke</li>
-        <li>Combine with <code>maxLength</code> for length caps and <code>decimalMaxLength</code> for decimal-precision caps; <code>isAllowed</code> is for everything else</li>
+        <li>
+          Combine with <code>maxLength</code> for length caps and <code>decimalMaxLength</code> for
+          decimal-precision caps; <code>isAllowed</code> is for everything else
+        </li>
       </ul>
     </div>
-  )
+  );
 }

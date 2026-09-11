@@ -6,11 +6,7 @@ interface CursorVisualizerProps {
   className?: string;
 }
 
-export function CursorVisualizer({
-  value,
-  cursorPosition,
-  className,
-}: CursorVisualizerProps) {
+export function CursorVisualizer({ value, cursorPosition, className }: CursorVisualizerProps) {
   const chars = value.split('');
   const validCursorPos = Math.min(Math.max(0, cursorPosition), chars.length);
 
@@ -60,9 +56,7 @@ export function CursorVisualizer({
       <p className="text-xs text-muted-foreground mt-1">
         Cursor at position: <span className="font-mono text-secondary">{validCursorPos}</span>
         {chars.length > 0 && (
-          <span className="ml-2">
-            (after "{chars[validCursorPos - 1] || 'start'}")
-          </span>
+          <span className="ml-2">(after "{chars[validCursorPos - 1] || 'start'}")</span>
         )}
       </p>
     </div>

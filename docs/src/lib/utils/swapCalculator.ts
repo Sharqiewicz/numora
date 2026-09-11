@@ -64,4 +64,3 @@ export function calculateExchangeRate(
   const rate = fromPrice / toPrice;
   return rate.toFixed(6);
 }
-

@@ -1,27 +1,78 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { ExampleWithDemo } from '@/components/ExampleWithDemo'
-import { FormatOn } from 'numora'
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { ExampleWithDemo } from '@/components/ExampleWithDemo';
+import { FormatOn } from 'numora';
 
 export const Route = createFileRoute('/docs/numora-react/features/decimals')({
   head: () => ({
     meta: [
       { title: 'Decimal Input Validation & Limits | numora-react' },
-      { name: 'description', content: 'Validate decimal inputs and enforce limits using the NumoraInput React component. Set max/min decimal places with full TypeScript support.' },
+      {
+        name: 'description',
+        content:
+          'Validate decimal inputs and enforce limits using the NumoraInput React component. Set max/min decimal places with full TypeScript support.',
+      },
       { property: 'og:title', content: 'Decimal Input Validation & Limits | numora-react' },
-      { property: 'og:description', content: 'Validate decimal inputs and enforce limits using the NumoraInput React component. Set max/min decimal places with TypeScript support.' },
-      { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/features/decimals' },
+      {
+        property: 'og:description',
+        content:
+          'Validate decimal inputs and enforce limits using the NumoraInput React component. Set max/min decimal places with TypeScript support.',
+      },
+      {
+        property: 'og:url',
+        content: 'https://numeric-input.com/docs/numora-react/features/decimals',
+      },
       { name: 'twitter:title', content: 'Decimal Input Validation & Limits | numora-react' },
-      { name: 'twitter:description', content: 'Validate decimal inputs and enforce limits using the NumoraInput React component.' },
+      {
+        name: 'twitter:description',
+        content:
+          'Validate decimal inputs and enforce limits using the NumoraInput React component.',
+      },
     ],
     links: [
       { rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/features/decimals' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Decimal Handling in numora-react - React Numeric Input Decimal Precision", "description": "Configure decimal precision in the numora-react React numeric input component. Control decimal separator, max decimals, and minimum decimal padding.", "url": "https://numeric-input.com/docs/numora-react/features/decimals", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numeric-input.com/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Decimals", "item": "https://numeric-input.com/docs/numora-react/features/decimals" }] }]) },
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify([
+          {
+            '@context': 'https://schema.org',
+            '@type': 'TechArticle',
+            headline: 'Decimal Handling in numora-react - React Numeric Input Decimal Precision',
+            description:
+              'Configure decimal precision in the numora-react React numeric input component. Control decimal separator, max decimals, and minimum decimal padding.',
+            url: 'https://numeric-input.com/docs/numora-react/features/decimals',
+            author: {
+              '@type': 'Person',
+              name: 'Kacper Szarkiewicz',
+              url: 'https://x.com/sharqiewicz',
+            },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://numeric-input.com' },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Numora React',
+                item: 'https://numeric-input.com/docs/numora-react',
+              },
+              {
+                '@type': 'ListItem',
+                position: 3,
+                name: 'Decimals',
+                item: 'https://numeric-input.com/docs/numora-react/features/decimals',
+              },
+            ],
+          },
+        ]),
+      },
     ],
   }),
   component: Decimals,
-})
+});
 
 function Decimals() {
   return (
@@ -70,10 +121,18 @@ function Decimals() {
 
       <h2>Automatic behaviors</h2>
       <ul>
-        <li><strong>Comma/dot conversion</strong> - when no thousand separator is set, both <code>,</code> and <code>.</code> keystrokes map to the configured decimal separator</li>
-        <li><strong>Duplicate prevention</strong> - typing a second decimal separator is blocked</li>
-        <li><strong>Paste cleanup</strong> - if multiple separators appear (e.g. <code>"12.34.56"</code>), all but the first are removed (<code>"12.3456"</code>)</li>
+        <li>
+          <strong>Comma/dot conversion</strong> - when no thousand separator is set, both{' '}
+          <code>,</code> and <code>.</code> keystrokes map to the configured decimal separator
+        </li>
+        <li>
+          <strong>Duplicate prevention</strong> - typing a second decimal separator is blocked
+        </li>
+        <li>
+          <strong>Paste cleanup</strong> - if multiple separators appear (e.g.{' '}
+          <code>"12.34.56"</code>), all but the first are removed (<code>"12.3456"</code>)
+        </li>
       </ul>
     </div>
-  )
+  );
 }

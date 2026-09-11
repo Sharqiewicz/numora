@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState } from 'react';
 import {
   expandCompactNotation,
   expandScientificNotation,
@@ -7,13 +7,13 @@ import {
   removeLeadingZeros,
   removeNonNumericCharacters,
   removeThousandSeparators,
-} from 'numora'
+} from 'numora';
 
 interface Step {
-  name: string
-  description: string
-  output: string
-  ran: boolean
+  name: string;
+  description: string;
+  output: string;
+  ran: boolean;
 }
 
 const config = {
@@ -22,80 +22,80 @@ const config = {
   enableCompactNotation: true,
   enableNegative: false,
   enableLeadingZeros: false,
-}
+};
 
 function pipeline(input: string): Step[] {
-  const steps: Step[] = []
-  let v = input
+  const steps: Step[] = [];
+  let v = input;
 
-  v = filterMobileKeyboardArtifacts(v)
+  v = filterMobileKeyboardArtifacts(v);
   steps.push({
     name: 'filterMobileKeyboardArtifacts',
     description: 'Strip non-breaking spaces and Unicode whitespace',
     output: v,
     ran: true,
-  })
+  });
 
-  v = removeThousandSeparators(v, config.thousandSeparator)
+  v = removeThousandSeparators(v, config.thousandSeparator);
   steps.push({
     name: 'removeThousandSeparators',
     description: 'Strip the configured grouping char (formatting, not data)',
     output: v,
     ran: true,
-  })
+  });
 
   if (config.enableCompactNotation) {
-    v = expandCompactNotation(v)
+    v = expandCompactNotation(v);
     steps.push({
       name: 'expandCompactNotation',
       description: 'Expand "1k" → "1000", "2.5M" → "2500000"',
       output: v,
       ran: true,
-    })
+    });
   }
 
-  v = expandScientificNotation(v)
+  v = expandScientificNotation(v);
   steps.push({
     name: 'expandScientificNotation',
     description: 'Expand "1.5e-7" → "0.00000015"',
     output: v,
     ran: true,
-  })
+  });
 
-  v = removeNonNumericCharacters(v, config.enableNegative, config.decimalSeparator)
+  v = removeNonNumericCharacters(v, config.enableNegative, config.decimalSeparator);
   steps.push({
     name: 'removeNonNumericCharacters',
     description: 'Strip everything that is not a digit or the decimal separator',
     output: v,
     ran: true,
-  })
+  });
 
-  v = removeExtraDecimalSeparators(v, config.decimalSeparator)
+  v = removeExtraDecimalSeparators(v, config.decimalSeparator);
   steps.push({
     name: 'removeExtraDecimalSeparators',
     description: 'Keep only the first decimal point',
     output: v,
     ran: true,
-  })
+  });
 
   if (!config.enableLeadingZeros) {
-    v = removeLeadingZeros(v)
+    v = removeLeadingZeros(v);
     steps.push({
       name: 'removeLeadingZeros',
       description: 'Drop "007" → "7" unless leading zeros are enabled',
       output: v,
       ran: true,
-    })
+    });
   }
 
-  return steps
+  return steps;
 }
 
-const PRESETS = ['$1,234.56abc', '1.5e-7', '2.5M', '007.5', '1.2.3.4', '12,34,567']
+const PRESETS = ['$1,234.56abc', '1.5e-7', '2.5M', '007.5', '1.2.3.4', '12,34,567'];
 
 export function SanitizationStepper() {
-  const [value, setValue] = useState('$1,234.56abc')
-  const steps = pipeline(value)
+  const [value, setValue] = useState('$1,234.56abc');
+  const steps = pipeline(value);
 
   return (
     <div className="my-6 space-y-4 rounded-lg border bg-muted/30 p-4">
@@ -131,8 +131,8 @@ export function SanitizationStepper() {
           <div className="text-right">Output</div>
         </div>
         {steps.map((step, i) => {
-          const prev = i === 0 ? value : steps[i - 1].output
-          const changed = prev !== step.output
+          const prev = i === 0 ? value : steps[i - 1].output;
+          const changed = prev !== step.output;
           return (
             <div
               key={step.name}
@@ -155,9 +155,9 @@ export function SanitizationStepper() {
                 )}
               </div>
             </div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
