@@ -11,3 +11,5 @@
 .prettierrc
 ARTICLE.md
 WHY_NUMORA.md
+docs/agents
+docs/adr

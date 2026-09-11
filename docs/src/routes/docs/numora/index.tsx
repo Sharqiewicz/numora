@@ -1,49 +1,86 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import CHEVRON_RIGHT from '@/assets/chevron-right.svg'
-import { Button } from '@/components/ui/button'
-import { CodeBlock } from '@/components/CodeBlock'
+import { createFileRoute, Link } from '@tanstack/react-router';
+import CHEVRON_RIGHT from '@/assets/chevron-right.svg';
+import { Button } from '@/components/ui/button';
+import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora/')({
   head: () => ({
     meta: [
       { title: 'Numora - Numeric Input Library | Docs' },
-      { name: 'description', content: 'Get started with numora, the zero-dependency JavaScript numeric input library. Attach to any input element - works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.' },
+      {
+        name: 'description',
+        content:
+          'Get started with numora, the zero-dependency JavaScript numeric input library. Attach to any input element - works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.',
+      },
       { property: 'og:title', content: 'Numora - Numeric Input Library | Docs' },
-      { property: 'og:description', content: 'Get started with numora, the zero-dependency JavaScript numeric input library. Framework-agnostic - works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.' },
+      {
+        property: 'og:description',
+        content:
+          'Get started with numora, the zero-dependency JavaScript numeric input library. Framework-agnostic - works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.',
+      },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora' },
       { name: 'twitter:title', content: 'Numora - Numeric Input Library | Docs' },
-      { name: 'twitter:description', content: 'Zero-dependency JavaScript numeric input library. Framework-agnostic - works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.' },
+      {
+        name: 'twitter:description',
+        content:
+          'Zero-dependency JavaScript numeric input library. Framework-agnostic - works with React, Vue, Svelte, Angular, and Vanilla JS. 6.4kb gzipped.',
+      },
     ],
-    links: [
-      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora' },
-    ],
+    links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora' }],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify([
-        { "@context": "https://schema.org", "@type": "SoftwareSourceCode", "name": "numora", "codeRepository": "https://github.com/sharqiewicz/numora", "programmingLanguage": "TypeScript", "runtimePlatform": "Browser", "url": "https://numeric-input.com/docs/numora", "description": "Zero-dependency JavaScript numeric input library. Precision-first, framework-agnostic, 6.4kb gzipped." },
-        { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numeric-input.com/docs/numora" }] }
-      ]) },
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify([
+          {
+            '@context': 'https://schema.org',
+            '@type': 'SoftwareSourceCode',
+            name: 'numora',
+            codeRepository: 'https://github.com/sharqiewicz/numora',
+            programmingLanguage: 'TypeScript',
+            runtimePlatform: 'Browser',
+            url: 'https://numeric-input.com/docs/numora',
+            description:
+              'Zero-dependency JavaScript numeric input library. Precision-first, framework-agnostic, 6.4kb gzipped.',
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://numeric-input.com' },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Numora JS',
+                item: 'https://numeric-input.com/docs/numora',
+              },
+            ],
+          },
+        ]),
+      },
     ],
   }),
   component: GetStarted,
-})
+});
 
 function GetStarted() {
   return (
-    <div className="prose prose-invert max-w-none text-muted-foreground!">
-      <h1>Numora - Numeric Input Library</h1>
-      <p>
-        <strong className="font-numora">numora</strong> is a zero-dependency TypeScript library that turns any{' '}
-        <code>{'<input>'}</code> element into a precision numeric input. Unlike{' '}
-        <code>{'<input type="number">'}</code>, numora uses <code>type="text"</code> under the hood so you control
-        exactly what the user can type, paste, and see.
+    <div className="prose prose-invert max-w-xl">
+      <h1 className="text-stone-100">Numora - Numeric Input Library</h1>
+      <p className="text-stone-400 text-base leading-6">
+        <strong className="font-numora">numora</strong> is a zero-dependency TypeScript library that
+        turns any <code>{'<input>'}</code> element into a precision numeric input. Unlike{' '}
+        <code>{'<input type="number">'}</code>, numora uses <code>type="text"</code> under the hood
+        so you control exactly what the user can type, paste, and see.
       </p>
 
-      <h2>Why <strong className="font-numora">numora</strong>?</h2>
+      <h2 className="text-stone-100 text-2xl">
+        Why <strong className="font-numora">numora</strong>?
+      </h2>
 
-      <p>
-        If you audit the codebases of the top 10 DeFi protocols - Uniswap, Aave, Curve, Balancer - you'll notice a pattern.
-        For the most critical UI component in finance, the numeric input, every single one has built a custom implementation
-        from scratch.
+      <p className="text-stone-400 text-base leading-6">
+        If you audit the codebases of the top 10 DeFi protocols - Uniswap, Aave, Curve, Balancer -
+        you'll notice a pattern. For the most critical UI component in finance, the numeric input,
+        every single one has built a custom implementation from scratch.
       </p>
       <ul className="list-disc list-inside">
         <li>Uniswap maintains ~200 lines of custom regex and locale logic.</li>
@@ -51,31 +88,55 @@ function GetStarted() {
         <li>Curve relies on a complex chain of hooks to handle state.</li>
       </ul>
 
-      <p><strong>There is no standard.</strong> Every team wastes days reinventing the wheel: comma/dot separator logic, parseFloat precision loss, mobile keyboard ghost characters.</p>
-
-      <p>
-        <strong>numora is the new standard for numeric inputs</strong> - a precision-first library you drop in once, configure with options, and forget about.
+      <p className="text-stone-400 text-base leading-6">
+        <strong>There is no standard.</strong> Every team wastes days reinventing the wheel:
+        comma/dot separator logic, parseFloat precision loss, mobile keyboard ghost characters.
       </p>
 
-      <h2>What you get</h2>
+      <p className="text-stone-400 text-base leading-6">
+        <strong>numora is the new standard for numeric inputs</strong> - a precision-first library
+        you drop in once, configure with options, and forget about.
+      </p>
+
+      <h2 className="text-stone-100 text-2xl">What you get</h2>
       <ul className="list-disc list-inside">
-        <li><strong>Zero dependencies</strong> - no moment, no lodash, no formatting library</li>
-        <li><strong>6.4 kb gzipped</strong> - negligible bundle cost</li>
-        <li><strong>String-only values</strong> - never converts to <code>Number</code>, so no IEEE 754 rounding errors on amounts like <code>0.1 + 0.2</code></li>
-        <li><strong>Full cursor preservation</strong> - editing in the middle of a formatted number keeps the caret in place after reformatting</li>
-        <li><strong>Thousand separator formatting</strong> - Standard, Indian Lakh, and East Asian Wan grouping styles</li>
-        <li><strong>Paste sanitization</strong> - strips non-numeric characters, expands compact notation (<code>1k → 1000</code>) and scientific notation (<code>1.5e-7 → 0.00000015</code>)</li>
-        <li><strong>Framework-agnostic</strong> - works with React, Vue, Svelte, Angular, or plain HTML</li>
+        <li>
+          <strong>Zero dependencies</strong> - no moment, no lodash, no formatting library
+        </li>
+        <li>
+          <strong>6.4 kb gzipped</strong> - negligible bundle cost
+        </li>
+        <li>
+          <strong>String-only values</strong> - never converts to <code>Number</code>, so no IEEE
+          754 rounding errors on amounts like <code>0.1 + 0.2</code>
+        </li>
+        <li>
+          <strong>Full cursor preservation</strong> - editing in the middle of a formatted number
+          keeps the caret in place after reformatting
+        </li>
+        <li>
+          <strong>Thousand separator formatting</strong> - Standard, Indian Lakh, and East Asian Wan
+          grouping styles
+        </li>
+        <li>
+          <strong>Paste sanitization</strong> - strips non-numeric characters, expands compact
+          notation (<code>1k → 1000</code>) and scientific notation (
+          <code>1.5e-7 → 0.00000015</code>)
+        </li>
+        <li>
+          <strong>Framework-agnostic</strong> - works with React, Vue, Svelte, Angular, or plain
+          HTML
+        </li>
       </ul>
 
-      <h2>Vanilla JS API</h2>
-      <p>
-        The core package exports a <code>NumoraInput</code> class. Instantiate it with a container element and an
-        optional <code>FormattingOptions</code> object. The class attaches all event listeners and manages internal state -
-        no build step, no JSX, no reactivity system required.
+      <h2 className="text-stone-100 text-2xl">Vanilla JS API</h2>
+      <p className="text-stone-400 text-base leading-6">
+        The core package exports a <code>NumoraInput</code> class. Instantiate it with a container
+        element and an optional <code>FormattingOptions</code> object. The class attaches all event
+        listeners and manages internal state - no build step, no JSX, no reactivity system required.
       </p>
       <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+        {`import { NumoraInput } from 'numora'
 
 const container = document.querySelector('#amount-input')
 
@@ -91,56 +152,72 @@ container.addEventListener('change', (e) => {
 })`}
       </CodeBlock>
 
-      <p>
+      <p className="text-stone-400 text-base leading-6">
         The <code>NumoraInput</code> class is the same engine used by the{' '}
-        <Link to="/docs/numora-react">numora-react</Link> component. Both share the formatting pipeline, sanitization
-        logic, and options interface.
+        <Link to="/docs/numora-react" className="underline link-underline hover:text-stone-100 transition-colors">numora-react</Link> component. Both share the formatting
+        pipeline, sanitization logic, and options interface.
       </p>
 
-      <hr/>
-      <h2>Use Numora in your framework</h2>
-      <p>
-        Numora is a precision-first <strong>numeric input library</strong> that works in every modern
-        JavaScript framework. The core <code>NumoraInput</code> class is vanilla TypeScript and ships with
-        thin, idiomatic adapters for each ecosystem – no separate wrapper packages needed.
+      <hr />
+      <h2 className="text-stone-100 text-2xl">Use Numora in your framework</h2>
+      <p className="text-stone-400 text-base leading-6">
+        Numora is a precision-first <strong>numeric input library</strong> that works in every
+        modern JavaScript framework. The core <code>NumoraInput</code> class is vanilla TypeScript
+        and ships with thin, idiomatic adapters for each ecosystem – no separate wrapper packages
+        needed.
       </p>
       <ul className="list-disc list-inside">
         <li>
-          <Link to="/docs/numora/frameworks/svelte"><strong>Svelte numeric input</strong></Link> – a 10-line{' '}
-          <code>use:numora</code> action for Svelte 5 and SvelteKit (SSR-safe).
+          <Link to="/docs/numora/frameworks/svelte" className="underline link-underline hover:text-stone-100 transition-colors">
+            <strong>Svelte numeric input</strong>
+          </Link>{' '}
+          – a 10-line <code>use:numora</code> action for Svelte 5 and SvelteKit (SSR-safe).
         </li>
         <li>
-          <Link to="/docs/numora/frameworks/vue"><strong>Vue numeric input</strong></Link> – a Vue 3
-          composable bound to a template <code>ref</code>, or a <code>v-numora</code> directive (works
-          with Nuxt 3, VeeValidate, FormKit, Pinia).
+          <Link to="/docs/numora/frameworks/vue" className="underline link-underline hover:text-stone-100 transition-colors">
+            <strong>Vue numeric input</strong>
+          </Link>{' '}
+          – a Vue 3 composable bound to a template <code>ref</code>, or a <code>v-numora</code>{' '}
+          directive (works with Nuxt 3, VeeValidate, FormKit, Pinia).
         </li>
         <li>
-          <Link to="/docs/numora/frameworks/angular"><strong>Angular numeric input</strong></Link> – a
-          standalone directive that composes with <code>ControlValueAccessor</code> and{' '}
+          <Link to="/docs/numora/frameworks/angular" className="underline link-underline hover:text-stone-100 transition-colors">
+            <strong>Angular numeric input</strong>
+          </Link>{' '}
+          – a standalone directive that composes with <code>ControlValueAccessor</code> and{' '}
           <code>FormControl&lt;string&gt;</code> for Reactive Forms.
         </li>
         <li>
-          <Link to="/docs/numora/frameworks/solid"><strong>SolidJS numeric input</strong></Link> – a tiny{' '}
-          <code>onMount</code> wrapper that writes the raw value into a <code>createSignal</code> (works
-          with SolidStart).
+          <Link to="/docs/numora/frameworks/solid" className="underline link-underline hover:text-stone-100 transition-colors">
+            <strong>SolidJS numeric input</strong>
+          </Link>{' '}
+          – a tiny <code>onMount</code> wrapper that writes the raw value into a{' '}
+          <code>createSignal</code> (works with SolidStart).
         </li>
         <li>
-          <Link to="/docs/numora-react"><strong>React numeric input</strong></Link> – the{' '}
-          <code>numora-react</code> package gives you a drop-in <code>&lt;NumoraInput /&gt;</code>{' '}
-          component with full TypeScript support and React Hook Form integration.
+          <Link to="/docs/numora-react" className="underline link-underline hover:text-stone-100 transition-colors">
+            <strong>React numeric input</strong>
+          </Link>{' '}
+          – the <code>numora-react</code> package gives you a drop-in{' '}
+          <code>&lt;NumoraInput /&gt;</code> component with full TypeScript support and React Hook
+          Form integration.
         </li>
       </ul>
 
-      <hr/>
-      <h2>Next Steps</h2>
-      <p>
-        Follow the <Link to="/docs/numora/installation">Installation</Link> guide to add numora to your project, or
-        read <Link to="/docs/numora/anatomy">Anatomy</Link> to understand the <code>beforeinput</code>-based
-        architecture.
+      <hr />
+      <h2 className="text-stone-100 text-2xl">Next Steps</h2>
+      <p className="text-stone-400 text-base leading-6">
+        Follow the <Link to="/docs/numora/installation" className="underline link-underline hover:text-stone-100 transition-colors">Installation</Link> guide to add numora to
+        your project, or read <Link to="/docs/numora/anatomy" className="underline link-underline hover:text-stone-100 transition-colors">Anatomy</Link> to understand the{' '}
+        <code>beforeinput</code>-based architecture.
       </p>
       <div className="flex justify-between items-center gap-2 my-8">
-        <Link to="/docs/numora/installation"><Button variant="default">Installation <img src={CHEVRON_RIGHT} alt="Chevron Right" className="w-4 h-4" /></Button></Link>
+        <Link to="/docs/numora/installation">
+          <Button variant="default">
+            Installation <img src={CHEVRON_RIGHT} alt="Chevron Right" className="w-4 h-4" />
+          </Button>
+        </Link>
       </div>
     </div>
-  )
+  );
 }

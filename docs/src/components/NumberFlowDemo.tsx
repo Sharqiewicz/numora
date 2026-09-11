@@ -26,7 +26,7 @@ export function NumberFlowDemo() {
           onChange={(e: NumoraInputChangeEvent) => setAmount(e.target.value)}
           onBlur={() => setEditing(false)}
           formatOn={FormatOn.Change}
-          decimalMaxLength={6}
+          maxDecimals={6}
           thousandSeparator=","
           placeholder="0"
           className="w-full bg-transparent text-4xl font-mono text-white placeholder-surface-6 focus:outline-none"

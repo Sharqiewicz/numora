@@ -1,22 +1,22 @@
-import { useState } from 'react'
-import { FormatOn, ThousandStyle } from 'numora'
+import { useState } from 'react';
+import { FormatOn, ThousandStyle } from 'numora';
 import {
   type NumoraHTMLInputElement,
   NumoraInput,
   type NumoraInputChangeEvent,
-} from 'numora-react'
+} from 'numora-react';
 
 export function ValueReadout() {
-  const [rawValue, setRawValue] = useState('')
-  const [formattedValue, setFormattedValue] = useState('')
-  const [selectionStart, setSelectionStart] = useState<number | null>(0)
+  const [rawValue, setRawValue] = useState('');
+  const [formattedValue, setFormattedValue] = useState('');
+  const [selectionStart, setSelectionStart] = useState<number | null>(0);
 
   const handleChange = (e: NumoraInputChangeEvent) => {
-    const target = e.target as NumoraHTMLInputElement
-    setRawValue(target.value)
-    setFormattedValue(target.formattedValue ?? '')
-    setSelectionStart(target.selectionStart)
-  }
+    const target = e.target as NumoraHTMLInputElement;
+    setRawValue(target.value);
+    setFormattedValue(target.formattedValue ?? '');
+    setSelectionStart(target.selectionStart);
+  };
 
   return (
     <div className="my-6 grid gap-4 rounded-lg border bg-muted/30 p-4 md:grid-cols-2">
@@ -53,5 +53,5 @@ export function ValueReadout() {
         </div>
       </div>
     </div>
-  )
+  );
 }

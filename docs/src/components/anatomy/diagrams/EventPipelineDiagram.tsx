@@ -5,7 +5,7 @@ export function EventPipelineDiagram() {
     { x: 360, label: 'DOM mutation', kind: 'phantom' as const },
     { x: 480, label: 'input', kind: 'normal' as const },
     { x: 720, label: 'keyup', kind: 'normal' as const },
-  ]
+  ];
 
   return (
     <div className="my-10">
@@ -24,14 +24,22 @@ export function EventPipelineDiagram() {
           if (e.kind === 'hero') {
             return (
               <g key={e.label}>
-                <line x1={e.x} y1={42} x2={e.x} y2={72} className="stroke-amber-300" strokeWidth="2" strokeLinecap="round" />
+                <line
+                  x1={e.x}
+                  y1={42}
+                  x2={e.x}
+                  y2={72}
+                  className="stroke-amber-300"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
                 <text x={e.x} y={92} textAnchor="middle" className="fill-amber-300" fontSize="14">
                   {e.label}
                 </text>
               </g>
-            )
+            );
           }
-          const isPhantom = e.kind === 'phantom'
+          const isPhantom = e.kind === 'phantom';
           return (
             <g key={e.label}>
               <line
@@ -54,9 +62,9 @@ export function EventPipelineDiagram() {
                 {e.label}
               </text>
             </g>
-          )
+          );
         })}
       </svg>
     </div>
-  )
+  );
 }

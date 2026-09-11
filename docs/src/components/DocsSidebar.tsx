@@ -1,5 +1,5 @@
-import { Link, useRouterState, useNavigate } from '@tanstack/react-router'
-import { LayoutGroup, motion, useReducedMotion } from 'motion/react'
+import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
+import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import {
   Rocket,
   Download,
@@ -17,7 +17,7 @@ import {
   Layers,
   Ruler,
   CheckCircle,
-} from 'lucide-react'
+} from 'lucide-react';
 import {
   SidebarContent,
   SidebarGroup,
@@ -26,10 +26,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar'
-import { TabsClipPath } from './TabsClipPath'
-import { PackageTab, usePackage } from '@/contexts/PackageContext'
-import { getPackageHref, extractPageFromPath, buildPackagePath } from '@/utils/packageRoutes'
+} from '@/components/ui/sidebar';
+import { TabsClipPath } from './TabsClipPath';
+import { PackageTab, usePackage } from '@/contexts/PackageContext';
+import { getPackageHref, extractPageFromPath, buildPackagePath } from '@/utils/packageRoutes';
 
 const navigation = [
   {
@@ -157,33 +157,29 @@ const navigation = [
       },
     ],
   },
-]
+];
 
-
-const frameworkTabs: PackageTab[] = [
- 'core', 'react'
-]
-
+const frameworkTabs: PackageTab[] = ['core', 'react'];
 
 export function DocsSidebar() {
-  const router = useRouterState()
-  const navigate = useNavigate()
-  const currentPath = router.location.pathname
-  const { selectedPackage, setSelectedPackage, getPackageRoutePrefix } = usePackage()
-  const packagePrefix = getPackageRoutePrefix()
-  const shouldReduceMotion = useReducedMotion()
+  const router = useRouterState();
+  const navigate = useNavigate();
+  const currentPath = router.location.pathname;
+  const { selectedPackage, setSelectedPackage, getPackageRoutePrefix } = usePackage();
+  const packagePrefix = getPackageRoutePrefix();
+  const shouldReduceMotion = useReducedMotion();
 
   const handlePackageChange = (tab: string) => {
-    const newPackage = tab as typeof selectedPackage
-    setSelectedPackage(newPackage)
+    const newPackage = tab as typeof selectedPackage;
+    setSelectedPackage(newPackage);
 
-    const page = extractPageFromPath(currentPath)
+    const page = extractPageFromPath(currentPath);
     if (page !== null) {
-      const newPrefix = newPackage === 'react' ? 'numora-react' : 'numora'
-      const newPath = buildPackagePath(page, newPrefix)
-      navigate({ to: newPath })
+      const newPrefix = newPackage === 'react' ? 'numora-react' : 'numora';
+      const newPath = buildPackagePath(page, newPrefix);
+      navigate({ to: newPath });
     }
-  }
+  };
 
   return (
     <SidebarContent>
@@ -193,59 +189,62 @@ export function DocsSidebar() {
         onChange={handlePackageChange}
       />
       <LayoutGroup>
-      {navigation.map((group) => {
-        // Filter items by selected package (items with no `packages` field are shown for all)
-        const visibleItems = group.items.filter(
-          (item) => !('packages' in item) || (item as { packages?: PackageTab[] }).packages?.includes(selectedPackage),
-        )
-        if (visibleItems.length === 0) return null
+        {navigation.map((group) => {
+          // Filter items by selected package (items with no `packages` field are shown for all)
+          const visibleItems = group.items.filter(
+            (item) =>
+              !('packages' in item) ||
+              (item as { packages?: PackageTab[] }).packages?.includes(selectedPackage)
+          );
+          if (visibleItems.length === 0) return null;
 
-        return (
-          <SidebarGroup key={group.title}>
-            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {visibleItems.map((item) => {
-                  const packageHref = getPackageHref(item.href, packagePrefix)
-                  const isActive =
-                    currentPath === packageHref ||
-                    (packageHref !== `/docs/${packagePrefix}` && currentPath.startsWith(packageHref + '/'))
-                  const Icon = item.icon
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      {isActive &&
-                        (shouldReduceMotion ? (
-                          <span
-                            aria-hidden
-                            className="absolute inset-0 -z-10 rounded-xl bg-sidebar-accent"
-                          />
-                        ) : (
-                          <motion.span
-                            aria-hidden
-                            layoutId="docs-nav-active"
-                            className="absolute inset-0 -z-10 rounded-xl bg-sidebar-accent"
-                            transition={{ type: 'tween', duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                          />
-                        ))}
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        className="data-[active=true]:bg-transparent"
-                      >
-                        <Link to={packageHref}>
-                          <Icon />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )
-      })}
+          return (
+            <SidebarGroup key={group.title}>
+              <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {visibleItems.map((item) => {
+                    const packageHref = getPackageHref(item.href, packagePrefix);
+                    const isActive =
+                      currentPath === packageHref ||
+                      (packageHref !== `/docs/${packagePrefix}` &&
+                        currentPath.startsWith(packageHref + '/'));
+                    const Icon = item.icon;
+                    return (
+                      <SidebarMenuItem key={item.href}>
+                        {isActive &&
+                          (shouldReduceMotion ? (
+                            <span
+                              aria-hidden
+                              className="absolute inset-0 -z-10 rounded-xl bg-sidebar-accent"
+                            />
+                          ) : (
+                            <motion.span
+                              aria-hidden
+                              layoutId="docs-nav-active"
+                              className="absolute inset-0 -z-10 rounded-xl bg-sidebar-accent"
+                              transition={{ type: 'tween', duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                            />
+                          ))}
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive}
+                          className="data-[active=true]:bg-transparent"
+                        >
+                          <Link to={packageHref}>
+                            <Icon />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          );
+        })}
       </LayoutGroup>
     </SidebarContent>
-  )
+  );
 }

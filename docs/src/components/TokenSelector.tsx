@@ -52,49 +52,40 @@ export function TokenSelector({
             isOpen ? 'rotate-180' : ''
           }`}
         >
-          <path
-            d="M7 8l3 3 3-3"
-            stroke="currentColor"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-          />
+          <path d="M7 8l3 3 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
         </svg>
       </button>
       <ul
         className={`w-full !mt-0 no-scrollbar absolute left-0 right-0 top-full w-full origin-top rounded-xl rounded-tl-none rounded-tr-none shadow-lg overflow-hidden z-100 transition-[opacity,scale,max-height] duration-200 ease-out border-t-0 bg-surface-1 border border-brand ${
-          isOpen
-            ? 'max-h-64 scale-100 opacity-100'
-            : 'max-h-0 scale-95 opacity-0'
+          isOpen ? 'max-h-64 scale-100 opacity-100' : 'max-h-0 scale-95 opacity-0'
         }`}
       >
         {TOKENS.filter((t) => t.symbol !== selectedToken.symbol).map((token) => (
           <li key={token.symbol}>
             <button
-            className={`w-full !mt-0 flex items-center px-3 py-2.5 cursor-pointer transition-[background-color,scale] duration-150 ease-out hover:bg-surface-3 active:scale-[0.96] ${
-              disabledToken && token.symbol === disabledToken.symbol
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
-            }`}
-
-          disabled={disabledToken && token.symbol === disabledToken.symbol}
-            onClick={() => handleTokenSelect(token)}
-            onKeyDown={(e) => handleKeyDown(e, token)}
-            role="button"
-            tabIndex={0}
-          >
-            <img
-              src={token.logoImg}
-              alt={token.symbol}
-              className="w-5 h-5 rounded-full mr-2 outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
-            />
-            <span className="font-semibold text-sm sm:text-base text-white mr-1 text-gray-900">
-              {token.symbol}
-            </span>
-          </button>
+              className={`w-full !mt-0 flex items-center px-3 py-2.5 cursor-pointer transition-[background-color,scale] duration-150 ease-out hover:bg-surface-3 active:scale-[0.96] ${
+                disabledToken && token.symbol === disabledToken.symbol
+                  ? 'opacity-50 cursor-not-allowed'
+                  : ''
+              }`}
+              disabled={disabledToken && token.symbol === disabledToken.symbol}
+              onClick={() => handleTokenSelect(token)}
+              onKeyDown={(e) => handleKeyDown(e, token)}
+              role="button"
+              tabIndex={0}
+            >
+              <img
+                src={token.logoImg}
+                alt={token.symbol}
+                className="w-5 h-5 rounded-full mr-2 outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+              />
+              <span className="font-semibold text-sm sm:text-base text-white mr-1 text-gray-900">
+                {token.symbol}
+              </span>
+            </button>
           </li>
         ))}
       </ul>
     </div>
   );
 }
-

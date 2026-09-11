@@ -1,41 +1,94 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { CodeBlock } from '@/components/CodeBlock'
+import { createFileRoute } from '@tanstack/react-router';
+import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora/features/scientific-notation')({
   head: () => ({
     meta: [
       { title: 'Scientific Notation Input (1e-18) | Numora' },
-      { name: 'description', content: 'Handle scientific notation in numeric inputs with Numora. Prevent JavaScript\'s automatic 1e-6 conversion and preserve full expanded strings for DeFi token amounts.' },
+      {
+        name: 'description',
+        content:
+          "Handle scientific notation in numeric inputs with Numora. Prevent JavaScript's automatic 1e-6 conversion and preserve full expanded strings for DeFi token amounts.",
+      },
       { property: 'og:title', content: 'Scientific Notation Input (1e-18) | Numora' },
-      { property: 'og:description', content: 'Handle scientific notation in numeric inputs with Numora. Prevent 1e-18 issues and preserve full expanded decimal strings.' },
-      { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/scientific-notation' },
+      {
+        property: 'og:description',
+        content:
+          'Handle scientific notation in numeric inputs with Numora. Prevent 1e-18 issues and preserve full expanded decimal strings.',
+      },
+      {
+        property: 'og:url',
+        content: 'https://numeric-input.com/docs/numora/features/scientific-notation',
+      },
       { name: 'twitter:title', content: 'Scientific Notation Input (1e-18) | Numora' },
-      { name: 'twitter:description', content: 'Handle scientific notation (1e-18) in numeric inputs with Numora.' },
+      {
+        name: 'twitter:description',
+        content: 'Handle scientific notation (1e-18) in numeric inputs with Numora.',
+      },
     ],
     links: [
-      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora/features/scientific-notation' },
+      {
+        rel: 'canonical',
+        href: 'https://numeric-input.com/docs/numora/features/scientific-notation',
+      },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Scientific Notation Handling in Numora - Safe Paste for Numeric Input", "description": "Handle scientific notation safely in JavaScript numeric inputs. Numora expands 1.5e-7 to 0.00000015 automatically when pasting from block explorers or APIs.", "url": "https://numeric-input.com/docs/numora/features/scientific-notation", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora JS", "item": "https://numeric-input.com/docs/numora" }, { "@type": "ListItem", "position": 3, "name": "Scientific Notation", "item": "https://numeric-input.com/docs/numora/features/scientific-notation" }] }]) },
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify([
+          {
+            '@context': 'https://schema.org',
+            '@type': 'TechArticle',
+            headline: 'Scientific Notation Handling in Numora - Safe Paste for Numeric Input',
+            description:
+              'Handle scientific notation safely in JavaScript numeric inputs. Numora expands 1.5e-7 to 0.00000015 automatically when pasting from block explorers or APIs.',
+            url: 'https://numeric-input.com/docs/numora/features/scientific-notation',
+            author: {
+              '@type': 'Person',
+              name: 'Kacper Szarkiewicz',
+              url: 'https://x.com/sharqiewicz',
+            },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://numeric-input.com' },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Numora JS',
+                item: 'https://numeric-input.com/docs/numora',
+              },
+              {
+                '@type': 'ListItem',
+                position: 3,
+                name: 'Scientific Notation',
+                item: 'https://numeric-input.com/docs/numora/features/scientific-notation',
+              },
+            ],
+          },
+        ]),
+      },
     ],
   }),
   component: ScientificNotation,
-})
+});
 
 function ScientificNotation() {
   return (
-    <div className="prose prose-invert max-w-none">
-      <h1>Scientific Notation</h1>
-      <p className="text-lg text-muted-foreground">
+    <div className="prose prose-invert max-w-xl">
+      <h1 className="text-stone-100">Scientific Notation</h1>
+      <p className="text-stone-400 text-base leading-6">
         Numora always expands scientific notation to decimal notation. This is automatic and cannot
         be disabled. Expansion uses string arithmetic, so there is no floating-point precision loss.
       </p>
 
       <CodeBlock language="typescript">
-{`import { NumoraInput } from 'numora'
+        {`import { NumoraInput } from 'numora'
 
 const input = new NumoraInput(container, {
-  decimalMaxLength: 18,
+  maxDecimals: 18,
 })
 
 // Paste or type any of these - all are expanded automatically:
@@ -47,10 +100,10 @@ const input = new NumoraInput(container, {
 // "1.5e-18"  → "0.0000000000000000015"  (no precision loss)`}
       </CodeBlock>
 
-      <p>
+      <p className="text-stone-400 text-base leading-6">
         Both <code>e</code> and <code>E</code> are supported. The expanded value is then processed
         through the rest of the sanitization pipeline and formatted according to your configuration.
       </p>
     </div>
-  )
+  );
 }

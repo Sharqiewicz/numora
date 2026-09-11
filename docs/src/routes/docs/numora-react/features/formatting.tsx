@@ -1,52 +1,116 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { ExampleWithDemo } from '@/components/ExampleWithDemo'
-import { FormatOn, ThousandStyle } from 'numora'
+import { createFileRoute } from '@tanstack/react-router';
+import { ExampleWithDemo } from '@/components/ExampleWithDemo';
+import { FormatOn, ThousandStyle } from 'numora';
 
 export const Route = createFileRoute('/docs/numora-react/features/formatting')({
   head: () => ({
     meta: [
       { title: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react' },
-      { name: 'description', content: 'Format numbers as you type using the NumoraInput React component. Thousand separators, multiple grouping styles, real-time formatting with cursor position preservation.' },
-      { property: 'og:title', content: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react' },
-      { property: 'og:description', content: 'Format numbers as you type using the NumoraInput React component. Thousand separators and cursor position preservation.' },
-      { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/features/formatting' },
-      { name: 'twitter:title', content: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react' },
-      { name: 'twitter:description', content: 'Format numbers as you type using the NumoraInput React component.' },
+      {
+        name: 'description',
+        content:
+          'Format numbers as you type using the NumoraInput React component. Thousand separators, multiple grouping styles, real-time formatting with cursor position preservation.',
+      },
+      {
+        property: 'og:title',
+        content: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react',
+      },
+      {
+        property: 'og:description',
+        content:
+          'Format numbers as you type using the NumoraInput React component. Thousand separators and cursor position preservation.',
+      },
+      {
+        property: 'og:url',
+        content: 'https://numeric-input.com/docs/numora-react/features/formatting',
+      },
+      {
+        name: 'twitter:title',
+        content: 'React Numeric Input Formatting - Thousand Separators, Lakh, Wan | numora-react',
+      },
+      {
+        name: 'twitter:description',
+        content: 'Format numbers as you type using the NumoraInput React component.',
+      },
     ],
     links: [
       { rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/features/formatting' },
     ],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify([{ "@context": "https://schema.org", "@type": "TechArticle", "headline": "Number Formatting in numora-react - React Numeric Input Thousand Separators", "description": "Format numbers as you type in a React numeric input. numora-react supports Standard, Indian Lakh, and East Asian Wan grouping with automatic cursor preservation.", "url": "https://numeric-input.com/docs/numora-react/features/formatting", "author": { "@type": "Person", "name": "Kacper Szarkiewicz", "url": "https://x.com/sharqiewicz" } }, { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Numora React", "item": "https://numeric-input.com/docs/numora-react" }, { "@type": "ListItem", "position": 3, "name": "Number Formatting", "item": "https://numeric-input.com/docs/numora-react/features/formatting" }] }]) },
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify([
+          {
+            '@context': 'https://schema.org',
+            '@type': 'TechArticle',
+            headline: 'Number Formatting in numora-react - React Numeric Input Thousand Separators',
+            description:
+              'Format numbers as you type in a React numeric input. numora-react supports Standard, Indian Lakh, and East Asian Wan grouping with automatic cursor preservation.',
+            url: 'https://numeric-input.com/docs/numora-react/features/formatting',
+            author: {
+              '@type': 'Person',
+              name: 'Kacper Szarkiewicz',
+              url: 'https://x.com/sharqiewicz',
+            },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://numeric-input.com' },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Numora React',
+                item: 'https://numeric-input.com/docs/numora-react',
+              },
+              {
+                '@type': 'ListItem',
+                position: 3,
+                name: 'Number Formatting',
+                item: 'https://numeric-input.com/docs/numora-react/features/formatting',
+              },
+            ],
+          },
+        ]),
+      },
     ],
   }),
   component: Formatting,
-})
+});
 
 function Formatting() {
   return (
-    <div className="prose prose-invert max-w-none">
-      <h1>Formatting</h1>
-      <p className="text-lg text-muted-foreground">
+    <div className="prose prose-invert max-w-xl">
+      <h1 className="text-stone-100">Formatting</h1>
+      <p className="text-stone-400 text-base leading-6">
         Numora formats numbers with thousand separators as the user types, preserving cursor
         position throughout.
       </p>
 
-      <h2>Grouping styles</h2>
+      <h2 className="text-stone-100 text-2xl">Grouping styles</h2>
       <div className="space-y-4">
         <ExampleWithDemo
           title="Standard: 1,234,567"
           description="Type a large number to see standard grouping"
           language="tsx"
           code={`<NumoraInput thousandSeparator="," thousandStyle={ThousandStyle.Thousand} />`}
-          config={{ thousandSeparator: ',', thousandStyle: ThousandStyle.Thousand, maxDecimals: 2 }}
+          config={{
+            thousandSeparator: ',',
+            thousandStyle: ThousandStyle.Thousand,
+            maxDecimals: 2,
+          }}
         />
         <ExampleWithDemo
           title="Indian (Lakh): 12,34,567"
           description="Type a large number to see Indian numbering"
           language="tsx"
           code={`<NumoraInput thousandSeparator="," thousandsStyle={ThousandStyle.Lakh} />`}
-          config={{ thousandSeparator: ',', thousandStyle: ThousandStyle.Lakh, maxDecimals: 2 }}
+          config={{
+            thousandSeparator: ',',
+            thousandStyle: ThousandStyle.Lakh,
+            maxDecimals: 2,
+          }}
         />
         <ExampleWithDemo
           title="Chinese (Wan): 123,4567"
@@ -60,11 +124,15 @@ function Formatting() {
           description="Type a large number to see none grouping"
           language="tsx"
           code={`<NumoraInput thousandSeparator="," thousandsGroupStyle={ThousandStyle.None} />`}
-          config={{ thousandSeparator: ',', thousandStyle: ThousandStyle.None, maxDecimals: 2 }}
+          config={{
+            thousandSeparator: ',',
+            thousandStyle: ThousandStyle.None,
+            maxDecimals: 2,
+          }}
         />
       </div>
 
-      <h2>When to format</h2>
+      <h2 className="text-stone-100 text-2xl">When to format</h2>
       <div className="space-y-4">
         <ExampleWithDemo
           title="Blur (default)"
@@ -82,11 +150,17 @@ function Formatting() {
         />
       </div>
 
-      <h2>Automatic behaviors</h2>
+      <h2 className="text-stone-100 text-2xl">Automatic behaviors</h2>
       <ul>
-        <li><strong>Cursor preservation</strong> - the cursor stays in the correct position when separators are added or removed during formatting</li>
-        <li><strong>Separator skipping</strong> - backspace and delete automatically skip over thousand separators so they never need to be deleted manually</li>
+        <li>
+          <strong>Cursor preservation</strong> - the cursor stays in the correct position when
+          separators are added or removed during formatting
+        </li>
+        <li>
+          <strong>Separator skipping</strong> - backspace and delete automatically skip over
+          thousand separators so they never need to be deleted manually
+        </li>
       </ul>
     </div>
-  )
+  );
 }

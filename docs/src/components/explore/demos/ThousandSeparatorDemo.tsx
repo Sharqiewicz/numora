@@ -6,10 +6,10 @@ import { InputComparison } from '../InputComparison';
 import { BrokenInput } from '../BrokenInput';
 import { cn } from '@/lib/utils';
 
-type GroupingStyle = 'thousand' | 'lakh' | 'wan';
+type GroupingKey = 'thousand' | 'lakh' | 'wan';
 
 const GROUPING_STYLES: Record<
-  GroupingStyle,
+  GroupingKey,
   { label: string; example: string; style: ThousandStyle }
 > = {
   thousand: {
@@ -30,11 +30,11 @@ const GROUPING_STYLES: Record<
 };
 
 export function ThousandSeparatorDemo() {
-  const [groupingStyle, setGroupingStyle] = useState<GroupingStyle>('thousand');
+  const [groupingKey, setGroupingKey] = useState<GroupingKey>('thousand');
   const [naiveValue, setNaiveValue] = useState('');
   const [numoraValue, setNumoraValue] = useState('');
 
-  const currentStyle = GROUPING_STYLES[groupingStyle];
+  const currentStyle = GROUPING_STYLES[groupingKey];
 
   return (
     <ProblemSection
@@ -44,8 +44,8 @@ export function ThousandSeparatorDemo() {
       subtitle="Format on blur is jarring, format on change is hard"
       description={
         <p>
-          Formatting numbers with thousand separators as users type is surprisingly difficult.
-          Most implementations either format on blur (jarring) or format on change (cursor jumps).
+          Formatting numbers with thousand separators as users type is surprisingly difficult. Most
+          implementations either format on blur (jarring) or format on change (cursor jumps).
           Different regions also use different grouping styles.
         </p>
       }
@@ -55,22 +55,25 @@ export function ThousandSeparatorDemo() {
           <span className="font-medium">Grouping style:</span>
         </div>
         <div className="flex flex-wrap gap-2">
-          {(Object.entries(GROUPING_STYLES) as [GroupingStyle, typeof GROUPING_STYLES[GroupingStyle]][]).map(
-            ([key, { label }]) => (
-              <button
-                key={key}
-                onClick={() => setGroupingStyle(key)}
-                className={cn(
-                  'px-4 py-2 rounded-lg border font-medium text-sm active:scale-[0.96] transition-[background-color,border-color,color,scale] duration-150 ease-out-expo',
-                  groupingStyle === key
-                    ? 'bg-secondary text-secondary-foreground border-secondary'
-                    : 'bg-muted/30 text-muted-foreground border-border hover:bg-muted/50'
-                )}
-              >
-                {label}
-              </button>
-            )
-          )}
+          {(
+            Object.entries(GROUPING_STYLES) as [
+              GroupingKey,
+              (typeof GROUPING_STYLES)[GroupingKey],
+            ][]
+          ).map(([key, { label }]) => (
+            <button
+              key={key}
+              onClick={() => setGroupingKey(key)}
+              className={cn(
+                'px-4 py-2 rounded-lg border font-medium text-sm active:scale-[0.96] transition-[background-color,border-color,color,scale] duration-150 ease-out-expo',
+                groupingKey === key
+                  ? 'bg-secondary text-secondary-foreground border-secondary'
+                  : 'bg-muted/30 text-muted-foreground border-border hover:bg-muted/50'
+              )}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -80,8 +83,8 @@ export function ThousandSeparatorDemo() {
         leftInput={
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Type <code className="px-1 py-0.5 rounded bg-muted font-mono">1234567</code> and
-              watch the cursor:
+              Type <code className="px-1 py-0.5 rounded bg-muted font-mono">1234567</code> and watch
+              the cursor:
             </p>
             <BrokenInput
               mode="naive-format"
@@ -118,7 +121,9 @@ export function ThousandSeparatorDemo() {
               <ul className="text-green-400 list-disc list-inside space-y-1 text-xs">
                 <li>Cursor stays in logical position</li>
                 <li>Edit anywhere without issues</li>
-                <li>Supports {currentStyle.label.split(' ')[0]} grouping: {currentStyle.example}</li>
+                <li>
+                  Supports {currentStyle.label.split(' ')[0]} grouping: {currentStyle.example}
+                </li>
               </ul>
             </div>
           </div>

@@ -1,19 +1,20 @@
-import { useState } from 'react'
-import { FormatOn, ThousandStyle } from 'numora'
-import { NumoraInput } from 'numora-react'
-import { InputPair } from '../InputPair'
+import { useState } from 'react';
+import { FormatOn, ThousandStyle } from 'numora';
+import { NumoraInput } from 'numora-react';
+import { InputPair } from '../InputPair';
 
 export function PlainVsNumoraSection() {
-  const [plainValue, setPlainValue] = useState('')
+  const [plainValue, setPlainValue] = useState('');
 
   return (
     <section id="plain-vs-numora" className="space-y-4 scroll-mt-24">
-      <h2>Plain <code>&lt;input&gt;</code> vs Numora</h2>
+      <h2>
+        Plain <code>&lt;input&gt;</code> vs Numora
+      </h2>
       <p>
-        Type the same thing into both inputs below - for example{' '}
-        <code>$1,234.56abc</code>, then <code>1.5e-7</code>, then <code>2.5k</code>. The
-        plain input takes whatever you give it. Numora cleans, expands, and groups in
-        real time:
+        Type the same thing into both inputs below - for example <code>$1,234.56abc</code>, then{' '}
+        <code>1.5e-7</code>, then <code>2.5k</code>. The plain input takes whatever you give it.
+        Numora cleans, expands, and groups in real time:
       </p>
       <InputPair
         left={{
@@ -48,5 +49,5 @@ export function PlainVsNumoraSection() {
         }}
       />
     </section>
-  )
+  );
 }

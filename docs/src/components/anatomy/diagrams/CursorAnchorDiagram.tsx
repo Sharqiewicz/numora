@@ -1,30 +1,30 @@
 export function CursorAnchorDiagram() {
-  const before = '1,234,567'
-  const naiveAfter = '12,345,678'
-  const numoraAfter = '12,348,567'
-  const caretBeforeIdx = 4
-  const naiveCaretIdx = 4
-  const numoraCaretIdx = 5
+  const before = '1,234,567';
+  const naiveAfter = '12,345,678';
+  const numoraAfter = '12,348,567';
+  const caretBeforeIdx = 4;
+  const naiveCaretIdx = 4;
+  const numoraCaretIdx = 5;
 
-  const cellW = 22
-  const cellH = 32
-  const labelX = 16
-  const gridX = 150
+  const cellW = 22;
+  const cellH = 32;
+  const labelX = 16;
+  const gridX = 150;
 
   type CharRowOpts = {
-    chars: string
-    y: number
-    caretIdx: number
-    dim: boolean
-    showCount: boolean
-  }
+    chars: string;
+    y: number;
+    caretIdx: number;
+    dim: boolean;
+    showCount: boolean;
+  };
 
   const charRow = ({ chars, y, caretIdx, dim, showCount }: CharRowOpts) => {
     return (
       <>
         {[...chars].map((ch, i) => {
-          const isSep = ch === ','
-          const isCounted = showCount && !isSep && i < caretIdx
+          const isSep = ch === ',';
+          const isCounted = showCount && !isSep && i < caretIdx;
           return (
             <g key={i}>
               <text
@@ -55,7 +55,7 @@ export function CursorAnchorDiagram() {
                 />
               )}
             </g>
-          )
+          );
         })}
         <line
           x1={gridX + caretIdx * cellW}
@@ -67,8 +67,8 @@ export function CursorAnchorDiagram() {
           strokeDasharray={dim ? '2,3' : undefined}
         />
       </>
-    )
-  }
+    );
+  };
 
   return (
     <div className="my-10">
@@ -92,7 +92,13 @@ export function CursorAnchorDiagram() {
         <text x={labelX} y="134" className="fill-muted-foreground/70" fontSize="11">
           restore index 4
         </text>
-        {charRow({ chars: naiveAfter, y: 100, caretIdx: naiveCaretIdx, dim: true, showCount: false })}
+        {charRow({
+          chars: naiveAfter,
+          y: 100,
+          caretIdx: naiveCaretIdx,
+          dim: true,
+          showCount: false,
+        })}
 
         <text x={labelX} y="196" className="fill-violet-300" fontSize="13" fontWeight="600">
           Numora
@@ -100,8 +106,14 @@ export function CursorAnchorDiagram() {
         <text x={labelX} y="214" className="fill-muted-foreground/70" fontSize="11">
           re-anchor at 3rd digit
         </text>
-        {charRow({ chars: numoraAfter, y: 180, caretIdx: numoraCaretIdx, dim: false, showCount: true })}
+        {charRow({
+          chars: numoraAfter,
+          y: 180,
+          caretIdx: numoraCaretIdx,
+          dim: false,
+          showCount: true,
+        })}
       </svg>
     </div>
-  )
+  );
 }

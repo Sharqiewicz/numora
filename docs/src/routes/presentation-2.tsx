@@ -4,9 +4,7 @@ import LightRays from '@/components/LightRays';
 
 export const Route = createFileRoute('/presentation-2')({
   head: () => ({
-    meta: [
-      { name: 'robots', content: 'noindex, nofollow' },
-    ],
+    meta: [{ name: 'robots', content: 'noindex, nofollow' }],
   }),
   component: Presentation2,
 });
@@ -36,8 +34,6 @@ function Presentation2() {
       />
 
       <main className="relative z-10 flex flex-col items-center text-center px-6 gap-0">
-
-
         {/* Brand name */}
         <motion.h1
           {...fadeUp(0.0)}
@@ -45,9 +41,7 @@ function Presentation2() {
           style={{ fontSize: '80px', order: -1 }}
           aria-label="Numora is the new Numeric Input Standard"
         >
-          <span className="drop-shadow-[0_0_60px_oklch(0.694_0.131_276.5_/_0.55)]">
-            numora.
-          </span>
+          <span className="drop-shadow-[0_0_60px_oklch(0.694_0.131_276.5_/_0.55)]">numora.</span>
         </motion.h1>
 
         {/* "Numeric Input Standard." */}

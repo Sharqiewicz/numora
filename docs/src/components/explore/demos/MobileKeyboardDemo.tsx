@@ -35,8 +35,8 @@ export function MobileKeyboardDemo() {
       subtitle="Hidden characters that break your validation"
       description={
         <p>
-          Mobile keyboards often insert non-breaking spaces (U+00A0), zero-width characters,
-          or other invisible Unicode. These break validation and calculations silently.
+          Mobile keyboards often insert non-breaking spaces (U+00A0), zero-width characters, or
+          other invisible Unicode. These break validation and calculations silently.
         </p>
       }
     >
@@ -58,9 +58,7 @@ export function MobileKeyboardDemo() {
             <code className="block p-2 rounded bg-background font-mono text-orange-400">
               31 C2 A0 32 33 34
             </code>
-            <p className="text-xs text-muted-foreground mt-1">
-              (C2 A0 = UTF-8 non-breaking space)
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">(C2 A0 = UTF-8 non-breaking space)</p>
           </div>
         </div>
       </div>

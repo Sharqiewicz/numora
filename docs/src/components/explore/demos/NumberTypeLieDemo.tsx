@@ -82,9 +82,9 @@ export function NumberTypeLieDemo() {
       subtitle="It seems right, but it's deeply broken"
       description={
         <p>
-          <code className="px-1 py-0.5 rounded bg-muted font-mono">{'<input type="number">'}</code> seems
-          like the obvious choice for numeric inputs, but it has fundamental problems that make it
-          unsuitable for most real-world applications.
+          <code className="px-1 py-0.5 rounded bg-muted font-mono">{'<input type="number">'}</code>{' '}
+          seems like the obvious choice for numeric inputs, but it has fundamental problems that
+          make it unsuitable for most real-world applications.
         </p>
       }
     >
@@ -139,17 +139,13 @@ export function NumberTypeLieDemo() {
             </div>
             <div className="p-3 rounded-lg bg-muted/30 border border-border">
               <p className="text-xs text-muted-foreground">Implementation:</p>
-              <code className="font-mono text-xs text-orange-400">
-                {'<input type="number" />'}
-              </code>
+              <code className="font-mono text-xs text-orange-400">{'<input type="number" />'}</code>
             </div>
           </div>
         }
         rightInput={
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Same test - hover and scroll:
-            </p>
+            <p className="text-sm text-muted-foreground">Same test - hover and scroll:</p>
             <NumoraInput
               value={numoraValue}
               onChange={(e) => setNumoraValue(e.target.value)}
