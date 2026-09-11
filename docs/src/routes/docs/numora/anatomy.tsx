@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router';
 import {
   BeforeInputSection,
   CursorPreservationSection,
@@ -15,12 +15,11 @@ import {
   RawVsFormattedSection,
   SanitizationSection,
   UserInputSection,
-} from '@/components/anatomy/sections'
+} from '@/components/anatomy/sections';
 
-const TITLE =
-  'Anatomy of a Numeric Input - How HTML Inputs, Float Math, and Numora Actually Work'
+const TITLE = 'Anatomy of a Numeric Input - How HTML Inputs, Float Math, and Numora Actually Work';
 const DESCRIPTION =
-  "A guided dissection of the HTML input element, the keydown/beforeinput/input/paste lifecycle, IEEE 754 float pitfalls, the nine-step sanitization pipeline, and how the numora JavaScript library rebuilds it all for reliable formatting, undo, and cursor preservation."
+  'A guided dissection of the HTML input element, the keydown/beforeinput/input/paste lifecycle, IEEE 754 float pitfalls, the nine-step sanitization pipeline, and how the numora JavaScript library rebuilds it all for reliable formatting, undo, and cursor preservation.';
 
 export const Route = createFileRoute('/docs/numora/anatomy')({
   head: () => ({
@@ -33,9 +32,7 @@ export const Route = createFileRoute('/docs/numora/anatomy')({
       { name: 'twitter:title', content: 'Anatomy of a Numeric Input' },
       { name: 'twitter:description', content: DESCRIPTION },
     ],
-    links: [
-      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora/anatomy' },
-    ],
+    links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora/anatomy' }],
     scripts: [
       {
         type: 'application/ld+json',
@@ -81,12 +78,12 @@ export const Route = createFileRoute('/docs/numora/anatomy')({
     ],
   }),
   component: Anatomy,
-})
+});
 
 function Anatomy() {
-  const pkg = 'numora' as const
+  const pkg = 'numora' as const;
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert max-w-xl">
       <Hero pkg={pkg} />
       <div className="space-y-16">
         {/* Act 1 - Why this exists */}
@@ -112,5 +109,5 @@ function Anatomy() {
         <DropInUsageSection pkg={pkg} />
       </div>
     </div>
-  )
+  );
 }

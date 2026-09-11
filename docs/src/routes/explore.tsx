@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import LightRays from '@/components/LightRays';
+import LightRays from '@/components/LightRaysDeferred';
 import { Socials } from '@/components/socials';
 import {
   ExploreHero,
@@ -17,21 +17,60 @@ export const Route = createFileRoute('/explore')({
   head: () => ({
     meta: [
       { title: 'Why Numeric Input & Number Input Break - Interactive Demos | Numora' },
-      { name: 'description', content: 'See 7 ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal dilemmas, mobile keyboard chaos, and more. Interactive live demos.' },
-      { property: 'og:title', content: 'Why Numeric Input & Number Input Break - Interactive Demos | Numora' },
-      { property: 'og:description', content: 'See 7 ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal dilemmas, mobile keyboard chaos, and more.' },
+      {
+        name: 'description',
+        content:
+          'See 7 ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal dilemmas, mobile keyboard chaos, and more. Interactive live demos.',
+      },
+      {
+        property: 'og:title',
+        content: 'Why Numeric Input & Number Input Break - Interactive Demos | Numora',
+      },
+      {
+        property: 'og:description',
+        content:
+          'See 7 ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal dilemmas, mobile keyboard chaos, and more.',
+      },
       { property: 'og:url', content: 'https://numeric-input.com/explore' },
-      { name: 'twitter:title', content: 'Why Numeric Input & Number Input Break - Interactive Demos | Numora' },
-      { name: 'twitter:description', content: 'See 7 ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal dilemmas, and more.' },
+      {
+        name: 'twitter:title',
+        content: 'Why Numeric Input & Number Input Break - Interactive Demos | Numora',
+      },
+      {
+        name: 'twitter:description',
+        content:
+          'See 7 ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal dilemmas, and more.',
+      },
     ],
-    links: [
-      { rel: 'canonical', href: 'https://numeric-input.com/explore' },
-    ],
+    links: [{ rel: 'canonical', href: 'https://numeric-input.com/explore' }],
     scripts: [
-      { type: 'application/ld+json', children: JSON.stringify([
-        { "@context": "https://schema.org", "@type": "WebPage", "name": "Why Numeric Input Breaks - Interactive Demos", "description": "See how input type=number fails in production: cursor jumping, scientific notation paste, decimal dilemmas, mobile keyboard chaos, and more.", "url": "https://numeric-input.com/explore", "isPartOf": { "@type": "WebSite", "name": "Numora", "url": "https://numeric-input.com" } },
-        { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://numeric-input.com" }, { "@type": "ListItem", "position": 2, "name": "Explore", "item": "https://numeric-input.com/explore" }] }
-      ]) },
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify([
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebPage',
+            name: 'Why Numeric Input Breaks - Interactive Demos',
+            description:
+              'See how input type=number fails in production: cursor jumping, scientific notation paste, decimal dilemmas, mobile keyboard chaos, and more.',
+            url: 'https://numeric-input.com/explore',
+            isPartOf: { '@type': 'WebSite', name: 'Numora', url: 'https://numeric-input.com' },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://numeric-input.com' },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Explore',
+                item: 'https://numeric-input.com/explore',
+              },
+            ],
+          },
+        ]),
+      },
     ],
   }),
   component: ExplorePage,
@@ -65,9 +104,8 @@ function ExplorePage() {
               Ready to solve these problems?
             </h2>
             <p className="text-muted-foreground mb-8">
-              <strong className="font-numora text-secondary">numora</strong> handles all of this
-              out of the box. No more regex nightmares, no more cursor jumping, no more
-              precision loss.
+              <strong className="font-numora text-secondary">numora</strong> handles all of this out
+              of the box. No more regex nightmares, no more cursor jumping, no more precision loss.
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
               <a

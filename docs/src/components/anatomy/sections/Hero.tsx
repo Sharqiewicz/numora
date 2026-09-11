@@ -1,8 +1,9 @@
-import { Link } from '@tanstack/react-router'
-import type { SectionProps } from './types'
+import { Link } from '@tanstack/react-router';
+import type { SectionProps } from './types';
 
 export function Hero({ pkg }: SectionProps) {
-  const installPath = pkg === 'numora-react' ? '/docs/numora-react/installation' : '/docs/numora/installation'
+  const installPath =
+    pkg === 'numora-react' ? '/docs/numora-react/installation' : '/docs/numora/installation';
 
   return (
     <section className="not-prose mb-16 space-y-6 border-b border-border/40 pb-12">
@@ -10,10 +11,14 @@ export function Hero({ pkg }: SectionProps) {
         How a numeric input actually works.
       </h1>
       <p className="max-w-2xl text-lg text-muted-foreground">
-        We'll dissect the HTML <code className="rounded bg-muted px-1 py-0.5 font-mono text-base">&lt;input&gt;</code>{' '}
-        element, watch the four events that fire on every keystroke, see what breaks when
-        users paste real-world numbers, and rebuild it with{' '}
-        <span className="text-foreground">{pkg === 'numora-react' ? 'numora-react' : 'numora'}</span> step by step.
+        We'll dissect the HTML{' '}
+        <code className="rounded bg-muted px-1 py-0.5 font-mono text-base">&lt;input&gt;</code>{' '}
+        element, watch the four events that fire on every keystroke, see what breaks when users
+        paste real-world numbers, and rebuild it with{' '}
+        <span className="text-foreground">
+          {pkg === 'numora-react' ? 'numora-react' : 'numora'}
+        </span>{' '}
+        step by step.
       </p>
       <div className="flex flex-wrap gap-3 pt-2">
         <a
@@ -30,5 +35,5 @@ export function Hero({ pkg }: SectionProps) {
         </Link>
       </div>
     </section>
-  )
+  );
 }

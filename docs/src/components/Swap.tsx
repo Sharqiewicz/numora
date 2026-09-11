@@ -32,24 +32,48 @@ export function Swap() {
     if (!prices || !fromToken || !toToken) return;
 
     if (lastEdited !== 'to' && fromAmount && +fromAmount > 0) {
-      setToAmount(calculateSwapAmount(fromAmount, fromToken.symbol as any, toToken.symbol as any, prices, effectiveToDecimals));
+      setToAmount(
+        calculateSwapAmount(
+          fromAmount,
+          fromToken.symbol as any,
+          toToken.symbol as any,
+          prices,
+          effectiveToDecimals
+        )
+      );
     } else if (lastEdited === 'to' && toAmount && +toAmount > 0) {
-      setFromAmount(calculateReverseSwapAmount(toAmount, fromToken.symbol as any, toToken.symbol as any, prices, effectiveFromDecimals));
+      setFromAmount(
+        calculateReverseSwapAmount(
+          toAmount,
+          fromToken.symbol as any,
+          toToken.symbol as any,
+          prices,
+          effectiveFromDecimals
+        )
+      );
     }
-  }, [fromAmount, toAmount, lastEdited, prices, fromToken, toToken, effectiveFromDecimals, effectiveToDecimals]);
+  }, [
+    fromAmount,
+    toAmount,
+    lastEdited,
+    prices,
+    fromToken,
+    toToken,
+    effectiveFromDecimals,
+    effectiveToDecimals,
+  ]);
 
-  const priceInfo =
-    isLoading
-      ? 'Loading prices…'
-      : !prices
-        ? 'Failed to fetch prices'
-        : fromAmount && +fromAmount > 0
-          ? `1 ${fromToken.symbol} ≈ ${calculateExchangeRate(
-              fromToken.symbol as any,
-              toToken.symbol as any,
-              prices
-            )} ${toToken.symbol}`
-          : '-';
+  const priceInfo = isLoading
+    ? 'Loading prices…'
+    : !prices
+      ? 'Failed to fetch prices'
+      : fromAmount && +fromAmount > 0
+        ? `1 ${fromToken.symbol} ≈ ${calculateExchangeRate(
+            fromToken.symbol as any,
+            toToken.symbol as any,
+            prices
+          )} ${toToken.symbol}`
+        : '-';
 
   function flipTokens() {
     const tempToken = fromToken;
@@ -127,7 +151,9 @@ export function Swap() {
         </div>
 
         <div className="group !mt-0 flex items-center gap-2 p-2 border rounded-t-md bg-surface-3 border-surface-5 hover:bg-surface-5 [&:has(:focus-visible)]:ring-2 [&:has(:focus-visible)]:ring-brand">
-          <label htmlFor="fromAmount" className="sr-only">From amount</label>
+          <label htmlFor="fromAmount" className="sr-only">
+            From amount
+          </label>
           <NumoraInput
             id="fromAmount"
             name="fromAmount"
@@ -139,8 +165,6 @@ export function Swap() {
             formatOn={FormatOn.Change}
             thousandStyle={ThousandStyle.Thousand}
             enableCompactNotation
-            rawValueMode
-
           />
           <TokenSelector
             label="From"
@@ -179,7 +203,9 @@ export function Swap() {
         </div>
 
         <div className="group mt-0.5  flex items-center gap-2 p-2 border  rounded-b-md bg-surface-3 border-surface-5 hover:bg-surface-5 [&:has(:focus-visible)]:ring-2 [&:has(:focus-visible)]:ring-brand">
-          <label htmlFor="toAmount" className="sr-only">To amount</label>
+          <label htmlFor="toAmount" className="sr-only">
+            To amount
+          </label>
           <NumoraInput
             id="toAmount"
             name="toAmount"
@@ -191,7 +217,6 @@ export function Swap() {
             formatOn={FormatOn.Change}
             thousandStyle={ThousandStyle.Thousand}
             enableCompactNotation
-            rawValueMode
           />
           <TokenSelector
             label="To"
@@ -225,4 +250,3 @@ export function Swap() {
     </div>
   );
 }
-

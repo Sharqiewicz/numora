@@ -4,9 +4,7 @@ import LightRays from '@/components/LightRays';
 
 export const Route = createFileRoute('/presentation')({
   head: () => ({
-    meta: [
-      { name: 'robots', content: 'noindex, nofollow' },
-    ],
+    meta: [{ name: 'robots', content: 'noindex, nofollow' }],
   }),
   component: Presentation,
 });
@@ -38,11 +36,7 @@ function Presentation() {
             <motion.span
               key={word + i}
               className="inline-block mr-[0.25em] last:mr-0"
-              initial={
-                shouldReduceMotion
-                  ? false
-                  : { opacity: 0, y: 32, filter: 'blur(8px)' }
-              }
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 32, filter: 'blur(8px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               transition={{
                 duration: 0.65,

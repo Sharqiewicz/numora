@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router';
 import {
   BeforeInputSection,
   CursorPreservationSection,
@@ -18,12 +18,12 @@ import {
   ReactSyntheticBypassSection,
   SanitizationSection,
   UserInputSection,
-} from '@/components/anatomy/sections'
+} from '@/components/anatomy/sections';
 
 const TITLE =
-  'Anatomy of NumoraInput - React Numeric Input Internals, beforeinput Bypass, and Proxy Targets'
+  'Anatomy of NumoraInput - React Numeric Input Internals, beforeinput Bypass, and Proxy Targets';
 const DESCRIPTION =
-  "A guided dissection of the React NumoraInput component: the HTML input primitive, the four native events, IEEE 754 pitfalls, the nine-step sanitization pipeline, why beforeinput cannot use React's synthetic event delegation, defaultValue vs value, and the Proxy on e.target."
+  "A guided dissection of the React NumoraInput component: the HTML input primitive, the four native events, IEEE 754 pitfalls, the nine-step sanitization pipeline, why beforeinput cannot use React's synthetic event delegation, defaultValue vs value, and the Proxy on e.target.";
 
 export const Route = createFileRoute('/docs/numora-react/anatomy')({
   head: () => ({
@@ -36,9 +36,7 @@ export const Route = createFileRoute('/docs/numora-react/anatomy')({
       { name: 'twitter:title', content: 'Anatomy of NumoraInput' },
       { name: 'twitter:description', content: DESCRIPTION },
     ],
-    links: [
-      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/anatomy' },
-    ],
+    links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/anatomy' }],
     scripts: [
       {
         type: 'application/ld+json',
@@ -84,12 +82,12 @@ export const Route = createFileRoute('/docs/numora-react/anatomy')({
     ],
   }),
   component: Anatomy,
-})
+});
 
 function Anatomy() {
-  const pkg = 'numora-react' as const
+  const pkg = 'numora-react' as const;
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert max-w-xl">
       <Hero pkg={pkg} />
       <div className="space-y-16">
         <NativeInputSection />
@@ -111,5 +109,5 @@ function Anatomy() {
         <DropInUsageSection pkg={pkg} />
       </div>
     </div>
-  )
+  );
 }

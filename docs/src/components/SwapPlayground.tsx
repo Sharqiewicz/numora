@@ -30,7 +30,11 @@ function Annotation({ side, title, description, delay, topOffset, skip }: Annota
 
   const dotStyle: CSSProperties = skip
     ? { opacity: 1, animation: 'none' }
-    : { animationDelay: `${delay + 400}ms`, animationDuration: '0.3s', animationFillMode: 'forwards' };
+    : {
+        animationDelay: `${delay + 400}ms`,
+        animationDuration: '0.3s',
+        animationFillMode: 'forwards',
+      };
 
   return (
     <div
@@ -45,9 +49,10 @@ function Annotation({ side, title, description, delay, topOffset, skip }: Annota
       <div
         className={`
           absolute top-2 w-6 h-[2px] bg-gradient-to-r
-          ${isLeft
-            ? '-right-8 from-transparent to-secondary animate-draw-line-right'
-            : '-left-8 from-secondary to-transparent animate-draw-line'
+          ${
+            isLeft
+              ? '-right-8 from-transparent to-secondary animate-draw-line-right'
+              : '-left-8 from-secondary to-transparent animate-draw-line'
           }
         `}
         style={lineStyle}
@@ -63,12 +68,8 @@ function Annotation({ side, title, description, delay, topOffset, skip }: Annota
       />
 
       <div className="animate-float-gentle" style={{ animationDelay: `${delay + 600}ms` }}>
-        <div className="text-secondary font-semibold text-sm mb-1 tracking-tight">
-          {title}
-        </div>
-        <div className="text-xs text-muted-foreground leading-relaxed">
-          {description}
-        </div>
+        <div className="text-secondary font-semibold text-sm mb-1 tracking-tight">{title}</div>
+        <div className="text-xs text-muted-foreground leading-relaxed">{description}</div>
       </div>
     </div>
   );
@@ -99,7 +100,10 @@ export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {
 
   return (
     <div className="relative bg-radial-[at_50%_60%] from-white/10 via-transparent to-transparent">
-      <div className="flex flex-col items-center gap-3 text-center animate-fade-in opacity-0" style={d(0)}>
+      <div
+        className="flex flex-col items-center gap-3 text-center animate-fade-in opacity-0"
+        style={d(0)}
+      >
         <div>
           <Link to="/">
             <h1
@@ -122,7 +126,10 @@ export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {
         </div>
       </div>
 
-      <div className="text-center mb-12 mt-8 max-w-3xl mx-auto px-6 animate-fade-in opacity-0" style={d(150)}>
+      <div
+        className="text-center mb-12 mt-8 max-w-3xl mx-auto px-6 animate-fade-in opacity-0"
+        style={d(150)}
+      >
         <h2 className="[text-wrap:balance] text-4xl mb-4">
           {heading ? (
             <>

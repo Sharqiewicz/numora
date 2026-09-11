@@ -1,14 +1,14 @@
-import { type ReactNode, useState } from 'react'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { type ReactNode, useState } from 'react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-export type TorphBlurVariant = 'minimal' | 'polished'
+export type TorphBlurVariant = 'minimal' | 'polished';
 
 interface TorphBlurSectionProps {
-  children: (variant: TorphBlurVariant) => ReactNode
+  children: (variant: TorphBlurVariant) => ReactNode;
 }
 
 export function TorphBlurSection({ children }: TorphBlurSectionProps) {
-  const [variant, setVariant] = useState<TorphBlurVariant>('minimal')
+  const [variant, setVariant] = useState<TorphBlurVariant>('minimal');
 
   return (
     <>
@@ -22,5 +22,5 @@ export function TorphBlurSection({ children }: TorphBlurSectionProps) {
       </div>
       {children(variant)}
     </>
-  )
+  );
 }

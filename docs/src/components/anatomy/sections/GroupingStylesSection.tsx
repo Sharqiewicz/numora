@@ -1,9 +1,9 @@
-import { FormatOn, ThousandStyle } from 'numora'
-import { NumoraInput } from 'numora-react'
-import { GroupingStylesDiagram } from '../diagrams'
+import { FormatOn, ThousandStyle } from 'numora';
+import { NumoraInput } from 'numora-react';
+import { GroupingStylesDiagram } from '../diagrams';
 
 const inputClass =
-  'w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring'
+  'w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring';
 
 const styles: { label: string; style: ThousandStyle; example: string; description: string }[] = [
   {
@@ -24,16 +24,16 @@ const styles: { label: string; style: ThousandStyle; example: string; descriptio
     example: '100,0000',
     description: 'CJK convention. Four-digit groups (myriad / 万).',
   },
-]
+];
 
 export function GroupingStylesSection() {
   return (
     <section id="grouping-styles" className="space-y-4 scroll-mt-24">
       <h2>Thousand grouping styles</h2>
       <p>
-        Different writing systems group large numbers differently. Numora ships three
-        styles, each producing a different visual rhythm for the same underlying value.
-        Type <code>10000000</code> in all three to see them diverge:
+        Different writing systems group large numbers differently. Numora ships three styles, each
+        producing a different visual rhythm for the same underlying value. Type{' '}
+        <code>10000000</code> in all three to see them diverge:
       </p>
       <GroupingStylesDiagram />
       <div className="my-6 grid gap-4 rounded-lg border bg-muted/30 p-4 md:grid-cols-3">
@@ -56,5 +56,5 @@ export function GroupingStylesSection() {
         ))}
       </div>
     </section>
-  )
+  );
 }

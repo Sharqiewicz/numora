@@ -500,23 +500,35 @@ body {
     @apply text-foreground;
   }
 
-  .prose h1 {
+  /* Quiet rule under body links; brightens with the text on hover. */
+  .link-underline {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+    transition: text-decoration-color 150ms ease;
+  }
+
+  .link-underline:hover {
+    text-decoration-color: currentColor;
+  }
+
+  :where(.prose) h1 {
     @apply text-4xl font-bold mb-4 mt-8 first:mt-0;
   }
 
-  .prose h2 {
+  :where(.prose) h2 {
     @apply text-3xl font-semibold mb-3 mt-8;
   }
 
-  .prose h3 {
+  :where(.prose) h3 {
     @apply text-2xl font-semibold mb-2 mt-6;
   }
 
-  .prose h4 {
+  :where(.prose) h4 {
     @apply text-xl font-semibold mb-2 mt-4;
   }
 
-  .prose p {
+  :where(.prose) p {
     @apply mb-4 leading-7;
   }
 
@@ -545,8 +557,8 @@ body {
     @apply mb-4;
   }
 
-  .prose a {
-    @apply text-primary underline-offset-4 hover:underline;
+  :where(.prose) a {
+    @apply text-inherit underline-offset-4;
   }
 
   .prose table {

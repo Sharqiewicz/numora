@@ -80,11 +80,7 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
             <Socials className="justify-end" />
           </header>
           <main className="flex-1">
-            <AnimatePresence
-              mode="wait"
-              initial={false}
-              onExitComplete={handleExitComplete}
-            >
+            <AnimatePresence mode="wait" initial={false} onExitComplete={handleExitComplete}>
               <motion.div
                 key={location.pathname}
                 className="container mx-auto max-w-3xl px-4 py-8"

@@ -1,6 +1,7 @@
 import { FormatOn, NumoraInput, ThousandStyle } from 'numora';
 import { useEffect, useRef } from 'react';
 import { TextMorph } from 'torph';
+import { startTypingLoop } from '@/hooks/use-typing-loop';
 
 export function TorphVanillaDemo() {
   const displayRef = useRef<HTMLSpanElement>(null);
@@ -44,7 +45,10 @@ export function TorphVanillaDemo() {
     input.addEventListener('beforeinput', scheduleMorphSync);
     input.addEventListener('input', syncMorph);
 
+    const stopTypingLoop = startTypingLoop(input, { mode: 'change' });
+
     return () => {
+      stopTypingLoop();
       input.removeEventListener('beforeinput', scheduleMorphSync);
       input.removeEventListener('input', syncMorph);
       morph.destroy();
@@ -59,8 +63,10 @@ export function TorphVanillaDemo() {
           width: 100%;
           height: 100%;
           margin: 0;
-          padding: 0;
+          padding: 0.75rem 1rem;
+          box-sizing: border-box;
           border: 0;
+          text-align: right;
           background: transparent;
           color: transparent;
           caret-color: var(--secondary);
@@ -70,8 +76,8 @@ export function TorphVanillaDemo() {
         .torph-vanilla-input-host input::selection { background: color-mix(in oklch, var(--secondary) 40%, transparent); }
         .torph-vanilla-input-host input::placeholder { color: transparent; }
       `}</style>
-      <div className="my-16 py-12 flex justify-center items-center">
-        <label className="relative inline-flex items-center min-h-[44px] min-w-[6ch] text-4xl font-mono leading-none text-white">
+      <div className="my-12 w-full max-w-lg mx-auto">
+        <label className="relative flex items-center justify-end w-full rounded-2xl border border-surface-3 bg-surface-1 overflow-hidden px-4 py-3 text-xl font-mono tracking-wide text-white cursor-text">
           <span ref={displayRef} className="pointer-events-none whitespace-pre" aria-hidden="true">
             0
           </span>

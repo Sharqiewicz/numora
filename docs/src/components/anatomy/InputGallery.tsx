@@ -1,4 +1,4 @@
-import { sanitizeNumoraInput } from 'numora'
+import { sanitizeNumoraInput } from 'numora';
 
 const cases: { input: string; label: string }[] = [
   { input: '$1,234.56', label: 'Currency symbol + commas' },
@@ -10,7 +10,7 @@ const cases: { input: string; label: string }[] = [
   { input: '1 234', label: 'Non-breaking space (mobile keyboards)' },
   { input: 'abc123def', label: 'Letters mixed in' },
   { input: '12,34,567', label: 'Indian Lakh grouping' },
-]
+];
 
 export function InputGallery() {
   return (
@@ -37,21 +37,19 @@ export function InputGallery() {
               enableLeadingZeros: false,
               decimalSeparator: '.',
               thousandSeparator: ',',
-            })
+            });
             return (
               <tr key={c.input} className="border-t border-border/40">
                 <td className="px-4 py-2 font-mono">"{c.input}"</td>
-                <td className="px-4 py-2 font-mono text-emerald-400">
-                  "{cleaned}"
-                </td>
+                <td className="px-4 py-2 font-mono text-emerald-400">"{cleaned}"</td>
                 <td className="hidden px-4 py-2 text-xs text-muted-foreground sm:table-cell">
                   {c.label}
                 </td>
               </tr>
-            )
+            );
           })}
         </tbody>
       </table>
     </div>
-  )
+  );
 }

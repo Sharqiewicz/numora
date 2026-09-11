@@ -2,6 +2,7 @@ import { FormatOn, ThousandStyle } from 'numora';
 import { NumoraInput, type NumoraInputChangeEvent } from 'numora-react';
 import { useEffect, useRef, useState } from 'react';
 import { TextMorph } from 'torph';
+import { useTypingLoop } from '@/hooks/use-typing-loop';
 
 /**
  * The 3-line core integration: NumoraInput → onChange → TextMorph.update.
@@ -14,7 +15,10 @@ import { TextMorph } from 'torph';
 export function TorphBlurMinimal() {
   const [formatted, setFormatted] = useState('1,234,567');
   const displayRef = useRef<HTMLSpanElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const morphRef = useRef<TextMorph | null>(null);
+
+  useTypingLoop(inputRef, { mode: 'blur' });
 
   useEffect(() => {
     if (!displayRef.current) return;
@@ -36,12 +40,13 @@ export function TorphBlurMinimal() {
   }, [formatted]);
 
   return (
-    <div className="my-16 py-12 flex justify-center items-center">
-      <label className="relative inline-flex items-center min-h-[44px] min-w-[6ch] text-4xl font-mono leading-none text-white">
+    <div className="my-12 w-full max-w-lg mx-auto">
+      <label className="relative flex items-center justify-end w-full rounded-2xl border border-surface-3 bg-surface-1 overflow-hidden px-4 py-3 text-xl font-mono tracking-wide text-white cursor-text">
         <span ref={displayRef} aria-hidden="true" className="pointer-events-none whitespace-pre">
           0
         </span>
         <NumoraInput
+          ref={inputRef}
           defaultValue="1234567"
           onChange={(e: NumoraInputChangeEvent) => setFormatted(e.target.formattedValue || '')}
           formatOn={FormatOn.Blur}
@@ -49,7 +54,7 @@ export function TorphBlurMinimal() {
           thousandSeparator=","
           thousandStyle={ThousandStyle.Thousand}
           aria-label="Amount (blur to format)"
-          className="absolute inset-0 w-full h-full m-0 p-0 border-0 bg-transparent text-transparent placeholder-transparent caret-secondary outline-none focus:outline-none selection:bg-secondary/40 text-4xl font-mono leading-none"
+          className="absolute inset-0 w-full h-full m-0 px-4 py-3 border-0 bg-transparent text-transparent placeholder-transparent caret-secondary outline-none focus:outline-none selection:bg-secondary/40 text-right text-xl font-mono tracking-wide"
         />
       </label>
     </div>

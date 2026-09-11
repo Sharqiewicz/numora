@@ -1,19 +1,14 @@
-import {
-  Outlet,
-  createRootRouteWithContext,
-  HeadContent,
-  Scripts,
-} from '@tanstack/react-router'
+import { Outlet, createRootRouteWithContext, HeadContent, Scripts } from '@tanstack/react-router';
 
-import type { QueryClient } from '@tanstack/react-query'
-import type { TRPCRouter } from '@/integrations/trpc/router'
-import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query'
+import type { QueryClient } from '@tanstack/react-query';
+import type { TRPCRouter } from '@/integrations/trpc/router';
+import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query';
 
-import stylesCss from '../styles.css?url'
+import stylesCss from '../styles.css?url';
 
 interface MyRouterContext {
-  queryClient: QueryClient
-  trpc: TRPCOptionsProxy<TRPCRouter>
+  queryClient: QueryClient;
+  trpc: TRPCOptionsProxy<TRPCRouter>;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
@@ -22,30 +17,45 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
       { title: 'Numora - Numeric Input & Number Input Library' },
-      { name: 'description', content: 'The only framework-agnostic numeric input library. Format numbers as you type, thousand separators, decimal limits, cursor management. Works with React, Vue, Svelte, and Vanilla JS.' },
+      {
+        name: 'description',
+        content:
+          'The only framework-agnostic numeric input library. Format numbers as you type, thousand separators, decimal limits, cursor management. Works with React, Vue, Svelte, and Vanilla JS.',
+      },
       { property: 'og:type', content: 'website' },
       { property: 'og:site_name', content: 'Numora' },
       { property: 'og:title', content: 'Numora - Numeric Input & Number Input Library' },
-      { property: 'og:description', content: 'The only framework-agnostic numeric input library. Format numbers as you type, thousand separators, decimal limits, cursor management. Works with React, Vue, Svelte, and Vanilla JS.' },
+      {
+        property: 'og:description',
+        content:
+          'The only framework-agnostic numeric input library. Format numbers as you type, thousand separators, decimal limits, cursor management. Works with React, Vue, Svelte, and Vanilla JS.',
+      },
       { property: 'og:url', content: 'https://numeric-input.com' },
       { name: 'twitter:card', content: 'summary_large_image' },
       { name: 'twitter:site', content: '@sharqiewicz' },
       { property: 'og:image', content: 'https://numeric-input.com/og-image.png' },
       { property: 'og:image:width', content: '1200' },
       { property: 'og:image:height', content: '630' },
+      {
+        property: 'og:image:alt',
+        content:
+          'Numora — the numeric input library. Zero dependencies, 6.4kb gzipped, works with any framework.',
+      },
       { name: 'twitter:image', content: 'https://numeric-input.com/og-image.png' },
+      {
+        name: 'twitter:image:alt',
+        content:
+          'Numora — the numeric input library. Zero dependencies, 6.4kb gzipped, works with any framework.',
+      },
     ],
     links: [
       { rel: 'stylesheet', href: stylesCss },
       { rel: 'icon', href: '/favicon.png' },
       { rel: 'manifest', href: '/manifest.json' },
-      { rel: 'preload', href: '/videos/scientific-notation.mp4', as: 'video', type: 'video/mp4' },
-      { rel: 'prefetch', href: '/videos/cursor-jump.mp4', as: 'video', type: 'video/mp4' },
-      { rel: 'prefetch', href: '/videos/paste.mp4', as: 'video', type: 'video/mp4' },
     ],
   }),
   component: RootDocument,
-})
+});
 
 function RootDocument() {
   return (
@@ -58,5 +68,5 @@ function RootDocument() {
         <Scripts />
       </body>
     </html>
-  )
+  );
 }

@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react';
 
 interface LogEntry {
-  id: number
-  t: number
-  event: string
-  detail: string
+  id: number;
+  t: number;
+  event: string;
+  detail: string;
 }
 
 const EVENT_COLORS: Record<string, string> = {
@@ -12,44 +12,43 @@ const EVENT_COLORS: Record<string, string> = {
   beforeinput: 'text-amber-400',
   input: 'text-emerald-400',
   keyup: 'text-muted-foreground',
-}
+};
 
 export function EventPipelineDemo() {
-  const [log, setLog] = useState<LogEntry[]>([])
-  const inputRef = useRef<HTMLInputElement>(null)
-  const idRef = useRef(0)
+  const [log, setLog] = useState<LogEntry[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const idRef = useRef(0);
 
   useEffect(() => {
-    const input = inputRef.current
-    if (!input) return
-    const start = performance.now()
+    const input = inputRef.current;
+    if (!input) return;
+    const start = performance.now();
 
     const push = (event: string, detail: string) => {
-      idRef.current += 1
+      idRef.current += 1;
       setLog((prev) => [
         ...prev.slice(-19),
         { id: idRef.current, t: Math.round(performance.now() - start), event, detail },
-      ])
-    }
+      ]);
+    };
 
-    const onKeyDown = (e: KeyboardEvent) => push('keydown', `key="${e.key}"`)
+    const onKeyDown = (e: KeyboardEvent) => push('keydown', `key="${e.key}"`);
     const onBeforeInput = (e: InputEvent) =>
-      push('beforeinput', `${e.inputType}, data="${e.data ?? ''}"`)
-    const onInput = (e: Event) =>
-      push('input', `value="${(e.target as HTMLInputElement).value}"`)
-    const onKeyUp = (e: KeyboardEvent) => push('keyup', `key="${e.key}"`)
+      push('beforeinput', `${e.inputType}, data="${e.data ?? ''}"`);
+    const onInput = (e: Event) => push('input', `value="${(e.target as HTMLInputElement).value}"`);
+    const onKeyUp = (e: KeyboardEvent) => push('keyup', `key="${e.key}"`);
 
-    input.addEventListener('keydown', onKeyDown)
-    input.addEventListener('beforeinput', onBeforeInput)
-    input.addEventListener('input', onInput)
-    input.addEventListener('keyup', onKeyUp)
+    input.addEventListener('keydown', onKeyDown);
+    input.addEventListener('beforeinput', onBeforeInput);
+    input.addEventListener('input', onInput);
+    input.addEventListener('keyup', onKeyUp);
     return () => {
-      input.removeEventListener('keydown', onKeyDown)
-      input.removeEventListener('beforeinput', onBeforeInput)
-      input.removeEventListener('input', onInput)
-      input.removeEventListener('keyup', onKeyUp)
-    }
-  }, [])
+      input.removeEventListener('keydown', onKeyDown);
+      input.removeEventListener('beforeinput', onBeforeInput);
+      input.removeEventListener('input', onInput);
+      input.removeEventListener('keyup', onKeyUp);
+    };
+  }, []);
 
   return (
     <div className="my-6 space-y-3 rounded-lg border bg-muted/30 p-4">
@@ -70,9 +69,7 @@ export function EventPipelineDemo() {
               key={entry.id}
               className="leading-relaxed transition-[opacity,transform] duration-150 ease-out-expo starting:opacity-0 starting:-translate-y-1 motion-reduce:transition-none"
             >
-              <span className="text-muted-foreground">
-                +{String(entry.t).padStart(4, ' ')}ms{' '}
-              </span>
+              <span className="text-muted-foreground">+{String(entry.t).padStart(4, ' ')}ms </span>
               <span className={EVENT_COLORS[entry.event] ?? 'text-foreground'}>
                 {entry.event.padEnd(11, ' ')}
               </span>
@@ -82,5 +79,5 @@ export function EventPipelineDemo() {
         )}
       </div>
     </div>
-  )
+  );
 }

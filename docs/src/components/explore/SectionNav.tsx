@@ -107,9 +107,7 @@ export function SectionNav() {
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">{label}</span>
-                  <span className="sm:hidden">
-                    {SECTIONS.findIndex((s) => s.id === id) + 1}
-                  </span>
+                  <span className="sm:hidden">{SECTIONS.findIndex((s) => s.id === id) + 1}</span>
                 </a>
               ))}
             </div>

@@ -77,7 +77,11 @@ export function NumberFlowVanillaOverlayDemo() {
       `}</style>
       <div className="my-16 py-12 flex justify-center items-center">
         <label className="relative inline-flex items-center min-h-[44px] min-w-[6ch] text-4xl font-mono leading-none text-white">
-          <span ref={displayRef} className="pointer-events-none whitespace-pre tabular-nums" aria-hidden="true">
+          <span
+            ref={displayRef}
+            className="pointer-events-none whitespace-pre tabular-nums"
+            aria-hidden="true"
+          >
             1,234,567
           </span>
           <div ref={hostRef} className="nf-vanilla-input-host absolute inset-0" />

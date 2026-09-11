@@ -106,8 +106,8 @@ export function DecimalDilemmaDemo() {
             />
             <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-sm">
               <p className="text-green-400">
-                Configurable decimal separator. Multiple decimals are automatically prevented
-                (only the first is kept).
+                Configurable decimal separator. Multiple decimals are automatically prevented (only
+                the first is kept).
               </p>
             </div>
           </div>

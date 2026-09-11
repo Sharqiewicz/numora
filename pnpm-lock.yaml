@@ -119,6 +119,9 @@ importers:
       react-syntax-highlighter:
         specifier: ^16.1.0
         version: 16.1.1(react@19.2.4)
+      refractor:
+        specifier: 5.0.0
+        version: 5.0.0
       superjson:
         specifier: ^2.2.2
         version: 2.2.6
