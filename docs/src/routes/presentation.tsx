@@ -40,7 +40,7 @@ function Presentation() {
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               transition={{
                 duration: 0.65,
-                ease: [0.215, 0.61, 0.355, 1],
+                ease: [0.16, 1, 0.3, 1],
                 delay: shouldReduceMotion ? 0 : 0.15 + i * 0.1,
               }}
             >
@@ -61,7 +61,7 @@ function Presentation() {
           animate={{ scaleX: 1, opacity: 1 }}
           transition={{
             duration: 0.7,
-            ease: [0.215, 0.61, 0.355, 1],
+            ease: [0.16, 1, 0.3, 1],
             delay: shouldReduceMotion ? 0 : 0.9,
           }}
           style={{ transformOrigin: 'center' }}
@@ -73,7 +73,7 @@ function Presentation() {
           animate={{ opacity: 1, y: 0 }}
           transition={{
             duration: 0.55,
-            ease: [0.215, 0.61, 0.355, 1],
+            ease: [0.16, 1, 0.3, 1],
             delay: shouldReduceMotion ? 0 : 1.0,
           }}
         >

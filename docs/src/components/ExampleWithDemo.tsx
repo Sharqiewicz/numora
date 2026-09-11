@@ -1,5 +1,5 @@
-import { NumoraInput } from 'numora-react';
 import type { NumoraInputProps } from 'numora-react';
+import { NumoraInput } from 'numora-react';
 import { CodeBlock } from './CodeBlock';
 
 interface ExampleWithDemoProps {
@@ -24,9 +24,13 @@ export function ExampleWithDemo({
       {title && <h4 className="text-lg font-semibold">{title}</h4>}
       {description && <p className="text-sm text-muted-foreground">{description}</p>}
       <CodeBlock language={language}>{code}</CodeBlock>
-      <div className="rounded-lg border bg-muted/30 p-4">
+      <div className="rounded-lg bg-muted/30 p-4 shadow-border">
         <label className="mb-2 block text-sm font-medium">Live Example:</label>
-        <NumoraInput {...config} placeholder={placeholder} className="w-full outline-none" />
+        <NumoraInput
+          {...config}
+          placeholder={placeholder}
+          className="w-full outline-none tabular-nums"
+        />
       </div>
     </div>
   );

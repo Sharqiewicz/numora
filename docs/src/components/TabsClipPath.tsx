@@ -24,7 +24,7 @@ export function TabsClipPath({
 
           const clipLeft = offsetLeft;
           const clipRight = offsetLeft + offsetWidth;
-          container.style.clipPath = `inset(0 ${Number(100 - (clipRight / container.offsetWidth) * 100).toFixed()}% 0 ${Number((clipLeft / container.offsetWidth) * 100).toFixed()}% round 17px)`;
+          container.style.clipPath = `inset(0 ${Number(100 - (clipRight / container.offsetWidth) * 100).toFixed()}% 0 ${Number((clipLeft / container.offsetWidth) * 100).toFixed()}% round 12px)`;
         }
       }
     };
@@ -41,7 +41,7 @@ export function TabsClipPath({
         {tabs.map((tab) => (
           <li key={tab}>
             <button
-              className="flex h-[28px] cursor-pointer items-center gap-2 rounded-xl  px-2 font-semibold text-white text-xs hover:bg-secondary/50 transition-colors duration-150 ease-out-expo"
+              className="flex h-[28px] cursor-pointer items-center gap-2 rounded-xl px-2 font-semibold text-white text-xs hover:bg-secondary/50 active:scale-[0.96] transition-[color,background-color,transform,scale] duration-150 ease-out-expo"
               data-tab={tab}
               onClick={() => {
                 onChange(tab);
@@ -63,7 +63,7 @@ export function TabsClipPath({
           {tabs.map((tab) => (
             <li key={tab}>
               <button
-                className="flex h-[28px] items-center gap-2 rounded-xl px-2 font-semibold text-xs text-foreground"
+                className="flex h-[28px] items-center gap-2 rounded-xl px-2 font-semibold text-xs text-foreground active:scale-[0.96] transition-[transform,scale] duration-150 ease-out-expo"
                 data-tab={tab}
                 onClick={() => {
                   onChange(tab);

@@ -98,7 +98,7 @@ export function SectionNav() {
                   key={id}
                   href={`#${id}`}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium',
+                    'flex items-center gap-1.5 px-3 py-1.5 min-h-10 rounded-full text-xs font-medium',
                     'transition-colors duration-200 whitespace-nowrap',
                     activeSection === id
                       ? 'bg-secondary text-secondary-foreground'

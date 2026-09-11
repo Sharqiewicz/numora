@@ -116,7 +116,7 @@ export function SanitizationStepper() {
               key={preset}
               type="button"
               onClick={() => setValue(preset)}
-              className="rounded border border-border/60 bg-background/50 px-2 py-0.5 font-mono text-xs text-muted-foreground hover:border-border hover:text-foreground"
+              className="rounded border border-border/60 bg-background/50 px-2.5 py-1 font-mono text-xs text-muted-foreground transition-[color,border-color,scale] duration-150 ease-out hover:border-border hover:text-foreground active:scale-[0.96]"
             >
               {preset}
             </button>

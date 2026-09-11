@@ -326,6 +326,8 @@ body {
   /* Motion easing tokens (generate `ease-out-expo` / `ease-drawer` utilities) */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Shadow-as-border token (dark-mode single ring; site is dark-only) */
+  --shadow-border: 0 0 0 1px oklch(1 0 0 / 0.08);
   --animate-fade-in-out: fade-in-out 1.5s ease forwards;
   --animate-fade-in: fade-in 1.5s ease forwards;
   --animate-fade-in-fast: fade-in 0.6s ease forwards;
@@ -481,6 +483,15 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+  }
+  p, li, blockquote, figcaption {
+    text-wrap: pretty;
   }
 }
 

@@ -44,14 +44,14 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
       opacity: 1,
       y: 0,
       transition: prefersReducedMotion
-        ? { duration: 0.12, ease: 'easeOut' }
-        : { duration: 0.24, ease: [0.16, 1, 0.3, 1] },
+        ? { duration: 0.12, ease: 'easeOut' as const }
+        : { duration: 0.24, ease: [0.16, 1, 0.3, 1] as const },
     },
     exit: {
       opacity: 0,
-      transition: { duration: 0.12, ease: 'easeOut' },
+      transition: { duration: 0.12, ease: 'easeOut' as const },
     },
-  };
+  } as const;
 
   return (
     <PackageProvider>

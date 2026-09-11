@@ -152,7 +152,7 @@ function TorphIntegration() {
                   opacity: 1,
                   transition: prefersReducedMotion
                     ? { duration: 0.1 }
-                    : { duration: 0.15, ease: 'easeOut' },
+                    : { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
                 }}
                 exit={{
                   opacity: 0,

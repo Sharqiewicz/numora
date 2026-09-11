@@ -43,9 +43,18 @@ const GlareHover: React.FC<GlareHoverProps> = ({
 
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
+  const prefersReducedMotion = () =>
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const animateIn = () => {
     const el = overlayRef.current;
     if (!el) return;
+
+    if (prefersReducedMotion()) {
+      el.style.transition = 'none';
+      el.style.backgroundPosition = '100% 100%, 0 0';
+      return;
+    }
 
     el.style.transition = 'none';
     el.style.backgroundPosition = '-100% -100%, 0 0';
@@ -57,7 +66,7 @@ const GlareHover: React.FC<GlareHoverProps> = ({
     const el = overlayRef.current;
     if (!el) return;
 
-    if (playOnce) {
+    if (playOnce || prefersReducedMotion()) {
       el.style.transition = 'none';
       el.style.backgroundPosition = '-100% -100%, 0 0';
     } else {

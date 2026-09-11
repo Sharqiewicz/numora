@@ -18,8 +18,7 @@ const JSON_LD = [
   {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
-    headline:
-      'Torph integration with Numora React',
+    headline: 'Torph integration with Numora React',
     description: META_DESCRIPTION,
     url: TORPH_PAGE_URL,
     author: { '@type': 'Person', name: 'Kacper Szarkiewicz', url: 'https://x.com/sharqiewicz' },
@@ -154,7 +153,7 @@ function TorphIntegration() {
                   opacity: 1,
                   transition: prefersReducedMotion
                     ? { duration: 0.1 }
-                    : { duration: 0.15, ease: 'easeOut' },
+                    : { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
                 }}
                 exit={{
                   opacity: 0,
