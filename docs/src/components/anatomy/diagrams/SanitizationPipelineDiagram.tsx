@@ -41,7 +41,7 @@ export function SanitizationPipelineDiagram() {
                 cx={lineX}
                 cy={y}
                 r="5"
-                className="fill-cyan-400"
+                className="fill-signal-sky"
                 fillOpacity={opacityLevel}
               />
               <text x={lineX + 18} y={y + 4} className="fill-foreground" fontSize="13">

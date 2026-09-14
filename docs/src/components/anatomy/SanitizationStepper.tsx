@@ -147,7 +147,7 @@ export function SanitizationStepper() {
               </div>
               <div className="font-mono text-sm">
                 {step.output ? (
-                  <span className={changed ? 'text-emerald-400' : 'text-muted-foreground'}>
+                  <span className={changed ? 'text-signal-green' : 'text-muted-foreground'}>
                     "{step.output}"
                   </span>
                 ) : (

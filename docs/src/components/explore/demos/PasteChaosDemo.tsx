@@ -102,7 +102,7 @@ function ResultDisplay({ label, original, result, isBroken }: ResultDisplayProps
         <span className="text-muted-foreground">→</span>
         <code
           className={`px-2 py-0.5 rounded ${
-            isBroken && hasError ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'
+            isBroken && hasError ? 'bg-signal-red/20 text-signal-red' : 'bg-signal-green/20 text-signal-green'
           }`}
         >
           {isEmpty ? '(empty)' : result}

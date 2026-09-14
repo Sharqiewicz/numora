@@ -82,13 +82,13 @@ export const Route = createFileRoute('/docs/numora-react/features/formatting')({
 function Formatting() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Formatting</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Formatting</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Numora formats numbers with thousand separators as the user types, preserving cursor
         position throughout.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Grouping styles</h2>
+      <h2 className="text-foreground text-2xl">Grouping styles</h2>
       <div className="space-y-4">
         <ExampleWithDemo
           title="Standard: 1,234,567"
@@ -132,7 +132,7 @@ function Formatting() {
         />
       </div>
 
-      <h2 className="text-stone-100 text-2xl">When to format</h2>
+      <h2 className="text-foreground text-2xl">When to format</h2>
       <div className="space-y-4">
         <ExampleWithDemo
           title="Blur (default)"
@@ -150,7 +150,7 @@ function Formatting() {
         />
       </div>
 
-      <h2 className="text-stone-100 text-2xl">Automatic behaviors</h2>
+      <h2 className="text-foreground text-2xl">Automatic behaviors</h2>
       <ul>
         <li>
           <strong>Cursor preservation</strong> - the cursor stays in the correct position when

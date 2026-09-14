@@ -65,21 +65,21 @@ export const Route = createFileRoute('/docs/numora-react/')({
 function GetStarted() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Numora React - React Numeric Input Component</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Numora React - React Numeric Input Component</h1>
+      <p className="text-muted-foreground text-base leading-6">
         <strong className="font-numora">numora-react</strong> is a drop-in replacement for{' '}
         <code>{'<input>'}</code> that handles all numeric formatting, sanitization, and cursor
         management inside React. It's a <code>forwardRef</code> component that works in controlled
         and uncontrolled patterns and accepts every standard HTML input attribute.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">What makes it different</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">What makes it different</h2>
+      <p className="text-muted-foreground text-base leading-6">
         On every change, <code>e.target.value</code> always returns the raw numeric string - no
         separators, no formatting characters. Safe to pass directly to BigNumber, ethers.js, viem,
         or any precision math library. No parsing step needed.
       </p>
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         <code>e.target.formattedValue</code> gives you the display string with thousand separators
         and decimal formatting for showing to the user. Two values, one event - clean separation
         between machine-readable and human-readable.
@@ -103,7 +103,7 @@ function Amount() {
 }`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">React ecosystem</h2>
+      <h2 className="text-foreground text-2xl">React ecosystem</h2>
       <ul className="list-disc list-inside">
         <li>
           <strong>Controlled & uncontrolled</strong> - works either way, no special props required
@@ -126,26 +126,26 @@ function Amount() {
         </li>
       </ul>
 
-      <h2 className="text-stone-100 text-2xl">
+      <h2 className="text-foreground text-2xl">
         Why <strong className="font-numora">numora-react</strong>?
       </h2>
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Every React DeFi app reinvents the numeric input. Uniswap, Aave, and Curve all maintain
         hundreds of lines of custom keystroke handlers, regex sanitizers, and cursor position
         trackers. numora-react ships all of that as a single component you configure with props.
       </p>
-      <p className="text-stone-400 text-base leading-6">
-        The component delegates to the same <Link to="/docs/numora" className="underline link-underline hover:text-stone-100 transition-colors">core numora engine</Link> - a
+      <p className="text-muted-foreground text-base leading-6">
+        The component delegates to the same <Link to="/docs/numora" className="underline link-underline hover:text-foreground transition-colors">core numora engine</Link> - a
         vanilla TypeScript library with zero runtime dependencies. The React layer is a thin wrapper
         that hooks the engine into React's event system and value tracker.
       </p>
 
       <hr />
-      <h2 className="text-stone-100 text-2xl">Next Steps</h2>
-      <p className="text-stone-400 text-base leading-6">
-        Follow the <Link to="/docs/numora-react/installation" className="underline link-underline hover:text-stone-100 transition-colors">Installation</Link> guide to add
+      <h2 className="text-foreground text-2xl">Next Steps</h2>
+      <p className="text-muted-foreground text-base leading-6">
+        Follow the <Link to="/docs/numora-react/installation" className="underline link-underline hover:text-foreground transition-colors">Installation</Link> guide to add
         numora-react to your project, or read{' '}
-        <Link to="/docs/numora-react/how-it-works" className="underline link-underline hover:text-stone-100 transition-colors">How It Works</Link> for the React-specific event
+        <Link to="/docs/numora-react/how-it-works" className="underline link-underline hover:text-foreground transition-colors">How It Works</Link> for the React-specific event
         architecture.
       </p>
       <div className="flex justify-between items-center gap-2 my-8">

@@ -81,20 +81,20 @@ export const Route = createFileRoute('/docs/numora-react/installation')({
 function Installation() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Install numora-react</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Install numora-react</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Drop a precision-ready numeric input component into any React project in under a minute.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Install</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Install</h2>
+      <p className="text-muted-foreground text-base leading-6">
         numora-react has one peer dependency: <code>numora</code> (the core engine). Both are
         installed together. Pick your package manager:
       </p>
 
       <InstallTabs packages="numora numora-react" />
 
-      <h3 className="text-stone-100">Basic Usage</h3>
+      <h3 className="text-foreground">Basic Usage</h3>
       <ExampleWithDemo
         code={`import { NumoraInput, FormatOn } from 'numora-react'
 
@@ -114,8 +114,8 @@ function App() {
         description="Try typing a number to see formatting in action"
       />
 
-      <h2 className="text-stone-100 text-2xl">Controlled component</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Controlled component</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Use <code>useState</code> with <code>NumoraInput</code> like any controlled input. The raw
         value (no separators) lives in <code>e.target.value</code>:
       </p>
@@ -134,13 +134,13 @@ function AmountField() {
         maxDecimals={6}
         formatOn={FormatOn.Change}
       />
-      <p className="text-stone-400 text-base leading-6">Raw value: {amount}</p>
+      <p className="text-muted-foreground text-base leading-6">Raw value: {amount}</p>
     </>
   )
 }`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">What you get</h2>
+      <h2 className="text-foreground text-2xl">What you get</h2>
       <ul className="list-disc list-inside">
         <li>
           <code>e.target.value</code> - raw numeric string, no separators (safe for BigNumber,
@@ -164,8 +164,8 @@ function AmountField() {
         </li>
       </ul>
 
-      <h2 className="text-stone-100 text-2xl">TypeScript</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">TypeScript</h2>
+      <p className="text-muted-foreground text-base leading-6">
         <code>NumoraInput</code> accepts all standard <code>HTMLInputElement</code> props plus{' '}
         <code>FormattingOptions</code>. Import types directly from <code>numora-react</code>:
       </p>
@@ -179,11 +179,11 @@ function AmountField() {
 
       <hr />
 
-      <h2 className="text-stone-100 text-2xl">Next Steps</h2>
-      <p className="text-stone-400 text-base leading-6">
-        Read <Link to="/docs/numora-react/how-it-works" className="underline link-underline hover:text-stone-100 transition-colors">How It Works</Link> to understand the React
+      <h2 className="text-foreground text-2xl">Next Steps</h2>
+      <p className="text-muted-foreground text-base leading-6">
+        Read <Link to="/docs/numora-react/how-it-works" className="underline link-underline hover:text-foreground transition-colors">How It Works</Link> to understand the React
         event architecture, or jump to{' '}
-        <Link to="/docs/numora-react/features/formatting" className="underline link-underline hover:text-stone-100 transition-colors">Formatting</Link> features.
+        <Link to="/docs/numora-react/features/formatting" className="underline link-underline hover:text-foreground transition-colors">Formatting</Link> features.
       </p>
       <div className="flex items-center gap-2 my-8">
         <Link to="/docs/numora-react/how-it-works">

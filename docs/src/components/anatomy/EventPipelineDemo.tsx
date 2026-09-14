@@ -8,9 +8,9 @@ interface LogEntry {
 }
 
 const EVENT_COLORS: Record<string, string> = {
-  keydown: 'text-purple-400',
-  beforeinput: 'text-amber-400',
-  input: 'text-emerald-400',
+  keydown: 'text-signal-purple',
+  beforeinput: 'text-signal-amber',
+  input: 'text-signal-green',
   keyup: 'text-muted-foreground',
 };
 

@@ -79,8 +79,8 @@ export const Route = createFileRoute('/docs/numora-react/features/scientific-not
 function ScientificNotation() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Scientific Notation</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Scientific Notation</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Numora always expands scientific notation to decimal notation. This is automatic and cannot
         be disabled. Expansion uses string arithmetic, so there is no floating-point precision loss.
       </p>
@@ -92,7 +92,7 @@ function ScientificNotation() {
         config={{ maxDecimals: 18 }}
       />
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Both <code>e</code> and <code>E</code> are supported. The expanded value is then processed
         through the rest of the sanitization pipeline and formatted according to your configuration.
       </p>

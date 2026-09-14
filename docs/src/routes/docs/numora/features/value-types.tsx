@@ -79,14 +79,14 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
 function ValueTypes() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Value Types</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Value Types</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Numora always works with strings. <code>onChange</code> emits a string on every change. Two
         modes control <em>which</em> string you receive.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Default: formatted string</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Default: formatted string</h2>
+      <p className="text-muted-foreground text-base leading-6">
         By default <code>onChange</code> receives the display value - the same string shown in the
         input, including thousand separators.
       </p>
@@ -101,8 +101,8 @@ const numoraInput = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">rawValueMode: raw string</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">rawValueMode: raw string</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Set <code>rawValueMode: true</code> and <code>onChange</code> receives the plain numeric
         string with thousand separators stripped. The input still displays the formatted value.{' '}
         <code>instance.value</code> also returns the raw string in this mode.
@@ -120,8 +120,8 @@ const numoraInput = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">valueAsNumber</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">valueAsNumber</h2>
+      <p className="text-muted-foreground text-base leading-6">
         <code>valueAsNumber</code> converts the current value to a JavaScript <code>number</code>{' '}
         via <code>parseFloat</code>. Use it as an escape hatch when you need a number type, not as
         the primary way to read the value.
@@ -132,15 +132,15 @@ console.log(typeof num) // "number"
 console.log(num)        // 1234.56
 console.log(isNaN(numoraInput.valueAsNumber)) // true when input is empty`}
       </CodeBlock>
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         <strong>Precision warning:</strong> <code>parseFloat</code> is subject to IEEE 754 limits.
         Integers above <code>Number.MAX_SAFE_INTEGER</code> and long decimals may silently lose
         precision. For financial arithmetic, keep working with the string from <code>onChange</code>{' '}
         and use a decimal library such as <code>decimal.js</code>.
       </p>
 
-      <h3 className="text-stone-100">Setting valueAsNumber</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Setting valueAsNumber</h3>
+      <p className="text-muted-foreground text-base leading-6">
         The setter accepts a JavaScript <code>number</code> and converts it with the configured{' '}
         <code>decimalSeparator</code>, so <code>valueAsNumber = 1234.5</code> under{' '}
         <code>locale="de-DE"</code> displays <code>1.234,5</code>. Assigning a non-finite value (

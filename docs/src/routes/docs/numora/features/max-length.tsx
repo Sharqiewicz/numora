@@ -72,14 +72,14 @@ export const Route = createFileRoute('/docs/numora/features/max-length')({
 function MaxLength() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Max Length</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Max Length</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Cap the input by raw character count - thousand separators are excluded from the limit, so
         the cap reflects the actual numeric value rather than the formatted display.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Why not the native HTML attribute?</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Why not the native HTML attribute?</h2>
+      <p className="text-muted-foreground text-base leading-6">
         The native <code>maxLength</code> attribute on <code>&lt;input&gt;</code> counts every
         formatted character. With thousand separators, <code>1,234,567</code> is 9 characters; the
         user thinks of it as 7 digits. Numora's option counts the raw value the way users actually
@@ -98,7 +98,7 @@ const input = new NumoraInput(container, {
 // Next keystroke is blocked - raw length is already 7.`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">Rules</h2>
+      <h2 className="text-foreground text-2xl">Rules</h2>
       <ul>
         <li>
           Counts the <strong>raw</strong> value - thousand separators are stripped before measuring
@@ -122,14 +122,14 @@ const input = new NumoraInput(container, {
         </li>
       </ul>
 
-      <h2 className="text-stone-100 text-2xl">Pasted values</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Pasted values</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Pastes are truncated after sanitization. Pasting <code>"99999999"</code> into an input with{' '}
         <code>maxLength: 4</code> commits <code>"9999"</code>.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Standalone utility</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Standalone utility</h2>
+      <p className="text-muted-foreground text-base leading-6">
         For one-off truncation outside of the input pipeline, Numora exports
         <code>truncateToMaxLength</code>:
       </p>

@@ -115,8 +115,8 @@ export const Route = createFileRoute('/docs/numora/frameworks/angular')({
 function AngularIntegration() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Angular Numeric Input</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Angular Numeric Input</h1>
+      <p className="text-muted-foreground text-base leading-6">
         <strong className="font-numora">Numora</strong> is a precision-first{' '}
         <strong>Angular numeric input</strong> library: thousand separators, decimal limits, paste
         sanitisation, scientific-notation expansion and cursor preservation – wrapped in a
@@ -127,22 +127,22 @@ function AngularIntegration() {
         rounding. No <code>numora-angular</code> wrapper, 6.4 kb gzipped, zero runtime dependencies.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Install</h2>
+      <h2 className="text-foreground text-2xl">Install</h2>
       <CodeBlock language="bash">
         {`pnpm add numora
 # or
 npm install numora`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">Standalone directive with ControlValueAccessor</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Standalone directive with ControlValueAccessor</h2>
+      <p className="text-muted-foreground text-base leading-6">
         <code>NumoraInput</code> attaches directly to an existing <code>&lt;input&gt;</code>{' '}
         element. Implementing Angular&apos;s <code>ControlValueAccessor</code> on the directive lets
         the same <code>&lt;input numora&gt;</code> plug into <code>[(ngModel)]</code> and Reactive
         Forms with no extra glue:
       </p>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         <code>src/app/numora.directive.ts</code>:
       </p>
       <CodeBlock language="ts">
@@ -221,7 +221,7 @@ export class NumoraDirective implements ControlValueAccessor, OnInit {
 }`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Use it directly on any <code>&lt;input&gt;</code>:
       </p>
 
@@ -245,7 +245,7 @@ import { ThousandStyle } from 'numora';
         }"
       />
     </label>
-    <p className="text-stone-400 text-base leading-6">Raw value: {{ value() }}</p>
+    <p className="text-muted-foreground text-base leading-6">Raw value: {{ value() }}</p>
   \`,
 })
 export class AmountComponent {
@@ -255,7 +255,7 @@ export class AmountComponent {
 }`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Or plug it into Reactive Forms – the raw string flows through <code>FormControl</code>:
       </p>
 
@@ -277,7 +277,7 @@ import { ThousandStyle } from 'numora';
         [numora]="{ thousandStyle: ThousandStyle.Thousand, maxDecimals: 2 }"
       />
     </label>
-    <p className="text-stone-400 text-base leading-6">Raw value: {{ amount.value }}</p>
+    <p className="text-muted-foreground text-base leading-6">Raw value: {{ amount.value }}</p>
   \`,
 })
 export class AmountFormComponent {
@@ -286,7 +286,7 @@ export class AmountFormComponent {
 }`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Numora adopts the <code>&lt;input&gt;</code> and forces the required attributes (
         <code>type</code>, <code>inputmode</code>, <code>spellcheck</code>,{' '}
         <code>autocomplete</code>, <code>pattern</code>). The <code>ControlValueAccessor</code>{' '}
@@ -296,21 +296,21 @@ export class AmountFormComponent {
         <code>enable()</code> – everything Angular Forms expects.
       </p>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Because the <code>&lt;input&gt;</code> is yours, set <code>placeholder</code>,{' '}
         <code>aria-label</code>, <code>name</code> or any other attribute on it directly in the
         template.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Animated example: Numora + Torph in Angular</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Animated example: Numora + Torph in Angular</h2>
+      <p className="text-muted-foreground text-base leading-6">
         For animated digit transitions, stack a{' '}
-        <a href="https://torph.lochie.dev" target="_blank" rel="noopener noreferrer" className="underline link-underline hover:text-stone-100 transition-colors">
+        <a href="https://torph.lochie.dev" target="_blank" rel="noopener noreferrer" className="underline link-underline hover:text-foreground transition-colors">
           Torph
         </a>{' '}
         <code>TextMorph</code> on top of a transparent-text <code>NumoraInput</code>. The input owns
         the keyboard, undo and IME; Torph animates the visible characters. The{' '}
-        <Link to="/docs/numora/integrations/torph" className="underline link-underline hover:text-stone-100 transition-colors">vanilla overlay guide</Link> covers the pattern
+        <Link to="/docs/numora/integrations/torph" className="underline link-underline hover:text-foreground transition-colors">vanilla overlay guide</Link> covers the pattern
         in depth - below is the idiomatic Angular standalone component.
       </p>
 
@@ -400,7 +400,7 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
 }`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Note <code>encapsulation: ViewEncapsulation.None</code> - Numora creates the{' '}
         <code>&lt;input&gt;</code> at runtime, so Angular&apos;s default shadow-DOM-style attribute
         scoping can&apos;t reach it. The <code>beforeinput</code> microtask + <code>input</code>{' '}
@@ -408,16 +408,16 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
         <code>prefers-reduced-motion</code> automatically.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">FAQ</h2>
+      <h2 className="text-foreground text-2xl">FAQ</h2>
 
-      <h3 className="text-stone-100">Is there a numora-angular package?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Is there a numora-angular package?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         No. Numora is intentionally a thin layer over the native <code>&lt;input&gt;</code>. A short
         standalone directive is the entire Angular adapter.
       </p>
 
-      <h3 className="text-stone-100">Does Numora integrate with Angular Reactive Forms?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Does Numora integrate with Angular Reactive Forms?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Yes – the <code>NumoraDirective</code> above implements <code>ControlValueAccessor</code>{' '}
         out of the box, so the same <code>&lt;input numora&gt;</code> works with{' '}
         <code>[(ngModel)]</code> and <code>[formControl]</code> with no extra wiring. Numora&apos;s
@@ -425,50 +425,50 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
         number-coercion gymnastics, no IEEE 754 rounding errors on currency amounts.
       </p>
 
-      <h3 className="text-stone-100">How do I add thousand separators to an Angular number input?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">How do I add thousand separators to an Angular number input?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Pass <code>thousandStyle: ThousandStyle.Thousand</code> through the directive&apos;s{' '}
         <code>@Input()</code>. Numora formats as the user types, keeps the caret stable through the
         inserted comma, and emits the raw separator-free string from <code>onChange</code> - feed it
         into a signal or <code>FormControl&lt;string&gt;</code>.
       </p>
 
-      <h3 className="text-stone-100">Does it work with Angular Universal SSR?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Does it work with Angular Universal SSR?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Yes. <code>NumoraInput</code> touches the DOM, so initialise it in <code>ngOnInit</code> on
         the browser platform (guard with <code>isPlatformBrowser</code> if you target the server).
         Universal renders an empty host element on the server, Numora mounts on hydration.
       </p>
 
-      <h3 className="text-stone-100">
+      <h3 className="text-foreground">
         Why not a native <code>&lt;input type=&quot;number&quot;&gt;</code>?
       </h3>
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Native number inputs lose precision (IEEE 754), have inconsistent mobile keyboards, do not
         format thousand separators, and break paste sanitisation. Numora keeps the value as a string
         throughout and handles all of the above.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Numora in other frameworks</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Numora in other frameworks</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Numora&apos;s core is framework-agnostic. The same vanilla <code>NumoraInput</code> class
         powers the numeric input across every modern UI framework:
       </p>
       <ul className="list-disc list-inside">
         <li>
-          <Link to="/docs/numora/frameworks/svelte" className="underline link-underline hover:text-stone-100 transition-colors">Svelte numeric input</Link> –{' '}
+          <Link to="/docs/numora/frameworks/svelte" className="underline link-underline hover:text-foreground transition-colors">Svelte numeric input</Link> –{' '}
           <code>use:numora</code> action for Svelte and SvelteKit
         </li>
         <li>
-          <Link to="/docs/numora/frameworks/vue" className="underline link-underline hover:text-stone-100 transition-colors">Vue numeric input</Link> – Vue 3{' '}
+          <Link to="/docs/numora/frameworks/vue" className="underline link-underline hover:text-foreground transition-colors">Vue numeric input</Link> – Vue 3{' '}
           <code>v-numora</code> custom directive
         </li>
         <li>
-          <Link to="/docs/numora/frameworks/solid" className="underline link-underline hover:text-stone-100 transition-colors">SolidJS numeric input</Link> – signal-bound{' '}
+          <Link to="/docs/numora/frameworks/solid" className="underline link-underline hover:text-foreground transition-colors">SolidJS numeric input</Link> – signal-bound{' '}
           <code>onMount</code> wrapper
         </li>
         <li>
-          <Link to="/docs/numora-react" className="underline link-underline hover:text-stone-100 transition-colors">React numeric input</Link> – drop-in{' '}
+          <Link to="/docs/numora-react" className="underline link-underline hover:text-foreground transition-colors">React numeric input</Link> – drop-in{' '}
           <code>&lt;NumoraInput /&gt;</code> component (<code>numora-react</code>)
         </li>
       </ul>

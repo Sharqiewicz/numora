@@ -62,11 +62,11 @@ export function DecimalDilemmaDemo() {
         <div className="grid grid-cols-2 gap-4 mt-3">
           <div>
             <p className="text-xs text-muted-foreground mb-1">Valid for {locale}:</p>
-            <code className="font-mono text-green-400">{exampleValid}</code>
+            <code className="font-mono text-signal-green">{exampleValid}</code>
           </div>
           <div>
             <p className="text-xs text-muted-foreground mb-1">Confusing for {locale}:</p>
-            <code className="font-mono text-orange-400">{exampleInvalid}</code>
+            <code className="font-mono text-signal-amber">{exampleInvalid}</code>
           </div>
         </div>
       </div>
@@ -85,8 +85,8 @@ export function DecimalDilemmaDemo() {
               onChange={setNativeValue}
               placeholder={`Type ${exampleValid}...`}
             />
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm">
-              <p className="text-red-400">
+            <div className="p-3 rounded-lg bg-signal-red/10 border border-signal-red/30 text-sm">
+              <p className="text-signal-red">
                 Native input rejects commas entirely and can't be configured for locale.
               </p>
             </div>
@@ -104,8 +104,8 @@ export function DecimalDilemmaDemo() {
               placeholder={`Type ${exampleValid}...`}
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
-            <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-sm">
-              <p className="text-green-400">
+            <div className="p-3 rounded-lg bg-signal-green/10 border border-signal-green/30 text-sm">
+              <p className="text-signal-green">
                 Configurable decimal separator. Multiple decimals are automatically prevented (only
                 the first is kept).
               </p>

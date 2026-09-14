@@ -18,55 +18,102 @@ code {
   --font-satoshi: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-righteous: 'Righteous', sans-serif;
 
-  --background: #0c0a09;
-  --foreground: oklch(0.885 0 0);
-  --card: #0c0a09;
-  --card-foreground: oklch(0.985 0 0);
-  --popover: #0c0a09;
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.21 0.006 285.885);
+  /* Neutral ramp. Every neutral carries the brand hue (277) so whites, greys
+     and blacks are tinted to the same temperature as the brand. L and C are
+     unchanged from the previous values - this is a tonality fix only. */
+  --background: oklch(0.147 0.004 277);
+  --foreground: oklch(0.940 0.004 277);
+  --card: oklch(0.147 0.004 277);
+  --card-foreground: oklch(0.985 0.002 277);
+  --popover: oklch(0.147 0.004 277);
+  --popover-foreground: oklch(0.985 0.002 277);
+  --primary: oklch(0.985 0.002 277);
+  --primary-foreground: oklch(0.210 0.006 277);
   --secondary: oklch(0.694 0.131 276.5);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground: oklch(0.985 0 0);
+  --secondary-foreground: oklch(0.985 0.002 277);
+  --muted: oklch(0.274 0.006 277);
+  --muted-foreground: oklch(0.712 0.013 277);
+  --accent: oklch(0.274 0.006 277);
+  --accent-foreground: oklch(0.985 0.002 277);
   --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.274 0.006 286.033);
-  --input: oklch(0.274 0.006 286.033);
-  --ring: oklch(0.442 0.017 285.786);
-  --sidebar: #0c0a09;
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.274 0.006 286.033);
-  --sidebar-ring: oklch(0 0 0);
+  --destructive-foreground: oklch(0.985 0.002 277);
+  /* Borders are white at low alpha so they pick up the tone of whatever
+     surface sits behind them instead of declaring a competing colour. */
+  --border: oklch(1 0 0 / 0.08);
+  --input: oklch(0.274 0.006 277);
+  --ring: oklch(0.442 0.017 277);
+  --sidebar: oklch(0.147 0.004 277);
+  --sidebar-foreground: oklch(0.985 0.002 277);
+  --sidebar-primary: oklch(0.460 0.277 278);
+  --sidebar-primary-foreground: oklch(0.985 0.002 277);
+  --sidebar-accent: oklch(0.274 0.006 277);
+  --sidebar-accent-foreground: oklch(0.985 0.002 277);
+  --sidebar-border: oklch(1 0 0 / 0.08);
+  --sidebar-ring: oklch(0.442 0.017 277);
 
   /* Surface tokens - component-level dark surfaces */
-  --surface-1: oklch(0.145 0.005 255);
-  --surface-2: oklch(0.188 0.006 255);
-  --surface-3: oklch(0.200 0.007 255);
-  --surface-4: oklch(0.253 0.008 255);
-  --surface-5: oklch(0.278 0.008 255);
-  --surface-6: oklch(0.295 0.007 255);
-  --surface-7: oklch(0.360 0.010 255);
+  --surface-1: oklch(0.145 0.005 277);
+  --surface-2: oklch(0.188 0.006 277);
+  --surface-3: oklch(0.200 0.007 277);
+  --surface-4: oklch(0.253 0.008 277);
+  --surface-5: oklch(0.278 0.008 277);
+  --surface-6: oklch(0.295 0.007 277);
+  --surface-7: oklch(0.360 0.010 277);
 
   /* Brand / interactive tokens */
   --brand: oklch(0.460 0.277 278);
   --brand-hover: oklch(0.370 0.220 277);
   --brand-disabled: oklch(0.310 0.177 278);
 
-  /* Muted icon / placeholder text */
-  --muted-icon: oklch(0.674 0.057 273);
+  /* Signal palette. Every colour in this set shares one lightness per tier
+     and the same percentage of its own hue's maximum chroma, so no signal
+     reads brighter or more vivid than its peers when they sit side by side.
+       (bare)     text and icons on the page background   L 0.750 @ 90%
+       -fg        text on a signal surface                L 0.840 @ 78%
+       -line      borders                                 L 0.380 @ 55%
+       -surface   tinted backgrounds                      L 0.260 @ 45%
+     Absolute chroma differs per hue on purpose: red simply cannot reach
+     green's chroma at the same lightness in sRGB. */
+  --signal-red: oklch(0.750 0.136 22);
+  --signal-amber: oklch(0.750 0.139 84);
+  --signal-green: oklch(0.750 0.146 163);
+  --signal-sky: oklch(0.750 0.139 233);
+  --signal-violet: oklch(0.750 0.128 293);
+  --signal-purple: oklch(0.750 0.145 305);
 
-  /* Gradient overlay colors */
+  --signal-red-fg: oklch(0.840 0.069 22);
+  --signal-amber-fg: oklch(0.840 0.135 84);
+  --signal-green-fg: oklch(0.840 0.142 163);
+  --signal-sky-fg: oklch(0.840 0.075 233);
+  --signal-violet-fg: oklch(0.840 0.068 293);
+  --signal-purple-fg: oklch(0.840 0.078 305);
+
+  --signal-red-line: oklch(0.380 0.085 22);
+  --signal-amber-line: oklch(0.380 0.043 84);
+  --signal-green-line: oklch(0.380 0.046 163);
+  --signal-sky-line: oklch(0.380 0.044 233);
+  --signal-violet-line: oklch(0.380 0.117 293);
+  --signal-purple-line: oklch(0.380 0.109 305);
+
+  --signal-red-surface: oklch(0.260 0.048 22);
+  --signal-amber-surface: oklch(0.260 0.025 84);
+  --signal-green-surface: oklch(0.260 0.026 163);
+  --signal-sky-surface: oklch(0.260 0.025 233);
+  --signal-violet-surface: oklch(0.260 0.066 293);
+  --signal-purple-surface: oklch(0.260 0.062 305);
+
+  /* Muted icon / placeholder text */
+  --muted-icon: oklch(0.674 0.057 277);
+
+  /* Gradient overlay colours. Each has a zero-alpha twin at the same hue so
+     the fade travels through its own colour instead of through `transparent`,
+     which is rgba(0,0,0,0) and drags the midpoints toward grey. */
   --gradient-1-color: oklch(0.454 0.265 275 / 0.12);
+  --gradient-1-fade: oklch(0.454 0.265 275 / 0);
   --gradient-2-color: oklch(0.588 0.200 252.5 / 0.10);
+  --gradient-2-fade: oklch(0.588 0.200 252.5 / 0);
   --gradient-3-color: oklch(0.551 0.248 293 / 0.08);
+  --gradient-3-fade: oklch(0.551 0.248 293 / 0);
 
   --radius: 0.5rem;
 }
@@ -81,11 +128,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  background-color: #0c0a09;
+  background-color: var(--background);
   background-image:
-    radial-gradient(circle at 20% 30%, var(--gradient-1-color) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, var(--gradient-2-color) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, var(--gradient-1-color) 0%, transparent 50%);
+    radial-gradient(circle at 20% 30%, var(--gradient-1-color) 0%, var(--gradient-1-fade) 50%),
+    radial-gradient(circle at 80% 70%, var(--gradient-2-color) 0%, var(--gradient-2-fade) 50%),
+    radial-gradient(circle at 50% 50%, var(--gradient-3-color) 0%, var(--gradient-3-fade) 50%);
   background-size: 200% 200%;
   background-attachment: fixed;
 
@@ -209,10 +256,10 @@ body {
 /* Button pulse glow effect */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 0 0 oklch(0.694 0.131 276.5 / 0);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--secondary) 0%, transparent);
   }
   50% {
-    box-shadow: 0 0 20px 4px oklch(0.694 0.131 276.5 / 0.3);
+    box-shadow: 0 0 20px 4px color-mix(in oklab, var(--secondary) 30%, transparent);
   }
 }
 
@@ -323,6 +370,30 @@ body {
   --color-brand-hover: var(--brand-hover);
   --color-brand-disabled: var(--brand-disabled);
   --color-muted-icon: var(--muted-icon);
+  --color-signal-red: var(--signal-red);
+  --color-signal-amber: var(--signal-amber);
+  --color-signal-green: var(--signal-green);
+  --color-signal-sky: var(--signal-sky);
+  --color-signal-violet: var(--signal-violet);
+  --color-signal-purple: var(--signal-purple);
+  --color-signal-red-fg: var(--signal-red-fg);
+  --color-signal-amber-fg: var(--signal-amber-fg);
+  --color-signal-green-fg: var(--signal-green-fg);
+  --color-signal-sky-fg: var(--signal-sky-fg);
+  --color-signal-violet-fg: var(--signal-violet-fg);
+  --color-signal-purple-fg: var(--signal-purple-fg);
+  --color-signal-red-line: var(--signal-red-line);
+  --color-signal-amber-line: var(--signal-amber-line);
+  --color-signal-green-line: var(--signal-green-line);
+  --color-signal-sky-line: var(--signal-sky-line);
+  --color-signal-violet-line: var(--signal-violet-line);
+  --color-signal-purple-line: var(--signal-purple-line);
+  --color-signal-red-surface: var(--signal-red-surface);
+  --color-signal-amber-surface: var(--signal-amber-surface);
+  --color-signal-green-surface: var(--signal-green-surface);
+  --color-signal-sky-surface: var(--signal-sky-surface);
+  --color-signal-violet-surface: var(--signal-violet-surface);
+  --color-signal-purple-surface: var(--signal-purple-surface);
   /* Motion easing tokens (generate `ease-out-expo` / `ease-drawer` utilities) */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
@@ -356,9 +427,9 @@ body {
   .animated-gradient-bg {
     background-color: var(--background);
     background-image:
-      radial-gradient(circle at 20% 30%, var(--gradient-1-color) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, var(--gradient-2-color) 0%, transparent 50%),
-      radial-gradient(circle at 50% 50%, var(--gradient-3-color) 0%, transparent 50%);
+      radial-gradient(circle at 20% 30%, var(--gradient-1-color) 0%, var(--gradient-1-fade) 50%),
+      radial-gradient(circle at 80% 70%, var(--gradient-2-color) 0%, var(--gradient-2-fade) 50%),
+      radial-gradient(circle at 50% 50%, var(--gradient-3-color) 0%, var(--gradient-3-fade) 50%);
     background-size: 200% 200%;
     background-attachment: fixed;
     animation: gradient-shift 25s ease infinite;
@@ -464,17 +535,6 @@ body {
       transform: none !important;
     }
   }
-}
-
-.dark {
-  --sidebar: oklch(0.186 0.009 264);
-  --sidebar-foreground: oklch(0.953 0.006 264);
-  --sidebar-primary: oklch(0.496 0.196 252);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.245 0.007 264);
-  --sidebar-accent-foreground: oklch(0.953 0.006 264);
-  --sidebar-border: oklch(0.245 0.007 264);
-  --sidebar-ring: oklch(0.623 0.188 258);
 }
 
 @layer base {
