@@ -72,26 +72,26 @@ export const Route = createFileRoute('/docs/numora/features/validation')({
 function Validation() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Custom Validation</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Custom Validation</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Reject keystrokes and pastes <em>before</em> they commit using an <code>isAllowed</code>{' '}
         predicate. Useful for enforcing caps, business rules, or format invariants that don't fit
         one of the built-in options.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Shape</h2>
+      <h2 className="text-foreground text-2xl">Shape</h2>
       <CodeBlock language="typescript">
         {`type IsAllowed = (rawValue: string) => boolean`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         <code>rawValue</code> is the sanitized, raw (no-separator) string that <em>would</em>
         be committed by this keystroke or paste. Return <code>true</code> to accept it,
         <code>false</code> to discard it - the input stays at its previous value and no
         <code>onChange</code> fires.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Example: cap at 100</h2>
+      <h2 className="text-foreground text-2xl">Example: cap at 100</h2>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
@@ -104,14 +104,14 @@ const input = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">Example: only multiples of 5</h2>
+      <h2 className="text-foreground text-2xl">Example: only multiples of 5</h2>
       <CodeBlock language="typescript">
         {`new NumoraInput(container, {
   isAllowed: (raw) => raw === '' || /^[0-9]+$/.test(raw) && Number(raw) % 5 === 0,
 })`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">Notes</h2>
+      <h2 className="text-foreground text-2xl">Notes</h2>
       <ul>
         <li>
           Runs <em>after</em> sanitization and formatting, but <em>before</em> the DOM is mutated

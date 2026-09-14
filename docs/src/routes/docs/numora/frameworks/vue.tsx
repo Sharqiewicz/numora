@@ -115,8 +115,8 @@ export const Route = createFileRoute('/docs/numora/frameworks/vue')({
 function VueIntegration() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Vue Numeric Input</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Vue Numeric Input</h1>
+      <p className="text-muted-foreground text-base leading-6">
         <strong className="font-numora">Numora</strong> is a precision-first{' '}
         <strong>Vue numeric input</strong> library: thousand separators, decimal limits, paste
         sanitisation, scientific-notation expansion and cursor preservation – all driven by a
@@ -126,21 +126,21 @@ function VueIntegration() {
         VeeValidate, FormKit and Pinia without any wrapper package.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Install</h2>
+      <h2 className="text-foreground text-2xl">Install</h2>
       <CodeBlock language="bash">
         {`pnpm add numora
 # or
 npm install numora`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">Vue 3 directive</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Vue 3 directive</h2>
+      <p className="text-muted-foreground text-base leading-6">
         <code>NumoraInput</code> attaches directly to an existing <code>&lt;input&gt;</code>{' '}
         element. A custom directive is the idiomatic Vue 3 adapter – drop this helper into your
         project once and every <code>&lt;input v-numora=&quot;opts&quot;&gt;</code> works.
       </p>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         <code>src/directives/numora.ts</code>:
       </p>
       <CodeBlock language="ts">
@@ -155,7 +155,7 @@ export const vNumora: Directive<HTMLInputElement, NumoraInputOptions> = {
 };`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Register globally in <code>src/main.ts</code> (or import + declare locally in any{' '}
         <code>&lt;script setup&gt;</code>):
       </p>
@@ -167,7 +167,7 @@ import { vNumora } from './directives/numora';
 createApp(App).directive('numora', vNumora).mount('#app');`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Component <code>&lt;script setup lang=&quot;ts&quot;&gt;</code>:
       </p>
       <CodeBlock language="ts">
@@ -177,7 +177,7 @@ import { ThousandStyle } from 'numora';
 const value = ref('');`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Component <code>&lt;template&gt;</code>:
       </p>
       <CodeBlock language="html">
@@ -191,10 +191,10 @@ const value = ref('');`}
     }"
   />
 </label>
-<p className="text-stone-400 text-base leading-6">Raw value: {{ value }}</p>`}
+<p className="text-muted-foreground text-base leading-6">Raw value: {{ value }}</p>`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         The directive receives the <code>&lt;input&gt;</code> Vue renders and calls{' '}
         <code>new NumoraInput(el, binding.value)</code>. Numora adopts the element, forces the
         required attributes (<code>type</code>, <code>inputmode</code>, <code>spellcheck</code>,{' '}
@@ -203,27 +203,27 @@ const value = ref('');`}
         field.
       </p>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Because the <code>&lt;input&gt;</code> is yours, set <code>placeholder</code>,{' '}
         <code>aria-label</code>, <code>name</code> or any other attribute on it directly in the
         template.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Animated example: Numora + Torph in Vue 3</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Animated example: Numora + Torph in Vue 3</h2>
+      <p className="text-muted-foreground text-base leading-6">
         For animated digit transitions, stack a{' '}
-        <a href="https://torph.lochie.dev" target="_blank" rel="noopener noreferrer" className="underline link-underline hover:text-stone-100 transition-colors">
+        <a href="https://torph.lochie.dev" target="_blank" rel="noopener noreferrer" className="underline link-underline hover:text-foreground transition-colors">
           Torph
         </a>{' '}
         <code>TextMorph</code> on top of a transparent-text <code>NumoraInput</code>. The input owns
         the keyboard, undo and IME; Torph animates the visible characters. The{' '}
-        <Link to="/docs/numora/integrations/torph" className="underline link-underline hover:text-stone-100 transition-colors">vanilla overlay guide</Link> covers the pattern
+        <Link to="/docs/numora/integrations/torph" className="underline link-underline hover:text-foreground transition-colors">vanilla overlay guide</Link> covers the pattern
         in depth - below is the idiomatic Vue 3 adapter.
       </p>
 
       <CodeBlock language="bash">{`pnpm add numora torph`}</CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Script block (inside <code>&lt;script setup lang=&quot;ts&quot;&gt;</code>):
       </p>
       <CodeBlock language="ts">
@@ -272,7 +272,7 @@ onMounted(() => {
 onBeforeUnmount(() => cleanup?.());`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Template (inside <code>&lt;template&gt;</code>):
       </p>
       <CodeBlock language="html">
@@ -282,7 +282,7 @@ onBeforeUnmount(() => cleanup?.());`}
 </label>`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Styles (inside <code>&lt;style scoped&gt;</code>):
       </p>
       <CodeBlock language="css">
@@ -308,49 +308,49 @@ onBeforeUnmount(() => cleanup?.());`}
 .numora-overlay-host :deep(input::placeholder) { color: transparent; }`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         The <code>beforeinput</code> microtask + <code>input</code> listener combination keeps Torph
         in sync across typing, paste, undo and redo. Torph respects{' '}
         <code>prefers-reduced-motion</code> automatically.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">FAQ</h2>
+      <h2 className="text-foreground text-2xl">FAQ</h2>
 
-      <h3 className="text-stone-100">Is there a numora-vue package?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Is there a numora-vue package?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         No - and there does not need to be. Numora is intentionally a thin layer over the native{' '}
         <code>&lt;input&gt;</code>. A six-line <code>v-numora</code> directive is the entire Vue
         adapter.
       </p>
 
-      <h3 className="text-stone-100">Does Numora work with Nuxt 3 and SSR?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Does Numora work with Nuxt 3 and SSR?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Yes. <code>NumoraInput</code> touches the DOM, so the <code>v-numora</code> directive only
         initialises in the <code>mounted</code> hook – that path only runs in the browser. Nuxt
         renders the empty <code>&lt;input&gt;</code> on the server and Numora adopts it on
         hydration. No Nuxt-specific configuration needed.
       </p>
 
-      <h3 className="text-stone-100">How do I add thousand separators to a Vue number input?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">How do I add thousand separators to a Vue number input?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Pass <code>thousandStyle: ThousandStyle.Thousand</code> inside the <code>v-numora</code>{' '}
         binding. Numora formats as the user types, keeps the caret stable through the inserted
         comma, and emits the raw separator-free string from <code>onChange</code> – safe to feed
         into <code>ref</code>, Pinia, VeeValidate or FormKit.
       </p>
 
-      <h3 className="text-stone-100">Does it support i18n (decimal commas, currency formatting) in Vue?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Does it support i18n (decimal commas, currency formatting) in Vue?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Yes. Set <code>decimalSeparator: &apos;,&apos;</code> and{' '}
         <code>thousandSeparator: &apos;.&apos;</code> (or use the <code>locale</code> option) for
         European formats. Numora keeps the raw value as a string end-to-end, so currency math stays
         precise – no <code>parseFloat</code> rounding errors.
       </p>
 
-      <h3 className="text-stone-100">
+      <h3 className="text-foreground">
         Why not <code>v-model</code> on a plain <code>&lt;input&gt;</code>?
       </h3>
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Numora handles thousand separators, decimal limits, scientific notation, paste sanitisation,
         cursor preservation through formatting, and mobile keyboard hints (
         <code>inputmode=&quot;decimal&quot;</code>). Doing all of that on a plain{' '}
@@ -358,26 +358,26 @@ onBeforeUnmount(() => cleanup?.());`}
         the part Numora exists to solve.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Numora in other frameworks</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Numora in other frameworks</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Numora&apos;s core is framework-agnostic. The same vanilla <code>NumoraInput</code> class
         powers the numeric input across every modern UI framework:
       </p>
       <ul className="list-disc list-inside">
         <li>
-          <Link to="/docs/numora/frameworks/svelte" className="underline link-underline hover:text-stone-100 transition-colors">Svelte numeric input</Link> –{' '}
+          <Link to="/docs/numora/frameworks/svelte" className="underline link-underline hover:text-foreground transition-colors">Svelte numeric input</Link> –{' '}
           <code>use:numora</code> action for Svelte and SvelteKit
         </li>
         <li>
-          <Link to="/docs/numora/frameworks/angular" className="underline link-underline hover:text-stone-100 transition-colors">Angular numeric input</Link> – standalone
+          <Link to="/docs/numora/frameworks/angular" className="underline link-underline hover:text-foreground transition-colors">Angular numeric input</Link> – standalone
           directive with <code>ControlValueAccessor</code>
         </li>
         <li>
-          <Link to="/docs/numora/frameworks/solid" className="underline link-underline hover:text-stone-100 transition-colors">SolidJS numeric input</Link> – signal-bound{' '}
+          <Link to="/docs/numora/frameworks/solid" className="underline link-underline hover:text-foreground transition-colors">SolidJS numeric input</Link> – signal-bound{' '}
           <code>onMount</code> wrapper
         </li>
         <li>
-          <Link to="/docs/numora-react" className="underline link-underline hover:text-stone-100 transition-colors">React numeric input</Link> – drop-in{' '}
+          <Link to="/docs/numora-react" className="underline link-underline hover:text-foreground transition-colors">React numeric input</Link> – drop-in{' '}
           <code>&lt;NumoraInput /&gt;</code> component (<code>numora-react</code>)
         </li>
       </ul>

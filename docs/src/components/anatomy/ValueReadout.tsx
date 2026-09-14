@@ -38,18 +38,18 @@ export function ValueReadout() {
           <span className="text-foreground">e.target.value</span>{' '}
           <span className="text-muted-foreground/60">// raw, no separators</span>
           <br />
-          <span className="text-emerald-400">"{rawValue}"</span>
+          <span className="text-signal-green">"{rawValue}"</span>
         </div>
         <div>
           <span className="text-foreground">e.target.formattedValue</span>{' '}
           <span className="text-muted-foreground/60">// display string</span>
           <br />
-          <span className="text-emerald-400">"{formattedValue}"</span>
+          <span className="text-signal-green">"{formattedValue}"</span>
         </div>
         <div>
           <span className="text-foreground">e.target.selectionStart</span>
           <br />
-          <span className="text-emerald-400">{selectionStart}</span>
+          <span className="text-signal-green">{selectionStart}</span>
         </div>
       </div>
     </div>

@@ -74,18 +74,18 @@ export const Route = createFileRoute('/docs/numora/installation')({
 function Installation() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Install numora</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Install numora</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Add the numora JavaScript numeric input library to any project - no framework required.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Install</h2>
-      <p className="text-stone-400 text-base leading-6">numora has zero runtime dependencies. Pick your package manager:</p>
+      <h2 className="text-foreground text-2xl">Install</h2>
+      <p className="text-muted-foreground text-base leading-6">numora has zero runtime dependencies. Pick your package manager:</p>
 
       <InstallTabs packages="numora" />
 
-      <h2 className="text-stone-100 text-2xl">Basic Usage</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Basic Usage</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Import the <code>NumoraInput</code> class and attach it to any container element:
       </p>
       <CodeBlock language="typescript">
@@ -100,8 +100,8 @@ const numoraInput = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">Options</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Options</h2>
+      <p className="text-muted-foreground text-base leading-6">
         numora accepts a <code>FormattingOptions</code> object as the second argument. Common
         options:
       </p>
@@ -135,14 +135,14 @@ const numoraInput = new NumoraInput(container, {
           <code>rawValueMode</code> - emit raw values without separators in <code>onChange</code>
         </li>
       </ul>
-      <p className="text-stone-400 text-base leading-6">
-        See the <Link to="/docs/numora/features/formatting" className="underline link-underline hover:text-stone-100 transition-colors">Formatting</Link> and{' '}
-        <Link to="/docs/numora/features/sanitization" className="underline link-underline hover:text-stone-100 transition-colors">Sanitization</Link> docs for the full options
+      <p className="text-muted-foreground text-base leading-6">
+        See the <Link to="/docs/numora/features/formatting" className="underline link-underline hover:text-foreground transition-colors">Formatting</Link> and{' '}
+        <Link to="/docs/numora/features/sanitization" className="underline link-underline hover:text-foreground transition-colors">Sanitization</Link> docs for the full options
         reference.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">TypeScript</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">TypeScript</h2>
+      <p className="text-muted-foreground text-base leading-6">
         numora ships with full TypeScript declarations - no <code>@types</code> package needed.
         Import types directly:
       </p>
@@ -160,11 +160,11 @@ const options: FormattingOptions = {
 
       <hr />
 
-      <h2 className="text-stone-100 text-2xl">Next Steps</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Next Steps</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Learn how the <code>beforeinput</code>-based event architecture works in the{' '}
-        <Link to="/docs/numora/anatomy" className="underline link-underline hover:text-stone-100 transition-colors">Anatomy</Link> guide, or jump to the{' '}
-        <Link to="/docs/numora/features/formatting" className="underline link-underline hover:text-stone-100 transition-colors">Formatting</Link> feature docs.
+        <Link to="/docs/numora/anatomy" className="underline link-underline hover:text-foreground transition-colors">Anatomy</Link> guide, or jump to the{' '}
+        <Link to="/docs/numora/features/formatting" className="underline link-underline hover:text-foreground transition-colors">Formatting</Link> feature docs.
       </p>
       <div className="flex items-center gap-2 my-8">
         <Link to="/docs/numora/anatomy">

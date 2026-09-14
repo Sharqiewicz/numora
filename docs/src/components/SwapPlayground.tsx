@@ -51,8 +51,8 @@ function Annotation({ side, title, description, delay, topOffset, skip }: Annota
           absolute top-2 w-6 h-[2px] bg-gradient-to-r
           ${
             isLeft
-              ? '-right-8 from-transparent to-secondary animate-draw-line-right'
-              : '-left-8 from-secondary to-transparent animate-draw-line'
+              ? '-right-8 from-secondary/0 to-secondary animate-draw-line-right'
+              : '-left-8 from-secondary to-secondary/0 animate-draw-line'
           }
         `}
         style={lineStyle}
@@ -99,7 +99,7 @@ export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {
     'One example of where numora shines. Handling numeric state in DeFi is deceptively hard - sanitize keystrokes, expand scientific notation, preserve cursor position, and more.';
 
   return (
-    <div className="relative bg-radial-[at_50%_60%] from-white/10 via-transparent to-transparent">
+    <div className="relative bg-radial-[at_50%_60%] from-white/10 via-white/0 to-white/0">
       <div
         className="flex flex-col items-center gap-3 text-center animate-fade-in opacity-0"
         style={d(0)}
@@ -118,7 +118,7 @@ export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {
           <div
             className="
               h-[2px] w-full mx-auto mt-1
-              bg-gradient-to-r from-transparent via-secondary to-transparent
+              bg-gradient-to-r from-secondary/0 via-secondary to-secondary/0
               animate-expand-line
             "
             style={underlineStyle}

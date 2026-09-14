@@ -11,12 +11,12 @@ const badgeVariants = cva(
     variants: {
       variant: {
         green:
-          'h-9 gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium  bg-green-900 text-green-300 border border-green-800',
-        blue: 'h-9 gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium  bg-blue-900 text-blue-300 border border-blue-800',
+          'h-9 gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium  bg-signal-green-surface text-signal-green-fg border border-signal-green-line',
+        blue: 'h-9 gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium  bg-signal-sky-surface text-signal-sky-fg border border-signal-sky-line',
         orange:
-          'h-9 gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium  bg-orange-900 text-orange-300 border border-orange-800',
-        gray: 'h-9 gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium  bg-gray-900 text-gray-300 border border-gray-800',
-        red: 'h-9 gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium  bg-red-900 text-red-300 border border-red-800',
+          'h-9 gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium  bg-signal-amber-surface text-signal-amber-fg border border-signal-amber-line',
+        gray: 'h-9 gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium  bg-surface-3 text-foreground border border-surface-5',
+        red: 'h-9 gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium  bg-signal-red-surface text-signal-red-fg border border-signal-red-line',
       },
     },
     defaultVariants: {

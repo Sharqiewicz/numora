@@ -78,15 +78,15 @@ function Locale() {
 
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Locale</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Locale</h1>
+      <p className="text-muted-foreground text-base leading-6">
         The <code>locale</code> prop auto-detects thousand and decimal separators via{' '}
         <code>Intl.NumberFormat</code>. Grouping style is still controlled separately by{' '}
         <code>thousandStyle</code>.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Browser locale (auto-detect)</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Browser locale (auto-detect)</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Pass <code>locale={'{true}'}</code> to detect both separators from the browser's current
         locale. Explicit <code>thousandSeparator</code> or <code>decimalSeparator</code> values
         always take priority over locale-detected ones.
@@ -101,8 +101,8 @@ function Locale() {
         />
       </div>
 
-      <h2 className="text-stone-100 text-2xl">Specific locale tag</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Specific locale tag</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Pass a BCP 47 locale tag to pin separators to a specific locale - useful for SSR or
         server-driven locale handling.
       </p>
@@ -116,8 +116,8 @@ function Locale() {
         />
       </div>
 
-      <h2 className="text-stone-100 text-2xl">getSeparatorsFromLocale</h2>
-      <p className="text-stone-400 text-base leading-6">For pre-computing separators and passing them explicitly:</p>
+      <h2 className="text-foreground text-2xl">getSeparatorsFromLocale</h2>
+      <p className="text-muted-foreground text-base leading-6">For pre-computing separators and passing them explicitly:</p>
       <CodeBlock language="tsx">
         {`import { NumoraInput } from 'numora-react'
 import { getSeparatorsFromLocale } from 'numora'
@@ -134,16 +134,16 @@ getSeparatorsFromLocale('fr-FR')
 <NumoraInput thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} />`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         For decimal separator configuration without locale detection, see{' '}
-        <Link to="/docs/numora-react/features/decimals" className="underline link-underline hover:text-stone-100 transition-colors">
+        <Link to="/docs/numora-react/features/decimals" className="underline link-underline hover:text-foreground transition-colors">
           Decimals
         </Link>
         .
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Value format under a locale</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Value format under a locale</h2>
+      <p className="text-muted-foreground text-base leading-6">
         A string <code>value</code> / <code>defaultValue</code> is already in the field's{' '}
         <em>display</em> format, so a de-DE-configured field expects <code>','</code> for the
         decimal mark and reads a bare <code>'.'</code> as the thousand separator. A JS{' '}
@@ -152,7 +152,7 @@ getSeparatorsFromLocale('fr-FR')
         formatting it: <code>{'<NumoraInput locale="de-DE" value={1234.5} />'}</code> displays{' '}
         <code>"1.234,5"</code>, not the <code>"12.345"</code> you would get from{' '}
         <code>{'value="1234.5"'}</code>, which reads the dot as grouping and strips it. See{' '}
-        <Link to="/docs/numora-react/features/value-types" className="underline link-underline hover:text-stone-100 transition-colors">features/value-types</Link> for the full
+        <Link to="/docs/numora-react/features/value-types" className="underline link-underline hover:text-foreground transition-colors">features/value-types</Link> for the full
         value contract.
       </p>
     </div>

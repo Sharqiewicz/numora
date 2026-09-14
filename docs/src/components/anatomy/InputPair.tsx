@@ -15,8 +15,8 @@ interface InputPairProps {
 
 const TONE_COLORS: Record<NonNullable<PaneProps['tone']>, string> = {
   neutral: 'text-foreground',
-  bad: 'text-red-400',
-  good: 'text-emerald-400',
+  bad: 'text-signal-red',
+  good: 'text-signal-green',
 };
 
 export function InputPair({ left, right, caption }: InputPairProps) {

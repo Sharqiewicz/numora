@@ -119,19 +119,19 @@ export function NumberTypeLieDemo() {
                     animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: 0.18, ease: [0.16, 1, 0.3, 1] } }}
                     exit={{ opacity: 0, y: -2, scale: 0.97, transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] } }}
                   >
-                    <div className="px-3 py-1 rounded bg-red-500 text-white text-xs font-medium motion-safe:animate-bounce">
+                    <div className="px-3 py-1 rounded bg-signal-red text-white text-xs font-medium motion-safe:animate-bounce">
                       Value changed by scroll!
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm">
+            <div className="p-3 rounded-lg bg-signal-red/10 border border-signal-red/30 text-sm">
               <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle className="w-4 h-4 text-red-400" />
-                <span className="text-red-400 font-medium">Try this:</span>
+                <AlertTriangle className="w-4 h-4 text-signal-red" />
+                <span className="text-signal-red font-medium">Try this:</span>
               </div>
-              <ul className="text-red-400 list-disc list-inside space-y-1 text-xs">
+              <ul className="text-signal-red list-disc list-inside space-y-1 text-xs">
                 <li>Hover and scroll to change value accidentally</li>
                 <li>Try typing 1,000 (comma rejected)</li>
                 <li>Notice the ugly spinner buttons</li>
@@ -139,7 +139,7 @@ export function NumberTypeLieDemo() {
             </div>
             <div className="p-3 rounded-lg bg-muted/30 border border-border">
               <p className="text-xs text-muted-foreground">Implementation:</p>
-              <code className="font-mono text-xs text-orange-400">{'<input type="number" />'}</code>
+              <code className="font-mono text-xs text-signal-amber">{'<input type="number" />'}</code>
             </div>
           </div>
         }
@@ -155,9 +155,9 @@ export function NumberTypeLieDemo() {
               placeholder="Type a number..."
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
-            <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-sm">
-              <p className="text-green-400 font-medium mb-2">Numora uses:</p>
-              <ul className="text-green-400 list-disc list-inside space-y-1 text-xs">
+            <div className="p-3 rounded-lg bg-signal-green/10 border border-signal-green/30 text-sm">
+              <p className="text-signal-green font-medium mb-2">Numora uses:</p>
+              <ul className="text-signal-green list-disc list-inside space-y-1 text-xs">
                 <li>type="text" - no scroll hijacking</li>
                 <li>inputmode="decimal" - mobile numeric keyboard</li>
                 <li>Full formatting support with commas</li>
@@ -166,7 +166,7 @@ export function NumberTypeLieDemo() {
             </div>
             <div className="p-3 rounded-lg bg-muted/30 border border-border">
               <p className="text-xs text-muted-foreground">Implementation:</p>
-              <code className="font-mono text-xs text-green-400">
+              <code className="font-mono text-xs text-signal-green">
                 {'<input type="text" inputmode="decimal" />'}
               </code>
             </div>
@@ -185,10 +185,10 @@ interface ProblemCardProps {
 
 function ProblemCard({ icon: Icon, title, description }: ProblemCardProps) {
   return (
-    <div className="p-4 rounded-lg bg-red-950/20 border border-red-500/30">
+    <div className="p-4 rounded-lg bg-signal-red-surface/20 border border-signal-red/30">
       <div className="flex items-center gap-2 mb-2">
-        <Icon className="w-4 h-4 text-red-400" />
-        <span className="font-medium text-sm text-red-400">{title}</span>
+        <Icon className="w-4 h-4 text-signal-red" />
+        <span className="font-medium text-sm text-signal-red">{title}</span>
       </div>
       <p className="text-xs text-muted-foreground">{description}</p>
     </div>

@@ -2,8 +2,8 @@ import { type RefObject, useEffect } from 'react';
 
 export type TypingLoopMode = 'change' | 'blur';
 
-const TYPE_MS = 280;
-const HOLD_MS = 1600;
+const TYPE_MS = 220;
+const HOLD_MS = 1800;
 /**
  * Time between the simulated focus and the first keystroke. The focus-strip morph
  * (1,234,567 → 1234567) takes ~400ms, so this lets it land before digits start

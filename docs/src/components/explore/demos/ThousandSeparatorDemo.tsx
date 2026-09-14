@@ -92,9 +92,9 @@ export function ThousandSeparatorDemo() {
               onChange={setNaiveValue}
               placeholder="Type 1234567..."
             />
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm space-y-2">
-              <p className="text-red-400 font-medium">Problems:</p>
-              <ul className="text-red-400 list-disc list-inside space-y-1 text-xs">
+            <div className="p-3 rounded-lg bg-signal-red/10 border border-signal-red/30 text-sm space-y-2">
+              <p className="text-signal-red font-medium">Problems:</p>
+              <ul className="text-signal-red list-disc list-inside space-y-1 text-xs">
                 <li>Cursor jumps to end after each keystroke</li>
                 <li>Editing in the middle is impossible</li>
                 <li>Only supports one grouping style</li>
@@ -116,9 +116,9 @@ export function ThousandSeparatorDemo() {
               placeholder="Type 1234567..."
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
-            <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-sm space-y-2">
-              <p className="text-green-400 font-medium">Features:</p>
-              <ul className="text-green-400 list-disc list-inside space-y-1 text-xs">
+            <div className="p-3 rounded-lg bg-signal-green/10 border border-signal-green/30 text-sm space-y-2">
+              <p className="text-signal-green font-medium">Features:</p>
+              <ul className="text-signal-green list-disc list-inside space-y-1 text-xs">
                 <li>Cursor stays in logical position</li>
                 <li>Edit anywhere without issues</li>
                 <li>

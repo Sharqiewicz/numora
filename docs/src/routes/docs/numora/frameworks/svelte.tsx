@@ -116,8 +116,8 @@ export const Route = createFileRoute('/docs/numora/frameworks/svelte')({
 function SvelteIntegration() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Svelte Numeric Input</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Svelte Numeric Input</h1>
+      <p className="text-muted-foreground text-base leading-6">
         <strong className="font-numora">Numora</strong> is a precision-first{' '}
         <strong>Svelte numeric input</strong> library: thousand separators, decimal limits, paste
         sanitisation, scientific-notation expansion and cursor preservation – all driven by a
@@ -128,21 +128,21 @@ function SvelteIntegration() {
         zero runtime dependencies.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Install</h2>
+      <h2 className="text-foreground text-2xl">Install</h2>
       <CodeBlock language="bash">
         {`pnpm add numora
 # or
 npm install numora`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">Svelte action</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Svelte action</h2>
+      <p className="text-muted-foreground text-base leading-6">
         <code>NumoraInput</code> attaches directly to an existing <code>&lt;input&gt;</code>{' '}
         element. A Svelte action is the idiomatic way to bind that lifecycle to a DOM node. Drop
         this five-line helper into your project once and reuse it everywhere.
       </p>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         <code>src/lib/numora.ts</code>:
       </p>
       <CodeBlock language="ts">
@@ -154,7 +154,7 @@ export function numora(node: HTMLInputElement, options: NumoraInputOptions) {
 }`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Component <code>&lt;script lang=&quot;ts&quot;&gt;</code>:
       </p>
       <CodeBlock language="ts">
@@ -164,7 +164,7 @@ import { ThousandStyle } from 'numora';
 let value = $state('');`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">Component markup:</p>
+      <p className="text-muted-foreground text-base leading-6">Component markup:</p>
       <CodeBlock language="html">
         {`<label>
   Amount
@@ -177,10 +177,10 @@ let value = $state('');`}
   />
 </label>
 
-<p className="text-stone-400 text-base leading-6">Raw value: {value}</p>`}
+<p className="text-muted-foreground text-base leading-6">Raw value: {value}</p>`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         The action receives the <code>&lt;input&gt;</code> Svelte renders and calls{' '}
         <code>new NumoraInput(node, options)</code> – Numora adopts the element, forces the required
         attributes (<code>type</code>, <code>inputmode</code>, <code>spellcheck</code>,{' '}
@@ -189,27 +189,27 @@ let value = $state('');`}
         or form library.
       </p>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Because the <code>&lt;input&gt;</code> is yours, set <code>placeholder</code>,{' '}
         <code>aria-label</code>, <code>name</code> or any other attribute on it directly in the
         markup.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Animated example: Numora + Torph in Svelte</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Animated example: Numora + Torph in Svelte</h2>
+      <p className="text-muted-foreground text-base leading-6">
         For animated digit transitions, stack a{' '}
-        <a href="https://torph.lochie.dev" target="_blank" rel="noopener noreferrer" className="underline link-underline hover:text-stone-100 transition-colors">
+        <a href="https://torph.lochie.dev" target="_blank" rel="noopener noreferrer" className="underline link-underline hover:text-foreground transition-colors">
           Torph
         </a>{' '}
         <code>TextMorph</code> on top of a transparent-text <code>NumoraInput</code>. The input owns
         the keyboard, undo and IME; Torph animates the visible characters. The{' '}
-        <Link to="/docs/numora/integrations/torph" className="underline link-underline hover:text-stone-100 transition-colors">vanilla overlay guide</Link> covers the pattern
+        <Link to="/docs/numora/integrations/torph" className="underline link-underline hover:text-foreground transition-colors">vanilla overlay guide</Link> covers the pattern
         in depth - below is the idiomatic Svelte 5 adapter.
       </p>
 
       <CodeBlock language="bash">{`pnpm add numora torph`}</CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Script block (inside <code>&lt;script lang=&quot;ts&quot;&gt;</code>):
       </p>
       <CodeBlock language="ts">
@@ -254,7 +254,7 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
 }`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">Markup:</p>
+      <p className="text-muted-foreground text-base leading-6">Markup:</p>
       <CodeBlock language="html">
         {`<label
   class="numora-overlay"
@@ -265,7 +265,7 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
 </label>`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Styles (inside the component&apos;s <code>&lt;style&gt;</code> block):
       </p>
       <CodeBlock language="css">
@@ -291,48 +291,48 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
 .numora-overlay-host :global(input::placeholder) { color: transparent; }`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         The <code>beforeinput</code> microtask + <code>input</code> listener combination guarantees
         Torph stays in sync across typing, paste, undo and redo. Torph respects{' '}
         <code>prefers-reduced-motion</code> automatically.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">FAQ</h2>
+      <h2 className="text-foreground text-2xl">FAQ</h2>
 
-      <h3 className="text-stone-100">Is there a numora-svelte package?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Is there a numora-svelte package?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         No - and there does not need to be. Numora is intentionally a thin layer over the native{' '}
         <code>&lt;input&gt;</code>. A ten-line action is the entire Svelte adapter.
       </p>
 
-      <h3 className="text-stone-100">Does Numora work with SvelteKit and SSR?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Does Numora work with SvelteKit and SSR?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Yes. <code>NumoraInput</code> touches the DOM, so initialise it inside an action or{' '}
         <code>onMount</code> - both only run in the browser. SvelteKit renders an empty host element
         on the server, and Numora mounts the formatted <code>&lt;input&gt;</code> on hydration. No
         SSR-specific configuration is needed.
       </p>
 
-      <h3 className="text-stone-100">How do I add thousand separators to a Svelte number input?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">How do I add thousand separators to a Svelte number input?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Pass <code>thousandStyle: ThousandStyle.Thousand</code> to the <code>use:numora</code>{' '}
         action. Numora formats as the user types, repositions the caret through the inserted comma,
         and emits the raw separator-free string from <code>onChange</code> - safe to feed straight
         into a store or form library.
       </p>
 
-      <h3 className="text-stone-100">Does it support i18n (decimal commas, currency formatting) in Svelte?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Does it support i18n (decimal commas, currency formatting) in Svelte?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Yes. Set <code>decimalSeparator: &apos;,&apos;</code> and{' '}
         <code>thousandSeparator: &apos;.&apos;</code> (or use the <code>locale</code> option) for
         European locales. Numora keeps the raw value as a string end-to-end, so currency math stays
         precise - no <code>parseFloat</code> rounding errors on amounts like <code>0.1 + 0.2</code>.
       </p>
 
-      <h3 className="text-stone-100">
+      <h3 className="text-foreground">
         Why not use a normal <code>&lt;input&gt;</code> with <code>bind:value</code>?
       </h3>
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Numora handles thousand separators, decimal limits, scientific notation, paste sanitisation,
         cursor preservation through formatting, and mobile keyboard hints (
         <code>inputmode=&quot;decimal&quot;</code>). Doing all of that on a plain{' '}
@@ -340,26 +340,26 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
         that&apos;s the part Numora exists to solve.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Numora in other frameworks</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Numora in other frameworks</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Numora&apos;s core is framework-agnostic. The same vanilla <code>NumoraInput</code> class
         powers the numeric input across every modern UI framework:
       </p>
       <ul className="list-disc list-inside">
         <li>
-          <Link to="/docs/numora/frameworks/vue" className="underline link-underline hover:text-stone-100 transition-colors">Vue numeric input</Link> – Vue 3{' '}
+          <Link to="/docs/numora/frameworks/vue" className="underline link-underline hover:text-foreground transition-colors">Vue numeric input</Link> – Vue 3{' '}
           <code>v-numora</code> custom directive
         </li>
         <li>
-          <Link to="/docs/numora/frameworks/angular" className="underline link-underline hover:text-stone-100 transition-colors">Angular numeric input</Link> – standalone
+          <Link to="/docs/numora/frameworks/angular" className="underline link-underline hover:text-foreground transition-colors">Angular numeric input</Link> – standalone
           directive with <code>ControlValueAccessor</code>
         </li>
         <li>
-          <Link to="/docs/numora/frameworks/solid" className="underline link-underline hover:text-stone-100 transition-colors">SolidJS numeric input</Link> – signal-bound{' '}
+          <Link to="/docs/numora/frameworks/solid" className="underline link-underline hover:text-foreground transition-colors">SolidJS numeric input</Link> – signal-bound{' '}
           <code>onMount</code> wrapper
         </li>
         <li>
-          <Link to="/docs/numora-react" className="underline link-underline hover:text-stone-100 transition-colors">React numeric input</Link> – drop-in{' '}
+          <Link to="/docs/numora-react" className="underline link-underline hover:text-foreground transition-colors">React numeric input</Link> – drop-in{' '}
           <code>&lt;NumoraInput /&gt;</code> component (<code>numora-react</code>)
         </li>
       </ul>

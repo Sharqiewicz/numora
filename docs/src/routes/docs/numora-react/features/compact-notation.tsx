@@ -78,8 +78,8 @@ export const Route = createFileRoute('/docs/numora-react/features/compact-notati
 function CompactNotation() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Compact Notation</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Compact Notation</h1>
+      <p className="text-muted-foreground text-base leading-6">
         When enabled, pasting shorthand values like <code>"1k"</code> or <code>"2.5m"</code> expands
         them to full numbers. Expansion uses string arithmetic - no precision loss.
       </p>
@@ -123,7 +123,7 @@ function CompactNotation() {
         config={{ enableCompactNotation: true, maxDecimals: 18 }}
       />
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Expansion only happens on paste - users cannot type compact notation character by character.
         The expanded value then passes through the rest of the sanitization and formatting pipeline.
       </p>

@@ -70,12 +70,12 @@ export const Route = createFileRoute('/docs/numora/features/decimals')({
 function Decimals() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Decimals</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Decimals</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Control decimal precision, separators, and locale-aware formatting.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Precision limits</h2>
+      <h2 className="text-foreground text-2xl">Precision limits</h2>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
@@ -92,7 +92,7 @@ const input = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">Separators</h2>
+      <h2 className="text-foreground text-2xl">Separators</h2>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
@@ -104,15 +104,15 @@ const input = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         For locale-aware separator detection, see{' '}
-        <Link to="/docs/numora/features/locale" className="underline link-underline hover:text-stone-100 transition-colors">
+        <Link to="/docs/numora/features/locale" className="underline link-underline hover:text-foreground transition-colors">
           Locale
         </Link>
         .
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Automatic behaviors</h2>
+      <h2 className="text-foreground text-2xl">Automatic behaviors</h2>
       <ul>
         <li>
           <strong>Comma/dot conversion</strong> - when no thousand separator is set, both{' '}

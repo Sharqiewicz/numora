@@ -77,8 +77,8 @@ export function ScientificNotationDemo() {
             />
             <div className="p-3 rounded-lg bg-muted/30 border border-border">
               <p className="text-xs text-muted-foreground mb-1">Native displays:</p>
-              <code className="font-mono text-red-400">{nativeValue || '(empty)'}</code>
-              <p className="text-xs text-red-400 mt-2">
+              <code className="font-mono text-signal-red">{nativeValue || '(empty)'}</code>
+              <p className="text-xs text-signal-red mt-2">
                 Shows scientific notation or loses precision entirely
               </p>
             </div>
@@ -101,8 +101,8 @@ export function ScientificNotationDemo() {
             />
             <div className="p-3 rounded-lg bg-muted/30 border border-border">
               <p className="text-xs text-muted-foreground mb-1">Numora expands:</p>
-              <code className="font-mono text-green-400 break-all">{numoraValue || '(empty)'}</code>
-              <p className="text-xs text-green-400 mt-2">
+              <code className="font-mono text-signal-green break-all">{numoraValue || '(empty)'}</code>
+              <p className="text-xs text-signal-green mt-2">
                 Full decimal expansion with precise representation
               </p>
             </div>
@@ -134,7 +134,7 @@ function ExampleCard({ icon, title, scientific, expanded }: ExampleCardProps) {
         </div>
         <div className="flex items-center gap-2 text-xs">
           <span className="text-muted-foreground">Output:</span>
-          <code className="font-mono text-green-400 break-all">{expanded}</code>
+          <code className="font-mono text-signal-green break-all">{expanded}</code>
         </div>
       </div>
     </div>

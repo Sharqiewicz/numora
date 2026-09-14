@@ -29,7 +29,7 @@ export function Hero({ delay = 0, skipIntro = false }: HeroProps) {
         <div
           className="
             h-[2px] w-full mx-auto mt-1
-            bg-gradient-to-r from-transparent via-secondary to-transparent
+            bg-gradient-to-r from-secondary/0 via-secondary to-secondary/0
             animate-expand-line
           "
           style={underlineStyle}

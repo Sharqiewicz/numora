@@ -29,11 +29,11 @@ export function EventPipelineDiagram() {
                   y1={42}
                   x2={e.x}
                   y2={72}
-                  className="stroke-amber-300"
+                  className="stroke-signal-amber-fg"
                   strokeWidth="2"
                   strokeLinecap="round"
                 />
-                <text x={e.x} y={92} textAnchor="middle" className="fill-amber-300" fontSize="14">
+                <text x={e.x} y={92} textAnchor="middle" className="fill-signal-amber-fg" fontSize="14">
                   {e.label}
                 </text>
               </g>

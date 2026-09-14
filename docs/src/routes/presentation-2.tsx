@@ -59,7 +59,7 @@ function Presentation2() {
 
         {/* Divider */}
         <motion.div
-          className="mt-8 h-px w-32 bg-gradient-to-r from-transparent via-secondary/50 to-transparent"
+          className="mt-8 h-px w-32 bg-gradient-to-r from-secondary/0 via-secondary/50 to-secondary/0"
           initial={reduced ? false : { scaleX: 0, opacity: 0 }}
           animate={{ scaleX: 1, opacity: 1 }}
           transition={{ duration: 0.65, ease, delay: reduced ? 0 : 0.5 }}

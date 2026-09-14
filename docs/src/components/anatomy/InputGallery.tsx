@@ -41,7 +41,7 @@ export function InputGallery() {
             return (
               <tr key={c.input} className="border-t border-border/40">
                 <td className="px-4 py-2 font-mono">"{c.input}"</td>
-                <td className="px-4 py-2 font-mono text-emerald-400">"{cleaned}"</td>
+                <td className="px-4 py-2 font-mono text-signal-green">"{cleaned}"</td>
                 <td className="hidden px-4 py-2 text-xs text-muted-foreground sm:table-cell">
                   {c.label}
                 </td>

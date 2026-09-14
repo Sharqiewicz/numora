@@ -121,9 +121,9 @@ function TorphIntegration() {
 
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Torph integration with Numora</h1>
-      <p className="text-stone-400 text-base leading-6">
-        <a href={TORPH_LIB_URL} target="_blank" rel="noreferrer noopener" className="underline link-underline hover:text-stone-100 transition-colors">
+      <h1 className="text-foreground">Torph integration with Numora</h1>
+      <p className="text-muted-foreground text-base leading-6">
+        <a href={TORPH_LIB_URL} target="_blank" rel="noreferrer noopener" className="underline link-underline hover:text-foreground transition-colors">
           <strong>Torph</strong> by Lochie Axon
         </a>{' '}
         is an animated text-morphing library. This guide layers a Torph <code>TextMorph</code> on
@@ -131,14 +131,14 @@ function TorphIntegration() {
         appears animated. The real <code>&lt;input&gt;</code> still handles every keystroke. Torph
         just renders what the user sees.
       </p>
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Using React? See the{' '}
-        <Link to="/docs/numora-react/integrations/torph" className="underline link-underline hover:text-stone-100 transition-colors">Numora React Torph integration</Link> - it
+        <Link to="/docs/numora-react/integrations/torph" className="underline link-underline hover:text-foreground transition-colors">Numora React Torph integration</Link> - it
         wires the overlay through <code>onChange</code> instead of manual DOM listeners.
       </p>
 
       <TorphVanillaDemo />
-      <p className="text-stone-400 text-base leading-6 text-center -mt-8 mb-12">
+      <p className="text-muted-foreground text-base leading-6 text-center -mt-8 mb-12">
         <code>FormatOn.Change</code> - separators animate on every keystroke.
       </p>
 
@@ -163,7 +163,7 @@ function TorphIntegration() {
                 }}
               >
                 {variant === 'minimal' ? <TorphVanillaBlurMinimal /> : <TorphVanillaBlurDemo />}
-                <p className="text-stone-400 text-base leading-6 text-center -mt-8 mb-12">
+                <p className="text-muted-foreground text-base leading-6 text-center -mt-8 mb-12">
                   <code>FormatOn.Blur</code> -{' '}
                   {variant === 'minimal'
                     ? 'minimal integration; the caret floats during the focus-strip morph.'
@@ -189,7 +189,7 @@ function TorphIntegration() {
                     transition: { duration: 0.12 },
                   }}
                 >
-                  <p className="text-stone-400 text-base leading-6">
+                  <p className="text-muted-foreground text-base leading-6">
                     <strong>Hiding the caret during the focus-strip morph.</strong> With{' '}
                     <code>FormatOn.Blur</code>, focusing the input swaps <code>1,234,567</code> to{' '}
                     <code>1234567</code> in one DOM call. The caret jumps to its final index
@@ -234,7 +234,7 @@ input.addEventListener('focus', () => {
 .numora-overlay-host.caret-suppressed input { caret-color: transparent; }`}
                   </CodeBlock>
 
-                  <p className="text-stone-400 text-base leading-6">
+                  <p className="text-muted-foreground text-base leading-6">
                     The flag gates the toggle so per-keystroke morphs after the strip don't keep
                     flipping the caret - only the first morph after focus matters.
                   </p>
@@ -245,14 +245,14 @@ input.addEventListener('focus', () => {
         )}
       </TorphBlurSection>
 
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         The demos above are rendered inside this React docs site, but the code below is plain
         TypeScript - no React. It uses the vanilla <code>NumoraInput</code> class and Torph's
         vanilla <code>TextMorph</code> directly.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">How the overlay works</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">How the overlay works</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Native <code>&lt;input&gt;</code> elements render their <code>value</code> as a string with
         no child DOM, so animation libraries can't inject animated spans into them directly. The
         overlay sidesteps that by stacking two layers in the same box:
@@ -268,7 +268,7 @@ input.addEventListener('focus', () => {
           undo, IME, and mobile <code>inputmode</code>.
         </li>
       </ul>
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         Both layers render the same formatted string. The vanilla <code>NumoraInput</code> class
         applies formatting in <code>beforeinput</code> via <code>setRangeText</code>, but only runs{' '}
         <code>onChange</code> (or your listeners) when an <code>input</code> event follows - which
@@ -280,11 +280,11 @@ input.addEventListener('focus', () => {
         its text is transparent, you only see the Torph layer.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Installation</h2>
+      <h2 className="text-foreground text-2xl">Installation</h2>
       <InstallTabs packages="numora torph" />
 
-      <h2 id="overlay" className="text-stone-100 text-2xl">Building the overlay</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 id="overlay" className="text-foreground text-2xl">Building the overlay</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Two DOM nodes in a relative-positioned wrapper, one stylesheet, and a small sync bridge
         between the two libraries.
       </p>
@@ -378,7 +378,7 @@ input.addEventListener('beforeinput', scheduleMorphSync)
 input.addEventListener('input', syncMorph)`}
       </CodeBlock>
 
-      <h3 className="text-stone-100">Why each line matters</h3>
+      <h3 className="text-foreground">Why each line matters</h3>
       <ul>
         <li>
           <strong>
@@ -407,14 +407,14 @@ input.addEventListener('input', syncMorph)`}
         </li>
       </ul>
 
-      <h2 className="text-stone-100 text-2xl">Reducing motion</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Reducing motion</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Torph respects <code>prefers-reduced-motion</code> by default. If a user opts out of
         animations at the OS level the morph becomes an instant swap.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">Cleanup</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Cleanup</h2>
+      <p className="text-muted-foreground text-base leading-6">
         On teardown remove the bridge listeners, call <code>morph.destroy()</code> to detach Torph's
         observers, then remove the input element. The vanilla <code>NumoraInput</code> doesn't
         expose an explicit destroy method - its internal listeners are bound to the input it
@@ -428,7 +428,7 @@ morph.destroy()
 input.remove()`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">Key points</h2>
+      <h2 className="text-foreground text-2xl">Key points</h2>
       <ul>
         <li>
           <strong>No precision boundary.</strong> Torph operates on strings; numora hands you the
@@ -455,12 +455,12 @@ input.remove()`}
         </li>
       </ul>
 
-      <h2 className="text-stone-100 text-2xl">FAQ</h2>
+      <h2 className="text-foreground text-2xl">FAQ</h2>
 
-      <h3 className="text-stone-100">What is the Torph library?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">What is the Torph library?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Torph is an animated text-morphing library by{' '}
-        <a href={LOCHIE_URL} target="_blank" rel="noreferrer noopener" className="underline link-underline hover:text-stone-100 transition-colors">
+        <a href={LOCHIE_URL} target="_blank" rel="noreferrer noopener" className="underline link-underline hover:text-foreground transition-colors">
           Lochie Axon
         </a>
         . It diffs an old string and a new string and animates each character between them. Torph
@@ -468,25 +468,25 @@ input.remove()`}
         vanilla one.
       </p>
 
-      <h3 className="text-stone-100">Does Torph work without React?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Does Torph work without React?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Yes. The code on this page uses the vanilla <code>TextMorph</code> class from the{' '}
         <code>torph</code> package together with the vanilla <code>NumoraInput</code> class. No
         React in the runtime.
       </p>
 
-      <h3 className="text-stone-100">How does Torph fit with Numora?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">How does Torph fit with Numora?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Numora formats the display string in <code>beforeinput</code>; your bridge mirrors{' '}
         <code>numora.value</code> into <code>morph.update()</code> and Torph animates it. The two
         libraries compose because Numora never crosses the string→number boundary, and Torph
         operates on strings directly.
       </p>
 
-      <h3 className="text-stone-100">Where can I install the Torph library?</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Where can I install the Torph library?</h3>
+      <p className="text-muted-foreground text-base leading-6">
         The Torph library lives at{' '}
-        <a href={TORPH_LIB_URL} target="_blank" rel="noreferrer noopener" className="underline link-underline hover:text-stone-100 transition-colors">
+        <a href={TORPH_LIB_URL} target="_blank" rel="noreferrer noopener" className="underline link-underline hover:text-foreground transition-colors">
           torph.lochie.me
         </a>{' '}
         and is published on npm as <code>torph</code>. Install both packages with{' '}

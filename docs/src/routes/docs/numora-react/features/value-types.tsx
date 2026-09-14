@@ -85,15 +85,15 @@ export const Route = createFileRoute('/docs/numora-react/features/value-types')(
 function ValueTypes() {
   return (
     <div className="prose prose-invert max-w-xl">
-      <h1 className="text-stone-100">Value Types</h1>
-      <p className="text-stone-400 text-base leading-6">
+      <h1 className="text-foreground">Value Types</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Numora always works with strings. <code>e.target.value</code> in <code>onChange</code> is
         always the <strong>raw numeric string</strong> - separators stripped, ready to parse or
         store. The formatted display string lives in <code>e.target.formattedValue</code>.
       </p>
 
-      <h2 className="text-stone-100 text-2xl">e.target.value - raw numeric string</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">e.target.value - raw numeric string</h2>
+      <p className="text-muted-foreground text-base leading-6">
         <code>onChange</code> fires a <code>NumoraInputChangeEvent</code> (structurally compatible
         with React's <code>ChangeEvent&lt;HTMLInputElement&gt;</code>). <code>e.target.value</code>{' '}
         returns the raw numeric string - separators removed - so you can pass it directly to a form
@@ -111,8 +111,8 @@ function ValueTypes() {
 />`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">e.target.formattedValue - formatted display string</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">e.target.formattedValue - formatted display string</h2>
+      <p className="text-muted-foreground text-base leading-6">
         The formatted value (with separators) is available as <code>e.target.formattedValue</code>{' '}
         via the typed <code>NumoraHTMLInputElement</code> export. This is the same string visible in
         the input.
@@ -130,8 +130,8 @@ function ValueTypes() {
 />`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">Reading the formatted value via ref</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">Reading the formatted value via ref</h2>
+      <p className="text-muted-foreground text-base leading-6">
         You can also read the formatted value at any time via a ref - useful when you need it
         outside of an <code>onChange</code> handler:
       </p>
@@ -155,8 +155,8 @@ function App() {
 }`}
       </CodeBlock>
 
-      <h2 className="text-stone-100 text-2xl">valueAsNumber</h2>
-      <p className="text-stone-400 text-base leading-6">
+      <h2 className="text-foreground text-2xl">valueAsNumber</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Need a <code>number</code>? Access <code>valueAsNumber</code> via a ref. It strips
         separators and calls <code>parseFloat</code> internally.
       </p>
@@ -174,15 +174,15 @@ function App() {
   return <NumoraInput ref={ref} thousandSeparator="," maxDecimals={2} />
 }`}
       </CodeBlock>
-      <p className="text-stone-400 text-base leading-6">
+      <p className="text-muted-foreground text-base leading-6">
         <strong>Precision warning:</strong> <code>parseFloat</code> is subject to IEEE 754 limits.
         Integers above <code>Number.MAX_SAFE_INTEGER</code> and long decimals may silently lose
         precision. For financial arithmetic, use the string from <code>e.target.value</code> with a
         decimal library such as <code>decimal.js</code>.
       </p>
 
-      <h3 className="text-stone-100">Numeric value and defaultValue props</h3>
-      <p className="text-stone-400 text-base leading-6">
+      <h3 className="text-foreground">Numeric value and defaultValue props</h3>
+      <p className="text-muted-foreground text-base leading-6">
         <code>value</code> and <code>defaultValue</code> accept a <code>string</code> or a{' '}
         <code>number</code>. A string is used as-is and must already be written with the configured{' '}
         <code>decimalSeparator</code>. A number is converted for you, so{' '}
