@@ -6,11 +6,13 @@ import { TorphDemo } from '@/components/TorphDemo';
 const integrations = [
   {
     title: 'Torph + Numora',
-    description: 'Animation library by Lochie Axon',
+    name: 'Torph',
+    description: 'Animation library by Lochie Axon.',
     href: '/docs/numora-react/integrations/torph',
   },
   {
     title: 'React Hook Form + Numora',
+    name: 'React Hook Form',
     description: 'Controller with validation and form state.',
     href: '/docs/numora-react/integrations/react-hook-form',
   },
@@ -38,7 +40,7 @@ export function IntegrationsSection({
           Works with any framework
         </h3>
         <p className="text-sm text-muted-foreground mb-8 text-center">
-          Numora&apos;s core is vanilla TypeScript - a thin adapter is all you need.
+          Numora&apos;s core is vanilla TypeScript, so a thin adapter is all you need.
         </p>
         <FrameworkUsage />
       </div>
@@ -63,7 +65,7 @@ export function IntegrationsSection({
         className="grid gap-4 sm:grid-cols-2 max-w-2xl mx-auto mb-16 animate-fade-in opacity-0"
         style={groupStyle(200)}
       >
-        {integrations.map(({ title, description, href }) => (
+        {integrations.map(({ title, name, description, href }) => (
           <GlareHover
             key={href}
             glareColor="#ffffff"
@@ -79,7 +81,7 @@ export function IntegrationsSection({
                 <p className="text-sm text-muted-foreground mt-1">{description}</p>
               </div>
               <span className="text-xs text-secondary/80 group-hover:text-secondary mt-auto">
-                Read the guide →
+                Read the {name} guide →
               </span>
             </Link>
           </GlareHover>

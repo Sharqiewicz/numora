@@ -1,11 +1,8 @@
 import { useState } from 'react';
 import { FormatOn, ThousandStyle } from 'numora';
 import { NumoraInput } from 'numora-react';
-import { InputPair } from '../InputPair';
 import { CursorAnchorDiagram } from '../diagrams';
-
-const inputClass =
-  'w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring';
+import { DiagramFrame, demoInputClass } from '../kit';
 
 function NaiveFormattedInput() {
   const [value, setValue] = useState('1,234,567');
@@ -16,7 +13,7 @@ function NaiveFormattedInput() {
     setValue(formatted);
   };
 
-  return <input type="text" value={value} onChange={onChange} className={inputClass} />;
+  return <input type="text" value={value} onChange={onChange} className={demoInputClass} />;
 }
 
 export function CursorPreservationSection() {
@@ -24,50 +21,54 @@ export function CursorPreservationSection() {
     <section id="cursor-preservation" className="space-y-4 scroll-mt-24">
       <h2>Cursor preservation</h2>
       <p>
-        The classic input-mask bug: a user clicks into the middle of <code>1,234,567</code> to
-        insert a digit, the formatter rebuilds the string with a new comma in a different place, and
-        the cursor lands several characters away from where it should be.
+        Input masks tend to get this wrong. A user clicks into the middle of <code>1,234,567</code>
+        and types a digit. The formatter rebuilds the string with the commas in new places, and the
+        cursor ends up several characters from where it should be.
       </p>
       <CursorAnchorDiagram />
       <p>
-        Numora's <code>computeCursorPosition</code> anchors on <em>significant characters</em>{' '}
-        rather than character index — the classic <strong>rank/select</strong> pair.{' '}
-        <code>significantCharRank</code> walks the intended string from the start to the caret,
-        counting everything that belongs to the raw value (digits, the decimal separator, a leading
-        minus) while skipping injected thousand separators. <code>positionAfterRank</code> then
-        walks the formatted string until it has counted the same number, and parks the cursor there.
-        The user feels the caret stay "between the same two digits" no matter how the separators
-        rearranged around it — and because the grouping style only changes <em>where</em> the
-        separators sit, Thousand, Lakh and Wan all fall out of the same two functions with no
-        per-style code.
+        Numora's <code>computeCursorPosition</code> anchors on <em>meaningful characters</em>{' '}
+        instead of character index. <code>countMeaningfulDigitsBeforePosition</code> counts
+        everything before the cursor that is not a thousand separator, and{' '}
+        <code>findPositionWithMeaningfulDigitCount</code> walks the newly formatted string until it
+        has counted the same number, then puts the cursor there. The cursor stays between the same
+        two digits, wherever the separators move.
       </p>
       <p>
         Click between the <code>3</code> and the <code>4</code> in both inputs below and type a
-        digit. The naive formatter jumps your cursor; Numora keeps it pinned:
+        digit. The naive formatter sends the cursor to the end. Numora keeps it between the same two digits:
       </p>
-      <InputPair
-        left={{
-          label: 'Naive formatter (rebuilds the string)',
-          tone: 'bad',
-          input: <NaiveFormattedInput />,
-          note: 'Reformats on every change. Cursor is restored to its old index, but the index now points at a different character.',
-        }}
-        right={{
-          label: 'NumoraInput',
-          tone: 'good',
-          input: (
-            <NumoraInput
+      <DiagramFrame variant="demo">
+        <div className="grid gap-5 md:grid-cols-2">
+          <div className="space-y-2">
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: the input is nested */}
+            <label className="block space-y-2">
+<span className="block text-[13px] font-medium text-signal-red-fg">Naive formatter (rebuilds the string)</span>
+<NaiveFormattedInput />
+</label>
+            <p className="text-[13px] text-muted-foreground">
+              Rewrites the controlled value on every change, so the browser moves the cursor to the end of the input.
+            </p>
+          </div>
+          <div className="space-y-2">
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: the input is nested */}
+            <label className="block space-y-2">
+<span className="block text-[13px] font-medium text-signal-violet-fg">NumoraInput</span>
+<NumoraInput
               formatOn={FormatOn.Change}
               thousandSeparator=","
               thousandStyle={ThousandStyle.Thousand}
               maxDecimals={2}
               defaultValue="1234567"
-              className={inputClass}
+              className={demoInputClass}
             />
-          ),
-          note: 'Counts meaningful digits before the caret, then re-anchors. The cursor stays between the same two digits.',
-        }}
-      />
+</label>
+            <p className="text-[13px] text-muted-foreground">
+              Counts the digits before the cursor, then places the cursor after the same count in the new string.
+            </p>
+          </div>
+        </div>
+      </DiagramFrame>
     </section>
   );
 }

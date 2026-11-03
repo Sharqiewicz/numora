@@ -4,30 +4,30 @@ import { CodeBlock } from '@/components/CodeBlock';
 export const Route = createFileRoute('/docs/numora/features/value-types')({
   head: () => ({
     meta: [
-      { title: 'Raw vs Formatted Value - Numeric Input Output Types | Numora' },
+      { title: 'Value types | Numora' },
       {
         name: 'description',
         content:
-          'Learn how Numora always emits string values from onChange, what rawValueMode does, and when to use valueAsNumber as an escape hatch.',
+          'Numora always emits string values from onChange. This page covers what rawValueMode does and when to use valueAsNumber.',
       },
       {
         property: 'og:title',
-        content: 'Raw vs Formatted Value - Numeric Input Output Types | Numora',
+        content: 'Value types | Numora',
       },
       {
         property: 'og:description',
         content:
-          'Learn how Numora always emits string values from onChange, what rawValueMode does, and when to use valueAsNumber.',
+          'Numora always emits string values from onChange. This page covers what rawValueMode does and when to use valueAsNumber.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/value-types' },
       {
         name: 'twitter:title',
-        content: 'Raw vs Formatted Value - Numeric Input Output Types | Numora',
+        content: 'Value types | Numora',
       },
       {
         name: 'twitter:description',
         content:
-          'Numora always emits strings from onChange. Learn about rawValueMode and the valueAsNumber escape hatch.',
+          'Numora always emits string values from onChange. This page covers what rawValueMode does and when to use valueAsNumber.',
       },
     ],
     links: [
@@ -40,9 +40,9 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Value Types in Numora - Raw vs Formatted Numeric Input Values',
+            headline: 'Value types in Numora: raw vs formatted numeric input values',
             description:
-              'Understand value types in the Numora JavaScript numeric input library. Raw string values for math operations, formatted display strings for the UI.',
+              'Value types in the Numora JavaScript numeric input library. Raw string values for math, formatted display strings for the UI.',
             url: 'https://numeric-input.com/docs/numora/features/value-types',
             author: {
               '@type': 'Person',
@@ -58,13 +58,13 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
               {
                 '@type': 'ListItem',
                 position: 2,
-                name: 'Numora JS',
+                name: 'Numora',
                 item: 'https://numeric-input.com/docs/numora',
               },
               {
                 '@type': 'ListItem',
                 position: 3,
-                name: 'Value Types',
+                name: 'Value types',
                 item: 'https://numeric-input.com/docs/numora/features/value-types',
               },
             ],
@@ -78,53 +78,38 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
 
 function ValueTypes() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Value Types</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Numora always works with strings. <code>onChange</code> emits a string on every change. Two
-        modes control <em>which</em> string you receive.
+    <div className="docs-prose max-w-[40rem]">
+      <h1>Value types</h1>
+      <p>
+        Numora always works with strings. <code>onChange</code> emits a string on every change. Value types decide <em>which</em> string you receive: the formatted display value (default) or the raw value.
       </p>
 
-      <h2 className="text-foreground text-2xl">Default: formatted string</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        By default <code>onChange</code> receives the display value - the same string shown in the
-        input, including thousand separators.
-      </p>
-      <CodeBlock language="typescript">
-        {`import { NumoraInput } from 'numora'
-
-const numoraInput = new NumoraInput(container, {
-  thousandSeparator: ',',
-  onChange: (value) => {
-    console.log(value) // "1,234.56"
-  },
-})`}
-      </CodeBlock>
-
-      <h2 className="text-foreground text-2xl">rawValueMode: raw string</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Set <code>rawValueMode: true</code> and <code>onChange</code> receives the plain numeric
-        string with thousand separators stripped. The input still displays the formatted value.{' '}
-        <code>instance.value</code> also returns the raw string in this mode.
+      <h2>Formatted by default, raw with rawValueMode</h2>
+      <p>
+        By default <code>onChange</code> receives the display value, the same string shown in the
+        input, including thousand separators. With <code>rawValueMode: true</code> it receives the
+        plain numeric string with separators removed, and <code>instance.value</code> returns the
+        raw string too. The input still displays the formatted value.
       </p>
       <CodeBlock language="typescript">
-        {`import { NumoraInput } from 'numora'
+        {`import { NumoraInput, FormatOn, ThousandStyle } from 'numora'
 
 const numoraInput = new NumoraInput(container, {
-  thousandSeparator: ',',
-  rawValueMode: true,
+  thousandStyle: ThousandStyle.Thousand,
+  formatOn: FormatOn.Change,
+  // rawValueMode: false (default) → onChange gets "1,234.56"
+  rawValueMode: true, //             → onChange gets "1234.56"
   onChange: (value) => {
-    console.log(value)                    // "1234.56" ← no separators
+    console.log(value)
     console.log(numoraInput.getElement().value) // "1,234.56" ← display value
   },
 })`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">valueAsNumber</h2>
-      <p className="text-muted-foreground text-base leading-6">
+      <h2>valueAsNumber</h2>
+      <p>
         <code>valueAsNumber</code> converts the current value to a JavaScript <code>number</code>{' '}
-        via <code>parseFloat</code>. Use it as an escape hatch when you need a number type, not as
-        the primary way to read the value.
+        via <code>parseFloat</code>. Use it only when you need a number type. Read the string for everything else.
       </p>
       <CodeBlock language="typescript">
         {`const num = numoraInput.valueAsNumber
@@ -132,21 +117,21 @@ console.log(typeof num) // "number"
 console.log(num)        // 1234.56
 console.log(isNaN(numoraInput.valueAsNumber)) // true when input is empty`}
       </CodeBlock>
-      <p className="text-muted-foreground text-base leading-6">
+      <p>
         <strong>Precision warning:</strong> <code>parseFloat</code> is subject to IEEE 754 limits.
-        Integers above <code>Number.MAX_SAFE_INTEGER</code> and long decimals may silently lose
-        precision. For financial arithmetic, keep working with the string from <code>onChange</code>{' '}
+        Integers above <code>Number.MAX_SAFE_INTEGER</code> and long decimals can lose
+        precision without any warning. For financial arithmetic, keep working with the string from <code>onChange</code>{' '}
         and use a decimal library such as <code>decimal.js</code>.
       </p>
 
-      <h3 className="text-foreground">Setting valueAsNumber</h3>
-      <p className="text-muted-foreground text-base leading-6">
-        The setter accepts a JavaScript <code>number</code> and converts it with the configured{' '}
-        <code>decimalSeparator</code>, so <code>valueAsNumber = 1234.5</code> under{' '}
-        <code>locale="de-DE"</code> displays <code>1.234,5</code>. Assigning a non-finite value (
-        <code>NaN</code>, <code>Infinity</code>, <code>-Infinity</code>) or a negative number while{' '}
-        <code>enableNegative</code> is <code>false</code> throws a <code>RangeError</code> instead
-        of silently clearing the field or dropping the sign.
+      <h3>Setting valueAsNumber</h3>
+      <p>
+        The setter accepts a JavaScript <code>number</code> and writes its JavaScript string form
+        (always dot-decimal) as-is, so <code>valueAsNumber = 1234.5</code> sets the value to{' '}
+        <code>"1234.5"</code>. Assigning <code>NaN</code> clears the field. The setter does not
+        convert the decimal separator: with a non-dot decimal separator (for example{' '}
+        <code>locale: 'de-DE'</code>), pass a string formatted with the configured separator to{' '}
+        <code>setValue</code> instead, such as <code>setValue('1234,5')</code>.
       </p>
     </div>
   );

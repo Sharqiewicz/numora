@@ -1,136 +1,176 @@
-type Group = { from: number; to: number; color: string };
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { DiagramFrame, DUR, EASE, SPRING, useScene } from '../kit';
 
-interface Style {
-  label: string;
-  formatted: string;
-  groups: Group[];
-  description?: string;
+type StyleId = 'none' | 'thousand' | 'lakh' | 'wan';
+
+/** Absolute start times (s) of the autoplay tour. */
+const BEATS = { thousand: 0.5 } as const;
+const ms = (s: number) => Math.round(s * 1000);
+
+const DIGITS = '10000000';
+
+/** Mirrors packages/core/src/features/formatting/thousand-grouping.ts: sizes are counted from the right. */
+const STYLES: { id: StyleId; label: string; rule: string; first: number; rest: number }[] = [
+  { id: 'none', label: 'None', rule: 'No separators. The value stays as typed.', first: 0, rest: 0 },
+  { id: 'thousand', label: 'Thousand', rule: 'Groups of 3 from the right (Western).', first: 3, rest: 3 },
+  { id: 'lakh', label: 'Lakh', rule: '3 on the right, then groups of 2 (Indian).', first: 3, rest: 2 },
+  { id: 'wan', label: 'Wan', rule: 'Groups of 4 from the right (East Asian, the myriad).', first: 4, rest: 4 },
+];
+
+/** Group sizes left-to-right, e.g. lakh of 8 digits -> [1, 2, 2, 3]. */
+function groupSizes(len: number, first: number, rest: number): number[] {
+  if (!first || len <= first) return [len];
+  const out = [first];
+  let left = len - first;
+  while (left > 0) {
+    const n = Math.min(rest, left);
+    out.unshift(n);
+    left -= n;
+  }
+  return out;
 }
 
-export function GroupingStylesDiagram() {
-  const styles: Style[] = [
-    {
-      label: 'raw',
-      formatted: '10000000',
-      groups: [],
-    },
-    {
-      label: 'Thousand',
-      formatted: '10,000,000',
-      groups: [
-        { from: 0, to: 1, color: 'emerald' },
-        { from: 3, to: 5, color: 'sky' },
-        { from: 7, to: 9, color: 'amber' },
-      ],
-      description: 'Group by 3 from the right (Western)',
-    },
-    {
-      label: 'Lakh',
-      formatted: '1,00,00,000',
-      groups: [
-        { from: 0, to: 0, color: 'emerald' },
-        { from: 2, to: 3, color: 'sky' },
-        { from: 5, to: 6, color: 'amber' },
-        { from: 8, to: 10, color: 'violet' },
-      ],
-      description: 'Three then twos from the right (Indian)',
-    },
-    {
-      label: 'Wan',
-      formatted: '1000,0000',
-      groups: [
-        { from: 0, to: 3, color: 'sky' },
-        { from: 5, to: 8, color: 'amber' },
-      ],
-      description: 'Four-digit groups, the myriad (CJK)',
-    },
-  ];
+function layoutFor(id: StyleId) {
+  const s = STYLES.find((x) => x.id === id) ?? STYLES[0];
+  const sizes = groupSizes(DIGITS.length, s.first, s.rest);
+  // For each digit: where it sits in its group. Separators precede digit i when i is a group start.
+  const pos: { start: boolean; end: boolean }[] = [];
+  const starts = new Set<number>();
+  let i = 0;
+  for (const size of sizes) {
+    for (let k = 0; k < size; k++) {
+      pos.push({ start: k === 0, end: k === size - 1 });
+      if (k === 0 && i > 0) starts.add(i);
+      i++;
+    }
+  }
+  return { sizes, pos, seps: starts, grouped: id !== 'none' };
+}
 
-  const cellW = 26;
-  const colorMap: Record<string, string> = {
-    emerald: 'fill-signal-green/15 stroke-signal-green/70',
-    sky: 'fill-signal-sky/15 stroke-signal-sky/70',
-    amber: 'fill-signal-amber/15 stroke-signal-amber/70',
-    violet: 'fill-signal-violet/15 stroke-signal-violet/70',
+const formatted = (id: StyleId) => {
+  const { seps } = layoutFor(id);
+  return [...DIGITS].map((d, i) => (seps.has(i) ? `,${d}` : d)).join('');
+};
+
+export function GroupingStylesDiagram() {
+  const scene = useScene();
+  const reduced = useReducedMotion() ?? false;
+  const [style, setStyle] = useState<StyleId>('thousand');
+  const timers = useRef<number[]>([]);
+  // Live-region text. Stays empty until the user picks a style, so the autoplay tour is silent.
+  const [announce, setAnnounce] = useState('');
+
+  const clear = useCallback(() => {
+    for (const t of timers.current) window.clearTimeout(t);
+    timers.current = [];
+  }, []);
+
+  useEffect(() => {
+    clear();
+    if (scene.phase === 'hidden') setStyle('none');
+    if (scene.phase === 'play') {
+      // One-shot tour: None -> Thousand, ending on the same frame SSR renders.
+      setAnnounce('');
+      setStyle('none');
+      timers.current.push(window.setTimeout(() => setStyle('thousand'), ms(BEATS.thousand)));
+    }
+    return clear;
+  }, [scene.phase, clear]);
+
+  const pick = (id: StyleId) => {
+    clear();
+    setStyle(id);
+    const label = STYLES.find((s) => s.id === id)?.label ?? id;
+    setAnnounce(`${label} grouping: ${formatted(id)}`);
   };
 
-  return (
-    <div className="my-10">
-      <svg
-        viewBox="0 0 720 360"
-        role="img"
-        aria-label="The same underlying value rendered with three grouping rhythms: Thousand, Lakh, and Wan, with the raw value at top for comparison"
-        className="block w-full"
+  const { pos, seps, grouped } = layoutFor(style);
+  const active = STYLES.find((s) => s.id === style) ?? STYLES[0];
+  const digitTransition = reduced ? { duration: 0 } : SPRING;
+
+  const row: React.ReactNode[] = [];
+  [...DIGITS].forEach((d, i) => {
+    if (seps.has(i)) {
+      row.push(
+        <motion.span
+          // biome-ignore lint/suspicious/noArrayIndexKey: digit positions are the stable identity
+          key={`sep-${i}`}
+          layout="position"
+          transition={{ layout: digitTransition, opacity: { duration: DUR.fast, ease: EASE.outExpo } }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="inline-block w-[0.55em] text-center text-signal-sky-fg"
+        >
+          ,
+        </motion.span>,
+      );
+    }
+    const p = pos[i];
+    row.push(
+      <motion.span
+        // biome-ignore lint/suspicious/noArrayIndexKey: digit positions are the stable identity
+        key={`d-${i}`}
+        layout="position"
+        transition={{ layout: digitTransition }}
+        className="relative inline-block w-[0.62em] pb-2 text-center"
       >
-        {styles.map((s, idx) => {
-          const isRaw = s.groups.length === 0;
-          const rowY = 30 + idx * 78;
-          const chars = [...s.formatted];
-          const totalW = chars.length * cellW;
-          const startX = (720 - totalW) / 2;
+        {d}
+        {grouped && (
+          <span
+            aria-hidden
+            className={cn(
+              'absolute inset-x-0 bottom-0 h-1.5 border-b-2 border-muted-foreground',
+              p.start && 'rounded-bl-sm border-l-2',
+              p.end && 'rounded-br-sm border-r-2',
+            )}
+          />
+        )}
+      </motion.span>,
+    );
+  });
 
-          return (
-            <g key={s.label}>
-              <text
-                x="20"
-                y={rowY + 22}
-                className={isRaw ? 'fill-muted-foreground' : 'fill-foreground'}
-                fontSize={isRaw ? 13 : 14}
-                fontWeight={isRaw ? 400 : 600}
-                fontStyle={isRaw ? 'italic' : 'normal'}
-              >
-                {s.label}
-              </text>
-              {s.description && (
-                <text x="20" y={rowY + 40} className="fill-muted-foreground" fontSize="11">
-                  {s.description}
-                </text>
-              )}
+  return (
+    <DiagramFrame
+      sceneRef={scene.ref}
+    >
+      <fieldset className="m-0 flex min-w-0 flex-wrap gap-x-5 gap-y-1 border-0 p-0">
+        <legend className="sr-only">Grouping style</legend>
+        {STYLES.map((s) => (
+          <button
+            key={s.id}
+            type="button"
+            aria-pressed={style === s.id}
+            onClick={() => pick(s.id)}
+            className={cn(
+              'relative -mb-px min-h-11 border-b-2 px-0.5 text-[14px] font-medium transition-colors duration-150 ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none sm:min-h-9',
+              style === s.id
+                ? 'border-foreground text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground',
+            )}
+          >
+            {s.label}
+          </button>
+        ))}
+      </fieldset>
 
-              {s.groups.map((g, gi) => {
-                const x = startX + g.from * cellW;
-                const w = (g.to - g.from + 1) * cellW;
-                return (
-                  <rect
-                    key={gi}
-                    x={x - 2}
-                    y={rowY + 4}
-                    width={w}
-                    height={44}
-                    rx={6}
-                    className={colorMap[g.color]}
-                    strokeWidth="1.5"
-                  />
-                );
-              })}
+      <div className="relative mt-6 flex min-h-[4.5rem] items-end">
+        <div
+          aria-hidden
+          className="flex items-end font-mono text-[28px] leading-none tabular-nums text-foreground sm:text-[32px]"
+        >
+          <AnimatePresence mode="popLayout" initial={false}>
+            {row}
+          </AnimatePresence>
+        </div>
+      </div>
+      <output className="sr-only">{announce}</output>
 
-              {chars.map((ch, i) => {
-                const isSep = ch === ',';
-                return (
-                  <text
-                    key={i}
-                    x={startX + i * cellW + cellW / 2}
-                    y={rowY + 32}
-                    textAnchor="middle"
-                    className={
-                      isSep
-                        ? 'fill-muted-foreground'
-                        : isRaw
-                          ? 'fill-muted-foreground'
-                          : 'fill-foreground'
-                    }
-                    fontSize="18"
-                    fontFamily="ui-monospace, monospace"
-                    fontWeight={isSep || isRaw ? 400 : 600}
-                  >
-                    {ch}
-                  </text>
-                );
-              })}
-            </g>
-          );
-        })}
-      </svg>
-    </div>
+      <div className="mt-3 flex min-h-10 flex-col gap-1 text-[13px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <span>{active.rule}</span>
+      </div>
+    </DiagramFrame>
   );
 }

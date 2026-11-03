@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FormatOn, ThousandStyle } from 'numora';
 import { NumoraInput } from 'numora-react';
 import { InputPair } from '../InputPair';
+import { DemoInput, demoInputClass } from '../kit';
 
 export function PlainVsNumoraSection() {
   const [plainValue, setPlainValue] = useState('');
@@ -12,24 +13,24 @@ export function PlainVsNumoraSection() {
         Plain <code>&lt;input&gt;</code> vs Numora
       </h2>
       <p>
-        Type the same thing into both inputs below - for example <code>$1,234.56abc</code>, then{' '}
-        <code>1.5e-7</code>, then <code>2.5k</code>. The plain input takes whatever you give it.
-        Numora cleans, expands, and groups in real time:
+        Type the same text into both inputs below, for example <code>$1,234.56abc</code>, then{' '}
+        <code>1.5e-7</code>, then <code>2.5k</code>. Numora cleans, expands and
+        groups the value as you type:
       </p>
       <InputPair
         left={{
           label: 'Plain <input type="text">',
           tone: 'bad',
           input: (
-            <input
+            <DemoInput
               type="text"
               value={plainValue}
               onChange={(e) => setPlainValue(e.target.value)}
-              placeholder="Try $1,234.56abc"
-              className="w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring"
+              aria-label="Plain text input"
+              placeholder="$1,234.56abc"
             />
           ),
-          note: 'Accepts every character. No grouping. No expansion. Holds a string and shrugs.',
+          note: 'Keeps whatever you type.',
         }}
         right={{
           label: 'NumoraInput',
@@ -41,11 +42,12 @@ export function PlainVsNumoraSection() {
               thousandStyle={ThousandStyle.Thousand}
               maxDecimals={2}
               enableCompactNotation
-              placeholder="Try $1,234.56abc"
-              className="w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring"
+              aria-label="Numora input"
+              placeholder="$1,234.56abc"
+              className={demoInputClass}
             />
           ),
-          note: 'Strips junk, expands compact notation, applies thousand grouping.',
+          note: 'Cleans, expands and groups.',
         }}
       />
     </section>

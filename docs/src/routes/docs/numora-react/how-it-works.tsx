@@ -1,33 +1,32 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora-react/how-it-works')({
   head: () => ({
     meta: [
-      { title: 'How numora-react Works - React Numeric Input Pipeline Reference' },
+      { title: 'How it works | Numora React' },
       {
         name: 'description',
         content:
-          "Quick reference for numora-react's pipeline: event handlers, the seven-step sanitization order, formatting stages, and value output. For the full narrative, see the Anatomy page.",
+          "Quick reference for Numora React's pipeline: event handlers, the ten-step sanitization order, formatting stages, and value output. For the full narrative, see the Anatomy page.",
       },
       {
         property: 'og:title',
-        content: 'How numora-react Works - React Numeric Input Pipeline Reference',
+        content: 'How it works | Numora React',
       },
       {
         property: 'og:description',
         content:
-          "Quick reference for numora-react's pipeline: event handlers, sanitization, formatting, and value output.",
+          "Quick reference for Numora React's pipeline: event handlers, sanitization, formatting, and value output.",
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/how-it-works' },
       {
         name: 'twitter:title',
-        content: 'How numora-react Works - React Numeric Input Pipeline Reference',
+        content: 'How it works | Numora React',
       },
       {
         name: 'twitter:description',
         content:
-          "Quick reference for numora-react's pipeline: event handlers, sanitization, formatting, value output.",
+          "Quick reference for Numora React's pipeline: event handlers, sanitization, formatting, value output.",
       },
     ],
     links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/how-it-works' }],
@@ -38,9 +37,9 @@ export const Route = createFileRoute('/docs/numora-react/how-it-works')({
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'How numora-react Works - React Numeric Input Pipeline Reference',
+            headline: 'How it works | Numora React',
             description:
-              "Quick reference for numora-react's pipeline: event handlers, sanitization, formatting, and value output. The Anatomy page covers the same surface as a long-form narrative with diagrams and demos.",
+              "Quick reference for Numora React's pipeline: event handlers, sanitization, formatting, and value output. The Anatomy page covers the same surface as a long-form narrative with diagrams and demos.",
             url: 'https://numeric-input.com/docs/numora-react/how-it-works',
             author: {
               '@type': 'Person',
@@ -62,7 +61,7 @@ export const Route = createFileRoute('/docs/numora-react/how-it-works')({
               {
                 '@type': 'ListItem',
                 position: 3,
-                name: 'How It Works',
+                name: 'How it works',
                 item: 'https://numeric-input.com/docs/numora-react/how-it-works',
               },
             ],
@@ -79,223 +78,107 @@ const ANATOMY = '/docs/numora-react/anatomy';
 
 function HowItWorks() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">How It Works</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        A scannable reference for numora-react's event handlers, sanitization steps, formatting
-        stages, and value output. For the long-form narrative with diagrams and demos, see{' '}
-        <Link to={ANATOMY} className="underline link-underline hover:text-foreground transition-colors">Anatomy of a Numeric Input</Link>.
+    <div className="docs-prose max-w-[40rem]">
+      <h1>How it works</h1>
+      <p>
+        A cheat sheet. Each row links to the section of <Link to={ANATOMY}>Anatomy</Link> that
+        explains it with diagrams and demos.
       </p>
 
-      <h2 className="text-foreground text-2xl">React integration</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        <code>NumoraInput</code> is a <code>forwardRef</code> functional component that calls the
-        core event handlers directly - no vanilla class is instantiated. Props map to core options,
-        and <code>onChange</code> fires after every pipeline cycle with a synthetic event whose{' '}
-        <code>target</code> exposes both the raw and formatted values.
+      <h2>React integration</h2>
+      <p>
+        <code>NumoraInput</code> is a <code>forwardRef</code> component that calls the core event
+        handlers directly and never instantiates the vanilla class. After every pipeline cycle,{' '}
+        <code>onChange</code> fires with a synthetic event whose <code>target</code> exposes both
+        the raw and formatted values.
       </p>
 
-      <h2 className="text-foreground text-2xl">Events</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        numora-react intercepts four input vectors on a single{' '}
-        <code>&lt;input type="text"&gt;</code>. See{' '}
-        <Link to={ANATOMY} hash="event-pipeline" className="underline link-underline hover:text-foreground transition-colors">
-          Anatomy: event pipeline
-        </Link>{' '}
-        for the lifecycle and timing of each.
-      </p>
+      <h2>Events</h2>
       <ul>
         <li>
-          <strong>
-            <Link to={ANATOMY} hash="keydown" className="underline link-underline hover:text-foreground transition-colors">
-              <code>keydown</code>
-            </Link>
-          </strong>{' '}
-          - skips the cursor over thousand separators on <kbd>Delete</kbd> / <kbd>Backspace</kbd>.
-        </li>
-        <li>
-          <strong>
-            <Link to={ANATOMY} hash="before-input" className="underline link-underline hover:text-foreground transition-colors">
-              <code>beforeinput</code>
-            </Link>
-          </strong>{' '}
-          - primary formatting hook. Registered via native <code>addEventListener</code> (see{' '}
-          <Link to={ANATOMY} hash="react-synthetic-bypass" className="underline link-underline hover:text-foreground transition-colors">
-            why it bypasses React's synthetic system
+          <Link to={ANATOMY} hash="keydown">
+            <code>keydown</code>
           </Link>
-          ), calls <code>preventDefault()</code> and writes the formatted result via{' '}
-          <code>setRangeText</code>, preserving the browser's undo stack.
+          : skips the cursor over separators on <kbd>Delete</kbd> / <kbd>Backspace</kbd>.
         </li>
         <li>
-          <strong>
+          <Link to={ANATOMY} hash="before-input">
+            <code>beforeinput</code>
+          </Link>
+          : the main formatting hook, registered with native <code>addEventListener</code> (
+          <Link to={ANATOMY} hash="react-synthetic-bypass">
+            why it bypasses React
+          </Link>
+          ). Writes the formatted value with <code>setRangeText</code>.
+        </li>
+        <li>
+          <Link to={ANATOMY} hash="event-pipeline">
             <code>input</code>
-          </strong>{' '}
-          - single <code>onChange</code> emitter; idempotent on values already produced by the
-          pipeline.
+          </Link>
+          : fallback for undo/redo, autofill and other changes without <code>beforeinput</code>.
         </li>
         <li>
-          <strong>
-            <Link to={ANATOMY} hash="paste" className="underline link-underline hover:text-foreground transition-colors">
-              <code>paste</code>
-            </Link>
-          </strong>{' '}
-          - splices clipboard text into the selection range, runs the full pipeline, repositions the
-          cursor.
+          <Link to={ANATOMY} hash="paste">
+            <code>paste</code>
+          </Link>
+          : splices clipboard text into the selection and runs the full pipeline.
         </li>
         <li>
-          <strong>
-            <Link to={ANATOMY} hash="format-mode" className="underline link-underline hover:text-foreground transition-colors">
-              <code>focus</code> / <code>blur</code>
-            </Link>
-          </strong>{' '}
-          - strip / re-apply thousand separators in <code>FormatOn.Blur</code> mode (the React
-          default).
+          <Link to={ANATOMY} hash="format-mode">
+            <code>focus</code> / <code>blur</code>
+          </Link>
+          : strip and re-apply separators in <code>FormatOn.Blur</code> mode.
         </li>
       </ul>
 
-      <h2 className="text-foreground text-2xl">Sanitization</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Seven steps run in order on every value before formatting is applied. See{' '}
-        <Link to={ANATOMY} hash="sanitization" className="underline link-underline hover:text-foreground transition-colors">
-          Anatomy: sanitization
-        </Link>{' '}
-        for the visual pipeline and per-step demos.
-      </p>
-      <ol>
-        <li>Mobile keyboard artifact filtering</li>
-        <li>Thousand separator removal</li>
-        <li>
-          Compact notation expansion (opt-in via <code>enableCompactNotation</code>)
-        </li>
-        <li>Scientific notation expansion</li>
-        <li>Non-numeric character removal</li>
-        <li>Extra decimal separator removal</li>
-        <li>
-          Leading zero normalization (disable with <code>enableLeadingZeros</code>)
-        </li>
-      </ol>
-      <p className="text-muted-foreground text-base leading-6">
-        Per-step configuration: see{' '}
-        <Link to="/docs/numora-react/features/sanitization" className="underline link-underline hover:text-foreground transition-colors">features/sanitization</Link>.
-      </p>
-
-      <h2 className="text-foreground text-2xl">Formatting</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Four stages run after sanitization. See{' '}
-        <Link to={ANATOMY} hash="grouping-styles" className="underline link-underline hover:text-foreground transition-colors">
-          Anatomy: formatting
-        </Link>{' '}
-        for diagrams and demos.
-      </p>
-      <ol>
-        <li>
-          Decimal trimming to <code>maxDecimals</code> (every keystroke)
-        </li>
-        <li>
-          Decimal padding to <code>decimalMinLength</code> - display/blur only, never on a
-          keystroke, so a padded field can still receive further digits by typing
-        </li>
-        <li>
-          Thousand grouping (<code>FormatOn.Change</code> only; deferred to blur in{' '}
-          <code>FormatOn.Blur</code>)
-        </li>
-        <li>
-          Cursor restoration after the formatted value replaces <code>input.value</code>
-        </li>
-      </ol>
-
-      <h2 className="text-foreground text-2xl">Value output</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Every value is emitted as a string on a single <code>onChange</code> event, with both
-        representations exposed on <code>e.target</code>. See{' '}
-        <Link to={ANATOMY} hash="raw-vs-formatted" className="underline link-underline hover:text-foreground transition-colors">
-          Anatomy: raw vs formatted
-        </Link>{' '}
-        for the mental model, and{' '}
-        <Link to={ANATOMY} hash="proxy-target" className="underline link-underline hover:text-foreground transition-colors">
-          Anatomy: the Proxy on e.target
-        </Link>{' '}
-        for how both values reach you from the same event.
-      </p>
+      <h2>Pipeline</h2>
       <ul>
         <li>
-          <strong>raw</strong> - the sanitized string without separators; always returned as{' '}
-          <code>e.target.value</code>. Safe to pass directly to form libraries.
+          <Link to={ANATOMY} hash="sanitization">
+            Sanitization
+          </Link>
+          : runs on every value before formatting. Options:{' '}
+          <Link to="/docs/numora-react/features/sanitization">Sanitization</Link>,{' '}
+          <Link to="/docs/numora-react/features/compact-notation">Compact notation</Link>,{' '}
+          <Link to="/docs/numora-react/features/scientific-notation">Scientific notation</Link>,{' '}
+          <Link to="/docs/numora-react/features/leading-zeros">Leading zeros</Link>,{' '}
+          <Link to="/docs/numora-react/features/max-length">Max length</Link>.
         </li>
         <li>
-          <strong>formatted</strong> - the display string with thousand separators; written to{' '}
-          <code>input.value</code> and available as <code>e.target.formattedValue</code> via{' '}
-          <code>NumoraHTMLInputElement</code>.
+          <Link to={ANATOMY} hash="grouping-styles">
+            Formatting
+          </Link>
+          : decimal trimming and padding, then thousand grouping. Options:{' '}
+          <Link to="/docs/numora-react/features/formatting">Formatting</Link>,{' '}
+          <Link to="/docs/numora-react/features/decimals">Decimals</Link>.
+        </li>
+        <li>
+          <Link to={ANATOMY} hash="cursor-preservation">
+            Cursor restoration
+          </Link>
+          : puts the cursor back after the formatted value replaces <code>input.value</code>.
+        </li>
+        <li>
+          <Link to={ANATOMY} hash="raw-vs-formatted">
+            Value output
+          </Link>
+          : <code>e.target.value</code> is raw, <code>e.target.formattedValue</code> is the display
+          string (
+          <Link to={ANATOMY} hash="proxy-target">
+            how
+          </Link>
+          ). See <Link to="/docs/numora-react/features/value-types">Value types</Link>.
         </li>
       </ul>
 
-      <h2 className="text-foreground text-2xl">Value format</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        A string <code>value</code> / <code>defaultValue</code> is already in the field's{' '}
-        <em>display</em> format - locale separators allowed, grouping optional - since that is what
-        every existing caller passes and <code>formatValueForDisplay</code> already strips grouping.
-        A JS <code>number</code> can only be dot-decimal, so numora-react converts a numeric{' '}
-        <code>value</code> / <code>defaultValue</code> to the configured decimal separator before
-        formatting it, instead of passing the dot through unchanged.
+      <h2>Input value format</h2>
+      <p>
+        A string <code>value</code> / <code>defaultValue</code> is in the field's <em>display</em>{' '}
+        format: locale separators are allowed and grouping is optional. A number is converted with{' '}
+        <code>String(value)</code> and always read as dot-decimal. Under a locale whose decimal
+        separator is not <code>'.'</code> (for example <code>locale="de-DE"</code>), pass a string
+        such as <code>{'value="1234,5"'}</code> instead of a number.
       </p>
-      <p className="text-muted-foreground text-base leading-6">
-        Example: under <code>locale="de-DE"</code> ('.' groups, ',' is the decimal mark),{' '}
-        <code>{'<NumoraInput locale="de-DE" value={1234.5} />'}</code> displays{' '}
-        <code>"1.234,5"</code>. Passing the raw string <code>{'value="1234.5"'}</code> instead
-        displays <code>"12.345"</code> - the dot is read as de-DE's thousand separator and stripped,
-        concatenating the digits.
-      </p>
-
-      <h2 className="text-foreground text-2xl">Full pipeline</h2>
-      {/*
-        React-only block. The React event flow has a step the vanilla flow doesn't -
-        native addEventListener('beforeinput') bypassing React's synthetic system -
-        which is awkward to convey through bullets alone. Vanilla how-it-works deliberately
-        does not have an equivalent diagram.
-      */}
-      <CodeBlock language="text">
-        {`user action
-    │
-    ├─ keydown ──────────── skip cursor over thousand separator (Delete/Backspace only)
-    │
-    ├─ beforeinput ─────── decimal separator handling        [native addEventListener]
-    │                      character insertion / deletion     (primary path)
-    │                      e.preventDefault() + setRangeText
-    │                      ↓ onChange called directly (setRangeText does not
-    │                        synchronously dispatch 'input' in current browsers/jsdom)
-    │
-    ├─ paste ────────────── splice clipboard into selection    (dedicated handler)
-    │                      sanitize + format + cursor reposition
-    │                      ↓ synthetic ChangeEvent → onChange directly
-    │
-    ├─ input / onChange ─── pure emitter                      (handleChange)
-    │                      reads already-formatted value from DOM
-    │                      strips separators → raw value
-    │                      fires onChange (e.target.value = raw)
-    │                      (also fires for undo/redo via native browser input event)
-    │
-    │   (beforeinput pipeline produces:)
-    │                      ▼
-    │             trimToDecimalMaxLength
-    │                      │
-    │                      ▼
-    │            formatNumoraInput (thousand grouping)
-    │            [FormatOn.Change only; skipped in FormatOn.Blur]
-    │                      │
-    │                ┌─────┴──────────────────────┐
-    │                ▼                             ▼
-    │           formatted                         raw
-    │         → input.value                     → e.target.value (onChange)
-    │         → e.target.formattedValue
-    │
-    │   ensureMinDecimals (decimalMinLength padding) never runs here - it's a
-    │   display/blur-only concern (see the blur branch below), so a padded field
-    │   can still receive further digits by typing.
-    │
-    └─ blur ─────────────── formatValueForDisplay
-                            [FormatOn.Blur, or decimalMinLength > 0]
-                            → input.value`}
-      </CodeBlock>
     </div>
   );
 }

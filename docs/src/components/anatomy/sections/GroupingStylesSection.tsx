@@ -1,9 +1,7 @@
 import { FormatOn, ThousandStyle } from 'numora';
 import { NumoraInput } from 'numora-react';
 import { GroupingStylesDiagram } from '../diagrams';
-
-const inputClass =
-  'w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring';
+import { DiagramFrame, demoInputClass } from '../kit';
 
 const styles: { label: string; style: ThousandStyle; example: string; description: string }[] = [
   {
@@ -22,7 +20,7 @@ const styles: { label: string; style: ThousandStyle; example: string; descriptio
     label: 'ThousandStyle.Wan',
     style: ThousandStyle.Wan,
     example: '100,0000',
-    description: 'CJK convention. Four-digit groups (myriad / 万).',
+    description: 'East Asian convention. Four-digit groups (myriad / 万).',
   },
 ];
 
@@ -31,30 +29,33 @@ export function GroupingStylesSection() {
     <section id="grouping-styles" className="space-y-4 scroll-mt-24">
       <h2>Thousand grouping styles</h2>
       <p>
-        Different writing systems group large numbers differently. Numora ships three styles, each
-        producing a different visual rhythm for the same underlying value. Type{' '}
-        <code>10000000</code> in all three to see them diverge:
+        Different regions group large numbers differently. Numora has three grouping styles, plus{' '}
+        <code>ThousandStyle.None</code>, and each one groups the same value in its own way. Type{' '}
+        <code>10000000</code> in all three to compare:
       </p>
       <GroupingStylesDiagram />
-      <div className="my-6 grid gap-4 rounded-lg border bg-muted/30 p-4 md:grid-cols-3">
-        {styles.map((s) => (
-          <div key={s.label} className="space-y-2">
-            <div className="text-sm font-medium">{s.label}</div>
-            <NumoraInput
-              formatOn={FormatOn.Change}
-              thousandSeparator=","
-              thousandStyle={s.style}
-              maxDecimals={2}
-              placeholder={s.example}
-              className={inputClass}
-            />
-            <div className="font-mono text-xs text-muted-foreground">
-              e.g. <span className="text-signal-green">{s.example}</span>
+      <DiagramFrame variant="demo">
+        <div className="grid gap-5 md:grid-cols-3">
+          {styles.map((s) => (
+            <div key={s.label} className="space-y-2">
+              <div className="font-mono text-[13px] font-medium text-foreground">{s.label}</div>
+              <NumoraInput
+                formatOn={FormatOn.Change}
+                thousandSeparator=","
+                thousandStyle={s.style}
+                maxDecimals={2}
+                aria-label={`${s.label.replace('ThousandStyle.', '')} grouping`}
+                placeholder={s.example}
+                className={demoInputClass}
+              />
+              <div className="font-mono text-[13px] text-muted-foreground">
+                e.g. <span className="text-foreground">{s.example}</span>
+              </div>
+              <div className="text-[13px] text-muted-foreground">{s.description}</div>
             </div>
-            <div className="text-xs text-muted-foreground">{s.description}</div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </DiagramFrame>
     </section>
   );
 }

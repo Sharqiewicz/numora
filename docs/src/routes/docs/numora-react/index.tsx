@@ -1,29 +1,27 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import CHEVRON_RIGHT from '@/assets/chevron-right.svg';
-import { Button } from '@/components/ui/button';
 import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora-react/')({
   head: () => ({
     meta: [
-      { title: 'Numora React - React Numeric Input Component | Docs' },
+      { title: 'React numeric input | Numora React' },
       {
         name: 'description',
         content:
-          'Get started with numora-react, the drop-in React numeric input component. Format numbers as you type, controlled or uncontrolled, compatible with React Hook Form and other form libraries.',
+          'Get started with Numora React, a React numeric input component. Format numbers as you type, controlled or uncontrolled, compatible with React Hook Form and other form libraries.',
       },
-      { property: 'og:title', content: 'Numora React - React Numeric Input Component | Docs' },
+      { property: 'og:title', content: 'React numeric input | Numora React' },
       {
         property: 'og:description',
         content:
-          'Drop-in React numeric input component. Controlled components, React Hook Form integration, raw value in onChange, formattedValue for display. Zero extra dependencies.',
+          'React numeric input component with controlled mode, React Hook Form integration, the raw value in onChange and formattedValue for display. No dependencies beyond its peers react and numora.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react' },
-      { name: 'twitter:title', content: 'Numora React - React Numeric Input Component | Docs' },
+      { name: 'twitter:title', content: 'React numeric input | Numora React' },
       {
         name: 'twitter:description',
         content:
-          'Drop-in React numeric input component. React Hook Form compatible, raw and formatted value access.',
+          'React numeric input component. Works with React Hook Form and gives you the raw and formatted value.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react' }],
@@ -40,7 +38,7 @@ export const Route = createFileRoute('/docs/numora-react/')({
             runtimePlatform: 'Browser',
             url: 'https://numeric-input.com/docs/numora-react',
             description:
-              'React numeric input component. Drop-in NumoraInput with TypeScript support, React Hook Form integration, and raw/formatted value separation.',
+              'React numeric input component. NumoraInput has TypeScript types, works with React Hook Form, and keeps the raw and formatted values separate.',
           },
           {
             '@context': 'https://schema.org',
@@ -64,25 +62,27 @@ export const Route = createFileRoute('/docs/numora-react/')({
 
 function GetStarted() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Numora React - React Numeric Input Component</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        <strong className="font-numora">numora-react</strong> is a drop-in replacement for{' '}
-        <code>{'<input>'}</code> that handles all numeric formatting, sanitization, and cursor
-        management inside React. It's a <code>forwardRef</code> component that works in controlled
-        and uncontrolled patterns and accepts every standard HTML input attribute.
+    <div className="docs-prose max-w-[40rem]">
+      <h1>Numora React</h1>
+      <p>
+        <strong className="font-numora">Numora React</strong> is a replacement for{' '}
+        <code>{'<input>'}</code> that handles numeric formatting, sanitization and cursor
+        management in React. It is a <code>forwardRef</code> component that works controlled
+        and uncontrolled and accepts standard HTML input attributes (except <code>type</code> and{' '}
+        <code>inputMode</code>, which it manages; <code>maxLength</code> counts the raw value).
       </p>
 
-      <h2 className="text-foreground text-2xl">What makes it different</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        On every change, <code>e.target.value</code> always returns the raw numeric string - no
-        separators, no formatting characters. Safe to pass directly to BigNumber, ethers.js, viem,
-        or any precision math library. No parsing step needed.
+      <h2>Raw and formatted values</h2>
+      <p>
+        On every change, <code>e.target.value</code> is the raw numeric string, with no thousand
+        separators or other formatting characters. With the default <code>.</code> decimal
+        separator you can pass it directly to BigNumber, ethers.js, viem or any precision math
+        library. With a custom <code>decimalSeparator</code> or a <code>locale</code>, the raw value
+        keeps that separator, so normalize it to <code>.</code> first.
       </p>
-      <p className="text-muted-foreground text-base leading-6">
-        <code>e.target.formattedValue</code> gives you the display string with thousand separators
-        and decimal formatting for showing to the user. Two values, one event - clean separation
-        between machine-readable and human-readable.
+      <p>
+        <code>e.target.formattedValue</code> is the display string, with thousand separators
+        and decimal formatting, for showing to the user. One event gives you both values.
       </p>
 
       <CodeBlock language="tsx">
@@ -95,66 +95,37 @@ function Amount() {
       maxDecimals={2}
       thousandSeparator=","
       onChange={(e) => {
-        console.log(e.target.value)          // "1234.56" - raw
-        console.log(e.target.formattedValue) // "1,234.56" - display
+        console.log(e.target.value)          // "1234.56" (raw)
+        console.log(e.target.formattedValue) // "1,234.56" (display)
       }}
     />
   )
 }`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">React ecosystem</h2>
-      <ul className="list-disc list-inside">
+      <p>
+        By default, grouping is <code>ThousandStyle.Thousand</code> with <code>,</code> as the
+        separator. The vanilla <code>numora</code> package defaults to no grouping. Pass{' '}
+        <code>thousandStyle={'{ThousandStyle.None}'}</code> to turn grouping off.
+      </p>
+
+      <h2>Works with</h2>
+      <ul>
+        <li>Controlled and uncontrolled use, with no special props</li>
         <li>
-          <strong>Controlled & uncontrolled</strong> - works either way, no special props required
+          React Hook Form, through <code>Controller</code>
         </li>
+        <li>Formik, as a custom field component</li>
         <li>
-          <strong>React Hook Form</strong> - drop-in compatible via <code>Controller</code>
+          <code>forwardRef</code>, which passes refs to the underlying input
         </li>
-        <li>
-          <strong>Formik</strong> - works as a custom field component
-        </li>
-        <li>
-          <strong>forwardRef</strong> - pass refs through to the underlying input
-        </li>
-        <li>
-          <strong>All HTML input props</strong> - <code>placeholder</code>, <code>disabled</code>,{' '}
-          <code>className</code>, <code>aria-*</code>, etc.
-        </li>
-        <li>
-          <strong>TypeScript-first</strong> - full type definitions for props, events, and options
-        </li>
+        <li>TypeScript types for props, events and options</li>
       </ul>
 
-      <h2 className="text-foreground text-2xl">
-        Why <strong className="font-numora">numora-react</strong>?
-      </h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Every React DeFi app reinvents the numeric input. Uniswap, Aave, and Curve all maintain
-        hundreds of lines of custom keystroke handlers, regex sanitizers, and cursor position
-        trackers. numora-react ships all of that as a single component you configure with props.
+      <p>
+        The component runs on the <Link to="/docs/numora">core numora engine</Link>, so both
+        packages share the same formatting behavior.
       </p>
-      <p className="text-muted-foreground text-base leading-6">
-        The component delegates to the same <Link to="/docs/numora" className="underline link-underline hover:text-foreground transition-colors">core numora engine</Link> - a
-        vanilla TypeScript library with zero runtime dependencies. The React layer is a thin wrapper
-        that hooks the engine into React's event system and value tracker.
-      </p>
-
-      <hr />
-      <h2 className="text-foreground text-2xl">Next Steps</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Follow the <Link to="/docs/numora-react/installation" className="underline link-underline hover:text-foreground transition-colors">Installation</Link> guide to add
-        numora-react to your project, or read{' '}
-        <Link to="/docs/numora-react/how-it-works" className="underline link-underline hover:text-foreground transition-colors">How It Works</Link> for the React-specific event
-        architecture.
-      </p>
-      <div className="flex justify-between items-center gap-2 my-8">
-        <Link to="/docs/numora-react/installation">
-          <Button variant="default">
-            Installation <img src={CHEVRON_RIGHT} alt="Chevron Right" className="w-4 h-4" />
-          </Button>
-        </Link>
-      </div>
     </div>
   );
 }

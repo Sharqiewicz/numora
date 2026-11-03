@@ -12,8 +12,8 @@ export function TorphVanillaBlurDemo() {
 
     displayRef.current.textContent = '';
 
-    // True from focus → first morph-complete, so the focus-strip morph hides the caret
-    // but later per-keystroke morphs do not (you need to see your caret while typing).
+    // True from focus → first morph-complete, so the focus-strip morph hides the cursor
+    // but later per-keystroke morphs do not (you need to see your cursor while typing).
     let postFocusMorphPending = false;
     const updateCaret = (hidden: boolean) => {
       hostRef.current?.classList.toggle('caret-suppressed', hidden);
@@ -32,7 +32,7 @@ export function TorphVanillaBlurDemo() {
 
     // Drive the morph via NumoraInput's onChange option. setRangeText fires a synchronous
     // `input` event during writes, but withInternalWrite suppresses NumoraInput's own
-    // handler - DOM `input` listeners would be racy in that window. onChange fires once
+    // handler, so DOM `input` listeners would be racy in that window. onChange fires once
     // per logical value change (typing, paste, focus-strip, blur-reformat).
     const numora = new NumoraInput(hostRef.current, {
       formatOn: FormatOn.Blur,
@@ -43,7 +43,7 @@ export function TorphVanillaBlurDemo() {
       onChange: (value) => morph.update(value || '0'),
     });
     const input = numora.getElement();
-    input.setAttribute('aria-label', 'Amount (blur to format)');
+    input.setAttribute('aria-label', 'Amount');
 
     // The constructor's setDefaultValue runs before onChange is wired (and never fires
     // onChange anyway), so prime the morph with the formatted initial value here.
@@ -95,12 +95,13 @@ export function TorphVanillaBlurDemo() {
         .torph-vanilla-input-host input::placeholder { color: transparent; }
       `}</style>
       <div className="my-12 w-full max-w-lg mx-auto">
-        <label className="relative flex items-center justify-end w-full rounded-2xl border border-surface-3 bg-surface-1 overflow-hidden px-4 py-3 text-xl font-mono tracking-wide text-white cursor-text">
+        <label className="relative flex items-center justify-end w-full rounded-2xl has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-muted-foreground border border-surface-3 bg-surface-1 overflow-hidden px-4 py-3 text-xl font-mono tracking-wide text-white cursor-text">
           <span ref={displayRef} className="pointer-events-none whitespace-pre" aria-hidden="true">
             0
           </span>
           <div ref={hostRef} className="torph-vanilla-input-host absolute inset-0" />
         </label>
+        <p className="mt-2 text-center text-sm text-muted-foreground">Blur the field to format.</p>
       </div>
     </>
   );

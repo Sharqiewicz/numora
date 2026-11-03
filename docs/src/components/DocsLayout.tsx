@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Link, useLocation } from '@tanstack/react-router';
+import { Link, useLocation, useRouter } from '@tanstack/react-router';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   Sidebar,
@@ -18,11 +18,33 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const prefersReducedMotion = useReducedMotion();
 
+  const router = useRouter();
+
   // Tracks the previous pathname so we only reset scroll on real page
   // navigations, never on the first mount and never on hash-only changes
   // (hash changes don't touch location.pathname, so this effect won't fire).
   const previousPathnameRef = useRef(location.pathname);
   const shouldResetScrollRef = useRef(false);
+
+  // The page swap waits for the exit fade, so the router's own scroll
+  // restoration runs while the old page is still mounted. Remember each history
+  // entry's scroll position ourselves and apply it once the new page is in:
+  // Back/Forward return to where the reader was, link clicks start at the top.
+  const scrollByEntryRef = useRef(new Map<string, number>());
+  const targetScrollYRef = useRef(0);
+
+  useEffect(() => {
+    let currentKey = router.history.location.state.__TSR_key;
+    return router.history.subscribe(({ location: next, action }) => {
+      if (currentKey) scrollByEntryRef.current.set(currentKey, window.scrollY);
+      const nextKey = next.state.__TSR_key;
+      targetScrollYRef.current =
+        action.type === 'PUSH' || action.type === 'REPLACE' || !nextKey
+          ? 0
+          : (scrollByEntryRef.current.get(nextKey) ?? 0);
+      currentKey = nextKey;
+    });
+  }, [router]);
 
   useEffect(() => {
     if (previousPathnameRef.current !== location.pathname) {
@@ -34,7 +56,7 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
   const handleExitComplete = () => {
     if (shouldResetScrollRef.current) {
       shouldResetScrollRef.current = false;
-      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+      window.scrollTo({ top: targetScrollYRef.current, behavior: 'instant' as ScrollBehavior });
     }
   };
 
@@ -56,18 +78,29 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
   return (
     <PackageProvider>
       <SidebarProvider defaultOpen={true} open={true}>
-        <Sidebar collapsible={isMobile ? 'offcanvas' : 'none'}>
+        {/* `isMobile` is false on the server, so the inline sidebar is hidden
+            below md in CSS to keep phones from painting it before hydration. */}
+        <a
+          href="#content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-foreground focus:shadow-border"
+        >
+          Skip to content
+        </a>
+        <Sidebar
+          collapsible={isMobile ? 'offcanvas' : 'none'}
+          className={isMobile ? undefined : 'hidden md:flex'}
+        >
           <SidebarHeader className="px-4 py-3">
-            <Link to="/">
-              <h2
+            <Link to="/" aria-label="Numora home">
+              <span
                 className="
-                  text-4xl font-numora
+                  block text-4xl font-numora
                   transition-[color,filter] duration-300
                   [@media(hover:hover)]:hover:drop-shadow-[0_2px_20px_oklch(0.694_0.131_276.5_/_0.5)]
                 "
               >
                 numora.
-              </h2>
+              </span>
             </Link>
           </SidebarHeader>
           <DocsSidebar />
@@ -79,7 +112,8 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
             </div>
             <Socials className="justify-end" />
           </header>
-          <main className="flex-1">
+          {/* biome-ignore lint/correctness/useUniqueElementIds: the layout mounts once; this is the skip-link target */}
+          <div id="content" className="flex-1">
             <AnimatePresence mode="wait" initial={false} onExitComplete={handleExitComplete}>
               <motion.div
                 key={location.pathname}
@@ -92,7 +126,7 @@ export function DocsLayout({ children }: { children: React.ReactNode }) {
                 {children}
               </motion.div>
             </AnimatePresence>
-          </main>
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </PackageProvider>

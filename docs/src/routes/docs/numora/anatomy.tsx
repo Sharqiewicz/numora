@@ -17,9 +17,9 @@ import {
   UserInputSection,
 } from '@/components/anatomy/sections';
 
-const TITLE = 'Anatomy of a Numeric Input - How HTML Inputs, Float Math, and Numora Actually Work';
+const TITLE = 'Anatomy | Numora';
 const DESCRIPTION =
-  'A guided dissection of the HTML input element, the keydown/beforeinput/input/paste lifecycle, IEEE 754 float pitfalls, the nine-step sanitization pipeline, and how the numora JavaScript library rebuilds it all for reliable formatting, undo, and cursor preservation.';
+  'How the HTML input element works and where it breaks for numbers: the keydown, beforeinput, input and paste events, IEEE 754 float errors, the ten-step sanitization pipeline, and how Numora handles formatting, undo and cursor position.';
 
 export const Route = createFileRoute('/docs/numora/anatomy')({
   head: () => ({
@@ -29,10 +29,12 @@ export const Route = createFileRoute('/docs/numora/anatomy')({
       { property: 'og:title', content: TITLE },
       { property: 'og:description', content: DESCRIPTION },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/anatomy' },
-      { name: 'twitter:title', content: 'Anatomy of a Numeric Input' },
+      { name: 'twitter:title', content: TITLE },
       { name: 'twitter:description', content: DESCRIPTION },
     ],
-    links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora/anatomy' }],
+    links: [
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora/anatomy' },
+    ],
     scripts: [
       {
         type: 'application/ld+json',
@@ -62,7 +64,7 @@ export const Route = createFileRoute('/docs/numora/anatomy')({
               {
                 '@type': 'ListItem',
                 position: 2,
-                name: 'Numora JS',
+                name: 'Numora',
                 item: 'https://numeric-input.com/docs/numora',
               },
               {
@@ -83,29 +85,29 @@ export const Route = createFileRoute('/docs/numora/anatomy')({
 function Anatomy() {
   const pkg = 'numora' as const;
   return (
-    <div className="prose prose-invert max-w-xl">
+    <div className="docs-prose max-w-[40rem]">
       <Hero pkg={pkg} />
       <div className="space-y-16">
-        {/* Act 1 - Why this exists */}
-        <NativeInputSection />
+        {/* Act 1: why this exists */}
+        <NativeInputSection pkg={pkg} />
         <FloatVsStringSection />
         <UserInputSection />
         <PlainVsNumoraSection />
 
-        {/* Act 2 - How Numora intercepts (events) */}
+        {/* Act 2: how Numora intercepts events */}
         <EventPipelineSection />
         <KeydownSection />
         <BeforeInputSection />
         <PasteSection />
 
-        {/* Act 3 - What Numora does with the value */}
+        {/* Act 3: what Numora does with the value */}
         <SanitizationSection />
         <FormatModeSection />
         <GroupingStylesSection />
         <CursorPreservationSection />
         <RawVsFormattedSection pkg={pkg} />
 
-        {/* Act 4 - Using it */}
+        {/* Act 4: using it */}
         <DropInUsageSection pkg={pkg} />
       </div>
     </div>

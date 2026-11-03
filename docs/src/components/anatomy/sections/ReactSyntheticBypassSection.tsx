@@ -1,34 +1,45 @@
 import { CodeBlock } from '@/components/CodeBlock';
+import { WriteSuppressionDiagram } from '../diagrams/WriteSuppressionDiagram';
 
-const code = `useEffect(() => {
+const code = `// (trimmed)
+useEffect(() => {
   const input = internalInputRef.current
   if (!input) return
 
-  const handler = (e: InputEvent) => {
-    if (e.inputType === 'insertFromPaste' || e.inputType === 'insertFromDrop') return
+  const onBeforeInput = (e: InputEvent) => {
+    const result = handleOnBeforeInputNumoraInput(
+      e,
+      stateRef.current.maxDecimals,
+      stateRef.current.formattingOptions
+    )
 
-    const result = handleNumoraOnBeforeInput(e, {
-      maxDecimals: maxDecimalsRef.current,
-      formattingOptions: formattingOptionsRef.current,
-    })
-    if (result !== null) {
-      const numInput = input as NumoraHTMLInputElement
-      numInput.formattedValue = result.value
+    switch (result.type) {
+      case 'skip':   // paste/drop and unknown inputTypes: let the browser handle it
+        return
+      case 'reject': // second decimal, decimal cap, maxLength, isAllowed
+        e.preventDefault()
+        return
+      case 'handled': {
+        e.preventDefault()
+        const numInput = input as NumoraHTMLInputElement
+        // setRangeText fires an 'input' event; withInternalWrite suppresses it
+        withInternalWrite(() =>
+          writeValuePreservingUndo(input, result.formatted, result.cursorPos)
+        )
+        numInput.formattedValue = result.formatted
 
-      // Call onChange directly - guaranteed delivery, no dependency on
-      // React's value-tracker diff or synthetic event pipeline.
-      onChangeRef.current?.(createSyntheticChangeEvent(numInput, result.rawValue ?? ''))
-
-      // Dispatch a native 'input' to keep React's value tracker in sync.
-      isHandledByBeforeInputRef.current = true
-      input.dispatchEvent(new Event('input', { bubbles: true }))
-      isHandledByBeforeInputRef.current = false
+        // Call onChange directly with the raw value. This does not depend on
+        // React's value-tracker diff or synthetic event pipeline.
+        const cb = stateRef.current.onChange
+        if (cb) cb(createSyntheticChangeEvent(numInput, result.raw))
+        break
+      }
     }
   }
 
-  input.addEventListener('beforeinput', handler)
-  return () => input.removeEventListener('beforeinput', handler)
-}, [])`;
+  input.addEventListener('beforeinput', onBeforeInput)
+  return () => input.removeEventListener('beforeinput', onBeforeInput)
+}, [withInternalWrite])`;
 
 export function ReactSyntheticBypassSection() {
   return (
@@ -38,39 +49,39 @@ export function ReactSyntheticBypassSection() {
       </h2>
       <p>
         React's event system uses <strong>delegation</strong>: a single listener at the root
-        container fires handlers during the bubbling phase. For most events this is fine. For{' '}
-        <code>beforeinput</code> it is fatal - by the time bubbling reaches the root, the browser
-        has already committed the character to the DOM. Calling{' '}
-        <code>e.nativeEvent.preventDefault()</code> at that point is a no-op.
+        container fires handlers during the bubbling phase. That works for most events, but not for{' '}
+        <code>beforeinput</code>. React's <code>onBeforeInput</code> is not the native event. React
+        synthesizes it from <code>textInput</code>, <code>keypress</code> and composition events,
+        so it cannot reliably cancel the edit before the browser applies it.
       </p>
       <p>
-        This was verified empirically: switching to React's <code>onBeforeInput</code> prop caused
-        all validation and sanitisation to silently fail - any character could be typed.
-        ProseMirror, Slate, and Lexical hit the same constraint and all use native{' '}
-        <code>addEventListener</code> for <code>beforeinput</code>.
+        Switching to React's <code>onBeforeInput</code> prop broke validation and sanitization, and
+        any character could be typed. So Numora React registers the native listener itself.
       </p>
       <p>
         The listener is registered once at mount on the actual element. Mutable options are read
-        through refs updated via <code>useLayoutEffect</code> so prop changes never need a listener
-        re-registration:
+        through a <code>stateRef</code>, which a layout effect refreshes on every render. Prop
+        changes therefore never need the listener to be re-registered:
       </p>
       <CodeBlock language="tsx">{code}</CodeBlock>
       <h3 className="text-base">
-        <code>isHandledByBeforeInputRef</code> - preventing double-fire
+        <code>suppressNextInputEventRef</code> prevents a double fire
       </h3>
       <p>
         The native handler calls <code>onChange</code> directly with a synthetic{' '}
-        <code>ChangeEvent</code>, then dispatches a real <code>input</code> event so React's value
-        tracker stays in sync. That dispatched event flows through React's normal pipeline and would
-        trigger the React-side <code>handleChange</code> → <code>onChange</code> a <em>second</em>{' '}
-        time, firing every callback twice per keystroke.
+        <code>ChangeEvent</code>. Writing the formatted value with <code>setRangeText</code>{' '}
+        also fires an <code>input</code> event, synchronously, and React routes it to its own{' '}
+        <code>handleChange</code>. That would call <code>onChange</code> a <em>second</em>{' '}
+        time, so every callback would run twice per keystroke.
       </p>
+      <WriteSuppressionDiagram />
       <p>
-        <code>isHandledByBeforeInputRef</code> is the gate: it is set to <code>true</code>{' '}
-        synchronously around <code>dispatchEvent</code>, and because <code>dispatchEvent</code> is
-        synchronous, the React-side handler runs to completion while the flag is up. It reads the
-        flag, sees that <code>onChange</code> has already been called, and exits without
-        re-emitting.
+        <code>withInternalWrite</code> prevents that. It sets{' '}
+        <code>suppressNextInputEventRef</code> to <code>true</code> around the write, and because
+        the <code>input</code> event is dispatched synchronously, <code>handleChange</code> runs
+        while the flag is up, sees it, and returns without re-emitting. The flag is cleared in a{' '}
+        <code>finally</code> block as soon as the write completes. Numora never dispatches a
+        synthetic <code>input</code> event itself.
       </p>
     </section>
   );

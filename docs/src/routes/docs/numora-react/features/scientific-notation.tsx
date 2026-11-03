@@ -4,26 +4,26 @@ import { ExampleWithDemo } from '@/components/ExampleWithDemo';
 export const Route = createFileRoute('/docs/numora-react/features/scientific-notation')({
   head: () => ({
     meta: [
-      { title: 'Scientific Notation Input (1e-18) | numora-react' },
+      { title: 'Scientific notation | Numora React' },
       {
         name: 'description',
         content:
-          'Handle scientific notation input using the NumoraInput React component. Prevent 1e-18 issues and preserve full expanded decimal strings for token amounts.',
+          'Handle scientific notation input in the NumoraInput React component. Avoid 1e-18 problems and keep full expanded decimal strings for token amounts.',
       },
-      { property: 'og:title', content: 'Scientific Notation Input (1e-18) | numora-react' },
+      { property: 'og:title', content: 'Scientific notation | Numora React' },
       {
         property: 'og:description',
         content:
-          'Handle scientific notation input using the NumoraInput React component. Prevent 1e-18 issues for DeFi token amounts.',
+          'Handle scientific notation input in the NumoraInput React component. Avoid 1e-18 problems and keep full expanded decimal strings for token amounts.',
       },
       {
         property: 'og:url',
         content: 'https://numeric-input.com/docs/numora-react/features/scientific-notation',
       },
-      { name: 'twitter:title', content: 'Scientific Notation Input (1e-18) | numora-react' },
+      { name: 'twitter:title', content: 'Scientific notation | Numora React' },
       {
         name: 'twitter:description',
-        content: 'Handle scientific notation (1e-18) using the NumoraInput React component.',
+        content: 'Handle scientific notation input in the NumoraInput React component. Avoid 1e-18 problems and keep full expanded decimal strings for token amounts.',
       },
     ],
     links: [
@@ -40,9 +40,9 @@ export const Route = createFileRoute('/docs/numora-react/features/scientific-not
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
             headline:
-              'Scientific Notation Handling in numora-react - React Numeric Input Paste Safety',
+              'Scientific notation | Numora React',
             description:
-              'Handle scientific notation safely in React numeric inputs. numora-react expands 1.5e-7 to 0.00000015 automatically when pasting from block explorers or APIs.',
+              'Handle scientific notation in React numeric inputs. Numora React expands 1.5e-7 to 0.00000015 when you paste from block explorers or APIs.',
             url: 'https://numeric-input.com/docs/numora-react/features/scientific-notation',
             author: {
               '@type': 'Person',
@@ -64,7 +64,7 @@ export const Route = createFileRoute('/docs/numora-react/features/scientific-not
               {
                 '@type': 'ListItem',
                 position: 3,
-                name: 'Scientific Notation',
+                name: 'Scientific notation',
                 item: 'https://numeric-input.com/docs/numora-react/features/scientific-notation',
               },
             ],
@@ -78,23 +78,25 @@ export const Route = createFileRoute('/docs/numora-react/features/scientific-not
 
 function ScientificNotation() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Scientific Notation</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Numora always expands scientific notation to decimal notation. This is automatic and cannot
-        be disabled. Expansion uses string arithmetic, so there is no floating-point precision loss.
+    <div className="docs-prose max-w-[40rem]">
+      <h1>Scientific notation</h1>
+      <p>
+        Numora React always expands scientific notation to decimal notation, and you cannot
+        disable this. Expansion uses string arithmetic, so there is no floating-point
+        precision loss. Paste values such as <code>1.5e-7</code>, <code>2e+5</code> or{' '}
+        <code>1.5e-18</code> and each is expanded. Typing the characters one by one does
+        not expand them.
       </p>
 
       <ExampleWithDemo
-        description={'Try pasting "1.5e-7", "2e+5", or "1.5e-18" - all are expanded automatically'}
+        description={'Paste "1.5e-7", "2e+5" or "1.5e-18" to see each expanded'}
         language="tsx"
-        code={`<NumoraInput maxDecimals={18} />`}
-        config={{ maxDecimals: 18 }}
+        code={`<NumoraInput maxDecimals={19} />`}
+        config={{ maxDecimals: 19 }}
       />
 
-      <p className="text-muted-foreground text-base leading-6">
-        Both <code>e</code> and <code>E</code> are supported. The expanded value is then processed
-        through the rest of the sanitization pipeline and formatted according to your configuration.
+      <p>
+        Both <code>e</code> and <code>E</code> are supported.
       </p>
     </div>
   );

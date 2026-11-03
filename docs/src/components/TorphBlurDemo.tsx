@@ -13,8 +13,8 @@ export function TorphBlurDemo() {
   const displayRef = useRef<HTMLSpanElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const morphRef = useRef<TextMorph | null>(null);
-  // True from focus → first morph-complete, so the focus-strip morph hides the caret
-  // but later per-keystroke morphs do not (you need to see your caret while typing).
+  // True from focus → first morph-complete, so the focus-strip morph hides the cursor
+  // but later per-keystroke morphs do not (you need to see your cursor while typing).
   const postFocusMorphPendingRef = useRef(false);
 
   useTypingLoop(inputRef, { mode: 'blur' });
@@ -49,7 +49,7 @@ export function TorphBlurDemo() {
 
   return (
     <div className="my-12 w-full max-w-lg mx-auto">
-      <label className="relative flex items-center justify-end w-full rounded-2xl border border-surface-3 bg-surface-1 overflow-hidden px-4 py-3 text-xl font-mono tracking-wide text-white cursor-text">
+      <label className="relative flex items-center justify-end w-full rounded-2xl has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-muted-foreground border border-surface-3 bg-surface-1 overflow-hidden px-4 py-3 text-xl font-mono tracking-wide text-white cursor-text">
         <span ref={displayRef} aria-hidden="true" className="pointer-events-none whitespace-pre">
           0
         </span>
@@ -75,10 +75,11 @@ export function TorphBlurDemo() {
           maxDecimals={2}
           thousandSeparator=","
           thousandStyle={ThousandStyle.Thousand}
-          aria-label="Amount (blur to format)"
+          aria-label="Amount"
           className={`absolute inset-0 w-full h-full m-0 px-4 py-3 border-0 bg-transparent text-transparent placeholder-transparent ${caretHidden ? 'caret-transparent' : 'caret-secondary'} outline-none focus:outline-none selection:bg-secondary/40 text-right text-xl font-mono tracking-wide`}
         />
       </label>
+      <p className="mt-2 text-center text-sm text-muted-foreground">Blur the field to format.</p>
     </div>
   );
 }

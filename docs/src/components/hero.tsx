@@ -40,7 +40,7 @@ export function Hero({ delay = 0, skipIntro = false }: HeroProps) {
           [text-wrap:balance] text-muted-foreground max-w-lg leading-relaxed
         "
       >
-        Numeric inputs are broken. <strong className="font-numora text-foreground">numora</strong>{' '}
+        Numeric inputs are broken. <strong className="font-numora text-foreground">Numora</strong>{' '}
         fixes them.
       </p>
     </div>

@@ -1,8 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { FormatOn, ThousandStyle } from 'numora';
-import { NumoraInput, type NumoraInputChangeEvent } from 'numora-react';
+import { NumoraInput } from 'numora-react';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
-import { TextMorph } from 'torph';
 
 const SLIDE_DURATION = 4000;
 const TYPING_DELAY = 80;
@@ -26,63 +25,70 @@ const SLIDES: Slide[] = [
   {
     id: 'scientific',
     category: 'prevents',
-    label: 'Scientific Notation',
+    label: 'Scientific notation',
     demoValue: '10000000000000000000000000000000000',
-    description: 'Keeps large numbers in decimal - no 1e+21 surprises',
+    description: 'Keeps large numbers in decimal, so 1e+21 never shows up.',
     video: '/videos/scientific-notation.mp4',
     videoLabel: 'scientific notation bug',
   },
   {
     id: 'cursor',
     category: 'prevents',
-    label: 'Cursor Jumping',
+    label: 'Cursor jumping',
     demoValue: '1234567.89',
-    description: 'Cursor stays where you type - never jumps randomly.',
+    description: 'The cursor stays where you put it.',
     video: '/videos/cursor-jump.mp4',
     videoLabel: 'cursor jump',
   },
   {
     id: 'paste',
     category: 'prevents',
-    label: 'Paste Sanitization',
-    demoValue: '',
-    description: 'Dirty copy-paste values are cleaned automatically.',
+    label: 'Paste sanitization',
+    demoValue: '$1,234.56 USD',
+    isPaste: true,
+    description: 'Numora strips symbols and text from pasted values.',
     video: '/videos/paste.mp4',
     videoLabel: 'unhandled paste',
   },
   {
     id: 'thousands',
     category: 'features',
-    label: 'Thousand Format',
+    label: 'Thousand format',
     demoValue: '12345',
-    description: 'Format on every keystroke or on blur - your choice',
+    description: 'Format on every keystroke or on blur.',
     video: '/videos/format.mp4',
     videoLabel: 'format on change or on blur',
   },
   {
     id: 'compact',
     category: 'features',
-    label: 'Compact Notation',
+    label: 'Compact notation',
     demoValue: '1',
-    description: 'Type 1k, 1.5m or 2b - compact notation expands automatically',
+    typingSequence: ['1', '.', '5', 'm'],
+    description: 'Type 1k, 1.5m or 2b and Numora expands it.',
     video: '/videos/compact.mp4',
     videoLabel: 'compact notation',
   },
   {
     id: 'regional',
     category: 'features',
-    label: 'Regional Grouping',
+    label: 'Regional grouping',
     demoValue: '12345678',
-    description: 'Indian Lakh (12,34,567) and CJK Wan (1,2345,6789) groupings',
+    description: 'Lakh (Indian, 12,34,567) and Wan (East Asian, 1,2345,6789) groupings.',
   },
   {
     id: 'locale',
     category: 'features',
-    label: 'Locale Auto-Detection',
+    label: 'Locale auto-detection',
     demoValue: '1234567.89',
-    description: 'Separators auto-resolved via Intl.NumberFormat',
+    description: 'Numora reads the separators from Intl.NumberFormat.',
   },
 ];
+
+const CATEGORY_LABELS: Record<Category, string> = {
+  features: 'Feature',
+  prevents: 'Fixes',
+};
 
 const inputClass =
   'w-full bg-transparent text-xl font-mono text-white placeholder-surface-6 focus:outline-none text-right py-3 tracking-wide';
@@ -338,7 +344,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                         : 'text-secondary/70 bg-secondary/10'
                     }`}
                   >
-                    {s.category}
+                    {CATEGORY_LABELS[s.category]}
                   </div>
                 </div>
 
@@ -367,7 +373,8 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
               <button
                 key={index}
                 onClick={() => handleSlideClick(index)}
-                aria-label={`Go to slide ${index + 1}`}
+                aria-label={`Show ${SLIDES[index].label}`}
+                aria-current={index === activeSlide ? 'true' : undefined}
                 className={`rounded-full transition-[background-color,width,height] duration-200 cursor-pointer ${
                   index === activeSlide
                     ? 'w-2 h-2 bg-secondary/80'

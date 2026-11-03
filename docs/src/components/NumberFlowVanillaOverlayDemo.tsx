@@ -16,20 +16,9 @@ export function NumberFlowVanillaOverlayDemo() {
     const flow = document.createElement('number-flow');
     displayRef.current.appendChild(flow);
 
-    const numora = new NumoraInput(hostRef.current, {
-      formatOn: FormatOn.Change,
-      decimalMaxLength: 2,
-      thousandSeparator: ',',
-      value: '1234567',
-      thousandStyle: ThousandStyle.Thousand,
-    });
-    const input = numora.getElement();
-    input.setAttribute('aria-label', 'Amount');
-
-    const syncFlow = () => {
-      const raw = numora.value;
+    const syncFlow = (raw: string) => {
       const decimals = raw.includes('.') ? raw.split('.')[1].length : 0;
-      // Mirror typed decimals so trailing zeros line up under the caret.
+      // Mirror typed decimals so trailing zeros line up under the cursor.
       flow.format = {
         useGrouping: true,
         minimumFractionDigits: decimals,
@@ -38,20 +27,23 @@ export function NumberFlowVanillaOverlayDemo() {
       flow.update(raw === '' ? 0 : Number(raw));
     };
 
-    syncFlow();
+    const numora = new NumoraInput(hostRef.current, {
+      formatOn: FormatOn.Change,
+      decimalMaxLength: 2,
+      thousandSeparator: ',',
+      value: '1234567',
+      thousandStyle: ThousandStyle.Thousand,
+      // Without rawValueMode, onChange and numora.value return the formatted string.
+      rawValueMode: true,
+      onChange: syncFlow,
+    });
+    const input = numora.getElement();
+    input.setAttribute('aria-label', 'Amount');
 
-    // Numora applies formatted values in beforeinput via setRangeText. The input event
-    // is not guaranteed to follow on every path, so sync via a beforeinput microtask too.
-    const scheduleFlowSync = () => {
-      queueMicrotask(syncFlow);
-    };
-
-    input.addEventListener('beforeinput', scheduleFlowSync);
-    input.addEventListener('input', syncFlow);
+    // The initial value does not fire onChange, so prime the display.
+    syncFlow(numora.value);
 
     return () => {
-      input.removeEventListener('beforeinput', scheduleFlowSync);
-      input.removeEventListener('input', syncFlow);
       flow.remove();
       input.remove();
     };
@@ -76,7 +68,7 @@ export function NumberFlowVanillaOverlayDemo() {
         .nf-vanilla-input-host input::placeholder { color: transparent; }
       `}</style>
       <div className="my-16 py-12 flex justify-center items-center">
-        <label className="relative inline-flex items-center min-h-[44px] min-w-[6ch] text-4xl font-mono leading-none text-white">
+        <label className="relative inline-flex items-center min-h-[44px] min-w-[6ch] rounded-md has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-muted-foreground text-4xl font-mono leading-none text-white">
           <span
             ref={displayRef}
             className="pointer-events-none whitespace-pre tabular-nums"

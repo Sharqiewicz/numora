@@ -1,4 +1,7 @@
 import { Link } from '@tanstack/react-router';
+import { FormatOn, ThousandStyle } from 'numora';
+import { NumoraInput } from 'numora-react';
+import { demoInputClass, demoInputLgClass } from '../kit';
 import type { SectionProps } from './types';
 
 export function Hero({ pkg }: SectionProps) {
@@ -6,30 +9,39 @@ export function Hero({ pkg }: SectionProps) {
     pkg === 'numora-react' ? '/docs/numora-react/installation' : '/docs/numora/installation';
 
   return (
-    <section className="not-prose mb-16 space-y-6 border-b border-border/40 pb-12">
+    <section className="not-prose mb-16 space-y-6">
       <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-        How a numeric input actually works.
+        How a numeric input works
       </h1>
+      <div className="max-w-md">
+        <NumoraInput
+          formatOn={FormatOn.Change}
+          thousandSeparator=","
+          thousandStyle={ThousandStyle.Thousand}
+          maxDecimals={2}
+          defaultValue="1234567.89"
+          aria-label="Try Numora: type a number"
+          className={`${demoInputClass} ${demoInputLgClass}`}
+        />
+      </div>
       <p className="max-w-2xl text-lg text-muted-foreground">
-        We'll dissect the HTML{' '}
-        <code className="rounded bg-muted px-1 py-0.5 font-mono text-base">&lt;input&gt;</code>{' '}
-        element, watch the four events that fire on every keystroke, see what breaks when users
-        paste real-world numbers, and rebuild it with{' '}
+        How the HTML <code className="font-mono text-base">&lt;input&gt;</code> handles numbers, where
+        it breaks, and how{' '}
         <span className="text-foreground">
           {pkg === 'numora-react' ? 'numora-react' : 'numora'}
         </span>{' '}
-        step by step.
+        fixes it.
       </p>
-      <div className="flex flex-wrap gap-3 pt-2">
+      <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
         <a
           href="#sanitization"
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-[background-color,scale] duration-150 ease-out hover:bg-primary/90 active:scale-[0.96]"
+          className="text-muted-foreground underline-offset-4 transition-colors duration-150 ease-out-expo hover:text-foreground hover:underline"
         >
-          See the pipeline →
+          See the pipeline
         </a>
         <Link
           to={installPath}
-          className="rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-[background-color,scale] duration-150 ease-out hover:bg-muted/50 active:scale-[0.96]"
+          className="text-muted-foreground underline-offset-4 transition-colors duration-150 ease-out-expo hover:text-foreground hover:underline"
         >
           Install
         </Link>

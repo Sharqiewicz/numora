@@ -16,7 +16,7 @@ export function TorphBlurSection({ children }: TorphBlurSectionProps) {
         <Tabs value={variant} onValueChange={(v) => setVariant(v as TorphBlurVariant)}>
           <TabsList>
             <TabsTrigger value="minimal">Minimal</TabsTrigger>
-            <TabsTrigger value="polished">Caret polish</TabsTrigger>
+            <TabsTrigger value="polished">Cursor polish</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>

@@ -6,10 +6,10 @@ import { startTypingLoop } from '@/hooks/use-typing-loop';
 /**
  * The 3-line core integration for vanilla NumoraInput + Torph.
  *
- * The visible caret will briefly "float" during the focus-strip morph
- * (1,234,567 → 1234567) because the native caret lands at its final position
+ * The visible cursor drifts during the focus-strip morph
+ * (1,234,567 → 1234567) because the native cursor lands at its final position
  * while the digits slide into theirs over ~400ms. See `TorphVanillaBlurDemo`
- * for the variant that hides the caret during that window.
+ * for the variant that hides the cursor during that window.
  */
 export function TorphVanillaBlurMinimal() {
   const displayRef = useRef<HTMLSpanElement>(null);
@@ -33,7 +33,7 @@ export function TorphVanillaBlurMinimal() {
       onChange: (value) => morph.update(value || '0'),
     });
     const input = numora.getElement();
-    input.setAttribute('aria-label', 'Amount (blur to format)');
+    input.setAttribute('aria-label', 'Amount');
 
     // setDefaultValue runs before onChange is wired (and never fires onChange anyway).
     // Prime the morph with the formatted initial value.
@@ -69,12 +69,13 @@ export function TorphVanillaBlurMinimal() {
         .torph-vanilla-minimal-host input::placeholder { color: transparent; }
       `}</style>
       <div className="my-12 w-full max-w-lg mx-auto">
-        <label className="relative flex items-center justify-end w-full rounded-2xl border border-surface-3 bg-surface-1 overflow-hidden px-4 py-3 text-xl font-mono tracking-wide text-white cursor-text">
+        <label className="relative flex items-center justify-end w-full rounded-2xl has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-muted-foreground border border-surface-3 bg-surface-1 overflow-hidden px-4 py-3 text-xl font-mono tracking-wide text-white cursor-text">
           <span ref={displayRef} className="pointer-events-none whitespace-pre" aria-hidden="true">
             0
           </span>
           <div ref={hostRef} className="torph-vanilla-minimal-host absolute inset-0" />
         </label>
+        <p className="mt-2 text-center text-sm text-muted-foreground">Blur the field to format.</p>
       </div>
     </>
   );

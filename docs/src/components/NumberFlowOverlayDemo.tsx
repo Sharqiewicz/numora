@@ -12,13 +12,13 @@ export function NumberFlowOverlayDemo() {
   }, []);
 
   // Mirror the input's typed decimals on the animated layer so trailing zeros
-  // ("1.20") line up under the caret instead of collapsing to "1.2".
+  // ("1.20") line up under the cursor instead of collapsing to "1.2".
   const decimals = value.includes('.') ? value.split('.')[1].length : 0;
   const numericValue = value === '' ? 0 : Number(value);
 
   return (
     <div className="my-16 py-12 flex justify-center items-center">
-      <label className="relative inline-flex items-center min-h-[44px] min-w-[6ch] text-4xl font-mono leading-none text-white">
+      <label className="relative inline-flex items-center min-h-[44px] min-w-[6ch] rounded-md has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-muted-foreground text-4xl font-mono leading-none text-white">
         <span aria-hidden="true" className="pointer-events-none whitespace-pre tabular-nums">
           {mounted ? (
             <NumberFlow

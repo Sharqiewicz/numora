@@ -1,6 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
-@import url('https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700&display=swap');
-
 @import 'tailwindcss';
 
 @import 'tw-animate-css';
@@ -17,6 +14,9 @@ code {
 
   --font-satoshi: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-righteous: 'Righteous', sans-serif;
+  /* Site-wide UI + reading face. Loaded once in routes/__root.tsx. */
+  --font-reading: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-code: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Neutral ramp. Every neutral carries the brand hue (277) so whites, greys
      and blacks are tinted to the same temperature as the brand. L and C are
@@ -41,7 +41,7 @@ code {
      surface sits behind them instead of declaring a competing colour. */
   --border: oklch(1 0 0 / 0.08);
   --input: oklch(0.274 0.006 277);
-  --ring: oklch(0.442 0.017 277);
+  --ring: oklch(0.712 0.013 277);
   --sidebar: oklch(0.147 0.004 277);
   --sidebar-foreground: oklch(0.985 0.002 277);
   --sidebar-primary: oklch(0.460 0.277 278);
@@ -49,7 +49,7 @@ code {
   --sidebar-accent: oklch(0.274 0.006 277);
   --sidebar-accent-foreground: oklch(0.985 0.002 277);
   --sidebar-border: oklch(1 0 0 / 0.08);
-  --sidebar-ring: oklch(0.442 0.017 277);
+  --sidebar-ring: oklch(0.712 0.013 277);
 
   /* Surface tokens - component-level dark surfaces */
   --surface-1: oklch(0.145 0.005 277);
@@ -118,13 +118,26 @@ code {
   --radius: 0.5rem;
 }
 
+/* Smooth scrolling is opt-in for people who haven't asked for less motion */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 html {
-  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+button, a, input, select, textarea, [role="button"] {
+  touch-action: manipulation;
 }
 
 body {
   @apply m-0;
-  font-family: var(--font-satoshi);
+  font-family: var(--font-reading);
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
@@ -397,6 +410,7 @@ body {
   /* Motion easing tokens (generate `ease-out-expo` / `ease-drawer` utilities) */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-move: cubic-bezier(0.645, 0.045, 0.355, 1);
   /* Shadow-as-border token (dark-mode single ring; site is dark-only) */
   --shadow-border: 0 0 0 1px oklch(1 0 0 / 0.08);
   --animate-fade-in-out: fade-in-out 1.5s ease forwards;
@@ -416,7 +430,7 @@ body {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
   body {
     @apply text-foreground;
@@ -534,12 +548,18 @@ body {
       opacity: 1 !important;
       transform: none !important;
     }
+
+    /* The background gradient holds still; it's ambient, not feedback. */
+    body,
+    .animated-gradient-bg {
+      animation: none;
+    }
   }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
   body {
     @apply bg-background text-foreground;
@@ -555,105 +575,151 @@ body {
   }
 }
 
-@layer utilities {
-  .prose {
-    @apply text-foreground;
+/* ------------------------------------------------------------------------------------------
+   .docs-prose: calm long-form reading typography for every docs page.
+   Small quiet headings, 15px body at 1.65, muted body with bright emphasis, compact code chips.
+   Every selector is wrapped in :where() (zero specificity) inside the components layer, so any
+   utility class on an element still wins. `.not-prose` subtrees (diagrams, demos) are skipped.
+   ------------------------------------------------------------------------------------------ */
+@layer components {
+  .docs-prose {
+    font-family: var(--font-reading);
+    font-size: 15px;
+    line-height: 1.65;
+    letter-spacing: -0.006em;
+    font-optical-sizing: auto;
+    color: var(--muted-foreground);
   }
 
-  /* Quiet rule under body links; brightens with the text on hover. */
-  .link-underline {
+  :where(.docs-prose) :where(h1) {
+    color: var(--foreground);
+  }
+
+  :where(.docs-prose) :where(h2, h3, h4):not(:where(.not-prose, .not-prose *)) {
+    color: var(--foreground);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+  }
+  :where(.docs-prose) :where(h2):not(:where(.not-prose, .not-prose *)) {
+    font-size: 17px;
+  }
+  :where(.docs-prose) :where(h3, h4):not(:where(.not-prose, .not-prose *)) {
+    font-size: 15px;
+  }
+
+  :where(.docs-prose) :where(p, ul, ol, table):not(:where(.not-prose, .not-prose *)) {
+    margin: 0 0 1rem;
+  }
+  :where(.docs-prose) :where(ul):not(:where(.not-prose, .not-prose *)) {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+  :where(.docs-prose) :where(ol):not(:where(.not-prose, .not-prose *)) {
+    list-style: decimal;
+    padding-left: 1.25rem;
+  }
+  :where(.docs-prose) :where(li):not(:where(.not-prose, .not-prose *)) {
+    margin-bottom: 0.375rem;
+    padding-left: 0.125rem;
+  }
+  :where(.docs-prose) :where(li)::marker {
+    color: var(--surface-7);
+  }
+
+  :where(.docs-prose) :where(strong, b):not(:where(.not-prose, .not-prose *)) {
+    color: var(--foreground);
+    font-weight: 500;
+  }
+
+  :where(.docs-prose) :where(a):not(:where(.not-prose, .not-prose *, [data-slot])) {
+    color: var(--foreground);
+    text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 3px;
     text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
-    transition: text-decoration-color 150ms ease;
+    transition: text-decoration-color 150ms var(--ease-out-expo);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    :where(.docs-prose) :where(a):not(:where(.not-prose, .not-prose *, [data-slot])):hover {
+      text-decoration-color: currentColor;
+    }
   }
 
-  .link-underline:hover {
-    text-decoration-color: currentColor;
+  /* Inline code chips: small, bright text on a barely-lifted surface. Code blocks are untouched. */
+  :where(.docs-prose) :where(p, li, h2, h3, h4, td, th) :where(code, kbd):not(:where(.not-prose, .not-prose *)) {
+    font-size: 0.84em;
+    letter-spacing: 0;
+    color: var(--foreground);
+    background: var(--surface-4);
+    padding: 0.1em 0.3em;
+    border-radius: 4px;
+    overflow-wrap: anywhere;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  :where(.docs-prose) :where(kbd):not(:where(.not-prose, .not-prose *)) {
+    box-shadow: inset 0 -1px 0 var(--surface-7);
   }
 
-  :where(.prose) h1 {
-    @apply text-4xl font-bold mb-4 mt-8 first:mt-0;
+  :where(.docs-prose) :where(table):not(:where(.not-prose, .not-prose *)) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  :where(.docs-prose) :where(th):not(:where(.not-prose, .not-prose *)) {
+    text-align: left;
+    font-weight: 500;
+    color: var(--foreground);
+    padding: 0.5rem 0.75rem 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  :where(.docs-prose) :where(td):not(:where(.not-prose, .not-prose *)) {
+    padding: 0.5rem 0.75rem 0.5rem 0;
+    border-bottom: 1px solid var(--border);
   }
 
-  :where(.prose) h2 {
-    @apply text-3xl font-semibold mb-3 mt-8;
+  /* Page rhythm. Direct children of the article only, so nested sections (Anatomy) keep their own
+     spacing utilities. Quiet, small headings; air above them, a short gap below (they belong to
+     the text that follows). */
+  :where(.docs-prose) > :where(h1) {
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.75rem;
   }
+  :where(.docs-prose) > :where(h1 + p) {
+    font-size: 16px;
+    margin-bottom: 2.5rem;
+  }
+  :where(.docs-prose) > :where(h2) {
+    margin: 3rem 0 0.5rem;
+  }
+  :where(.docs-prose) > :where(h3) {
+    margin: 2rem 0 0.375rem;
+  }
+  :where(.docs-prose) > :where(h2, h3, h4) {
+    scroll-margin-top: 2rem;
+  }
+  :where(.docs-prose) > :where(:first-child) {
+    margin-top: 0;
+  }
+  :where(.docs-prose) > :where(hr) {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 3rem 0;
+  }
+  :where(.docs-prose) > :where(hr + h2, hr + h3) {
+    margin-top: 0;
+  }
+  :where(.docs-prose) :where(ul, ol) :where(ul, ol):not(:where(.not-prose, .not-prose *)) {
+    margin: 0.375rem 0 0;
+  }
+}
 
-  :where(.prose) h3 {
-    @apply text-2xl font-semibold mb-2 mt-6;
-  }
-
-  :where(.prose) h4 {
-    @apply text-xl font-semibold mb-2 mt-4;
-  }
-
-  :where(.prose) p {
-    @apply mb-4 leading-7;
-  }
-
-  .prose ul,
-  .prose ol {
-    @apply mb-4 ml-6;
-  }
-
-  .prose ul {
-    @apply list-disc;
-  }
-
-  .prose ol {
-    @apply list-decimal;
-  }
-
-  .prose li {
-    @apply mb-2;
-  }
-
-  .prose code {
-    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
-  }
-
-  .prose pre {
-    @apply mb-4;
-  }
-
-  :where(.prose) a {
-    @apply text-inherit underline-offset-4;
-  }
-
-  .prose table {
-    @apply w-full border-collapse mb-4;
-  }
-
-  .prose th {
-    @apply border border-border px-4 py-2 text-left font-semibold bg-muted/50;
-  }
-
-  .prose td {
-    @apply border border-border px-4 py-2;
-  }
-
-  .prose blockquote {
-    @apply border-l-4 border-border pl-4 italic my-4;
-  }
-
-  .prose hr {
-    @apply border-border my-8;
-  }
-
-  .prose strong {
-    @apply font-semibold;
-  }
-
-  .prose em {
-    @apply italic;
-  }
-
-  .prose pre[class*="language-"] {
-    @apply m-0 mb-0 bg-transparent p-0;
-  }
-
-  .prose code[class*="language-"] {
-    @apply bg-transparent p-0 rounded-none text-sm font-mono shadow-none;
-  }
+/* Unlayered on purpose: the global `code { font-family }` rule above is unlayered too. */
+.docs-prose code,
+.docs-prose kbd {
+  font-family: var(--font-code);
 }

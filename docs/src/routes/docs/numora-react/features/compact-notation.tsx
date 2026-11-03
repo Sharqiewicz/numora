@@ -4,26 +4,26 @@ import { ExampleWithDemo } from '@/components/ExampleWithDemo';
 export const Route = createFileRoute('/docs/numora-react/features/compact-notation')({
   head: () => ({
     meta: [
-      { title: 'Compact Notation (1k, 1m, 1b) | numora-react' },
+      { title: 'Compact notation | Numora React' },
       {
         name: 'description',
         content:
-          'Enable compact number notation using the NumoraInput React component. Let users type "1k", "1m", "1b" for compact shorthand number input.',
+          'Enable compact number notation in the NumoraInput React component. Users can type "1k", "1m" or "1b" as shorthand for the full number.',
       },
-      { property: 'og:title', content: 'Compact Notation (1k, 1m, 1b) | numora-react' },
+      { property: 'og:title', content: 'Compact notation | Numora React' },
       {
         property: 'og:description',
         content:
-          'Enable compact number notation using the NumoraInput React component. Type "1k", "1m", "1b" for shorthand input.',
+          'Enable compact number notation in the NumoraInput React component. Users can type "1k", "1m" or "1b" as shorthand for the full number.',
       },
       {
         property: 'og:url',
         content: 'https://numeric-input.com/docs/numora-react/features/compact-notation',
       },
-      { name: 'twitter:title', content: 'Compact Notation (1k, 1m, 1b) | numora-react' },
+      { name: 'twitter:title', content: 'Compact notation | Numora React' },
       {
         name: 'twitter:description',
-        content: 'Enable compact number notation using the NumoraInput React component.',
+        content: 'Enable compact number notation in the NumoraInput React component. Users can type "1k", "1m" or "1b" as shorthand for the full number.',
       },
     ],
     links: [
@@ -39,9 +39,9 @@ export const Route = createFileRoute('/docs/numora-react/features/compact-notati
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Compact Notation in numora-react - React Numeric Input 1k → 1000',
+            headline: 'Compact notation | Numora React',
             description:
-              'Expand compact notation in React numeric input fields. Type 1k, 1.5m, or 2b and numora-react automatically expands to the full numeric value.',
+              'Expand compact notation in React numeric input fields. Type 1k, 1.5m or 2b and Numora React expands it to the full numeric value.',
             url: 'https://numeric-input.com/docs/numora-react/features/compact-notation',
             author: {
               '@type': 'Person',
@@ -63,7 +63,7 @@ export const Route = createFileRoute('/docs/numora-react/features/compact-notati
               {
                 '@type': 'ListItem',
                 position: 3,
-                name: 'Compact Notation',
+                name: 'Compact notation',
                 item: 'https://numeric-input.com/docs/numora-react/features/compact-notation',
               },
             ],
@@ -77,13 +77,14 @@ export const Route = createFileRoute('/docs/numora-react/features/compact-notati
 
 function CompactNotation() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Compact Notation</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        When enabled, pasting shorthand values like <code>"1k"</code> or <code>"2.5m"</code> expands
-        them to full numbers. Expansion uses string arithmetic - no precision loss.
+    <div className="docs-prose max-w-[40rem]">
+      <h1>Compact notation</h1>
+      <p>
+        With <code>enableCompactNotation</code> set, typing or pasting shorthand like <code>"1k"</code> or{' '}
+        <code>"2.5m"</code> expands it to the full number. Expansion uses string arithmetic, so there is no precision loss.
       </p>
 
+      <div className="overflow-x-auto">
       <table>
         <thead>
           <tr>
@@ -115,17 +116,17 @@ function CompactNotation() {
           </tr>
         </tbody>
       </table>
+      </div>
 
       <ExampleWithDemo
-        description={'Paste "1k", "1.5m", "2B", or "2.5T" to see expansion'}
+        description={'Type or paste "1k", "1.5m", "2B", or "2.5T" to see expansion'}
         language="tsx"
         code={`<NumoraInput enableCompactNotation maxDecimals={18} />`}
         config={{ enableCompactNotation: true, maxDecimals: 18 }}
       />
 
-      <p className="text-muted-foreground text-base leading-6">
-        Expansion only happens on paste - users cannot type compact notation character by character.
-        The expanded value then passes through the rest of the sanitization and formatting pipeline.
+      <p>
+        Typing <code>1</code> then <code>k</code> gives <code>1000</code>.
       </p>
     </div>
   );

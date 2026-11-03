@@ -4,26 +4,26 @@ import { CodeBlock } from '@/components/CodeBlock';
 export const Route = createFileRoute('/docs/numora/features/sanitization')({
   head: () => ({
     meta: [
-      { title: 'Numeric Input Sanitization | Numora' },
+      { title: 'Sanitization | Numora' },
       {
         name: 'description',
         content:
-          'Sanitize numeric inputs and block invalid characters with Numora. Clean pasted values from block explorers, prevent invalid keystrokes, handle all input vectors.',
+          'Sanitize numeric inputs and block invalid characters with Numora. Clean pasted values from block explorers and block invalid keystrokes.',
       },
-      { property: 'og:title', content: 'Numeric Input Sanitization | Numora' },
+      { property: 'og:title', content: 'Sanitization | Numora' },
       {
         property: 'og:description',
         content:
-          'Sanitize numeric inputs and block invalid characters with Numora. Clean pasted values and prevent invalid keystrokes.',
+          'Sanitize numeric inputs and block invalid characters with Numora. Clean pasted values from block explorers and block invalid keystrokes.',
       },
       {
         property: 'og:url',
         content: 'https://numeric-input.com/docs/numora/features/sanitization',
       },
-      { name: 'twitter:title', content: 'Numeric Input Sanitization | Numora' },
+      { name: 'twitter:title', content: 'Sanitization | Numora' },
       {
         name: 'twitter:description',
-        content: 'Sanitize numeric inputs and block invalid characters with Numora.',
+        content: 'Sanitize numeric inputs and block invalid characters with Numora. Clean pasted values from block explorers and block invalid keystrokes.',
       },
     ],
     links: [
@@ -36,9 +36,9 @@ export const Route = createFileRoute('/docs/numora/features/sanitization')({
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Numeric Input Sanitization in Numora - Blocking Invalid Characters',
+            headline: 'Numeric input sanitization in Numora: blocking invalid characters',
             description:
-              'Sanitize numeric inputs and block invalid characters with Numora. Clean pasted values from block explorers, prevent invalid keystrokes, handle all input vectors.',
+              'Sanitize numeric inputs and block invalid characters with Numora. Clean pasted values from block explorers and block invalid keystrokes.',
             url: 'https://numeric-input.com/docs/numora/features/sanitization',
             author: {
               '@type': 'Person',
@@ -54,7 +54,7 @@ export const Route = createFileRoute('/docs/numora/features/sanitization')({
               {
                 '@type': 'ListItem',
                 position: 2,
-                name: 'Numora JS',
+                name: 'Numora',
                 item: 'https://numeric-input.com/docs/numora',
               },
               {
@@ -74,19 +74,19 @@ export const Route = createFileRoute('/docs/numora/features/sanitization')({
 
 function Sanitization() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Sanitization</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Numora sanitizes every value through a sequential pipeline before formatting is applied. For
+    <div className="docs-prose max-w-[40rem]">
+      <h1>Sanitization</h1>
+      <p>
+        Numora runs every value through a sequential sanitization pipeline before it formats. For
         the full architecture and pipeline diagram, see{' '}
-        <Link to="/docs/numora/anatomy" hash="sanitization" className="underline link-underline hover:text-foreground transition-colors">
-          Anatomy: Sanitization
+        <Link to="/docs/numora/anatomy" hash="sanitization">
+          Anatomy: sanitization
         </Link>
-        . The sections below cover each configurable sanitization feature.
+        . This page covers character filtering and the standalone <code>removeThousandSeparators</code> utility.
       </p>
 
-      <h2 className="text-foreground text-2xl">Non-numeric Character Filtering</h2>
-      <p className="text-muted-foreground text-base leading-6">Numora automatically removes invalid characters while preserving:</p>
+      <h2>Non-numeric character filtering</h2>
+      <p>Numora removes invalid characters and keeps:</p>
       <ul>
         <li>Digits (0-9)</li>
         <li>
@@ -96,32 +96,21 @@ function Sanitization() {
           Negative sign (<code>-</code>) if <code>enableNegative</code> is true
         </li>
       </ul>
-      <p className="text-muted-foreground text-base leading-6">
+      <p>
         A sign character is only ever kept in the leading position: a <code>-</code> found anywhere
-        else in the string is stripped rather than rejected (<code>"5-3"</code> → <code>"53"</code>
-        ), and a leading <code>+</code> is always removed (<code>"+5"</code> → <code>"5"</code>)
+        else in the string is removed rather than rejected (<code>"5-3"</code> → <code>"53"</code>), and a leading <code>+</code> is always removed (<code>"+5"</code> → <code>"5"</code>)
         since Numora has no concept of an explicit positive sign.
       </p>
 
-      <CodeBlock language="typescript">
-        {`import { NumoraInput } from 'numora'
-
-const numoraInput = new NumoraInput(container, {
-  maxDecimals: 2,
-  // Invalid characters are automatically removed
-  // Try typing letters or special characters - only numbers will be kept
-})`}
-      </CodeBlock>
-
-      <h2 className="text-foreground text-2xl">removeThousandSeparators</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Numora exports a standalone <code>removeThousandSeparators</code> utility for stripping
-        thousand separators from a formatted string. Useful when you need to extract a raw numeric
-        value from a display string.
+      <h2>removeThousandSeparators</h2>
+      <p>
+        Numora exports a standalone <code>removeThousandSeparators</code> utility that strips
+        thousand separators from a formatted string. Use it to get a raw numeric
+        value out of a display string.
       </p>
-      <p className="text-muted-foreground text-base leading-6">
-        (You can also access the raw value of the input by <code>e.target.rawValue</code> when{' '}
-        <code>rawValueMode</code> is <code>true</code>)
+      <p>
+        To read the raw value from the input, see{' '}
+        <Link to="/docs/numora/features/value-types">Value types</Link>.
       </p>
 
       <CodeBlock language="typescript">

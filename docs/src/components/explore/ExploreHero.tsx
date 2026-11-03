@@ -7,7 +7,7 @@ export function ExploreHero() {
     <section className="relative min-h-[70vh] container mx-auto flex flex-col items-center justify-center px-4 sm:px-8 py-16">
       <div className="animate-fade-in opacity-0 delay-[0.2s]">
         <Badge variant="blue" className="mb-6">
-          Interactive Demo
+          Interactive demo
         </Badge>
       </div>
 
@@ -20,7 +20,7 @@ export function ExploreHero() {
       >
         Explore{' '}
         <span className="text-secondary relative">
-          Numeric Input Problems
+          numeric input problems
           <span
             className="
               absolute -bottom-2 left-0 right-0 h-[3px]
@@ -39,8 +39,8 @@ export function ExploreHero() {
           text-lg
         "
       >
-        See the 7 most painful problems with numeric inputs in web apps. Try each demo yourself to
-        experience why <strong className="font-numora text-foreground">numora</strong> exists.
+        Seven ways a numeric input breaks in a web app. Try each demo, then you'll see why{' '}
+        <strong className="font-numora text-foreground">Numora</strong> exists.
       </p>
 
       <div className="animate-fade-in opacity-0 delay-[0.8s] flex gap-4 flex-wrap justify-center">
@@ -54,7 +54,7 @@ export function ExploreHero() {
               transition-shadow duration-300
             "
           >
-            <span className="relative z-10">Start Exploring</span>
+            <span className="relative z-10">Start exploring</span>
             <span
               className="
                 absolute inset-0 -translate-x-full
@@ -75,7 +75,7 @@ export function ExploreHero() {
               transition-shadow duration-300
             "
           >
-            Read the Docs
+            Read the docs
           </Button>
         </Link>
       </div>
@@ -95,7 +95,7 @@ export function ExploreHero() {
             group
           "
         >
-          <span className="text-xs tracking-widest uppercase">7 Problems</span>
+          <span className="text-xs tracking-widest uppercase">7 problems</span>
           <svg
             className="
               w-5 h-5

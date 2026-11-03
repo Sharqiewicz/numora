@@ -4,30 +4,30 @@ import { CodeBlock } from '@/components/CodeBlock';
 export const Route = createFileRoute('/docs/numora/features/formatting')({
   head: () => ({
     meta: [
-      { title: 'Numeric Input Formatting - Thousand Separators, Lakh, Wan | Numora' },
+      { title: 'Formatting | Numora' },
       {
         name: 'description',
         content:
-          'Add thousand separators and format numbers as you type with Numora. Supports Standard, Lakh, and Wan grouping styles with cursor position preservation.',
+          'Add thousand separators and format numbers as you type with Numora. Thousand, Lakh, and Wan grouping styles, with cursor position preservation.',
       },
       {
         property: 'og:title',
-        content: 'Numeric Input Formatting - Thousand Separators, Lakh, Wan | Numora',
+        content: 'Formatting | Numora',
       },
       {
         property: 'og:description',
         content:
-          'Add thousand separators and format numbers as you type with Numora. Supports multiple grouping styles with cursor position preservation.',
+          'Add thousand separators and format numbers as you type with Numora. Thousand, Lakh, and Wan grouping styles, with cursor position preservation.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/formatting' },
       {
         name: 'twitter:title',
-        content: 'Numeric Input Formatting - Thousand Separators, Lakh, Wan | Numora',
+        content: 'Formatting | Numora',
       },
       {
         name: 'twitter:description',
         content:
-          'Add thousand separators and format numbers as you type with Numora. Cursor position preserved.',
+          'Add thousand separators and format numbers as you type with Numora. Thousand, Lakh, and Wan grouping styles, with cursor position preservation.',
       },
     ],
     links: [
@@ -40,9 +40,9 @@ export const Route = createFileRoute('/docs/numora/features/formatting')({
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Number Formatting in Numora - Thousand Separators, Lakh, and Wan Grouping',
+            headline: 'Number formatting in Numora: Thousand, Lakh, and Wan grouping',
             description:
-              'Format numbers as you type in any JavaScript numeric input. Supports Standard (1,234,567), Indian Lakh (12,34,567), and East Asian Wan (123,4567) grouping with automatic cursor preservation.',
+              'Format numbers as you type in any JavaScript numeric input. Thousand (1,234,567), Lakh (Indian, 12,34,567), and Wan (East Asian, 123,4567) grouping, with cursor preservation.',
             url: 'https://numeric-input.com/docs/numora/features/formatting',
             author: {
               '@type': 'Person',
@@ -58,13 +58,13 @@ export const Route = createFileRoute('/docs/numora/features/formatting')({
               {
                 '@type': 'ListItem',
                 position: 2,
-                name: 'Numora JS',
+                name: 'Numora',
                 item: 'https://numeric-input.com/docs/numora',
               },
               {
                 '@type': 'ListItem',
                 position: 3,
-                name: 'Number Formatting',
+                name: 'Formatting',
                 item: 'https://numeric-input.com/docs/numora/features/formatting',
               },
             ],
@@ -78,68 +78,55 @@ export const Route = createFileRoute('/docs/numora/features/formatting')({
 
 function Formatting() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Formatting</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Numora formats numbers with thousand separators as the user types, preserving cursor
-        position throughout.
+    <div className="docs-prose max-w-[40rem]">
+      <h1>Formatting</h1>
+      <p>
+        Formatting adds thousand separators to the value once <code>thousandStyle</code> is set (default{' '}
+        <code>None</code>). It runs on blur by default, or on every keystroke with{' '}
+        <code>FormatOn.Change</code>. Numora keeps the cursor in place either way.
       </p>
 
-      <h2 className="text-foreground text-2xl">Grouping styles</h2>
+      <h2>Grouping styles</h2>
       <CodeBlock language="typescript">
         {`import { NumoraInput, ThousandStyle } from 'numora'
 
-// Standard: 1,234,567
-const input = new NumoraInput(container, {
-  thousandSeparator: ',',
+// Thousand (1,234,567)
+const input1 = new NumoraInput(container, {
   thousandStyle: ThousandStyle.Thousand,
 })
 
-// Indian (Lakh): 12,34,567
-const input = new NumoraInput(container, {
-  thousandSeparator: ',',
+// Lakh (Indian, 12,34,567)
+const input2 = new NumoraInput(container, {
   thousandStyle: ThousandStyle.Lakh,
 })
 
-// Chinese (Wan): 123,4567
-const input = new NumoraInput(container, {
-  thousandSeparator: ',',
+// Wan (East Asian, 123,4567)
+const input3 = new NumoraInput(container, {
   thousandStyle: ThousandStyle.Wan,
-})
-
-// None: 1234567
-const input = new NumoraInput(container, {
-  thousandSeparator: ',',
-  thousandStyle: ThousandStyle.None,
 })`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">When to format</h2>
+      <h2>When to format</h2>
       <CodeBlock language="typescript">
-        {`import { NumoraInput, FormatOn } from 'numora'
+        {`import { NumoraInput, FormatOn, ThousandStyle } from 'numora'
 
-// Blur (default) - format when the input loses focus
-const input = new NumoraInput(container, {
+// Blur (default): format when the input loses focus
+const input1 = new NumoraInput(container, {
   formatOn: FormatOn.Blur,
-  thousandSeparator: ',',
+  thousandStyle: ThousandStyle.Thousand,
 })
 
-// Change - format on every keystroke
-const input = new NumoraInput(container, {
+// Change: format on every keystroke
+const input2 = new NumoraInput(container, {
   formatOn: FormatOn.Change,
-  thousandSeparator: ',',
+  thousandStyle: ThousandStyle.Thousand,
 })`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">Automatic behaviors</h2>
+      <h2>Separator skipping</h2>
       <ul>
         <li>
-          <strong>Cursor preservation</strong> - the cursor stays in the correct position when
-          separators are added or removed during formatting
-        </li>
-        <li>
-          <strong>Separator skipping</strong> - backspace and delete automatically skip over
-          thousand separators so they never need to be deleted manually
+          Backspace and Delete jump over thousand separators, so you never delete one by hand.
         </li>
       </ul>
     </div>

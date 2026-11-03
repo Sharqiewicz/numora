@@ -4,20 +4,20 @@ import { CodeBlock } from '@/components/CodeBlock';
 export const Route = createFileRoute('/docs/numora-react/features/value-types')({
   head: () => ({
     meta: [
-      { title: 'Raw vs Formatted Value - React Numeric Input Output Types | numora-react' },
+      { title: 'Value types | Numora React' },
       {
         name: 'description',
         content:
-          'Learn how numora-react emits the raw numeric string via e.target.value and exposes the formatted display value via e.target.formattedValue.',
+          'How Numora React emits the raw numeric string in e.target.value and exposes the formatted display value in e.target.formattedValue.',
       },
       {
         property: 'og:title',
-        content: 'Raw vs Formatted Value - React Numeric Input Output Types | numora-react',
+        content: 'Value types | Numora React',
       },
       {
         property: 'og:description',
         content:
-          'numora-react emits the raw numeric string via e.target.value in onChange. Access the formatted display value via e.target.formattedValue or a ref.',
+          'How Numora React emits the raw numeric string in e.target.value and exposes the formatted display value in e.target.formattedValue.',
       },
       {
         property: 'og:url',
@@ -25,12 +25,12 @@ export const Route = createFileRoute('/docs/numora-react/features/value-types')(
       },
       {
         name: 'twitter:title',
-        content: 'Raw vs Formatted Value - React Numeric Input Output Types | numora-react',
+        content: 'Value types | Numora React',
       },
       {
         name: 'twitter:description',
         content:
-          'numora-react emits the raw numeric string via e.target.value. Access the formatted display value via e.target.formattedValue.',
+          'How Numora React emits the raw numeric string in e.target.value and exposes the formatted display value in e.target.formattedValue.',
       },
     ],
     links: [
@@ -46,9 +46,9 @@ export const Route = createFileRoute('/docs/numora-react/features/value-types')(
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Raw vs Formatted Value in numora-react - React Numeric Input Output Types',
+            headline: 'Value types | Numora React',
             description:
-              'Understand value types in numora-react. e.target.value returns raw numeric strings for math; e.target.formattedValue returns the display string with separators.',
+              'Value types in Numora React. e.target.value is the raw numeric string for math; e.target.formattedValue is the display string with separators.',
             url: 'https://numeric-input.com/docs/numora-react/features/value-types',
             author: {
               '@type': 'Person',
@@ -70,7 +70,7 @@ export const Route = createFileRoute('/docs/numora-react/features/value-types')(
               {
                 '@type': 'ListItem',
                 position: 3,
-                name: 'Value Types',
+                name: 'Value types',
                 item: 'https://numeric-input.com/docs/numora-react/features/value-types',
               },
             ],
@@ -84,56 +84,39 @@ export const Route = createFileRoute('/docs/numora-react/features/value-types')(
 
 function ValueTypes() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Value Types</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Numora always works with strings. <code>e.target.value</code> in <code>onChange</code> is
-        always the <strong>raw numeric string</strong> - separators stripped, ready to parse or
-        store. The formatted display string lives in <code>e.target.formattedValue</code>.
+    <div className="docs-prose max-w-[40rem]">
+      <h1>Value types</h1>
+      <p>
+        Numora React always works with strings. In <code>onChange</code>,{' '}
+        <code>e.target.value</code> is always the <strong>raw numeric string</strong>. Thousand
+        separators are stripped, so you can parse or store it with the default <code>.</code> decimal
+        separator. With a custom <code>decimalSeparator</code> or a <code>locale</code>, the raw
+        value keeps that separator, so normalize it to <code>.</code> first. The formatted display string is in <code>e.target.formattedValue</code>.
       </p>
 
-      <h2 className="text-foreground text-2xl">e.target.value - raw numeric string</h2>
-      <p className="text-muted-foreground text-base leading-6">
+      <h2>e.target.value and e.target.formattedValue</h2>
+      <p>
         <code>onChange</code> fires a <code>NumoraInputChangeEvent</code> (structurally compatible
         with React's <code>ChangeEvent&lt;HTMLInputElement&gt;</code>). <code>e.target.value</code>{' '}
-        returns the raw numeric string - separators removed - so you can pass it directly to a form
-        library or state setter without post-processing.
-      </p>
-      <CodeBlock language="tsx">
-        {`import { NumoraInput } from 'numora-react'
-
-<NumoraInput
-  thousandSeparator=","
-  maxDecimals={2}
-  onChange={(e) => {
-    console.log(e.target.value) // "1234.56" - no separators
-  }}
-/>`}
-      </CodeBlock>
-
-      <h2 className="text-foreground text-2xl">e.target.formattedValue - formatted display string</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        The formatted value (with separators) is available as <code>e.target.formattedValue</code>{' '}
-        via the typed <code>NumoraHTMLInputElement</code> export. This is the same string visible in
-        the input.
+        is the raw numeric string, so you can pass it to a form library or state setter without
+        post-processing. <code>e.target.formattedValue</code>, available through the typed{' '}
+        <code>NumoraHTMLInputElement</code> export, is the string the input shows.
       </p>
       <CodeBlock language="tsx">
         {`import { NumoraInput, type NumoraHTMLInputElement } from 'numora-react'
 
 <NumoraInput
-  thousandSeparator=","
-  maxDecimals={2}
   onChange={(e) => {
-    console.log(e.target.value)                                   // "1234.56" - raw
-    console.log((e.target as NumoraHTMLInputElement).formattedValue) // "1,234.56" - formatted
+    console.log(e.target.value)                                      // "1234.56" (raw)
+    console.log((e.target as NumoraHTMLInputElement).formattedValue) // "1,234.56" (formatted)
   }}
 />`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">Reading the formatted value via ref</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        You can also read the formatted value at any time via a ref - useful when you need it
-        outside of an <code>onChange</code> handler:
+      <h2>Reading the formatted value via ref</h2>
+      <p>
+        You can also read the formatted value at any time through a ref, for example outside an{' '}
+        <code>onChange</code> handler:
       </p>
       <CodeBlock language="tsx">
         {`import { useRef } from 'react'
@@ -145,8 +128,6 @@ function App() {
   return (
     <NumoraInput
       ref={ref}
-      thousandSeparator=","
-      maxDecimals={2}
       onChange={() => {
         console.log((ref.current as NumoraHTMLInputElement).formattedValue) // "1,234.56"
       }}
@@ -155,39 +136,39 @@ function App() {
 }`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">valueAsNumber</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Need a <code>number</code>? Access <code>valueAsNumber</code> via a ref. It strips
-        separators and calls <code>parseFloat</code> internally.
+      <h2>Parsing the value</h2>
+      <p>
+        Numora React does not provide a numeric value such as <code>valueAsNumber</code>. Parse{' '}
+        <code>e.target.value</code> yourself with a decimal library:
       </p>
       <CodeBlock language="tsx">
-        {`import { useRef } from 'react'
+        {`import Decimal from 'decimal.js'
 import { NumoraInput } from 'numora-react'
 
-function App() {
-  const ref = useRef<HTMLInputElement>(null)
-
-  const handleSubmit = () => {
-    console.log((ref.current as any).valueAsNumber) // 1234.56
-  }
-
-  return <NumoraInput ref={ref} thousandSeparator="," maxDecimals={2} />
-}`}
+<NumoraInput
+  onChange={(e) => {
+    const raw = e.target.value
+    // skip intermediate states such as "", "-" or "."
+    if (!/^-?\\d+(\\.\\d+)?$/.test(raw)) return
+    const amount = new Decimal(raw) // exact, no float rounding
+    console.log(amount.toString())
+  }}
+/>`}
       </CodeBlock>
-      <p className="text-muted-foreground text-base leading-6">
-        <strong>Precision warning:</strong> <code>parseFloat</code> is subject to IEEE 754 limits.
-        Integers above <code>Number.MAX_SAFE_INTEGER</code> and long decimals may silently lose
-        precision. For financial arithmetic, use the string from <code>e.target.value</code> with a
-        decimal library such as <code>decimal.js</code>.
+      <p>
+        Avoid <code>Number()</code> and <code>parseFloat</code>.
+        They are subject to IEEE 754 limits, so integers above{' '}
+        <code>Number.MAX_SAFE_INTEGER</code> and long decimals may silently lose precision.
       </p>
 
-      <h3 className="text-foreground">Numeric value and defaultValue props</h3>
-      <p className="text-muted-foreground text-base leading-6">
+      <h2>Numeric value and defaultValue props</h2>
+      <p>
         <code>value</code> and <code>defaultValue</code> accept a <code>string</code> or a{' '}
-        <code>number</code>. A string is used as-is and must already be written with the configured{' '}
-        <code>decimalSeparator</code>. A number is converted for you, so{' '}
-        <code>value={'{1234.5}'}</code> under <code>locale="de-DE"</code> displays{' '}
-        <code>1.234,5</code>. Prefer strings when the value comes from a decimal library.
+        <code>number</code>. Both are converted with <code>String(value)</code> and used as-is, so a
+        number is always dot-decimal: <code>value={'{1234.5}'}</code> is read as{' '}
+        <code>"1234.5"</code>. With a non-dot <code>decimalSeparator</code> (or a locale such as{' '}
+        <code>de-DE</code>), pass a string already written in that format, for example{' '}
+        <code>value="1234,5"</code>. Prefer strings when the value comes from a decimal library.
       </p>
     </div>
   );

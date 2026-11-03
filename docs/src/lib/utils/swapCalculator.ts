@@ -1,6 +1,11 @@
 import type { PriceData } from '../services/priceService';
 import type { TokenSymbol } from '../constants/tokens';
 
+/** "0.02940500" -> "0.029405", "1.000" -> "1". */
+function trimTrailingZeros(value: string): string {
+  return value.includes('.') ? value.replace(/\.?0+$/, '') : value;
+}
+
 export function calculateSwapAmount(
   fromAmount: string,
   fromToken: TokenSymbol,
@@ -22,7 +27,7 @@ export function calculateSwapAmount(
   const fromValueUSD = parseFloat(fromAmount) * fromPrice;
   const toTokenAmount = fromValueUSD / toPrice;
 
-  return toTokenAmount.toFixed(toDecimals);
+  return trimTrailingZeros(toTokenAmount.toFixed(toDecimals));
 }
 
 export function calculateReverseSwapAmount(
@@ -46,7 +51,7 @@ export function calculateReverseSwapAmount(
   const toValueUSD = parseFloat(toAmount) * toPrice;
   const fromTokenAmount = toValueUSD / fromPrice;
 
-  return fromTokenAmount.toFixed(fromDecimals);
+  return trimTrailingZeros(fromTokenAmount.toFixed(fromDecimals));
 }
 
 export function calculateExchangeRate(

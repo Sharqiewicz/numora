@@ -1,6 +1,7 @@
 import { CodeBlock } from '@/components/CodeBlock';
 import { FormatOn, ThousandStyle } from 'numora';
 import { NumoraInput } from 'numora-react';
+import { DiagramFrame, demoInputClass } from '../kit';
 
 export function BeforeInputSection() {
   return (
@@ -9,25 +10,25 @@ export function BeforeInputSection() {
         <code>beforeinput</code> + undo/redo
       </h2>
       <p>
-        <code>beforeinput</code> was added to the DOM spec in 2016 specifically because developers
-        had been abusing <code>keydown</code> for input manipulation for two decades - breaking undo
-        history, IME input, and accessibility along the way. Numora's primary path runs entirely
-        through <code>beforeinput</code> for three reasons:
+        Formatting from <code>keydown</code> breaks undo history, IME input and accessibility
+        tools. Numora's primary path runs through <code>beforeinput</code> instead, for three
+        reasons:
       </p>
       <ol>
         <li>It is cancelable.</li>
         <li>
           When you write the formatted value with <code>setRangeText</code> after cancelling, the
-          browser records a single atomic undo entry - Ctrl+Z restores the previous value perfectly.
+          browser records a single atomic undo entry. Ctrl/Cmd+Z restores the previous value in one step.
         </li>
         <li>
           It fires for every input vector: keyboard, voice dictation, drag-and-drop, virtual
-          keyboards, autocorrect, IME - even when <code>keydown</code> doesn't fire at all.
+          keyboards, autocorrect and IME, including cases where <code>keydown</code> never fires.
         </li>
       </ol>
       <p>
-        The <code>inputType</code> values Numora dispatches on:
+        Numora branches on these <code>inputType</code> values:
       </p>
+      <div className="overflow-x-auto">
       <table>
         <thead>
           <tr>
@@ -64,14 +65,14 @@ export function BeforeInputSection() {
             <td>
               <code>deleteByCut</code>
             </td>
-            <td>Ctrl+X</td>
+            <td>Ctrl/Cmd+X</td>
             <td>Remove selection, format, apply</td>
           </tr>
           <tr>
             <td>
               <code>insertFromPaste</code>
             </td>
-            <td>Ctrl+V</td>
+            <td>Ctrl/Cmd+V</td>
             <td>
               Defer to dedicated <code>paste</code> handler
             </td>
@@ -80,44 +81,58 @@ export function BeforeInputSection() {
             <td>
               <code>historyUndo</code> / <code>historyRedo</code>
             </td>
-            <td>Ctrl+Z / Ctrl+Y</td>
+            <td>Ctrl/Cmd+Z / Ctrl+Y (Cmd+Shift+Z)</td>
             <td>Pass through; let the browser restore</td>
           </tr>
         </tbody>
       </table>
-      <p>The handler runs in nine steps:</p>
+      </div>
+      <p>
+        The handler (<code>handleOnBeforeInputNumoraInput</code>) is a pure function: it never
+        touches the DOM or the event. It returns a tagged result, and the caller applies it:
+      </p>
       <CodeBlock language="text">
-        {`1. Early return for paste/drop      → dedicated paste handler takes over
+        {`1. paste / drop / unknown inputType   → { type: 'skip' }
+                                                (browser or paste handler continues)
 2. Read currentValue, selectionStart/End from the DOM
-3. Special-case decimal separator   → convert ',' or '.' to configured sep,
-                                      block second decimal if one exists
-4. Compute intendedValue per inputType:
-     insertText            → splice data at cursor
+3. Decimal separator typed (',' or '.')
+     second decimal separator            → { type: 'reject' }
+     otherwise                           → convert to the configured separator
+4. Digit typed past the decimal cap      → { type: 'reject' }
+5. Compute intendedValue per inputType:
+     insertText            → splice data at the cursor
      deleteContentBackward → remove char before cursor (or selection)
      deleteContentForward  → remove char after cursor (or selection)
      deleteByCut/Drag      → remove selection
-     default               → return null (browser handles natively)
-5. e.preventDefault()                → block the browser mutation
-6. formatInputValue(intendedValue)   → sanitize → trim → apply separators
-7. target.setRangeText(formatted, 0, currentValue.length, 'end')
-                                     → atomic replace, single undo entry
-8. computeCursorPosition(...)        → select(new, rank(old, caret)) restores the caret
-9. Return { formatted, raw }`}
+     line deletions        → remove to line start / end
+6. maxLength exceeded on insert          → { type: 'reject' }
+7. formatInputValue(intendedValue)       → sanitize → trim → apply separators
+8. isAllowed(raw) returns false          → { type: 'reject' }
+9. computeCursorPosition(...)            → where the cursor should land
+10. { type: 'handled', formatted, raw, cursorPos }`}
       </CodeBlock>
       <p>
-        Try it: type <code>1234567</code> below, then press <kbd>Ctrl</kbd>+<kbd>Z</kbd>. The
-        browser restores <em>both</em> the digit and the comma in a single undo step:
+        On <code>reject</code> the caller calls <code>preventDefault()</code> and leaves the value
+        alone. On <code>handled</code> it calls <code>preventDefault()</code>, writes{' '}
+        <code>formatted</code> with <code>setRangeText(formatted, 0, currentValue.length, 'end')</code>{' '}
+        (one atomic undo entry), sets the cursor to <code>cursorPos</code>, and notifies{' '}
+        <code>onChange</code> with <code>raw</code> or <code>formatted</code>.
       </p>
-      <div className="my-6 rounded-lg border bg-muted/30 p-4">
+      <p>
+        Type <code>1234567</code> below, then press <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Z</kbd>. The
+        browser undoes the digit and the comma it added in a single step:
+      </p>
+      <DiagramFrame variant="demo">
         <NumoraInput
           formatOn={FormatOn.Change}
           thousandSeparator=","
           thousandStyle={ThousandStyle.Thousand}
           maxDecimals={2}
-          placeholder="Type 1234567, then Ctrl+Z"
-          className="w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring"
+          aria-label="Undo test input"
+          placeholder="1234567"
+          className={demoInputClass}
         />
-      </div>
+      </DiagramFrame>
     </section>
   );
 }

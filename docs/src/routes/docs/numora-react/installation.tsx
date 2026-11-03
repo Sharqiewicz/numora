@@ -3,35 +3,33 @@ import { InstallTabs } from '@/components/InstallTabs';
 import { CodeBlock } from '@/components/CodeBlock';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
 import { FormatOn } from 'numora';
-import CHEVRON_RIGHT from '@/assets/chevron-right.svg';
-import { Button } from '@/components/ui/button';
 
 export const Route = createFileRoute('/docs/numora-react/installation')({
   head: () => ({
     meta: [
-      { title: 'Install numora-react - React Numeric Input Component Setup' },
+      { title: 'Installation | Numora React' },
       {
         name: 'description',
         content:
-          'Add a precision-ready React numeric input component to your project in under a minute. Install numora-react, drop in NumoraInput, and get live number formatting with zero extra dependencies.',
+          'Add a React numeric input component to your project. Install Numora React, render NumoraInput, and get live number formatting with no dependencies beyond its peers react and numora.',
       },
       {
         property: 'og:title',
-        content: 'Install numora-react - React Numeric Input Component Setup',
+        content: 'Installation | Numora React',
       },
       {
         property: 'og:description',
         content:
-          'Install numora-react and drop in NumoraInput for precision number formatting in any React project. Zero extra dependencies, TypeScript-first.',
+          'Install Numora React and render NumoraInput for string-based number formatting in any React project. No dependencies beyond its peers react and numora. Written for TypeScript.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/installation' },
       {
         name: 'twitter:title',
-        content: 'Install numora-react - React Numeric Input Component Setup',
+        content: 'Installation | Numora React',
       },
       {
         name: 'twitter:description',
-        content: 'Drop-in React numeric input component. Live number formatting in minutes.',
+        content: 'React numeric input component with live number formatting.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/installation' }],
@@ -42,9 +40,9 @@ export const Route = createFileRoute('/docs/numora-react/installation')({
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Install numora-react - React Numeric Input Component Setup',
+            headline: 'Installation | Numora React',
             description:
-              'Step-by-step installation guide for numora-react, the React numeric input component.',
+              'Installation guide for Numora React, the React numeric input component.',
             url: 'https://numeric-input.com/docs/numora-react/installation',
             author: {
               '@type': 'Person',
@@ -80,21 +78,23 @@ export const Route = createFileRoute('/docs/numora-react/installation')({
 
 function Installation() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Install numora-react</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Drop a precision-ready numeric input component into any React project in under a minute.
+    <div className="docs-prose max-w-[40rem]">
+      <h1>Installation</h1>
+      <p>
+        Install Numora React and render <code>NumoraInput</code> in any React project.
       </p>
 
-      <h2 className="text-foreground text-2xl">Install</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        numora-react has one peer dependency: <code>numora</code> (the core engine). Both are
-        installed together. Pick your package manager:
+      <h2>Install</h2>
+      <p>
+        Numora React has peer dependencies on <code>react</code> (17 or later), <code>numora</code>{' '}
+        (3.5.0 or later, the core engine), and optionally <code>react-dom</code> (17 or later). The
+        command below installs <code>numora</code> and <code>numora-react</code> together. Pick your
+        package manager:
       </p>
 
       <InstallTabs packages="numora numora-react" />
 
-      <h3 className="text-foreground">Basic Usage</h3>
+      <h2>Basic usage</h2>
       <ExampleWithDemo
         code={`import { NumoraInput, FormatOn } from 'numora-react'
 
@@ -111,13 +111,14 @@ function App() {
           formatOn: FormatOn.Change,
           maxDecimals: 2,
         }}
-        description="Try typing a number to see formatting in action"
+        description="Type a number to see it formatted"
       />
 
-      <h2 className="text-foreground text-2xl">Controlled component</h2>
-      <p className="text-muted-foreground text-base leading-6">
+      <h2>Controlled component</h2>
+      <p>
         Use <code>useState</code> with <code>NumoraInput</code> like any controlled input. The raw
-        value (no separators) lives in <code>e.target.value</code>:
+        value (no separators) is in <code>e.target.value</code>. See{' '}
+        <Link to="/docs/numora-react">Get started</Link> for raw vs formatted values:
       </p>
       <CodeBlock language="tsx">
         {`import { useState } from 'react'
@@ -134,69 +135,24 @@ function AmountField() {
         maxDecimals={6}
         formatOn={FormatOn.Change}
       />
-      <p className="text-muted-foreground text-base leading-6">Raw value: {amount}</p>
+      <p>Raw value: {amount}</p>
     </>
   )
 }`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">What you get</h2>
-      <ul className="list-disc list-inside">
-        <li>
-          <code>e.target.value</code> - raw numeric string, no separators (safe for BigNumber,
-          ethers, viem)
-        </li>
-        <li>
-          <code>e.target.formattedValue</code> - display string with thousand separators
-        </li>
-        <li>
-          <strong>forwardRef support</strong> - pass refs through to the underlying input
-        </li>
-        <li>
-          <strong>All standard HTML input props</strong> - <code>placeholder</code>,{' '}
-          <code>disabled</code>, <code>className</code>, <code>aria-*</code>, etc.
-        </li>
-        <li>
-          <strong>React Hook Form compatible</strong> - works via <code>Controller</code>
-        </li>
-        <li>
-          <strong>TypeScript-first</strong> - every prop and event is typed
-        </li>
-      </ul>
-
-      <h2 className="text-foreground text-2xl">TypeScript</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        <code>NumoraInput</code> accepts all standard <code>HTMLInputElement</code> props plus{' '}
-        <code>FormattingOptions</code>. Import types directly from <code>numora-react</code>:
+      <h2>TypeScript</h2>
+      <p>
+        Types ship with the package. Import them from <code>numora-react</code>:
       </p>
       <CodeBlock language="typescript">
         {`import type {
   FormattingOptions,
+  NumoraInputProps,
   NumoraInputChangeEvent,
   NumoraHTMLInputElement,
 } from 'numora-react'`}
       </CodeBlock>
-
-      <hr />
-
-      <h2 className="text-foreground text-2xl">Next Steps</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Read <Link to="/docs/numora-react/how-it-works" className="underline link-underline hover:text-foreground transition-colors">How It Works</Link> to understand the React
-        event architecture, or jump to{' '}
-        <Link to="/docs/numora-react/features/formatting" className="underline link-underline hover:text-foreground transition-colors">Formatting</Link> features.
-      </p>
-      <div className="flex items-center gap-2 my-8">
-        <Link to="/docs/numora-react/how-it-works">
-          <Button variant="default">
-            How It Works <img src={CHEVRON_RIGHT} alt="Chevron Right" className="w-4 h-4" />
-          </Button>
-        </Link>
-        <Link to="/docs/numora-react/integrations/react-hook-form">
-          <Button variant="outline">
-            React Hook Form <img src={CHEVRON_RIGHT} alt="Chevron Right" className="w-4 h-4" />
-          </Button>
-        </Link>
-      </div>
     </div>
   );
 }

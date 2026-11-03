@@ -1,4 +1,5 @@
-import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
+import { useEffect } from 'react';
+import { Link, useRouter, useRouterState, useNavigate } from '@tanstack/react-router';
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import {
   Rocket,
@@ -17,6 +18,7 @@ import {
   Layers,
   Ruler,
   CheckCircle,
+  Binary,
 } from 'lucide-react';
 import {
   SidebarContent,
@@ -26,6 +28,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { TabsClipPath } from './TabsClipPath';
 import { PackageTab, usePackage } from '@/contexts/PackageContext';
@@ -36,7 +39,7 @@ const navigation = [
     title: 'Overview',
     items: [
       {
-        title: 'Get Started',
+        title: 'Get started',
         href: '/docs',
         icon: Rocket,
       },
@@ -71,7 +74,7 @@ const navigation = [
         icon: Type,
       },
       {
-        title: 'Value Types',
+        title: 'Value types',
         href: '/docs/features/value-types',
         icon: FileDigit,
       },
@@ -86,22 +89,22 @@ const navigation = [
         icon: Globe,
       },
       {
-        title: 'Compact Notation',
+        title: 'Compact notation',
         href: '/docs/features/compact-notation',
         icon: Minimize2,
       },
       {
-        title: 'Scientific Notation',
+        title: 'Scientific notation',
         href: '/docs/features/scientific-notation',
         icon: FunctionSquare,
       },
       {
-        title: 'Leading Zeros',
+        title: 'Leading zeros',
         href: '/docs/features/leading-zeros',
         icon: Hash,
       },
       {
-        title: 'Max Length',
+        title: 'Max length',
         href: '/docs/features/max-length',
         icon: Ruler,
       },
@@ -125,6 +128,11 @@ const navigation = [
         title: 'Torph',
         href: '/docs/integrations/torph',
         icon: Wand2,
+      },
+      {
+        title: 'NumberFlow',
+        href: '/docs/integrations/number-flow',
+        icon: Binary,
       },
     ],
   },
@@ -164,10 +172,19 @@ const frameworkTabs: PackageTab[] = ['core', 'react'];
 export function DocsSidebar() {
   const router = useRouterState();
   const navigate = useNavigate();
+  const { routesByPath } = useRouter();
   const currentPath = router.location.pathname;
   const { selectedPackage, setSelectedPackage, getPackageRoutePrefix } = usePackage();
   const packagePrefix = getPackageRoutePrefix();
   const shouldReduceMotion = useReducedMotion();
+  const { setOpenMobile } = useSidebar();
+
+  // Close the mobile sheet once a link has navigated, so the new page isn't
+  // left hidden behind it.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: currentPath is the trigger, not an input
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [currentPath, setOpenMobile]);
 
   const handlePackageChange = (tab: string) => {
     const newPackage = tab as typeof selectedPackage;
@@ -177,12 +194,15 @@ export function DocsSidebar() {
     if (page !== null) {
       const newPrefix = newPackage === 'react' ? 'numora-react' : 'numora';
       const newPath = buildPackagePath(page, newPrefix);
-      navigate({ to: newPath });
+      // Some pages exist for one package only (frameworks/*, react-hook-form);
+      // fall back to the package index instead of navigating to a 404.
+      const exists = newPath in routesByPath || `${newPath}/` in routesByPath;
+      navigate({ to: exists ? newPath : buildPackagePath('', newPrefix) });
     }
   };
 
   return (
-    <SidebarContent>
+    <SidebarContent role="navigation" aria-label="Documentation">
       <TabsClipPath
         tabs={frameworkTabs}
         activeTab={selectedPackage}
@@ -229,7 +249,7 @@ export function DocsSidebar() {
                         <SidebarMenuButton
                           asChild
                           isActive={isActive}
-                          className="data-[active=true]:bg-transparent"
+                          className="data-[active=true]:bg-transparent max-md:h-10"
                         >
                           <Link to={packageHref}>
                             <Icon />

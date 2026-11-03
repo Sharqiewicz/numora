@@ -16,7 +16,7 @@ export function BrokenInput({
   mode,
   value,
   onChange,
-  placeholder = 'Type here...',
+  placeholder = '1234.56',
   className,
   onCursorChange,
 }: BrokenInputProps) {
