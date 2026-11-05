@@ -73,9 +73,9 @@ export const Route = createFileRoute('/docs/numora/installation')({
 
 function Installation() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Install Numora - Numeric Input</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         Add the numora JavaScript numeric input library to any project - no framework required.
       </p>
 

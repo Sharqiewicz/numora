@@ -72,9 +72,9 @@ const ANATOMY = '/docs/numora/anatomy';
 
 function HowItWorks() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>How It Works</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         A scannable reference for Numora's event handlers, sanitization steps, formatting stages,
         and value output. For the long-form narrative with diagrams and demos, see{' '}
         <Link to={ANATOMY}>Anatomy of a Numeric Input</Link>.

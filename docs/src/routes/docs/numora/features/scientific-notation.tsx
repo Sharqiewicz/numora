@@ -77,9 +77,9 @@ export const Route = createFileRoute('/docs/numora/features/scientific-notation'
 
 function ScientificNotation() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Scientific Notation</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         Numora always expands scientific notation to decimal notation. This is automatic and cannot
         be disabled. Expansion uses string arithmetic, so there is no floating-point precision loss.
       </p>

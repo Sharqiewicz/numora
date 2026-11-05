@@ -77,9 +77,9 @@ export const Route = createFileRoute('/docs/numora-react/features/compact-notati
 
 function CompactNotation() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Compact Notation</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         When enabled, pasting shorthand values like <code>"1k"</code> or <code>"2.5m"</code> expands
         them to full numbers. Expansion uses string arithmetic - no precision loss.
       </p>

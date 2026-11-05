@@ -77,9 +77,9 @@ export const Route = createFileRoute('/docs/numora-react/features/leading-zeros'
 
 function LeadingZeros() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Leading Zeros</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         By default, Numora strips leading zeros from the integer part of a number. Set{' '}
         <code>enableLeadingZeros</code> to preserve them.
       </p>

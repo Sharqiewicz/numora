@@ -114,9 +114,9 @@ export const Route = createFileRoute('/docs/numora/frameworks/angular')({
 
 function AngularIntegration() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Angular Numeric Input</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         <strong className="font-numora">Numora</strong> is a precision-first{' '}
         <strong>Angular numeric input</strong> library: thousand separators, decimal limits, paste
         sanitisation, scientific-notation expansion and cursor preservation – wrapped in a
@@ -142,7 +142,7 @@ npm install numora`}
         Forms with no extra glue:
       </p>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         <code>src/app/numora.directive.ts</code>:
       </p>
       <CodeBlock language="ts">
@@ -286,7 +286,7 @@ export class AmountFormComponent {
 }`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Numora adopts the <code>&lt;input&gt;</code> and forces the required attributes (
         <code>type</code>, <code>inputmode</code>, <code>spellcheck</code>,{' '}
         <code>autocomplete</code>, <code>pattern</code>). The <code>ControlValueAccessor</code>{' '}
@@ -296,7 +296,7 @@ export class AmountFormComponent {
         <code>enable()</code> – everything Angular Forms expects.
       </p>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Because the <code>&lt;input&gt;</code> is yours, set <code>placeholder</code>,{' '}
         <code>aria-label</code>, <code>name</code> or any other attribute on it directly in the
         template.
@@ -400,7 +400,7 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
 }`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Note <code>encapsulation: ViewEncapsulation.None</code> - Numora creates the{' '}
         <code>&lt;input&gt;</code> at runtime, so Angular&apos;s default shadow-DOM-style attribute
         scoping can&apos;t reach it. The <code>beforeinput</code> microtask + <code>input</code>{' '}

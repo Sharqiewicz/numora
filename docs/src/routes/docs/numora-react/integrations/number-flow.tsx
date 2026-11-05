@@ -114,9 +114,9 @@ export const Route = createFileRoute('/docs/numora-react/integrations/number-flo
 
 function NumberFlowIntegration() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>NumberFlow Integration with Numora React</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         <a href={LIB_URL} target="_blank" rel="noreferrer noopener">
           <strong>NumberFlow</strong> by Maxwell Barvian
         </a>{' '}
@@ -128,7 +128,7 @@ function NumberFlowIntegration() {
       </p>
 
       <NumberFlowOverlayDemo />
-      <p className="text-center text-sm text-muted-foreground -mt-12 mb-12">
+      <p className="text-center text-sm -mt-12 mb-12">
         <code>FormatOn.Change</code> - digits animate on every keystroke.
       </p>
 

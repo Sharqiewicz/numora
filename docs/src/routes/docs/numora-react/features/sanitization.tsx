@@ -78,9 +78,9 @@ export const Route = createFileRoute('/docs/numora-react/features/sanitization')
 
 function Sanitization() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Sanitization</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         Numora sanitizes every value through a sequential pipeline before formatting is applied. For
         the full architecture and pipeline diagram, see{' '}
         <Link to="/docs/numora/anatomy" hash="sanitization">

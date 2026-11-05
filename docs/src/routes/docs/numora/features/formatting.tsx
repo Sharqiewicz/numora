@@ -78,9 +78,9 @@ export const Route = createFileRoute('/docs/numora/features/formatting')({
 
 function Formatting() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Formatting</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         Numora formats numbers with thousand separators as the user types, preserving cursor
         position throughout.
       </p>

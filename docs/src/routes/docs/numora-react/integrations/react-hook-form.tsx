@@ -79,9 +79,9 @@ export const Route = createFileRoute('/docs/numora-react/integrations/react-hook
 
 function ReactHookFormIntegration() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>React Hook Form Integration</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         Learn how to use NumoraInput with react-hook-form using the recommended{' '}
         <code>Controller</code> pattern.
       </p>

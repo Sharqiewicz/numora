@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import { TextMorph } from 'torph/react';
 import { MorphCode } from '@/components/MorphCode';
+import { CopyButton } from '@/components/CopyButton';
 
 /**
  * Pill button used to switch between morphing code examples
@@ -23,26 +22,17 @@ interface MorphCodeBlockProps {
 }
 
 /**
- * Syntax-highlighted code block whose content morphs between values, with a
- * morphing "Copy" → "Copied" button (mirrors the CodeBlock on the Torph site).
+ * Syntax-highlighted code block whose content morphs between values.
  */
 export function MorphCodeBlock({ code, language = 'typescript' }: MorphCodeBlockProps) {
-  const [isCopied, setIsCopied] = useState(false);
-
   return (
-    <div className="relative w-full">
-      <button
-        type="button"
-        onClick={() => {
-          setIsCopied(true);
-          navigator.clipboard.writeText(code);
-          setTimeout(() => setIsCopied(false), 2000);
-        }}
-        className="absolute right-0 top-0 z-10 p-[0.85rem] text-xs font-medium tracking-[-0.00563rem] text-muted-foreground hover:text-white transition-colors duration-200 cursor-pointer"
-      >
-        <TextMorph>{isCopied ? 'Copied' : 'Copy'}</TextMorph>
-      </button>
-      <pre className="relative block w-full m-0 px-4 py-3 text-white bg-surface-1 rounded-xl [corner-shape:superellipse(1.25)] font-mono text-[0.8125rem] font-light leading-[1.4] max-h-[11.75rem] overflow-y-auto">
+    <div className="group relative w-full">
+      <CopyButton
+        className="absolute top-2 right-2 z-10 p-1.5! opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
+        noBorder
+        text={code}
+      />
+      <pre className="relative block w-full m-0 px-4 py-3 pr-12 text-white bg-surface-1 rounded-xl [corner-shape:superellipse(1.25)] font-mono text-[0.8125rem] font-light leading-[1.4] max-h-[11.75rem] overflow-y-auto">
         <MorphCode code={code} language={language} />
       </pre>
     </div>

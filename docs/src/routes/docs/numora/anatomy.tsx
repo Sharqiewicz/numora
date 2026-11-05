@@ -83,7 +83,7 @@ export const Route = createFileRoute('/docs/numora/anatomy')({
 function Anatomy() {
   const pkg = 'numora' as const;
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <Hero pkg={pkg} />
       <div className="space-y-16">
         {/* Act 1 - Why this exists */}

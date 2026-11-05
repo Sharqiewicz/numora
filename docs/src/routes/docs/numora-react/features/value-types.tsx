@@ -84,9 +84,9 @@ export const Route = createFileRoute('/docs/numora-react/features/value-types')(
 
 function ValueTypes() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Value Types</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         Numora always works with strings. <code>e.target.value</code> in <code>onChange</code> is
         always the <strong>raw numeric string</strong> - separators stripped, ready to parse or
         store. The formatted display string lives in <code>e.target.formattedValue</code>.

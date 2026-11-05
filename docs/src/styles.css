@@ -584,4 +584,31 @@ body {
   .prose code[class*="language-"] {
     @apply bg-transparent p-0 rounded-none text-sm font-mono shadow-none;
   }
+
+  .prose-article {
+    @apply max-w-xl;
+  }
+
+  .prose-article h1,
+  .prose-article h2,
+  .prose-article h3 {
+    @apply text-stone-100;
+  }
+
+  .prose-article p {
+    @apply text-stone-400 leading-6;
+  }
+
+  .prose-article p:not(.text-sm) {
+    @apply text-base;
+  }
+
+  .prose-article ul,
+  .prose-article ol {
+    @apply text-stone-400 text-base leading-6;
+  }
+
+  .prose-article a {
+    @apply underline text-stone-400! hover:text-stone-100!;
+  }
 }

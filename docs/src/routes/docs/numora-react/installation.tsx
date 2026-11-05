@@ -80,9 +80,9 @@ export const Route = createFileRoute('/docs/numora-react/installation')({
 
 function Installation() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Install numora-react - React Numeric Input</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         Drop a precision-ready numeric input component into any React project in under a minute.
       </p>
 

@@ -34,7 +34,7 @@ function App() {
 - [Sanitization](https://numora.xyz/docs/numora-react/features/sanitization) - filters invalid characters and mobile keyboard artifacts
 - [Formatting](https://numora.xyz/docs/numora-react/features/formatting) - thousand separators (Thousand/Lakh/Wan), format on blur or change
 - [Decimals](https://numora.xyz/docs/numora-react/features/decimals) - configurable max decimal places and custom decimal separator
-- [Compact Notation](https://numora.xyz/docs/numora-react/features/compact-notation) - expands "1k" → "1000" on paste (opt-in)
+- [Compact Notation](https://numora.xyz/docs/numora-react/features/compact-notation) - expands "1k" → "1000" on paste (opt-in); a suffix is only expanded when it isn't itself followed by a digit or decimal separator, so typing `k` mid-number (e.g. "1k5") doesn't scale the prefix
 - [Scientific Notation](https://numora.xyz/docs/numora-react/features/scientific-notation) - always expands "1.5e-7" → "0.00000015" automatically
 - [Leading Zeros](https://numora.xyz/docs/numora-react/features/leading-zeros) - configurable leading zero behavior
 - [React Hook Form](https://numora.xyz/docs/numora-react/integrations/react-hook-form) - seamless integration via the `Controller` pattern
@@ -55,16 +55,18 @@ function App() {
 | `enableLeadingZeros` | `boolean` | `false` | Allow leading zeros |
 | `autoAddLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |
 | `maxLength` | `number` | `undefined` | Max raw length (digits + decimal separator + leading `-`; thousand separators not counted) |
-| `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject a keystroke/paste when it returns false (called with the post-sanitization raw value) |
+| `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject a keystroke/paste when it returns false (called with the post-sanitization raw value). A callback that throws is treated as "not allowed" (the keystroke is rejected) and the error is reported via `console.error` |
 | `locale` | `LocaleTag \| true` | `undefined` | Derive separators from `Intl.NumberFormat`; `true` uses the runtime default locale |
 | `onChange` | `(e: NumoraInputChangeEvent) => void` | `undefined` | Synthetic change event. `e.target.value` is raw; `e.target.formattedValue` is the display string |
 | `onValueChange` | `(values: { value: string; formattedValue: string }) => void` | `undefined` | Plain-object value callback, fired alongside `onChange` |
 
-All standard `HTMLInputElement` props are supported except `type` (always `'text'`) and `inputMode` (always `'decimal'`).
+All standard `HTMLInputElement` props are supported except `type` (always `'text'`) and `inputMode` (always `'decimal'`). A string `value` / `defaultValue` is already in the field's **display** format (locale separators allowed, grouping optional); a numeric `value` / `defaultValue` is always dot-decimal in JS, so it is converted to the configured decimal separator before formatting - `<NumoraInput locale="de-DE" value={1234.5} />` displays `"1.234,5"`, not `"12.345"`.
 
 In `onChange`, `e.target.value` is always the **raw** (unformatted) numeric string and `e.target.formattedValue` is the formatted display string (e.g. `"1,234.56"`). There is no `rawValueMode` toggle: the raw value is always available on the event.
 
 > **Note:** `e.target.value` (raw) is the inverse of reading the DOM node directly — `inputRef.current.value` returns the **formatted** string that's rendered. Use the `onChange` event or `onValueChange` for the raw value; read the ref only when you want the displayed text.
+
+A `readOnly` or `disabled` input ignores paste entirely (no write, no `onChange`), matching native `<input>` behavior.
 
 ## Documentation
 

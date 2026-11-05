@@ -76,9 +76,9 @@ export const Route = createFileRoute('/docs/numora-react/features/max-length')({
 
 function MaxLength() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Max Length</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         Cap the input by raw character count - thousand separators are excluded from the limit, so
         the cap reflects the actual numeric value rather than the formatted display.
       </p>

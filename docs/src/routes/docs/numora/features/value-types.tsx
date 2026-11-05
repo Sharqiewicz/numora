@@ -78,9 +78,9 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
 
 function ValueTypes() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Value Types</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         Numora always works with strings. <code>onChange</code> emits a string on every change. Two
         modes control <em>which</em> string you receive.
       </p>

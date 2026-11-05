@@ -12,7 +12,7 @@ const LOCHIE_URL = 'https://lochie.me/';
 
 const META_TITLE = 'Torph Integration - Animated Numeric Input with Numora React';
 const META_DESCRIPTION =
-  'Integrate the Torph library by Lochie Axon with Numora React to animate each digit while the real input keeps owning the keyboard, undo, IME, and string precision.';
+  'Integrate the Torph by Lochie Axon with Numora React to animate each digit while the real input keeps owning the keyboard, undo, IME, and string precision.';
 
 const JSON_LD = [
   {
@@ -120,9 +120,9 @@ function TorphIntegration() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Torph integration with Numora React</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         <a href={TORPH_LIB_URL} target="_blank" rel="noreferrer noopener">
           <strong>Torph</strong> by Lochie Axon
         </a>{' '}
@@ -131,14 +131,14 @@ function TorphIntegration() {
         itself appears animated. The real <code>&lt;input&gt;</code> still handles every keystroke;
         Torph just renders what the user sees.
       </p>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Using vanilla JS? See the{' '}
         <Link to="/docs/numora/integrations/torph">core Numora Torph integration</Link> - it uses{' '}
         <code>NumoraInput</code> and <code>TextMorph</code> directly with a DOM event bridge.
       </p>
 
       <TorphDemo />
-      <p className="text-center text-sm text-muted-foreground -mt-12 mb-12">
+      <p className="text-center text-sm -mt-12 mb-12">
         <code>FormatOn.Change</code> - separators animate on every keystroke.
       </p>
 
@@ -161,7 +161,7 @@ function TorphIntegration() {
                 }}
               >
                 {variant === 'minimal' ? <TorphBlurMinimal /> : <TorphBlurDemo />}
-                <p className="text-center text-sm text-muted-foreground -mt-12 mb-12">
+                <p className="text-center text-sm -mt-12 mb-12">
                   <code>FormatOn.Blur</code> -{' '}
                   {variant === 'minimal'
                     ? 'minimal integration; the caret floats during the focus-strip morph.'
@@ -229,7 +229,7 @@ const morph = new TextMorph({
 />`}
                   </CodeBlock>
 
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm">
                     The flag gates the toggle so per-keystroke morphs after the strip don't keep
                     flipping the caret - only the first morph after focus matters.
                   </p>

@@ -94,7 +94,15 @@ The intended use is: inspect what the user is about to do (via `inputType` and `
    - selectionStart, selectionEnd
 
 3. Decimal separator special case:
-   - typed ',' or '.' → convert to configured decimal separator
+   - typed ',' or '.' → convert to configured decimal separator, but ONLY when the typed
+     key is not itself the configured thousand separator - a key equal to the thousand
+     separator is rejected outright (en-US, thousandSeparator=','): typing ',' is ignored,
+     not remapped to '.'; de-DE (thousandSeparator='.'): typing '.' is ignored). Without
+     this guard a thousand-separator keystroke would silently become a second decimal point
+   - the Arabic decimal separator (U+066B), Arabic comma (U+060C), fullwidth comma/full stop,
+     and ideographic full stop are also recognized here and normalized to the configured
+     decimal separator - the same normalization `sanitizeNumoraInput` applies for values that
+     arrive any other way (paste, setValue, programmatic input)
    - already has decimal → e.preventDefault() + return null
 
 4. Compute intendedValue for each inputType:
@@ -184,7 +192,7 @@ During composition, the browser owns the input - it shows intermediate phonetic 
 
 - **After undo/redo:** `beforeinput` returns `{ type: 'skip' }` without `preventDefault`, so the browser applies the restore natively and fires `input` with `inputType` `historyUndo`/`historyRedo`. `handleChange` **deliberately does not reformat** — it just broadcasts the restored value. Re-formatting here would push another `setRangeText` step onto the undo stack and break the natural Ctrl+Z walk-back. This is the core of the undo-preservation design.
 
-- **Programmatic changes:** external code sets `input.value` and dispatches `new Event('input')`. This is the only branch that runs `formatInputValue`, and when the value changes it routes the write through `writeValuePreservingUndo` rather than assigning `target.value` directly — so even a programmatic write keeps undo history intact.
+- **Programmatic changes:** external code sets `input.value` and dispatches `new Event('input')` (autofill, IME commit, a form library resetting the field, or any other write that reaches `input` without going through `beforeinput`). When the field is focused, this branch runs `formatInputValue` under the field's real `formatOn` mode - the same typing-time formatting a keystroke would produce. When the field is **not** focused, there is no mid-edit state to respect, so the value is instead formatted for resting display (grouped, as if `FormatOn.Change`) - the same formatting a resting/programmatic value always gets, so e.g. a Blur-mode field left ungrouped by an autofill isn't stuck that way just because no blur followed it. Either way, when the value changes the write is routed through `writeValuePreservingUndo` rather than assigning `target.value` directly — so even a programmatic write keeps undo history intact.
 
 `handleValueChange` (and therefore `onChange`) is reached from every branch except the suppressed one.
 
@@ -217,6 +225,10 @@ Clipboard events (`cut`, `copy`, `paste`) were introduced to give applications c
 - `e.preventDefault()` in `paste` prevents the pasted text from appearing; you then manually set the value
 
 ### How Numora uses it
+A `readOnly` or `disabled` field rejects paste outright - no write, no `onChange` - matching
+what a native `<input readOnly>`/`<input disabled>` does. This check runs before anything
+else in the paste handler, in both packages.
+
 `handleOnPasteNumoraInput` in the paste handler:
 1. `e.preventDefault()` - blocks native paste
 2. Reads `e.clipboardData.getData('text')`
@@ -385,9 +397,9 @@ Tests that set `.value` directly and dispatch `new Event('input')` bypass `befor
 | `beforeinput` | Yes | Yes | Chrome 60 / Firefox 87 / Safari 10.1 | Format + apply via setRangeText |
 | `input` | No | Sometimes | HTML5 (2009) | Always runs full pipeline; emits onChange |
 | `keyup` | Yes | No | Netscape 2 (1996) | Ignored |
-| `paste` | Yes | No | IE 5 (1999) | Sanitize + apply clipboard value; dispatch synthetic input |
-| `focus` | No | No | DOM Level 2 (2000) | Strip thousand separators (Blur mode) |
-| `blur` | No | No | DOM Level 2 (2000) | Re-apply thousand separators (Blur mode) |
+| `paste` | Yes | No | IE 5 (1999) | Sanitize + apply clipboard value; dispatch synthetic input. No-op on `readOnly`/`disabled` |
+| `focus` | No | No | DOM Level 2 (2000) | Strip thousand separators (Blur mode) - neither package emits `onChange` for this strip (the raw value is unchanged) |
+| `blur` | No | No | DOM Level 2 (2000) | Re-apply thousand separators (Blur mode) / pad `decimalMinLength` - vanilla `onChange` fires only if the raw value actually changed (trailing separator strip, padding, `-0` → `0`) |
 
 ## Numora coverage gaps
 
@@ -494,27 +506,41 @@ The component renders `<input defaultValue={initialDisplayValue} />`, never `<in
 
 React-controlled inputs (`value=`) have the reconciler overwrite `input.value` on every render - undoing what `setRangeText` just wrote and breaking both formatting and undo history. `defaultValue` means React writes the DOM value once at mount and never touches it again, leaving `setRangeText` as the sole mutation path during typing.
 
-### Controlled `value` prop - bypasses the event sequence
+### Controlled `value` prop - bypasses the event sequence, echoed value compared by raw
 
-When a `value` prop is passed, a `useEffect` syncs changes directly into the DOM:
+When a `value` prop is passed, a layout effect syncs changes directly into the DOM. No
+`input`/`beforeinput` events fire for this path - it's a direct DOM write, gated by an
+equality check so the effect is a no-op on the overwhelmingly common controlled pattern:
+`onChange={(e) => setValue(e.target.value)}` feeding straight back into `value={value}`.
+
+The equality check compares **sanitized raw values**, not formatted display strings:
 
 ```typescript
-useEffect(() => {
-  if (controlledValue === undefined) return;
-  const { formatted, raw } = formatValueForDisplay(
-    String(controlledValue),
-    decimalMaxLength,
-    formattingOptions
-  );
-  if (formatted !== input.value) {
-    input.value = formatted;
-    (input as NumoraHTMLInputElement).formattedValue = formatted;
-    onValueChange?.({ value: raw, formattedValue: formatted });
-  }
-}, [controlledValue, decimalMaxLength, formattingOptions, onValueChange]);
+const domRaw = sanitizeNumoraInput(input.value, formattingOptions);
+const controlledRaw = sanitizeNumoraInput(controlledValueString, formattingOptions);
+if (domRaw === controlledRaw) {
+  numInput.formattedValue = input.value;
+  return; // parent didn't actually change the number - leave the DOM untouched
+}
+// ...parent value genuinely differs -> format for editing (Blur mode, focused) or
+// resting display (everything else) and write it, via writeValuePreservingUndo.
 ```
 
-No events fire. This is correct - programmatic value changes do not need undo history or cursor management.
+This matters because `formatValueForDisplay`/`formatForDisplay` (used by earlier versions
+of this check) strip a trailing decimal separator and pad to `decimalMinLength` - both
+display-only transforms. Comparing *those* outputs against the DOM value made a trailing
+`"1."` round-trip through the parent as `"1"` (the dot silently eaten while the user was
+mid-keystroke), `"0.05"` collapse, and a `decimalMinLength: 2` field snap to `"1.00"` after
+every keystroke - because the comparison itself was already lossy, not just the write.
+`sanitizeNumoraInput` performs none of those transforms, so comparing its output is a
+faithful "is this the same number" check: equal means the parent echoed the same value back
+(don't touch the DOM mid-entry); different means the parent genuinely changed it (external
+update, clamping, a numeric round-trip that lost precision, ...) and the field re-syncs to
+it.
+
+In Blur mode, while the field is focused, a genuinely-different value is formatted for
+*editing* (no thousand separators - the real `formatOn`) rather than resting display, so a
+programmatic update mid-typing doesn't inject commas and snap the caret to the end.
 
 ### `handleChange` mirrors the vanilla three-way branch
 
@@ -537,9 +563,16 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     return;
   }
 
-  // 3. Programmatic write: format, and route the write through
-  //    writeValuePreservingUndo rather than assigning .value directly.
-  const { formatted, raw } = formatValueForDisplay(numInput.value, decimalMaxLength, formattingOptions);
+  // 3. Programmatic write (IME commit, autofill, drag-drop, or a dispatched `input`):
+  //    while focused, format under the real formatOn (matches what typing would have
+  //    produced); while NOT focused, there's no mid-edit state to preserve, so format for
+  //    RESTING display instead (forced Change) - otherwise an autofill into a blurred
+  //    Blur-mode field would sit ungrouped until the next focus+blur cycle. Either way,
+  //    route the write through writeValuePreservingUndo rather than assigning .value directly.
+  const isFocused = typeof document !== 'undefined' && document.activeElement === numInput;
+  const { formatted, raw } = isFocused
+    ? formatValueForDisplay(numInput.value, decimalMaxLength, formattingOptions)
+    : formatForDisplay(numInput.value);
   if (formatted !== numInput.value) {
     withInternalWrite(() => writeValuePreservingUndo(numInput, formatted, formatted.length));
   }

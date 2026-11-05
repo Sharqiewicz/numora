@@ -69,9 +69,9 @@ export const Route = createFileRoute('/docs/numora/features/decimals')({
 
 function Decimals() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Decimals</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         Control decimal precision, separators, and locale-aware formatting.
       </p>
 

@@ -64,7 +64,7 @@ export const Route = createFileRoute('/docs/numora-react/')({
 
 function GetStarted() {
   return (
-    <div className="prose prose-invert max-w-none text-muted-foreground!">
+    <div className="prose prose-invert prose-article">
       <h1>Numora React - React Numeric Input Component</h1>
       <p>
         <strong className="font-numora">numora-react</strong> is a drop-in replacement for{' '}

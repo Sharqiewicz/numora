@@ -77,9 +77,9 @@ function Locale() {
   const usersLocale = Intl.NumberFormat().resolvedOptions().locale;
 
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Locale</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         The <code>locale</code> prop auto-detects thousand and decimal separators - and the
         digit-grouping style - via <code>Intl.NumberFormat</code>. An explicit{' '}
         <code>groupingStyle</code> always overrides the detected one.

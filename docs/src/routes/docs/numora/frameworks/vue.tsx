@@ -114,9 +114,9 @@ export const Route = createFileRoute('/docs/numora/frameworks/vue')({
 
 function VueIntegration() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Vue Numeric Input</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         <strong className="font-numora">Numora</strong> is a precision-first{' '}
         <strong>Vue numeric input</strong> library: thousand separators, decimal limits, paste
         sanitisation, scientific-notation expansion and cursor preservation – all driven by a
@@ -140,7 +140,7 @@ npm install numora`}
         project once and every <code>&lt;input v-numora=&quot;opts&quot;&gt;</code> works.
       </p>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         <code>src/directives/numora.ts</code>:
       </p>
       <CodeBlock language="ts">
@@ -155,7 +155,7 @@ export const vNumora: Directive<HTMLInputElement, NumoraInputOptions> = {
 };`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Register globally in <code>src/main.ts</code> (or import + declare locally in any{' '}
         <code>&lt;script setup&gt;</code>):
       </p>
@@ -167,7 +167,7 @@ import { vNumora } from './directives/numora';
 createApp(App).directive('numora', vNumora).mount('#app');`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Component <code>&lt;script setup lang=&quot;ts&quot;&gt;</code>:
       </p>
       <CodeBlock language="ts">
@@ -177,7 +177,7 @@ import { GroupingStyle } from 'numora';
 const value = ref('');`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Component <code>&lt;template&gt;</code>:
       </p>
       <CodeBlock language="html">
@@ -194,7 +194,7 @@ const value = ref('');`}
 <p>Raw value: {{ value }}</p>`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         The directive receives the <code>&lt;input&gt;</code> Vue renders and calls{' '}
         <code>new NumoraInput(el, binding.value)</code>. Numora adopts the element, forces the
         required attributes (<code>type</code>, <code>inputmode</code>, <code>spellcheck</code>,{' '}
@@ -203,7 +203,7 @@ const value = ref('');`}
         field.
       </p>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Because the <code>&lt;input&gt;</code> is yours, set <code>placeholder</code>,{' '}
         <code>aria-label</code>, <code>name</code> or any other attribute on it directly in the
         template.
@@ -223,7 +223,7 @@ const value = ref('');`}
 
       <CodeBlock language="bash">{`pnpm add numora torph`}</CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Script block (inside <code>&lt;script setup lang=&quot;ts&quot;&gt;</code>):
       </p>
       <CodeBlock language="ts">
@@ -272,7 +272,7 @@ onMounted(() => {
 onBeforeUnmount(() => cleanup?.());`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Template (inside <code>&lt;template&gt;</code>):
       </p>
       <CodeBlock language="html">
@@ -282,7 +282,7 @@ onBeforeUnmount(() => cleanup?.());`}
 </label>`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Styles (inside <code>&lt;style scoped&gt;</code>):
       </p>
       <CodeBlock language="css">
@@ -308,7 +308,7 @@ onBeforeUnmount(() => cleanup?.());`}
 .numora-overlay-host :deep(input::placeholder) { color: transparent; }`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         The <code>beforeinput</code> microtask + <code>input</code> listener combination keeps Torph
         in sync across typing, paste, undo and redo. Torph respects{' '}
         <code>prefers-reduced-motion</code> automatically.

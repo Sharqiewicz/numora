@@ -10,7 +10,7 @@ const TORPH_PAGE_URL = 'https://numeric-input.com/docs/numora/integrations/torph
 const TORPH_LIB_URL = 'https://torph.lochie.me/';
 const LOCHIE_URL = 'https://lochie.me/';
 
-const META_TITLE = 'Torph Library Integration - Animated Numeric Input with Numora';
+const META_TITLE = 'Torph Integration - Animated Numeric Input with Numora';
 const META_DESCRIPTION =
   'Integrate the Torph library by Lochie Axon with a vanilla Numora numeric input to animate each digit while the real input keeps owning the keyboard, undo, IME, and string precision.';
 
@@ -18,7 +18,7 @@ const JSON_LD = [
   {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
-    headline: 'Torph Library Integration with Numora - Animated digits on a vanilla numeric input',
+    headline: 'Torph Integration with Numora - Animated digits on a vanilla numeric input',
     description: META_DESCRIPTION,
     url: TORPH_PAGE_URL,
     author: { '@type': 'Person', name: 'Kacper Szarkiewicz', url: 'https://x.com/sharqiewicz' },
@@ -119,25 +119,25 @@ function TorphIntegration() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <div className="prose prose-invert max-w-none">
-      <h1>Torph Library Integration with Numora</h1>
-      <p className="text-lg text-muted-foreground">
+    <div className="prose prose-invert prose-article">
+      <h1>Torph integration with Numora</h1>
+      <p>
         <a href={TORPH_LIB_URL} target="_blank" rel="noreferrer noopener">
           <strong>Torph</strong> by Lochie Axon
         </a>{' '}
-        is an animated text-morphing library. This guide layers a Torph <code>TextMorph</code> on
+        is an animated text-morphing library. This guide layers <code>TextMorph</code> on
         top of a transparent-text vanilla <code>NumoraInput</code> so the editable surface itself
-        appears animated. The real <code>&lt;input&gt;</code> still handles every keystroke; Torph
-        just renders what the user sees.
+        appears animated. The real <code>&lt;input&gt;</code> still handles every keystroke. Torph
+        just renders what users see.
       </p>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Using React? See the{' '}
-        <Link to="/docs/numora-react/integrations/torph">Numora React Torph integration</Link> - it
+        <Link to="/docs/numora-react/integrations/torph">numora-react + torph integration</Link> - it
         wires the overlay through <code>onChange</code> instead of manual DOM listeners.
       </p>
 
       <TorphVanillaDemo />
-      <p className="text-center text-sm text-muted-foreground -mt-12 mb-12">
+      <p className="text-center text-sm -mt-12 mb-12">
         <code>FormatOn.Change</code> - separators animate on every keystroke.
       </p>
 
@@ -160,7 +160,7 @@ function TorphIntegration() {
                 }}
               >
                 {variant === 'minimal' ? <TorphVanillaBlurMinimal /> : <TorphVanillaBlurDemo />}
-                <p className="text-center text-sm text-muted-foreground -mt-12 mb-12">
+                <p className="text-center text-sm -mt-12 mb-12">
                   <code>FormatOn.Blur</code> -{' '}
                   {variant === 'minimal'
                     ? 'minimal integration; the caret floats during the focus-strip morph.'
@@ -231,7 +231,7 @@ input.addEventListener('focus', () => {
 .numora-overlay-host.caret-suppressed input { caret-color: transparent; }`}
                   </CodeBlock>
 
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm">
                     The flag gates the toggle so per-keystroke morphs after the strip don't keep
                     flipping the caret - only the first morph after focus matters.
                   </p>
@@ -242,7 +242,7 @@ input.addEventListener('focus', () => {
         )}
       </TorphBlurSection>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         The demos above are rendered inside this React docs site, but the code below is plain
         TypeScript - no React. It uses the vanilla <code>NumoraInput</code> class and Torph's
         vanilla <code>TextMorph</code> directly.

@@ -115,9 +115,9 @@ export const Route = createFileRoute('/docs/numora/integrations/number-flow')({
 
 function NumberFlowIntegration() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>NumberFlow Vanilla Integration with Numora</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         <a href={LIB_URL} target="_blank" rel="noreferrer noopener">
           <strong>NumberFlow</strong> by Maxwell Barvian
         </a>{' '}
@@ -126,7 +126,7 @@ function NumberFlowIntegration() {
         editable surface itself appears animated. The real <code>&lt;input&gt;</code> still handles
         every keystroke; NumberFlow just renders what the user sees.
       </p>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Using React? See the{' '}
         <Link to="/docs/numora-react/integrations/number-flow">
           Numora React NumberFlow integration
@@ -135,11 +135,11 @@ function NumberFlowIntegration() {
       </p>
 
       <NumberFlowVanillaOverlayDemo />
-      <p className="text-center text-sm text-muted-foreground -mt-12 mb-12">
+      <p className="text-center text-sm -mt-12 mb-12">
         <code>FormatOn.Change</code> - digits animate on every keystroke.
       </p>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         The demo above is rendered inside this React docs site, but the code below is plain
         TypeScript - no React. It uses the vanilla <code>NumoraInput</code> class and the{' '}
         <code>&lt;number-flow&gt;</code> custom element directly.

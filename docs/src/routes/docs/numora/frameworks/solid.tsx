@@ -114,9 +114,9 @@ export const Route = createFileRoute('/docs/numora/frameworks/solid')({
 
 function SolidIntegration() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Solid Numeric Input</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         <strong className="font-numora">Numora</strong> is a precision-first{' '}
         <strong>SolidJS numeric input</strong> library: thousand separators, decimal limits, paste
         sanitisation, scientific-notation expansion and cursor preservation – driven by a four-line{' '}
@@ -141,7 +141,7 @@ npm install numora`}
         <code>&lt;input use:numora={`{opts}`}&gt;</code> works.
       </p>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         <code>src/directives/numora.ts</code>:
       </p>
       <CodeBlock language="ts">
@@ -162,7 +162,7 @@ declare module 'solid-js' {
 }`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">Component:</p>
+      <p className="text-sm">Component:</p>
       <CodeBlock language="tsx">
         {`import { createSignal } from 'solid-js';
 import { GroupingStyle } from 'numora';
@@ -190,7 +190,7 @@ export function AmountInput() {
 }`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         The directive receives the <code>&lt;input&gt;</code> Solid renders and an accessor for its
         options, then calls <code>new NumoraInput(el, accessor())</code>. Numora adopts the element,
         forces the required attributes (<code>type</code>, <code>inputmode</code>,{' '}
@@ -199,7 +199,7 @@ export function AmountInput() {
         store.
       </p>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Because the <code>&lt;input&gt;</code> is yours, set <code>placeholder</code>,{' '}
         <code>aria-label</code>, <code>name</code> or any other attribute on it directly in the JSX.
       </p>
@@ -289,7 +289,7 @@ export function AnimatedAmountInput() {
 .numora-overlay-host input::placeholder { color: transparent; }`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Solid doesn&apos;t scope CSS by default, so the input selectors work as-is - Numora creates
         the <code>&lt;input&gt;</code> at runtime inside the host <code>&lt;div&gt;</code>. The{' '}
         <code>beforeinput</code> microtask + <code>input</code> listener combination keeps Torph in

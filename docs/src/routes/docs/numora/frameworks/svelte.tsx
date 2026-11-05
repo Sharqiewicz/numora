@@ -115,9 +115,9 @@ export const Route = createFileRoute('/docs/numora/frameworks/svelte')({
 
 function SvelteIntegration() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Svelte Numeric Input</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         <strong className="font-numora">Numora</strong> is a precision-first{' '}
         <strong>Svelte numeric input</strong> library: thousand separators, decimal limits, paste
         sanitisation, scientific-notation expansion and cursor preservation – all driven by a
@@ -142,7 +142,7 @@ npm install numora`}
         this five-line helper into your project once and reuse it everywhere.
       </p>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         <code>src/lib/numora.ts</code>:
       </p>
       <CodeBlock language="ts">
@@ -154,7 +154,7 @@ export function numora(node: HTMLInputElement, options: NumoraInputOptions) {
 }`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Component <code>&lt;script lang=&quot;ts&quot;&gt;</code>:
       </p>
       <CodeBlock language="ts">
@@ -164,7 +164,7 @@ import { GroupingStyle } from 'numora';
 let value = $state('');`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">Component markup:</p>
+      <p className="text-sm">Component markup:</p>
       <CodeBlock language="html">
         {`<label>
   Amount
@@ -180,7 +180,7 @@ let value = $state('');`}
 <p>Raw value: {value}</p>`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         The action receives the <code>&lt;input&gt;</code> Svelte renders and calls{' '}
         <code>new NumoraInput(node, options)</code> – Numora adopts the element, forces the required
         attributes (<code>type</code>, <code>inputmode</code>, <code>spellcheck</code>,{' '}
@@ -189,7 +189,7 @@ let value = $state('');`}
         or form library.
       </p>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Because the <code>&lt;input&gt;</code> is yours, set <code>placeholder</code>,{' '}
         <code>aria-label</code>, <code>name</code> or any other attribute on it directly in the
         markup.
@@ -209,7 +209,7 @@ let value = $state('');`}
 
       <CodeBlock language="bash">{`pnpm add numora torph`}</CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Script block (inside <code>&lt;script lang=&quot;ts&quot;&gt;</code>):
       </p>
       <CodeBlock language="ts">
@@ -254,7 +254,7 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
 }`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">Markup:</p>
+      <p className="text-sm">Markup:</p>
       <CodeBlock language="html">
         {`<label
   class="numora-overlay"
@@ -265,7 +265,7 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
 </label>`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         Styles (inside the component&apos;s <code>&lt;style&gt;</code> block):
       </p>
       <CodeBlock language="css">
@@ -291,7 +291,7 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
 .numora-overlay-host :global(input::placeholder) { color: transparent; }`}
       </CodeBlock>
 
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm">
         The <code>beforeinput</code> microtask + <code>input</code> listener combination guarantees
         Torph stays in sync across typing, paste, undo and redo. Torph respects{' '}
         <code>prefers-reduced-motion</code> automatically.

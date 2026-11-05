@@ -71,9 +71,9 @@ export const Route = createFileRoute('/docs/numora/features/validation')({
 
 function Validation() {
   return (
-    <div className="prose prose-invert max-w-none">
+    <div className="prose prose-invert prose-article">
       <h1>Custom Validation</h1>
-      <p className="text-lg text-muted-foreground">
+      <p>
         Reject keystrokes and pastes <em>before</em> they commit using an <code>isAllowed</code>{' '}
         predicate. Useful for enforcing caps, business rules, or format invariants that don't fit
         one of the built-in options.
