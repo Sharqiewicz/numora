@@ -65,6 +65,8 @@ Pasted text (and text the browser inserts through a plain `input` event) is read
 | `value` | `string` | `undefined` | Initial value (controlled) |
 | `defaultValue` | `string` | `undefined` | Initial value (uncontrolled) |
 
+The `locale` option derives only `Thousand` and `Lakh` grouping; `Wan` is never inferred (set `groupingStyle` explicitly) and the `tok` locale's 2-2-2 grouping is unsupported.
+
 The raw value is canonical for every locale: ASCII digits, `.` as the decimal, a leading `-`, no
 grouping (`1.234.567,89` in de-DE is raw `1234567.89`). `onChange`, `getValue()` and `value`
 all emit it; `getFormattedValue()` returns the display string. `value` / `defaultValue` /

@@ -83,16 +83,49 @@ function deriveGroupingStyle({ digitRuns, separators }: ProbeShape): GroupingSty
     : GroupingStyle.Thousand;
 }
 
+// Bidi control marks that RTL locales embed in formatted numbers. They are not separators.
+const BIDI_MARKS = /[\u200E\u200F\u061C\u202A-\u202E\u2066-\u2069]/g;
+
+/**
+ * Returns the code point of the locale's zero if its digits 0..9 are contiguous, otherwise
+ * undefined (e.g. `hanidec`: 〇一二三四五六七八九).
+ */
+function contiguousZero(formatter: Intl.NumberFormat): number | undefined {
+  let zero: number | undefined;
+  for (let i = 0; i <= 9; i++) {
+    const glyph = Array.from(formatter.format(i).replace(BIDI_MARKS, ''));
+    if (glyph.length !== 1) return undefined;
+    const code = glyph[0].codePointAt(0) ?? 0;
+    if (zero === undefined) zero = code;
+    else if (code !== zero + i) return undefined;
+  }
+  return zero;
+}
+
+/** Re-targets a tag to Latin digits. Separators do not depend on the digit set. */
+function withLatinDigits(locale: string | undefined): string {
+  const tag = locale ?? new Intl.NumberFormat().resolvedOptions().locale;
+  if (/-u-/i.test(tag)) {
+    // Replace an existing nu keyword, otherwise append one to the extension.
+    return /-nu-[a-z0-9]+/i.test(tag) ? tag.replace(/-nu-[a-z0-9]+/i, '-nu-latn') : `${tag}-nu-latn`;
+  }
+  return `${tag}-u-nu-latn`;
+}
+
 export function getSeparatorsFromLocale(locale?: string): {
   thousandSeparator: string;
   decimalSeparator: string;
   groupingStyle: GroupingStyle;
 } {
   try {
-    const formatter = new Intl.NumberFormat(locale);
+    let formatter = new Intl.NumberFormat(locale);
     // The locale's own zero digit anchors digit classification for the probe.
-    const zeroCode = formatter.format(0).codePointAt(0) ?? 0;
-    const shape = parseProbe(formatter.format(GROUPING_PROBE), zeroCode);
+    let zeroCode = contiguousZero(formatter);
+    if (zeroCode === undefined) {
+      formatter = new Intl.NumberFormat(withLatinDigits(locale));
+      zeroCode = contiguousZero(formatter) ?? 0x30;
+    }
+    const shape = parseProbe(formatter.format(GROUPING_PROBE).replace(BIDI_MARKS, ''), zeroCode);
     const { separators } = shape;
     return {
       // Last separator is the decimal one (the probe's fraction is right of it); anything

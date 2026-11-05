@@ -1,40 +1,48 @@
-import { getCachedRegex } from '../utils/regex-cache';
-
 /**
- * Normalizes non-ASCII decimal digits (fullwidth, Arabic-Indic, Devanagari, Thai, etc.)
- * to ASCII digits (0-9). `utils/locale.ts` correctly derives separators for locales such
- * as `ar-EG`, `fa-IR`, and `bn-IN`, but their native digit shapes were previously stripped
- * outright by `removeNonNumericCharacters` - meaning users typing on those keyboards could
- * not enter a value at all. This function is the fix: it recognizes every Unicode
- * decimal-digit (Nd) block reachable without a `\p{Nd}` property escape (unsupported on
- * Hermes) and maps each character back to its ASCII equivalent by offset from the block's
- * own zero code point - every Nd block is contiguous from its zero, the same fact
- * `locale.ts` relies on for its probe.
+ * Normalizes non-ASCII decimal digits (fullwidth, Arabic-Indic, Devanagari, Thai, Ol Chiki,
+ * Adlam, mathematical digits, etc.) to ASCII digits (0-9), so users typing on those
+ * keyboards, or pasting a locale's own formatted number, can enter a value.
  *
- * Fullwidth digits (U+FF10-U+FF19) are the block Japanese/Chinese IME keyboards commonly
- * produce; they look identical to ASCII digits but were the only block handled before.
+ * Deliberately table-driven: no `\p{Nd}` property escape (unsupported on Hermes) and no
+ * regex with astral ranges. Every decimal numbering system exposed by
+ * `Intl.supportedValuesOf('numberingSystem')` (except hanidec, handled separately below) is
+ * contiguous from its zero, so one zero code point per system is enough. The input is walked
+ * by code point, so astral-plane sets (Adlam, Osmanya, Brahmi, math digits...) are handled
+ * as surrogate pairs correctly.
  */
 
-/**
- * Zero code points of the supported decimal-digit blocks, in ascending order. Each block
- * spans exactly ten code points (zero..zero+9), so this one number per block is enough to
- * both build the match pattern below and, per matched character, recover its ASCII value.
- *
- * Blocks covered, in order: Arabic-Indic, Extended Arabic-Indic (Persian), NKo, Devanagari,
- * Bengali, Gurmukhi, Gujarati, Oriya, Tamil, Telugu, Kannada, Malayalam, Thai, Lao, Tibetan,
- * Myanmar, Khmer, Mongolian, Fullwidth.
- */
+/** Zero code points of every supported contiguous decimal-digit set, ascending. */
 const ZEROS = [
-  0x0660, 0x06f0, 0x07c0, 0x0966, 0x09e6, 0x0a66, 0x0ae6, 0x0b66, 0x0be6, 0x0c66, 0x0ce6, 0x0d66,
-  0x0e50, 0x0ed0, 0x0f20, 0x1040, 0x17e0, 0x1810, 0xff10,
+  0x660, 0x6f0, 0x7c0, 0x966, 0x9e6, 0xa66, 0xae6, 0xb66, 0xbe6, 0xc66, 0xce6, 0xd66, 0xde6,
+  0xe50, 0xed0, 0xf20, 0x1040, 0x1090, 0x17e0, 0x1810, 0x1946, 0x19d0, 0x1a80, 0x1a90, 0x1b50,
+  0x1bb0, 0x1c40, 0x1c50, 0xa620, 0xa8d0, 0xa900, 0xa9d0, 0xa9f0, 0xaa50, 0xabf0, 0xff10,
+  0x104a0, 0x10d30, 0x10d40, 0x11066, 0x110f0, 0x11136, 0x111d0, 0x112f0, 0x11450, 0x114d0,
+  0x11650, 0x116c0, 0x116d0, 0x116da, 0x11730, 0x118e0, 0x11950, 0x11bf0, 0x11c50, 0x11d50,
+  0x11da0, 0x11de0, 0x11f50, 0x16130, 0x16a60, 0x16ac0, 0x16b50, 0x16d70, 0x1ccf0, 0x1d7ce,
+  0x1d7d8, 0x1d7e2, 0x1d7ec, 0x1d7f6, 0x1e140, 0x1e2f0, 0x1e4f0, 0x1e5f1, 0x1e950, 0x1fbf0,
 ];
 
-// prettier-ignore
-const DIGIT_CLASS =
-  '[\\u0660-\\u0669\\u06F0-\\u06F9\\u07C0-\\u07C9\\u0966-\\u096F\\u09E6-\\u09EF' +
-  '\\u0A66-\\u0A6F\\u0AE6-\\u0AEF\\u0B66-\\u0B6F\\u0BE6-\\u0BEF\\u0C66-\\u0C6F' +
-  '\\u0CE6-\\u0CEF\\u0D66-\\u0D6F\\u0E50-\\u0E59\\u0ED0-\\u0ED9\\u0F20-\\u0F29' +
-  '\\u1040-\\u1049\\u17E0-\\u17E9\\u1810-\\u1819\\uFF10-\\uFF19]';
+/** Han decimal digits (numbering system `hanidec`) are NOT contiguous: 〇 一 二 ... 九. */
+const HANIDEC: Record<number, string> = {
+  0x3007: '0', 0x4e00: '1', 0x4e8c: '2', 0x4e09: '3', 0x56db: '4',
+  0x4e94: '5', 0x516d: '6', 0x4e03: '7', 0x516b: '8', 0x4e5d: '9',
+};
+
+function digitValue(code: number): string | undefined {
+  const han = HANIDEC[code];
+  if (han !== undefined) return han;
+  // Binary search for the greatest zero <= code.
+  let lo = 0;
+  let hi = ZEROS.length - 1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (ZEROS[mid] <= code) lo = mid + 1;
+    else hi = mid - 1;
+  }
+  if (hi < 0) return undefined;
+  const offset = code - ZEROS[hi];
+  return offset <= 9 ? String(offset) : undefined;
+}
 
 /**
  * @param value - Input value potentially containing non-ASCII decimal digits
@@ -43,19 +51,27 @@ const DIGIT_CLASS =
  * @example
  * normalizeDigits("１２３") // Returns: "123" (fullwidth)
  * normalizeDigits("١٢٣") // Returns: "123" (Arabic-Indic)
- * normalizeDigits("۱۲۳") // Returns: "123" (Extended Arabic-Indic / Persian)
  * normalizeDigits("१२३") // Returns: "123" (Devanagari)
+ * normalizeDigits("一二三") // Returns: "123" (Han decimal digits)
  */
 export function normalizeDigits(value: string): string {
-  return value.replace(getCachedRegex(DIGIT_CLASS), (char) => {
-    const code = char.charCodeAt(0);
-    for (const zero of ZEROS) {
-      if (code >= zero && code <= zero + 9) {
-        return String(code - zero);
-      }
+  // Fast path: nothing at or above the first non-ASCII digit block (U+0660).
+  let needsWork = false;
+  for (let i = 0; i < value.length; i++) {
+    if (value.charCodeAt(i) >= 0x660) {
+      needsWork = true;
+      break;
     }
-    return char;
-  });
+  }
+  if (!needsWork) return value;
+
+  let out = '';
+  // for...of iterates by code point, so surrogate pairs arrive as one character.
+  for (const char of value) {
+    const code = char.codePointAt(0) as number;
+    out += (code >= 0x660 ? digitValue(code) : undefined) ?? char;
+  }
+  return out;
 }
 
 /**
