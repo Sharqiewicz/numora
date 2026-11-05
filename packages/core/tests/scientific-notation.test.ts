@@ -232,5 +232,51 @@ describe('expandScientificNotation', () => {
       expect(sanitizeNumoraInput('2e5')).toBe('200000');
     });
   });
-});
 
+  describe('Regression: exponent immediately followed by a fractional tail is rejected (audit #12)', () => {
+    it('should reject "1e3.5" instead of fabricating "1000.5"', () => {
+      // The exponent grammar is digits-only, so ".5" is not part of the match. Before the
+      // fix the "1e3" portion silently expanded to "1000" and the unmatched ".5" was
+      // concatenated by the pipeline, producing "1000.5" - a fabricated magnitude.
+      expect(expandScientificNotation('1e3.5')).not.toBe('1000.5');
+      expect(expandScientificNotation('1e3.5')).toBe('.5');
+    });
+
+    it('should reject a negative-exponent token followed by a fractional tail', () => {
+      expect(expandScientificNotation('1e-3.5')).toBe('.5');
+    });
+
+    it('should reject a signed base followed by a fractional tail', () => {
+      expect(expandScientificNotation('-1e3.5')).toBe('.5');
+    });
+
+    it('should still expand a token where the tail digit is not adjacent to a decimal separator', () => {
+      // Sanity check: only "exponent digits immediately followed by sep+digit" is rejected.
+      expect(expandScientificNotation('1e3x5')).toBe('1000x5');
+    });
+
+    it('should not fabricate a magnitude through sanitizeNumoraInput either', () => {
+      expect(sanitizeNumoraInput('1e3.5')).not.toBe('1000.5');
+    });
+  });
+
+  describe('Regression: a second decimal separator can start a different valid match (audit #01 follow-up)', () => {
+    // Same class of bug as the compact-notation follow-up: the linear-scan rewrite skips
+    // a failed mantissa's whole span in one jump, which is only safe when the character
+    // right after the failed span isn't itself a decimal separator. These pin the scan to
+    // the same result the old backtracking regex gave.
+    it('should expand ".0.5e3" using the second "0." as the real mantissa', () => {
+      // The bare-decimal ".0" at position 0 fails (next char is "." not "e"/"E"), but
+      // re-anchoring right after that first "." finds "0.5" as a mantissa with "e3" after it.
+      expect(expandScientificNotation('.0.5e3')).toBe('.0500');
+    });
+
+    it('should expand "1.2.5e3" the same way with a leading digit', () => {
+      expect(expandScientificNotation('1.2.5e3')).toBe('1.2500');
+    });
+
+    it('should preserve a leading sign on the dead prefix', () => {
+      expect(expandScientificNotation('-.0.5e3')).toBe('-.0500');
+    });
+  });
+});

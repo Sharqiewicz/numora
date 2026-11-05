@@ -89,7 +89,11 @@ describe('writeValuePreservingUndo invariants', () => {
     vi.spyOn(input, 'setRangeText').mockImplementation((replacement) => {
       observed.push(`setRangeText:${replacement}`);
       // Mirror real behavior so subsequent reads see the new value
-      Object.defineProperty(input, 'value', { value: replacement, configurable: true, writable: true });
+      Object.defineProperty(input, 'value', {
+        value: replacement,
+        configurable: true,
+        writable: true,
+      });
     });
     vi.spyOn(input, 'setSelectionRange').mockImplementation((start) => {
       observed.push(`setSelectionRange:${start}`);

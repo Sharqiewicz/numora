@@ -9,10 +9,7 @@
  * If these tests fail, an unintentional side effect has crept back into a helper.
  */
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import {
-  handleOnBeforeInputNumoraInput,
-  handleOnPasteNumoraInput,
-} from '@/utils/event-handlers';
+import { handleOnBeforeInputNumoraInput, handleOnPasteNumoraInput } from '@/utils/event-handlers';
 import { InputType } from '@/types';
 
 function makeInput(initialValue = '', selectionStart = 0, selectionEnd = 0): HTMLInputElement {
@@ -158,12 +155,13 @@ describe('event-handler purity contract', () => {
       el: HTMLInputElement,
       pasted: string,
       overrides: Partial<ClipboardEvent> = {}
-    ): ClipboardEvent => ({
-      target: el,
-      preventDefault: vi.fn(),
-      clipboardData: { getData: vi.fn().mockReturnValue(pasted) },
-      ...overrides,
-    } as unknown as ClipboardEvent);
+    ): ClipboardEvent =>
+      ({
+        target: el,
+        preventDefault: vi.fn(),
+        clipboardData: { getData: vi.fn().mockReturnValue(pasted) },
+        ...overrides,
+      }) as unknown as ClipboardEvent;
 
     it('does not mutate input.value', () => {
       input.value = '1';

@@ -3,7 +3,7 @@
  * Supports multiple grouping styles: thousand (Western), lakh (Indian), wan (Chinese)
  */
 
-import { GROUPING_CONFIG  } from './constants';
+import { GROUPING_CONFIG } from './constants';
 import { GroupingStyle } from '../../types';
 
 /**
@@ -15,6 +15,9 @@ import { GroupingStyle } from '../../types';
  * @param _enableLeadingZeros - Vestigial. Leading zeros are grouped as part of the full
  *   integer regardless (see the note in the body), so this flag has no effect here. The
  *   parameter is retained because `decimalSeparator` follows it positionally.
+ * @deprecated `_enableLeadingZeros` is unused and kept only for positional compatibility
+ *   (so `decimalSeparator`, the fifth argument, doesn't shift). Scheduled for removal in
+ *   the next major version; do not rely on it doing anything.
  * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The formatted string with separators
  *
@@ -33,7 +36,13 @@ export function formatWithSeparators(
   decimalSeparator: string = '.'
 ): string {
   // Handle edge cases: empty, zero, or just decimal separator
-  if (!value || value === '0' || value === decimalSeparator || value === '-' || value === `-${decimalSeparator}`) {
+  if (
+    !value ||
+    value === '0' ||
+    value === decimalSeparator ||
+    value === '-' ||
+    value === `-${decimalSeparator}`
+  ) {
     return value;
   }
 
@@ -56,7 +65,9 @@ export function formatWithSeparators(
 
   // Preserve decimal separator even if no decimal digits
   if (hasDecimalSeparator) {
-    return decimalPart ? `${prefix}${formattedInteger}${decimalSeparator}${decimalPart}` : `${prefix}${formattedInteger}${decimalSeparator}`;
+    return decimalPart
+      ? `${prefix}${formattedInteger}${decimalSeparator}${decimalPart}`
+      : `${prefix}${formattedInteger}${decimalSeparator}`;
   }
 
   return `${prefix}${formattedInteger}`;
@@ -134,4 +145,3 @@ function groupDigitsFromRight(integerPart: string, separator: string, groupSize:
 
   return groups.reverse().join(separator);
 }
-

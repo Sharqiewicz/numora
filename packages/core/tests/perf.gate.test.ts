@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { formatWithSeparators } from '../src/features/formatting';
 import { GroupingStyle } from '../src/types';
+import { expandScientificNotation } from '../src/features/scientific-notation';
+import { expandCompactNotation } from '../src/features/compact-notation';
+import { sanitizeNumoraInput } from '../src/features/sanitization';
 
 /**
  * Performance gate for the large-input formatting path.
@@ -46,8 +49,12 @@ describe('⚡ formatting performance gate', () => {
   );
 
   it('should scale roughly linearly, not quadratically, with input size', () => {
-    const small = fastestOf(5, () => formatWithSeparators(digits(40000), ',', GroupingStyle.Thousand));
-    const large = fastestOf(5, () => formatWithSeparators(digits(160000), ',', GroupingStyle.Thousand));
+    const small = fastestOf(5, () =>
+      formatWithSeparators(digits(40000), ',', GroupingStyle.Thousand)
+    );
+    const large = fastestOf(5, () =>
+      formatWithSeparators(digits(160000), ',', GroupingStyle.Thousand)
+    );
 
     // 4x the input. Linear predicts ~4x the time; quadratic predicts ~16x. Assert < 8 -
     // above any plausible linear result, below any plausible quadratic one.
@@ -61,7 +68,58 @@ describe('⚡ formatting performance gate', () => {
 
   it('should stay under the ceiling when the value also has a decimal part', () => {
     const value = `${digits(160000)}.123456789012345678`;
-    const elapsed = fastestOf(3, () => formatWithSeparators(value, ',', GroupingStyle.Thousand, false, '.'));
+    const elapsed = fastestOf(3, () =>
+      formatWithSeparators(value, ',', GroupingStyle.Thousand, false, '.')
+    );
+    expect(elapsed).toBeLessThan(CEILING_MS);
+  });
+});
+
+/**
+ * Performance gate for scientific/compact notation expansion (audit #01).
+ *
+ * Both `expandScientificNotation` and `expandCompactNotation` used to build their
+ * mantissa regex as `\d+sep?\d*|sep\d+`. The `sep?` (optional, zero-width-capable)
+ * followed by an unbounded `\d*` lets the engine re-split the same digit run between
+ * the two quantifiers at every position, so a run of N digits with no valid suffix cost
+ * O(N^2) in the regex engine. Reference timings on the vulnerable regex (Node 24,
+ * M-series, single run): 1,000 digits + "e" ~153ms, 3,000 digits + "e" ~4.4s, 10,000
+ * digits + "e" ~158s; compact (opt-in) was worse at the same sizes.
+ *
+ * The fix replaced the regex-based matching with a single left-to-right scan (see the
+ * doc comments in `scientific-notation.ts` / `compact-notation.ts`): a maximal digit run
+ * that isn't followed by a valid suffix is skipped in one jump instead of retried at
+ * every offset inside it, which is what keeps this linear.
+ */
+describe('⚡ notation expansion gate', () => {
+  const digitsOf = (n: number) => '9'.repeat(n);
+
+  it('should expand a 10,000-digit value with a dangling "e" under the ceiling', () => {
+    const elapsed = fastestOf(3, () => expandScientificNotation(digitsOf(10_000) + 'e'));
+    expect(elapsed).toBeLessThan(CEILING_MS);
+  });
+
+  it('should expand a 10,000-digit value with a valid exponent under the ceiling', () => {
+    const elapsed = fastestOf(3, () => expandScientificNotation(digitsOf(10_000) + 'e5'));
+    expect(elapsed).toBeLessThan(CEILING_MS);
+  });
+
+  it('should expand a 10,000-digit value with a dangling "x" (no suffix) under the ceiling', () => {
+    const elapsed = fastestOf(3, () => expandCompactNotation(digitsOf(10_000) + 'x'));
+    expect(elapsed).toBeLessThan(CEILING_MS);
+  });
+
+  it('should expand a 10,000-digit value with a valid compact suffix under the ceiling', () => {
+    const elapsed = fastestOf(3, () => expandCompactNotation(digitsOf(10_000) + 'k'));
+    expect(elapsed).toBeLessThan(CEILING_MS);
+  });
+
+  it('should sanitize a 50,000-digit paste with compact notation enabled under the ceiling', () => {
+    // Exercises the `MAX_INPUT_LENGTH` cap in `sanitizeNumoraInput`: even a paste 5x the
+    // cap must not reach the notation-expansion steps with an unbounded string.
+    const elapsed = fastestOf(3, () =>
+      sanitizeNumoraInput(digitsOf(50_000) + 'e', { enableCompactNotation: true })
+    );
     expect(elapsed).toBeLessThan(CEILING_MS);
   });
 });

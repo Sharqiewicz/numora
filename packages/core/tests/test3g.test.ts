@@ -31,7 +31,13 @@ function significantBefore(str: string, pos: number): number {
   return count;
 }
 
-function beforeInput(value: string, selStart: number, selEnd: number, data: string, inputType: string) {
+function beforeInput(
+  value: string,
+  selStart: number,
+  selEnd: number,
+  data: string,
+  inputType: string
+) {
   const input = document.createElement('input');
   input.value = value;
   document.body.appendChild(input);

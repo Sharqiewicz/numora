@@ -6,12 +6,15 @@ import {
 import {
   computeCursorPosition,
   computeStripSeparatorsResult,
-  formatWithSeparators,
   writeStripPreservingUndo,
   writeValuePreservingUndo,
 } from './features/formatting';
 import { getSeparators } from './features/decimals';
-import { formatInputValue } from './utils/format-utils';
+import {
+  formatInputValue,
+  formatValueForDisplay,
+  normalizeNegativeZero,
+} from './utils/format-utils';
 import { removeThousandSeparators } from './features/sanitization';
 import { escapeRegExp } from './utils/escape-reg-exp';
 import { applyLocale } from './utils/locale';
@@ -28,15 +31,20 @@ import {
   DEFAULT_THOUSAND_SEPARATOR,
   DEFAULT_GROUPING_STYLE,
 } from './config';
-import { FormatOn, InputType, GroupingStyle, type FormattingOptions, type CaretPositionInfo, type LocaleTag } from './types';
+import {
+  FormatOn,
+  InputType,
+  GroupingStyle,
+  type FormattingOptions,
+  type CaretPositionInfo,
+  type LocaleTag,
+} from './types';
 import { validateNumoraInputOptions } from './validation';
-
 
 // maxLength and isAllowed are opt-in only - no sensible default - so they stay optional
 // in the resolved options. Everything else has a default in `config.ts`.
-type ResolvedNumoraOptions = Required<Omit<FormattingOptions, 'maxLength' | 'isAllowed'>>
-  & Pick<FormattingOptions, 'maxLength' | 'isAllowed'>
-  & {
+type ResolvedNumoraOptions = Required<Omit<FormattingOptions, 'maxLength' | 'isAllowed'>> &
+  Pick<FormattingOptions, 'maxLength' | 'isAllowed'> & {
     onChange?: (value: string) => void;
   };
 
@@ -45,17 +53,32 @@ type ResolvedNumoraOptions = Required<Omit<FormattingOptions, 'maxLength' | 'isA
 // would land as nonsense attributes (`thousandseparator=","` etc.). Add new options here
 // whenever a new field is introduced in NumoraInputOptions.
 const NUMORA_OPTION_KEYS = new Set<string>([
-  'decimalMaxLength', 'decimalMinLength', 'formatOn', 'thousandSeparator',
-  'groupingStyle', 'decimalSeparator', 'locale',
-  'enableCompactNotation', 'enableNegative', 'enableLeadingZeros',
-  'autoAddLeadingZero', 'emitRawValue',
-  'maxLength', 'isAllowed', 'onChange',
-  'value', 'defaultValue',
+  'decimalMaxLength',
+  'decimalMinLength',
+  'formatOn',
+  'thousandSeparator',
+  'groupingStyle',
+  'decimalSeparator',
+  'locale',
+  'enableCompactNotation',
+  'enableNegative',
+  'enableLeadingZeros',
+  'autoAddLeadingZero',
+  'emitRawValue',
+  'maxLength',
+  'isAllowed',
+  'onChange',
+  'value',
+  'defaultValue',
   // Protected native attrs set explicitly in createInputElement.
-  'type', 'inputMode', 'spellcheck', 'autocomplete',
+  'type',
+  'inputMode',
+  'spellcheck',
+  'autocomplete',
 ]);
 
-export interface NumoraInputOptions extends Partial<Omit<HTMLInputElement, 'value' | 'defaultValue' | 'onChange' | 'maxLength'>> {
+export interface NumoraInputOptions
+  extends Partial<Omit<HTMLInputElement, 'value' | 'defaultValue' | 'onChange' | 'maxLength'>> {
   // Formatting options
   formatOn?: FormatOn;
 
@@ -99,9 +122,11 @@ export class NumoraInput {
 
   private rawValue: string = '';
 
-  // True while we're applying our own setRangeText. The synchronous `input` event that
-  // setRangeText fires must NOT re-enter handleChange's broadcast path, or onChange
-  // double-fires and the cursor is recomputed against the post-write value.
+  // True while we're applying our own setRangeText. `setRangeText` does not synchronously
+  // dispatch `input` in current browsers or jsdom (verified); this flag is defensive, for
+  // environments or polyfills that do dispatch `input` on a programmatic write - such an
+  // event must NOT re-enter handleChange's broadcast path, or onChange double-fires and
+  // the cursor is recomputed against the post-write value.
   // try/finally in withInternalWrite guarantees this clears even if the write throws.
   private suppressNextInputEvent: boolean = false;
 
@@ -112,6 +137,13 @@ export class NumoraInput {
   // click fires after the browser has finalised the caret, so selectionStart reflects
   // the user's intended position when we read it.
   private pendingMouseStrip: boolean = false;
+
+  // Tracked internally rather than read off `document.activeElement` - tests (and some
+  // non-browser embedders) dispatch synthetic `focus`/`blur` events directly without ever
+  // moving the real DOM focus, so `document.activeElement` would not reflect them. This
+  // flag mirrors whatever focus/blur events this instance's own listeners have actually
+  // seen, which is what `handleChange`'s resting-vs-typing branch (A2-07) needs.
+  private isFocused: boolean = false;
 
   private caretPositionBeforeChange?: CaretPositionInfo;
 
@@ -187,18 +219,19 @@ export class NumoraInput {
 
   /**
    * Runs the full sanitization + formatting pipeline on a value destined for the DOM
-   * (initial value and programmatic `setValue`). Forcing `formatOn: Change` makes grouping
-   * separators apply regardless of the field's edit-time mode, so a resting/programmatic
-   * value always shows the same formatting the typed value settles to. Mirrors the React
-   * adapter's `formatForDisplay`, keeping the two packages' non-typing paths in parity.
+   * (initial value, programmatic `setValue`, and blur). Forcing `formatOn: Change` makes
+   * grouping separators apply regardless of the field's edit-time mode, so a
+   * resting/programmatic value always shows the same formatting the typed value settles
+   * to. Delegates to `formatValueForDisplay` (rather than `formatInputValue` directly) so
+   * decimalMinLength padding and the trailing-separator strip - display/blur-only concerns
+   * - apply here too. Mirrors the React adapter's `formatForDisplay`, keeping the two
+   * packages' non-typing paths in parity.
    */
   private formatForDisplay(value: string): { formatted: string; raw: string } {
-    return formatInputValue(
-      value,
-      this.resolvedOptions.decimalMaxLength,
-      { ...this.resolvedOptions, formatOn: FormatOn.Change },
-      !!this.resolvedOptions.thousandSeparator
-    );
+    return formatValueForDisplay(value, this.resolvedOptions.decimalMaxLength, {
+      ...this.resolvedOptions,
+      formatOn: FormatOn.Change,
+    });
   }
 
   private setDefaultValue(): void {
@@ -230,11 +263,23 @@ export class NumoraInput {
     this.element.setAttribute('spellcheck', 'false');
     this.element.setAttribute('autocomplete', 'off');
 
-    // Pattern helps with native validation but is optional
-    // HTML pattern attr: optional leading `-` (if negatives enabled) + digits + optional decimal separator + digits.
+    // Pattern helps with native validation but is optional.
+    // HTML pattern attr: optional leading `-` (if negatives enabled) + digits optionally
+    // interleaved with the configured thousand separator + optional decimal separator +
+    // digits. Must accept the component's OWN grouped output ("1,234", "1.234,5" in de-DE,
+    // "12,34,567" in Lakh grouping, ...) or native constraint validation
+    // (validity.patternMismatch / form.checkValidity()) fails on a value Numora itself
+    // produced. Deliberately permissive about *where* the thousand separator falls -
+    // Lakh/Wan group sizes differ from Thousand and enforcing exact group widths here would
+    // just re-implement (and risk diverging from) formatWithSeparators.
     const escapedDecimal = escapeRegExp(this.resolvedOptions.decimalSeparator);
     const negativePrefix = this.resolvedOptions.enableNegative ? '-?' : '';
-    this.element.setAttribute('pattern', `^${negativePrefix}[0-9]*[${escapedDecimal}]?[0-9]*$`);
+    const thousandSeparator = this.resolvedOptions.thousandSeparator;
+    const escapedThousand = thousandSeparator ? escapeRegExp(thousandSeparator) : '';
+    this.element.setAttribute(
+      'pattern',
+      `^${negativePrefix}[0-9${escapedThousand}]*([${escapedDecimal}][0-9]*)?$`
+    );
 
     // Filter Numora-specific options + protected native attrs from what we assign.
     // maxLength is in NUMORA_OPTION_KEYS so it never reaches the native attribute - the
@@ -278,8 +323,30 @@ export class NumoraInput {
     add('keydown', this.handleKeyDown.bind(this) as EventListener);
     add('paste', this.handlePaste.bind(this) as EventListener);
 
-    // Only add focus/blur handlers for 'blur' mode formatting
-    if (this.resolvedOptions.formatOn === FormatOn.Blur && this.resolvedOptions.thousandSeparator) {
+    // `isFocused` bookkeeping is unconditional - independent of the formatOn/grouping/
+    // decimalMinLength/enableNegative combination below, `handleChange`'s resting-vs-typing
+    // branch (A2-07) needs an accurate focus state for every configuration, including a
+    // plain Change-mode field with none of those options set (which otherwise gets no
+    // focus/blur listener at all). Deliberately minimal - no formatting side effects - so
+    // it never changes behaviour for a config that doesn't also meet the condition below.
+    add('focus', () => {
+      this.isFocused = true;
+    });
+    add('blur', () => {
+      this.isFocused = false;
+    });
+
+    // Focus/blur handlers are needed for 'blur' mode grouping, for decimalMinLength
+    // padding (applies on blur regardless of formatOn - see handleBlur below), AND for the
+    // -0 -> 0 normalization (A2-11), which is likewise a blur-time concern independent of
+    // formatOn/grouping. The Blur-mode guard that used to live here now lives in
+    // stripSeparatorsAndMapCaret so Change mode + decimalMinLength/enableNegative doesn't
+    // strip separators on focus.
+    if (
+      (this.resolvedOptions.formatOn === FormatOn.Blur && this.resolvedOptions.thousandSeparator) ||
+      this.resolvedOptions.decimalMinLength > 0 ||
+      this.resolvedOptions.enableNegative
+    ) {
       add('focus', this.handleFocus.bind(this) as EventListener);
       add('blur', this.handleBlur.bind(this) as EventListener);
       // Mouse path: capture the intent on mousedown, defer strip until click so the
@@ -311,9 +378,12 @@ export class NumoraInput {
   }
 
   /**
-   * Runs `fn` with `suppressNextInputEvent` set so the synchronous `input` event fired
-   * by `setRangeText` is short-circuited in `handleChange`. Exactly one set/clear pair
-   * per write; try/finally guarantees the flag clears even if `fn` throws.
+   * Runs `fn` with `suppressNextInputEvent` set so `handleChange` short-circuits if an
+   * `input` event fires as a result. `setRangeText` does not synchronously dispatch
+   * `input` in current browsers or jsdom (verified) - this guard is defensive, for
+   * environments or polyfills that do dispatch `input` on a programmatic write. Exactly
+   * one set/clear pair per write; try/finally guarantees the flag clears even if `fn`
+   * throws.
    */
   private withInternalWrite(fn: () => void): void {
     this.suppressNextInputEvent = true;
@@ -333,26 +403,6 @@ export class NumoraInput {
       const valueToEmit = this.resolvedOptions.emitRawValue ? this.rawValue : formattedValue;
       this.resolvedOptions.onChange(valueToEmit);
     }
-  }
-
-  private applyDisplaySeparators(value: string): string {
-    if (!value) {
-      return value;
-    }
-
-    const { thousandSeparator, groupingStyle, enableLeadingZeros, decimalSeparator } = this.resolvedOptions;
-
-    if (thousandSeparator && groupingStyle !== GroupingStyle.None) {
-      return formatWithSeparators(
-        value,
-        thousandSeparator,
-        groupingStyle,
-        enableLeadingZeros,
-        decimalSeparator
-      );
-    }
-
-    return value;
   }
 
   private handleBeforeInput(e: InputEvent): void {
@@ -380,8 +430,9 @@ export class NumoraInput {
   }
 
   private handleChange(e: Event): void {
-    // Our own setRangeText fired this synchronously; the originating handler
-    // (beforeinput/paste/focus/blur) already broadcast. Skip to avoid double-firing.
+    // Only reached via `input` if some environment/polyfill dispatched it off our own
+    // setRangeText write; the originating handler (beforeinput/paste/focus/blur) already
+    // broadcast. Skip to avoid double-firing.
     if (this.suppressNextInputEvent) return;
 
     const target = e.target as HTMLInputElement;
@@ -406,24 +457,39 @@ export class NumoraInput {
     // Max of start/end works around a mobile-browser caret bug where selectionStart lags.
     const oldCursorPosition = Math.max(target.selectionStart ?? 0, target.selectionEnd ?? 0);
     const separators = getSeparators(this.resolvedOptions);
-    const shouldRemoveThousandSeparators = this.resolvedOptions.formatOn === FormatOn.Change;
 
-    const { formatted: newValue, raw: rawValue } = formatInputValue(
-      oldValue,
-      this.resolvedOptions.decimalMaxLength,
-      this.resolvedOptions,
-      shouldRemoveThousandSeparators
-    );
+    // When the element isn't focused (autofill, a programmatic `el.value = x` + dispatched
+    // `input` from external code, a form library resetting the field), there is no typing
+    // caret to preserve and no "mid-edit" state to respect - format the same way the
+    // resting/display value is always formatted (formatForDisplay forces FormatOn.Change),
+    // so e.g. Blur mode doesn't leave an ungrouped value sitting in an unfocused field.
+    // The focused path is unchanged: format under the field's real formatOn mode.
+    //
+    // Tracked via the instance's own `isFocused` flag (set by handleFocus/handleBlur)
+    // rather than `document.activeElement` - a synthetic `focus`/`blur` event dispatched
+    // without moving real DOM focus (common in tests, and possible from non-browser
+    // embedders) still reaches those listeners and should count as focused/unfocused.
+    const isFocused = this.isFocused;
+    const { formatted: newValue, raw: rawValue } = isFocused
+      ? formatInputValue(
+          oldValue,
+          this.resolvedOptions.decimalMaxLength,
+          this.resolvedOptions,
+          this.resolvedOptions.formatOn === FormatOn.Change
+        )
+      : this.formatForDisplay(oldValue);
 
     if (oldValue !== newValue) {
-      const computed = computeCursorPosition(
-        oldValue,
-        newValue,
-        oldCursorPosition,
-        this.caretPositionBeforeChange,
-        separators,
-        this.resolvedOptions
-      );
+      const computed = isFocused
+        ? computeCursorPosition(
+            oldValue,
+            newValue,
+            oldCursorPosition,
+            this.caretPositionBeforeChange,
+            separators,
+            this.resolvedOptions
+          )
+        : newValue.length;
       this.withInternalWrite(() =>
         writeValuePreservingUndo(target, newValue, computed ?? newValue.length)
       );
@@ -443,7 +509,15 @@ export class NumoraInput {
 
   private handlePaste(e: ClipboardEvent): void {
     e.preventDefault();
-    const result = handleOnPasteNumoraInput(e, this.resolvedOptions.decimalMaxLength, this.resolvedOptions);
+    // A readOnly/disabled field must reject the paste outright - no write, no onChange -
+    // matching native <input> behaviour (a native readOnly/disabled input never accepts
+    // pasted text either).
+    if (this.element.readOnly || this.element.disabled) return;
+    const result = handleOnPasteNumoraInput(
+      e,
+      this.resolvedOptions.decimalMaxLength,
+      this.resolvedOptions
+    );
 
     if (result.type === 'reject') return;
 
@@ -454,20 +528,31 @@ export class NumoraInput {
   }
 
   private stripSeparatorsAndMapCaret(target: HTMLInputElement): void {
+    // Change mode never groups mid-edit, so there is nothing to strip on focus even when
+    // focus/blur listeners are attached solely for decimalMinLength padding.
+    if (this.resolvedOptions.formatOn !== FormatOn.Blur) return;
     const sep = this.resolvedOptions.thousandSeparator;
     if (!sep || this.resolvedOptions.groupingStyle === GroupingStyle.None) return;
     const displayStart = target.selectionStart ?? 0;
     const displayEnd = target.selectionEnd ?? target.value.length;
+    // Captured before the write: stripping separators never changes the underlying digits,
+    // only their display, so this equals `result.raw` below in every real case - comparing
+    // the two is what keeps onChange from firing on a focus/click that changes nothing but
+    // presentation (see A2-06).
+    const rawBeforeStrip = this.toRaw(target.value);
     const result = computeStripSeparatorsResult(target.value, displayStart, displayEnd, sep);
     if (!result) return;
 
     this.withInternalWrite(() =>
       writeStripPreservingUndo(target, result.raw, result.rawStart, result.rawEnd)
     );
-    this.handleValueChange(result.raw, result.raw);
+    if (result.raw !== rawBeforeStrip) {
+      this.handleValueChange(result.raw, result.raw);
+    }
   }
 
   private handleFocus(e: FocusEvent): void {
+    this.isFocused = true;
     // Mouse-driven focus: skip - the strip happens on click, after the browser
     // has placed the cursor based on where the user clicked in the formatted value.
     if (this.pendingMouseStrip) return;
@@ -489,23 +574,39 @@ export class NumoraInput {
   }
 
   private handleBlur(e: FocusEvent): void {
+    this.isFocused = false;
     this.pendingMouseStrip = false;
 
     const target = e.target as HTMLInputElement;
-    const { thousandSeparator, groupingStyle } = this.resolvedOptions;
-    if (!thousandSeparator || groupingStyle === GroupingStyle.None || !target.value) return;
+    if (!target.value) return;
 
-    const formatted = this.applyDisplaySeparators(target.value);
-    if (formatted !== target.value) {
-      this.withInternalWrite(() =>
-        writeValuePreservingUndo(target, formatted, formatted.length)
-      );
+    const rawBeforeBlur = this.toRaw(target.value);
+
+    // "-0" (and its decimal variants "-0.", "-0.00", "-.0") settle to the unsigned form at
+    // rest - a resting negative zero is not a meaningful distinct value, and leaving it
+    // means `valueAsNumber` reports -0 forever after. Runs before formatForDisplay so the
+    // padding/grouping pipeline sees the already-designed string (see A2-11).
+    const normalizedValue = normalizeNegativeZero(
+      target.value,
+      this.resolvedOptions.decimalSeparator
+    );
+
+    // formatForDisplay forces FormatOn.Change and strips existing separators before
+    // re-grouping, so it is idempotent on an already-formatted value - re-blurring
+    // "1,234,567.89" never re-groups it into "1,2,34,,567.89". It also pads to
+    // decimalMinLength, matching React's blur handler.
+    const { formatted, raw } = this.formatForDisplay(normalizedValue);
+    if (formatted === target.value) return;
+
+    this.withInternalWrite(() => writeValuePreservingUndo(target, formatted, formatted.length));
+    // Only broadcast onChange when the sanitized raw value actually changed (A2-06) - blur
+    // can otherwise be purely cosmetic (regrouping thousand separators onto an unchanged
+    // raw value), and firing onChange for that misleads consumers into thinking the value
+    // changed. A trailing-separator strip, decimalMinLength padding, and the -0
+    // normalization above are real raw changes and must still notify.
+    if (raw !== rawBeforeBlur) {
+      this.handleValueChange(formatted, raw);
     }
-
-    const raw = this.resolvedOptions.emitRawValue
-      ? this.toRaw(formatted)
-      : undefined;
-    this.handleValueChange(formatted, raw);
   }
 
   public getValue(): string {
@@ -601,23 +702,44 @@ export class NumoraInput {
     }
     // Remove thousand separators and convert decimal separator to dot for parsing
     const cleanValue = this.toRaw(value);
-    const normalizedValue = this.resolvedOptions.decimalSeparator && this.resolvedOptions.decimalSeparator !== '.'
-      ? cleanValue.replace(new RegExp(escapeRegExp(this.resolvedOptions.decimalSeparator), 'g'), '.')
-      : cleanValue;
+    const normalizedValue =
+      this.resolvedOptions.decimalSeparator && this.resolvedOptions.decimalSeparator !== '.'
+        ? cleanValue.replace(
+            new RegExp(escapeRegExp(this.resolvedOptions.decimalSeparator), 'g'),
+            '.'
+          )
+        : cleanValue;
     return parseFloat(normalizedValue);
   }
 
   /**
    * Sets the value from a number, similar to HTMLInputElement.valueAsNumber.
+   *
+   * @throws {RangeError} if `num` is negative and `enableNegative` is false. A silent
+   * sign flip on a money field is worse than an exception - the field would otherwise
+   * display a positive value for a negative input with no indication anything was lost.
+   * @throws {RangeError} if `num` is `Infinity`, `-Infinity`, or `NaN` (passed directly as a
+   * number, not a non-numeric coercion - see below). Silently clearing the field for a
+   * non-finite number hides a bug in the caller's own arithmetic; a numeric field has no
+   * sensible display for "infinity" to silently normalize to, unlike -0.
    */
   public set valueAsNumber(num: number) {
-    // `Number.isNaN(Number(num))` is the exact equivalent of the global `isNaN(num)`, kept
-    // deliberately rather than simplified to `Number.isNaN(num)`. Untyped JS callers can
-    // pass a non-number here; the global form coerced first, so `valueAsNumber = 'abc'`
-    // cleared the input. Bare `Number.isNaN` would let that string through to `toString()`.
-    if (Number.isNaN(Number(num))) {
+    // Untyped JS callers can pass a non-number here despite the `number` type. Only
+    // genuinely non-numeric input (typeof !== 'number' - a string, an object, ...) is
+    // treated leniently and silently clears the field, matching the pre-existing behaviour
+    // for e.g. `valueAsNumber = 'abc'`. A real `number` that happens to be `NaN` falls
+    // through to the finiteness check below and throws, same as `Infinity`/`-Infinity` -
+    // silently clearing the field for those hides a bug in the caller's own arithmetic; a
+    // numeric field has no sensible display to silently normalize a non-finite value to.
+    if (typeof num !== 'number' && Number.isNaN(Number(num))) {
       this.setValue('');
       return;
+    }
+    if (!Number.isFinite(num)) {
+      throw new RangeError(`valueAsNumber: value must be finite (received ${num})`);
+    }
+    if (num < 0 && !this.resolvedOptions.enableNegative) {
+      throw new RangeError('valueAsNumber: negative value but enableNegative is false');
     }
     // `num.toString()` always emits a dot as the decimal mark. Where the configured
     // decimal separator differs - e.g. de-DE, where `.` is the *thousand* separator -

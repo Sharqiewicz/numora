@@ -4,7 +4,6 @@ import { formatValueForDisplay } from '../src/utils/format-utils';
 import { FormatOn, GroupingStyle } from '../src/types';
 import { DEFAULT_GROUPING_STYLE } from '../src/config';
 
-
 describe('✅ formatWithSeparators', () => {
   describe('✅ thousand style (standard Western)', () => {
     it('should format 1234567 to 1,234,567', () => {
@@ -196,11 +195,9 @@ describe('✅ formatWithSeparators', () => {
     it('should format -12345678.90 to -12,345,678.90', () => {
       expect(formatWithSeparators('-12345678.90', ',')).toBe('-12,345,678.90');
     });
-
   });
 
   describe('✅ edge cases', () => {
-
     it('should handle leading zeros', () => {
       expect(formatWithSeparators('001234567', ',', 'thousand')).toBe('001,234,567');
     });

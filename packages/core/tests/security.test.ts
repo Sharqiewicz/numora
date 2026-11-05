@@ -9,6 +9,7 @@ import { removeThousandSeparators } from '../src/features/sanitization';
 import { removeNonNumericCharacters } from '../src/features/non-numeric-characters';
 import { expandCompactNotation } from '../src/features/compact-notation';
 import { expandScientificNotation } from '../src/features/scientific-notation';
+import { sanitizeNumoraInput } from '../src/features/sanitization';
 import { GroupingStyle } from '../src/types';
 
 describe('Security Tests', () => {
@@ -59,7 +60,22 @@ describe('Security Tests', () => {
   describe('Regex Injection Prevention', () => {
     it('should handle regex special chars in separator without throwing', () => {
       // These are all valid but potentially dangerous separators
-      const dangerousSeparators = ['.', '*', '+', '?', '^', '$', '|', '(', ')', '[', ']', '{', '}', '\\'];
+      const dangerousSeparators = [
+        '.',
+        '*',
+        '+',
+        '?',
+        '^',
+        '$',
+        '|',
+        '(',
+        ')',
+        '[',
+        ']',
+        '{',
+        '}',
+        '\\',
+      ];
 
       for (const sep of dangerousSeparators) {
         expect(() => {
@@ -121,19 +137,36 @@ describe('Security Tests', () => {
       expect(result).toBe('12345'.repeat(1000));
       expect(duration).toBeLessThan(100);
     });
+
+    it('should handle a long digit run followed by a lone "e" without hanging (ReDoS regression, audit #01)', () => {
+      // Before the fix, the mantissa regex's `sep?\d*` let the engine re-split this digit
+      // run at every position once the trailing "e" failed to find exponent digits,
+      // costing O(n^2). A 5,000-digit input like this took multiple seconds.
+      const longInput = '9'.repeat(5000) + 'e';
+      const start = performance.now();
+      const result = expandScientificNotation(longInput);
+      const duration = performance.now() - start;
+
+      expect(result).toBeDefined();
+      expect(duration).toBeLessThan(100);
+    });
+
+    it('should handle a long digit run with enableCompactNotation reaching the regex without hanging (audit #01)', () => {
+      // `expandCompactNotation` had no early exit at all before the fix, so with
+      // `enableCompactNotation` on, any long digit string reached the vulnerable pattern.
+      const longInput = '9'.repeat(5000) + 'e';
+      const start = performance.now();
+      const result = sanitizeNumoraInput(longInput, { enableCompactNotation: true });
+      const duration = performance.now() - start;
+
+      expect(result).toBeDefined();
+      expect(duration).toBeLessThan(100);
+    });
   });
 
   describe('Compact Notation Security', () => {
     it('should handle malformed compact notation gracefully', () => {
-      const malformed = [
-        'kkk',
-        '1kk',
-        'k1k',
-        '1k2k3',
-        '...k',
-        'e1k',
-        '1e2k',
-      ];
+      const malformed = ['kkk', '1kk', 'k1k', '1k2k3', '...k', 'e1k', '1e2k'];
 
       for (const input of malformed) {
         expect(() => expandCompactNotation(input)).not.toThrow();
@@ -142,11 +175,7 @@ describe('Security Tests', () => {
 
     it('should not execute code in compact notation suffix', () => {
       // These should be treated as regular text, not code
-      const dangerous = [
-        '1${alert(1)}',
-        '1`rm -rf /`',
-        '1$(command)',
-      ];
+      const dangerous = ['1${alert(1)}', '1`rm -rf /`', '1$(command)'];
 
       for (const input of dangerous) {
         const result = expandCompactNotation(input);
@@ -165,16 +194,7 @@ describe('Security Tests', () => {
 
   describe('Scientific Notation Security', () => {
     it('should handle malformed scientific notation gracefully', () => {
-      const malformed = [
-        'eee',
-        '1e',
-        'e1',
-        '1e2e3',
-        '1e+',
-        '1e-',
-        '1e++2',
-        '1e--2',
-      ];
+      const malformed = ['eee', '1e', 'e1', '1e2e3', '1e+', '1e-', '1e++2', '1e--2'];
 
       for (const input of malformed) {
         expect(() => expandScientificNotation(input)).not.toThrow();
@@ -248,7 +268,7 @@ describe('Security Tests', () => {
 
       // Attempt prototype pollution
       new NumoraInput(container, {
-        '__proto__': { polluted: true },
+        __proto__: { polluted: true },
       } as any);
 
       expect((Object.prototype as any).polluted).toBeUndefined();
@@ -259,7 +279,7 @@ describe('Security Tests', () => {
       const originalPrototype = { ...Array.prototype };
 
       new NumoraInput(container, {
-        'constructor': { prototype: { polluted: true } },
+        constructor: { prototype: { polluted: true } },
       } as any);
 
       expect((Array.prototype as any).polluted).toBeUndefined();

@@ -31,14 +31,14 @@ describe('✅ getSeparatorsFromLocale', () => {
       expect(getSeparatorsFromLocale('bn-IN').groupingStyle).toBe(GroupingStyle.Lakh);
     });
 
-    it.each(['en-US', 'de-DE', 'fr-FR'])('should derive Thousand for %s', locale => {
+    it.each(['en-US', 'de-DE', 'fr-FR'])('should derive Thousand for %s', (locale) => {
       expect(getSeparatorsFromLocale(locale).groupingStyle).toBe(GroupingStyle.Thousand);
     });
 
     // Guards the deliberate scope decision: GroupingStyle.Wan is NOT derivable from Intl.
     // zh-CN and ja-JP both report Western 3-3-3 grouping, not 4-4-4, so locale inference
     // can only ever produce Thousand or Lakh. Wan stays opt-in via explicit groupingStyle.
-    it.each(['zh-CN', 'ja-JP'])('should derive Thousand (never Wan) for %s', locale => {
+    it.each(['zh-CN', 'ja-JP'])('should derive Thousand (never Wan) for %s', (locale) => {
       expect(getSeparatorsFromLocale(locale).groupingStyle).toBe(GroupingStyle.Thousand);
     });
 
@@ -112,7 +112,17 @@ describe('✅ getSeparatorsFromLocale without Intl.formatToParts (Hermes/iOS)', 
   });
 
   it('should agree with the formatToParts-capable result for every probed locale', () => {
-    const locales = ['en-US', 'de-DE', 'fr-FR', 'de-CH', 'hi-IN', 'en-IN', 'bn-IN', 'ar-EG', 'zh-CN'];
+    const locales = [
+      'en-US',
+      'de-DE',
+      'fr-FR',
+      'de-CH',
+      'hi-IN',
+      'en-IN',
+      'bn-IN',
+      'ar-EG',
+      'zh-CN',
+    ];
     for (const locale of locales) {
       expect(withFormatToPartsMissing(() => getSeparatorsFromLocale(locale))).toEqual(
         getSeparatorsFromLocale(locale)

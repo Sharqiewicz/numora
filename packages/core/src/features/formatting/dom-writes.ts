@@ -62,13 +62,9 @@ export function writeStripPreservingUndo(
   el: HTMLInputElement,
   raw: string,
   rawStart: number,
-  rawEnd: number,
+  rawEnd: number
 ): void {
-  if (
-    el.value === raw &&
-    el.selectionStart === rawStart &&
-    el.selectionEnd === rawEnd
-  ) {
+  if (el.value === raw && el.selectionStart === rawStart && el.selectionEnd === rawEnd) {
     return;
   }
   el.setRangeText(raw, 0, el.value.length, 'preserve');

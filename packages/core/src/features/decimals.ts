@@ -7,11 +7,12 @@ import { escapeRegExp } from '../utils/escape-reg-exp';
 // The character class [.,] covers both hardcoded removals in a single pass.
 const TAIL_CLEAN_REGEX = /[.,]/g;
 
-
 /**
  * Normalizes separator configuration with defaults.
  */
-export function getSeparators(options: SeparatorOptions | FormattingOptions | undefined): Separators {
+export function getSeparators(
+  options: SeparatorOptions | FormattingOptions | undefined
+): Separators {
   return {
     decimalSeparator: options?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
     thousandSeparator: options?.thousandSeparator,
@@ -48,6 +49,12 @@ export const trimToDecimalMaxLength = (
   decimalSeparator: string = DEFAULT_DECIMAL_SEPARATOR
 ): string => {
   const { sign, integer, decimal } = splitNumber(value, decimalSeparator);
+
+  // No decimals allowed at all: drop the separator outright, even when the fraction is
+  // empty (e.g. "1." -> "1"), instead of only trimming an existing fraction. Reconstructing
+  // from sign+integer is a no-op for values that never had a separator.
+  if (decimalMaxLength === 0) return `${sign}${integer}`;
+
   if (!decimal) return value;
 
   const trimmedDecimal = decimal.slice(0, decimalMaxLength);
@@ -89,6 +96,10 @@ export const ensureMinDecimals = (
   decimalSeparator: string = DEFAULT_DECIMAL_SEPARATOR
 ): string => {
   if (minDecimals <= 0) return value;
+
+  // Nothing to pad: '', '-', '.', '-.' carry no digit, so padding them would fabricate a
+  // number (e.g. '' -> '.00') out of a field that is actually empty or mid-entry.
+  if (!/\d/.test(value)) return value;
 
   const { sign, integer, decimal } = splitNumber(value, decimalSeparator);
 

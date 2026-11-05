@@ -48,11 +48,28 @@ const GATED_FILES = [
 // Identifiers purged from the source but previously documented. Each entry records why,
 // so a future reader can tell a stale doc from a deliberate revival.
 const DENYLIST = [
-  { token: 'handleOnChangeNumoraInput', reason: 'never existed; the real handler is handleOnBeforeInputNumoraInput' },
+  {
+    token: 'handleOnChangeNumoraInput',
+    reason: 'never existed; the real handler is handleOnBeforeInputNumoraInput',
+  },
   { token: 'handleNumoraOnBeforeInput', reason: 'renamed to handleOnBeforeInputNumoraInput' },
   { token: 'onRawValueChange', reason: 'renamed to onValueChange in v5' },
   { token: 'maxDecimals', reason: 'renamed to decimalMaxLength in v5' },
   { token: 'ThousandStyle', reason: 'renamed to GroupingStyle in v5' },
+  {
+    token: 'input-pattern',
+    reason:
+      'utils/input-pattern.ts never existed; the pattern attribute is built inline in NumoraInput.createInputElement',
+  },
+  {
+    token: 'getNumoraPattern',
+    reason:
+      'never existed; the pattern attribute is built inline in NumoraInput.createInputElement',
+  },
+  {
+    token: 'handleNumoraOnPaste',
+    reason: 'never existed; the real handler is handleOnPasteNumoraInput',
+  },
 ];
 
 const violations = [];
@@ -80,13 +97,17 @@ for (const file of GATED_FILES) {
 }
 
 if (violations.length > 0) {
-  console.error(`✗ Docs drift: ${violations.length} reference(s) to removed/renamed identifiers.\n`);
+  console.error(
+    `✗ Docs drift: ${violations.length} reference(s) to removed/renamed identifiers.\n`
+  );
   for (const v of violations) {
     console.error(`  ${v.file}:${v.line}  ${v.token}`);
     console.error(`    ${v.reason}`);
     console.error(`    > ${v.text.slice(0, 100)}\n`);
   }
-  console.error('Update the doc, or move the reference into docs/adr/ if it is a historical record.');
+  console.error(
+    'Update the doc, or move the reference into docs/adr/ if it is a historical record.'
+  );
   process.exit(1);
 }
 

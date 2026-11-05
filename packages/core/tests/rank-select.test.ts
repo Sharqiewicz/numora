@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  significantCharRank,
-  positionAfterRank,
-} from '../src/features/formatting/rank-select';
+import { significantCharRank, positionAfterRank } from '../src/features/formatting/rank-select';
 
 /**
  * Unit tests for the two primitives caret preservation is built on. The end-to-end caret

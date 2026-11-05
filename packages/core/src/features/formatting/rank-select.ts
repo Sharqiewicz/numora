@@ -48,11 +48,7 @@
  * significantCharRank("1,234", 3, ",")    // 2 — "1" and "2"
  * significantCharRank("1,234.56", 8, ",") // 7 — the decimal separator counts
  */
-export function significantCharRank(
-  value: string,
-  position: number,
-  separator: string
-): number {
+export function significantCharRank(value: string, position: number, separator: string): number {
   const limit = Math.min(position, value.length);
   const sepLength = separator.length;
   let count = 0;
@@ -85,11 +81,7 @@ export function significantCharRank(
  * @example
  * positionAfterRank("1,234", 3, ",") // 4 — "1,23|4"
  */
-export function positionAfterRank(
-  value: string,
-  targetRank: number,
-  separator: string
-): number {
+export function positionAfterRank(value: string, targetRank: number, separator: string): number {
   if (targetRank <= 0) return 0;
 
   const sepLength = separator.length;

@@ -33,7 +33,12 @@ export interface CaretOutcome {
   cursorPos: number;
 }
 
-function withInput<T>(value: string, selStart: number, selEnd: number, fn: (input: HTMLInputElement) => T): T {
+function withInput<T>(
+  value: string,
+  selStart: number,
+  selEnd: number,
+  fn: (input: HTMLInputElement) => T
+): T {
   const input = document.createElement('input');
   input.value = value;
   document.body.appendChild(input);
@@ -55,9 +60,15 @@ export function edit(
   o: FormattingOptions
 ): CaretOutcome | null {
   return withInput(value, selStart, selEnd, (input) => {
-    if (inputType === InputType.DeleteContentBackward || inputType === InputType.DeleteContentForward) {
+    if (
+      inputType === InputType.DeleteContentBackward ||
+      inputType === InputType.DeleteContentForward
+    ) {
       const key = inputType === InputType.DeleteContentBackward ? 'Backspace' : 'Delete';
-      handleOnKeyDownNumoraInput({ key, target: input, preventDefault() {} } as unknown as KeyboardEvent, o);
+      handleOnKeyDownNumoraInput(
+        { key, target: input, preventDefault() {} } as unknown as KeyboardEvent,
+        o
+      );
     }
     const res = handleOnBeforeInputNumoraInput(
       { inputType, data, target: input, preventDefault() {} } as unknown as InputEvent,
@@ -87,7 +98,11 @@ export function paste(
 ): CaretOutcome | null {
   return withInput(value, selStart, selEnd, (input) => {
     const res = handleOnPasteNumoraInput(
-      { target: input, clipboardData: { getData: () => clip }, preventDefault() {} } as unknown as ClipboardEvent,
+      {
+        target: input,
+        clipboardData: { getData: () => clip },
+        preventDefault() {},
+      } as unknown as ClipboardEvent,
       DEC_MAX,
       o
     );

@@ -19,17 +19,9 @@ export default {
       sourcemap: true,
     },
   ],
-  plugins: [
-    peerDepsExternal(),
-    resolve(),
-    commonjs(),
-    typescript({ tsconfig: './tsconfig.json' }),
-  ],
+  plugins: [peerDepsExternal(), resolve(), commonjs(), typescript({ tsconfig: './tsconfig.json' })],
   // Predicate so subpath imports like 'numora/internal' are externalized too (a bare
   // string only matches the exact id, which would bundle the internal entry).
   external: (id) =>
-    id === 'react' ||
-    id === 'react-dom' ||
-    id === 'numora' ||
-    id.startsWith('numora/'),
+    id === 'react' || id === 'react-dom' || id === 'numora' || id.startsWith('numora/'),
 };

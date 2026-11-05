@@ -10,13 +10,13 @@ export * from './NumoraInput';
 export { GroupingStyle, FormatOn, InputType } from './types';
 export type { FormattingOptions, CaretPositionInfo, LocaleTag } from './types';
 export { getSeparatorsFromLocale, applyLocale } from './utils/locale';
-export { formatValueForDisplay } from './utils/format-utils';
+export { formatValueForDisplay, normalizeNegativeZero } from './utils/format-utils';
 export { validateNumoraInputOptions } from './validation';
 
 // Pure sanitization/formatting utilities - standalone-usable public API.
 export { sanitizeNumoraInput, removeThousandSeparators } from './features/sanitization';
 export { filterMobileKeyboardArtifacts } from './features/mobile-keyboard-filtering';
-export { normalizeFullWidthDigits } from './features/fullwidth-digits';
+export { normalizeFullWidthDigits, normalizeDigits } from './features/fullwidth-digits';
 export { normalizeUnicodeMinus } from './features/unicode-minus';
 export { expandCompactNotation } from './features/compact-notation';
 export { expandScientificNotation } from './features/scientific-notation';

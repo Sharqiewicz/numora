@@ -149,7 +149,9 @@ describe('✅ expandCompactNotation', () => {
     });
 
     it('should handle very big number', () => {
-      expect(expandCompactNotation('111222333444555666777.8888K')).toBe('111222333444555666777888.8');
+      expect(expandCompactNotation('111222333444555666777.8888K')).toBe(
+        '111222333444555666777888.8'
+      );
     });
   });
 
@@ -178,6 +180,77 @@ describe('✅ expandCompactNotation', () => {
       // "1.5k" with comma as decimal separator: the literal "." is not the decimal
       // separator, so the regex sees "5k" and expands only that.
       expect(expandCompactNotation('1.5k', ',')).toBe('1.5000');
+    });
+  });
+
+  describe('Regression: a second decimal separator can start a different valid match (audit #01 follow-up)', () => {
+    // The linear-scan rewrite (audit #01) skips a failed mantissa's whole span in one
+    // jump for performance. That jump is only safe when the character right after the
+    // failed span isn't itself a decimal separator - when it is, a *different* mantissa
+    // starting partway through the failed span can still succeed, reusing that second
+    // separator. These pin the scan to the same result the old backtracking regex gave.
+    it('should expand ".0.b" to ".0" (not leave it unchanged)', () => {
+      // The bare-decimal ".0" at position 0 fails (next char is "." not a suffix), but
+      // re-anchoring right after that first "." finds "0.b" (mantissa "0." + suffix "b").
+      expect(expandCompactNotation('.0.b')).toBe('.0');
+    });
+
+    it('should expand "1.2.b" using the second "1." as a dead prefix', () => {
+      expect(expandCompactNotation('1.2.b')).toBe('1.2000000000');
+    });
+
+    it('should expand "12.34.b" the same way with longer digit runs', () => {
+      expect(expandCompactNotation('12.34.b')).toBe('12.34000000000');
+    });
+  });
+
+  describe('A2-10: a suffix immediately followed by a digit or decimal separator is not a token', () => {
+    it('should leave "1k234" unchanged (mid-number keystroke, not a compact-notation token)', () => {
+      expect(expandCompactNotation('1k234')).toBe('1k234');
+    });
+
+    it('should leave "1.5k234" unchanged the same way', () => {
+      expect(expandCompactNotation('1.5k234')).toBe('1.5k234');
+    });
+
+    it('should leave a suffix followed by the decimal separator unchanged ("1k.5")', () => {
+      expect(expandCompactNotation('1k.5')).toBe('1k.5');
+    });
+
+    it('should leave a suffix followed by the decimal separator unchanged with a custom separator ("1k,5" with comma decimal)', () => {
+      expect(expandCompactNotation('1k,5', ',')).toBe('1k,5');
+    });
+
+    it('should still expand when the suffix is at the end of the string ("1k")', () => {
+      expect(expandCompactNotation('1k')).toBe('1000');
+    });
+
+    it('should still expand when whitespace follows the suffix ("1k USD")', () => {
+      expect(expandCompactNotation('1k USD')).toBe('1000 USD');
+    });
+
+    it('should still expand multiple compact notations separated by whitespace ("1k 2m")', () => {
+      // The character right after the first suffix is whitespace, not a digit, so this is
+      // still a valid boundary even though a digit follows further along.
+      expect(expandCompactNotation('1k 2m')).toBe('1000 2000000');
+    });
+
+    it('should still expand when another non-numeric, non-separator character follows ("1kk")', () => {
+      expect(expandCompactNotation('1kk')).toBe('1000k');
+    });
+
+    it('should still expand with whitespace before the suffix and nothing after ("1 k")', () => {
+      expect(expandCompactNotation('1 k')).toBe('1000');
+    });
+
+    it('leaves the token alone so a subsequent non-numeric-character removal round-trips to the pre-keystroke value', () => {
+      // Simulates the Change-mode keystroke from A2-10: typing "k" in the middle of
+      // "1|234" produces "1k234" at the sanitizer's compact-notation step. It must survive
+      // unchanged here so downstream non-numeric-character removal strips only the "k",
+      // yielding back "1234" - i.e. the keystroke is a no-op and beforeinput rejects it.
+      const expanded = expandCompactNotation('1k234');
+      const withoutLetters = expanded.replace(/[a-zA-Z]/g, '');
+      expect(withoutLetters).toBe('1234');
     });
   });
 });

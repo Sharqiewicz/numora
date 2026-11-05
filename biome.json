@@ -1,15 +1,63 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+  "root": true,
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "packages/*/src/**",
+      "packages/*/tests/**",
+      "packages/*/*.{ts,mts,mjs,json}",
+      "docs/src/**",
+      "docs/*.{ts,json}",
+      "scripts/**",
+      "*.json",
+      ".vscode/**",
+      "!docs/src/routeTree.gen.ts",
+      "!docs/src/styles.css",
+      "!**/dist/**",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!pnpm-lock.yaml"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "lineEnding": "lf"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "jsxQuoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "es5",
+      "arrowParentheses": "always",
+      "bracketSpacing": true
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {
       "recommended": true
     }
-  },
-  "formatter": {
-    "enabled": false
-  },
-  "files": {
-    "includes": ["packages/core/src/**", "packages/react/src/**"]
   }
 }

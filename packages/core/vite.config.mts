@@ -18,7 +18,10 @@ export default defineConfig({
       // package.json exports map for both '.' and './internal' resolves consistently.
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'mjs' : 'js'}`,
     },
-    emptyOutDir: false,
+    // Clear stale hashed `internal-*` chunks between builds: `files: ["dist"]` publishes
+    // the whole directory, so leftovers from earlier builds would ship to npm. Safe because
+    // `tsc --emitDeclarationOnly` runs after Vite in the build script.
+    emptyOutDir: true,
   },
   test: {
     environment: 'jsdom',

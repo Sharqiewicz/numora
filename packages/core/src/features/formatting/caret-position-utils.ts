@@ -58,7 +58,7 @@ export function computeStripSeparatorsResult(
   currentValue: string,
   displayStart: number,
   displayEnd: number,
-  separator: string,
+  separator: string
 ): StripSeparatorsResult | null {
   const raw = removeThousandSeparators(currentValue, separator);
   if (raw === currentValue) return null;
@@ -150,8 +150,12 @@ export function computeCursorPosition(
   const thousandSeparator =
     formattingOptions?.thousandSeparator ?? separators.thousandSeparator ?? '';
 
-  const rawOld = thousandSeparator ? removeThousandSeparators(oldValue, thousandSeparator) : oldValue;
-  const rawNew = thousandSeparator ? removeThousandSeparators(newValue, thousandSeparator) : newValue;
+  const rawOld = thousandSeparator
+    ? removeThousandSeparators(oldValue, thousandSeparator)
+    : oldValue;
+  const rawNew = thousandSeparator
+    ? removeThousandSeparators(newValue, thousandSeparator)
+    : newValue;
 
   // rank: caret index in the separator-free ("raw") old value.
   const rawCaret = significantCharRank(oldValue, oldCursorPosition, thousandSeparator);
@@ -189,5 +193,3 @@ function commonPrefixLength(a: string, b: string): number {
   while (i < n && a[i] === b[i]) i++;
   return i;
 }
-
-

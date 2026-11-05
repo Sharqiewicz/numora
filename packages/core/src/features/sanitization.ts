@@ -8,9 +8,15 @@ import { truncateToMaxLength } from './max-length';
 import { filterMobileKeyboardArtifacts } from './mobile-keyboard-filtering';
 import { normalizeFullWidthDigits } from './fullwidth-digits';
 import { normalizeUnicodeMinus } from './unicode-minus';
+import { normalizeDecimalSeparators } from './decimal-separators';
 import { getCachedRegex } from '../utils/regex-cache';
 import { escapeRegExp } from '../utils/escape-reg-exp';
 import type { FormattingOptions } from '../types';
+
+// Upper bound on the raw input length sanitization will ever process. No numeric input a
+// person types or pastes is longer than this, and capping here bounds every downstream
+// step (including the two regex/scan-based expansions) against a pathological paste.
+const MAX_INPUT_LENGTH = 10_000;
 
 /**
  * Removes all occurrences of thousand separator from a string.
@@ -26,16 +32,21 @@ export function removeThousandSeparators(value: string, thousandSeparator: strin
 
 /**
  * Sanitizes numeric input by:
- * 0. Filter mobile keyboard artifacts (non-breaking spaces, Unicode whitespace)
- * 1. Remove thousand separators (formatting, not data) - only when `thousandSeparator` is set
- * 2. Normalizing fullwidth digits (e.g., １２３ → 123) and non-ASCII minus signs (e.g., − → -)
- * 3. (Optional) Expanding compact notation (e.g., 1k → 1000)
- * 4. Expanding scientific notation (e.g., 1.5e-5 → 0.000015)
- * 5. Removing non-numeric characters
- * 6. Removing extra decimal points
- * 7. (Optional) Removing leading zeros
- * 8. (Optional) Prepend `0` before a bare leading decimal separator (.5 → 0.5)
- * 9. (Optional) Truncate raw to `maxLength` characters
+ * 0. Capping the raw input to `MAX_INPUT_LENGTH` characters - bounds every downstream
+ *    step (including the regex/scan-based notation expansions) against a pathological
+ *    paste or keystroke
+ * 1. Filter mobile keyboard artifacts (non-breaking spaces, Unicode whitespace)
+ * 2. Remove thousand separators (formatting, not data) - only when `thousandSeparator` is set
+ * 3. Normalizing fullwidth digits (e.g., １２３ → 123), non-ASCII minus signs (e.g., − → -),
+ *    and non-ASCII decimal-separator glyphs (e.g., Arabic ٫ or fullwidth ， → the configured
+ *    `decimalSeparator`) - see `normalizeDecimalSeparators` for the full glyph table
+ * 4. (Optional) Expanding compact notation (e.g., 1k → 1000)
+ * 5. Expanding scientific notation (e.g., 1.5e-5 → 0.000015)
+ * 6. Removing non-numeric characters
+ * 7. Removing extra decimal points
+ * 8. (Optional) Removing leading zeros
+ * 9. (Optional) Prepend `0` before a bare leading decimal separator (.5 → 0.5)
+ * 10. (Optional) Truncate raw to `maxLength` characters
  *
  * Note: Decimal separator conversion (comma ↔ dot) is handled in the beforeinput event
  * (handleOnBeforeInputNumoraInput), not here, to avoid converting thousand separators.
@@ -48,6 +59,11 @@ export const sanitizeNumoraInput = (
   value: string,
   formattingOptions?: FormattingOptions
 ): string => {
+  // Step 0.
+  if (value.length > MAX_INPUT_LENGTH) {
+    value = value.slice(0, MAX_INPUT_LENGTH);
+  }
+
   // Step 1 also strips NBSP-family whitespace (incl. U+202F, the French thousand separator
   // from Intl.NumberFormat). For NBSP-using locales this means step 2 may already be a
   // no-op by the time it runs - benign, but worth knowing when debugging locale output.
@@ -65,6 +81,11 @@ export const sanitizeNumoraInput = (
 
     sanitized = normalizeFullWidthDigits(sanitized);
     sanitized = normalizeUnicodeMinus(sanitized);
+    sanitized = normalizeDecimalSeparators(
+      sanitized,
+      formattingOptions?.decimalSeparator,
+      formattingOptions?.thousandSeparator
+    );
 
     if (formattingOptions?.enableCompactNotation) {
       sanitized = expandCompactNotation(sanitized, formattingOptions?.decimalSeparator);

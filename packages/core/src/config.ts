@@ -1,4 +1,4 @@
-import { FormatOn, GroupingStyle } from "./types";
+import { FormatOn, GroupingStyle } from './types';
 
 // Precision-first default for the DeFi/crypto audience: token amounts routinely need
 // 6 (USDC), 8 (WBTC), or 18 (most ERC-20) decimals. A low default silently truncated

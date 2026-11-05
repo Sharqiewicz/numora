@@ -62,8 +62,9 @@ describe('maxLength option (pipeline integration)', () => {
   });
 
   it('strips thousand separators before counting', () => {
-    expect(sanitizeNumoraInput('1,234,567', { maxLength: 5, thousandSeparator: ',' }))
-      .toBe('12345');
+    expect(sanitizeNumoraInput('1,234,567', { maxLength: 5, thousandSeparator: ',' })).toBe(
+      '12345'
+    );
   });
 
   it('applies after scientific expansion', () => {

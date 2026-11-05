@@ -1,11 +1,19 @@
 import { getSeparators } from '../features/decimals';
-import { removeThousandSeparators } from '../features/sanitization';
-import {
-  computeCursorPosition,
-  skipOverThousandSeparatorOnDelete,
-} from '../features/formatting';
+import { sanitizeNumoraInput } from '../features/sanitization';
+import { NON_ASCII_DECIMAL_SEPARATOR_GLYPHS } from '../features/decimal-separators';
+import { computeCursorPosition, skipOverThousandSeparatorOnDelete } from '../features/formatting';
 import { type FormattingOptions, type CaretPositionInfo, FormatOn, InputType } from '../types';
 import { formatInputValue } from './format-utils';
+
+// Keys that, when typed, are candidates for remapping to the configured decimal separator:
+// the plain ASCII '.' and ',' plus every non-ASCII glyph that functions as a decimal mark
+// on some keyboard/locale (see `../features/decimal-separators` for the glyph table and
+// the matching sanitization-side fix for paste/IME-commit). A candidate is remapped to
+// `decimalSeparator` UNLESS it is itself the configured `thousandSeparator` (and differs
+// from `decimalSeparator`), in which case the keystroke is rejected outright (A2-04) -
+// otherwise typing "1,000,000" under an en-US config (thousand ',', decimal '.') would
+// have each comma parsed as a decimal point.
+const DECIMAL_KEY_CANDIDATES = new Set<string>(['.', ',', ...NON_ASCII_DECIMAL_SEPARATOR_GLYPHS]);
 
 /**
  * Outcome of `handleOnBeforeInputNumoraInput`. Pure: the helper does not mutate the
@@ -23,6 +31,29 @@ export type BeforeInputResult =
   | { type: 'handled'; formatted: string; raw: string; cursorPos: number }
   | { type: 'reject' }
   | { type: 'skip' };
+
+/**
+ * Invokes a user-supplied `isAllowed` validator, treating a throw as "not allowed" (A2-08).
+ *
+ * `isAllowed` runs synchronously inside `beforeinput`/paste handling, BEFORE the caller
+ * calls `preventDefault()`. If the validator throws and that exception is left to
+ * propagate, it unwinds out of the event listener before `preventDefault()` ever runs, so
+ * the browser proceeds to insert the raw keystroke natively - the exact bypass `isAllowed`
+ * exists to prevent. `console.error`-reporting the error (rather than swallowing it
+ * silently, and rather than rethrowing - which would surface as an unhandled exception
+ * outside this call stack, e.g. via `queueMicrotask`) keeps it visible to the developer
+ * without letting it interrupt the keystroke handling that must still return a `reject`
+ * result, or risk crashing an unrelated caller (a test runner, a host app's own global
+ * error handler) that isn't expecting an async throw from a keystroke.
+ */
+function callIsAllowed(isAllowed: (rawValue: string) => boolean, rawValue: string): boolean {
+  try {
+    return isAllowed(rawValue);
+  } catch (err) {
+    console.error('[numora] isAllowed threw; treating the keystroke as not allowed:', err);
+    return false;
+  }
+}
 
 /**
  * Computes the formatted value, raw value, and target cursor position for a
@@ -52,9 +83,24 @@ export function handleOnBeforeInputNumoraInput(
 
   let inputData = e.data ?? '';
 
-  if (e.inputType === InputType.InsertText && (e.data === ',' || e.data === '.')) {
+  if (e.inputType === InputType.InsertText && DECIMAL_KEY_CANDIDATES.has(inputData)) {
     const decimalSep = separators.decimalSeparator;
-    const valueOutsideSelection = currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
+    const thousandSep = formattingOptions?.thousandSeparator;
+
+    // The typed key is configured as the thousand separator (and isn't ALSO the decimal
+    // separator, which would make remapping a no-op anyway): reject the keystroke rather
+    // than remap it to a decimal point (A2-04/A2-05).
+    if (inputData === thousandSep && inputData !== decimalSep) {
+      return { type: 'reject' };
+    }
+
+    // decimalMaxLength: 0 means no fractional part is allowed at all, so refuse the
+    // decimal-separator keystroke outright rather than insert-then-trim it away.
+    if (decimalMaxLength === 0) {
+      return { type: 'reject' };
+    }
+    const valueOutsideSelection =
+      currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
     if (valueOutsideSelection.includes(decimalSep)) {
       return { type: 'reject' };
     }
@@ -88,22 +134,48 @@ export function handleOnBeforeInputNumoraInput(
 
   switch (e.inputType) {
     case InputType.InsertText: {
-      intendedValue = currentValue.slice(0, selectionStart) + inputData + currentValue.slice(selectionEnd);
+      intendedValue =
+        currentValue.slice(0, selectionStart) + inputData + currentValue.slice(selectionEnd);
       intendedCursorPos = selectionStart + inputData.length;
       break;
     }
     case InputType.DeleteContentBackward: {
-      const deleteFrom = hasSelection ? selectionStart : Math.max(0, selectionStart - 1);
+      // Mobile fallback: separator skipping normally happens in handleOnKeyDownNumoraInput,
+      // but Android soft keyboards often report `key: 'Unidentified'` or fire no keydown at
+      // all, so `beforeinput` is the only signal. When the char immediately before the caret
+      // is the thousand separator, delete the digit behind it too - otherwise deleting just
+      // the separator re-formats back to the same string (a no-op backspace). Only applies
+      // with no active selection; a real keydown-driven caret skip has already moved the
+      // caret past the separator by the time this runs, so this branch is simply not taken.
+      const thousandSep = formattingOptions?.thousandSeparator;
+      const deletesOverSeparator =
+        !hasSelection &&
+        thousandSep !== undefined &&
+        currentValue[selectionStart - 1] === thousandSep;
+      const deleteFrom = hasSelection
+        ? selectionStart
+        : deletesOverSeparator
+          ? Math.max(0, selectionStart - 2)
+          : Math.max(0, selectionStart - 1);
       const deleteTo = hasSelection ? selectionEnd : selectionStart;
       intendedValue = currentValue.slice(0, deleteFrom) + currentValue.slice(deleteTo);
       intendedCursorPos = deleteFrom;
       break;
     }
     case InputType.DeleteContentForward: {
-      const deleteTo = hasSelection ? selectionEnd : selectionStart + 1;
+      // Same mobile fallback as DeleteContentBackward above, mirrored for forward delete:
+      // when the char at the caret is the thousand separator, delete the digit past it too.
+      const thousandSep = formattingOptions?.thousandSeparator;
+      const deletesOverSeparator =
+        !hasSelection && thousandSep !== undefined && currentValue[selectionStart] === thousandSep;
+      const deleteTo = hasSelection
+        ? selectionEnd
+        : deletesOverSeparator
+          ? selectionStart + 2
+          : selectionStart + 1;
       intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(deleteTo);
       intendedCursorPos = selectionStart;
-      if (!hasSelection) endOffset = 1;
+      if (!hasSelection) endOffset = deleteTo - selectionStart;
       break;
     }
     case InputType.DeleteByCut:
@@ -113,14 +185,18 @@ export function handleOnBeforeInputNumoraInput(
       break;
     }
     case InputType.DeleteSoftLineBackward:
-    case InputType.DeleteHardLineBackward: {
+    case InputType.DeleteHardLineBackward:
+    // A numeric field is always a single "word", so word-boundary deletion (Alt/Option +
+    // Backspace/Delete on desktop) behaves the same as line deletion here.
+    case InputType.DeleteWordBackward: {
       const deleteFrom = hasSelection ? selectionStart : 0;
       intendedValue = currentValue.slice(0, deleteFrom) + currentValue.slice(selectionEnd);
       intendedCursorPos = deleteFrom;
       break;
     }
     case InputType.DeleteSoftLineForward:
-    case InputType.DeleteHardLineForward: {
+    case InputType.DeleteHardLineForward:
+    case InputType.DeleteWordForward: {
       const deleteTo = hasSelection ? selectionEnd : currentValue.length;
       intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(deleteTo);
       intendedCursorPos = selectionStart;
@@ -138,15 +214,15 @@ export function handleOnBeforeInputNumoraInput(
       return { type: 'skip' };
   }
 
-  if (
-    formattingOptions?.maxLength !== undefined &&
-    e.inputType === InputType.InsertText
-  ) {
-    const sep = formattingOptions.thousandSeparator;
-    const intendedRawLength = sep
-      ? removeThousandSeparators(intendedValue, sep).length
-      : intendedValue.length;
-    if (intendedRawLength > formattingOptions.maxLength) {
+  if (formattingOptions?.maxLength !== undefined && e.inputType === InputType.InsertText) {
+    // Check the length AFTER sanitization (grouping separators stripped, leading zeros
+    // collapsed, etc.), not the raw pre-sanitization intended value - otherwise a value
+    // that would sanitize down to fit under maxLength gets rejected anyway.
+    const sanitizedLength = sanitizeNumoraInput(intendedValue, {
+      ...formattingOptions,
+      maxLength: undefined,
+    }).length;
+    if (sanitizedLength > formattingOptions.maxLength) {
       return { type: 'reject' };
     }
   }
@@ -159,7 +235,16 @@ export function handleOnBeforeInputNumoraInput(
     shouldRemoveThousandSeparators
   );
 
-  if (formattingOptions?.isAllowed && !formattingOptions.isAllowed(rawValue)) {
+  if (formattingOptions?.isAllowed && !callIsAllowed(formattingOptions.isAllowed, rawValue)) {
+    return { type: 'reject' };
+  }
+
+  // Nothing actually changed (e.g. a rejected letter, Backspace at position 0, Delete at
+  // the end, Backspace on an empty field) - reject so the caller does not fire onChange
+  // for a no-op keystroke. Accepted consequence: a selection whose replacement sanitizes
+  // back to the exact same string (e.g. selecting the "," in "1,234" and typing a letter)
+  // keeps its selection instead of collapsing, since `reject` leaves the DOM untouched.
+  if (newValue === currentValue) {
     return { type: 'reject' };
   }
 
@@ -248,7 +333,7 @@ export function handleOnPasteNumoraInput(
     true
   );
 
-  if (formattingOptions?.isAllowed && !formattingOptions.isAllowed(rawValue)) {
+  if (formattingOptions?.isAllowed && !callIsAllowed(formattingOptions.isAllowed, rawValue)) {
     return { type: 'reject' };
   }
 

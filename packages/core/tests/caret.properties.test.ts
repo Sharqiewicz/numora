@@ -22,7 +22,9 @@ import {
  */
 
 const isDigit = (c: string) => c >= '0' && c <= '9';
-const nonZeroDigits = fc.array(fc.integer({ min: 1, max: 9 }), { minLength: 1, maxLength: 16 }).map((a) => a.join(''));
+const nonZeroDigits = fc
+  .array(fc.integer({ min: 1, max: 9 }), { minLength: 1, maxLength: 16 })
+  .map((a) => a.join(''));
 
 const LOCALES: Array<{ name: string; o: FormattingOptions; sep: string }> = [
   { name: 'thousand', o: makeOptions(), sep: ',' },
@@ -37,27 +39,39 @@ for (const { name, o, sep } of LOCALES) {
   describe(`caret properties — ${name}`, () => {
     it('caret is always within bounds after inserting any digit at any position', () => {
       fc.assert(
-        fc.property(nonZeroDigits, fc.nat(), fc.integer({ min: 0, max: 9 }), (raw, posNat, digit) => {
-          const v = format(raw, o);
-          const pos = posNat % (v.length + 1);
-          const r = typeDigit(v, pos, String(digit), o);
-          if (!r) return; // rejected → not a caret case
-          expect(r.cursorPos).toBeGreaterThanOrEqual(0);
-          expect(r.cursorPos).toBeLessThanOrEqual(r.formatted.length);
-        }),
+        fc.property(
+          nonZeroDigits,
+          fc.nat(),
+          fc.integer({ min: 0, max: 9 }),
+          (raw, posNat, digit) => {
+            const v = format(raw, o);
+            const pos = posNat % (v.length + 1);
+            const r = typeDigit(v, pos, String(digit), o);
+            if (!r) return; // rejected → not a caret case
+            expect(r.cursorPos).toBeGreaterThanOrEqual(0);
+            expect(r.cursorPos).toBeLessThanOrEqual(r.formatted.length);
+          }
+        ),
         RUNS
       );
     });
 
     it('inserting a digit lands the caret one significant char past the edit point', () => {
       fc.assert(
-        fc.property(nonZeroDigits, fc.nat(), fc.integer({ min: 1, max: 9 }), (raw, posNat, digit) => {
-          const v = format(raw, o);
-          const pos = posNat % (v.length + 1);
-          const r = typeDigit(v, pos, String(digit), o);
-          if (!r) return;
-          expect(significantBefore(r.formatted, r.cursorPos, sep)).toBe(significantBefore(v, pos, sep) + 1);
-        }),
+        fc.property(
+          nonZeroDigits,
+          fc.nat(),
+          fc.integer({ min: 1, max: 9 }),
+          (raw, posNat, digit) => {
+            const v = format(raw, o);
+            const pos = posNat % (v.length + 1);
+            const r = typeDigit(v, pos, String(digit), o);
+            if (!r) return;
+            expect(significantBefore(r.formatted, r.cursorPos, sep)).toBe(
+              significantBefore(v, pos, sep) + 1
+            );
+          }
+        ),
         RUNS
       );
     });
@@ -71,7 +85,9 @@ for (const { name, o, sep } of LOCALES) {
           const pos = digitEnds[posNat % digitEnds.length];
           const r = backspace(v, pos, o);
           if (!r) return;
-          expect(significantBefore(r.formatted, r.cursorPos, sep)).toBe(significantBefore(v, pos - 1, sep));
+          expect(significantBefore(r.formatted, r.cursorPos, sep)).toBe(
+            significantBefore(v, pos - 1, sep)
+          );
         }),
         RUNS
       );
@@ -86,7 +102,9 @@ for (const { name, o, sep } of LOCALES) {
           const pos = digitStarts[posNat % digitStarts.length];
           const r = forwardDelete(v, pos, o);
           if (!r) return;
-          expect(significantBefore(r.formatted, r.cursorPos, sep)).toBe(significantBefore(v, pos, sep));
+          expect(significantBefore(r.formatted, r.cursorPos, sep)).toBe(
+            significantBefore(v, pos, sep)
+          );
         }),
         RUNS
       );

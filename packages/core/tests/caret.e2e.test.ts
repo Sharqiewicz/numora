@@ -184,7 +184,11 @@ describe('caret e2e — value-normalizing transforms', () => {
   });
 
   it('compact expansion "15k" → "15,000" snaps caret to end', () => {
-    const COMPACT: FormattingOptions = { ...LZ, autoAddLeadingZero: false, enableCompactNotation: true };
+    const COMPACT: FormattingOptions = {
+      ...LZ,
+      autoAddLeadingZero: false,
+      enableCompactNotation: true,
+    };
     const r = type('15', 2, 'k', COMPACT);
     expect(r.formatted).toBe('15,000');
     expect(r.cursorPos).toBe(r.formatted.length);

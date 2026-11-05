@@ -7,7 +7,9 @@
 **/build
 **/.netlify
 **/.tanstack
-**/.vscode
+**/.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .prettierrc
 ARTICLE.md
 WHY_NUMORA.md

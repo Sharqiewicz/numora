@@ -15,7 +15,11 @@ import {
 } from '@/utils/event-handlers';
 import { InputType } from '@/types';
 
-function makeInput(value = '', selectionStart = 0, selectionEnd = selectionStart): HTMLInputElement {
+function makeInput(
+  value = '',
+  selectionStart = 0,
+  selectionEnd = selectionStart
+): HTMLInputElement {
   const el = document.createElement('input');
   el.value = value;
   document.body.appendChild(el);
@@ -120,7 +124,6 @@ describe('BeforeInputResult contract', () => {
     const validTypes: BeforeInputResult['type'][] = ['handled', 'reject', 'skip'];
     expect(validTypes).toContain(result.type);
   });
-
 });
 
 describe('PasteResult contract', () => {
@@ -151,5 +154,4 @@ describe('PasteResult contract', () => {
     const validTypes: PasteResult['type'][] = ['handled', 'reject'];
     expect(validTypes).toContain(result.type);
   });
-
 });

@@ -18,7 +18,12 @@ const cursorAfterFormat = (numStr: string, formatted: string, oldCursor: number)
     oldCursor,
     { selectionStart: oldCursor, selectionEnd: oldCursor, endOffset: 0 },
     { thousandSeparator: ',', decimalSeparator: '.' },
-    { thousandSeparator: ',', groupingStyle: GroupingStyle.Thousand, formatOn: FormatOn.Change, decimalSeparator: '.' }
+    {
+      thousandSeparator: ',',
+      groupingStyle: GroupingStyle.Thousand,
+      formatOn: FormatOn.Change,
+      decimalSeparator: '.',
+    }
   ) ?? -1;
 
 describe('Formatting Properties', () => {
@@ -40,30 +45,24 @@ describe('Formatting Properties', () => {
 
     it('should preserve all numeric digits (lakh style)', () => {
       fc.assert(
-        fc.property(
-          fc.stringMatching(/^[1-9]\d{0,15}$/),
-          (numStr) => {
-            const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Lakh);
-            const digitsIn = numStr.replace(/\D/g, '');
-            const digitsOut = formatted.replace(/\D/g, '');
-            return digitsIn === digitsOut;
-          }
-        ),
+        fc.property(fc.stringMatching(/^[1-9]\d{0,15}$/), (numStr) => {
+          const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Lakh);
+          const digitsIn = numStr.replace(/\D/g, '');
+          const digitsOut = formatted.replace(/\D/g, '');
+          return digitsIn === digitsOut;
+        }),
         { numRuns: 100 }
       );
     });
 
     it('should preserve all numeric digits (wan style)', () => {
       fc.assert(
-        fc.property(
-          fc.stringMatching(/^[1-9]\d{0,15}$/),
-          (numStr) => {
-            const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Wan);
-            const digitsIn = numStr.replace(/\D/g, '');
-            const digitsOut = formatted.replace(/\D/g, '');
-            return digitsIn === digitsOut;
-          }
-        ),
+        fc.property(fc.stringMatching(/^[1-9]\d{0,15}$/), (numStr) => {
+          const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Wan);
+          const digitsIn = numStr.replace(/\D/g, '');
+          const digitsOut = formatted.replace(/\D/g, '');
+          return digitsIn === digitsOut;
+        }),
         { numRuns: 100 }
       );
     });
@@ -72,8 +71,8 @@ describe('Formatting Properties', () => {
       fc.assert(
         fc.property(
           fc.tuple(
-            fc.stringMatching(/^[1-9]\d{0,10}$/),  // Integer part
-            fc.stringMatching(/^\d{1,8}$/)         // Decimal part
+            fc.stringMatching(/^[1-9]\d{0,10}$/), // Integer part
+            fc.stringMatching(/^\d{1,8}$/) // Decimal part
           ),
           ([intPart, decPart]) => {
             const numStr = `${intPart}.${decPart}`;
@@ -95,15 +94,12 @@ describe('Formatting Properties', () => {
 
     it('should be idempotent when applied twice', () => {
       fc.assert(
-        fc.property(
-          fc.stringMatching(/^[1-9]\d{0,12}$/),
-          (numStr) => {
-            const formatted1 = formatWithSeparators(numStr, ',', GroupingStyle.Thousand);
-            const unformatted = removeThousandSeparators(formatted1, ',');
-            const formatted2 = formatWithSeparators(unformatted, ',', GroupingStyle.Thousand);
-            return formatted1 === formatted2;
-          }
-        ),
+        fc.property(fc.stringMatching(/^[1-9]\d{0,12}$/), (numStr) => {
+          const formatted1 = formatWithSeparators(numStr, ',', GroupingStyle.Thousand);
+          const unformatted = removeThousandSeparators(formatted1, ',');
+          const formatted2 = formatWithSeparators(unformatted, ',', GroupingStyle.Thousand);
+          return formatted1 === formatted2;
+        }),
         { numRuns: 100 }
       );
     });
@@ -112,14 +108,11 @@ describe('Formatting Properties', () => {
   describe('removeThousandSeparators', () => {
     it('should be inverse of formatWithSeparators', () => {
       fc.assert(
-        fc.property(
-          fc.stringMatching(/^[1-9]\d{0,12}$/),
-          (numStr) => {
-            const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Thousand);
-            const unformatted = removeThousandSeparators(formatted, ',');
-            return unformatted === numStr;
-          }
-        ),
+        fc.property(fc.stringMatching(/^[1-9]\d{0,12}$/), (numStr) => {
+          const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Thousand);
+          const unformatted = removeThousandSeparators(formatted, ',');
+          return unformatted === numStr;
+        }),
         { numRuns: 100 }
       );
     });
@@ -130,7 +123,13 @@ describe('Formatting Properties', () => {
           fc.stringMatching(/^[1-9]\d{0,12}$/),
           fc.constantFrom('.', ' ', "'"),
           (numStr, separator) => {
-            const formatted = formatWithSeparators(numStr, separator, GroupingStyle.Thousand, false, ',');
+            const formatted = formatWithSeparators(
+              numStr,
+              separator,
+              GroupingStyle.Thousand,
+              false,
+              ','
+            );
             const unformatted = removeThousandSeparators(formatted, separator);
             return unformatted === numStr;
           }
@@ -143,30 +142,24 @@ describe('Formatting Properties', () => {
   describe('expandCompactNotation', () => {
     it('should expand k suffix correctly', () => {
       fc.assert(
-        fc.property(
-          fc.integer({ min: 1, max: 999 }),
-          (num) => {
-            const compact = `${num}k`;
-            const expanded = expandCompactNotation(compact);
-            const expected = (num * 1000).toString();
-            return expanded === expected;
-          }
-        ),
+        fc.property(fc.integer({ min: 1, max: 999 }), (num) => {
+          const compact = `${num}k`;
+          const expanded = expandCompactNotation(compact);
+          const expected = (num * 1000).toString();
+          return expanded === expected;
+        }),
         { numRuns: 100 }
       );
     });
 
     it('should expand m suffix correctly', () => {
       fc.assert(
-        fc.property(
-          fc.integer({ min: 1, max: 999 }),
-          (num) => {
-            const compact = `${num}m`;
-            const expanded = expandCompactNotation(compact);
-            const expected = (num * 1000000).toString();
-            return expanded === expected;
-          }
-        ),
+        fc.property(fc.integer({ min: 1, max: 999 }), (num) => {
+          const compact = `${num}m`;
+          const expanded = expandCompactNotation(compact);
+          const expected = (num * 1000000).toString();
+          return expanded === expected;
+        }),
         { numRuns: 100 }
       );
     });
@@ -190,13 +183,10 @@ describe('Formatting Properties', () => {
 
     it('should preserve non-compact values', () => {
       fc.assert(
-        fc.property(
-          fc.stringMatching(/^[1-9]\d{0,10}$/),
-          (numStr) => {
-            const result = expandCompactNotation(numStr);
-            return result === numStr;
-          }
-        ),
+        fc.property(fc.stringMatching(/^[1-9]\d{0,10}$/), (numStr) => {
+          const result = expandCompactNotation(numStr);
+          return result === numStr;
+        }),
         { numRuns: 100 }
       );
     });
@@ -221,13 +211,10 @@ describe('Formatting Properties', () => {
 
     it('should preserve non-scientific values', () => {
       fc.assert(
-        fc.property(
-          fc.stringMatching(/^[1-9]\d{0,10}$/),
-          (numStr) => {
-            const result = expandScientificNotation(numStr);
-            return result === numStr;
-          }
-        ),
+        fc.property(fc.stringMatching(/^[1-9]\d{0,10}$/), (numStr) => {
+          const result = expandScientificNotation(numStr);
+          return result === numStr;
+        }),
         { numRuns: 100 }
       );
     });
@@ -237,52 +224,42 @@ describe('Formatting Properties', () => {
 describe('Cursor Position Properties', () => {
   it('cursor position should always be within bounds', () => {
     fc.assert(
-      fc.property(
-        fc.stringMatching(/^[1-9]\d{0,10}$/),
-        fc.nat(20),
-        (numStr, cursorOffset) => {
-          const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Thousand);
-          const oldCursor = Math.min(cursorOffset, numStr.length);
+      fc.property(fc.stringMatching(/^[1-9]\d{0,10}$/), fc.nat(20), (numStr, cursorOffset) => {
+        const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Thousand);
+        const oldCursor = Math.min(cursorOffset, numStr.length);
 
-          const newCursor = cursorAfterFormat(numStr, formatted, oldCursor);
+        const newCursor = cursorAfterFormat(numStr, formatted, oldCursor);
 
-          return newCursor >= 0 && newCursor <= formatted.length;
-        }
-      ),
+        return newCursor >= 0 && newCursor <= formatted.length;
+      }),
       { numRuns: 100 }
     );
   });
 
   it('cursor at end should stay at end after formatting', () => {
     fc.assert(
-      fc.property(
-        fc.stringMatching(/^[1-9]\d{0,10}$/),
-        (numStr) => {
-          const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Thousand);
-          const oldCursor = numStr.length;
+      fc.property(fc.stringMatching(/^[1-9]\d{0,10}$/), (numStr) => {
+        const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Thousand);
+        const oldCursor = numStr.length;
 
-          const newCursor = cursorAfterFormat(numStr, formatted, oldCursor);
+        const newCursor = cursorAfterFormat(numStr, formatted, oldCursor);
 
-          return newCursor === formatted.length;
-        }
-      ),
+        return newCursor === formatted.length;
+      }),
       { numRuns: 100 }
     );
   });
 
   it('cursor at start should stay at start after formatting', () => {
     fc.assert(
-      fc.property(
-        fc.stringMatching(/^[1-9]\d{0,10}$/),
-        (numStr) => {
-          const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Thousand);
-          const oldCursor = 0;
+      fc.property(fc.stringMatching(/^[1-9]\d{0,10}$/), (numStr) => {
+        const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Thousand);
+        const oldCursor = 0;
 
-          const newCursor = cursorAfterFormat(numStr, formatted, oldCursor);
+        const newCursor = cursorAfterFormat(numStr, formatted, oldCursor);
 
-          return newCursor === 0;
-        }
-      ),
+        return newCursor === 0;
+      }),
       { numRuns: 100 }
     );
   });

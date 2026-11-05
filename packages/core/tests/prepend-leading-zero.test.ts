@@ -67,8 +67,9 @@ describe('autoAddLeadingZero option (pipeline integration)', () => {
   });
 
   it('prepends 0 to negative leading decimal', () => {
-    expect(sanitizeNumoraInput('-.5', { autoAddLeadingZero: true, enableNegative: true }))
-      .toBe('-0.5');
+    expect(sanitizeNumoraInput('-.5', { autoAddLeadingZero: true, enableNegative: true })).toBe(
+      '-0.5'
+    );
   });
 
   it('runs after removeLeadingZeros so 00.5 → 0.5 (not 00.5)', () => {
@@ -76,7 +77,8 @@ describe('autoAddLeadingZero option (pipeline integration)', () => {
   });
 
   it('respects custom decimal separator', () => {
-    expect(sanitizeNumoraInput(',5', { autoAddLeadingZero: true, decimalSeparator: ',' }))
-      .toBe('0,5');
+    expect(sanitizeNumoraInput(',5', { autoAddLeadingZero: true, decimalSeparator: ',' })).toBe(
+      '0,5'
+    );
   });
 });

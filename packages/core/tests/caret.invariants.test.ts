@@ -133,7 +133,10 @@ for (const loc of LOCALES) {
         // select-all replace
         const all = selectReplace(v, 0, v.length, '7', o);
         if (all) {
-          expect(significantBefore(all.formatted, all.cursorPos, sep), `${name} selrep-all "${v}"`).toBe(1);
+          expect(
+            significantBefore(all.formatted, all.cursorPos, sep),
+            `${name} selrep-all "${v}"`
+          ).toBe(1);
         }
       }
     });

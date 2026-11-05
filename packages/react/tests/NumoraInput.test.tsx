@@ -2,7 +2,11 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { Controller, useController, useForm } from 'react-hook-form';
-import { NumoraInput, type NumoraHTMLInputElement, type NumoraInputChangeEvent } from '../src/index';
+import {
+  NumoraInput,
+  type NumoraHTMLInputElement,
+  type NumoraInputChangeEvent,
+} from '../src/index';
 import { FormatOn, GroupingStyle } from 'numora';
 
 // ---------------------------------------------------------------------------
@@ -248,6 +252,155 @@ describe('NumoraInput', () => {
 
       expect(input.value).toBe('1234');
     });
+
+    // A2-01: `formatValueForDisplay` (and `formatForDisplay`, which forces Change) both
+    // strip a trailing decimal separator and pad to `decimalMinLength` - display/blur-only
+    // concerns. Formatting the controlled echo-back with those and comparing the RESULT
+    // against the DOM's current value made "1." round-trip as "1", "0.05" collapse
+    // mid-entry, and a decimalMinLength:2 field snap to "1.00" after every keystroke. The
+    // fix compares `sanitizeNumoraInput` output instead (no display-only transforms) to
+    // detect a same-number echo and leaves the DOM untouched in that case.
+    describe('accepts a trailing decimal separator through the echo-back (A2-01)', () => {
+      it('Blur mode: typing "1", ".", "5" lands as "1.5", not "15"', () => {
+        const raws: string[] = [];
+        function Wrapper() {
+          const [val, setVal] = useState('');
+          return (
+            <NumoraInput
+              data-testid="input"
+              value={val}
+              onChange={(e) => {
+                setVal(e.target.value);
+                raws.push(e.target.value);
+              }}
+            />
+          );
+        }
+        render(<Wrapper />);
+        const input = screen.getByTestId('input') as HTMLInputElement;
+        act(() => input.focus());
+
+        act(() => simulateTyping(input, '1'));
+        expect(input.value).toBe('1');
+        act(() => simulateTyping(input, '.'));
+        expect(input.value).toBe('1.');
+        act(() => simulateTyping(input, '5'));
+        expect(input.value).toBe('1.5');
+
+        expect(raws).toEqual(['1', '1.', '1.5']);
+      });
+
+      it('Change mode: typing "0", ".", "0", "5" lands as "0.05", not "5"', () => {
+        function Wrapper() {
+          const [val, setVal] = useState('');
+          return (
+            <NumoraInput
+              data-testid="input"
+              value={val}
+              onChange={(e) => setVal(e.target.value)}
+              formatOn={FormatOn.Change}
+            />
+          );
+        }
+        render(<Wrapper />);
+        const input = screen.getByTestId('input') as HTMLInputElement;
+        act(() => input.focus());
+
+        act(() => simulateTyping(input, '0'));
+        act(() => simulateTyping(input, '.'));
+        act(() => simulateTyping(input, '0'));
+        act(() => simulateTyping(input, '5'));
+
+        expect(input.value).toBe('0.05');
+      });
+
+      it('Change mode: groups digits while preserving a trailing decimal separator mid-entry', () => {
+        function Wrapper() {
+          const [val, setVal] = useState('');
+          return (
+            <NumoraInput
+              data-testid="input"
+              value={val}
+              onChange={(e) => setVal(e.target.value)}
+              thousandSeparator=","
+              formatOn={FormatOn.Change}
+            />
+          );
+        }
+        render(<Wrapper />);
+        const input = screen.getByTestId('input') as HTMLInputElement;
+        act(() => input.focus());
+
+        for (const ch of ['1', '2', '3', '4', '.', '5']) {
+          act(() => simulateTyping(input, ch));
+        }
+
+        expect(input.value).toBe('1,234.5');
+      });
+
+      it('decimalMinLength/decimalMaxLength 2: does not pad/truncate while focused, still correct after blur', () => {
+        function Wrapper() {
+          const [val, setVal] = useState('');
+          return (
+            <NumoraInput
+              data-testid="input"
+              value={val}
+              onChange={(e) => setVal(e.target.value)}
+              decimalMaxLength={2}
+              decimalMinLength={2}
+            />
+          );
+        }
+        render(<Wrapper />);
+        const input = screen.getByTestId('input') as HTMLInputElement;
+        act(() => input.focus());
+
+        for (const ch of ['1', '.', '5', '7']) {
+          act(() => simulateTyping(input, ch));
+        }
+        // Focused: no premature padding/truncation artifact (e.g. "1.00") from the
+        // controlled echo-back forcing decimalMinLength on every keystroke.
+        expect(input.value).toBe('1.57');
+
+        act(() => fireEvent.blur(input));
+        expect(input.value).toBe('1.57');
+      });
+
+      // `valueAsNumber` is a native getter that is spec-mandated to return NaN for any
+      // input whose `type` is not number/range/date/etc. - and NumoraInput's underlying
+      // <input> is always `type="text"` (see the JSX below), regardless of its content.
+      // So `e.target.valueAsNumber` can NEVER recover the typed value here - this is a
+      // platform limitation, not something A2-01 can fix (there is no display-formatting
+      // choice that changes what a native DOM getter returns for a text input). Use
+      // `e.target.value` (the raw string) instead, or parse it yourself with `Number(...)`.
+      // What A2-01 still guarantees: the field does not corrupt into a literal "NaN" and
+      // stays usable - it resets to empty and keeps accepting further digits normally.
+      it('valueAsNumber cannot round-trip a text input - documents the platform limitation', () => {
+        function Wrapper() {
+          const [val, setVal] = useState<number>(0);
+          return (
+            <NumoraInput
+              data-testid="input"
+              value={val}
+              onChange={(e) => setVal(e.target.valueAsNumber)}
+            />
+          );
+        }
+        render(<Wrapper />);
+        const input = screen.getByTestId('input') as HTMLInputElement;
+        act(() => input.focus());
+        input.setSelectionRange(input.value.length, input.value.length);
+
+        act(() => simulateTyping(input, '.'));
+        // valueAsNumber on a type="text" input is always NaN, so the controlled value
+        // collapses - but it collapses to an EMPTY field, not to a corrupted/garbage one.
+        expect(input.value).toBe('');
+
+        // The field is still fully usable afterwards - no digits get stuck or rejected.
+        act(() => simulateTyping(input, '5'));
+        expect(input.value).toBe('5');
+      });
+    });
   });
 
   describe('mouse-strip flag robustness (#5)', () => {
@@ -416,9 +569,7 @@ describe('NumoraInput', () => {
   describe('paste handling', () => {
     it('formats pasted numeric value and fires onChange', () => {
       const onChange = vi.fn();
-      render(
-        <NumoraInput data-testid="input" onChange={onChange} decimalMaxLength={2} />
-      );
+      render(<NumoraInput data-testid="input" onChange={onChange} decimalMaxLength={2} />);
       const input = screen.getByTestId('input') as HTMLInputElement;
 
       act(() => simulatePaste(input, '1234.56'));
@@ -426,6 +577,29 @@ describe('NumoraInput', () => {
       expect(onChange).toHaveBeenCalled();
       const event: NumoraInputChangeEvent = onChange.mock.calls.at(-1)![0];
       expect(event.target.value).toBe('1234.56');
+    });
+
+    // A2-02
+    it('ignores a paste on a readOnly input (no write, no onChange)', () => {
+      const onChange = vi.fn();
+      render(<NumoraInput data-testid="input" readOnly defaultValue="5" onChange={onChange} />);
+      const input = screen.getByTestId('input') as HTMLInputElement;
+
+      act(() => simulatePaste(input, '999'));
+
+      expect(input.value).toBe('5');
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('ignores a paste on a disabled input (no write, no onChange)', () => {
+      const onChange = vi.fn();
+      render(<NumoraInput data-testid="input" disabled defaultValue="5" onChange={onChange} />);
+      const input = screen.getByTestId('input') as HTMLInputElement;
+
+      act(() => simulatePaste(input, '999'));
+
+      expect(input.value).toBe('5');
+      expect(onChange).not.toHaveBeenCalled();
     });
   });
 
@@ -448,13 +622,7 @@ describe('NumoraInput', () => {
 
   describe('autoAddLeadingZero', () => {
     it('prepends 0 before a bare leading decimal on typing', async () => {
-      render(
-        <NumoraInput
-          data-testid="input"
-          autoAddLeadingZero
-          formatOn={FormatOn.Change}
-        />
-      );
+      render(<NumoraInput data-testid="input" autoAddLeadingZero formatOn={FormatOn.Change} />);
       const input = screen.getByTestId('input') as HTMLInputElement;
 
       await act(async () => {
@@ -556,13 +724,7 @@ describe('NumoraInput', () => {
     it('rejects paste when validator returns false', () => {
       const isAllowed = (raw: string) => raw === '' || Number(raw) <= 100;
       const onChange = vi.fn();
-      render(
-        <NumoraInput
-          data-testid="input"
-          isAllowed={isAllowed}
-          onChange={onChange}
-        />
-      );
+      render(<NumoraInput data-testid="input" isAllowed={isAllowed} onChange={onChange} />);
       const input = screen.getByTestId('input') as HTMLInputElement;
 
       act(() => simulatePaste(input, '500'));
@@ -607,13 +769,7 @@ describe('NumoraInput', () => {
 describe('handleChange fallback (non-beforeinput edits)', () => {
   it('sanitizes a dirty insertFromDrop value before broadcasting', () => {
     const onChange = vi.fn();
-    render(
-      <NumoraInput
-        data-testid="input"
-        onChange={onChange}
-        decimalMaxLength={2}
-      />
-    );
+    render(<NumoraInput data-testid="input" onChange={onChange} decimalMaxLength={2} />);
     const input = screen.getByTestId('input') as HTMLInputElement;
 
     // Simulate drop/autofill: use fireEvent.change so React's synthetic onChange fires,
@@ -665,13 +821,46 @@ describe('handleChange fallback (non-beforeinput edits)', () => {
     // The DOM value must NOT be rewritten (no extra formatting step).
     expect(input.value).toBe('123');
   });
+
+  // A2-07
+  it('formats an unfocused autofill in Blur mode for its RESTING display (grouped), not the editing display', () => {
+    const onChange = vi.fn();
+    render(
+      <NumoraInput
+        data-testid="input"
+        onChange={onChange}
+        thousandSeparator=","
+        groupingStyle={GroupingStyle.Thousand}
+        formatOn={FormatOn.Blur}
+      />
+    );
+    const input = screen.getByTestId('input') as HTMLInputElement;
+    // Not focused: document.activeElement is not `input`.
+    expect(document.activeElement).not.toBe(input);
+
+    // Simulate an autofill/programmatic write landing while the field is at rest.
+    fireEvent.change(input, {
+      target: { value: '1234567' },
+      nativeEvent: new InputEvent('input', { bubbles: true, inputType: 'insertReplacementText' }),
+    });
+
+    // Blur mode normally keeps separators OUT while editing, but this value never went
+    // through an editing session - it should rest exactly like a blurred/initial value.
+    expect(input.value).toBe('1,234,567');
+    const event: NumoraInputChangeEvent = onChange.mock.calls.at(-1)![0];
+    expect(event.target.value).toBe('1234567');
+    expect((event.target as NumoraHTMLInputElement).formattedValue).toBe('1,234,567');
+  });
 });
 
 // ---------------------------------------------------------------------------
 // simulateDelete helper
 // ---------------------------------------------------------------------------
 
-function simulateDelete(el: HTMLInputElement, inputType: 'deleteContentBackward' | 'deleteContentForward'): void {
+function simulateDelete(
+  el: HTMLInputElement,
+  inputType: 'deleteContentBackward' | 'deleteContentForward'
+): void {
   const beforeInput = new InputEvent('beforeinput', {
     bubbles: true,
     cancelable: true,
@@ -856,13 +1045,7 @@ describe('keyboard delete/backspace', () => {
 
   it('delete-forward removes the character after the caret', async () => {
     const onChange = vi.fn();
-    render(
-      <NumoraInput
-        data-testid="input"
-        onChange={onChange}
-        formatOn={FormatOn.Change}
-      />
-    );
+    render(<NumoraInput data-testid="input" onChange={onChange} formatOn={FormatOn.Change} />);
     const input = screen.getByTestId('input') as HTMLInputElement;
 
     await act(async () => {
@@ -998,6 +1181,71 @@ describe('locale', () => {
     const input = screen.getByTestId('input') as HTMLInputElement;
     expect(input.value).toBe('12.345.678');
   });
+
+  // Regression (ticket 04): a numeric `value`/`defaultValue` is always dot-decimal
+  // (`String(1234.5)` -> `'1234.5'`), so under de-DE - where '.' is the *thousand*
+  // separator - passing it straight through got silently reinterpreted as grouping and
+  // concatenated: 1234.5 displayed as "12.345", a silent 10x error. The initializer must
+  // convert a JS number to the field's display format before formatting it.
+  it('converts a numeric controlled value to de-DE display format', () => {
+    render(<NumoraInput data-testid="input" locale="de-DE" value={1234.5} onChange={() => {}} />);
+    const input = screen.getByTestId('input') as HTMLInputElement;
+    expect(input.value).toBe('1.234,5');
+  });
+
+  it('converts a numeric defaultValue to de-DE display format', () => {
+    render(<NumoraInput data-testid="input" locale="de-DE" defaultValue={0.5} />);
+    const input = screen.getByTestId('input') as HTMLInputElement;
+    expect(input.value).toBe('0,5');
+  });
+
+  // A string value is already display text (locale separators allowed) and must NOT be
+  // reinterpreted - only a JS number goes through the dot-to-comma conversion.
+  it('leaves a de-DE-formatted string value unchanged', () => {
+    render(<NumoraInput data-testid="input" locale="de-DE" defaultValue="1.234,5" />);
+    const input = screen.getByTestId('input') as HTMLInputElement;
+    expect(input.value).toBe('1.234,5');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// A2-09: formattingOptions memoization must not depend on onChange/isAllowed identity
+// ---------------------------------------------------------------------------
+
+describe('formattingOptions memoization (A2-09)', () => {
+  it('does not reconstruct Intl.NumberFormat (locale resolution) when only an inline onChange changes identity', () => {
+    const OriginalNumberFormat = Intl.NumberFormat;
+    let constructions = 0;
+    // @ts-expect-error - test spy, not a full Intl.NumberFormat replacement.
+    Intl.NumberFormat = function (...args: unknown[]) {
+      constructions++;
+      // eslint-disable-next-line new-cap
+      return new OriginalNumberFormat(...(args as [string]));
+    };
+    Intl.NumberFormat.prototype = OriginalNumberFormat.prototype;
+
+    try {
+      let bump: () => void = () => {};
+      function Parent() {
+        const [, setN] = useState(0);
+        bump = () => setN((x) => x + 1);
+        // A fresh inline function every render - the pre-fix memo depended on `onChange`
+        // identity, so this alone forced `applyLocale`/Intl.NumberFormat to re-run.
+        return <NumoraInput data-testid="input" locale="de-DE" onChange={() => {}} />;
+      }
+      render(<Parent />);
+      const afterMount = constructions;
+      expect(afterMount).toBeGreaterThan(0);
+
+      act(() => bump());
+      act(() => bump());
+      act(() => bump());
+
+      expect(constructions).toBe(afterMount);
+    } finally {
+      Intl.NumberFormat = OriginalNumberFormat;
+    }
+  });
 });
 
 describe('blur onChange guard', () => {
@@ -1041,7 +1289,8 @@ describe('blur onChange guard', () => {
     // On mount: "1,234" (initialDisplayValue forces Change mode for initial format)
     expect(input.value).toBe('1,234');
 
-    // Focus strips separators (onChange fires from stripSeparatorsAndMapCaret).
+    // Focus strips separators for display only (A2-06: the raw number is unchanged by a
+    // separator strip, so stripSeparatorsAndMapCaret no longer fires onChange here).
     fireEvent.focus(input);
     expect(input.value).toBe('1234');
 
@@ -1055,12 +1304,43 @@ describe('blur onChange guard', () => {
     expect(event.target.value).toBe('1234');
     expect((event.target as NumoraHTMLInputElement).formattedValue).toBe('1,234');
   });
+
+  // A2-06
+  it('does not fire onChange/onValueChange for the focus-strip itself (raw value is unchanged)', () => {
+    const onChange = vi.fn();
+    const onValueChange = vi.fn();
+    render(
+      <NumoraInput
+        data-testid="input"
+        onChange={onChange}
+        onValueChange={onValueChange}
+        thousandSeparator=","
+        groupingStyle={GroupingStyle.Thousand}
+        formatOn={FormatOn.Blur}
+        defaultValue="1234567"
+      />
+    );
+    const input = screen.getByTestId('input') as HTMLInputElement;
+    expect(input.value).toBe('1,234,567');
+
+    onChange.mockClear();
+    onValueChange.mockClear();
+
+    // Focus strips the separators - display changes ("1,234,567" -> "1234567") but the
+    // number itself does not, so neither callback should fire.
+    fireEvent.focus(input);
+    expect(input.value).toBe('1234567');
+    expect((input as unknown as NumoraHTMLInputElement).formattedValue).toBe('1234567');
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
 });
 
 describe('decimalMinLength', () => {
-  it('pads to decimalMinLength zeros immediately on typing (applied at keystroke time)', async () => {
-    // decimalMinLength is enforced in the beforeinput pipeline (formatInputValue →
-    // ensureMinDecimals), so the value is padded on each keystroke — not deferred to blur.
+  it('does not pad while typing - padding is a display/blur-only concern', async () => {
+    // decimalMinLength pads on display/blur only (formatValueForDisplay), never on the
+    // typing path (formatInputValue) - padding on every keystroke would make a 2/2
+    // currency field unable to receive cents by typing.
     const onChange = vi.fn();
     render(
       <NumoraInput
@@ -1074,42 +1354,191 @@ describe('decimalMinLength', () => {
     const input = screen.getByTestId('input') as HTMLInputElement;
 
     await act(async () => {
+      simulateTyping(input, '1');
+      simulateTyping(input, '2');
+      simulateTyping(input, '.');
       simulateTyping(input, '5');
     });
 
-    // Padding is applied immediately at keystroke, not deferred to blur.
-    expect(input.value).toBe('5.00');
-    expect(onChange).toHaveBeenCalled();
-    const event: NumoraInputChangeEvent = onChange.mock.calls.at(-1)![0];
-    expect(event.target.value).toBe('5.00');
-  });
+    expect(input.value).toBe('12.5');
 
-  it('blur does not fire onChange when decimalMinLength already padded the value', async () => {
-    // Since padding is applied at keystroke, blur sees no change and must NOT fire onChange.
-    const onChange = vi.fn();
-    render(
-      <NumoraInput
-        data-testid="input"
-        onChange={onChange}
-        decimalMinLength={2}
-        decimalMaxLength={2}
-        formatOn={FormatOn.Blur}
-      />
-    );
-    const input = screen.getByTestId('input') as HTMLInputElement;
-
-    await act(async () => {
-      simulateTyping(input, '5');
-    });
-    // Value is already "5.00"
-    expect(input.value).toBe('5.00');
     onChange.mockClear();
-
-    // Blur: "5.00" formats to "5.00" — no change, onChange must NOT fire.
     await act(async () => {
       fireEvent.blur(input);
     });
+
+    expect(input.value).toBe('12.50');
+    expect(onChange).toHaveBeenCalledTimes(1);
+    const event: NumoraInputChangeEvent = onChange.mock.calls[0][0];
+    expect(event.target.value).toBe('12.50');
+  });
+
+  it('select-all + delete clears the field instead of leaving a bare separator', async () => {
+    const onChange = vi.fn();
+    render(
+      <NumoraInput
+        data-testid="input"
+        onChange={onChange}
+        decimalMinLength={2}
+        decimalMaxLength={2}
+        formatOn={FormatOn.Blur}
+      />
+    );
+    const input = screen.getByTestId('input') as HTMLInputElement;
+
+    await act(async () => {
+      simulateTyping(input, '1');
+      simulateTyping(input, '2');
+    });
+    expect(input.value).toBe('12');
+
+    await act(async () => {
+      input.setSelectionRange(0, input.value.length);
+      simulateDelete(input, 'deleteContentBackward');
+    });
+
+    expect(input.value).toBe('');
+  });
+
+  it('blur on an empty field stays empty and does not fire onChange', async () => {
+    const onChange = vi.fn();
+    render(
+      <NumoraInput
+        data-testid="input"
+        onChange={onChange}
+        decimalMinLength={2}
+        decimalMaxLength={2}
+        formatOn={FormatOn.Blur}
+      />
+    );
+    const input = screen.getByTestId('input') as HTMLInputElement;
+
+    onChange.mockClear();
+    await act(async () => {
+      fireEvent.blur(input);
+    });
+
+    expect(input.value).toBe('');
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('Change mode + decimalMinLength + grouping pads on blur', async () => {
+    const onChange = vi.fn();
+    render(
+      <NumoraInput
+        data-testid="input"
+        onChange={onChange}
+        decimalMinLength={2}
+        thousandSeparator=","
+        groupingStyle={GroupingStyle.Thousand}
+        formatOn={FormatOn.Change}
+      />
+    );
+    const input = screen.getByTestId('input') as HTMLInputElement;
+
+    await act(async () => {
+      for (const char of '1234.5') {
+        simulateTyping(input, char);
+      }
+    });
+
+    await act(async () => {
+      fireEvent.blur(input);
+    });
+
+    expect(input.value).toBe('1,234.50');
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ target: expect.objectContaining({ value: '1234.50' }) })
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// decimalMaxLength: 0 and a trailing separator surviving to display (ticket 08,
+// steps 1 and 3 - the beforeinput reject is step 2, owned by another agent's
+// work on event-handlers.ts).
+// ---------------------------------------------------------------------------
+
+describe('decimalMaxLength: 0 and trailing separator on blur', () => {
+  it('normalizes -0 to 0 on blur with enableNegative (A2-11)', async () => {
+    const onChange = vi.fn();
+    render(
+      <NumoraInput
+        data-testid="input"
+        onChange={onChange}
+        enableNegative
+        formatOn={FormatOn.Change}
+      />
+    );
+    const input = screen.getByTestId('input') as HTMLInputElement;
+    input.focus();
+    simulateTyping(input, '-');
+    simulateTyping(input, '0');
+    expect(input.value).toBe('-0');
+    fireEvent.blur(input);
+    expect(input.value).toBe('0');
+    const last = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(last.target.value).toBe('0');
+  });
+
+  it('blur strips a trailing separator: 1234. -> 1,234', async () => {
+    const onChange = vi.fn();
+    render(
+      <NumoraInput
+        data-testid="input"
+        onChange={onChange}
+        thousandSeparator=","
+        groupingStyle={GroupingStyle.Thousand}
+        formatOn={FormatOn.Blur}
+        decimalMaxLength={2}
+      />
+    );
+    const input = screen.getByTestId('input') as HTMLInputElement;
+
+    // Typing still allows a trailing separator mid-entry - only the display/blur path
+    // strips it.
+    await act(async () => {
+      for (const char of '1234.') {
+        simulateTyping(input, char);
+      }
+    });
+    expect(input.value).toBe('1234.');
+
+    await act(async () => {
+      fireEvent.blur(input);
+    });
+
+    expect(input.value).toBe('1,234');
+    expect(input.value.endsWith('.')).toBe(false);
+  });
+
+  it('blur strips a trailing separator and pads when decimalMinLength is set: 1234. -> 1,234.00', async () => {
+    const onChange = vi.fn();
+    render(
+      <NumoraInput
+        data-testid="input"
+        onChange={onChange}
+        thousandSeparator=","
+        groupingStyle={GroupingStyle.Thousand}
+        formatOn={FormatOn.Blur}
+        decimalMaxLength={2}
+        decimalMinLength={2}
+      />
+    );
+    const input = screen.getByTestId('input') as HTMLInputElement;
+
+    await act(async () => {
+      for (const char of '1234.') {
+        simulateTyping(input, char);
+      }
+    });
+    expect(input.value).toBe('1234.');
+
+    await act(async () => {
+      fireEvent.blur(input);
+    });
+
+    expect(input.value).toBe('1,234.00');
   });
 });
 
@@ -1316,7 +1745,9 @@ describe('react-hook-form integration', () => {
         simulateTyping(input, '0');
       });
 
-      await act(async () => { fireEvent.blur(input); });
+      await act(async () => {
+        fireEvent.blur(input);
+      });
 
       // Display formatted by blur; stored value must be bare "5000"
       expect(input.value).toBe('5,000');
@@ -1373,16 +1804,23 @@ describe('separator default resolution (parity with vanilla)', () => {
   it('throws when thousandSeparator="." is given without decimalSeparator (would collide with the "." default)', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
-      expect(() =>
-        render(<NumoraInput thousandSeparator="." defaultValue="1234567" />)
-      ).toThrow(/cannot equal|separator/i);
+      expect(() => render(<NumoraInput thousandSeparator="." defaultValue="1234567" />)).toThrow(
+        /cannot equal|separator/i
+      );
     } finally {
       spy.mockRestore();
     }
   });
 
   it('accepts the European pair (thousandSeparator="." + decimalSeparator=",")', () => {
-    render(<NumoraInput data-testid="eu" thousandSeparator="." decimalSeparator="," defaultValue="1234567" />);
+    render(
+      <NumoraInput
+        data-testid="eu"
+        thousandSeparator="."
+        decimalSeparator=","
+        defaultValue="1234567"
+      />
+    );
     expect((screen.getByTestId('eu') as HTMLInputElement).value).toBe('1.234.567');
   });
 });
