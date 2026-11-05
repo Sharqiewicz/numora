@@ -20,59 +20,85 @@ Numora is a framework-agnostic numeric input and number input library for JavaSc
 
 ## Features
 
+- Sanitization: https://numeric-input.com/docs/numora/features/sanitization
 - Formatting: https://numeric-input.com/docs/numora/features/formatting
 - Value Types: https://numeric-input.com/docs/numora/features/value-types
 - Decimals: https://numeric-input.com/docs/numora/features/decimals
-- Sanitization: https://numeric-input.com/docs/numora/features/sanitization
+- Locale: https://numeric-input.com/docs/numora/features/locale
 - Compact Notation: https://numeric-input.com/docs/numora/features/compact-notation
 - Scientific Notation: https://numeric-input.com/docs/numora/features/scientific-notation
 - Leading Zeros: https://numeric-input.com/docs/numora/features/leading-zeros
-- Locale: https://numeric-input.com/docs/numora/features/locale
+- Max Length: https://numeric-input.com/docs/numora/features/max-length
+- Validation: https://numeric-input.com/docs/numora/features/validation
 
 ## Integrations
 
 - React Hook Form: https://numeric-input.com/docs/numora-react/integrations/react-hook-form
+- Torph: https://numeric-input.com/docs/numora-react/integrations/torph
+- NumberFlow: https://numeric-input.com/docs/numora-react/integrations/number-flow
+
+## Frameworks (numora)
+
+- Svelte: https://numeric-input.com/docs/numora/frameworks/svelte
+- Vue: https://numeric-input.com/docs/numora/frameworks/vue
+- Angular: https://numeric-input.com/docs/numora/frameworks/angular
+- Solid: https://numeric-input.com/docs/numora/frameworks/solid
 
 ## API Reference - numora (vanilla JS)
 
+All values are strings; Numora never converts them to `Number`.
+
 ```ts
-import { NumoraInput } from 'numora'
+import { NumoraInput, FormatOn, ThousandStyle } from 'numora'
 
 const numoraInput = new NumoraInput(containerElement, {
-  maxDecimals?: number,         // max decimal places
-  minDecimals?: number,         // min decimal places (pads zeros)
-  thousandSeparator?: string,   // e.g. ','
-  thousandStyle?: 'thousand' | 'lakh' | 'wan',
-  decimalSeparator?: string,    // e.g. '.'
-  formatOn?: FormatOn,          // FormatOn.Change | FormatOn.Blur
-  allowNegative?: boolean,
-  allowLeadingZeros?: boolean,
-  allowScientificNotation?: boolean,
-  locale?: string,              // e.g. 'en-US', 'de-DE'
+  decimalMaxLength?: number,       // max decimal places (default 2)
+  decimalMinLength?: number,       // min decimal places, pads zeros (default 0)
+  thousandSeparator?: string,      // default ','
+  thousandStyle?: ThousandStyle,   // None (default) | Thousand | Lakh | Wan
+  decimalSeparator?: string,       // default '.'
+  formatOn?: FormatOn,             // FormatOn.Blur (default) | FormatOn.Change
+  locale?: string | true,          // e.g. 'de-DE', or true for the browser locale
+  enableCompactNotation?: boolean, // '1k' -> '1000'
+  enableNegative?: boolean,
+  enableLeadingZeros?: boolean,
+  autoAddLeadingZero?: boolean,    // '.5' -> '0.5'
+  rawValueMode?: boolean,          // onChange receives the value without separators
+  maxLength?: number,              // raw length; separators not counted
+  isAllowed?: (rawValue: string) => boolean, // reject an edit by returning false
+  onChange?: (value: string) => void,
+  value?: string,
+  defaultValue?: string,
 })
+
+numoraInput.getValue()
+numoraInput.setValue('1234.5')
 ```
+
+Scientific notation (e.g. `1.5e-7`) is always expanded to a plain decimal string.
 
 ## API Reference - numora-react
 
 ```tsx
-import { NumoraInput, FormatOn } from 'numora-react'
+import { NumoraInput, FormatOn, ThousandStyle } from 'numora-react'
 
 <NumoraInput
-  maxDecimals={2}
-  minDecimals={0}
+  maxDecimals={2}                        // default 2
+  decimalMinLength={0}
   thousandSeparator=","
-  thousandStyle="thousand"
+  thousandStyle={ThousandStyle.Thousand} // default Thousand
   decimalSeparator="."
-  formatOn={FormatOn.Change}
-  allowNegative={false}
-  allowLeadingZeros={false}
-  allowScientificNotation={false}
+  formatOn={FormatOn.Change}             // default FormatOn.Blur
   locale="en-US"
+  enableNegative={false}
+  enableLeadingZeros={false}
+  enableCompactNotation={false}
+  maxLength={18}
+  isAllowed={(raw) => raw !== '0'}
   onChange={(e) => {
-    e.target.value    // formatted display string, e.g. "1,234.56"
-    e.target.rawValue // clean numeric string, e.g. "1234.56"
+    e.target.value          // raw numeric string, e.g. "1234.56"
+    e.target.formattedValue // display string, e.g. "1,234.56"
   }}
-  onRawValueChange={(raw) => console.log(raw)} // shorthand for raw value
 />
 ```
 
@@ -80,7 +106,7 @@ import { NumoraInput, FormatOn } from 'numora-react'
 
 - **DeFi / financial inputs**: prevent scientific notation, enforce decimal precision, expose raw value for smart contract calls
 - **International forms**: locale-aware decimal and thousand separators (e.g. German `1.234,56`)
-- **React Hook Form integration**: use `onRawValueChange` to feed clean values into form state
+- **React Hook Form integration**: spread `register()` onto `NumoraInput`; `e.target.value` is already the raw value
 - **Mobile-safe inputs**: normalises mobile keyboard quirks across iOS and Android
 - **Formatted display while typing**: thousand separators added live without breaking cursor position
 

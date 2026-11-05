@@ -8,3 +8,23 @@
   to     = "https://numeric-input.com/:splat"
   status = 301
   force  = true
+
+# Bare section paths have no page of their own; send them to the docs index
+# (react is the default package in PackageContext).
+[[redirects]]
+  from   = "/docs"
+  to     = "/docs/numora-react"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/numora"
+  to     = "/docs/numora"
+  status = 301
+  force  = true
+
+[[redirects]]
+  from   = "/numora-react"
+  to     = "/docs/numora-react"
+  status = 301
+  force  = true
