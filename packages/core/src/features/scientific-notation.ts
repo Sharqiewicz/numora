@@ -2,9 +2,12 @@
  * Static regex patterns for scientific notation processing.
  * Defined at module level to avoid recompilation on each function call.
  */
-import { escapeRegExp } from '../utils/escape-reg-exp';
-import { getCachedRegex } from '../utils/regex-cache';
-import { failedMantissaResumeIndex, isDigit, matchMantissaAt } from '../utils/mantissa-scan';
+import {
+  failedMantissaResumeIndex,
+  isDigit,
+  matchMantissaAt,
+  trimTrailingZeroRun,
+} from '../utils/mantissa-scan';
 
 // Match strings that are all zeros
 const ALL_ZEROS_REGEX = /^0+$/;
@@ -43,9 +46,6 @@ const MAX_EXPANSION_DIGITS = 1000;
 export function expandScientificNotation(value: string, decimalSeparator: string = '.'): string {
   // Fast early-exit for the dominant case (no scientific notation present)
   if (!value.includes('e') && !value.includes('E')) return value;
-
-  const escapedSep = escapeRegExp(decimalSeparator);
-  const trailingZerosRegex = getCachedRegex(`${escapedSep}?0+$`, '');
 
   const len = value.length;
   let out = '';
@@ -87,7 +87,7 @@ export function expandScientificNotation(value: string, decimalSeparator: string
 
         const base = value.slice(i, mantissaEnd);
         const expStr = value.slice(mantissaEnd + 1, e);
-        out += expandToken(base, expStr, decimalSeparator, trailingZerosRegex);
+        out += expandToken(base, expStr, decimalSeparator);
         i = e;
         continue;
       }
@@ -106,8 +106,7 @@ export function expandScientificNotation(value: string, decimalSeparator: string
 function expandToken(
   base: string,
   expStr: string,
-  decimalSeparator: string,
-  trailingZerosRegex: RegExp
+  decimalSeparator: string
 ): string {
   const exponent = parseInt(expStr, 10);
 
@@ -131,8 +130,7 @@ function expandToken(
           integerPart,
           decimalPart,
           Math.abs(exponent),
-          decimalSeparator,
-          trailingZerosRegex
+          decimalSeparator
         );
 
   // Don't carry the sign onto a magnitude that collapsed to zero: "-0e5" is 0, not "-0".
@@ -169,8 +167,7 @@ function expandNegativeExponent(
   integerPart: string,
   decimalPart: string,
   exponent: number,
-  decimalSeparator: string,
-  trailingZerosRegex: RegExp
+  decimalSeparator: string
 ): string {
   const allDigits = integerPart + decimalPart;
 
@@ -185,23 +182,22 @@ function expandNegativeExponent(
   if (newDecimalPosition <= 0) {
     const leadingZeros = Math.abs(newDecimalPosition);
     const result = `0${decimalSeparator}${'0'.repeat(leadingZeros)}${allDigits}`;
-    return trimTrailingZeros(result, decimalSeparator, trailingZerosRegex);
+    return trimTrailingZeros(result, decimalSeparator);
   }
 
   if (newDecimalPosition < integerPart.length) {
     const newIntegerPart = allDigits.slice(0, newDecimalPosition);
     const newDecimalPart = allDigits.slice(newDecimalPosition);
     const result = `${newIntegerPart}${decimalSeparator}${newDecimalPart}`;
-    return trimTrailingZeros(result, decimalSeparator, trailingZerosRegex);
+    return trimTrailingZeros(result, decimalSeparator);
   }
 
-  return trimTrailingZeros(allDigits, decimalSeparator, trailingZerosRegex);
+  return trimTrailingZeros(allDigits, decimalSeparator);
 }
 
 function trimTrailingZeros(
   value: string,
-  decimalSeparator: string,
-  trailingZerosRegex: RegExp
+  decimalSeparator: string
 ): string {
   if (!value.includes(decimalSeparator)) {
     return value;
@@ -215,17 +211,17 @@ function trimTrailingZeros(
   }
 
   if (value.startsWith(zeroSep)) {
-    const trimmed = value.replace(trailingZerosRegex, '');
+    const trimmed = trimTrailingZeroRun(value, decimalSeparator);
     return trimmed === '0' ? '0' : trimmed || '0';
   }
 
   if (value.startsWith(negZeroSep)) {
-    const trimmed = value.replace(trailingZerosRegex, '');
+    const trimmed = trimTrailingZeroRun(value, decimalSeparator);
     if (trimmed === '-0' || trimmed === '0') {
       return '0';
     }
     return trimmed || '0';
   }
 
-  return value.replace(trailingZerosRegex, '') || value;
+  return trimTrailingZeroRun(value, decimalSeparator) || value;
 }

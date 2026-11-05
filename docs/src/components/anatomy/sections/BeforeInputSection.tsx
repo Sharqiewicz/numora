@@ -101,7 +101,8 @@ export function BeforeInputSection() {
 6. formatInputValue(intendedValue)   → sanitize → trim → apply separators
 7. target.setRangeText(formatted, 0, currentValue.length, 'end')
                                      → atomic replace, single undo entry
-8. computeCursorPosition(...)        → select(new, rank(old, caret)) restores the caret
+8. computeCaretFromEdit(...)        → rank of the sanitized text left of the caret,
+                                     selected in the formatted string
 9. Return { formatted, raw }`}
       </CodeBlock>
       <p>

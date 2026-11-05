@@ -31,6 +31,7 @@ import {
   type ValueSource,
 } from 'numora';
 import {
+  computeCaretAfterRewrite,
   computeStripSeparatorsResult,
   handleOnBeforeInputNumoraInput,
   handleOnKeyDownNumoraInput,
@@ -532,7 +533,18 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       ? formatValueForDisplay(numInput.value, decimalMaxLength, formattingOptions, 'foreign')
       : formatForDisplay(numInput.value, 'foreign');
     if (formatted !== numInput.value) {
-      withInternalWrite(() => writeValuePreservingUndo(numInput, formatted, formatted.length));
+      // Same rank logic as the vanilla class: mapped while focused, at the end otherwise.
+      // (Undo/redo returned above: the browser restores its own caret there.)
+      const caret = computeCaretAfterRewrite(
+        numInput.value,
+        Math.max(numInput.selectionStart ?? 0, numInput.selectionEnd ?? 0),
+        formatted,
+        decimalMaxLength,
+        formattingOptions,
+        !!formattingOptions.thousandSeparator,
+        isFocused
+      );
+      withInternalWrite(() => writeValuePreservingUndo(numInput, formatted, caret));
     }
     numInput.formattedValue = formatted;
     if (onChange) onChange(createSyntheticChangeEvent(numInput, raw));

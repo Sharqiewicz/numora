@@ -1,11 +1,5 @@
 import { DEFAULT_DECIMAL_SEPARATOR } from '../config';
 import type { SeparatorOptions, Separators, FormattingOptions } from '../types';
-import { getCachedRegex } from '../utils/regex-cache';
-import { escapeRegExp } from '../utils/escape-reg-exp';
-
-// Pre-compiled regex for the common case: decimal separator is '.' or ','.
-// The character class [.,] covers both hardcoded removals in a single pass.
-const TAIL_CLEAN_REGEX = /[.,]/g;
 
 /**
  * Normalizes separator configuration with defaults.
@@ -76,15 +70,13 @@ export const removeExtraDecimalSeparators = (
   const head = value.slice(0, firstIdx + 1);
   const tail = value.slice(firstIdx + 1);
 
-  // Single-pass removal of all three characters (',', '.', decimalSeparator).
-  // For standard separators use the pre-compiled constant; for custom separators
-  // build and cache a character-class regex that covers all three.
-  const isStandardSeparator = decimalSeparator === '.' || decimalSeparator === ',';
-  const cleanRegex = isStandardSeparator
-    ? TAIL_CLEAN_REGEX
-    : getCachedRegex('[,\\.' + escapeRegExp(decimalSeparator) + ']', 'g');
-
-  return head + tail.replace(cleanRegex, '');
+  // Single pass dropping every ',', '.' and decimal separator from the tail.
+  let cleaned = '';
+  for (let i = 0; i < tail.length; i++) {
+    const ch = tail[i];
+    if (ch !== ',' && ch !== '.' && ch !== decimalSeparator) cleaned += ch;
+  }
+  return head + cleaned;
 };
 
 /**

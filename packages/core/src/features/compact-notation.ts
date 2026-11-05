@@ -2,9 +2,12 @@
  * Static regex patterns for compact notation processing.
  * Defined at module level to avoid recompilation on each function call.
  */
-import { escapeRegExp } from '../utils/escape-reg-exp';
-import { getCachedRegex } from '../utils/regex-cache';
-import { failedMantissaResumeIndex, isDigit, matchMantissaAt } from '../utils/mantissa-scan';
+import {
+  failedMantissaResumeIndex,
+  isDigit,
+  matchMantissaAt,
+  trimTrailingZeroRun,
+} from '../utils/mantissa-scan';
 
 // Remove leading zeros from integer part
 const LEADING_ZEROS_REGEX = /^0+/;
@@ -66,9 +69,6 @@ export function expandCompactNotation(value: string, decimalSeparator: string = 
   // Fast early-exit for the dominant case (no compact-notation suffix present anywhere).
   if (!SUFFIX_PRESENT_REGEX.test(value)) return value;
 
-  const escapedSep = escapeRegExp(decimalSeparator);
-  const trailingZerosRegex = getCachedRegex(`${escapedSep}?0+$`, '');
-
   const len = value.length;
   let out = '';
   let i = 0;
@@ -103,7 +103,7 @@ export function expandCompactNotation(value: string, decimalSeparator: string = 
 
     if (zerosToAdd && !suffixFollowedByDigitOrSeparator) {
       const number = value.slice(i, mantissaEnd);
-      out += expandToken(number, zerosToAdd, decimalSeparator, trailingZerosRegex);
+      out += expandToken(number, zerosToAdd, decimalSeparator);
       i = s + 1;
       continue;
     }
@@ -121,8 +121,7 @@ export function expandCompactNotation(value: string, decimalSeparator: string = 
 function expandToken(
   number: string,
   zerosToAdd: number,
-  decimalSeparator: string,
-  trailingZerosRegex: RegExp
+  decimalSeparator: string
 ): string {
   const [integerPart, decimalPart = ''] = number.split(decimalSeparator);
 
@@ -155,7 +154,7 @@ function expandToken(
 
   // Trim trailing zeros from decimal part only (if decimal separator exists)
   if (result.includes(decimalSeparator)) {
-    result = result.replace(trailingZerosRegex, '');
+    result = trimTrailingZeroRun(result, decimalSeparator);
   }
 
   return result;

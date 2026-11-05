@@ -3,7 +3,7 @@
  * Run with: npx vitest bench
  */
 import { bench, describe } from 'vitest';
-import { formatWithSeparators, computeCursorPosition } from '../src/features/formatting';
+import { formatWithSeparators } from '../src/features/formatting';
 import { removeThousandSeparators, sanitizeNumoraInput } from '../src/features/sanitization';
 import { removeNonNumericCharacters } from '../src/features/non-numeric-characters';
 import { expandCompactNotation } from '../src/features/compact-notation';
@@ -172,45 +172,6 @@ describe('Formatting Benchmarks', () => {
         thousandSeparator: ',',
         decimalSeparator: '.',
       });
-    });
-  });
-
-  describe('Cursor Position Calculation', () => {
-    const seps = { thousandSeparator: ',', decimalSeparator: '.' };
-    const fopts = {
-      thousandSeparator: ',',
-      groupingStyle: GroupingStyle.Thousand,
-      formatOn: FormatOn.Change,
-      decimalSeparator: '.',
-    };
-    const cc = (oldV: string, newV: string, cur: number) =>
-      computeCursorPosition(
-        oldV,
-        newV,
-        cur,
-        { selectionStart: cur, selectionEnd: cur, endOffset: 0 },
-        seps,
-        fopts
-      );
-
-    bench('insertion - no separator change', () => {
-      cc('123', '1234', 3);
-    });
-
-    bench('insertion - separator added', () => {
-      cc('999', '1,000', 3);
-    });
-
-    bench('deletion - separator removed', () => {
-      cc('1,000', '100', 2);
-    });
-
-    bench('large number insertion', () => {
-      cc('123,456,789', '1,234,567,890', 11);
-    });
-
-    bench('with decimal values', () => {
-      cc('1,234.5', '12,345.5', 5);
     });
   });
 

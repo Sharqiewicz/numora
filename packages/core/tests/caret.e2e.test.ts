@@ -9,16 +9,10 @@ import type { FormattingOptions } from '../src/types';
 /**
  * END-TO-END caret behavior — the behavioral source of truth for cursor positioning.
  *
- * These drive the REAL event handlers exactly as the DOM does, so the `oldValue`
- * passed down to `computeCursorPosition` is the post-keystroke `intendedValue`
- * (current DOM value with the edit applied + stale separators), and the caret
- * argument is the post-edit caret — which is how the runtime actually calls it.
- *
- * Contrast with `formatting.compute-cursor-position.test.ts`, which exercises
- * `computeCursorPosition` in isolation with a synthetic *pre*-keystroke `oldValue`.
- * That isolated convention does NOT match the runtime and must not be used to judge
- * product behavior (it is what made Plan 008's "caret-one-left" finding a false
- * positive — see plans/README.md row 008 and june_audit.md).
+ * These drive the REAL event handlers exactly as the DOM does: the caret is computed
+ * from the edit itself (`computeCaretFromEdit`: text left of the edit plus the inserted
+ * text, sanitized, then selected by rank in the new display string). Judge product
+ * behaviour here, not with isolated helper calls on synthetic inputs.
  *
  * Invariant under test: after inserting a glyph the caret rests immediately after it;
  * after deletion it rests at the natural spot; separator reflow never shifts it.

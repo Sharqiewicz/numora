@@ -4,12 +4,11 @@ import {
   handleOnPasteNumoraInput,
 } from './utils/event-handlers';
 import {
-  computeCursorPosition,
   computeStripSeparatorsResult,
   writeStripPreservingUndo,
   writeValuePreservingUndo,
 } from './features/formatting';
-import { getSeparators } from './features/decimals';
+import { computeCaretAfterRewrite } from './utils/caret';
 import {
   displayToRawValue,
   formatInputValue,
@@ -36,7 +35,6 @@ import {
   InputType,
   GroupingStyle,
   type FormattingOptions,
-  type CaretPositionInfo,
   type LocaleTag,
   type NumoraValues,
 } from './types';
@@ -143,7 +141,6 @@ export class NumoraInput {
   // seen, which is what `handleChange`'s resting-vs-typing branch (A2-07) needs.
   private isFocused: boolean = false;
 
-  private caretPositionBeforeChange?: CaretPositionInfo;
 
   // Bound listeners Numora attached, retained so destroy() can remove exactly them.
   private boundListeners: Array<[string, EventListener]> = [];
@@ -438,7 +435,6 @@ export class NumoraInput {
       (e.inputType === InputType.HistoryUndo || e.inputType === InputType.HistoryRedo)
     ) {
       const raw = this.toRaw(target.value);
-      this.caretPositionBeforeChange = undefined;
       this.handleValueChange(target.value, raw);
       return;
     }
@@ -451,8 +447,6 @@ export class NumoraInput {
     const oldValue = target.value;
     // Max of start/end works around a mobile-browser caret bug where selectionStart lags.
     const oldCursorPosition = Math.max(target.selectionStart ?? 0, target.selectionEnd ?? 0);
-    const separators = getSeparators(this.resolvedOptions);
-
     // When the element isn't focused (autofill, a programmatic `el.value = x` + dispatched
     // `input` from external code, a form library resetting the field), there is no typing
     // caret to preserve and no "mid-edit" state to respect - format the same way the
@@ -476,31 +470,25 @@ export class NumoraInput {
       : this.formatForDisplay(oldValue, 'foreign');
 
     if (oldValue !== newValue) {
-      const computed = isFocused
-        ? computeCursorPosition(
-            oldValue,
-            newValue,
-            oldCursorPosition,
-            this.caretPositionBeforeChange,
-            separators,
-            this.resolvedOptions
-          )
-        : newValue.length;
-      this.withInternalWrite(() =>
-        writeValuePreservingUndo(target, newValue, computed ?? newValue.length)
+      const caret = computeCaretAfterRewrite(
+        oldValue,
+        oldCursorPosition,
+        newValue,
+        this.resolvedOptions.decimalMaxLength,
+        this.resolvedOptions,
+        this.resolvedOptions.formatOn === FormatOn.Change,
+        isFocused
       );
+      this.withInternalWrite(() => writeValuePreservingUndo(target, newValue, caret));
     }
 
-    this.caretPositionBeforeChange = undefined;
     this.handleValueChange(newValue, rawValue);
   }
 
   private handleKeyDown(e: KeyboardEvent): void {
-    const inputElement = e.target as HTMLInputElement;
-    this.caretPositionBeforeChange = handleOnKeyDownNumoraInput(e, this.resolvedOptions) ?? {
-      selectionStart: inputElement.selectionStart ?? 0,
-      selectionEnd: inputElement.selectionEnd ?? 0,
-    };
+    // Moves the caret over a thousand separator on Delete/Backspace; the caret info it
+    // returns is not needed here (beforeinput derives its own edit).
+    handleOnKeyDownNumoraInput(e, this.resolvedOptions);
   }
 
   private handlePaste(e: ClipboardEvent): void {

@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { significantCharRank, positionAfterRank } from '../src/features/formatting/rank-select';
+import { significantCharRank, positionAfterRank, positionAfterMatchedPrefix } from '../src/features/formatting/rank-select';
 
 /**
  * Unit tests for the two primitives caret preservation is built on. The end-to-end caret
  * behavior lives in caret.{e2e,invariants,pins,properties}; this file pins the primitives
- * themselves, including the multi-character separator case that the old
- * `char !== separator` comparison silently got wrong.
+ * themselves. Separators are exactly one character (validation enforces it), so there is no
+ * multi-character case.
  */
 
 describe('significantCharRank (rank)', () => {
@@ -58,27 +58,20 @@ describe('positionAfterRank (select)', () => {
   });
 });
 
-describe('multi-character separators', () => {
-  // Not reachable through the validated NumoraInput/React constructor (validation.ts forces
-  // single-char separators), but these are pure exported utilities and must not drift.
-  const sep = ', ';
-
-  it('rank skips the whole separator, not one code unit of it', () => {
-    // "1, 234" — before index 6, the significant chars are "1","2","3","4".
-    expect(significantCharRank('1, 234', 6, sep)).toBe(4);
+describe('positionAfterMatchedPrefix (fused rank + select)', () => {
+  it('equals select(rank(prefix)) when the whole prefix survived', () => {
+    expect(positionAfterMatchedPrefix('1,234,567', '12345', ',')).toBe(7); // 1,234,5|67
+    expect(positionAfterMatchedPrefix('1,234', '1', ',')).toBe(1);
+    expect(positionAfterMatchedPrefix('1,234', '', ',')).toBe(0);
   });
 
-  it('select accounts for the separator width', () => {
-    expect(positionAfterRank('1, 234', 1, sep)).toBe(1);
-    expect(positionAfterRank('1, 234', 2, sep)).toBe(4); // "1, 2|34"
-    expect(positionAfterRank('1, 234', 4, sep)).toBe(6);
+  it('stops at the first divergence when the value was rewritten', () => {
+    // the full text dropped a leading zero the prefix still had
+    expect(positionAfterMatchedPrefix('5', '0', ',')).toBe(0);
+    expect(positionAfterMatchedPrefix('12.5', '12.9', ',')).toBe(3);
   });
 
-  it('rank/select stay consistent across a multi-char-separated value', () => {
-    const v = '1, 234, 567';
-    for (let pos = 0; pos <= v.length; pos++) {
-      const k = significantCharRank(v, pos, sep);
-      expect(significantCharRank(v, positionAfterRank(v, k, sep), sep)).toBe(k);
-    }
+  it('never runs past the formatted value', () => {
+    expect(positionAfterMatchedPrefix('1,234', '123456', ',')).toBe(5);
   });
 });

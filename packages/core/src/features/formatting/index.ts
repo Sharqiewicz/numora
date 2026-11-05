@@ -15,7 +15,6 @@ export { formatWithSeparators } from './thousand-grouping';
 
 // === CARET POSITION UTILITIES ===
 export {
-  computeCursorPosition,
   computeStripSeparatorsResult,
   skipOverThousandSeparatorOnDelete,
 } from './caret-position-utils';

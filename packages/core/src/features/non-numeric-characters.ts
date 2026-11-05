@@ -1,9 +1,6 @@
-import { escapeRegExp } from '../utils/escape-reg-exp';
-import { getCachedRegex } from '../utils/regex-cache';
-
 /**
  * Removes non-numeric characters from a string, preserving the decimal separator.
- * Uses cached regex for performance optimization.
+ * A single character loop: no regex is built or escaped per call.
  *
  * @param value - The string to sanitize
  * @param enableNegative - Whether to allow negative sign
@@ -15,19 +12,20 @@ export const removeNonNumericCharacters = (
   enableNegative = false,
   decimalSeparator: string = '.'
 ): string => {
-  const escapedSeparator = escapeRegExp(decimalSeparator);
-  const regex = getCachedRegex(`[^0-9${escapedSeparator}]`, 'g');
-
-  if (!enableNegative) {
-    return value.replace(regex, '');
+  let numericOnly = '';
+  let runStart = 0;
+  for (let i = 0; i < value.length; i++) {
+    const ch = value[i];
+    if ((ch >= '0' && ch <= '9') || ch === decimalSeparator) continue;
+    if (i > runStart) numericOnly += value.slice(runStart, i);
+    runStart = i + 1;
   }
+  numericOnly = runStart === 0 ? value : numericOnly + value.slice(runStart);
 
-  const hasLeadingMinus = value.startsWith('-');
-  const numericOnly = value.replace(regex, '');
+  if (!enableNegative) return numericOnly;
 
-  if (hasLeadingMinus && (numericOnly.length > 0 || value === '-')) {
+  if (value.startsWith('-') && (numericOnly.length > 0 || value === '-')) {
     return '-' + numericOnly;
   }
-
   return numericOnly;
 };

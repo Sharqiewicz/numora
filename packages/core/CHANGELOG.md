@@ -2,7 +2,22 @@
 
 ## Unreleased
 
-### Changed (internal)
+### Changed
+- **Caret computed from the edit itself.** The new caret rank is the rank of the text left of
+  the edit plus the inserted text, sanitized with the same options, selected in the new display
+  string (`computeCaretFromEdit`). Replaces the common-prefix / distance-from-end guess and
+  fixes edits that change the value in several places, e.g. pasting `1.99999999999` into
+  `1|23` with 8 decimals now leaves the caret after the last surviving digit
+  (`11.99999999|`, was `11.999999|99`). `computeCursorPosition` is removed (internal).
+- **React and vanilla place the caret the same way** for `input` events not handled by
+  `beforeinput` (autofill, IME): mapped while focused, end of value while unfocused.
+- **No regex is built per keystroke**; the sanitizer uses literal loops (`regex-cache.ts`
+  removed). Mapper: 9 µs at 1000 digits, was 15 µs. Run `pnpm bench`.
+- **Separators are exactly one character** (already enforced by validation). The standalone
+  exports `expandCompactNotation`, `expandScientificNotation`, `removeNonNumericCharacters`
+  and `removeExtraDecimalSeparators` now assume it.
+
+### Changed (internal, earlier)
 - **Caret engine simplified to the standard rank/select mapping.** `computeCursorPosition`
   now preserves the caret by anchoring on the separator-free ("raw") value: it maps the
   caret's raw index from the old value to the new one, then re-finds that position (select).

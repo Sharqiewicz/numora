@@ -2,7 +2,8 @@ import { getSeparators } from '../features/decimals';
 import { sanitizeNumoraInput } from '../features/sanitization';
 import { normalizeForeignFormat, canonicalToDisplayText } from '../features/foreign-format';
 import { NON_ASCII_DECIMAL_SEPARATOR_GLYPHS } from '../features/decimal-separators';
-import { computeCursorPosition, skipOverThousandSeparatorOnDelete } from '../features/formatting';
+import { skipOverThousandSeparatorOnDelete } from '../features/formatting';
+import { computeCaretFromEdit } from './caret';
 import { type FormattingOptions, type CaretPositionInfo, FormatOn, InputType } from '../types';
 import { formatInputValue } from './format-utils';
 
@@ -127,14 +128,10 @@ export function handleOnBeforeInputNumoraInput(
   }
 
   // intendedValue: what the input would contain if we let the browser apply the action.
-  // intendedCursorPos: where the caret would land in intendedValue. The caret math
-  // (computeCursorPosition) maps this through separator reflow, so intendedCursorPos
-  // already encodes the post-edit position for every action below (including Delete).
-  // endOffset is retained on the caret-info payload for back-compat but no longer drives
-  // the caret computation.
+  // intendedCursorPos: where the caret would sit in it. The final caret is computed from the
+  // text left of that position (utils/caret.ts), so it is the only edit signal needed.
   let intendedValue: string;
   let intendedCursorPos: number;
-  let endOffset = 0;
   const hasSelection = selectionStart !== selectionEnd;
 
   switch (e.inputType) {
@@ -180,7 +177,6 @@ export function handleOnBeforeInputNumoraInput(
           : selectionStart + 1;
       intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(deleteTo);
       intendedCursorPos = selectionStart;
-      if (!hasSelection) endOffset = deleteTo - selectionStart;
       break;
     }
     case InputType.DeleteByCut:
@@ -205,7 +201,6 @@ export function handleOnBeforeInputNumoraInput(
       const deleteTo = hasSelection ? selectionEnd : currentValue.length;
       intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(deleteTo);
       intendedCursorPos = selectionStart;
-      if (!hasSelection) endOffset = currentValue.length - selectionStart;
       break;
     }
     default:
@@ -253,25 +248,18 @@ export function handleOnBeforeInputNumoraInput(
     return { type: 'reject' };
   }
 
-  let cursorPos: number;
-  if (intendedValue !== newValue) {
-    const syntheticCaretInfo: CaretPositionInfo = {
-      selectionStart,
-      selectionEnd,
-      endOffset,
-    };
-    const computed = computeCursorPosition(
-      intendedValue,
-      newValue,
-      intendedCursorPos,
-      syntheticCaretInfo,
-      separators,
-      formattingOptions
-    );
-    cursorPos = computed ?? intendedCursorPos;
-  } else {
-    cursorPos = intendedCursorPos;
-  }
+  // The caret rank is the rank of the sanitized text that stood left of the caret after the
+  // edit (see utils/caret.ts), selected in the final display string.
+  const cursorPos =
+    intendedValue !== newValue
+      ? computeCaretFromEdit(
+          intendedValue.slice(0, intendedCursorPos),
+          newValue,
+          decimalMaxLength,
+          formattingOptions,
+          shouldRemoveThousandSeparators
+        )
+      : intendedCursorPos;
 
   return { type: 'handled', formatted: newValue, raw: rawValue, cursorPos };
 }
@@ -358,25 +346,16 @@ export function handleOnPasteNumoraInput(
   // not misattributed to the insertion point.
   const intendedCursorPos = selStart + clipboardData.length;
 
-  let cursorPos: number;
-  if (combinedValue !== formattedValue) {
-    const syntheticCaretInfo: CaretPositionInfo = {
-      selectionStart: selStart,
-      selectionEnd: selEnd,
-      endOffset: 0,
-    };
-    const computed = computeCursorPosition(
-      combinedValue,
-      formattedValue,
-      intendedCursorPos,
-      syntheticCaretInfo,
-      separators,
-      formattingOptions
-    );
-    cursorPos = computed ?? intendedCursorPos;
-  } else {
-    cursorPos = intendedCursorPos;
-  }
+  const cursorPos =
+    combinedValue !== formattedValue
+      ? computeCaretFromEdit(
+          combinedValue.slice(0, intendedCursorPos),
+          formattedValue,
+          decimalMaxLength,
+          formattingOptions,
+          true
+        )
+      : intendedCursorPos;
 
   return { type: 'handled', formatted: formattedValue, raw: rawValue, cursorPos };
 }

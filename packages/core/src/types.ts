@@ -75,6 +75,11 @@ export type InputType = (typeof InputType)[keyof typeof InputType];
 
 export interface FormattingOptions {
   formatOn?: FormatOn;
+  /**
+   * Grouping mark. Exactly ONE character (UTF-16 code unit), or `''` for none; anything else
+   * throws in `validateNumoraInputOptions`. Caret and sanitization code relies on this and
+   * compares one character at a time.
+   */
   thousandSeparator?: string;
   groupingStyle?: GroupingStyle;
   enableCompactNotation?: boolean;
@@ -86,6 +91,7 @@ export interface FormattingOptions {
    * common but `0.` form is the canonical representation.
    */
   autoAddLeadingZero?: boolean;
+  /** Decimal mark. Exactly ONE character (enforced by `validateNumoraInputOptions`). */
   decimalSeparator?: string;
   decimalMaxLength?: number;
   decimalMinLength?: number;

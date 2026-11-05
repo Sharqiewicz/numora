@@ -30,6 +30,40 @@ export function displayToRawValue(
 }
 
 /**
+ * The sanitize + decimal-trim half of `formatInputValue`, before grouping: locale text with
+ * no grouping (in Change mode) and at most `decimalMaxLength` decimals. Shared with the caret
+ * mapper, which runs it on the text before the caret.
+ */
+export function sanitizeAndTrim(
+  rawValue: string,
+  decimalMaxLength: number,
+  formattingOptions?: FormattingOptions,
+  shouldRemoveThousandSeparators?: boolean,
+  source: ValueSource = 'display'
+): string {
+  // In 'change' mode, formatNumoraInput adds separators back, so we must remove them first to parse the number.
+  // In 'blur' mode, formatNumoraInput does nothing during typing, so removing separators would be unnecessary.
+  const shouldRemove =
+    shouldRemoveThousandSeparators ?? formattingOptions?.formatOn === FormatOn.Change;
+
+  // sanitizeNumoraInput treats `thousandSeparator` as the flag for separator removal:
+  // pass undefined to keep separators (e.g. typing path in blur mode).
+  // `foreign`/`canonical` sources are never the field's own grouped text, and detection
+  // needs the configured separators, so they always get the full options.
+  const sanitizeOptions =
+    shouldRemove || source !== 'display'
+      ? formattingOptions
+      : { ...formattingOptions, thousandSeparator: undefined };
+  const sanitizedValue = sanitizeNumoraInput(rawValue, sanitizeOptions, source);
+
+  return trimToDecimalMaxLength(
+    sanitizedValue,
+    decimalMaxLength,
+    getSeparators(formattingOptions).decimalSeparator
+  );
+}
+
+/**
  * Formats a value from user input events (onChange, onBlur) by sanitizing, trimming decimals, and applying formatting.
  * The behavior adapts based on formatOn mode - removes separators in 'change' mode since they'll be re-added.
  *
@@ -48,26 +82,12 @@ export function formatInputValue(
   source: ValueSource = 'display'
 ): { formatted: string; raw: string } {
   const separators = getSeparators(formattingOptions);
-
-  // In 'change' mode, formatNumoraInput adds separators back, so we must remove them first to parse the number.
-  // In 'blur' mode, formatNumoraInput does nothing during typing, so removing separators would be unnecessary.
-  const shouldRemove =
-    shouldRemoveThousandSeparators ?? formattingOptions?.formatOn === FormatOn.Change;
-
-  // sanitizeNumoraInput treats `thousandSeparator` as the flag for separator removal:
-  // pass undefined to keep separators (e.g. typing path in blur mode).
-  // `foreign`/`canonical` sources are never the field's own grouped text, and detection
-  // needs the configured separators, so they always get the full options.
-  const sanitizeOptions =
-    shouldRemove || source !== 'display'
-      ? formattingOptions
-      : { ...formattingOptions, thousandSeparator: undefined };
-  const sanitizedValue = sanitizeNumoraInput(rawValue, sanitizeOptions, source);
-
-  const sanitizedAndTrimmedValue = trimToDecimalMaxLength(
-    sanitizedValue,
+  const sanitizedAndTrimmedValue = sanitizeAndTrim(
+    rawValue,
     decimalMaxLength,
-    separators.decimalSeparator
+    formattingOptions,
+    shouldRemoveThousandSeparators,
+    source
   );
 
   // decimalMinLength padding is a display/blur concern, not a typing concern - see
@@ -131,7 +151,7 @@ export function formatValueForDisplay(
   const minDecimals = formattingOptions?.decimalMinLength ?? 0;
 
   const stripTrailingSeparator = (v: string): string =>
-    v.endsWith(separators.decimalSeparator) ? v.slice(0, -separators.decimalSeparator.length) : v;
+    v.endsWith(separators.decimalSeparator) ? v.slice(0, -1) : v;
 
   return {
     formatted: ensureMinDecimals(

@@ -791,6 +791,34 @@ describe('handleChange fallback (non-beforeinput edits)', () => {
     expect(input.value).toMatch(/^[\d.]*$/);
   });
 
+  // Q8 parity: the vanilla class maps the caret through the rewrite while focused and puts
+  // it at the end while unfocused; React shares the same core logic.
+  const nativeInputEvent = (input: HTMLInputElement, value: string, caret: number) => {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+    setter.call(input, value);
+    input.setSelectionRange(caret, caret);
+    act(() => {
+      input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertReplacementText' }));
+    });
+  };
+
+  it('keeps the caret on the same digit for a focused non-beforeinput edit', () => {
+    render(<NumoraInput data-testid="input" formatOn={FormatOn.Change} thousandSeparator="," />);
+    const input = screen.getByTestId('input') as HTMLInputElement;
+    act(() => input.focus());
+    nativeInputEvent(input, '1234', 2);
+    expect(input.value).toBe('1,234');
+    expect(input.selectionStart).toBe(3); // 1,2|34
+  });
+
+  it('puts the caret at the end for a non-beforeinput edit while unfocused', () => {
+    render(<NumoraInput data-testid="input" formatOn={FormatOn.Change} thousandSeparator="," />);
+    const input = screen.getByTestId('input') as HTMLInputElement;
+    nativeInputEvent(input, '1234', 2);
+    expect(input.value).toBe('1,234');
+    expect(input.selectionStart).toBe(5);
+  });
+
   it('does not re-format on undo (undo branch is still a pass-through)', () => {
     const onChange = vi.fn();
     render(

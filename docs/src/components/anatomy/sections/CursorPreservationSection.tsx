@@ -30,16 +30,18 @@ export function CursorPreservationSection() {
       </p>
       <CursorAnchorDiagram />
       <p>
-        Numora's <code>computeCursorPosition</code> anchors on <em>significant characters</em>{' '}
-        rather than character index — the classic <strong>rank/select</strong> pair.{' '}
-        <code>significantCharRank</code> walks the intended string from the start to the caret,
-        counting everything that belongs to the raw value (digits, the decimal separator, a leading
-        minus) while skipping injected thousand separators. <code>positionAfterRank</code> then
-        walks the formatted string until it has counted the same number, and parks the cursor there.
-        The user feels the caret stay "between the same two digits" no matter how the separators
-        rearranged around it — and because the grouping style only changes <em>where</em> the
-        separators sit, Thousand, Lakh and Wan all fall out of the same two functions with no
-        per-style code.
+        Numora computes the caret from the edit itself. The text left of the edit plus the
+        inserted text is run through the same sanitizer as the whole value (separators removed,
+        leading zeros dropped, <code>1k</code> expanded, decimals trimmed). Its length is the
+        caret's <em>rank</em>: the number of significant characters (digits, the decimal
+        separator, a leading minus) before it. <code>positionAfterMatchedPrefix</code> then walks
+        the formatted string, skipping injected thousand separators, until it has passed that many
+        characters, and parks the cursor there. The user feels the caret stay "between the same
+        two digits" no matter how the separators rearranged around it, and a paste whose tail was
+        trimmed leaves the caret right after the last pasted character that survived. The grouping
+        style only changes <em>where</em> the separators sit, so Thousand, Lakh and Wan need no
+        per-style code. Separators are always exactly one character, so every comparison is a
+        single-character comparison.
       </p>
       <p>
         Click between the <code>3</code> and the <code>4</code> in both inputs below and type a

@@ -24,6 +24,8 @@ export interface MantissaMatch {
 }
 
 /**
+ * (The decimal separator is exactly one character; validation enforces it.)
+ *
  * Finds the numeric mantissa starting at `start`, mirroring the unambiguous grammar
  * `\d+(?:sep\d*)?|sep\d+`: a digit run optionally extended by one decimal separator and
  * more digits, or a bare leading-decimal (separator then >=1 digit). Returns `null` if no
@@ -40,8 +42,8 @@ export function matchMantissaAt(
     let k = start;
     while (k < len && isDigit(value[k])) k++;
 
-    if (value.startsWith(decimalSeparator, k)) {
-      const sepEnd = k + decimalSeparator.length;
+    if (value[k] === decimalSeparator) {
+      const sepEnd = k + 1;
       let m = sepEnd;
       while (m < len && isDigit(value[m])) m++;
       return { end: m, sepEnd };
@@ -49,8 +51,8 @@ export function matchMantissaAt(
     return { end: k, sepEnd: -1 };
   }
 
-  if (value.startsWith(decimalSeparator, start)) {
-    const sepEnd = start + decimalSeparator.length;
+  if (value[start] === decimalSeparator) {
+    const sepEnd = start + 1;
     if (isDigit(value[sepEnd])) {
       let m = sepEnd;
       while (m < len && isDigit(value[m])) m++;
@@ -78,7 +80,20 @@ export function failedMantissaResumeIndex(
   match: MantissaMatch,
   decimalSeparator: string
 ): number {
-  return match.sepEnd !== -1 && value.startsWith(decimalSeparator, match.end)
+  return match.sepEnd !== -1 && value[match.end] === decimalSeparator
     ? match.sepEnd
     : match.end;
+}
+
+/**
+ * Drops trailing zeros and, when the zero run directly follows the decimal separator, that
+ * separator too ("1.500" -> "1.5", "1.000" -> "1", "100" -> "1"). Literal scan, equivalent to
+ * replacing `${sep}?0+$` without building a regex per call.
+ */
+export function trimTrailingZeroRun(value: string, decimalSeparator: string): string {
+  let end = value.length;
+  while (end > 0 && value[end - 1] === '0') end--;
+  if (end === value.length) return value;
+  if (end > 0 && value[end - 1] === decimalSeparator) end--;
+  return value.slice(0, end);
 }

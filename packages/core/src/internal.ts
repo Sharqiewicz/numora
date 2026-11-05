@@ -15,6 +15,7 @@ export {
   handleOnPasteNumoraInput,
   handleOnKeyDownNumoraInput,
 } from './utils/event-handlers';
+export { computeCaretAfterRewrite } from './utils/caret';
 export {
   writeValuePreservingUndo,
   writeStripPreservingUndo,

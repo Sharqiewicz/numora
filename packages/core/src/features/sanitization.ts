@@ -10,8 +10,6 @@ import { normalizeFullWidthDigits } from './fullwidth-digits';
 import { normalizeUnicodeMinus } from './unicode-minus';
 import { normalizeDecimalSeparators } from './decimal-separators';
 import { normalizeForeignFormat, canonicalToDisplayText } from './foreign-format';
-import { getCachedRegex } from '../utils/regex-cache';
-import { escapeRegExp } from '../utils/escape-reg-exp';
 import type { FormattingOptions } from '../types';
 
 // Upper bound on the raw input length sanitization will ever process. No numeric input a
@@ -36,14 +34,15 @@ export type ValueSource = 'display' | 'foreign' | 'canonical';
 
 /**
  * Removes all occurrences of thousand separator from a string.
- * Uses cached regex for performance optimization.
  *
  * @param value - The string to remove separators from
  * @param thousandSeparator - The thousand separator character to remove
  * @returns The string with all thousand separators removed
  */
 export function removeThousandSeparators(value: string, thousandSeparator: string): string {
-  return value.replace(getCachedRegex(escapeRegExp(thousandSeparator)), '');
+  // The separator is exactly one character, so split/join is a literal replace-all: no regex
+  // to build, escape or cache.
+  return thousandSeparator ? value.split(thousandSeparator).join('') : value;
 }
 
 /**

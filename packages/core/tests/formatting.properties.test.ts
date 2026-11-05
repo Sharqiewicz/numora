@@ -4,7 +4,8 @@
  */
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { formatWithSeparators, computeCursorPosition } from '../src/features/formatting';
+import { formatWithSeparators } from '../src/features/formatting';
+import { computeCaretFromEdit } from '../src/utils/caret';
 import { removeThousandSeparators } from '../src/features/sanitization';
 import { expandCompactNotation } from '../src/features/compact-notation';
 import { expandScientificNotation } from '../src/features/scientific-notation';
@@ -12,19 +13,12 @@ import { GroupingStyle, FormatOn } from '../src/types';
 
 // Drives the real caret entry point. numStr is unformatted; caret is collapsed at oldCursor.
 const cursorAfterFormat = (numStr: string, formatted: string, oldCursor: number): number =>
-  computeCursorPosition(
-    numStr,
-    formatted,
-    oldCursor,
-    { selectionStart: oldCursor, selectionEnd: oldCursor, endOffset: 0 },
-    { thousandSeparator: ',', decimalSeparator: '.' },
-    {
-      thousandSeparator: ',',
-      groupingStyle: GroupingStyle.Thousand,
-      formatOn: FormatOn.Change,
-      decimalSeparator: '.',
-    }
-  ) ?? -1;
+  computeCaretFromEdit(numStr.slice(0, oldCursor), formatted, 8, {
+    thousandSeparator: ',',
+    groupingStyle: GroupingStyle.Thousand,
+    formatOn: FormatOn.Change,
+    decimalSeparator: '.',
+  });
 
 describe('Formatting Properties', () => {
   describe('formatWithSeparators', () => {

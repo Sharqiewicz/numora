@@ -122,7 +122,20 @@ The intended use is: inspect what the user is about to do (via `inputType` and `
    → replaces entire input value with formatted result
    → fires synchronous 'input' event (real browsers only; jsdom skips this)
 
-8. Place cursor at correct position
+8. Place cursor at correct position (computeCaretFromEdit)
+   → sanitize + trim the text LEFT of the caret as it stood after the edit
+     (everything left of the edit + the inserted text), exactly as the full value was
+   → its length is the caret rank: significant chars (digits, decimal separator, sign)
+     before the caret, thousand separators ignored
+   → select that rank in the formatted string: the index just after the last character of
+     the sanitized prefix that is still the start of the final value
+   → handles non-contiguous edits (paste with a decimal trim, a dropped leading zero,
+     `1k` -> `1,000`, sign toggle, select-and-replace, Backspace over a separator) because
+     the prefix is rebuilt from the edit, not guessed from a diff
+   → inserted/pasted text is already in the field's locale (a typed `.` is mapped to `,` in
+     de-DE; the clipboard slice is normalized first), so the prefix is never re-detected as
+     foreign format in isolation (`1.23` would read as a decimal, `1.234` as grouping)
+   → separators are exactly one character (enforced by validation)
 
 9. Return { formatted, raw }
    → return value is ignored by the caller; onChange emission
@@ -201,6 +214,15 @@ During composition, the browser owns the input - it shows intermediate phonetic 
 The vanilla `handleChange` reformats on every `input` event. This is intentional - it's the correct fallback for any path that doesn't go through `beforeinput`.
 
 ---
+
+### Caret for `input` events `beforeinput` did not handle
+
+Autofill, IME commit and programmatic dispatches reach `handleChange` without an edit. Vanilla
+and React share `computeCaretAfterRewrite`: while the field is focused the caret is mapped with
+the same rank logic (the text left of the browser's caret, sanitized, selected in the new value);
+while unfocused it goes to the end. If the value was re-read wholesale as a foreign format, the
+caret goes to the end. Undo/redo (`historyUndo`/`historyRedo`) is not touched: the browser's own
+caret restore stands.
 
 ## 4. `keyup`
 

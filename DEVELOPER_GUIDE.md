@@ -233,21 +233,16 @@ packages/core/src/
 const input = new NumoraInput(container, {
   decimalMaxLength: 6,
   placeholder: "Enter amount",
-  onChange: (value) => console.log(value)
+  onChange: ({ value, formattedValue }) => console.log(value, formattedValue)
 });
 
 input.getValue();  // "123.456"
 input.setValue("789.012");
 ```
 
-**State Management:**
-```typescript
-private caretPositionBeforeChange?: {
-  selectionStart: number;
-  selectionEnd: number;
-  endOffset?: number;  // Used to distinguish Delete vs Backspace
-}
-```
+**Caret:** no caret state is kept between events. `beforeinput` and paste compute the new
+caret from the edit itself (`computeCaretFromEdit`); browser-inserted `input` events use
+`computeCaretAfterRewrite` (mapped while focused, end of value while unfocused).
 
 ---
 
