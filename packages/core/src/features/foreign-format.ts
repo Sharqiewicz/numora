@@ -1,3 +1,8 @@
+import {
+  ARABIC_DECIMAL_SEPARATOR as ARABIC_DECIMAL,
+  COMMA_LIKE_GLYPHS,
+  DOT_LIKE_GLYPHS,
+} from './decimal-separators';
 import { normalizeDigits } from './fullwidth-digits';
 import type { GroupingStyle } from '../types';
 
@@ -7,15 +12,12 @@ export interface ForeignFormatOptions {
   groupingStyle?: GroupingStyle;
 }
 
-// Marks that are unambiguously a decimal mark wherever they appear (Arabic decimal
-// separator). The field's own decimal separator joins them when it is not '.' or ','.
-const ARABIC_DECIMAL = '٫';
-const COMMA_GLYPHS = ['،', '，'];
-const DOT_GLYPHS = ['．', '。'];
+// ARABIC_DECIMAL is a decimal mark wherever it appears. The field's own decimal separator
+// joins it when that separator is not '.' or ','.
 
 const isDigit = (c: string): boolean => c >= '0' && c <= '9';
 
-function mapGlyphs(value: string, glyphs: string[], to: string, keep: Array<string | undefined>) {
+function mapGlyphs(value: string, glyphs: readonly string[], to: string, keep: Array<string | undefined>) {
   let out = value;
   for (const g of glyphs) {
     if (keep.indexOf(g) !== -1 || out.indexOf(g) === -1) continue;
@@ -57,8 +59,8 @@ export function normalizeForeignFormat(value: string, options?: ForeignFormatOpt
   const keep = [decimalSeparator, thousandSeparator];
 
   let v = normalizeDigits(value).replace(/[\s​]/g, '');
-  v = mapGlyphs(v, COMMA_GLYPHS, ',', keep);
-  v = mapGlyphs(v, DOT_GLYPHS, '.', keep);
+  v = mapGlyphs(v, COMMA_LIKE_GLYPHS, ',', keep);
+  v = mapGlyphs(v, DOT_LIKE_GLYPHS, '.', keep);
 
   if (thousandSeparator && thousandSeparator !== '.' && thousandSeparator !== ',') {
     v = v.split(thousandSeparator).join('');

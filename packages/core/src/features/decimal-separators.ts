@@ -18,12 +18,16 @@
  * Deliberately NOT included: U+066C ARABIC THOUSANDS SEPARATOR (٬) - it is a grouping
  * mark, never a decimal mark, and must never be remapped to the decimal separator.
  */
+export const ARABIC_DECIMAL_SEPARATOR = '٫'; // ٫ ARABIC DECIMAL SEPARATOR
+/** Glyphs that read like `,`: ARABIC COMMA (،), FULLWIDTH COMMA (，). */
+export const COMMA_LIKE_GLYPHS = ['،', '，'] as const;
+/** Glyphs that read like `.`: FULLWIDTH FULL STOP (．), IDEOGRAPHIC FULL STOP (。). */
+export const DOT_LIKE_GLYPHS = ['．', '。'] as const;
+
 export const NON_ASCII_DECIMAL_SEPARATOR_GLYPHS = [
-  '٫', // ٫ ARABIC DECIMAL SEPARATOR
-  '،', // ، ARABIC COMMA
-  '，', // ， FULLWIDTH COMMA
-  '．', // ． FULLWIDTH FULL STOP
-  '。', // 。 IDEOGRAPHIC FULL STOP
+  ARABIC_DECIMAL_SEPARATOR,
+  ...COMMA_LIKE_GLYPHS,
+  ...DOT_LIKE_GLYPHS,
 ] as const;
 
 /**
