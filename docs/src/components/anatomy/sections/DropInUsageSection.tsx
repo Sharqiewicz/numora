@@ -23,7 +23,7 @@ new NumoraInput(container, {
   groupingStyle: GroupingStyle.Thousand,
   decimalMaxLength: 2,
   enableCompactNotation: true,
-  onChange: (value) => console.log(value),
+  onChange: ({ value }) => console.log(value),
 })`;
 
 export function DropInUsageSection({ pkg }: SectionProps) {

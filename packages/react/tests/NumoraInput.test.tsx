@@ -1199,12 +1199,17 @@ describe('locale', () => {
     expect(input.value).toBe('0,5');
   });
 
-  // A string value is already display text (locale separators allowed) and must NOT be
-  // reinterpreted - only a JS number goes through the dot-to-comma conversion.
-  it('leaves a de-DE-formatted string value unchanged', () => {
-    render(<NumoraInput data-testid="input" locale="de-DE" defaultValue="1.234,5" />);
+  // App-supplied values are canonical raw values (ADR 0004/0006): a string is never read as
+  // locale text and never format-detected.
+  it('formats a canonical raw string defaultValue into de-DE display', () => {
+    render(<NumoraInput data-testid="input" locale="de-DE" defaultValue="1234.5" />);
     const input = screen.getByTestId('input') as HTMLInputElement;
     expect(input.value).toBe('1.234,5');
+  });
+
+  it('does not reinterpret a canonical value as de-DE grouping (1.5 stays 1,5)', () => {
+    render(<NumoraInput data-testid="input" locale="de-DE" defaultValue="1.5" />);
+    expect((screen.getByTestId('input') as HTMLInputElement).value).toBe('1,5');
   });
 });
 
@@ -1822,5 +1827,87 @@ describe('separator default resolution (parity with vanilla)', () => {
       />
     );
     expect((screen.getByTestId('eu') as HTMLInputElement).value).toBe('1.234.567');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Canonical raw value (ADR 0004/0005/0006)
+// ---------------------------------------------------------------------------
+
+describe('canonical raw value', () => {
+  const deProps = { locale: 'de-DE', groupingStyle: GroupingStyle.Thousand, formatOn: FormatOn.Change } as const;
+
+  it('de-DE typing 1234567.89 gives display 1.234.567,89 and raw 1234567.89', () => {
+    const onChange = vi.fn();
+    const onValueChange = vi.fn();
+    render(<NumoraInput data-testid="i" {...deProps} onChange={onChange} onValueChange={onValueChange} />);
+    const input = screen.getByTestId('i') as HTMLInputElement;
+    for (const ch of '1234567.89') simulateTyping(input, ch);
+    expect(input.value).toBe('1.234.567,89');
+    const e = onChange.mock.calls.at(-1)![0] as NumoraInputChangeEvent;
+    expect(e.target.value).toBe('1234567.89');
+    expect(e.target.formattedValue).toBe('1.234.567,89');
+    expect(onValueChange).toHaveBeenLastCalledWith({
+      value: '1234567.89',
+      formattedValue: '1.234.567,89',
+    });
+  });
+
+  it('de-DE ignores a second typed "."', () => {
+    render(<NumoraInput data-testid="i" {...deProps} onChange={() => {}} />);
+    const input = screen.getByTestId('i') as HTMLInputElement;
+    for (const ch of '1.5.') simulateTyping(input, ch);
+    expect(input.value).toBe('1,5');
+  });
+
+  it('en-US rejects a typed ","', () => {
+    render(<NumoraInput data-testid="i" {...deProps} locale="en-US" onChange={() => {}} />);
+    const input = screen.getByTestId('i') as HTMLInputElement;
+    simulateTyping(input, '1');
+    simulateTyping(input, ',');
+    expect(input.value).toBe('1');
+  });
+
+  it('de-DE paste 1.234,56 emits canonical raw 1234.56', () => {
+    const onChange = vi.fn();
+    render(<NumoraInput data-testid="i" {...deProps} onChange={onChange} />);
+    const input = screen.getByTestId('i') as HTMLInputElement;
+    simulatePaste(input, '1.234,56');
+    expect(input.value).toBe('1.234,56');
+    expect((onChange.mock.calls.at(-1)![0] as NumoraInputChangeEvent).target.value).toBe('1234.56');
+  });
+
+  it('de-DE paste 1.5 is 1,5 (not 15)', () => {
+    const onChange = vi.fn();
+    render(<NumoraInput data-testid="i" {...deProps} onChange={onChange} />);
+    const input = screen.getByTestId('i') as HTMLInputElement;
+    simulatePaste(input, '1.5');
+    expect(input.value).toBe('1,5');
+    expect((onChange.mock.calls.at(-1)![0] as NumoraInputChangeEvent).target.value).toBe('1.5');
+  });
+
+  it('controlled echo of canonical raw leaves the DOM untouched, including the trailing decimal', () => {
+    function Controlled() {
+      const [v, setV] = useState('');
+      return (
+        <NumoraInput
+          data-testid="i"
+          {...deProps}
+          value={v}
+          onChange={(e) => setV(e.target.value)}
+        />
+      );
+    }
+    render(<Controlled />);
+    const input = screen.getByTestId('i') as HTMLInputElement;
+    for (const ch of '1234,') simulateTyping(input, ch);
+    expect(input.value).toBe('1.234,');
+    simulateTyping(input, '5');
+    expect(input.value).toBe('1.234,5');
+  });
+
+  it('controlled canonical value 1234.5 renders as 1.234,5', () => {
+    render(<NumoraInput data-testid="i" {...deProps} value="1234.5" onChange={() => {}} />);
+    expect((screen.getByTestId('i') as HTMLInputElement).value).toBe('1.234,5');
   });
 });

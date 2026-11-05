@@ -60,9 +60,9 @@ function App() {
 | `onChange` | `(e: NumoraInputChangeEvent) => void` | `undefined` | Synthetic change event. `e.target.value` is raw; `e.target.formattedValue` is the display string |
 | `onValueChange` | `(values: { value: string; formattedValue: string }) => void` | `undefined` | Plain-object value callback, fired alongside `onChange` |
 
-All standard `HTMLInputElement` props are supported except `type` (always `'text'`) and `inputMode` (always `'decimal'`). A string `value` / `defaultValue` is already in the field's **display** format (locale separators allowed, grouping optional); a numeric `value` / `defaultValue` is always dot-decimal in JS, so it is converted to the configured decimal separator before formatting - `<NumoraInput locale="de-DE" value={1234.5} />` displays `"1.234,5"`, not `"12.345"`.
+All standard `HTMLInputElement` props are supported except `type` (always `'text'`) and `inputMode` (always `'decimal'`). `value` / `defaultValue` are canonical raw values (ASCII digits, `.` decimal, `-` sign, no grouping), never locale text and never format-detected: `<NumoraInput locale="de-DE" value="1234.5" />` (or `value={1234.5}`) displays `"1.234,5"`, and `value="1.234"` is the number 1.234 (`"1,234"`). The controlled echo pattern (`onChange={e => setV(e.target.value)}`) therefore round-trips in every locale. Pasted text is format-detected (a pasted `"1.234,56"` is 1234.56 in any locale); typed keys are not.
 
-In `onChange`, `e.target.value` is always the **raw** (unformatted) numeric string and `e.target.formattedValue` is the formatted display string (e.g. `"1,234.56"`). There is no `rawValueMode` toggle: the raw value is always available on the event.
+In `onChange`, `e.target.value` is always the **raw** (unformatted) numeric string and `e.target.formattedValue` is the formatted display string (e.g. `"1,234.56"`). The raw value is canonical in every locale (de-DE display `1.234.567,89` is raw `1234567.89`), and there is no toggle: it is always available on the event.
 
 > **Note:** `e.target.value` (raw) is the inverse of reading the DOM node directly — `inputRef.current.value` returns the **formatted** string that's rendered. Use the `onChange` event or `onValueChange` for the raw value; read the ref only when you want the displayed text.
 

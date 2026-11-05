@@ -22,9 +22,9 @@ export function ProxyTargetSection() {
       </h2>
       <p>
         Every formatting cycle produces two strings: a formatted display value and a raw numeric
-        value. The vanilla <code>NumoraInput</code> class emits one or the other through{' '}
-        <code>onChange</code> based on <code>emitRawValue</code>. The React component does something
-        different: it always exposes both on the change event's <code>target</code>.
+        value. The vanilla <code>NumoraInput</code> class passes both to <code>onChange</code> as a{' '}
+        <code>{'{ value, formattedValue }'}</code> object. The React component exposes both on the
+        change event's <code>target</code> instead.
       </p>
       <p>
         It does this with a Proxy. The synthetic <code>ChangeEvent</code>'s <code>target</code>{' '}

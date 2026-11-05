@@ -11,11 +11,12 @@ import {
 } from './features/formatting';
 import { getSeparators } from './features/decimals';
 import {
+  displayToRawValue,
   formatInputValue,
   formatValueForDisplay,
   normalizeNegativeZero,
 } from './utils/format-utils';
-import { removeThousandSeparators } from './features/sanitization';
+import type { ValueSource } from './features/sanitization';
 import { escapeRegExp } from './utils/escape-reg-exp';
 import { applyLocale } from './utils/locale';
 import {
@@ -27,7 +28,6 @@ import {
   DEFAULT_ENABLE_LEADING_ZEROS,
   DEFAULT_ENABLE_NEGATIVE,
   DEFAULT_FORMAT_ON,
-  DEFAULT_EMIT_RAW_VALUE,
   DEFAULT_THOUSAND_SEPARATOR,
   DEFAULT_GROUPING_STYLE,
 } from './config';
@@ -38,6 +38,7 @@ import {
   type FormattingOptions,
   type CaretPositionInfo,
   type LocaleTag,
+  type NumoraValues,
 } from './types';
 import { validateNumoraInputOptions } from './validation';
 
@@ -45,7 +46,7 @@ import { validateNumoraInputOptions } from './validation';
 // in the resolved options. Everything else has a default in `config.ts`.
 type ResolvedNumoraOptions = Required<Omit<FormattingOptions, 'maxLength' | 'isAllowed'>> &
   Pick<FormattingOptions, 'maxLength' | 'isAllowed'> & {
-    onChange?: (value: string) => void;
+    onChange?: (values: NumoraValues) => void;
   };
 
 // Every option that belongs to Numora rather than the native <input>. createInputElement
@@ -64,7 +65,6 @@ const NUMORA_OPTION_KEYS = new Set<string>([
   'enableNegative',
   'enableLeadingZeros',
   'autoAddLeadingZero',
-  'emitRawValue',
   'maxLength',
   'isAllowed',
   'onChange',
@@ -99,7 +99,6 @@ export interface NumoraInputOptions
   enableNegative?: boolean;
   enableLeadingZeros?: boolean;
   autoAddLeadingZero?: boolean;
-  emitRawValue?: boolean;
 
   // Validation
   /** Max raw length (digits + decimal sep + leading `-`). Separators not counted. */
@@ -108,7 +107,8 @@ export interface NumoraInputOptions
   isAllowed?: (rawValue: string) => boolean;
 
   // Event handlers
-  onChange?: (value: string) => void;
+  /** Fired on every change with `{ value, formattedValue }`: canonical raw + display string. */
+  onChange?: (values: NumoraValues) => void;
 
   // Value initialization
   value?: string;
@@ -119,8 +119,6 @@ export class NumoraInput {
   private element!: HTMLInputElement;
 
   private resolvedOptions: ResolvedNumoraOptions;
-
-  private rawValue: string = '';
 
   // True while we're applying our own setRangeText. `setRangeText` does not synchronously
   // dispatch `input` in current browsers or jsdom (verified); this flag is defensive, for
@@ -175,7 +173,6 @@ export class NumoraInput {
       enableNegative = DEFAULT_ENABLE_NEGATIVE,
       enableLeadingZeros = DEFAULT_ENABLE_LEADING_ZEROS,
       autoAddLeadingZero = DEFAULT_AUTO_ADD_LEADING_ZERO,
-      emitRawValue = DEFAULT_EMIT_RAW_VALUE,
       maxLength,
       isAllowed,
       onChange,
@@ -194,7 +191,6 @@ export class NumoraInput {
       enableNegative,
       enableLeadingZeros,
       autoAddLeadingZero,
-      emitRawValue,
       maxLength,
       isAllowed,
       onChange,
@@ -212,9 +208,9 @@ export class NumoraInput {
     this.setDefaultValue();
   }
 
-  private toRaw(value: string): string {
-    const sep = this.resolvedOptions.thousandSeparator;
-    return sep ? removeThousandSeparators(value, sep) : value;
+  /** Display text (what is in the field) to the canonical raw value. */
+  private toRaw(display: string): string {
+    return displayToRawValue(display, this.resolvedOptions);
   }
 
   /**
@@ -226,24 +222,28 @@ export class NumoraInput {
    * decimalMinLength padding and the trailing-separator strip - display/blur-only concerns
    * - apply here too. Mirrors the React adapter's `formatForDisplay`, keeping the two
    * packages' non-typing paths in parity.
+   *
+   * `source` says how to read `value`: `display` (the field's own text, e.g. on blur),
+   * `foreign` (browser-inserted text) or `canonical` (app-supplied, `.` is the decimal).
    */
-  private formatForDisplay(value: string): { formatted: string; raw: string } {
-    return formatValueForDisplay(value, this.resolvedOptions.decimalMaxLength, {
-      ...this.resolvedOptions,
-      formatOn: FormatOn.Change,
-    });
+  private formatForDisplay(
+    value: string,
+    source: ValueSource = 'display'
+  ): { formatted: string; raw: string } {
+    return formatValueForDisplay(
+      value,
+      this.resolvedOptions.decimalMaxLength,
+      { ...this.resolvedOptions, formatOn: FormatOn.Change },
+      source
+    );
   }
 
   private setDefaultValue(): void {
     if (!this.element.value) return;
 
-    const { formatted, raw } = this.formatForDisplay(this.element.value);
-
-    if (this.resolvedOptions.emitRawValue) {
-      this.rawValue = raw;
-    }
-
-    this.element.value = formatted;
+    // The initial value (option, or a pre-set value on an adopted <input>) is supplied by
+    // the app, so it is a canonical raw value (ADR 0004), not locale text.
+    this.element.value = this.formatForDisplay(this.element.value, 'canonical').formatted;
   }
 
   private createInputElement(container: HTMLElement, options: NumoraInputOptions): void {
@@ -394,15 +394,8 @@ export class NumoraInput {
     }
   }
 
-  private handleValueChange(formattedValue: string, rawValue?: string): void {
-    if (this.resolvedOptions.emitRawValue && rawValue !== undefined) {
-      this.rawValue = rawValue;
-    }
-
-    if (this.resolvedOptions.onChange) {
-      const valueToEmit = this.resolvedOptions.emitRawValue ? this.rawValue : formattedValue;
-      this.resolvedOptions.onChange(valueToEmit);
-    }
+  private handleValueChange(formattedValue: string, rawValue: string): void {
+    this.resolvedOptions.onChange?.({ value: rawValue, formattedValue });
   }
 
   private handleBeforeInput(e: InputEvent): void {
@@ -450,6 +443,8 @@ export class NumoraInput {
       return;
     }
 
+    // Browser-inserted text (autofill, a programmatic `el.value = x` + dispatched `input`)
+    // can be in any locale's format, so it is read with foreign-format detection (ADR 0006).
     // Programmatic input event (synthetic dispatch from external code or tests). Format
     // the current value and route the write through writeValuePreservingUndo so undo stays
     // intact instead of being wiped by `target.value = x`.
@@ -475,9 +470,10 @@ export class NumoraInput {
           oldValue,
           this.resolvedOptions.decimalMaxLength,
           this.resolvedOptions,
-          this.resolvedOptions.formatOn === FormatOn.Change
+          this.resolvedOptions.formatOn === FormatOn.Change,
+          'foreign'
         )
-      : this.formatForDisplay(oldValue);
+      : this.formatForDisplay(oldValue, 'foreign');
 
     if (oldValue !== newValue) {
       const computed = isFocused
@@ -536,9 +532,10 @@ export class NumoraInput {
     const displayStart = target.selectionStart ?? 0;
     const displayEnd = target.selectionEnd ?? target.value.length;
     // Captured before the write: stripping separators never changes the underlying digits,
-    // only their display, so this equals `result.raw` below in every real case - comparing
-    // the two is what keeps onChange from firing on a focus/click that changes nothing but
-    // presentation (see A2-06).
+    // only their display, so the canonical raw of `result.raw` below equals this in every real
+    // case - comparing the two is what keeps onChange from firing on a focus/click that changes
+    // nothing but presentation (see A2-06). Both sides must be canonical: `result.raw` is
+    // locale text (`1234567,89` in de-DE).
     const rawBeforeStrip = this.toRaw(target.value);
     const result = computeStripSeparatorsResult(target.value, displayStart, displayEnd, sep);
     if (!result) return;
@@ -546,8 +543,8 @@ export class NumoraInput {
     this.withInternalWrite(() =>
       writeStripPreservingUndo(target, result.raw, result.rawStart, result.rawEnd)
     );
-    if (result.raw !== rawBeforeStrip) {
-      this.handleValueChange(result.raw, result.raw);
+    if (this.toRaw(result.raw) !== rawBeforeStrip) {
+      this.handleValueChange(target.value, this.toRaw(target.value));
     }
   }
 
@@ -609,30 +606,34 @@ export class NumoraInput {
     }
   }
 
+  /**
+   * The canonical raw value: ASCII digits, `.` decimal, `-` sign, no grouping, identical for
+   * every locale (de-DE display `1.234.567,89` -> `1234567.89`). Safe to parse with
+   * `Number()` or a decimal library. Use {@link getFormattedValue} for the display string.
+   */
   public getValue(): string {
-    if (this.resolvedOptions.emitRawValue) {
-      return this.rawValue;
-    }
+    return this.toRaw(this.element.value);
+  }
+
+  /** The display string shown in the field (locale separators and grouping included). */
+  public getFormattedValue(): string {
     return this.element.value;
   }
 
   /**
    * Sets the input's value programmatically.
    *
-   * @param value - The new value. In `emitRawValue`, this is treated as raw and re-formatted for display.
+   * @param value - A canonical raw value (ADR 0004): `.` is always the decimal mark and
+   *   there is no grouping, whatever the field's locale (`'1234.5'` shows as `1.234,5` in
+   *   de-DE). It is never detected as locale text. It is re-formatted for display.
    * @param options.undoable - Defaults to `true`: routes the write through `setRangeText`
    *   so the browser's undo stack stays intact and `Ctrl+Z` can revert this call. Pass
    *   `false` only when you intentionally want to wipe the undo history (e.g. form reset).
    */
   public setValue(value: string, options?: { undoable?: boolean }): void {
     // Route through the same pipeline as typing/paste so programmatic writes honor
-    // sanitization, decimalMaxLength, maxLength, enableNegative and grouping — previously
-    // this path wrote the string verbatim (no formatting, no guards) whenever emitRawValue
-    // was false, diverging from both the typed path and the initial-value path.
-    const { formatted, raw } = this.formatForDisplay(value);
-    if (this.resolvedOptions.emitRawValue) {
-      this.rawValue = raw;
-    }
+    // sanitization, decimalMaxLength, maxLength, enableNegative and grouping.
+    const { formatted } = this.formatForDisplay(value, 'canonical');
 
     if (options?.undoable === false) {
       this.element.value = formatted;
@@ -668,18 +669,15 @@ export class NumoraInput {
   }
 
   /**
-   * Gets the current value of the input.
-   * In emitRawValue, returns the raw numeric value without formatting.
-   * Otherwise, returns the formatted display value.
+   * The canonical raw value (same as {@link getValue}). Use {@link getFormattedValue} for
+   * the display string.
    */
   public get value(): string {
     return this.getValue();
   }
 
   /**
-   * Sets the value of the input.
-   * In emitRawValue, the value will be formatted for display.
-   * Otherwise, sets the value directly.
+   * Sets the value of the input from a canonical raw value (same as {@link setValue}).
    */
   public set value(val: string) {
     this.setValue(val);
@@ -700,16 +698,7 @@ export class NumoraInput {
     if (!value) {
       return NaN;
     }
-    // Remove thousand separators and convert decimal separator to dot for parsing
-    const cleanValue = this.toRaw(value);
-    const normalizedValue =
-      this.resolvedOptions.decimalSeparator && this.resolvedOptions.decimalSeparator !== '.'
-        ? cleanValue.replace(
-            new RegExp(escapeRegExp(this.resolvedOptions.decimalSeparator), 'g'),
-            '.'
-          )
-        : cleanValue;
-    return parseFloat(normalizedValue);
+    return Number(value);
   }
 
   /**
@@ -741,15 +730,8 @@ export class NumoraInput {
     if (num < 0 && !this.resolvedOptions.enableNegative) {
       throw new RangeError('valueAsNumber: negative value but enableNegative is false');
     }
-    // `num.toString()` always emits a dot as the decimal mark. Where the configured
-    // decimal separator differs - e.g. de-DE, where `.` is the *thousand* separator -
-    // passing the dot through unchanged makes sanitization strip it as grouping and
-    // concatenate the digits: 1234567.89 would land as 123456789, a silent 100x error.
-    // Mirror of the conversion the getter applies in the opposite direction.
-    const { decimalSeparator } = this.resolvedOptions;
-    const stringValue = num.toString();
-    this.setValue(
-      decimalSeparator === '.' ? stringValue : stringValue.replace('.', decimalSeparator)
-    );
+    // `num.toString()` is a canonical raw value (dot decimal, possibly exponent form that
+    // the sanitization pipeline expands), exactly what `setValue` takes.
+    this.setValue(num.toString());
   }
 }

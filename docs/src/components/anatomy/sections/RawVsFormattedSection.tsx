@@ -19,10 +19,8 @@ const vanillaCode = `import { NumoraInput } from 'numora'
 new NumoraInput(container, {
   thousandSeparator: ',',
   decimalMaxLength: 2,
-  emitRawValue: true,
-  // When emitRawValue is true, onChange receives the raw value.
-  // When false (the default), it receives the formatted value.
-  onChange: (value) => console.log(value),
+  // onChange always receives both: the canonical raw value and the display string.
+  onChange: ({ value, formattedValue }) => console.log(value, formattedValue),
 })`;
 
 export function RawVsFormattedSection({ pkg }: SectionProps) {
@@ -49,8 +47,9 @@ export function RawVsFormattedSection({ pkg }: SectionProps) {
       ) : (
         <>
           <p>
-            The vanilla <code>NumoraInput</code> class emits one or the other through{' '}
-            <code>onChange</code>, controlled by <code>emitRawValue</code>:
+            The vanilla <code>NumoraInput</code> class passes both to <code>onChange</code> as{' '}
+            <code>{'{ value, formattedValue }'}</code>; <code>getValue()</code> returns the raw
+            value and <code>getFormattedValue()</code> the display string:
           </p>
           <CodeBlock language="typescript">{vanillaCode}</CodeBlock>
         </>

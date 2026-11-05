@@ -3,12 +3,12 @@ import { NumoraInput } from '../src/NumoraInput';
 import { FormatOn, GroupingStyle } from '../src/types';
 
 /**
- * Regression: in the default config (`emitRawValue: false`) `setValue` used to write its
+ * Regression: in the default config  `setValue` used to write its
  * argument to the DOM verbatim — no sanitization, no grouping, no decimal/length caps —
  * diverging from both the typed path and the initial-value path. It now runs the full
  * display pipeline, so a programmatic write formats identically to construction.
  */
-describe('setValue runs the full pipeline in default (emitRawValue: false) mode', () => {
+describe('setValue runs the full pipeline in default mode', () => {
   let container: HTMLElement;
 
   beforeEach(() => {
@@ -51,7 +51,7 @@ describe('setValue runs the full pipeline in default (emitRawValue: false) mode'
     const input = make({ maxLength: 5 });
     input.setValue('1234567890');
     // 5 raw chars -> "12345", then grouped
-    expect(input.getValue().replace(/,/g, '')).toBe('12345');
+    expect(input.getValue()).toBe('12345');
   });
 
   it('strips a sign when enableNegative is false', () => {

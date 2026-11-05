@@ -20,13 +20,15 @@ import {
   InputType,
   GroupingStyle,
   applyLocale,
+  displayToRawValue,
   formatValueForDisplay,
   normalizeNegativeZero,
-  removeThousandSeparators,
   sanitizeNumoraInput,
   validateNumoraInputOptions,
   type FormattingOptions,
   type LocaleTag,
+  type NumoraValues,
+  type ValueSource,
 } from 'numora';
 import {
   computeStripSeparatorsResult,
@@ -65,13 +67,7 @@ export type NumoraInputChangeEvent = Omit<ChangeEvent<HTMLInputElement>, 'target
   target: NumoraHTMLInputElement;
 };
 
-/** Plain value payload passed to `onValueChange`. */
-export interface NumoraValues {
-  /** Raw (unformatted) numeric string, separators stripped. */
-  value: string;
-  /** Formatted display string (e.g. `"1,234.56"`), the value visible in the input. */
-  formattedValue: string;
-}
+export type { NumoraValues };
 
 /**
  * Creates a synthetic change event where `target.value` returns the raw (unformatted)
@@ -162,38 +158,6 @@ export interface NumoraInputProps
   isAllowed?: (rawValue: string) => boolean;
 }
 
-/** Strip thousand separators to recover the raw numeric string from a formatted display value. */
-function toRawValue(formatted: string, thousandSeparator?: string): string {
-  return thousandSeparator ? removeThousandSeparators(formatted, thousandSeparator) : formatted;
-}
-
-/**
- * Converts a JS number to a display string, swapping `.` for the configured decimal
- * separator when it differs. Mirrors the vanilla `valueAsNumber` setter in
- * `NumoraInput.ts`: `num.toString()` always emits a dot as the decimal mark, so under a
- * locale where `.` means something else (de-DE's thousand separator) passing it straight
- * through would get silently reinterpreted by sanitization as grouping and concatenated -
- * e.g. `1234.5` landing as `12345`, a silent 10x error.
- */
-function numberToDisplayString(num: number, decimalSeparator: string): string {
-  const stringValue = num.toString();
-  return decimalSeparator === '.' ? stringValue : stringValue.replace('.', decimalSeparator);
-}
-
-/**
- * Coerces a `value`/`defaultValue` prop to the string the formatting pipeline expects.
- * String props are already in the field's display format (locale separators allowed) and
- * pass through unchanged - that is what every existing caller passes, and
- * `formatValueForDisplay` already strips grouping. A JS `number` can only be dot-decimal,
- * so it is converted via {@link numberToDisplayString} instead.
- */
-function propValueToDisplayString(
-  value: string | number | readonly string[],
-  decimalSeparator: string
-): string {
-  return typeof value === 'number' ? numberToDisplayString(value, decimalSeparator) : String(value);
-}
-
 const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) => {
   const {
     decimalMaxLength = 18,
@@ -268,13 +232,13 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // isAllowed (read from the ref, not the stable wrapper) so a genuine caller mistake
     // (wrong type) still throws - this only runs when the formatting props themselves
     // change, not on every inline-callback identity change. The cast bridges the signature
-    // gap: vanilla's onChange takes a string, React's takes an event - assertFunction only
+    // gap: vanilla's onChange takes a values object, React's takes an event - assertFunction only
     // checks `typeof === 'function'`, so either is fine.
     validateNumoraInputOptions({
       ...options,
       isAllowed: latestCallbacksRef.current.isAllowed,
       onChange: latestCallbacksRef.current.onChange as unknown as
-        | ((value: string) => void)
+        | ((values: NumoraValues) => void)
         | undefined,
     });
     return options;
@@ -297,11 +261,13 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   // Programmatic / restored values always want separators applied, regardless of whether
   // the user chose Blur mode (which suppresses separators during typing). Inline helper
   // avoids a second formatting-options object that callers would have to track.
-  const formatForDisplay = (raw: string) =>
-    formatValueForDisplay(raw, decimalMaxLength, {
-      ...formattingOptions,
-      formatOn: FormatOn.Change,
-    });
+  const formatForDisplay = (value: string, source: ValueSource = 'display') =>
+    formatValueForDisplay(
+      value,
+      decimalMaxLength,
+      { ...formattingOptions, formatOn: FormatOn.Change },
+      source
+    );
 
   const internalInputRef = useRef<HTMLInputElement>(null);
   // Mirror of props read by mount-only DOM listeners (beforeinput, mousedown/click) that
@@ -365,7 +331,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       // an unchanged raw, for no purpose). Still refresh `formattedValue` so it mirrors the
       // new (stripped) display.
       const numInput = input as NumoraHTMLInputElement;
-      numInput.formattedValue = result.raw;
+      numInput.formattedValue = input.value;
     },
     [withInternalWrite]
   );
@@ -380,8 +346,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   const [initialDisplayValue] = useState(() => {
     const valueToFormat = controlledValue !== undefined ? controlledValue : defaultValue;
     if (valueToFormat === undefined) return '';
-    const decimalSep = formattingOptions.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR;
-    return formatForDisplay(propValueToDisplayString(valueToFormat, decimalSep)).formatted;
+    // App-supplied values are canonical raw values ('1234.5', never locale text).
+    return formatForDisplay(String(valueToFormat), 'canonical').formatted;
   });
 
   // Layout effect 1: external ref → internal input.
@@ -408,10 +374,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     const input = internalInputRef.current;
     if (!input) return;
 
-    const controlledValueString = propValueToDisplayString(
-      controlledValue,
-      formattingOptions.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR
-    );
+    const controlledValueString = String(controlledValue);
     const numInput = input as NumoraHTMLInputElement;
 
     // A2-01: is this just the parent echoing the raw value straight back (the single most
@@ -430,7 +393,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // value (external update, clamping, a numeric-state round-trip that lost precision,
     // etc.) -> fall through to the resting/editing formatting as before.
     const domRaw = sanitizeNumoraInput(input.value, formattingOptions);
-    const controlledRaw = sanitizeNumoraInput(controlledValueString, formattingOptions);
+    const controlledRaw = sanitizeNumoraInput(controlledValueString, formattingOptions, 'canonical');
     if (domRaw === controlledRaw) {
       numInput.formattedValue = input.value;
       return;
@@ -448,8 +411,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       typeof document !== 'undefined' &&
       document.activeElement === input;
     const { formatted } = isEditingInBlurMode
-      ? formatValueForDisplay(controlledValueString, decimalMaxLength, formattingOptions)
-      : formatForDisplay(controlledValueString);
+      ? formatValueForDisplay(controlledValueString, decimalMaxLength, formattingOptions, 'canonical')
+      : formatForDisplay(controlledValueString, 'canonical');
     if (formatted === input.value) {
       numInput.formattedValue = formatted;
       return;
@@ -548,7 +511,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // via setRangeText - that would push another undo step and break the natural Ctrl+Z
     // walk-back. Just broadcast.
     if (inputType === InputType.HistoryUndo || inputType === InputType.HistoryRedo) {
-      const raw = toRawValue(numInput.value, formattingOptions.thousandSeparator);
+      const raw = displayToRawValue(numInput.value, formattingOptions);
       numInput.formattedValue = numInput.value;
       if (onChange) onChange(createSyntheticChangeEvent(numInput, raw));
       if (onValueChange) onValueChange({ value: raw, formattedValue: numInput.value });
@@ -566,8 +529,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // would leave an autofilled value ungrouped until the next focus+blur cycle.
     const isFocused = typeof document !== 'undefined' && document.activeElement === numInput;
     const { formatted, raw } = isFocused
-      ? formatValueForDisplay(numInput.value, decimalMaxLength, formattingOptions)
-      : formatForDisplay(numInput.value);
+      ? formatValueForDisplay(numInput.value, decimalMaxLength, formattingOptions, 'foreign')
+      : formatForDisplay(numInput.value, 'foreign');
     if (formatted !== numInput.value) {
       withInternalWrite(() => writeValuePreservingUndo(numInput, formatted, formatted.length));
     }

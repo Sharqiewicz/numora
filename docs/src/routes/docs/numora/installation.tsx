@@ -132,7 +132,8 @@ const numoraInput = new NumoraInput(container, {
           <code>enableCompactNotation</code> - expand <code>1k → 1000</code> on input
         </li>
         <li>
-          <code>emitRawValue</code> - emit raw values without separators in <code>onChange</code>
+          <code>onChange</code> receives <code>{'{ value, formattedValue }'}</code> - the raw value
+          has no separators
         </li>
       </ul>
       <p>

@@ -94,11 +94,12 @@ The intended use is: inspect what the user is about to do (via `inputType` and `
    - selectionStart, selectionEnd
 
 3. Decimal separator special case:
-   - typed ',' or '.' → convert to configured decimal separator, but ONLY when the typed
-     key is not itself the configured thousand separator - a key equal to the thousand
-     separator is rejected outright (en-US, thousandSeparator=','): typing ',' is ignored,
-     not remapped to '.'; de-DE (thousandSeparator='.'): typing '.' is ignored). Without
-     this guard a thousand-separator keystroke would silently become a second decimal point
+   - typed ',' or '.' → convert to configured decimal separator. A typed '.' is always a
+     decimal key (ADR 0005), including in comma-decimal locales where '.' is the thousand
+     separator (de-DE): it inserts the decimal when none exists and is ignored otherwise.
+     Any OTHER key equal to the thousand separator is rejected outright (en-US,
+     thousandSeparator=','): typing ',' is ignored, not remapped to '.'. Without this
+     guard a thousand-separator keystroke would silently become a second decimal point
    - the Arabic decimal separator (U+066B), Arabic comma (U+060C), fullwidth comma/full stop,
      and ideographic full stop are also recognized here and normalized to the configured
      decimal separator - the same normalization `sanitizeNumoraInput` applies for values that
@@ -233,9 +234,9 @@ else in the paste handler, in both packages.
 1. `e.preventDefault()` - blocks native paste
 2. Reads `e.clipboardData.getData('text')`
 3. Splices clipboard text into the current value at the active selection
-4. Runs the combined value through the full sanitize → format pipeline
+4. Reads the clipboard slice with foreign-format detection (ADR 0006, `normalizeForeignFormat`): the field's own separators are only a hint, so de-DE `1.5` is 1,5 and en-US `1.234,56` is 1,234.56. Then runs the combined value through the full sanitize → format pipeline
 5. Sets `input.value` directly and repositions cursor
-6. Returns `{ formatted, raw }` - caller (`handlePaste`) then dispatches a synthetic `input` event so `handleChange` fires `onChange`
+6. Returns `{ formatted, raw }` (`raw` is the canonical raw value: ASCII digits, `.` decimal, no grouping) - caller (`handlePaste`) then dispatches a synthetic `input` event so `handleChange` fires `onChange`
 
 **Note:** `beforeinput` fires for `insertFromPaste` before `paste` fires. Numora returns `null` from `handleOnBeforeInputNumoraInput` for paste (`inputType === 'insertFromPaste'`), deferring entirely to the `paste` handler.
 
@@ -584,7 +585,7 @@ const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
 
 ### `formattedValue` stored on the DOM element; `e.target.value` is raw
 
-There is no `emitRawValue` toggle in React. The synthetic change event's `target` is a
+There is no raw-value toggle in either package: `e.target.value` is always the canonical raw value. The synthetic change event's `target` is a
 `Proxy` whose `value` getter returns the **raw** value, while the display string is
 exposed as `formattedValue` — a custom property on the DOM element, typed via the
 exported `NumoraHTMLInputElement` interface. It stays in sync with the DOM without

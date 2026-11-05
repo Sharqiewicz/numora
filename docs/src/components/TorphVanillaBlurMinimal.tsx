@@ -29,13 +29,13 @@ export function TorphVanillaBlurMinimal() {
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
       value: '1234567',
-      onChange: (value) => morph.update(value || '0'),
+      onChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
     });
     numora.getElement().setAttribute('aria-label', 'Amount (blur to format)');
 
     // setDefaultValue runs before onChange is wired (and never fires onChange anyway).
     // Prime the morph with the formatted initial value.
-    morph.update(numora.value || '0');
+    morph.update(numora.getFormattedValue() || '0');
 
     return () => {
       morph.destroy();

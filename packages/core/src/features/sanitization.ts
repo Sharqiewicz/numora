@@ -9,6 +9,7 @@ import { filterMobileKeyboardArtifacts } from './mobile-keyboard-filtering';
 import { normalizeFullWidthDigits } from './fullwidth-digits';
 import { normalizeUnicodeMinus } from './unicode-minus';
 import { normalizeDecimalSeparators } from './decimal-separators';
+import { normalizeForeignFormat, canonicalToDisplayText } from './foreign-format';
 import { getCachedRegex } from '../utils/regex-cache';
 import { escapeRegExp } from '../utils/escape-reg-exp';
 import type { FormattingOptions } from '../types';
@@ -17,6 +18,21 @@ import type { FormattingOptions } from '../types';
 // person types or pastes is longer than this, and capping here bounds every downstream
 // step (including the two regex/scan-based expansions) against a pathological paste.
 const MAX_INPUT_LENGTH = 10_000;
+
+/**
+ * Where a string handed to the pipeline came from, which decides how its `.` and `,` are read.
+ *
+ * - `display` (default): the field's own locale text (typing, blur, the DOM value).
+ *   `thousandSeparator` groups, `decimalSeparator` is the decimal.
+ * - `foreign`: text of unknown format (paste, autofill, browser-inserted text). Read with
+ *   foreign-format detection (ADR 0006), then continues as locale text.
+ * - `canonical`: a value supplied by the app (`value`, `defaultValue`, `setValue`). `.` is
+ *   ALWAYS the decimal (ADR 0004), never grouping and never detected.
+ *
+ * The output is always locale text (field decimal separator, no grouping); the
+ * canonical raw value is derived from it with `displayToRawValue`.
+ */
+export type ValueSource = 'display' | 'foreign' | 'canonical';
 
 /**
  * Removes all occurrences of thousand separator from a string.
@@ -36,6 +52,7 @@ export function removeThousandSeparators(value: string, thousandSeparator: strin
  *    step (including the regex/scan-based notation expansions) against a pathological
  *    paste or keystroke
  * 1. Filter mobile keyboard artifacts (non-breaking spaces, Unicode whitespace)
+ * 1b. Read the text per `source` (foreign-format detection / canonical `.` decimal)
  * 2. Remove thousand separators (formatting, not data) - only when `thousandSeparator` is set
  * 3. Normalizing fullwidth digits (e.g., １２３ → 123), non-ASCII minus signs (e.g., − → -),
  *    and non-ASCII decimal-separator glyphs (e.g., Arabic ٫ or fullwidth ， → the configured
@@ -57,7 +74,8 @@ export function removeThousandSeparators(value: string, thousandSeparator: strin
  */
 export const sanitizeNumoraInput = (
   value: string,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: FormattingOptions,
+  source: ValueSource = 'display'
 ): string => {
   // Step 0.
   if (value.length > MAX_INPUT_LENGTH) {
@@ -75,6 +93,19 @@ export const sanitizeNumoraInput = (
   // the event handler and leave the input in an undefined state. Fall back to the
   // best-effort value computed so far rather than crashing the keystroke.
   try {
+    // Source handling comes first so every later step sees plain locale text.
+    if (source === 'foreign') {
+      sanitized = canonicalToDisplayText(
+        normalizeForeignFormat(sanitized, formattingOptions),
+        formattingOptions?.decimalSeparator
+      );
+    } else if (source === 'canonical') {
+      sanitized = canonicalToDisplayText(
+        normalizeFullWidthDigits(sanitized),
+        formattingOptions?.decimalSeparator
+      );
+    }
+
     if (formattingOptions?.thousandSeparator) {
       sanitized = removeThousandSeparators(sanitized, formattingOptions.thousandSeparator);
     }

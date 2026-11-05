@@ -1,9 +1,9 @@
-import { FormatOn, GroupingStyle, type FormattingOptions } from './types';
+import { FormatOn, GroupingStyle, type FormattingOptions, type NumoraValues } from './types';
 
 // Derived from FormattingOptions so adding a new field to that interface automatically
 // flows into validation - no more drift between the option surface and the validator.
 export type NumoraInputValidationOptions = FormattingOptions & {
-  onChange?: (value: string) => void;
+  onChange?: (values: NumoraValues) => void;
 };
 
 /**
@@ -29,7 +29,6 @@ export function validateNumoraInputOptions(options: NumoraInputValidationOptions
   assertBoolean('enableNegative', options.enableNegative);
   assertBoolean('enableLeadingZeros', options.enableLeadingZeros);
   assertBoolean('autoAddLeadingZero', options.autoAddLeadingZero);
-  assertBoolean('emitRawValue', options.emitRawValue);
   assertPositiveInt('maxLength', options.maxLength);
   assertFunction('isAllowed', options.isAllowed);
   assertFunction('onChange', options.onChange);

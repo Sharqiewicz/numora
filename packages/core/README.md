@@ -23,11 +23,13 @@ const input = new NumoraInput(document.querySelector('#amount'), {
   thousandSeparator: ',',
   groupingStyle: GroupingStyle.Thousand,
   formatOn: FormatOn.Blur,
-  onChange: (value) => console.log(value),
+  onChange: ({ value, formattedValue }) => console.log(value, formattedValue),
 });
 
-// Get / set value
-input.value = '1234.56';
+// Get / set value (always the canonical raw value: digits, '.' decimal, '-' sign, no grouping)
+input.setValue('1234.56');
+console.log(input.getValue()); // '1234.56'
+console.log(input.getFormattedValue()); // '1,234.56'
 console.log(input.valueAsNumber); // 1234.56
 ```
 
@@ -35,12 +37,12 @@ console.log(input.valueAsNumber); // 1234.56
 
 - [Sanitization](https://numora.xyz/docs/numora/features/sanitization) - filters invalid characters and mobile keyboard artifacts
 - [Formatting](https://numora.xyz/docs/numora/features/formatting) - thousand separators (Thousand/Lakh/Wan), format on blur or change
-- [Decimals](https://numora.xyz/docs/numora/features/decimals) - min/max decimal places, custom decimal separator, raw value mode
+- [Decimals](https://numora.xyz/docs/numora/features/decimals) - min/max decimal places, custom decimal separator, canonical raw value
 - [Compact Notation](https://numora.xyz/docs/numora/features/compact-notation) - expands "1k" → "1000" on paste/setValue (opt-in); a suffix is only expanded when it isn't itself followed by a digit or decimal separator, so typing `k` in the middle of a number (e.g. "1k5") doesn't scale the prefix
 - [Scientific Notation](https://numora.xyz/docs/numora/features/scientific-notation) - always expands "1.5e-7" → "0.00000015" automatically
 - [Leading Zeros](https://numora.xyz/docs/numora/features/leading-zeros) - configurable leading zero behavior
 
-Paste is sanitized under the field's own configured separators, not the clipboard text's source locale, which can't be inferred from a bare string: pasting `"1 234,56"` into an en-US-configured field yields `123456`, and pasting `"12,34,567"` yields `1234567`. A `readOnly` or `disabled` field ignores paste entirely (no write, no `onChange`), matching native `<input>` behavior. Integrators accepting foreign-formatted clipboard text should pre-parse it before calling `setValue`.
+Pasted text (and text the browser inserts through a plain `input` event) is read with foreign-format detection (ADR 0006): if `.` and `,` both appear the last one is the decimal; a mark repeated more than once is grouping; a single mark equal to the field's decimal separator is the decimal; a single mark followed by exactly three digits (Lakh/Wan group sizes included) is grouping; any other single mark is the decimal. So `"1.234"` pasted into a de-DE field is `1234`, `"1.5"` is `1,5`, and `"1.234,56"` pasted into an en-US field is `1,234.56`. Typed keys are never detected. In a comma-decimal locale the `.` key is a decimal key (ignored when a decimal already exists); in en-US a typed `,` is rejected. A `readOnly` or `disabled` field ignores paste entirely (no write, no `onChange`), matching native `<input>` behavior.
 
 ## Options
 
@@ -59,16 +61,17 @@ Paste is sanitized under the field's own configured separators, not the clipboar
 | `maxLength` | `number` | `undefined` | Max raw length (digits + decimal separator + leading `-`; thousand separators not counted) |
 | `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject a keystroke/paste when it returns false (called with the post-sanitization raw value). A callback that throws is treated as "not allowed" (the keystroke is rejected) and the error is reported via `console.error` |
 | `locale` | `string \| true` | `undefined` | Derive separators from `Intl.NumberFormat`; `true` uses the runtime default locale |
-| `emitRawValue` | `boolean` | `false` | Return unformatted (raw) values in `onChange` |
-| `onChange` | `(value: string) => void` | `undefined` | Called when value changes |
+| `onChange` | `(values: { value: string; formattedValue: string }) => void` | `undefined` | Called when value changes. `value` is the canonical raw value, `formattedValue` the display string |
 | `value` | `string` | `undefined` | Initial value (controlled) |
 | `defaultValue` | `string` | `undefined` | Initial value (uncontrolled) |
 
-`value` / `defaultValue` / `setValue` are strings in the field's **display** format (locale
-separators allowed, grouping optional) - e.g. under `locale: 'de-DE'`, `setValue('1.234,5')`.
-`valueAsNumber` is the escape hatch for a plain JS number: the setter converts it to the
-configured decimal separator (`valueAsNumber = 1234.5` under `locale: 'de-DE'` displays
-`"1.234,5"`, not `"12.345"`) and throws `RangeError` if the value is negative while
+The raw value is canonical for every locale: ASCII digits, `.` as the decimal, a leading `-`, no
+grouping (`1.234.567,89` in de-DE is raw `1234567.89`). `onChange`, `getValue()` and `value`
+all emit it; `getFormattedValue()` returns the display string. `value` / `defaultValue` /
+`setValue` accept canonical raw values only - never locale text, never format-detected
+(`setValue('1.234')` in de-DE is the number 1.234, shown as `1,234`).
+`valueAsNumber` is `Number(raw)` (`NaN` for an empty field); its setter writes the number
+canonically (`valueAsNumber = 1234.5` under `locale: 'de-DE'` displays `"1.234,5"`) and throws `RangeError` if the value is negative while
 `enableNegative` is `false`, or if the value is non-finite (`Infinity`, `-Infinity`, `NaN`).
 
 A value that sanitizes to an all-zero negative (e.g. typing `-0` or `-0.00`) is normalized

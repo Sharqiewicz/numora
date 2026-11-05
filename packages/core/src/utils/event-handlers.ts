@@ -1,5 +1,6 @@
 import { getSeparators } from '../features/decimals';
 import { sanitizeNumoraInput } from '../features/sanitization';
+import { normalizeForeignFormat, canonicalToDisplayText } from '../features/foreign-format';
 import { NON_ASCII_DECIMAL_SEPARATOR_GLYPHS } from '../features/decimal-separators';
 import { computeCursorPosition, skipOverThousandSeparatorOnDelete } from '../features/formatting';
 import { type FormattingOptions, type CaretPositionInfo, FormatOn, InputType } from '../types';
@@ -88,9 +89,13 @@ export function handleOnBeforeInputNumoraInput(
     const thousandSep = formattingOptions?.thousandSeparator;
 
     // The typed key is configured as the thousand separator (and isn't ALSO the decimal
-    // separator, which would make remapping a no-op anyway): reject the keystroke rather
-    // than remap it to a decimal point (A2-04/A2-05).
-    if (inputData === thousandSep && inputData !== decimalSep) {
+    // separator, which would make remapping a no-op anyway). ADR 0005: in a comma-decimal
+    // locale (thousand '.', e.g. de-DE) a typed '.' is the decimal key - numpads and US
+    // keyboards emit it - so it falls through to the decimal handling below (inserted only
+    // while the value has no decimal yet, ignored otherwise). Any other key that equals
+    // the thousand separator (',' in en-US) stays rejected (A2-04/A2-05): remapping it
+    // would turn a grouping habit into a stray decimal point.
+    if (inputData === thousandSep && inputData !== decimalSep && inputData !== '.') {
       return { type: 'reject' };
     }
 
@@ -319,7 +324,16 @@ export function handleOnPasteNumoraInput(
   const { value, selectionStart, selectionEnd } = inputElement;
   const separators = getSeparators(formattingOptions);
 
-  const clipboardData = e.clipboardData?.getData('text/plain') || '';
+  // Pasted text is read with foreign-format detection (ADR 0006), NOT strictly by the
+  // field's locale: de-DE `1.5` is 1.5 and `1,234,567.89` is 1234567.89. Only the clipboard
+  // slice is detected - the rest of the combined value is the field's own display text.
+  // The slice is rewritten to the field's locale text so the combined value then goes
+  // through the ordinary pipeline, and the caret math below uses its (rewritten) length.
+  const rawClipboard = e.clipboardData?.getData('text/plain') || '';
+  const clipboardData = canonicalToDisplayText(
+    normalizeForeignFormat(rawClipboard, formattingOptions),
+    separators.decimalSeparator
+  );
   const selStart = selectionStart ?? 0;
   const selEnd = selectionEnd ?? 0;
   const combinedValue = value.slice(0, selStart) + clipboardData + value.slice(selEnd);

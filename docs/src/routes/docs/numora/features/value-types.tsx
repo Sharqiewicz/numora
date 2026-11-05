@@ -8,7 +8,7 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
       {
         name: 'description',
         content:
-          'Learn how Numora always emits string values from onChange, what emitRawValue does, and when to use valueAsNumber as an escape hatch.',
+          'Learn how Numora always emits string values from onChange, how the raw and formatted values relate, and when to use valueAsNumber as an escape hatch.',
       },
       {
         property: 'og:title',
@@ -17,7 +17,7 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
       {
         property: 'og:description',
         content:
-          'Learn how Numora always emits string values from onChange, what emitRawValue does, and when to use valueAsNumber.',
+          'Learn how Numora always emits string values from onChange, how the raw and formatted values relate, and when to use valueAsNumber.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/value-types' },
       {
@@ -27,7 +27,7 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
       {
         name: 'twitter:description',
         content:
-          'Numora always emits strings from onChange. Learn about emitRawValue and the valueAsNumber escape hatch.',
+          'Numora always emits strings from onChange. Learn about the raw value and the valueAsNumber escape hatch.',
       },
     ],
     links: [
@@ -85,45 +85,32 @@ function ValueTypes() {
         modes control <em>which</em> string you receive.
       </p>
 
-      <h2>Default: formatted string</h2>
+      <h2>Raw value and formatted value</h2>
       <p>
-        By default <code>onChange</code> receives the display value - the same string shown in the
-        input, including thousand separators.
+        <code>onChange</code> receives <code>{'{ value, formattedValue }'}</code>. <code>value</code>{' '}
+        is the canonical raw string for every locale: ASCII digits, <code>.</code> as the decimal, a
+        leading <code>-</code>, no grouping (a de-DE display of <code>1.234.567,89</code> is raw{' '}
+        <code>1234567.89</code>). <code>getValue()</code> and <code>instance.value</code> return the
+        same raw string; <code>getFormattedValue()</code> returns the display string.
       </p>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
 const numoraInput = new NumoraInput(container, {
   thousandSeparator: ',',
-  onChange: (value) => {
-    console.log(value) // "1,234.56"
+  onChange: ({ value, formattedValue }) => {
+    console.log(value)          // "1234.56" ← no separators
+    console.log(formattedValue) // "1,234.56" ← display value
   },
-})`}
-      </CodeBlock>
-
-      <h2>emitRawValue: raw string</h2>
-      <p>
-        Set <code>emitRawValue: true</code> and <code>onChange</code> receives the plain numeric
-        string with thousand separators stripped. The input still displays the formatted value.{' '}
-        <code>instance.value</code> also returns the raw string in this mode.
-      </p>
-      <CodeBlock language="typescript">
-        {`import { NumoraInput } from 'numora'
-
-const numoraInput = new NumoraInput(container, {
-  thousandSeparator: ',',
-  emitRawValue: true,
-  onChange: (value) => {
-    console.log(value)                    // "1234.56" ← no separators
-    console.log(numoraInput.getElement().value) // "1,234.56" ← display value
-  },
-})`}
+})
+numoraInput.getValue()          // "1234.56"
+numoraInput.getFormattedValue() // "1,234.56"`}
       </CodeBlock>
 
       <h2>valueAsNumber</h2>
       <p>
         <code>valueAsNumber</code> converts the current value to a JavaScript <code>number</code>{' '}
-        via <code>parseFloat</code>. Use it as an escape hatch when you need a number type, not as
+        via <code>Number(raw)</code>. Use it as an escape hatch when you need a number type, not as
         the primary way to read the value.
       </p>
       <CodeBlock language="typescript">
@@ -133,7 +120,7 @@ console.log(num)        // 1234.56
 console.log(isNaN(numoraInput.valueAsNumber)) // true when input is empty`}
       </CodeBlock>
       <p>
-        <strong>Precision warning:</strong> <code>parseFloat</code> is subject to IEEE 754 limits.
+        <strong>Precision warning:</strong> <code>Number</code> is subject to IEEE 754 limits.
         Integers above <code>Number.MAX_SAFE_INTEGER</code> and long decimals may silently lose
         precision. For financial arithmetic, keep working with the string from <code>onChange</code>{' '}
         and use a decimal library such as <code>decimal.js</code>.
@@ -141,8 +128,8 @@ console.log(isNaN(numoraInput.valueAsNumber)) // true when input is empty`}
 
       <h3>Setting valueAsNumber</h3>
       <p>
-        The setter accepts a JavaScript <code>number</code> and converts it with the configured{' '}
-        <code>decimalSeparator</code>, so <code>valueAsNumber = 1234.5</code> under{' '}
+        The setter accepts a JavaScript <code>number</code> and writes it as a canonical raw
+        value, so <code>valueAsNumber = 1234.5</code> under{' '}
         <code>locale="de-DE"</code> displays <code>1.234,5</code>. Assigning a non-finite value (
         <code>NaN</code>, <code>Infinity</code>, <code>-Infinity</code>) or a negative number while{' '}
         <code>enableNegative</code> is <code>false</code> throws a <code>RangeError</code> instead

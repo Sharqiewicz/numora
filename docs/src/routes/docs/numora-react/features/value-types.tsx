@@ -155,29 +155,31 @@ function App() {
 }`}
       </CodeBlock>
 
-      <h2>valueAsNumber</h2>
+      <h2>Getting a number</h2>
       <p>
-        Need a <code>number</code>? Access <code>valueAsNumber</code> via a ref. It strips
-        separators and calls <code>parseFloat</code> internally.
+        Need a <code>number</code>? Call <code>Number(e.target.value)</code>. The raw value is
+        canonical in every locale (<code>.</code> decimal, no grouping), so it parses the same way
+        for a German or an Indian user.
       </p>
       <CodeBlock language="tsx">
-        {`import { useRef } from 'react'
-import { NumoraInput } from 'numora-react'
+        {`import { NumoraInput } from 'numora-react'
 
 function App() {
-  const ref = useRef<HTMLInputElement>(null)
-
-  const handleSubmit = () => {
-    console.log((ref.current as any).valueAsNumber) // 1234.56
-  }
-
-  return <NumoraInput ref={ref} thousandSeparator="," decimalMaxLength={2} />
+  return (
+    <NumoraInput
+      locale="de-DE"
+      onChange={(e) => {
+        console.log(e.target.value) // "1234.56" (display "1.234,56")
+        console.log(Number(e.target.value)) // 1234.56
+      }}
+    />
+  )
 }`}
       </CodeBlock>
       <p>
-        <strong>Precision warning:</strong> <code>parseFloat</code> is subject to IEEE 754 limits.
+        <strong>Precision warning:</strong> <code>Number</code> is subject to IEEE 754 limits.
         Integers above <code>Number.MAX_SAFE_INTEGER</code> and long decimals may silently lose
-        precision. For financial arithmetic, use the string from <code>e.target.value</code> with a
+        precision. For financial arithmetic, pass the string from <code>e.target.value</code> to a
         decimal library such as <code>decimal.js</code>.
       </p>
 

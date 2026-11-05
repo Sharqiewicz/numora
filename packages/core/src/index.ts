@@ -8,13 +8,19 @@
  */
 export * from './NumoraInput';
 export { GroupingStyle, FormatOn, InputType } from './types';
-export type { FormattingOptions, CaretPositionInfo, LocaleTag } from './types';
+export type { FormattingOptions, CaretPositionInfo, LocaleTag, NumoraValues } from './types';
 export { getSeparatorsFromLocale, applyLocale } from './utils/locale';
-export { formatValueForDisplay, normalizeNegativeZero } from './utils/format-utils';
+export {
+  formatValueForDisplay,
+  normalizeNegativeZero,
+  displayToRawValue,
+} from './utils/format-utils';
 export { validateNumoraInputOptions } from './validation';
 
 // Pure sanitization/formatting utilities - standalone-usable public API.
 export { sanitizeNumoraInput, removeThousandSeparators } from './features/sanitization';
+export type { ValueSource } from './features/sanitization';
+export { normalizeForeignFormat } from './features/foreign-format';
 export { filterMobileKeyboardArtifacts } from './features/mobile-keyboard-filtering';
 export { normalizeFullWidthDigits, normalizeDigits } from './features/fullwidth-digits';
 export { normalizeUnicodeMinus } from './features/unicode-minus';

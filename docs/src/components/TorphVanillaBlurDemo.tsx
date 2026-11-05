@@ -39,14 +39,14 @@ export function TorphVanillaBlurDemo() {
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
       value: '1234567',
-      onChange: (value) => morph.update(value || '0'),
+      onChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
     });
     const input = numora.getElement();
     input.setAttribute('aria-label', 'Amount (blur to format)');
 
     // The constructor's setDefaultValue runs before onChange is wired (and never fires
     // onChange anyway), so prime the morph with the formatted initial value here.
-    morph.update(numora.value || '0');
+    morph.update(numora.getFormattedValue() || '0');
 
     const handleFocus = () => {
       postFocusMorphPending = true;

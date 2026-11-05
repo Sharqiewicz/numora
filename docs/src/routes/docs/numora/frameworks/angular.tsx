@@ -181,9 +181,9 @@ export class NumoraDirective implements ControlValueAccessor, OnInit {
   ngOnInit(): void {
     this.instance = new NumoraInput(this.el.nativeElement, {
       ...this.options,
-      onChange: (raw: string) => {
-        this.onChangeCb(raw);
-        this.options.onChange?.(raw);
+      onChange: (values) => {
+        this.onChangeCb(values.value);
+        this.options.onChange?.(values);
       },
     });
     if (this.pendingValue !== null) {

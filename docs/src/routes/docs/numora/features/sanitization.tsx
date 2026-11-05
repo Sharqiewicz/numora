@@ -120,8 +120,8 @@ const numoraInput = new NumoraInput(container, {
         value from a display string.
       </p>
       <p>
-        (You can also access the raw value of the input by <code>e.target.rawValue</code> when{' '}
-        <code>emitRawValue</code> is <code>true</code>)
+        (The raw value is also available as <code>getValue()</code> on the vanilla instance and as{' '}
+        <code>e.target.value</code> in React - always canonical, whatever the locale.)
       </p>
 
       <CodeBlock language="typescript">

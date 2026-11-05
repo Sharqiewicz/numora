@@ -1,8 +1,33 @@
 import { trimToDecimalMaxLength, ensureMinDecimals, getSeparators } from '../features/decimals';
-import { sanitizeNumoraInput } from '../features/sanitization';
+import {
+  sanitizeNumoraInput,
+  removeThousandSeparators,
+  type ValueSource,
+} from '../features/sanitization';
 import { formatWithSeparators } from '../features/formatting';
 import { type FormattingOptions, FormatOn } from '../types';
-import { DEFAULT_GROUPING_STYLE } from '../config';
+import { DEFAULT_GROUPING_STYLE, DEFAULT_DECIMAL_SEPARATOR } from '../config';
+
+/**
+ * Converts the field's display text (locale decimal, optional grouping) to the canonical
+ * raw value: ASCII digits, `.` decimal, `-` sign, no grouping, for every locale (ADR 0004).
+ * Order matters: grouping is removed BEFORE the decimal swap, because in de-DE the
+ * thousand separator is `.` and the decimal separator `,` becomes `.`.
+ *
+ * @example
+ * displayToRawValue('1.234.567,89', { decimalSeparator: ',', thousandSeparator: '.' })
+ * // '1234567.89'
+ */
+export function displayToRawValue(
+  display: string,
+  options?: Pick<FormattingOptions, 'decimalSeparator' | 'thousandSeparator'>
+): string {
+  const decimalSeparator = options?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR;
+  const thousandSeparator = options?.thousandSeparator;
+  let raw = thousandSeparator ? removeThousandSeparators(display, thousandSeparator) : display;
+  if (decimalSeparator !== '.') raw = raw.split(decimalSeparator).join('.');
+  return raw;
+}
 
 /**
  * Formats a value from user input events (onChange, onBlur) by sanitizing, trimming decimals, and applying formatting.
@@ -12,13 +37,15 @@ import { DEFAULT_GROUPING_STYLE } from '../config';
  * @param decimalMaxLength - Maximum number of decimal places allowed
  * @param formattingOptions - Optional formatting options
  * @param shouldRemoveThousandSeparators - Whether to remove thousand separators during sanitization (default: determined by formatOn)
- * @returns Object with formatted value and raw value (raw value is the value before formatting)
+ * @param source - How to read `rawValue`'s separators (see `ValueSource`). Default `'display'`.
+ * @returns `formatted` (display text) and `raw` (the canonical raw value: `.` decimal, no grouping)
  */
 export function formatInputValue(
   rawValue: string,
   decimalMaxLength: number,
   formattingOptions?: FormattingOptions,
-  shouldRemoveThousandSeparators?: boolean
+  shouldRemoveThousandSeparators?: boolean,
+  source: ValueSource = 'display'
 ): { formatted: string; raw: string } {
   const separators = getSeparators(formattingOptions);
 
@@ -29,10 +56,13 @@ export function formatInputValue(
 
   // sanitizeNumoraInput treats `thousandSeparator` as the flag for separator removal:
   // pass undefined to keep separators (e.g. typing path in blur mode).
-  const sanitizeOptions = shouldRemove
-    ? formattingOptions
-    : { ...formattingOptions, thousandSeparator: undefined };
-  const sanitizedValue = sanitizeNumoraInput(rawValue, sanitizeOptions);
+  // `foreign`/`canonical` sources are never the field's own grouped text, and detection
+  // needs the configured separators, so they always get the full options.
+  const sanitizeOptions =
+    shouldRemove || source !== 'display'
+      ? formattingOptions
+      : { ...formattingOptions, thousandSeparator: undefined };
+  const sanitizedValue = sanitizeNumoraInput(rawValue, sanitizeOptions, source);
 
   const sanitizedAndTrimmedValue = trimToDecimalMaxLength(
     sanitizedValue,
@@ -61,7 +91,7 @@ export function formatInputValue(
       )
     : sanitizedAndTrimmedValue;
 
-  return { formatted, raw: sanitizedAndTrimmedValue };
+  return { formatted, raw: displayToRawValue(sanitizedAndTrimmedValue, formattingOptions) };
 }
 
 /**
@@ -78,19 +108,23 @@ export function formatInputValue(
  * @param value - The value to format for display
  * @param decimalMaxLength - Maximum number of decimal places allowed
  * @param formattingOptions - Optional formatting options
- * @returns Object with formatted value and raw value
+ * @param source - How to read `value` (see `ValueSource`). Default `'display'`: the field's
+ *   own locale text. Pass `'canonical'` for app-supplied values (`.` is always the decimal).
+ * @returns `formatted` (display text) and `raw` (canonical raw value)
  */
 export function formatValueForDisplay(
   value: string,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: FormattingOptions,
+  source: ValueSource = 'display'
 ): { formatted: string; raw: string } {
   const shouldRemoveThousandSeparators = !!formattingOptions?.thousandSeparator;
   const { formatted, raw } = formatInputValue(
     value,
     decimalMaxLength,
     formattingOptions,
-    shouldRemoveThousandSeparators
+    shouldRemoveThousandSeparators,
+    source
   );
 
   const separators = getSeparators(formattingOptions);
@@ -105,7 +139,12 @@ export function formatValueForDisplay(
       minDecimals,
       separators.decimalSeparator
     ),
-    raw: ensureMinDecimals(stripTrailingSeparator(raw), minDecimals, separators.decimalSeparator),
+    // `raw` is canonical here, so its decimal separator is always '.'.
+    raw: ensureMinDecimals(
+      raw.endsWith('.') ? raw.slice(0, -1) : raw,
+      minDecimals,
+      DEFAULT_DECIMAL_SEPARATOR
+    ),
   };
 }
 

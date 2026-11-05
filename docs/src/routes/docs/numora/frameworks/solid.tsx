@@ -181,7 +181,7 @@ export function AmountInput() {
         use:numora={{
           groupingStyle: GroupingStyle.Thousand,
           decimalMaxLength: 2,
-          onChange: (v) => setValue(v),
+          onChange: ({ value: v }) => setValue(v),
         }}
       />
       <p>Raw value: {value()}</p>

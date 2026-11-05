@@ -71,7 +71,7 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
     }
   });
 
-  it('de-DE (thousand ".", decimal ","): "." typed is rejected', () => {
+  it('de-DE (thousand ".", decimal ","): "." typed is the decimal key (ADR 0005, supersedes A2-04)', () => {
     const input = makeInput('1', 1, 1);
     const opts: FormattingOptions = { thousandSeparator: '.', decimalSeparator: ',' };
     const result = handleOnBeforeInputNumoraInput(
@@ -79,7 +79,11 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
       18,
       opts
     );
-    expect(result).toEqual({ type: 'reject' });
+    expect(result.type).toBe('handled');
+    if (result.type === 'handled') {
+      expect(result.formatted).toBe('1,');
+      expect(result.raw).toBe('1.');
+    }
   });
 
   it('de-DE: "," typed still inserts the decimal separator', () => {
@@ -92,7 +96,7 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
     );
     expect(result.type).toBe('handled');
     if (result.type === 'handled') {
-      expect(result.raw).toBe('1,');
+      expect(result.raw).toBe('1.');
     }
   });
 
@@ -140,7 +144,7 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
     );
     expect(dotResult.type).toBe('handled');
     if (dotResult.type === 'handled') {
-      expect(dotResult.raw).toBe('1·');
+      expect(dotResult.raw).toBe('1.');
     }
 
     const comma = makeInput('1', 1, 1);
@@ -203,7 +207,7 @@ describe('A2-05 — non-ASCII decimal-separator glyphs follow the same remap-or-
     );
     expect(result.type).toBe('handled');
     if (result.type === 'handled') {
-      expect(result.raw).toBe('12٫');
+      expect(result.raw).toBe('12.');
     }
   });
 

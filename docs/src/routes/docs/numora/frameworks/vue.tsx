@@ -187,7 +187,7 @@ const value = ref('');`}
     v-numora="{
       groupingStyle: GroupingStyle.Thousand,
       decimalMaxLength: 2,
-      onChange: (v) => (value = v),
+      onChange: ({ value: v }) => (value = v),
     }"
   />
 </label>

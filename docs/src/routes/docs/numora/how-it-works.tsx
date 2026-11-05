@@ -207,8 +207,9 @@ function HowItWorks() {
           to <code>input.value</code>.
         </li>
         <li>
-          <strong>raw</strong> - the sanitized string without separators; emitted via{' '}
-          <code>onChange</code> when <code>emitRawValue: true</code>.
+          <strong>raw</strong> - the sanitized string without separators; canonical in every locale
+          (<code>.</code> decimal, no grouping); emitted as <code>value</code> in{' '}
+          <code>onChange</code> and returned by <code>getValue()</code>.
         </li>
       </ul>
 

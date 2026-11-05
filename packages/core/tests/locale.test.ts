@@ -212,7 +212,6 @@ describe('✅ locale-driven grouping end to end', () => {
     instance = new NumoraInput(container, {
       locale: 'hi-IN',
       value: '12345678',
-      emitRawValue: true,
     });
     expect(instance.getElement().value).toBe('1,23,45,678');
     expect(instance.getValue()).toBe('12345678');

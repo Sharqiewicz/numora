@@ -114,7 +114,16 @@ export interface FormattingOptions {
    * change, no onChange fires, undo history is untouched).
    */
   isAllowed?: (rawValue: string) => boolean;
-  emitRawValue?: boolean;
+}
+
+/**
+ * Payload of every change notification (vanilla `onChange`, React `onValueChange`).
+ * `value` is the canonical raw value (ASCII digits, `.` decimal, `-` sign, no grouping, the
+ * same for every locale); `formattedValue` is the string shown in the field.
+ */
+export interface NumoraValues {
+  value: string;
+  formattedValue: string;
 }
 
 export interface CaretPositionInfo {
