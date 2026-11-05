@@ -51,7 +51,7 @@ const JSON_LD = [
         name: 'How do I add thousand separators to a Solid number input?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Pass groupingStyle: GroupingStyle.Thousand inside the use:numora binding. Numora formats as the user types, repositions the caret through the inserted comma, and emits the raw separator-free string from onChange – write it directly into a createSignal setter.',
+          text: 'Pass groupingStyle: GroupingStyle.Thousand inside the use:numora binding. Numora formats as the user types, repositions the caret through the inserted comma, and passes the raw value to onChange as value – write it directly into a createSignal setter.',
         },
       },
       {
@@ -75,7 +75,7 @@ const JSON_LD = [
         name: 'Does it support i18n decimal commas and currency in Solid?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. Pass decimalSeparator: "," and thousandSeparator: "." (or use the locale option) for European locales. Numora keeps the raw value as a string end-to-end, so currency math stays precise – no parseFloat rounding errors on amounts like 0.1 + 0.2.',
+          text: 'Yes. Pass decimalSeparator: "," and thousandSeparator: "." (or use the locale option) for European locales. The raw value is a plain dot-decimal string in every locale, so currency math stays precise – no parseFloat rounding errors on amounts like 0.1 + 0.2.',
         },
       },
       {
@@ -194,9 +194,9 @@ export function AmountInput() {
         The directive receives the <code>&lt;input&gt;</code> Solid renders and an accessor for its
         options, then calls <code>new NumoraInput(el, accessor())</code>. Numora adopts the element,
         forces the required attributes (<code>type</code>, <code>inputmode</code>,{' '}
-        <code>spellcheck</code>, <code>autocomplete</code>, <code>pattern</code>), and emits the
-        raw, separator-free string from <code>onChange</code> – write it straight into a signal or
-        store.
+        <code>spellcheck</code>, <code>autocomplete</code>, <code>pattern</code>), and passes the
+        raw value to <code>onChange</code> as <code>value</code> – write it straight into a signal
+        or store.
       </p>
 
       <p className="text-sm">
@@ -316,7 +316,7 @@ export function AnimatedAmountInput() {
       <p>
         Pass <code>groupingStyle: GroupingStyle.Thousand</code> inside the <code>use:numora</code>{' '}
         binding. Numora formats as the user types, keeps the caret stable through the inserted
-        comma, and emits the raw separator-free string from <code>onChange</code> – write it
+        comma, and passes the raw value to <code>onChange</code> as <code>value</code> – write it
         straight into your <code>createSignal</code> setter.
       </p>
 
@@ -324,8 +324,8 @@ export function AnimatedAmountInput() {
       <p>
         Yes. Set <code>decimalSeparator: &apos;,&apos;</code> and{' '}
         <code>thousandSeparator: &apos;.&apos;</code> (or use the <code>locale</code> option) for
-        European formats. Numora keeps the raw value as a string end-to-end, so currency math stays
-        precise – no <code>parseFloat</code> rounding errors.
+        European formats. The raw value is a plain dot-decimal string in every locale, so currency
+        math stays precise – no <code>parseFloat</code> rounding errors.
       </p>
 
       <h3>

@@ -51,7 +51,7 @@ const JSON_LD = [
         name: 'How do I format a number input with thousand separators in Vue?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Pass groupingStyle: GroupingStyle.Thousand inside the v-numora binding. Numora formats as the user types, keeps the caret stable through the inserted separator, and emits the raw separator-free string from onChange so your ref or Pinia store stays clean.',
+          text: 'Pass groupingStyle: GroupingStyle.Thousand inside the v-numora binding. Numora formats as the user types, keeps the caret stable through the inserted separator, and passes the raw value to onChange as value so your ref or Pinia store stays clean.',
         },
       },
       {
@@ -75,7 +75,7 @@ const JSON_LD = [
         name: 'Does it work with VeeValidate, FormKit or Pinia in Vue?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: "Yes. Numora's onChange emits the raw separator-free string – feed it into VeeValidate, FormKit, Pinia, or any other Vue state library exactly as you would a normal v-model value. The string-end-to-end design avoids parseFloat rounding errors in financial flows.",
+          text: "Yes. Numora's onChange passes the raw value as value – feed it into VeeValidate, FormKit, Pinia, or any other Vue state library exactly as you would a normal v-model value. The string-end-to-end design avoids parseFloat rounding errors in financial flows.",
         },
       },
       {
@@ -198,9 +198,9 @@ const value = ref('');`}
         The directive receives the <code>&lt;input&gt;</code> Vue renders and calls{' '}
         <code>new NumoraInput(el, binding.value)</code>. Numora adopts the element, forces the
         required attributes (<code>type</code>, <code>inputmode</code>, <code>spellcheck</code>,{' '}
-        <code>autocomplete</code>, <code>pattern</code>), and emits the raw, separator-free string
-        from <code>onChange</code> – safe to feed straight into a ref, Pinia store, or VeeValidate
-        field.
+        <code>autocomplete</code>, <code>pattern</code>), and passes the raw value to{' '}
+        <code>onChange</code> as <code>value</code> – safe to feed straight into a ref, Pinia store,
+        or VeeValidate field.
       </p>
 
       <p className="text-sm">
@@ -335,16 +335,16 @@ onBeforeUnmount(() => cleanup?.());`}
       <p>
         Pass <code>groupingStyle: GroupingStyle.Thousand</code> inside the <code>v-numora</code>{' '}
         binding. Numora formats as the user types, keeps the caret stable through the inserted
-        comma, and emits the raw separator-free string from <code>onChange</code> – safe to feed
-        into <code>ref</code>, Pinia, VeeValidate or FormKit.
+        comma, and passes the raw value to <code>onChange</code> as <code>value</code> – safe to
+        feed into <code>ref</code>, Pinia, VeeValidate or FormKit.
       </p>
 
       <h3>Does it support i18n (decimal commas, currency formatting) in Vue?</h3>
       <p>
         Yes. Set <code>decimalSeparator: &apos;,&apos;</code> and{' '}
         <code>thousandSeparator: &apos;.&apos;</code> (or use the <code>locale</code> option) for
-        European formats. Numora keeps the raw value as a string end-to-end, so currency math stays
-        precise – no <code>parseFloat</code> rounding errors.
+        European formats. The raw value is a plain dot-decimal string in every locale, so currency
+        math stays precise – no <code>parseFloat</code> rounding errors.
       </p>
 
       <h3>

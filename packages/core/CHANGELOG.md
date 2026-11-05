@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+### Breaking
+- **The raw value is canonical in every locale**: ASCII digits, `.` as the decimal mark, `-`
+  as the sign, no grouping. A de-DE field showing `1.234.567,89` reports `1234567.89`, so
+  `Number(raw)` and decimal libraries work for every user. String `value`, `defaultValue` and
+  `setValue()` inputs use the same format: `value="1234.5"` means 1234.5 in every locale.
+- **Vanilla `onChange` receives `{ value, formattedValue }`** instead of a string. `getValue()`
+  returns the raw value; use the new `getFormattedValue()` for the display string.
+- **`emitRawValue` is removed.** Read `value` or `formattedValue` from the payload instead.
+
+### Fixed
+- **Comma-decimal locales accept a typed `.` as the decimal key** when the value has no
+  decimal yet (numpads and phones emit `.`). Before, de-DE silently dropped it and typing
+  `1234567.89` gave 123 456 789. A typed `,` in dot-decimal locales is still rejected.
+- **Pasted and browser-inserted numbers are read with foreign-format detection**: when both
+  `.` and `,` appear the last one is the decimal; a mark forming valid three-digit groups is
+  grouping; anything else is the decimal. Pasting `1.5` into de-DE now gives 1.5 (was 15), and
+  `1,234,567.89` gives 1234567.89 (was 1.23456789).
+- **Focusing a de-DE field with decimals no longer fires `onChange`** in blur mode.
+- **Every `Intl` locale works with `locale`:**
+  - bidi and zero-width marks are stripped, so RTL locales keep the minus sign on paste;
+  - every contiguous Unicode digit set is folded to ASCII, including astral ones;
+  - locales with non-contiguous digits (hanidec) derive separators from Latin digits instead
+    of throwing.
+
 ### Changed
 - **Caret computed from the edit itself.** The new caret rank is the rank of the text left of
   the edit plus the inserted text, sanitized with the same options, selected in the new display

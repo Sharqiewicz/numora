@@ -52,7 +52,7 @@ const JSON_LD = [
         name: 'How do I add thousand separators to a number input in Svelte?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Pass groupingStyle: GroupingStyle.Thousand to the use:numora action. Numora formats as the user types, repositions the caret through the inserted comma, and emits the raw separator-free string from onChange so your Svelte store stays clean.',
+          text: 'Pass groupingStyle: GroupingStyle.Thousand to the use:numora action. Numora formats as the user types, repositions the caret through the inserted comma, and passes the raw value to onChange as value so your Svelte store stays clean.',
         },
       },
       {
@@ -76,7 +76,7 @@ const JSON_LD = [
         name: 'Does it support i18n decimal commas and currency formatting in Svelte?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. Pass decimalSeparator: "," and thousandSeparator: "." (or use the locale option) for European locales. Numora keeps the raw value as a string internally, so currency math stays precise – feed the raw value straight into your pricing logic without parseFloat rounding errors.',
+          text: 'Yes. Pass decimalSeparator: "," and thousandSeparator: "." (or use the locale option) for European locales. The raw value is a plain dot-decimal string in every locale, so currency math stays precise – feed the raw value straight into your pricing logic without parseFloat rounding errors.',
         },
       },
       {
@@ -185,8 +185,8 @@ let value = $state('');`}
         <code>new NumoraInput(node, options)</code> – Numora adopts the element, forces the required
         attributes (<code>type</code>, <code>inputmode</code>, <code>spellcheck</code>,{' '}
         <code>autocomplete</code>, <code>pattern</code>) and wires its listeners.{' '}
-        <code>onChange</code> receives the raw, separator-free string – safe to feed into your store
-        or form library.
+        <code>onChange</code> receives the raw value as <code>value</code> – safe to feed into your
+        store or form library.
       </p>
 
       <p className="text-sm">
@@ -317,16 +317,17 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
       <p>
         Pass <code>groupingStyle: GroupingStyle.Thousand</code> to the <code>use:numora</code>{' '}
         action. Numora formats as the user types, repositions the caret through the inserted comma,
-        and emits the raw separator-free string from <code>onChange</code> - safe to feed straight
-        into a store or form library.
+        and passes the raw value to <code>onChange</code> as <code>value</code> - safe to feed
+        straight into a store or form library.
       </p>
 
       <h3>Does it support i18n (decimal commas, currency formatting) in Svelte?</h3>
       <p>
         Yes. Set <code>decimalSeparator: &apos;,&apos;</code> and{' '}
         <code>thousandSeparator: &apos;.&apos;</code> (or use the <code>locale</code> option) for
-        European locales. Numora keeps the raw value as a string end-to-end, so currency math stays
-        precise - no <code>parseFloat</code> rounding errors on amounts like <code>0.1 + 0.2</code>.
+        European locales. The raw value is a plain dot-decimal string in every locale, so currency
+        math stays precise - no <code>parseFloat</code> rounding errors on amounts like{' '}
+        <code>0.1 + 0.2</code>.
       </p>
 
       <h3>

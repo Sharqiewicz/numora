@@ -8,7 +8,7 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
       {
         name: 'description',
         content:
-          'Learn how Numora always emits string values from onChange, how the raw and formatted values relate, and when to use valueAsNumber as an escape hatch.',
+          'Learn how the Numora onChange callback delivers the raw and display values as strings, how the raw and formatted values relate, and when to use valueAsNumber as an escape hatch.',
       },
       {
         property: 'og:title',
@@ -17,7 +17,7 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
       {
         property: 'og:description',
         content:
-          'Learn how Numora always emits string values from onChange, how the raw and formatted values relate, and when to use valueAsNumber.',
+          'Learn how the Numora onChange callback delivers the raw and display values as strings, how the raw and formatted values relate, and when to use valueAsNumber.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/value-types' },
       {
@@ -27,7 +27,7 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
       {
         name: 'twitter:description',
         content:
-          'Numora always emits strings from onChange. Learn about the raw value and the valueAsNumber escape hatch.',
+          'The Numora onChange callback delivers strings, never numbers. Learn about the raw value and the valueAsNumber escape hatch.',
       },
     ],
     links: [
@@ -87,11 +87,12 @@ function ValueTypes() {
 
       <h2>Raw value and formatted value</h2>
       <p>
-        <code>onChange</code> receives <code>{'{ value, formattedValue }'}</code>. <code>value</code>{' '}
-        is the canonical raw string for every locale: ASCII digits, <code>.</code> as the decimal, a
-        leading <code>-</code>, no grouping (a de-DE display of <code>1.234.567,89</code> is raw{' '}
-        <code>1234567.89</code>). <code>getValue()</code> and <code>instance.value</code> return the
-        same raw string; <code>getFormattedValue()</code> returns the display string.
+        <code>onChange</code> receives <code>{'{ value, formattedValue }'}</code>.{' '}
+        <code>value</code> is the canonical raw string for every locale: ASCII digits,{' '}
+        <code>.</code> as the decimal, a leading <code>-</code>, no grouping (a de-DE display of{' '}
+        <code>1.234.567,89</code> is raw <code>1234567.89</code>). <code>getValue()</code> and{' '}
+        <code>instance.value</code> return the same raw string; <code>getFormattedValue()</code>{' '}
+        returns the display string.
       </p>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
@@ -128,12 +129,12 @@ console.log(isNaN(numoraInput.valueAsNumber)) // true when input is empty`}
 
       <h3>Setting valueAsNumber</h3>
       <p>
-        The setter accepts a JavaScript <code>number</code> and writes it as a canonical raw
-        value, so <code>valueAsNumber = 1234.5</code> under{' '}
-        <code>locale="de-DE"</code> displays <code>1.234,5</code>. Assigning a non-finite value (
-        <code>NaN</code>, <code>Infinity</code>, <code>-Infinity</code>) or a negative number while{' '}
-        <code>enableNegative</code> is <code>false</code> throws a <code>RangeError</code> instead
-        of silently clearing the field or dropping the sign.
+        The setter accepts a JavaScript <code>number</code> and writes it as a canonical raw value,
+        so <code>valueAsNumber = 1234.5</code> under <code>locale="de-DE"</code> displays{' '}
+        <code>1.234,5</code>. Assigning a non-finite value (<code>NaN</code>, <code>Infinity</code>,{' '}
+        <code>-Infinity</code>) or a negative number while <code>enableNegative</code> is{' '}
+        <code>false</code> throws a <code>RangeError</code> instead of silently clearing the field
+        or dropping the sign.
       </p>
     </div>
   );

@@ -51,7 +51,7 @@ const JSON_LD = [
         name: 'How do I add thousand separators to an Angular number input?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: "Pass groupingStyle: GroupingStyle.Thousand through the directive's @Input. Numora formats as the user types, repositions the caret through the inserted comma, and emits the raw separator-free string from onChange – feed it straight into a signal or FormControl<string>.",
+          text: "Pass groupingStyle: GroupingStyle.Thousand through the directive's @Input. Numora formats as the user types, repositions the caret through the inserted comma, and passes the raw value to onChange as value – feed it straight into a signal or FormControl<string>.",
         },
       },
       {
@@ -429,8 +429,8 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
       <p>
         Pass <code>groupingStyle: GroupingStyle.Thousand</code> through the directive&apos;s{' '}
         <code>@Input()</code>. Numora formats as the user types, keeps the caret stable through the
-        inserted comma, and emits the raw separator-free string from <code>onChange</code> - feed it
-        into a signal or <code>FormControl&lt;string&gt;</code>.
+        inserted comma, and passes the raw value to <code>onChange</code> as <code>value</code> -
+        feed it into a signal or <code>FormControl&lt;string&gt;</code>.
       </p>
 
       <h3>Does it work with Angular Universal SSR?</h3>
