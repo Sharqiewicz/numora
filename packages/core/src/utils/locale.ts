@@ -112,11 +112,29 @@ function withLatinDigits(locale: string | undefined): string {
   return `${tag}-u-nu-latn`;
 }
 
+/** Development-only: an invalid tag otherwise falls back to en-US separators silently. */
+function warnInvalidLocale(locale: string | undefined): void {
+  let isProduction = false;
+  try {
+    // Bundlers replace this; unbundled ESM has no `process`, so guard the lookup.
+    isProduction = typeof process !== 'undefined' && process.env.NODE_ENV === 'production';
+  } catch {
+    // Some environments expose a `process` without `env`.
+  }
+  if (isProduction) return;
+  console.warn(
+    `[numora] Invalid locale "${locale}": Intl.NumberFormat rejected it, so the field uses "," grouping and "." decimal. Pass a BCP 47 tag such as "de-DE".`
+  );
+}
+
 export function getSeparatorsFromLocale(locale?: string): {
   thousandSeparator: string;
   decimalSeparator: string;
   groupingStyle: GroupingStyle;
 } {
+  // Java, Python and Android write tags with `_` (`de_DE`), which Intl rejects with a
+  // RangeError. Read them as the BCP 47 tag they name instead of falling back to en-US.
+  if (locale) locale = locale.replace(/_/g, '-');
   try {
     let formatter = new Intl.NumberFormat(locale);
     // The locale's own zero digit anchors digit classification for the probe.
@@ -135,6 +153,7 @@ export function getSeparatorsFromLocale(locale?: string): {
       groupingStyle: deriveGroupingStyle(shape),
     };
   } catch {
+    warnInvalidLocale(locale);
     return {
       thousandSeparator: ',',
       decimalSeparator: '.',

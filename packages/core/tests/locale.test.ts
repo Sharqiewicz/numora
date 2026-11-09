@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NumoraInput } from '../src/NumoraInput';
 import { applyLocale, getSeparatorsFromLocale } from '../src/utils/locale';
 import { GroupingStyle } from '../src/types';
@@ -215,5 +215,34 @@ describe('✅ locale-driven grouping end to end', () => {
     });
     expect(instance.getElement().value).toBe('1,23,45,678');
     expect(instance.getValue()).toBe('12345678');
+  });
+});
+
+describe('getSeparatorsFromLocale: underscore tags', () => {
+  it('reads de_DE (Java/Python/Android style) the same as de-DE', () => {
+    expect(getSeparatorsFromLocale('de_DE')).toEqual(getSeparatorsFromLocale('de-DE'));
+    expect(getSeparatorsFromLocale('de_DE').decimalSeparator).toBe(',');
+  });
+  it('reads pt_BR the same as pt-BR', () => {
+    expect(getSeparatorsFromLocale('pt_BR')).toEqual(getSeparatorsFromLocale('pt-BR'));
+  });
+});
+
+describe('getSeparatorsFromLocale: invalid tags', () => {
+  it('warns once in development and falls back to en-US separators', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(getSeparatorsFromLocale('not a locale!')).toMatchObject({
+      thousandSeparator: ',',
+      decimalSeparator: '.',
+    });
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain('not a locale!');
+    warn.mockRestore();
+  });
+  it('does not warn for a valid tag', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    getSeparatorsFromLocale('de-DE');
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 });
