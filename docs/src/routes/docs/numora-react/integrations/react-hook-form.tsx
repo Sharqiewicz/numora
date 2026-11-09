@@ -79,15 +79,15 @@ export const Route = createFileRoute('/docs/numora-react/integrations/react-hook
 
 function ReactHookFormIntegration() {
   return (
-    <div className="prose prose-invert prose-article">
-      <h1>React Hook Form Integration</h1>
-      <p>
+    <div className="prose prose-invert max-w-xl">
+      <h1 className="text-foreground">React Hook Form Integration</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Learn how to use NumoraInput with react-hook-form using the recommended{' '}
         <code>Controller</code> pattern.
       </p>
 
-      <h2>Overview</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">Overview</h2>
+      <p className="text-muted-foreground text-base leading-6">
         <code>NumoraInput</code> manages its own DOM value directly (via an uncontrolled{' '}
         <code>defaultValue</code> internally), but supports a controlled-style <code>value</code>{' '}
         prop that syncs programmatic changes into the input. React Hook Form's{' '}
@@ -96,14 +96,14 @@ function ReactHookFormIntegration() {
         <code>disabled</code> wiring automatically.
       </p>
 
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         <strong>Note:</strong> <code>numora-react</code> does not require{' '}
         <code>react-hook-form</code> as a dependency. It works with react-hook-form when it's
         present in your project.
       </p>
 
-      <h2>Controller Pattern (recommended)</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">Controller Pattern (recommended)</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Always forward all four field properties - <code>onChange</code>, <code>onBlur</code>,{' '}
         <code>ref</code>, and <code>disabled</code>. Omitting <code>onBlur</code> breaks
         touched-state tracking; omitting <code>ref</code> breaks auto-focus on validation errors.
@@ -149,8 +149,8 @@ function Form() {
         description="Basic form with Controller pattern - works with setValue() automatically"
       />
 
-      <h3>Validation errors</h3>
-      <p>
+      <h3 className="text-foreground">Validation errors</h3>
+      <p className="text-muted-foreground text-base leading-6">
         Use <code>fieldState.error</code> from the render prop to display validation messages:
       </p>
 
@@ -177,7 +177,7 @@ function Form() {
       </CodeBlock>
 
       <div className="bg-muted/50 border border-border rounded-lg p-4 my-4">
-        <p className="text-sm m-0">
+        <p className="text-muted-foreground text-base leading-6 m-0">
           <strong>💡 Tip:</strong> <code>NumoraInput</code>'s <code>onChange</code> always exposes
           the raw (unformatted) numeric string - no post-processing required:
           <ul className="mt-2 mb-0">
@@ -193,8 +193,8 @@ function Form() {
         </p>
       </div>
 
-      <h2>Complete example</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">Complete example</h2>
+      <p className="text-muted-foreground text-base leading-6">
         A form with programmatic updates (<code>Max</code> / <code>Half</code> buttons) using the
         Controller pattern:
       </p>
@@ -254,8 +254,8 @@ function SwapForm() {
 }`}
       </CodeBlock>
 
-      <h2>Why not register?</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">Why not register?</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Don't spread <code>register('amount')</code> onto <code>NumoraInput</code>.{' '}
         <code>register</code> reads the value from the DOM node through its <code>ref</code>, and
         the DOM node holds the display string, so the form stores <code>"1,234.5"</code> (or{' '}
@@ -264,7 +264,7 @@ function SwapForm() {
         input, where a comma-decimal locale can misread it. Use <code>Controller</code>.
       </p>
 
-      <h2>Key points</h2>
+      <h2 className="text-foreground text-2xl">Key points</h2>
       <ul>
         <li>
           <strong>

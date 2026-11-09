@@ -36,7 +36,7 @@ export function TabsClipPath({
   }, [activeTab]);
 
   return (
-    <div className="relative ml-3 mr-auto flex rounded-xl bg-gray-800 shadow-xs">
+    <div className="relative ml-3 mr-auto flex rounded-xl bg-surface-5 shadow-xs">
       <ul className="relative flex items-center justify-center gap-2 ">
         {tabs.map((tab) => (
           <li key={tab}>

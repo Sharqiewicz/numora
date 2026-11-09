@@ -58,7 +58,7 @@ export function ExploreHero() {
             <span
               className="
                 absolute inset-0 -translate-x-full
-                bg-gradient-to-r from-transparent via-white/20 to-transparent
+                bg-gradient-to-r from-white/0 via-white/20 to-white/0
                 group-hover:translate-x-full
                 transition-transform duration-300
               "

@@ -49,7 +49,7 @@ export function CursorAnchorDiagram() {
                   x2={gridX + i * cellW + cellW - 4}
                   y1={y + 32}
                   y2={y + 32}
-                  className="stroke-violet-300"
+                  className="stroke-signal-violet-fg"
                   strokeWidth="2"
                   strokeLinecap="round"
                 />
@@ -100,7 +100,7 @@ export function CursorAnchorDiagram() {
           showCount: false,
         })}
 
-        <text x={labelX} y="196" className="fill-violet-300" fontSize="13" fontWeight="600">
+        <text x={labelX} y="196" className="fill-signal-violet-fg" fontSize="13" fontWeight="600">
           Numora
         </text>
         <text x={labelX} y="214" className="fill-muted-foreground/70" fontSize="11">

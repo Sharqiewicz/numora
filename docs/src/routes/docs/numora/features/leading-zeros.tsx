@@ -74,9 +74,9 @@ export const Route = createFileRoute('/docs/numora/features/leading-zeros')({
 
 function LeadingZeros() {
   return (
-    <div className="prose prose-invert prose-article">
-      <h1>Leading Zeros</h1>
-      <p>
+    <div className="prose prose-invert max-w-xl">
+      <h1 className="text-foreground">Leading Zeros</h1>
+      <p className="text-muted-foreground text-base leading-6">
         By default, Numora strips leading zeros from the integer part of a number. Set{' '}
         <code>enableLeadingZeros: true</code> to preserve them.
       </p>
@@ -97,7 +97,7 @@ const input = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2>Rules</h2>
+      <h2 className="text-foreground text-2xl">Rules</h2>
       <ul>
         <li>
           Only the integer part is affected - decimal zeros are never touched (<code>"0.05"</code>{' '}
@@ -111,7 +111,7 @@ const input = new NumoraInput(container, {
         </li>
       </ul>
 
-      <h2>When to use each</h2>
+      <h2 className="text-foreground text-2xl">When to use each</h2>
       <ul>
         <li>
           <strong>Removed (default)</strong> - currency and general numeric inputs where leading
@@ -123,8 +123,8 @@ const input = new NumoraInput(container, {
         </li>
       </ul>
 
-      <h2>Auto-prepend leading zero</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">Auto-prepend leading zero</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Set <code>autoAddLeadingZero: true</code> to automatically prepend <code>0</code>
         before a bare decimal separator. Useful when you want <code>.5</code> stored as
         <code>0.5</code> so the value is unambiguously parseable downstream.

@@ -77,14 +77,14 @@ export const Route = createFileRoute('/docs/numora/features/scientific-notation'
 
 function ScientificNotation() {
   return (
-    <div className="prose prose-invert prose-article">
-      <h1>Scientific Notation</h1>
-      <p>
+    <div className="prose prose-invert max-w-xl">
+      <h1 className="text-foreground">Scientific Notation</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Numora expands scientific notation to decimal notation. Expansion uses string arithmetic, so
         there is no floating-point precision loss. Typing <code>e</code> is rejected, so scientific
         notation enters the field through paste or through values your app passes in.
       </p>
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         To refuse pasted scientific notation instead, set{' '}
         <code>enableScientificNotation: false</code>: such a paste leaves the field unchanged.
         Values your app passes in (<code>value</code>, <code>defaultValue</code>,{' '}
@@ -108,7 +108,7 @@ const input = new NumoraInput(container, {
 // "1.5e-18"  → "0.0000000000000000015"  (no precision loss)`}
       </CodeBlock>
 
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         Both <code>e</code> and <code>E</code> are supported. The expanded value is then processed
         through the rest of the sanitization pipeline and formatted according to your configuration.
       </p>

@@ -4,30 +4,34 @@ const code = `useEffect(() => {
   const input = internalInputRef.current
   if (!input) return
 
-  const handler = (e: InputEvent) => {
-    if (e.inputType === 'insertFromPaste' || e.inputType === 'insertFromDrop') return
+  const onBeforeInput = (e: InputEvent) => {
+    const result = handleOnBeforeInputNumoraInput(
+      e,
+      stateRef.current.decimalMaxLength,
+      stateRef.current.formattingOptions
+    )
 
-    const result = handleNumoraOnBeforeInput(e, {
-      decimalMaxLength: maxDecimalsRef.current,
-      formattingOptions: formattingOptionsRef.current,
-    })
-    if (result !== null) {
-      const numInput = input as NumoraHTMLInputElement
-      numInput.formattedValue = result.value
-
-      // Call onChange directly - guaranteed delivery, no dependency on
-      // React's value-tracker diff or synthetic event pipeline.
-      onChangeRef.current?.(createSyntheticChangeEvent(numInput, result.rawValue ?? ''))
-
-      // Dispatch a native 'input' to keep React's value tracker in sync.
-      isHandledByBeforeInputRef.current = true
-      input.dispatchEvent(new Event('input', { bubbles: true }))
-      isHandledByBeforeInputRef.current = false
+    switch (result.type) {
+      case 'skip':
+        return
+      case 'reject':
+        e.preventDefault()
+        return
+      case 'handled': {
+        e.preventDefault()
+        // setRangeText under the hood, so the browser's undo history survives.
+        withInternalWrite(() =>
+          writeValuePreservingUndo(input, result.formatted, result.cursorPos)
+        )
+        // Call onChange directly - guaranteed delivery, no dependency on
+        // React's value-tracker diff or synthetic event pipeline.
+        stateRef.current.onChange?.(createSyntheticChangeEvent(input, result.raw))
+      }
     }
   }
 
-  input.addEventListener('beforeinput', handler)
-  return () => input.removeEventListener('beforeinput', handler)
+  input.addEventListener('beforeinput', onBeforeInput)
+  return () => input.removeEventListener('beforeinput', onBeforeInput)
 }, [])`;
 
 export function ReactSyntheticBypassSection() {
@@ -51,26 +55,26 @@ export function ReactSyntheticBypassSection() {
       </p>
       <p>
         The listener is registered once at mount on the actual element. Mutable options are read
-        through refs updated via <code>useLayoutEffect</code> so prop changes never need a listener
+        through a ref updated via <code>useLayoutEffect</code> so prop changes never need a listener
         re-registration:
       </p>
       <CodeBlock language="tsx">{code}</CodeBlock>
       <h3 className="text-base">
-        <code>isHandledByBeforeInputRef</code> - preventing double-fire
+        <code>suppressNextInputEventRef</code> - preventing double-fire
       </h3>
       <p>
-        The native handler calls <code>onChange</code> directly with a synthetic{' '}
-        <code>ChangeEvent</code>, then dispatches a real <code>input</code> event so React's value
-        tracker stays in sync. That dispatched event flows through React's normal pipeline and would
-        trigger the React-side <code>handleChange</code> → <code>onChange</code> a <em>second</em>{' '}
-        time, firing every callback twice per keystroke.
+        The handler writes the formatted value with <code>setRangeText</code> and calls{' '}
+        <code>onChange</code> itself. No <code>input</code> event is dispatched afterwards. But
+        some environments and polyfills fire a native <code>input</code> event on a programmatic
+        write, and that event would reach the React-side <code>handleChange</code> and call{' '}
+        <code>onChange</code> a <em>second</em> time.
       </p>
       <p>
-        <code>isHandledByBeforeInputRef</code> is the gate: it is set to <code>true</code>{' '}
-        synchronously around <code>dispatchEvent</code>, and because <code>dispatchEvent</code> is
-        synchronous, the React-side handler runs to completion while the flag is up. It reads the
-        flag, sees that <code>onChange</code> has already been called, and exits without
-        re-emitting.
+        <code>withInternalWrite</code> is the gate: it sets <code>suppressNextInputEventRef</code>{' '}
+        to <code>true</code> for the duration of the write, and <code>handleChange</code> returns
+        early while the flag is up. Every internal write (typing, paste, focus-strip,
+        blur-regroup) goes through it, so <code>handleChange</code> only ever sees browser-native
+        edits such as undo, redo and autofill.
       </p>
     </section>
   );

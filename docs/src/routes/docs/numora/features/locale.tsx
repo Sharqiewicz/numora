@@ -68,16 +68,16 @@ export const Route = createFileRoute('/docs/numora/features/locale')({
 
 function Locale() {
   return (
-    <div className="prose prose-invert prose-article">
-      <h1>Locale</h1>
-      <p>
+    <div className="prose prose-invert max-w-xl">
+      <h1 className="text-foreground">Locale</h1>
+      <p className="text-muted-foreground text-base leading-6">
         The <code>locale</code> prop auto-detects thousand and decimal separators - and the
         digit-grouping style - via <code>Intl.NumberFormat</code>. An explicit{' '}
         <code>groupingStyle</code> always overrides the detected one.
       </p>
 
-      <h2>Browser locale (auto-detect)</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">Browser locale (auto-detect)</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Pass <code>locale: true</code> to detect both separators from the browser's current locale.
         Explicit <code>thousandSeparator</code> or <code>decimalSeparator</code> values always take
         priority over locale-detected ones.
@@ -102,8 +102,8 @@ const input2 = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2>Specific locale tag</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">Specific locale tag</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Pass a BCP 47 locale tag to pin separators to a specific locale - useful for SSR or
         server-driven locale handling.
       </p>
@@ -117,8 +117,8 @@ const input = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2>Grouping style detection</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">Grouping style detection</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Indic locales group as 3-2-2 (lakh/crore) rather than 3-3-3. When <code>groupingStyle</code>{' '}
         is left unset, it is derived from the locale, so <code>hi-IN</code> and <code>en-IN</code>{' '}
         get <code>GroupingStyle.Lakh</code> automatically.
@@ -133,15 +133,15 @@ const input2 = new NumoraInput(container, {
   groupingStyle: GroupingStyle.Thousand,
 })`}
       </CodeBlock>
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         Only <code>Thousand</code> and <code>Lakh</code> are inferrable.{' '}
         <code>GroupingStyle.Wan</code> (4-4-4) is not derivable from <code>Intl.NumberFormat</code>{' '}
         - <code>zh-CN</code> and <code>ja-JP</code> both report Western 3-3-3 grouping - so Wan must
         be passed explicitly.
       </p>
 
-      <h2>getSeparatorsFromLocale</h2>
-      <p>For pre-computing separators and passing them explicitly:</p>
+      <h2 className="text-foreground text-2xl">getSeparatorsFromLocale</h2>
+      <p className="text-muted-foreground text-base leading-6">For pre-computing separators and passing them explicitly:</p>
       <CodeBlock language="typescript">
         {`import { NumoraInput, getSeparatorsFromLocale } from 'numora'
 
@@ -160,16 +160,16 @@ getSeparatorsFromLocale('en-IN')
 const input = new NumoraInput(container, { thousandSeparator, decimalSeparator })`}
       </CodeBlock>
 
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         For decimal separator configuration without locale detection, see{' '}
-        <Link to="/docs/numora/features/decimals" className="text-primary underline">
+        <Link to="/docs/numora/features/decimals" className="underline link-underline hover:text-foreground transition-colors">
           Decimals
         </Link>
         .
       </p>
 
-      <h2>What the field displays</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">What the field displays</h2>
+      <p className="text-muted-foreground text-base leading-6">
         The field shows the locale's separators with ASCII digits and an ASCII <code>-</code>. In
         ar-EG it shows <code>1٬234٫5</code>, not the Arabic-Indic <code>١٬٢٣٤٫٥</code> that{' '}
         <code>Intl.NumberFormat</code> prints, and in sv-SE it shows <code>-</code>, not{' '}
@@ -178,14 +178,14 @@ const input = new NumoraInput(container, { thousandSeparator, decimalSeparator }
         even where <code>Intl</code> leaves them ungrouped.
       </p>
 
-      <h2>Value format under a locale</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">Value format under a locale</h2>
+      <p className="text-muted-foreground text-base leading-6">
         <code>value</code>, <code>defaultValue</code> and <code>setValue</code> take the canonical
         raw value in every locale: ASCII digits, <code>.</code> as the decimal mark, no grouping.
         Under <code>locale: 'de-DE'</code>, <code>setValue('1234.5')</code> and{' '}
         <code>instance.valueAsNumber = 1234.5</code> both display <code>"1.234,5"</code>, and{' '}
         <code>getValue()</code> returns <code>"1234.5"</code>. See{' '}
-        <Link to="/docs/numora/features/value-types">features/value-types</Link> for the full value
+        <Link to="/docs/numora/features/value-types" className="underline link-underline hover:text-foreground transition-colors">features/value-types</Link> for the full value
         contract.
       </p>
     </div>

@@ -123,7 +123,7 @@ function App() {
     <div className="min-h-screen animated-gradient-bg relative overflow-x-hidden">
       <LightRays />
       <Socials
-        className="bg-gray-900/60 border border-gray-900 rounded-full px-8 py-2 animate-fade-in opacity-0 fixed z-10 bottom-2 left-1/2 -translate-x-1/2 sm:top-4 sm:right-8 sm:translate-x-0 sm:bottom-auto sm:left-auto"
+        className="bg-surface-3/60 border border-border rounded-full px-8 py-2 animate-fade-in opacity-0 fixed z-10 bottom-2 left-1/2 -translate-x-1/2 sm:top-4 sm:right-8 sm:translate-x-0 sm:bottom-auto sm:left-auto"
         style={d(800)}
       />
       <main className="flex justify-center items-center flex-col z-[5] relative">
@@ -148,7 +148,7 @@ function App() {
                 <span
                   className="
                   absolute inset-0 -translate-x-full
-                  bg-gradient-to-r from-transparent via-white/20 to-transparent
+                  bg-gradient-to-r from-white/0 via-white/20 to-white/0
                   group-hover:translate-x-full
                   transition-transform duration-300
                 "

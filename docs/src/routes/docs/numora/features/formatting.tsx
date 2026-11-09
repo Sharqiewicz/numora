@@ -78,14 +78,14 @@ export const Route = createFileRoute('/docs/numora/features/formatting')({
 
 function Formatting() {
   return (
-    <div className="prose prose-invert prose-article">
-      <h1>Formatting</h1>
-      <p>
+    <div className="prose prose-invert max-w-xl">
+      <h1 className="text-foreground">Formatting</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Numora formats numbers with thousand separators as the user types, preserving cursor
         position throughout.
       </p>
 
-      <h2>Grouping styles</h2>
+      <h2 className="text-foreground text-2xl">Grouping styles</h2>
       <CodeBlock language="typescript">
         {`import { NumoraInput, GroupingStyle } from 'numora'
 
@@ -114,7 +114,7 @@ const input = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2>When to format</h2>
+      <h2 className="text-foreground text-2xl">When to format</h2>
       <CodeBlock language="typescript">
         {`import { NumoraInput, FormatOn } from 'numora'
 
@@ -131,7 +131,7 @@ const input = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2>Automatic behaviors</h2>
+      <h2 className="text-foreground text-2xl">Automatic behaviors</h2>
       <ul>
         <li>
           <strong>Cursor preservation</strong> - the cursor stays in the correct position when

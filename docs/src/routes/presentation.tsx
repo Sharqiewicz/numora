@@ -56,7 +56,7 @@ function Presentation() {
         </h1>
 
         <motion.div
-          className="mt-5 h-[2px] w-48 mx-auto bg-gradient-to-r from-transparent via-secondary to-transparent"
+          className="mt-5 h-[2px] w-48 mx-auto bg-gradient-to-r from-secondary/0 via-secondary to-secondary/0"
           initial={shouldReduceMotion ? false : { scaleX: 0, opacity: 0 }}
           animate={{ scaleX: 1, opacity: 1 }}
           transition={{

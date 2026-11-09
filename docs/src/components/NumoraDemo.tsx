@@ -334,7 +334,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                   <div
                     className={`text-xs px-1.5 py-0.5  z-[5] rounded-full ${
                       s.category === 'prevents'
-                        ? 'text-yellow-400/70 bg-yellow-400/10'
+                        ? 'text-signal-amber/70 bg-signal-amber/10'
                         : 'text-secondary/70 bg-secondary/10'
                     }`}
                   >

@@ -64,20 +64,20 @@ export const Route = createFileRoute('/docs/numora/')({
 
 function GetStarted() {
   return (
-    <div className="prose prose-invert prose-article">
-      <h1>Numora - Numeric Input Library</h1>
-      <p>
+    <div className="prose prose-invert max-w-xl">
+      <h1 className="text-foreground">Numora - Numeric Input Library</h1>
+      <p className="text-muted-foreground text-base leading-6">
         <strong className="font-numora">numora</strong> is a zero-dependency TypeScript library that
         turns any <code>{'<input>'}</code> element into a precision numeric input. Unlike{' '}
         <code>{'<input type="number">'}</code>, numora uses <code>type="text"</code> under the hood
         so you control exactly what the user can type, paste, and see.
       </p>
 
-      <h2>
+      <h2 className="text-foreground text-2xl">
         Why <strong className="font-numora">numora</strong>?
       </h2>
 
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         If you audit the codebases of the top 10 DeFi protocols - Uniswap, Aave, Curve, Balancer -
         you'll notice a pattern. For the most critical UI component in finance, the numeric input,
         every single one has built a custom implementation from scratch.
@@ -88,20 +88,20 @@ function GetStarted() {
         <li>Curve relies on a complex chain of hooks to handle state.</li>
       </ul>
 
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         <strong>There is no standard.</strong> Every team wastes days reinventing the wheel:
         comma/dot separator logic, parseFloat precision loss, mobile keyboard ghost characters.
       </p>
 
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         <strong>numora is the new standard for numeric inputs</strong> - a precision-first library
         you drop in once, configure with options, and forget about.
       </p>
 
-      <h2>What you get</h2>
+      <h2 className="text-foreground text-2xl">What you get</h2>
       <ul className="list-disc list-inside">
         <li>
-          <strong>Zero dependencies</strong>
+          <strong>Zero dependencies</strong> - no moment, no lodash, no formatting library
         </li>
         <li>
           <strong>Tiny bundle size</strong>
@@ -129,8 +129,8 @@ function GetStarted() {
         </li>
       </ul>
 
-      <h2>Vanilla JS API</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">Vanilla JS API</h2>
+      <p className="text-muted-foreground text-base leading-6">
         The core package exports a <code>NumoraInput</code> class. Instantiate it with a container
         element and an optional <code>FormattingOptions</code> object. The class attaches all event
         listeners and manages internal state - no build step, no JSX, no reactivity system required.
@@ -152,18 +152,63 @@ container.addEventListener('change', (e) => {
 })`}
       </CodeBlock>
 
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         The <code>NumoraInput</code> class is the same engine used by the{' '}
-        <Link to="/docs/numora-react">numora-react</Link> component. Both share the formatting
+        <Link to="/docs/numora-react" className="underline link-underline hover:text-foreground transition-colors">numora-react</Link> component. Both share the formatting
         pipeline, sanitization logic, and options interface.
       </p>
 
       <hr />
+      <h2 className="text-foreground text-2xl">Use Numora in your framework</h2>
+      <p className="text-muted-foreground text-base leading-6">
+        Numora is a precision-first <strong>numeric input library</strong> that works in every
+        modern JavaScript framework. The core <code>NumoraInput</code> class is vanilla TypeScript
+        and ships with thin, idiomatic adapters for each ecosystem – no separate wrapper packages
+        needed.
+      </p>
+      <ul className="list-disc list-inside">
+        <li>
+          <Link to="/docs/numora/frameworks/svelte" className="underline link-underline hover:text-foreground transition-colors">
+            <strong>Svelte numeric input</strong>
+          </Link>{' '}
+          – a 10-line <code>use:numora</code> action for Svelte 5 and SvelteKit (SSR-safe).
+        </li>
+        <li>
+          <Link to="/docs/numora/frameworks/vue" className="underline link-underline hover:text-foreground transition-colors">
+            <strong>Vue numeric input</strong>
+          </Link>{' '}
+          – a Vue 3 composable bound to a template <code>ref</code>, or a <code>v-numora</code>{' '}
+          directive (works with Nuxt 3, VeeValidate, FormKit, Pinia).
+        </li>
+        <li>
+          <Link to="/docs/numora/frameworks/angular" className="underline link-underline hover:text-foreground transition-colors">
+            <strong>Angular numeric input</strong>
+          </Link>{' '}
+          – a standalone directive that composes with <code>ControlValueAccessor</code> and{' '}
+          <code>FormControl&lt;string&gt;</code> for Reactive Forms.
+        </li>
+        <li>
+          <Link to="/docs/numora/frameworks/solid" className="underline link-underline hover:text-foreground transition-colors">
+            <strong>SolidJS numeric input</strong>
+          </Link>{' '}
+          – a tiny <code>onMount</code> wrapper that writes the raw value into a{' '}
+          <code>createSignal</code> (works with SolidStart).
+        </li>
+        <li>
+          <Link to="/docs/numora-react" className="underline link-underline hover:text-foreground transition-colors">
+            <strong>React numeric input</strong>
+          </Link>{' '}
+          – the <code>numora-react</code> package gives you a drop-in{' '}
+          <code>&lt;NumoraInput /&gt;</code> component with full TypeScript support and React Hook
+          Form integration.
+        </li>
+      </ul>
 
-      <h2>Next Steps</h2>
-      <p>
-        Follow the <Link to="/docs/numora/installation">Installation</Link> guide to add numora to
-        your project, or read <Link to="/docs/numora/anatomy">Anatomy</Link> to understand the{' '}
+      <hr />
+      <h2 className="text-foreground text-2xl">Next Steps</h2>
+      <p className="text-muted-foreground text-base leading-6">
+        Follow the <Link to="/docs/numora/installation" className="underline link-underline hover:text-foreground transition-colors">Installation</Link> guide to add numora to
+        your project, or read <Link to="/docs/numora/anatomy" className="underline link-underline hover:text-foreground transition-colors">Anatomy</Link> to understand the{' '}
         <code>beforeinput</code>-based architecture.
       </p>
       <div className="flex justify-between items-center gap-2 my-8">

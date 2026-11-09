@@ -60,8 +60,8 @@ export function CursorPositionDemo() {
               placeholder="Type 1234567..."
             />
             <CursorVisualizer value={formatWithCommas(naiveValue)} cursorPosition={naiveCursor} />
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-sm">
-              <p className="text-red-400">
+            <div className="p-3 rounded-lg bg-signal-red/10 border border-signal-red/30 text-sm">
+              <p className="text-signal-red">
                 The cursor always jumps to the end, making editing impossible.
               </p>
             </div>
@@ -86,8 +86,8 @@ export function CursorPositionDemo() {
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
             <CursorVisualizer value={numoraValue} cursorPosition={numoraCursor} />
-            <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-sm">
-              <p className="text-green-400">
+            <div className="p-3 rounded-lg bg-signal-green/10 border border-signal-green/30 text-sm">
+              <p className="text-signal-green">
                 Cursor stays where you expect it, even as commas are added.
               </p>
             </div>

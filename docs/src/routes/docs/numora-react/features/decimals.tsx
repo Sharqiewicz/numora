@@ -76,11 +76,13 @@ export const Route = createFileRoute('/docs/numora-react/features/decimals')({
 
 function Decimals() {
   return (
-    <div className="prose prose-invert prose-article">
-      <h1>Decimals</h1>
-      <p>Control decimal precision, separators, and locale-aware formatting.</p>
+    <div className="prose prose-invert max-w-xl">
+      <h1 className="text-foreground">Decimals</h1>
+      <p className="text-muted-foreground text-base leading-6">
+        Control decimal precision, separators, and locale-aware formatting.
+      </p>
 
-      <h2>Precision limits</h2>
+      <h2 className="text-foreground text-2xl">Precision limits</h2>
       <div className="space-y-4">
         <ExampleWithDemo
           title="Max decimal places"
@@ -98,7 +100,7 @@ function Decimals() {
         />
       </div>
 
-      <h2>Separators</h2>
+      <h2 className="text-foreground text-2xl">Separators</h2>
       <div className="space-y-4">
         <ExampleWithDemo
           title="European format"
@@ -109,15 +111,15 @@ function Decimals() {
         />
       </div>
 
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         For locale-aware separator detection, see{' '}
-        <Link to="/docs/numora-react/features/locale" className="text-primary underline">
+        <Link to="/docs/numora-react/features/locale" className="underline link-underline hover:text-foreground transition-colors">
           Locale
         </Link>
         .
       </p>
 
-      <h2>Automatic behaviors</h2>
+      <h2 className="text-foreground text-2xl">Automatic behaviors</h2>
       <ul>
         <li>
           <strong>Comma/dot conversion</strong> - when no thousand separator is set, both{' '}

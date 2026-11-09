@@ -1,84 +1,8 @@
 import { FormatOn } from 'numora';
 import { NumoraInput, type NumoraInputChangeEvent } from 'numora-react';
-import { type RefObject, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TextMorph } from 'torph';
-
-const TYPE_MS = 280;
-const HOLD_MS = 1600;
-const SEQUENCE = ['1234567.89', '0'];
-
-/**
- * Loops through SEQUENCE, "typing" each value into the input one character at a time.
- * Each value starts by selecting the current content, so the first key replaces it -
- * exactly what a user does with ⌘A then a digit. Characters go through real
- * `beforeinput` events so Numora's formatting path (and therefore Torph's morph) runs.
- * Pauses while the user has the field focused.
- */
-function useTypingLoop(inputRef: RefObject<HTMLInputElement | null>) {
-  useEffect(() => {
-    const input = inputRef.current;
-    if (!input) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    const nativeSetter = Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      'value'
-    )?.set;
-
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    let valueIndex = 0;
-    let charIndex = 0;
-    let disposed = false;
-
-    const typeChar = (char: string, replaceAll: boolean) => {
-      const { scrollX, scrollY } = window;
-      if (replaceAll) input.setSelectionRange(0, input.value.length);
-      else input.setSelectionRange(input.value.length, input.value.length);
-
-      const beforeInput = new InputEvent('beforeinput', {
-        bubbles: true,
-        cancelable: true,
-        inputType: 'insertText',
-        data: char,
-      });
-      input.dispatchEvent(beforeInput);
-      if (!beforeInput.defaultPrevented) {
-        const next = replaceAll ? char : input.value + char;
-        nativeSetter?.call(input, next);
-        input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
-      }
-      window.scrollTo(scrollX, scrollY);
-    };
-
-    const tick = () => {
-      if (disposed) return;
-      if (document.activeElement === input) {
-        // User is editing - check back later without touching their value.
-        timer = setTimeout(tick, HOLD_MS);
-        return;
-      }
-
-      const target = SEQUENCE[valueIndex];
-      typeChar(target[charIndex], charIndex === 0);
-      charIndex += 1;
-
-      if (charIndex < target.length) {
-        timer = setTimeout(tick, TYPE_MS);
-      } else {
-        charIndex = 0;
-        valueIndex = (valueIndex + 1) % SEQUENCE.length;
-        timer = setTimeout(tick, HOLD_MS);
-      }
-    };
-
-    timer = setTimeout(tick, HOLD_MS);
-
-    return () => {
-      disposed = true;
-      if (timer) clearTimeout(timer);
-    };
-  }, [inputRef]);
-}
+import { useTypingLoop } from '@/hooks/use-typing-loop';
 
 export function TorphDemo() {
   const [value, setValue] = useState('1234567');

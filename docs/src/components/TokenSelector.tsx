@@ -41,7 +41,7 @@ export function TokenSelector({
           alt={selectedToken.symbol}
           className="w-6 h-6 sm:w-7 sm:h-7 rounded-full mr-3 outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
         />
-        <p className="font-semibold sm:text-base text-sm text-white mr-1 text-gray-900">
+        <p className="font-semibold sm:text-base text-sm text-foreground mr-1">
           {selectedToken.symbol}
         </p>
         <svg
@@ -79,7 +79,7 @@ export function TokenSelector({
                 alt={token.symbol}
                 className="w-5 h-5 rounded-full mr-2 outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
               />
-              <span className="font-semibold text-sm sm:text-base text-white mr-1 text-gray-900">
+              <span className="font-semibold text-sm sm:text-base text-foreground mr-1">
                 {token.symbol}
               </span>
             </button>

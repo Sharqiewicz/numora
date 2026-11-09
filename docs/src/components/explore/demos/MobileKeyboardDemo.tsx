@@ -55,7 +55,7 @@ export function MobileKeyboardDemo() {
           </div>
           <div>
             <p className="text-xs text-muted-foreground mb-1">What's actually there (hex):</p>
-            <code className="block p-2 rounded bg-background font-mono text-orange-400">
+            <code className="block p-2 rounded bg-background font-mono text-signal-amber">
               31 C2 A0 32 33 34
             </code>
             <p className="text-xs text-muted-foreground mt-1">(C2 A0 = UTF-8 non-breaking space)</p>
@@ -84,12 +84,12 @@ export function MobileKeyboardDemo() {
               <div className="space-y-2">
                 <div className="p-3 rounded-lg bg-muted/30 border border-border">
                   <p className="text-xs text-muted-foreground mb-1">Hex view:</p>
-                  <code className="font-mono text-orange-400 text-xs break-all">
+                  <code className="font-mono text-signal-amber text-xs break-all">
                     {showHexView(nativeValue)}
                   </code>
                 </div>
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30">
-                  <p className="text-xs text-red-400">
+                <div className="p-3 rounded-lg bg-signal-red/10 border border-signal-red/30">
+                  <p className="text-xs text-signal-red">
                     parseFloat("{nativeValue}") = {parseFloat(nativeValue) || 'NaN'}
                     <br />
                     The hidden character breaks parsing!
@@ -117,12 +117,12 @@ export function MobileKeyboardDemo() {
               <div className="space-y-2">
                 <div className="p-3 rounded-lg bg-muted/30 border border-border">
                   <p className="text-xs text-muted-foreground mb-1">Hex view:</p>
-                  <code className="font-mono text-green-400 text-xs break-all">
+                  <code className="font-mono text-signal-green text-xs break-all">
                     {showHexView(numoraValue)}
                   </code>
                 </div>
-                <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
-                  <p className="text-xs text-green-400">
+                <div className="p-3 rounded-lg bg-signal-green/10 border border-signal-green/30">
+                  <p className="text-xs text-signal-green">
                     Automatically cleaned to: {numoraValue}
                     <br />
                     All hidden characters removed!

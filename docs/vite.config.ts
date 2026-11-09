@@ -31,7 +31,14 @@ const config = defineConfig({
       projects: ['./tsconfig.json'],
     }),
     tailwindcss(),
-    viteReact(),
+    viteReact({
+      // The Vite equivalent of Next's `transpilePackages`. numora-react is a
+      // workspace symlink, so its dist lands outside node_modules and is served
+      // as app source -- but plugin-react's default include is /\.[tj]sx?$/,
+      // which skips the .mjs bundle. Adding it here gets Fast Refresh (and so
+      // preserves input value + caret) instead of a full page reload on rebuild.
+      include: [/\.[tj]sx?$/, /packages\/react\/dist\/index\.mjs$/],
+    }),
   ],
 });
 

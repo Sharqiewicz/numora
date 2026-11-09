@@ -78,15 +78,15 @@ export const Route = createFileRoute('/docs/numora/features/value-types')({
 
 function ValueTypes() {
   return (
-    <div className="prose prose-invert prose-article">
-      <h1>Value Types</h1>
-      <p>
+    <div className="prose prose-invert max-w-xl">
+      <h1 className="text-foreground">Value Types</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Numora always works with strings. <code>onChange</code> emits a string on every change. Two
         modes control <em>which</em> string you receive.
       </p>
 
-      <h2>Raw value and formatted value</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">Raw value and formatted value</h2>
+      <p className="text-muted-foreground text-base leading-6">
         <code>onChange</code> receives <code>{'{ value, formattedValue }'}</code>.{' '}
         <code>value</code> is the canonical raw string for every locale: ASCII digits,{' '}
         <code>.</code> as the decimal, a leading <code>-</code>, no grouping (a de-DE display of{' '}
@@ -108,8 +108,8 @@ numoraInput.getValue()          // "1234.56"
 numoraInput.getFormattedValue() // "1,234.56"`}
       </CodeBlock>
 
-      <h2>Native form submission</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">Native form submission</h2>
+      <p className="text-muted-foreground text-base leading-6">
         A plain <code>&lt;form&gt;</code> submit or <code>new FormData(form)</code> reads the
         input's DOM value, which is the display string (<code>"1,234.56"</code>, or
         <code>"1.234,56"</code> in de-DE). To submit the raw value, leave the visible input without
@@ -124,8 +124,8 @@ const numoraInput = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2>valueAsNumber</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">valueAsNumber</h2>
+      <p className="text-muted-foreground text-base leading-6">
         <code>valueAsNumber</code> converts the current value to a JavaScript <code>number</code>{' '}
         via <code>Number(raw)</code>. Use it as an escape hatch when you need a number type, not as
         the primary way to read the value.
@@ -136,15 +136,15 @@ console.log(typeof num) // "number"
 console.log(num)        // 1234.56
 console.log(isNaN(numoraInput.valueAsNumber)) // true when input is empty`}
       </CodeBlock>
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         <strong>Precision warning:</strong> <code>Number</code> is subject to IEEE 754 limits.
         Integers above <code>Number.MAX_SAFE_INTEGER</code> and long decimals may silently lose
         precision. For financial arithmetic, keep working with the string from <code>onChange</code>{' '}
         and use a decimal library such as <code>decimal.js</code>.
       </p>
 
-      <h3>Setting valueAsNumber</h3>
-      <p>
+      <h3 className="text-foreground">Setting valueAsNumber</h3>
+      <p className="text-muted-foreground text-base leading-6">
         The setter accepts a JavaScript <code>number</code> and writes it as a canonical raw value,
         so <code>valueAsNumber = 1234.5</code> under <code>locale="de-DE"</code> displays{' '}
         <code>1.234,5</code>. Assigning a non-finite value (<code>NaN</code>, <code>Infinity</code>,{' '}

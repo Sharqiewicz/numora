@@ -74,19 +74,19 @@ export const Route = createFileRoute('/docs/numora/features/sanitization')({
 
 function Sanitization() {
   return (
-    <div className="prose prose-invert prose-article">
-      <h1>Sanitization</h1>
-      <p>
+    <div className="prose prose-invert max-w-xl">
+      <h1 className="text-foreground">Sanitization</h1>
+      <p className="text-muted-foreground text-base leading-6">
         Numora sanitizes every value through a sequential pipeline before formatting is applied. For
         the full architecture and pipeline diagram, see{' '}
-        <Link to="/docs/numora/anatomy" hash="sanitization">
+        <Link to="/docs/numora/anatomy" hash="sanitization" className="underline link-underline hover:text-foreground transition-colors">
           Anatomy: Sanitization
         </Link>
         . The sections below cover each configurable sanitization feature.
       </p>
 
-      <h2>Non-numeric Character Filtering</h2>
-      <p>Numora automatically removes invalid characters while preserving:</p>
+      <h2 className="text-foreground text-2xl">Non-numeric Character Filtering</h2>
+      <p className="text-muted-foreground text-base leading-6">Numora automatically removes invalid characters while preserving:</p>
       <ul>
         <li>Digits (0-9)</li>
         <li>
@@ -96,7 +96,7 @@ function Sanitization() {
           Negative sign (<code>-</code>) if <code>enableNegative</code> is true
         </li>
       </ul>
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         A sign character is only ever kept in the leading position: a <code>-</code> found anywhere
         else in the string is stripped rather than rejected (<code>"5-3"</code> → <code>"53"</code>
         ), and a leading <code>+</code> is always removed (<code>"+5"</code> → <code>"5"</code>)
@@ -113,13 +113,13 @@ const numoraInput = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2>removeThousandSeparators</h2>
-      <p>
+      <h2 className="text-foreground text-2xl">removeThousandSeparators</h2>
+      <p className="text-muted-foreground text-base leading-6">
         Numora exports a standalone <code>removeThousandSeparators</code> utility for stripping
         thousand separators from a formatted string. Useful when you need to extract a raw numeric
         value from a display string.
       </p>
-      <p>
+      <p className="text-muted-foreground text-base leading-6">
         (The raw value is also available as <code>getValue()</code> on the vanilla instance and as{' '}
         <code>e.target.value</code> in React - always canonical, whatever the locale.)
       </p>

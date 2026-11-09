@@ -49,7 +49,7 @@ export function GroupingStylesSection() {
               className={inputClass}
             />
             <div className="font-mono text-xs text-muted-foreground">
-              e.g. <span className="text-emerald-400">{s.example}</span>
+              e.g. <span className="text-signal-green">{s.example}</span>
             </div>
             <div className="text-xs text-muted-foreground">{s.description}</div>
           </div>

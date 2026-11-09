@@ -87,7 +87,7 @@ export const Route = createFileRoute('/docs/numora-react/anatomy')({
 function Anatomy() {
   const pkg = 'numora-react' as const;
   return (
-    <div className="prose prose-invert prose-article">
+    <div className="prose prose-invert max-w-xl">
       <Hero pkg={pkg} />
       <div className="space-y-16">
         <NativeInputSection />

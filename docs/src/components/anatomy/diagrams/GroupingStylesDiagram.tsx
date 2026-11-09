@@ -48,10 +48,10 @@ export function GroupingStylesDiagram() {
 
   const cellW = 26;
   const colorMap: Record<string, string> = {
-    emerald: 'fill-emerald-400/15 stroke-emerald-400/70',
-    sky: 'fill-sky-400/15 stroke-sky-400/70',
-    amber: 'fill-amber-400/15 stroke-amber-400/70',
-    violet: 'fill-violet-400/15 stroke-violet-400/70',
+    emerald: 'fill-signal-green/15 stroke-signal-green/70',
+    sky: 'fill-signal-sky/15 stroke-signal-sky/70',
+    amber: 'fill-signal-amber/15 stroke-signal-amber/70',
+    violet: 'fill-signal-violet/15 stroke-signal-violet/70',
   };
 
   return (
