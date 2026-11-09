@@ -30,3 +30,12 @@ june_audit.md
 plans/
 docs/agents
 docs/adr
+
+# Agent and domain files (kept local, out of history)
+CLAUDE.md
+CONTEXT.md
+GLOSSARY.md
+.claude/
+.scratch/
+docs/.cursorrules
+docs/.vscode/
