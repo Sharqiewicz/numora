@@ -12,11 +12,14 @@ export default {
       sourcemap: true,
       exports: 'named',
       interop: 'auto',
+      // Lets Next.js App Router server components import the package without a wrapper.
+      banner: "'use client';",
     },
     {
       file: 'dist/index.mjs',
       format: 'esm',
       sourcemap: true,
+      banner: "'use client';",
     },
   ],
   plugins: [peerDepsExternal(), resolve(), commonjs(), typescript({ tsconfig: './tsconfig.json' })],
