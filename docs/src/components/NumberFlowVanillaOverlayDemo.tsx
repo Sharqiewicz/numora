@@ -35,7 +35,7 @@ export function NumberFlowVanillaOverlayDemo() {
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals,
       };
-      flow.update(raw === '' ? 0 : Number(raw));
+      flow.update(Number(raw) || 0);
     };
 
     syncFlow();

@@ -146,7 +146,10 @@ function HowItWorks() {
         <li>
           Compact notation expansion (opt-in via <code>enableCompactNotation</code>)
         </li>
-        <li>Scientific notation expansion</li>
+        <li>
+          Scientific notation expansion (a paste is rejected instead when{' '}
+          <code>enableScientificNotation</code> is <code>false</code>)
+        </li>
         <li>Non-numeric character removal</li>
         <li>Extra decimal separator removal</li>
         <li>
@@ -215,19 +218,11 @@ function HowItWorks() {
 
       <h2>Value format</h2>
       <p>
-        String <code>value</code> / <code>setValue</code> are already in the field's{' '}
-        <em>display</em> format - locale separators allowed, grouping optional - since that is what
-        every existing caller passes and <code>formatValueForDisplay</code> already strips grouping.
-        A JS <code>number</code> is always dot-decimal, so the <code>valueAsNumber</code> setter
-        converts it to the configured decimal separator before writing, instead of passing the dot
-        through unchanged.
-      </p>
-      <p>
-        Example: under <code>locale: 'de-DE'</code> ('.' groups, ',' is the decimal mark),{' '}
-        <code>instance.valueAsNumber = 1234.5</code> displays <code>"1.234,5"</code>. Passing the
-        raw string <code>'1234.5'</code> to <code>setValue</code> instead displays{' '}
-        <code>"12.345"</code> - the dot is read as de-DE's thousand separator and stripped,
-        concatenating the digits. Setting a negative <code>valueAsNumber</code> with{' '}
+        String <code>value</code>, <code>defaultValue</code> and <code>setValue</code> take the
+        canonical raw value: ASCII digits, <code>.</code> as the decimal mark, no grouping, in every
+        locale. Under <code>locale: 'de-DE'</code> ('.' groups, ',' is the decimal mark),{' '}
+        <code>setValue('1234.5')</code> and <code>instance.valueAsNumber = 1234.5</code> both
+        display <code>"1.234,5"</code>. Setting a negative <code>valueAsNumber</code> with{' '}
         <code>enableNegative: false</code> throws a <code>RangeError</code> rather than silently
         dropping the sign.
       </p>

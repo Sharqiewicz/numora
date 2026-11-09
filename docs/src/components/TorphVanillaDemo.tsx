@@ -30,7 +30,7 @@ export function TorphVanillaDemo() {
     });
 
     const syncMorph = () => {
-      morph.update(numora.value || '0');
+      morph.update(numora.getFormattedValue() || '0');
     };
 
     syncMorph();

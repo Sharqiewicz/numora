@@ -75,9 +75,7 @@ function Installation() {
   return (
     <div className="prose prose-invert prose-article">
       <h1>Install Numora - Numeric Input</h1>
-      <p>
-        Add the numora JavaScript numeric input library to any project - no framework required.
-      </p>
+      <p>Add the numora JavaScript numeric input library to any project - no framework required.</p>
 
       <h2>Install</h2>
       <p>numora has zero runtime dependencies. Pick your package manager:</p>
@@ -130,6 +128,10 @@ const numoraInput = new NumoraInput(container, {
         </li>
         <li>
           <code>enableCompactNotation</code> - expand <code>1k → 1000</code> on input
+        </li>
+        <li>
+          <code>enableScientificNotation</code> - expand pasted <code>1.5e-7</code> (default{' '}
+          <code>true</code>); <code>false</code> rejects such a paste
         </li>
         <li>
           <code>onChange</code> receives <code>{'{ value, formattedValue }'}</code> - the raw value

@@ -254,41 +254,15 @@ function SwapForm() {
 }`}
       </CodeBlock>
 
-      <h2>Register pattern (uncontrolled)</h2>
+      <h2>Why not register?</h2>
       <p>
-        For basic forms that don't need programmatic updates or <code>setValue()</code>, you can use
-        the <code>register</code> pattern. Spread the register result and leave{' '}
-        <code>NumoraInput</code> to manage its own value - do not also pass a <code>value</code>{' '}
-        prop:
+        Don't spread <code>register('amount')</code> onto <code>NumoraInput</code>.{' '}
+        <code>register</code> reads the value from the DOM node through its <code>ref</code>, and
+        the DOM node holds the display string, so the form stores <code>"1,234.5"</code> (or{' '}
+        <code>"1.234,5"</code> in de-DE) instead of the raw value <code>"1234.5"</code>.{' '}
+        <code>setValue()</code> and <code>reset()</code> then write that string straight into the
+        input, where a comma-decimal locale can misread it. Use <code>Controller</code>.
       </p>
-
-      <CodeBlock language="tsx">
-        {`import { useForm } from 'react-hook-form'
-import { NumoraInput } from 'numora-react'
-
-function Form() {
-  const { register, handleSubmit } = useForm()
-
-  return (
-    <form onSubmit={handleSubmit((data) => console.log(data))}>
-      <NumoraInput
-        {...register('amount')}
-        decimalMaxLength={2}
-        thousandSeparator=","
-      />
-      <button type="submit">Submit</button>
-    </form>
-  )
-}`}
-      </CodeBlock>
-
-      <div className="bg-muted/50 border border-border rounded-lg p-4 my-4">
-        <p className="text-sm m-0">
-          <strong>⚠️ Limitation:</strong> With the <code>register</code> pattern, calling{' '}
-          <code>setValue()</code> won't update the displayed value. Use the <code>Controller</code>{' '}
-          pattern whenever you need programmatic updates.
-        </p>
-      </div>
 
       <h2>Key points</h2>
       <ul>
@@ -304,8 +278,8 @@ function Form() {
           validation, and all react-hook-form features.
         </li>
         <li>
-          <strong>Register pattern</strong>: works for basic form submission only -{' '}
-          <code>setValue()</code> won't update the UI.
+          <strong>Register pattern</strong>: not supported. It stores the display string, not the
+          raw value.
         </li>
         <li>
           <strong>Raw values by default:</strong> <code>e.target.value</code> in{' '}

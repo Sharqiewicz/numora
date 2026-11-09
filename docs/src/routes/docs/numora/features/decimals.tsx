@@ -71,9 +71,7 @@ function Decimals() {
   return (
     <div className="prose prose-invert prose-article">
       <h1>Decimals</h1>
-      <p>
-        Control decimal precision, separators, and locale-aware formatting.
-      </p>
+      <p>Control decimal precision, separators, and locale-aware formatting.</p>
 
       <h2>Precision limits</h2>
       <CodeBlock language="typescript">
@@ -122,8 +120,10 @@ const input = new NumoraInput(container, {
           <strong>Duplicate prevention</strong> - typing a second decimal separator is blocked
         </li>
         <li>
-          <strong>Paste cleanup</strong> - if multiple separators appear (e.g.{' '}
-          <code>"12.34.56"</code>), all but the first are removed (<code>"12.3456"</code>)
+          <strong>Paste cleanup</strong> - pasted text is read by its own format: when both{' '}
+          <code>.</code> and <code>,</code> appear, the last one is the decimal (
+          <code>"1,234.56"</code> → <code>1234.56</code>), and a mark that repeats is grouping (
+          <code>"12.34.56"</code> → <code>123456</code>)
         </li>
       </ul>
     </div>

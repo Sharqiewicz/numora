@@ -10,6 +10,18 @@
 - **Vanilla `onChange` receives `{ value, formattedValue }`** instead of a string. `getValue()`
   returns the raw value; use the new `getFormattedValue()` for the display string.
 - **`emitRawValue` is removed.** Read `value` or `formattedValue` from the payload instead.
+- **`ThousandStyle` is renamed `GroupingStyle`, and the `thousandStyle` option `groupingStyle`.**
+  The string values (`'none'`, `'thousand'`, `'lakh'`, `'wan'`) are unchanged. An old
+  `thousandStyle` option is ignored and the field uses the default (`thousand`), so a v4
+  `thousandStyle: 'lakh'`, `'wan'` or `'none'` silently changes grouping: rename it.
+  `GroupingStyle` is now a const object plus a string union instead of a TypeScript `enum`.
+- **Event handlers and DOM writers moved from `numora` to `numora/internal`:**
+  `handleOnBeforeInputNumoraInput`, `handleOnPasteNumoraInput`, `handleOnKeyDownNumoraInput`,
+  `writeValuePreservingUndo`, `writeStripPreservingUndo`, `computeStripSeparatorsResult` and
+  `StripSeparatorsResult`. `numora/internal` exists for `numora-react` and other first-party
+  wrappers and has no semver guarantee.
+- **`numora-react` re-exports `GroupingStyle`** instead of `ThousandStyle`, and ships a
+  `'use client'` directive so Next.js server components can import it directly.
 
 ### Fixed
 - **Comma-decimal locales accept a typed `.` as the decimal key** when the value has no
@@ -24,7 +36,18 @@
   - bidi and zero-width marks are stripped, so RTL locales keep the minus sign on paste;
   - every contiguous Unicode digit set is folded to ASCII, including astral ones;
   - locales with non-contiguous digits (hanidec) derive separators from Latin digits instead
-    of throwing.
+    of throwing;
+  - underscore tags such as `de_DE` (Java, Python, Android) are read as `de-DE` instead of
+    silently falling back to en-US separators.
+
+### Added
+- **`enableScientificNotation`** option (default `true`, same behaviour as v4). Set it to
+  `false` to reject pasted scientific notation instead of expanding it; the field is left
+  unchanged rather than dropping the `e` (`1.5e-7` would otherwise become `1.57`). Values
+  the app passes in (`value`, `defaultValue`, `setValue()`) always expand.
+- **Dev-only warning for an invalid `locale`.** `Intl.NumberFormat` rejecting the tag used to
+  fall back silently to `,` grouping and `.` decimal; it now logs a `console.warn` naming the
+  tag, except when `NODE_ENV` is `production`.
 
 ### Changed
 - **Caret computed from the edit itself.** The new caret rank is the rank of the text left of

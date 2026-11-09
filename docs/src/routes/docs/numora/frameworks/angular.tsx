@@ -153,6 +153,7 @@ npm install numora`}
   HostListener,
   inject,
   Input,
+  OnDestroy,
   OnInit,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -169,7 +170,7 @@ import { NumoraInput, type NumoraInputOptions } from 'numora';
     },
   ],
 })
-export class NumoraDirective implements ControlValueAccessor, OnInit {
+export class NumoraDirective implements ControlValueAccessor, OnInit, OnDestroy {
   private readonly el = inject<ElementRef<HTMLInputElement>>(ElementRef);
   private instance!: NumoraInput;
   private pendingValue: string | null = null;
@@ -190,6 +191,11 @@ export class NumoraDirective implements ControlValueAccessor, OnInit {
       this.instance.setValue(this.pendingValue);
       this.pendingValue = null;
     }
+  }
+
+  ngOnDestroy(): void {
+    // Removes Numora's listeners from the adopted <input>.
+    this.instance?.destroy();
   }
 
   @HostListener('blur')
@@ -251,7 +257,7 @@ import { GroupingStyle } from 'numora';
 export class AmountComponent {
   protected readonly GroupingStyle = GroupingStyle;
   protected readonly value = signal('');
-  protected readonly handleChange = (v: string) => this.value.set(v);
+  protected readonly handleChange = ({ value }: { value: string }) => this.value.set(value);
 }`}
       </CodeBlock>
 
@@ -385,7 +391,7 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
     });
     morph.update('0');
 
-    this.syncMorph = () => morph.update(this.numora.value || '0');
+    this.syncMorph = () => morph.update(this.numora.getFormattedValue() || '0');
     // Numora writes the formatted value in beforeinput; sync after that handler runs.
     this.scheduleSync = () => queueMicrotask(this.syncMorph);
 

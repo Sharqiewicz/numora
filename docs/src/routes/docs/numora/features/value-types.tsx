@@ -108,6 +108,22 @@ numoraInput.getValue()          // "1234.56"
 numoraInput.getFormattedValue() // "1,234.56"`}
       </CodeBlock>
 
+      <h2>Native form submission</h2>
+      <p>
+        A plain <code>&lt;form&gt;</code> submit or <code>new FormData(form)</code> reads the
+        input's DOM value, which is the display string (<code>"1,234.56"</code>, or
+        <code>"1.234,56"</code> in de-DE). To submit the raw value, leave the visible input without
+        a <code>name</code> and mirror <code>getValue()</code> into a hidden input:
+      </p>
+      <CodeBlock language="typescript">
+        {`const hidden = form.querySelector<HTMLInputElement>('input[name="amount"]')!
+const numoraInput = new NumoraInput(container, {
+  onChange: ({ value }) => {
+    hidden.value = value // "1234.56"
+  },
+})`}
+      </CodeBlock>
+
       <h2>valueAsNumber</h2>
       <p>
         <code>valueAsNumber</code> converts the current value to a JavaScript <code>number</code>{' '}

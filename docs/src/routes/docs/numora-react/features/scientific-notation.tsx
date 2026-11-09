@@ -81,12 +81,19 @@ function ScientificNotation() {
     <div className="prose prose-invert prose-article">
       <h1>Scientific Notation</h1>
       <p>
-        Numora always expands scientific notation to decimal notation. This is automatic and cannot
-        be disabled. Expansion uses string arithmetic, so there is no floating-point precision loss.
+        Numora expands scientific notation to decimal notation. Expansion uses string arithmetic, so
+        there is no floating-point precision loss. Typing <code>e</code> is rejected, so scientific
+        notation enters the field through paste or through values your app passes in.
+      </p>
+      <p>
+        To refuse pasted scientific notation instead, pass{' '}
+        <code>enableScientificNotation={'{false}'}</code>: such a paste leaves the field unchanged.
+        Values passed through <code>value</code> or <code>defaultValue</code> are expanded either
+        way, because <code>String(1e21)</code> is <code>"1e+21"</code> in JavaScript.
       </p>
 
       <ExampleWithDemo
-        description={'Try pasting "1.5e-7", "2e+5", or "1.5e-18" - all are expanded automatically'}
+        description={'Try pasting "1.5e-7", "2e+5", or "1.5e-18" - all are expanded'}
         language="tsx"
         code={`<NumoraInput decimalMaxLength={18} />`}
         config={{ decimalMaxLength: 18 }}

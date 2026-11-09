@@ -195,7 +195,7 @@ function AnimatedInput() {
 
   // Mirror the input's typed decimals so trailing zeros line up under the caret.
   const decimals = value.includes('.') ? value.split('.')[1].length : 0
-  const numericValue = value === '' ? 0 : Number(value)
+  const numericValue = Number(value) || 0
 
   return (
     <label className="relative inline-flex items-center text-4xl font-mono leading-none text-white">

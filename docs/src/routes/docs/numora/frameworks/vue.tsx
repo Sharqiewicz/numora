@@ -256,7 +256,7 @@ onMounted(() => {
   });
   morph.update('0');
 
-  const syncMorph = () => morph.update(numora.value || '0');
+  const syncMorph = () => morph.update(numora.getFormattedValue() || '0');
   // Numora writes the formatted value in beforeinput; sync after that handler runs.
   const scheduleSync = () => queueMicrotask(syncMorph);
 

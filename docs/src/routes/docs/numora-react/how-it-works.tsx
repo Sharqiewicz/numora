@@ -167,7 +167,10 @@ function HowItWorks() {
         <li>
           Compact notation expansion (opt-in via <code>enableCompactNotation</code>)
         </li>
-        <li>Scientific notation expansion</li>
+        <li>
+          Scientific notation expansion (a paste is rejected instead when{' '}
+          <code>enableScientificNotation</code> is <code>false</code>)
+        </li>
         <li>Non-numeric character removal</li>
         <li>Extra decimal separator removal</li>
         <li>
@@ -231,19 +234,11 @@ function HowItWorks() {
 
       <h2>Value format</h2>
       <p>
-        A string <code>value</code> / <code>defaultValue</code> is already in the field's{' '}
-        <em>display</em> format - locale separators allowed, grouping optional - since that is what
-        every existing caller passes and <code>formatValueForDisplay</code> already strips grouping.
-        A JS <code>number</code> can only be dot-decimal, so numora-react converts a numeric{' '}
-        <code>value</code> / <code>defaultValue</code> to the configured decimal separator before
-        formatting it, instead of passing the dot through unchanged.
-      </p>
-      <p>
-        Example: under <code>locale="de-DE"</code> ('.' groups, ',' is the decimal mark),{' '}
-        <code>{'<NumoraInput locale="de-DE" value={1234.5} />'}</code> displays{' '}
-        <code>"1.234,5"</code>. Passing the raw string <code>{'value="1234.5"'}</code> instead
-        displays <code>"12.345"</code> - the dot is read as de-DE's thousand separator and stripped,
-        concatenating the digits.
+        A string <code>value</code> / <code>defaultValue</code> is the canonical raw value: ASCII
+        digits, <code>.</code> as the decimal mark, no grouping, in every locale. A JS{' '}
+        <code>number</code> is read the same way. Under <code>locale="de-DE"</code> ('.' groups, ','
+        is the decimal mark), both <code>{'value="1234.5"'}</code> and{' '}
+        <code>{'value={1234.5}'}</code> display <code>"1.234,5"</code>.
       </p>
 
       <h2>Full pipeline</h2>

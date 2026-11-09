@@ -178,16 +178,23 @@ getSeparatorsFromLocale('en-IN')
         .
       </p>
 
+      <h2>What the field displays</h2>
+      <p>
+        The field shows the locale's separators with ASCII digits and an ASCII <code>-</code>. In
+        ar-EG it shows <code>1٬234٫5</code>, not the Arabic-Indic <code>١٬٢٣٤٫٥</code> that{' '}
+        <code>Intl.NumberFormat</code> prints, and in sv-SE it shows <code>-</code>, not{' '}
+        <code>−</code> (U+2212). Typed and pasted native digits and minus signs are still accepted
+        and folded to ASCII. Four-digit numbers are always grouped (<code>1.234</code> in es-ES),
+        even where <code>Intl</code> leaves them ungrouped.
+      </p>
+
       <h2>Value format under a locale</h2>
       <p>
-        A string <code>value</code> / <code>defaultValue</code> is already in the field's{' '}
-        <em>display</em> format, so a de-DE-configured field expects <code>','</code> for the
-        decimal mark and reads a bare <code>'.'</code> as the thousand separator. A JS{' '}
-        <code>number</code> is always dot-decimal, so numora-react converts a numeric{' '}
-        <code>value</code> / <code>defaultValue</code> to the configured decimal separator before
-        formatting it: <code>{'<NumoraInput locale="de-DE" value={1234.5} />'}</code> displays{' '}
-        <code>"1.234,5"</code>, not the <code>"12.345"</code> you would get from{' '}
-        <code>{'value="1234.5"'}</code>, which reads the dot as grouping and strips it. See{' '}
+        <code>value</code> and <code>defaultValue</code> take the canonical raw value in every
+        locale: ASCII digits, <code>.</code> as the decimal mark, no grouping. Under{' '}
+        <code>locale="de-DE"</code>, both <code>{'value="1234.5"'}</code> and{' '}
+        <code>{'value={1234.5}'}</code> display <code>"1.234,5"</code>, and{' '}
+        <code>e.target.value</code> is <code>"1234.5"</code>. See{' '}
         <Link to="/docs/numora-react/features/value-types">features/value-types</Link> for the full
         value contract.
       </p>

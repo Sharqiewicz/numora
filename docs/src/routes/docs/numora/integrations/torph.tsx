@@ -78,7 +78,7 @@ const JSON_LD = [
         name: 'How does the Torph + Numora overlay work?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'A transparent-text NumoraInput sits on top of a Torph TextMorph element. The input owns the keyboard, undo, IME, and mobile inputmode. A beforeinput microtask sync plus an input listener calls morph.update(numora.value) so Torph animates the visible digits.',
+          text: 'A transparent-text NumoraInput sits on top of a Torph TextMorph element. The input owns the keyboard, undo, IME, and mobile inputmode. A beforeinput microtask sync plus an input listener calls morph.update(numora.getFormattedValue()) so Torph animates the visible digits.',
         },
       },
       {
@@ -125,15 +125,15 @@ function TorphIntegration() {
         <a href={TORPH_LIB_URL} target="_blank" rel="noreferrer noopener">
           <strong>Torph</strong> by Lochie Axon
         </a>{' '}
-        is an animated text-morphing library. This guide layers <code>TextMorph</code> on
-        top of a transparent-text vanilla <code>NumoraInput</code> so the editable surface itself
-        appears animated. The real <code>&lt;input&gt;</code> still handles every keystroke. Torph
-        just renders what users see.
+        is an animated text-morphing library. This guide layers <code>TextMorph</code> on top of a
+        transparent-text vanilla <code>NumoraInput</code> so the editable surface itself appears
+        animated. The real <code>&lt;input&gt;</code> still handles every keystroke. Torph just
+        renders what users see.
       </p>
       <p className="text-sm">
         Using React? See the{' '}
-        <Link to="/docs/numora-react/integrations/torph">numora-react + torph integration</Link> - it
-        wires the overlay through <code>onChange</code> instead of manual DOM listeners.
+        <Link to="/docs/numora-react/integrations/torph">numora-react + torph integration</Link> -
+        it wires the overlay through <code>onChange</code> instead of manual DOM listeners.
       </p>
 
       <TorphVanillaDemo />
@@ -272,9 +272,9 @@ input.addEventListener('focus', () => {
         is not guaranteed on every path. The bridge therefore syncs Torph via a{' '}
         <code>beforeinput</code> microtask (typing) and an <code>input</code> listener (undo/redo;
         paste, since Numora's paste handler dispatches a synthetic <code>input</code> after
-        sanitizing). Each calls <code>morph.update(numora.value)</code>. Torph diffs old vs new and
-        animates each digit / separator into place. The input itself never animates - but because
-        its text is transparent, you only see the Torph layer.
+        sanitizing). Each calls <code>morph.update(numora.getFormattedValue())</code>. Torph diffs
+        old vs new and animates each digit / separator into place. The input itself never animates -
+        but because its text is transparent, you only see the Torph layer.
       </p>
 
       <h2>Installation</h2>
@@ -363,9 +363,9 @@ const morph = new TextMorph({
 morph.update('0')
 
 const syncMorph = () => {
-  // numora.value mirrors what the input shows. With FormatOn.Change that's
-  // the formatted string - exactly what Torph should display.
-  morph.update(numora.value || '0')
+  // getFormattedValue() is what the input shows (numora.value is the raw value).
+  // With FormatOn.Change that includes separators - exactly what Torph should display.
+  morph.update(numora.getFormattedValue() || '0')
 }
 
 // Numora applies formatted values in beforeinput (setRangeText). Sync after that
@@ -398,7 +398,7 @@ input.addEventListener('input', syncMorph)`}
           <code>beforeinput</code> microtask sync plus an <code>input</code> listener for undo/redo
           and paste. <code>FormatOn.Blur</code> also works, but the focus event silently strips
           separators - bind a <code>focus</code> listener that calls{' '}
-          <code>morph.update(numora.value)</code> too.
+          <code>morph.update(numora.getFormattedValue())</code> too.
         </li>
         <li>
           <strong>Match typography</strong> - <code>font: inherit</code> plus{' '}
@@ -442,7 +442,7 @@ input.remove()`}
         </li>
         <li>
           <strong>
-            Mirror <code>numora.value</code> into Torph.
+            Mirror <code>numora.getFormattedValue()</code> into Torph.
           </strong>{' '}
           That string always equals the input's current display. With <code>FormatOn.Change</code>,
           sync on <code>beforeinput</code> (microtask) plus <code>input</code> for undo/redo and
@@ -479,9 +479,9 @@ input.remove()`}
       <h3>How does Torph fit with Numora?</h3>
       <p>
         Numora formats the display string in <code>beforeinput</code>; your bridge mirrors{' '}
-        <code>numora.value</code> into <code>morph.update()</code> and Torph animates it. The two
-        libraries compose because Numora never crosses the string→number boundary, and Torph
-        operates on strings directly.
+        <code>numora.getFormattedValue()</code> into <code>morph.update()</code> and Torph animates
+        it. The two libraries compose because Numora never crosses the string→number boundary, and
+        Torph operates on strings directly.
       </p>
 
       <h3>Where can I install the Torph library?</h3>

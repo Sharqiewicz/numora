@@ -14,7 +14,7 @@ export function NumberFlowOverlayDemo() {
   // Mirror the input's typed decimals on the animated layer so trailing zeros
   // ("1.20") line up under the caret instead of collapsing to "1.2".
   const decimals = value.includes('.') ? value.split('.')[1].length : 0;
-  const numericValue = value === '' ? 0 : Number(value);
+  const numericValue = Number(value) || 0;
 
   return (
     <div className="my-16 py-12 flex justify-center items-center">

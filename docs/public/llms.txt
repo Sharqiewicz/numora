@@ -35,52 +35,65 @@ Numora is a framework-agnostic numeric input and number input library for JavaSc
 
 ## API Reference - numora (vanilla JS)
 
+All values are strings; Numora never converts them to `Number`. The raw value is canonical in
+every locale: ASCII digits, `.` decimal, no grouping (a de-DE field showing `1.234,5` reports
+`1234.5`).
+
 ```ts
-import { NumoraInput } from 'numora'
+import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
 
 const numoraInput = new NumoraInput(containerElement, {
-  maxDecimals?: number,         // max decimal places
-  minDecimals?: number,         // min decimal places (pads zeros)
-  thousandSeparator?: string,   // e.g. ','
-  thousandStyle?: 'thousand' | 'lakh' | 'wan',
-  decimalSeparator?: string,    // e.g. '.'
-  formatOn?: FormatOn,          // FormatOn.Change | FormatOn.Blur
-  allowNegative?: boolean,
-  allowLeadingZeros?: boolean,
-  allowScientificNotation?: boolean,
-  locale?: string,              // e.g. 'en-US', 'de-DE'
+  decimalMaxLength?: number,          // max decimal places (default 18)
+  decimalMinLength?: number,          // min decimal places, pads zeros on blur (default 0)
+  thousandSeparator?: string,         // default ','
+  groupingStyle?: GroupingStyle,      // 'thousand' (default) | 'lakh' | 'wan' | 'none'
+  decimalSeparator?: string,          // default '.'
+  formatOn?: FormatOn,                // FormatOn.Blur (default) | FormatOn.Change
+  locale?: string | true,             // e.g. 'de-DE', or true for the browser locale
+  enableCompactNotation?: boolean,    // '1k' -> '1000'
+  enableScientificNotation?: boolean, // default true: pasted '1.5e-7' -> '0.00000015'; false: rejected
+  enableNegative?: boolean,
+  enableLeadingZeros?: boolean,
+  autoAddLeadingZero?: boolean,       // '.5' -> '0.5'
+  maxLength?: number,                 // raw length; separators not counted
+  isAllowed?: (rawValue: string) => boolean, // reject an edit by returning false
+  onChange?: ({ value, formattedValue }) => void, // value is raw, formattedValue is displayed
+  value?: string,                     // canonical raw value
+  defaultValue?: string,
 })
+
+numoraInput.getValue()          // raw, e.g. '1234.5'
+numoraInput.getFormattedValue() // displayed, e.g. '1,234.5'
+numoraInput.setValue('1234.5')
 ```
+
+Values the app passes in (`value`, `defaultValue`, `setValue`) always expand scientific notation,
+even with `enableScientificNotation: false`, since `String(1e21)` is `'1e+21'`.
 
 ## API Reference - numora-react
 
 ```tsx
-import { NumoraInput, FormatOn } from 'numora-react'
+import { NumoraInput, FormatOn, GroupingStyle } from 'numora-react'
 
 <NumoraInput
-  maxDecimals={2}
-  minDecimals={0}
-  thousandSeparator=","
-  thousandStyle="thousand"
-  decimalSeparator="."
+  decimalMaxLength={2}
+  groupingStyle={GroupingStyle.Thousand}
   formatOn={FormatOn.Change}
-  allowNegative={false}
-  allowLeadingZeros={false}
-  allowScientificNotation={false}
-  locale="en-US"
+  locale="de-DE"
+  enableNegative
+  value={amount}               // canonical raw value, e.g. "1234.56"
   onChange={(e) => {
-    e.target.value    // formatted display string, e.g. "1,234.56"
-    e.target.rawValue // clean numeric string, e.g. "1234.56"
+    e.target.value             // raw value, e.g. "1234.56"
+    e.target.formattedValue    // displayed string, e.g. "1.234,56"
   }}
-  onRawValueChange={(raw) => console.log(raw)} // shorthand for raw value
 />
 ```
 
 ## Common Use Cases
 
-- **DeFi / financial inputs**: prevent scientific notation, enforce decimal precision, expose raw value for smart contract calls
+- **DeFi / financial inputs**: keep large and tiny values in decimal notation, enforce decimal precision, expose raw value for smart contract calls
 - **International forms**: locale-aware decimal and thousand separators (e.g. German `1.234,56`)
-- **React Hook Form integration**: use `onRawValueChange` to feed clean values into form state
+- **React Hook Form integration**: use `Controller` and pass `e.target.value` (the raw value) to `field.onChange`; `register` is not supported
 - **Mobile-safe inputs**: normalises mobile keyboard quirks across iOS and Android
 - **Formatted display while typing**: thousand separators added live without breaking cursor position
 

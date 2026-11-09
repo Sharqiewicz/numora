@@ -168,16 +168,23 @@ const input = new NumoraInput(container, { thousandSeparator, decimalSeparator }
         .
       </p>
 
+      <h2>What the field displays</h2>
+      <p>
+        The field shows the locale's separators with ASCII digits and an ASCII <code>-</code>. In
+        ar-EG it shows <code>1٬234٫5</code>, not the Arabic-Indic <code>١٬٢٣٤٫٥</code> that{' '}
+        <code>Intl.NumberFormat</code> prints, and in sv-SE it shows <code>-</code>, not{' '}
+        <code>−</code> (U+2212). Typed and pasted native digits and minus signs are still accepted
+        and folded to ASCII. Four-digit numbers are always grouped (<code>1.234</code> in es-ES),
+        even where <code>Intl</code> leaves them ungrouped.
+      </p>
+
       <h2>Value format under a locale</h2>
       <p>
-        String <code>value</code> / <code>setValue</code> are already in the field's{' '}
-        <em>display</em> format, so a de-DE-configured field expects <code>','</code> for the
-        decimal mark and reads a bare <code>'.'</code> as the thousand separator. A JS{' '}
-        <code>number</code> is always dot-decimal, so passing one through <code>valueAsNumber</code>{' '}
-        converts it to the configured decimal separator first:{' '}
-        <code>instance.valueAsNumber = 1234.5</code> under <code>locale: 'de-DE'</code> displays{' '}
-        <code>"1.234,5"</code>, not the <code>"12.345"</code> you would get from{' '}
-        <code>setValue('1234.5')</code>, which reads the dot as grouping and strips it. See{' '}
+        <code>value</code>, <code>defaultValue</code> and <code>setValue</code> take the canonical
+        raw value in every locale: ASCII digits, <code>.</code> as the decimal mark, no grouping.
+        Under <code>locale: 'de-DE'</code>, <code>setValue('1234.5')</code> and{' '}
+        <code>instance.valueAsNumber = 1234.5</code> both display <code>"1.234,5"</code>, and{' '}
+        <code>getValue()</code> returns <code>"1234.5"</code>. See{' '}
         <Link to="/docs/numora/features/value-types">features/value-types</Link> for the full value
         contract.
       </p>

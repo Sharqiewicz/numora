@@ -155,6 +155,22 @@ function App() {
 }`}
       </CodeBlock>
 
+      <h2>Native form submission</h2>
+      <p>
+        A plain <code>&lt;form&gt;</code> submit or <code>new FormData(form)</code> reads the
+        input's DOM value, which is the display string (<code>"1,234.56"</code>, or
+        <code>"1.234,56"</code> in de-DE). To submit the raw value, leave the visible input without
+        a <code>name</code> and mirror <code>e.target.value</code> into a hidden input:
+      </p>
+      <CodeBlock language="tsx">
+        {`const [amount, setAmount] = useState('')
+
+<form action="/pay">
+  <NumoraInput value={amount} onChange={(e) => setAmount(e.target.value)} />
+  <input type="hidden" name="amount" value={amount} />
+</form>`}
+      </CodeBlock>
+
       <h2>Getting a number</h2>
       <p>
         Need a <code>number</code>? Call <code>Number(e.target.value)</code>. The raw value is
