@@ -24,6 +24,7 @@ import {
   DEFAULT_DECIMAL_MIN_LENGTH,
   DEFAULT_DECIMAL_SEPARATOR,
   DEFAULT_ENABLE_COMPACT_NOTATION,
+  DEFAULT_ENABLE_SCIENTIFIC_NOTATION,
   DEFAULT_ENABLE_LEADING_ZEROS,
   DEFAULT_ENABLE_NEGATIVE,
   DEFAULT_FORMAT_ON,
@@ -60,6 +61,7 @@ const NUMORA_OPTION_KEYS = new Set<string>([
   'decimalSeparator',
   'locale',
   'enableCompactNotation',
+  'enableScientificNotation',
   'enableNegative',
   'enableLeadingZeros',
   'autoAddLeadingZero',
@@ -94,6 +96,7 @@ export interface NumoraInputOptions
 
   // Parsing options
   enableCompactNotation?: boolean;
+  enableScientificNotation?: boolean;
   enableNegative?: boolean;
   enableLeadingZeros?: boolean;
   autoAddLeadingZero?: boolean;
@@ -167,6 +170,7 @@ export class NumoraInput {
       decimalSeparator,
       locale,
       enableCompactNotation = DEFAULT_ENABLE_COMPACT_NOTATION,
+      enableScientificNotation = DEFAULT_ENABLE_SCIENTIFIC_NOTATION,
       enableNegative = DEFAULT_ENABLE_NEGATIVE,
       enableLeadingZeros = DEFAULT_ENABLE_LEADING_ZEROS,
       autoAddLeadingZero = DEFAULT_AUTO_ADD_LEADING_ZERO,
@@ -185,6 +189,7 @@ export class NumoraInput {
       groupingStyle: separators.groupingStyle ?? DEFAULT_GROUPING_STYLE,
       decimalSeparator: separators.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
       enableCompactNotation,
+      enableScientificNotation,
       enableNegative,
       enableLeadingZeros,
       autoAddLeadingZero,

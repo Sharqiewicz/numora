@@ -14,6 +14,7 @@ export const DEFAULT_THOUSAND_SEPARATOR = ',';
 export const DEFAULT_GROUPING_STYLE = GroupingStyle.Thousand;
 export const DEFAULT_DECIMAL_SEPARATOR = '.';
 export const DEFAULT_ENABLE_COMPACT_NOTATION = false;
+export const DEFAULT_ENABLE_SCIENTIFIC_NOTATION = true;
 export const DEFAULT_ENABLE_NEGATIVE = false;
 export const DEFAULT_ENABLE_LEADING_ZEROS = false;
 export const DEFAULT_AUTO_ADD_LEADING_ZERO = false;

@@ -83,6 +83,14 @@ export interface FormattingOptions {
   thousandSeparator?: string;
   groupingStyle?: GroupingStyle;
   enableCompactNotation?: boolean;
+  /**
+   * When true (the default), pasted scientific notation is expanded (`1.5e-7` →
+   * `0.00000015`). When false, such a paste is rejected and the field is left unchanged,
+   * because dropping the `e` would silently change the number (`1.5e-7` → `1.57`). Values supplied by
+   * the app (`value`, `defaultValue`, `setValue`) are always expanded, since JS prints large
+   * and small numbers this way (`String(1e21)` is `"1e+21"`).
+   */
+  enableScientificNotation?: boolean;
   enableNegative?: boolean;
   enableLeadingZeros?: boolean;
   /**

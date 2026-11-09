@@ -55,6 +55,7 @@ Pasted text (and text the browser inserts through a plain `input` event) is read
 | `groupingStyle` | `GroupingStyle` | `GroupingStyle.Thousand` | Grouping style: `Thousand`, `Lakh`, `Wan`, or `None` |
 | `formatOn` | `FormatOn` | `FormatOn.Blur` | When to apply formatting: `Blur` or `Change` |
 | `enableCompactNotation` | `boolean` | `false` | Expand compact notation on paste/setValue |
+| `enableScientificNotation` | `boolean` | `true` | Expand pasted scientific notation; when `false` the paste is rejected. App values always expand |
 | `enableNegative` | `boolean` | `false` | Allow negative numbers |
 | `enableLeadingZeros` | `boolean` | `false` | Allow leading zeros |
 | `autoAddLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |

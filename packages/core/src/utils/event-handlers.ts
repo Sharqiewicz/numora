@@ -2,6 +2,7 @@ import { getSeparators } from '../features/decimals';
 import { sanitizeNumoraInput } from '../features/sanitization';
 import { normalizeForeignFormat, canonicalToDisplayText } from '../features/foreign-format';
 import { NON_ASCII_DECIMAL_SEPARATOR_GLYPHS } from '../features/decimal-separators';
+import { containsScientificNotation } from '../features/scientific-notation';
 import { skipOverThousandSeparatorOnDelete } from '../features/formatting';
 import { computeCaretFromEdit } from './caret';
 import { type FormattingOptions, type CaretPositionInfo, FormatOn, InputType } from '../types';
@@ -318,10 +319,16 @@ export function handleOnPasteNumoraInput(
   // The slice is rewritten to the field's locale text so the combined value then goes
   // through the ordinary pipeline, and the caret math below uses its (rewritten) length.
   const rawClipboard = e.clipboardData?.getData('text/plain') || '';
-  const clipboardData = canonicalToDisplayText(
-    normalizeForeignFormat(rawClipboard, formattingOptions),
-    separators.decimalSeparator
-  );
+  const canonicalClipboard = normalizeForeignFormat(rawClipboard, formattingOptions);
+  // Scientific notation is on unless explicitly disabled. With it off, the sanitizer would
+  // drop the `e` and turn `1.5e-7` into `1.57`, so refuse the paste instead.
+  if (
+    formattingOptions?.enableScientificNotation === false &&
+    containsScientificNotation(canonicalClipboard)
+  ) {
+    return { type: 'reject' };
+  }
+  const clipboardData = canonicalToDisplayText(canonicalClipboard, separators.decimalSeparator);
   const selStart = selectionStart ?? 0;
   const selEnd = selectionEnd ?? 0;
   const combinedValue = value.slice(0, selStart) + clipboardData + value.slice(selEnd);

@@ -43,6 +43,14 @@ const MAX_EXPANSION_DIGITS = 1000;
  * @param value - The string value that may contain scientific notation
  * @returns The expanded decimal string, or original value if not scientific notation
  */
+/**
+ * True when `value` holds a number in scientific notation: a digit, `e`/`E`, an optional
+ * sign, then a digit (`1.5e-7`, `2E5`). Expects ASCII digits; words like `EUR` don't match.
+ */
+export function containsScientificNotation(value: string): boolean {
+  return /\d[eE][+-]?\d/.test(value);
+}
+
 export function expandScientificNotation(value: string, decimalSeparator: string = '.'): string {
   // Fast early-exit for the dominant case (no scientific notation present)
   if (!value.includes('e') && !value.includes('E')) return value;

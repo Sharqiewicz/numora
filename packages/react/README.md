@@ -51,6 +51,7 @@ function App() {
 | `thousandSeparator` | `string` | `','` | Thousand separator character |
 | `groupingStyle` | `'thousand' \| 'lakh' \| 'wan'` | `'thousand'` | Grouping style |
 | `enableCompactNotation` | `boolean` | `false` | Expand compact notation on paste |
+| `enableScientificNotation` | `boolean` | `true` | Expand pasted scientific notation; when `false` the paste is rejected. `value` always expands |
 | `enableNegative` | `boolean` | `false` | Allow negative numbers |
 | `enableLeadingZeros` | `boolean` | `false` | Allow leading zeros |
 | `autoAddLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |

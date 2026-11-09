@@ -1939,3 +1939,29 @@ describe('canonical raw value', () => {
     expect((screen.getByTestId('i') as HTMLInputElement).value).toBe('1.234,5');
   });
 });
+
+describe('enableScientificNotation', () => {
+  it('rejects a pasted 1.5e-7 when disabled, leaving the field unchanged', () => {
+    const onChange = vi.fn();
+    render(
+      <NumoraInput
+        data-testid="i"
+        defaultValue="7"
+        enableScientificNotation={false}
+        onChange={onChange}
+      />
+    );
+    const input = screen.getByTestId('i') as HTMLInputElement;
+    input.setSelectionRange(1, 1);
+    simulatePaste(input, '1.5e-7');
+    expect(input.value).toBe('7');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('expands a pasted 1.5e-7 by default', () => {
+    render(<NumoraInput data-testid="i" decimalMaxLength={8} />);
+    const input = screen.getByTestId('i') as HTMLInputElement;
+    simulatePaste(input, '1.5e-7');
+    expect(input.value).toBe('0.00000015');
+  });
+});

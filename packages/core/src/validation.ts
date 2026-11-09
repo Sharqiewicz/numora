@@ -26,6 +26,7 @@ export function validateNumoraInputOptions(options: NumoraInputValidationOptions
   assertSeparatorNotReserved('decimalSeparator', options.decimalSeparator);
   assertSeparatorConflict(options.thousandSeparator, options.decimalSeparator);
   assertBoolean('enableCompactNotation', options.enableCompactNotation);
+  assertBoolean('enableScientificNotation', options.enableScientificNotation);
   assertBoolean('enableNegative', options.enableNegative);
   assertBoolean('enableLeadingZeros', options.enableLeadingZeros);
   assertBoolean('autoAddLeadingZero', options.autoAddLeadingZero);

@@ -51,8 +51,9 @@ export interface NumoraHTMLInputElement extends HTMLInputElement {
 /**
  * Synthetic change event fired by NumoraInput on every value change.
  *
- * - `target.value` - the **raw (unformatted) numeric string**, separators stripped.
- *   Safe to pass directly to react-hook-form's `field.onChange` or any other form library.
+ * - `target.value` - the **canonical raw value**: ASCII digits, `.` decimal, no grouping.
+ *   Pass it to react-hook-form's `Controller` (`field.onChange(e.target.value)`) or any
+ *   other form library that takes a value.
  *
  * - `target.formattedValue` - the formatted display string (e.g. `"1,234.56"`),
  *   the same value visible in the input. Use this when you need to display or store
@@ -61,8 +62,10 @@ export interface NumoraHTMLInputElement extends HTMLInputElement {
  * NOTE: `e.target.value` here is the RAW string, which is the inverse of reading the DOM
  * node directly - `inputRef.current.value` returns the FORMATTED string (what's rendered).
  *
- * Structurally assignable to `ChangeEvent<HTMLInputElement>`, so react-hook-form's
- * `register.onChange` can be spread directly onto the `onChange` prop.
+ * Structurally assignable to `ChangeEvent<HTMLInputElement>`, but `target` is a Proxy, not
+ * the input element itself. Do NOT spread react-hook-form's `register()`: it reads the DOM
+ * node through its ref, so it stores the formatted display string, and `setValue`/`reset`
+ * write a value back that a comma-decimal locale can misread. Use `Controller` instead.
  */
 export type NumoraInputChangeEvent = Omit<ChangeEvent<HTMLInputElement>, 'target'> & {
   target: NumoraHTMLInputElement;
@@ -140,6 +143,8 @@ export interface NumoraInputProps
   decimalMinLength?: number;
 
   enableCompactNotation?: boolean;
+  /** Expand pasted `1.5e-7` (default). Set `false` to reject such a paste instead. */
+  enableScientificNotation?: boolean;
   enableNegative?: boolean;
   enableLeadingZeros?: boolean;
   autoAddLeadingZero?: boolean;
@@ -178,6 +183,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     decimalSeparator,
     decimalMinLength,
     enableCompactNotation = false,
+    enableScientificNotation = true,
     enableNegative = false,
     enableLeadingZeros = false,
     autoAddLeadingZero = false,
@@ -222,6 +228,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       decimalMaxLength,
       decimalMinLength,
       enableCompactNotation,
+      enableScientificNotation,
       enableNegative,
       enableLeadingZeros,
       autoAddLeadingZero,
@@ -252,6 +259,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     decimalMaxLength,
     decimalMinLength,
     enableCompactNotation,
+    enableScientificNotation,
     enableNegative,
     enableLeadingZeros,
     autoAddLeadingZero,
