@@ -566,6 +566,117 @@ describe('NumoraInput', () => {
     });
   });
 
+  describe('controlled value while focused', () => {
+    function Controlled({ formatOn, initial = '1234' }: { formatOn: FormatOn; initial?: string }) {
+      const [v, setV] = useState(initial);
+      return (
+        <>
+          <NumoraInput
+            data-testid="input"
+            formatOn={formatOn}
+            thousandSeparator=","
+            groupingStyle={GroupingStyle.Thousand}
+            value={v}
+            onChange={(e) => setV(e.target.value)}
+          />
+          <button data-testid="set" onClick={() => setV('98765')} />
+        </>
+      );
+    }
+
+    it('keeps the value ungrouped while focused in Blur mode and groups on blur', () => {
+      render(<Controlled formatOn={FormatOn.Blur} />);
+      const input = screen.getByTestId('input') as HTMLInputElement;
+      expect(input.value).toBe('1,234');
+
+      act(() => input.focus());
+      expect(input.value).toBe('1234');
+
+      act(() => simulateTyping(input, '5'));
+      expect(input.value).toBe('12345');
+
+      // A second keystroke must stay ungrouped and land at the caret
+      act(() => simulateTyping(input, '6'));
+      expect(input.value).toBe('123456');
+      expect(input.selectionStart).toBe(6);
+
+      act(() => input.blur());
+      expect(input.value).toBe('123,456');
+    });
+
+    it('formats an external value change with separators while not focused', () => {
+      render(<Controlled formatOn={FormatOn.Blur} />);
+      const input = screen.getByTestId('input') as HTMLInputElement;
+      fireEvent.click(screen.getByTestId('set'));
+      expect(input.value).toBe('98,765');
+    });
+
+    it('shows the raw value for an external change while focused in Blur mode', () => {
+      render(<Controlled formatOn={FormatOn.Blur} />);
+      const input = screen.getByTestId('input') as HTMLInputElement;
+      act(() => input.focus());
+      fireEvent.click(screen.getByTestId('set'));
+      // fireEvent.click does not move focus, so the input is still the active element
+      expect(document.activeElement).toBe(input);
+      expect(input.value).toBe('98765');
+    });
+
+    it('still groups on every keystroke in Change mode', () => {
+      render(<Controlled formatOn={FormatOn.Change} />);
+      const input = screen.getByTestId('input') as HTMLInputElement;
+      act(() => input.focus());
+      act(() => simulateTyping(input, '5'));
+      expect(input.value).toBe('12,345');
+    });
+  });
+
+  // `input` events with no preceding cancelable `beforeinput`: execCommand('insertText'),
+  // browser autofill, some Android IMEs. Must be sanitized like the typing path.
+  describe('input event without beforeinput', () => {
+    it('sanitizes and formats the value before emitting (Change mode)', () => {
+      const onChange = vi.fn();
+      render(
+        <NumoraInput
+          data-testid="input"
+          onChange={onChange}
+          formatOn={FormatOn.Change}
+          enableCompactNotation
+        />
+      );
+      const input = screen.getByTestId('input') as HTMLInputElement;
+
+      fireEvent.input(input, { target: { value: '1.5k' } });
+
+      expect(onChange.mock.calls.at(-1)![0].target.value).toBe('1500');
+      expect(input.value).toBe('1,500');
+    });
+
+    it('strips non-numeric characters and expands scientific notation', () => {
+      const onChange = vi.fn();
+      render(<NumoraInput data-testid="input" onChange={onChange} />);
+      const input = screen.getByTestId('input') as HTMLInputElement;
+
+      fireEvent.input(input, { target: { value: '12abc.3' } });
+      expect(onChange.mock.calls.at(-1)![0].target.value).toBe('12.3');
+
+      fireEvent.input(input, { target: { value: '1e-7' } });
+      expect(onChange.mock.calls.at(-1)![0].target.value).toBe('0.0000001');
+      expect(input.value).toBe('0.0000001');
+    });
+
+    it('does not add separators while typing in Blur mode', () => {
+      const onChange = vi.fn();
+      render(<NumoraInput data-testid="input" onChange={onChange} formatOn={FormatOn.Blur} />);
+      const input = screen.getByTestId('input') as HTMLInputElement;
+      act(() => input.focus());
+
+      fireEvent.input(input, { target: { value: '1234567' } });
+
+      expect(input.value).toBe('1234567');
+      expect(onChange.mock.calls.at(-1)![0].target.value).toBe('1234567');
+    });
+  });
+
   describe('paste handling', () => {
     it('formats pasted numeric value and fires onChange', () => {
       const onChange = vi.fn();
