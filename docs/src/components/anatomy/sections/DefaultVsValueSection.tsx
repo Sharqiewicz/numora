@@ -12,15 +12,17 @@ export function DefaultVsValueSection() {
       </p>
       <CodeBlock language="tsx">{`<input defaultValue={initialDisplayValue} ref={internalInputRef} />`}</CodeBlock>
       <p>
-        A controlled React input (<code>value=</code>) makes the reconciler overwrite{' '}
-        <code>input.value</code> on every render - undoing what <code>setRangeText</code> just wrote
-        and breaking both formatting and undo history. <code>defaultValue</code> tells React "set
-        the DOM value once at mount, then leave it alone," leaving <code>setRangeText</code> as the
-        sole mutation path during typing.
+        A controlled input (<code>value=</code>) makes React overwrite{' '}
+        <code>input.value</code> on every render. That undoes what <code>setRangeText</code> just wrote
+        and breaks formatting and undo history. <code>defaultValue</code> sets the DOM value once
+        at mount, so <code>setRangeText</code> is the only thing that changes it while the user
+        types.
       </p>
       <p>
-        When you pass a <code>value</code> prop, an effect syncs it directly into the DOM without
-        firing events - programmatic value changes don't need undo history or cursor management.
+        When you pass a <code>value</code> prop, a layout effect formats it and compares the result
+        with the DOM. If they differ, it writes the new value with{' '}
+        <code>writeValuePreservingUndo</code>, so undo history survives external updates. That
+        write does not call <code>onChange</code>.
       </p>
     </section>
   );

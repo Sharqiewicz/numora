@@ -10,7 +10,7 @@ export function Socials({ className, style }: { className: string; style?: CSSPr
         href="https://x.com/sharqiewicz"
         target="_blank"
         rel="noopener noreferrer"
-        className="relative after:absolute after:-inset-2 after:content-['']"
+        className="relative after:absolute after:-inset-2.5 after:content-['']"
       >
         <img
           src={x}
@@ -22,7 +22,7 @@ export function Socials({ className, style }: { className: string; style?: CSSPr
         href="https://github.com/sharqiewicz/numora"
         target="_blank"
         rel="noopener noreferrer"
-        className="relative after:absolute after:-inset-2 after:content-['']"
+        className="relative after:absolute after:-inset-2.5 after:content-['']"
       >
         <img
           src={github}

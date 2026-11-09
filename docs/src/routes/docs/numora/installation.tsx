@@ -1,30 +1,28 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { InstallTabs } from '@/components/InstallTabs';
 import { CodeBlock } from '@/components/CodeBlock';
-import CHEVRON_RIGHT from '@/assets/chevron-right.svg';
-import { Button } from '@/components/ui/button';
 
 export const Route = createFileRoute('/docs/numora/installation')({
   head: () => ({
     meta: [
-      { title: 'Install Numora - Numeric Input Library Setup Guide' },
+      { title: 'Installation | Numora' },
       {
         name: 'description',
         content:
-          'Install the Numora JavaScript numeric input library with npm, pnpm, yarn, or bun. Zero dependencies, TypeScript-ready, works with any framework. Live number formatting in minutes.',
+          'Install the Numora TypeScript numeric input library with npm, pnpm, yarn, or bun. Zero dependencies, no framework required.',
       },
-      { property: 'og:title', content: 'Install Numora - Numeric Input Library Setup Guide' },
+      { property: 'og:title', content: 'Installation | Numora' },
       {
         property: 'og:description',
         content:
-          'Install the Numora JavaScript numeric input library. Zero dependencies, TypeScript-ready, works with any framework.',
+          'Install the Numora TypeScript numeric input library with npm, pnpm, yarn, or bun. Zero dependencies, no framework required.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/installation' },
-      { name: 'twitter:title', content: 'Install Numora - Numeric Input Library Setup Guide' },
+      { name: 'twitter:title', content: 'Installation | Numora' },
       {
         name: 'twitter:description',
         content:
-          'Install the Numora JavaScript numeric input library. Zero dependencies, works with any framework.',
+          'Install the Numora TypeScript numeric input library with npm, pnpm, yarn, or bun. Zero dependencies, no framework required.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora/installation' }],
@@ -35,9 +33,9 @@ export const Route = createFileRoute('/docs/numora/installation')({
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Install Numora - Numeric Input Library Setup',
+            headline: 'Install Numora',
             description:
-              'Step-by-step installation guide for the numora JavaScript numeric input library. Works with npm, pnpm, yarn, and bun.',
+              'How to install the Numora TypeScript numeric input library with npm, pnpm, yarn, or bun.',
             url: 'https://numeric-input.com/docs/numora/installation',
             author: {
               '@type': 'Person',
@@ -53,7 +51,7 @@ export const Route = createFileRoute('/docs/numora/installation')({
               {
                 '@type': 'ListItem',
                 position: 2,
-                name: 'Numora JS',
+                name: 'Numora',
                 item: 'https://numeric-input.com/docs/numora',
               },
               {
@@ -73,83 +71,90 @@ export const Route = createFileRoute('/docs/numora/installation')({
 
 function Installation() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Install numora</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Add the numora JavaScript numeric input library to any project - no framework required.
+    <div className="docs-prose max-w-[40rem]">
+      <h1>Install Numora</h1>
+      <p>
+        Add the Numora TypeScript numeric input library to any project. No framework required.
       </p>
 
-      <h2 className="text-foreground text-2xl">Install</h2>
-      <p className="text-muted-foreground text-base leading-6">numora has zero runtime dependencies. Pick your package manager:</p>
+      <h2>Install</h2>
+      <p>Numora has zero runtime dependencies. Pick your package manager:</p>
 
       <InstallTabs packages="numora" />
 
-      <h2 className="text-foreground text-2xl">Basic Usage</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Import the <code>NumoraInput</code> class and attach it to any container element:
+      <h2>Basic usage</h2>
+      <p>
+        Import the <code>NumoraInput</code> class and pass it a container element:
       </p>
       <CodeBlock language="typescript">
-        {`import { NumoraInput } from 'numora'
+        {`import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
 
 const container = document.querySelector('#my-input-container')
 
 const numoraInput = new NumoraInput(container, {
   decimalMaxLength: 2,
+  groupingStyle: GroupingStyle.Thousand,
   thousandSeparator: ',',
   decimalSeparator: '.',
+  formatOn: FormatOn.Change,
+  // typing 1234.56 displays "1,234.56"
 })`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">Options</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        numora accepts a <code>FormattingOptions</code> object as the second argument. Common
+      <h2>Options</h2>
+      <p>
+        Numora requires an options object (<code>NumoraInputOptions</code>) as the second argument. It extends{' '}
+        <code>FormattingOptions</code> with <code>locale</code>, <code>onChange</code>, <code>value</code> and <code>defaultValue</code>. Common
         options:
       </p>
-      <ul className="list-disc list-inside">
+      <ul>
         <li>
-          <code>decimalSeparator</code> - character separating integer from decimal part (default{' '}
+          <code>decimalSeparator</code>: the character between the integer and decimal parts (default{' '}
           <code>'.'</code>)
         </li>
         <li>
-          <code>thousandSeparator</code> - character inserted between digit groups (default{' '}
-          <code>','</code>)
+          <code>thousandSeparator</code>: the character between digit groups (default{' '}
+          <code>','</code>). Separators only appear when <code>groupingStyle</code> is not{' '}
+          <code>None</code>
         </li>
         <li>
-          <code>groupingStyle</code> - <code>None</code>, <code>Thousand</code>, <code>Lakh</code>,
-          or <code>Wan</code>
+          <code>groupingStyle</code>: <code>None</code>, <code>Thousand</code> (default),{' '}
+          <code>Lakh</code>, or <code>Wan</code>
         </li>
         <li>
-          <code>formatOn</code> - when separators are applied: <code>FormatOn.Blur</code> (default)
+          <code>formatOn</code>: when separators are applied, <code>FormatOn.Blur</code> (default)
           or <code>FormatOn.Change</code>
         </li>
         <li>
-          <code>decimalMinLength</code> - pad decimals to a minimum number of digits on blur
+          <code>decimalMaxLength</code>: maximum number of decimal digits (default <code>18</code>)
         </li>
         <li>
-          <code>enableNegative</code> - allow negative values (default <code>false</code>)
+          <code>decimalMinLength</code>: pad decimals to a minimum number of digits as you type (default <code>0</code>)
         </li>
         <li>
-          <code>enableCompactNotation</code> - expand <code>1k → 1000</code> on input
+          <code>enableNegative</code>: allow negative values (default <code>false</code>)
         </li>
         <li>
-          <code>enableScientificNotation</code> - expand pasted <code>1.5e-7</code> (default{' '}
+          <code>enableCompactNotation</code>: expand <code>1k → 1000</code> on input
+        </li>
+        <li>
+          <code>enableScientificNotation</code>: expand pasted <code>1.5e-7</code> (default{' '}
           <code>true</code>); <code>false</code> rejects such a paste
         </li>
         <li>
-          <code>onChange</code> receives <code>{'{ value, formattedValue }'}</code> - the raw value
+          <code>onChange</code>: receives <code>{'{ value, formattedValue }'}</code>. The raw value
           has no separators
         </li>
       </ul>
-      <p className="text-muted-foreground text-base leading-6">
-        See the <Link to="/docs/numora/features/formatting" className="underline link-underline hover:text-foreground transition-colors">Formatting</Link> and{' '}
-        <Link to="/docs/numora/features/sanitization" className="underline link-underline hover:text-foreground transition-colors">Sanitization</Link> docs for the full options
-        reference.
+      <p>
+        See the <Link to="/docs/numora/features/formatting">Formatting</Link> and{' '}
+        <Link to="/docs/numora/features/sanitization">Sanitization</Link> docs for details on
+        these options.
       </p>
 
-      <h2 className="text-foreground text-2xl">TypeScript</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        numora ships with full TypeScript declarations - no <code>@types</code> package needed.
-        Import types directly:
+      <h2>TypeScript</h2>
+      <p>
+        Numora ships its own declarations. Import types directly:
       </p>
       <CodeBlock language="typescript">
         {`import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
@@ -162,27 +167,6 @@ const options: FormattingOptions = {
   thousandSeparator: ',',
 }`}
       </CodeBlock>
-
-      <hr />
-
-      <h2 className="text-foreground text-2xl">Next Steps</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Learn how the <code>beforeinput</code>-based event architecture works in the{' '}
-        <Link to="/docs/numora/anatomy" className="underline link-underline hover:text-foreground transition-colors">Anatomy</Link> guide, or jump to the{' '}
-        <Link to="/docs/numora/features/formatting" className="underline link-underline hover:text-foreground transition-colors">Formatting</Link> feature docs.
-      </p>
-      <div className="flex items-center gap-2 my-8">
-        <Link to="/docs/numora/anatomy">
-          <Button variant="default">
-            Anatomy <img src={CHEVRON_RIGHT} alt="Chevron Right" className="w-4 h-4" />
-          </Button>
-        </Link>
-        <Link to="/docs/numora/features/formatting">
-          <Button variant="outline">
-            Formatting Features <img src={CHEVRON_RIGHT} alt="Chevron Right" className="w-4 h-4" />
-          </Button>
-        </Link>
-      </div>
     </div>
   );
 }

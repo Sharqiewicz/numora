@@ -77,7 +77,7 @@ export function TorphVanillaDemo() {
         .torph-vanilla-input-host input::placeholder { color: transparent; }
       `}</style>
       <div className="my-12 w-full max-w-lg mx-auto">
-        <label className="relative flex items-center justify-end w-full rounded-2xl border border-surface-3 bg-surface-1 overflow-hidden px-4 py-3 text-xl font-mono tracking-wide text-white cursor-text">
+        <label className="relative flex items-center justify-end w-full rounded-2xl has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-muted-foreground border border-surface-3 bg-surface-1 overflow-hidden px-4 py-3 text-xl font-mono tracking-wide text-white cursor-text">
           <span ref={displayRef} className="pointer-events-none whitespace-pre" aria-hidden="true">
             0
           </span>

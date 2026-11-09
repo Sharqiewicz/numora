@@ -1,26 +1,26 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora/features/validation')({
   head: () => ({
     meta: [
-      { title: 'Custom Validation with isAllowed | Numora' },
+      { title: 'Validation | Numora' },
       {
         name: 'description',
         content:
-          'Reject numeric input pre-commit with a custom isAllowed validator in Numora. Cap values, enforce business rules, and stop invalid keystrokes before they hit your state.',
+          'Reject numeric input pre-commit with a custom isAllowed validator in Numora. Cap values, enforce business rules, and stop invalid keystrokes before they reach your state.',
       },
-      { property: 'og:title', content: 'Custom Validation with isAllowed | Numora' },
+      { property: 'og:title', content: 'Validation | Numora' },
       {
         property: 'og:description',
         content:
-          'Reject numeric input pre-commit with a custom isAllowed validator. Block keystrokes and pastes before they fire onChange.',
+          'Reject numeric input pre-commit with a custom isAllowed validator in Numora. Cap values, enforce business rules, and stop invalid keystrokes before they reach your state.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/validation' },
-      { name: 'twitter:title', content: 'Custom Validation with isAllowed | Numora' },
+      { name: 'twitter:title', content: 'Validation | Numora' },
       {
         name: 'twitter:description',
-        content: 'Reject numeric input pre-commit with a custom isAllowed validator in Numora.',
+        content: 'Reject numeric input pre-commit with a custom isAllowed validator in Numora. Cap values, enforce business rules, and stop invalid keystrokes before they reach your state.',
       },
     ],
     links: [
@@ -33,9 +33,9 @@ export const Route = createFileRoute('/docs/numora/features/validation')({
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Custom Validation with isAllowed in Numora',
+            headline: 'Validation with isAllowed in Numora',
             description:
-              'Use the isAllowed predicate to reject invalid numeric input before it commits. Enforce caps, business rules, and other invariants without writing your own keydown handlers.',
+              'Use the isAllowed predicate to reject invalid numeric input before it commits. Enforce caps and business rules without writing your own keydown handlers.',
             url: 'https://numeric-input.com/docs/numora/features/validation',
             author: {
               '@type': 'Person',
@@ -51,7 +51,7 @@ export const Route = createFileRoute('/docs/numora/features/validation')({
               {
                 '@type': 'ListItem',
                 position: 2,
-                name: 'Numora JS',
+                name: 'Numora',
                 item: 'https://numeric-input.com/docs/numora',
               },
               {
@@ -71,27 +71,24 @@ export const Route = createFileRoute('/docs/numora/features/validation')({
 
 function Validation() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Custom Validation</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Reject keystrokes and pastes <em>before</em> they commit using an <code>isAllowed</code>{' '}
-        predicate. Useful for enforcing caps, business rules, or format invariants that don't fit
-        one of the built-in options.
+    <div className="docs-prose max-w-[40rem]">
+      <h1>Validation</h1>
+      <p>
+        An <code>isAllowed</code> predicate rejects keystrokes and pastes <em>before</em> they
+        commit. Use it for business rules or format constraints that don't fit a built-in option.
       </p>
 
-      <h2 className="text-foreground text-2xl">Shape</h2>
       <CodeBlock language="typescript">
         {`type IsAllowed = (rawValue: string) => boolean`}
       </CodeBlock>
 
-      <p className="text-muted-foreground text-base leading-6">
-        <code>rawValue</code> is the sanitized, raw (no-separator) string that <em>would</em>
-        be committed by this keystroke or paste. Return <code>true</code> to accept it,
-        <code>false</code> to discard it - the input stays at its previous value and no
-        <code>onChange</code> fires.
+      <p>
+        <code>rawValue</code> is the sanitized, raw (no-separator) string that <em>would</em>{' '}
+        be committed. Return <code>true</code> to accept it, <code>false</code> to discard it. The
+        input keeps its previous value and no <code>onChange</code> fires.
       </p>
 
-      <h2 className="text-foreground text-2xl">Example: cap at 100</h2>
+      <h2>Example: cap at 100</h2>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
@@ -104,14 +101,14 @@ const input = new NumoraInput(container, {
 })`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">Example: only multiples of 5</h2>
+      <h2>Example: whole numbers, up to 6 digits</h2>
       <CodeBlock language="typescript">
         {`new NumoraInput(container, {
-  isAllowed: (raw) => raw === '' || /^[0-9]+$/.test(raw) && Number(raw) % 5 === 0,
+  isAllowed: (raw) => /^\\d{0,6}$/.test(raw),
 })`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">Notes</h2>
+      <h2>Notes</h2>
       <ul>
         <li>
           Runs <em>after</em> sanitization and formatting, but <em>before</em> the DOM is mutated
@@ -121,10 +118,11 @@ const input = new NumoraInput(container, {
           Always allow the intermediate strings users need to type their way to a valid value (empty
           string, lone <code>-</code> or decimal separator)
         </li>
-        <li>Keep the predicate cheap - it runs on every keystroke</li>
+        <li>Keep the predicate cheap, because it runs on every keystroke</li>
         <li>
-          Combine with <code>maxLength</code> for length caps and <code>decimalMaxLength</code> for
-          decimal-precision caps; <code>isAllowed</code> is for everything else
+          For length and decimal-precision caps, use{' '}
+          <Link to="/docs/numora/features/max-length">max length</Link> and{' '}
+          <Link to="/docs/numora/features/decimals">decimals</Link> instead
         </li>
       </ul>
     </div>

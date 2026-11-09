@@ -1,6 +1,8 @@
 import { CodeBlock } from '@/components/CodeBlock';
+import { WriteSuppressionDiagram } from '../diagrams/WriteSuppressionDiagram';
 
-const code = `useEffect(() => {
+const code = `// (trimmed)
+useEffect(() => {
   const input = internalInputRef.current
   if (!input) return
 
@@ -42,16 +44,14 @@ export function ReactSyntheticBypassSection() {
       </h2>
       <p>
         React's event system uses <strong>delegation</strong>: a single listener at the root
-        container fires handlers during the bubbling phase. For most events this is fine. For{' '}
-        <code>beforeinput</code> it is fatal - by the time bubbling reaches the root, the browser
-        has already committed the character to the DOM. Calling{' '}
-        <code>e.nativeEvent.preventDefault()</code> at that point is a no-op.
+        container fires handlers during the bubbling phase. That works for most events, but not for{' '}
+        <code>beforeinput</code>. React's <code>onBeforeInput</code> is not the native event. React
+        synthesizes it from <code>textInput</code>, <code>keypress</code> and composition events,
+        so it cannot reliably cancel the edit before the browser applies it.
       </p>
       <p>
-        This was verified empirically: switching to React's <code>onBeforeInput</code> prop caused
-        all validation and sanitisation to silently fail - any character could be typed.
-        ProseMirror, Slate, and Lexical hit the same constraint and all use native{' '}
-        <code>addEventListener</code> for <code>beforeinput</code>.
+        Switching to React's <code>onBeforeInput</code> prop broke validation and sanitization, and
+        any character could be typed. So Numora React registers the native listener itself.
       </p>
       <p>
         The listener is registered once at mount on the actual element. Mutable options are read
@@ -69,6 +69,7 @@ export function ReactSyntheticBypassSection() {
         write, and that event would reach the React-side <code>handleChange</code> and call{' '}
         <code>onChange</code> a <em>second</em> time.
       </p>
+      <WriteSuppressionDiagram />
       <p>
         <code>withInternalWrite</code> is the gate: it sets <code>suppressNextInputEventRef</code>{' '}
         to <code>true</code> for the duration of the write, and <code>handleChange</code> returns

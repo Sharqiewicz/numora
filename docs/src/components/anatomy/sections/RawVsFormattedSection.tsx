@@ -10,7 +10,7 @@ const reactCode = `import { NumoraInput, type NumoraInputChangeEvent } from 'num
   onChange={(e: NumoraInputChangeEvent) => {
     e.target.value           // → "1234.56"   (raw, no separators)
     e.target.formattedValue  // → "1,234.56"  (display string)
-    e.target.selectionStart  // → caret position
+    e.target.selectionStart  // → cursor position
   }}
 />`;
 
@@ -29,18 +29,17 @@ export function RawVsFormattedSection({ pkg }: SectionProps) {
       <h2>Raw value vs formatted value</h2>
       <p>
         Every formatting cycle produces two strings: the formatted display string (
-        <code>"1,234.56"</code>) and the raw numeric string (<code>"1234.56"</code>). The raw value
-        is what your form, your validator, and your API expect; the formatted value is what the user
-        sees.
+        <code>"1,234.56"</code>) and the raw numeric string (<code>"1234.56"</code>). Your form, validator and API
+        expect the raw value. The user sees the formatted value.
       </p>
       {pkg === 'numora-react' ? (
         <>
           <p>
-            In <code>numora-react</code>, both are exposed on the change event's target.
+            In Numora React, both are exposed on the change event's target.{' '}
             <code>e.target.value</code> returns the raw value via a Proxy;{' '}
-            <code>e.target.formattedValue</code> is the display string. The same target is also a
-            real <code>HTMLInputElement</code>, so <code>selectionStart</code> and friends keep
-            working:
+            <code>e.target.formattedValue</code> is the display string. The same target also behaves as a
+            real <code>HTMLInputElement</code>, so <code>selectionStart</code> and the other
+            properties still work:
           </p>
           <CodeBlock language="tsx">{reactCode}</CodeBlock>
         </>
@@ -54,7 +53,7 @@ export function RawVsFormattedSection({ pkg }: SectionProps) {
           <CodeBlock language="typescript">{vanillaCode}</CodeBlock>
         </>
       )}
-      <p>Type below - both readouts update on every keystroke:</p>
+      <p>Type below. Both readouts update on every keystroke:</p>
       <ValueReadout />
     </section>
   );

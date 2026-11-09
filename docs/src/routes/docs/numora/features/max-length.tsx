@@ -4,23 +4,23 @@ import { CodeBlock } from '@/components/CodeBlock';
 export const Route = createFileRoute('/docs/numora/features/max-length')({
   head: () => ({
     meta: [
-      { title: 'Max Length (Raw-Counted) | Numora' },
+      { title: 'Max length | Numora' },
       {
         name: 'description',
         content:
-          'Cap numeric input length by raw digits with Numora. Thousand separators and decimal points are counted the way users actually think about length - not by formatted character count.',
+          'Cap numeric input length by raw digits with Numora. Thousand separators are not counted, so the limit applies to the digits and not to the formatted character count.',
       },
-      { property: 'og:title', content: 'Max Length (Raw-Counted) | Numora' },
+      { property: 'og:title', content: 'Max length | Numora' },
       {
         property: 'og:description',
         content:
-          'Cap numeric input length by raw digits with Numora. Separator-aware truncation for financial inputs.',
+          'Cap numeric input length by raw digits with Numora. Thousand separators are not counted, so the limit applies to the digits and not to the formatted character count.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/max-length' },
-      { name: 'twitter:title', content: 'Max Length (Raw-Counted) | Numora' },
+      { name: 'twitter:title', content: 'Max length | Numora' },
       {
         name: 'twitter:description',
-        content: 'Cap numeric input length by raw digits with Numora.',
+        content: 'Cap numeric input length by raw digits with Numora. Thousand separators are not counted, so the limit applies to the digits and not to the formatted character count.',
       },
     ],
     links: [
@@ -33,9 +33,9 @@ export const Route = createFileRoute('/docs/numora/features/max-length')({
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Max Length in Numora - Raw-Counted Numeric Input Length Limit',
+            headline: 'Max length in Numora: a raw-counted numeric input length limit',
             description:
-              'Cap numeric input length by raw digits with Numora. Thousand separators are excluded from the count, so the limit reflects the actual numeric value rather than the formatted display.',
+              'Cap numeric input length by raw digits with Numora. Thousand separators are excluded from the count, so the limit applies to the numeric value and not to the formatted display.',
             url: 'https://numeric-input.com/docs/numora/features/max-length',
             author: {
               '@type': 'Person',
@@ -51,13 +51,13 @@ export const Route = createFileRoute('/docs/numora/features/max-length')({
               {
                 '@type': 'ListItem',
                 position: 2,
-                name: 'Numora JS',
+                name: 'Numora',
                 item: 'https://numeric-input.com/docs/numora',
               },
               {
                 '@type': 'ListItem',
                 position: 3,
-                name: 'Max Length',
+                name: 'Max length',
                 item: 'https://numeric-input.com/docs/numora/features/max-length',
               },
             ],
@@ -71,66 +71,58 @@ export const Route = createFileRoute('/docs/numora/features/max-length')({
 
 function MaxLength() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Max Length</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Cap the input by raw character count - thousand separators are excluded from the limit, so
-        the cap reflects the actual numeric value rather than the formatted display.
-      </p>
-
-      <h2 className="text-foreground text-2xl">Why not the native HTML attribute?</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        The native <code>maxLength</code> attribute on <code>&lt;input&gt;</code> counts every
-        formatted character. With thousand separators, <code>1,234,567</code> is 9 characters; the
-        user thinks of it as 7 digits. Numora's option counts the raw value the way users actually
-        reason about length.
+    <div className="docs-prose max-w-[40rem]">
+      <h1>Max length</h1>
+      <p>
+        Max length caps the input by raw character count, so thousand separators are excluded.
+        The native <code>maxLength</code> attribute counts formatted characters:{' '}
+        <code>1,234,567</code> is 9 characters but only 7 digits, and Numora counts 7.
       </p>
 
       <CodeBlock language="typescript">
-        {`import { NumoraInput } from 'numora'
+        {`import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
 
 const input = new NumoraInput(container, {
   maxLength: 7,
+  groupingStyle: GroupingStyle.Thousand,
   thousandSeparator: ',',
+  formatOn: FormatOn.Change,
 })
 
 // User types: 1, 2, 3, 4, 5, 6, 7  → "1,234,567"  (allowed)
 // Next keystroke is blocked - raw length is already 7.`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">Rules</h2>
+      <h2>Rules</h2>
       <ul>
         <li>
-          Counts the <strong>raw</strong> value - thousand separators are stripped before measuring
+          Counts the <strong>raw</strong> value after sanitization. Thousand separators and{' '}
+          <code>decimalMinLength</code> padding are excluded
         </li>
         <li>
-          The decimal separator <em>is</em> counted (it's part of the raw value)
+          The decimal separator <em>is</em> counted (it is part of the raw value)
         </li>
         <li>
           A leading <code>-</code> sign <em>is</em> counted
         </li>
         <li>
-          Counts raw characters after sanitization, excluding grouping separators and{' '}
-          <code>decimalMinLength</code> padding
-        </li>
-        <li>
           Truncation happens from the right; if it would leave a trailing decimal separator, that
-          separator is also stripped (<code>"1234.56"</code> capped at 5 → <code>"1234"</code>)
+          separator is also removed (<code>"1234.56"</code> capped at 5 → <code>"1234"</code>)
         </li>
         <li>
           If truncation would leave a bare <code>"-"</code>, the result is <code>""</code>
         </li>
       </ul>
 
-      <h2 className="text-foreground text-2xl">Pasted values</h2>
-      <p className="text-muted-foreground text-base leading-6">
+      <h2>Pasted values</h2>
+      <p>
         Pastes are truncated after sanitization. Pasting <code>"99999999"</code> into an input with{' '}
         <code>maxLength: 4</code> commits <code>"9999"</code>.
       </p>
 
-      <h2 className="text-foreground text-2xl">Standalone utility</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        For one-off truncation outside of the input pipeline, Numora exports
+      <h2>Standalone utility</h2>
+      <p>
+        To truncate a string outside the input pipeline, use the exported{' '}
         <code>truncateToMaxLength</code>:
       </p>
 
@@ -138,8 +130,6 @@ const input = new NumoraInput(container, {
         {`import { truncateToMaxLength } from 'numora'
 
 truncateToMaxLength('1234567', 5)        // → '12345'
-truncateToMaxLength('1234.56', 5)        // → '1234'   (trailing dot stripped)
-truncateToMaxLength('-1234567', 5)       // → '-1234'  (minus counts)
 truncateToMaxLength('1234,56', 5, ',')   // → '1234'   (custom separator)`}
       </CodeBlock>
     </div>

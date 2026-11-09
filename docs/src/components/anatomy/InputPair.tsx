@@ -1,4 +1,6 @@
-import { type ReactNode } from 'react';
+import { Check, X } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { DiagramFrame } from './kit';
 
 interface PaneProps {
   label: string;
@@ -10,34 +12,47 @@ interface PaneProps {
 interface InputPairProps {
   left: PaneProps;
   right: PaneProps;
-  caption?: ReactNode;
 }
 
-const TONE_COLORS: Record<NonNullable<PaneProps['tone']>, string> = {
-  neutral: 'text-foreground',
-  bad: 'text-signal-red',
-  good: 'text-signal-green',
-};
-
-export function InputPair({ left, right, caption }: InputPairProps) {
+/** Icon + word verdict. Colour sits on the icon only; the word stays neutral, so one chip, one signal. */
+export function Verdict({ tone }: { tone: 'bad' | 'good' }) {
+  const bad = tone === 'bad';
+  const Icon = bad ? X : Check;
   return (
-    <div className="my-6 space-y-3 rounded-lg border bg-muted/30 p-4">
-      <div className="grid gap-4 md:grid-cols-2">
-        {[left, right].map((pane, i) => (
-          <div key={i} className="space-y-2">
-            <div className={`text-sm font-medium ${TONE_COLORS[pane.tone ?? 'neutral']}`}>
-              {pane.label}
-            </div>
-            {pane.input}
-            {pane.note && <div className="text-xs text-muted-foreground">{pane.note}</div>}
+    <span
+      className="inline-flex items-center gap-1 text-[12px] font-medium text-muted-foreground"
+    >
+      <Icon
+        className={`size-3.5 ${bad ? 'text-signal-red-fg' : 'text-signal-green-fg'}`}
+        aria-hidden
+      />
+      {bad ? 'Wrong' : 'Right'}
+    </span>
+  );
+}
+
+export function InputPair({ left, right }: InputPairProps) {
+  return (
+    <DiagramFrame variant="demo">
+      <div className="grid gap-6 md:grid-cols-2">
+        {[left, right].map((pane) => (
+          <div key={pane.label} className="space-y-2">
+            {/* biome-ignore lint/a11y/noLabelWithoutControl: the input is passed in as pane.input */}
+            <label className="block space-y-2">
+              <span className="flex items-center justify-between gap-2 text-[13px] font-medium text-foreground">
+                {pane.label}
+                {pane.tone && pane.tone !== 'neutral' && (
+                  <span aria-hidden>
+                    <Verdict tone={pane.tone} />
+                  </span>
+                )}
+              </span>
+              {pane.input}
+            </label>
+            {pane.note && <div className="text-[13px] text-muted-foreground">{pane.note}</div>}
           </div>
         ))}
       </div>
-      {caption && (
-        <div className="border-t border-border/40 pt-3 text-xs text-muted-foreground">
-          {caption}
-        </div>
-      )}
-    </div>
+    </DiagramFrame>
   );
 }

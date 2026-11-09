@@ -41,6 +41,8 @@ export function TabsClipPath({
         {tabs.map((tab) => (
           <li key={tab}>
             <button
+              type="button"
+              aria-pressed={activeTab === tab}
               className="flex h-[28px] cursor-pointer items-center gap-2 rounded-xl px-2 font-semibold text-white text-xs hover:bg-secondary/50 active:scale-[0.96] transition-[color,background-color,transform,scale] duration-150 ease-out-expo"
               data-tab={tab}
               onClick={() => {

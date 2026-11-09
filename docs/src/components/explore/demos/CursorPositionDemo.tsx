@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { NumoraInput } from 'numora-react';
+import { NumoraInput, type NumoraInputChangeEvent } from 'numora-react';
 import { FormatOn, GroupingStyle } from 'numora';
 import { ProblemSection } from '../ProblemSection';
 import { InputComparison } from '../InputComparison';
@@ -9,12 +9,14 @@ import { CursorVisualizer } from '../CursorVisualizer';
 export function CursorPositionDemo() {
   const [naiveValue, setNaiveValue] = useState('');
   const [numoraValue, setNumoraValue] = useState('');
+  const [numoraDisplay, setNumoraDisplay] = useState('');
   const [naiveCursor, setNaiveCursor] = useState(0);
   const [numoraCursor, setNumoraCursor] = useState(0);
   const numoraInputRef = useRef<HTMLInputElement>(null);
 
-  const handleNumoraChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNumoraChange = useCallback((e: NumoraInputChangeEvent) => {
     setNumoraValue(e.target.value);
+    setNumoraDisplay(e.target.formattedValue ?? e.target.value);
   }, []);
 
   const handleNumoraSelect = useCallback(() => {
@@ -34,19 +36,19 @@ export function CursorPositionDemo() {
     <ProblemSection
       id="cursor-position"
       problemNumber={2}
-      title="Cursor Position Hell"
-      subtitle="Formatting destroys cursor position"
+      title="Cursor position hell"
+      subtitle="Formatting moves the cursor"
       description={
         <p>
-          When you format a number (adding commas), the cursor jumps to the end. Try typing{' '}
-          <code className="px-1 py-0.5 rounded bg-muted font-mono">1234567</code> rapidly in both
+          Add commas to a number as it is typed and the cursor jumps to the end. Type{' '}
+          <code className="px-1 py-0.5 rounded bg-muted font-mono">1234567</code> quickly in both
           inputs and watch the cursor.
         </p>
       }
     >
       <InputComparison
-        leftLabel="Naive Formatting"
-        rightLabel="Numora Input"
+        leftLabel="Naive formatting"
+        rightLabel="Numora"
         leftInput={
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground mb-2">
@@ -57,12 +59,12 @@ export function CursorPositionDemo() {
               value={naiveValue}
               onChange={setNaiveValue}
               onCursorChange={setNaiveCursor}
-              placeholder="Type 1234567..."
+              placeholder="1234567"
             />
             <CursorVisualizer value={formatWithCommas(naiveValue)} cursorPosition={naiveCursor} />
             <div className="p-3 rounded-lg bg-signal-red/10 border border-signal-red/30 text-sm">
               <p className="text-signal-red">
-                The cursor always jumps to the end, making editing impossible.
+                The cursor jumps to the end every time, so you can't edit the middle.
               </p>
             </div>
           </div>
@@ -70,7 +72,7 @@ export function CursorPositionDemo() {
         rightInput={
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground mb-2">
-              Type rapidly and the cursor stays in the logical position:
+              Type quickly. The cursor stays where it belongs:
             </p>
             <NumoraInput
               ref={numoraInputRef}
@@ -82,13 +84,13 @@ export function CursorPositionDemo() {
               formatOn={FormatOn.Change}
               thousandSeparator=","
               groupingStyle={GroupingStyle.Thousand}
-              placeholder="Type 1234567..."
+              placeholder="1234567"
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
-            <CursorVisualizer value={numoraValue} cursorPosition={numoraCursor} />
+            <CursorVisualizer value={numoraDisplay} cursorPosition={numoraCursor} />
             <div className="p-3 rounded-lg bg-signal-green/10 border border-signal-green/30 text-sm">
               <p className="text-signal-green">
-                Cursor stays where you expect it, even as commas are added.
+                The cursor stays put, even as Numora adds commas.
               </p>
             </div>
           </div>

@@ -20,10 +20,9 @@ import {
   UserInputSection,
 } from '@/components/anatomy/sections';
 
-const TITLE =
-  'Anatomy of NumoraInput - React Numeric Input Internals, beforeinput Bypass, and Proxy Targets';
+const TITLE = 'Anatomy | Numora React';
 const DESCRIPTION =
-  "A guided dissection of the React NumoraInput component: the HTML input primitive, the four native events, IEEE 754 pitfalls, the nine-step sanitization pipeline, why beforeinput cannot use React's synthetic event delegation, defaultValue vs value, and the Proxy on e.target.";
+  "How the React NumoraInput component works: the HTML input element, the four native events, IEEE 754 float errors, the ten-step sanitization pipeline, why beforeinput cannot use React's synthetic events, defaultValue vs value, and the Proxy on e.target.";
 
 export const Route = createFileRoute('/docs/numora-react/anatomy')({
   head: () => ({
@@ -33,10 +32,12 @@ export const Route = createFileRoute('/docs/numora-react/anatomy')({
       { property: 'og:title', content: TITLE },
       { property: 'og:description', content: DESCRIPTION },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/anatomy' },
-      { name: 'twitter:title', content: 'Anatomy of NumoraInput' },
+      { name: 'twitter:title', content: TITLE },
       { name: 'twitter:description', content: DESCRIPTION },
     ],
-    links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/anatomy' }],
+    links: [
+      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/anatomy' },
+    ],
     scripts: [
       {
         type: 'application/ld+json',
@@ -87,14 +88,14 @@ export const Route = createFileRoute('/docs/numora-react/anatomy')({
 function Anatomy() {
   const pkg = 'numora-react' as const;
   return (
-    <div className="prose prose-invert max-w-xl">
+    <div className="docs-prose max-w-[40rem]">
       <Hero pkg={pkg} />
       <div className="space-y-16">
-        <NativeInputSection />
+        <NativeInputSection pkg={pkg} />
         <EventPipelineSection />
         <FloatVsStringSection />
         <UserInputSection />
-        <SanitizationSection pkg={pkg} />
+        <SanitizationSection />
         <PlainVsNumoraSection />
         <KeydownSection />
         <BeforeInputSection />

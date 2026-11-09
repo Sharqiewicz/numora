@@ -1,4 +1,7 @@
+import { motion, useReducedMotion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { DemoInput, DiagramFrame, DUR, demoInsetClass, EASE } from './kit';
 
 interface LogEntry {
   id: number;
@@ -7,17 +10,21 @@ interface LogEntry {
   detail: string;
 }
 
-const EVENT_COLORS: Record<string, string> = {
-  keydown: 'text-signal-purple',
-  beforeinput: 'text-signal-amber',
-  input: 'text-signal-green',
+// Bar colours match EventPipelineDiagram: amber for beforeinput, neutral otherwise.
+const BAR: Record<string, string> = {
+  beforeinput: 'border-signal-amber-line',
+};
+const NAME: Record<string, string> = {
+  beforeinput: 'text-signal-amber-fg',
   keyup: 'text-muted-foreground',
 };
 
 export function EventPipelineDemo() {
   const [log, setLog] = useState<LogEntry[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
   const idRef = useRef(0);
+  const reduced = useReducedMotion() ?? false;
 
   useEffect(() => {
     const input = inputRef.current;
@@ -50,34 +57,66 @@ export function EventPipelineDemo() {
     };
   }, []);
 
+  const newestId = log.length ? log[log.length - 1].id : -1;
+
+  useEffect(() => {
+    const el = logRef.current;
+    if (el && newestId >= 0) el.scrollTop = el.scrollHeight;
+  }, [newestId]);
+
   return (
-    <div className="my-6 space-y-3 rounded-lg border bg-muted/30 p-4">
-      <input
-        ref={inputRef}
-        type="text"
-        placeholder="Type to see events fire…"
-        className="w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring"
-      />
-      <div className="max-h-48 overflow-y-auto rounded bg-background p-3 font-mono text-xs">
-        {log.length === 0 ? (
-          <div className="text-muted-foreground transition-[opacity,transform] duration-150 ease-out-expo starting:opacity-0 starting:-translate-y-1 motion-reduce:transition-none">
-            {'// event log - start typing'}
-          </div>
-        ) : (
-          log.map((entry) => (
-            <div
-              key={entry.id}
-              className="leading-relaxed transition-[opacity,transform] duration-150 ease-out-expo starting:opacity-0 starting:-translate-y-1 motion-reduce:transition-none"
-            >
-              <span className="text-muted-foreground">+{String(entry.t).padStart(4, ' ')}ms </span>
-              <span className={EVENT_COLORS[entry.event] ?? 'text-foreground'}>
-                {entry.event.padEnd(11, ' ')}
-              </span>
-              <span className="text-muted-foreground/80"> {entry.detail}</span>
-            </div>
-          ))
-        )}
+    <DiagramFrame variant="demo">
+      <div className="space-y-3">
+        <DemoInput
+          ref={inputRef}
+          type="text"
+          aria-label="Event test input"
+          placeholder="1234"
+        />
+        <section
+          ref={logRef}
+          // biome-ignore lint/a11y/noNoninteractiveTabindex: scrollable region must be keyboard reachable
+          tabIndex={0}
+          aria-label="Event log"
+          className={cn(
+            demoInsetClass,
+            'min-h-32 max-h-48 overflow-y-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          )}
+        >
+          {log.length === 0 ? (
+            <div className="text-muted-foreground">{'// event log: start typing'}</div>
+          ) : (
+            log.map((entry) => (
+              <div
+                key={entry.id}
+                className={cn(
+                  'relative grid grid-cols-[minmax(0,1fr)_auto] gap-x-2 border-l-2 py-0.5 pl-2 leading-relaxed sm:grid-cols-[6.5rem_4.5rem_minmax(0,1fr)]',
+                  BAR[entry.event] ?? 'border-surface-7',
+                )}
+              >
+                {entry.event === 'beforeinput' && (
+                  <motion.span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 bg-signal-amber-surface"
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: 0 }}
+                    transition={{ duration: reduced ? DUR.fast : DUR.flash, ease: EASE.outExpo }}
+                  />
+                )}
+                <span className={cn('relative', NAME[entry.event] ?? 'text-foreground')}>
+                  {entry.event}
+                </span>
+                <span className="relative text-right tabular-nums text-muted-foreground sm:text-left">
+                  +{entry.t}ms
+                </span>
+                <span className="relative col-span-full min-w-0 text-muted-foreground [overflow-wrap:anywhere] sm:col-span-1">
+                  {entry.detail}
+                </span>
+              </div>
+            ))
+          )}
+        </section>
       </div>
-    </div>
+    </DiagramFrame>
   );
 }

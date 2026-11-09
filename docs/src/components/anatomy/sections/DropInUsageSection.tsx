@@ -34,10 +34,10 @@ export function DropInUsageSection({ pkg }: SectionProps) {
   return (
     <section id="drop-in-usage" className="space-y-4 scroll-mt-24">
       <h2>Drop-in usage</h2>
-      <p>Everything above is one component (or one class) and a handful of options. Install:</p>
+      <p>Install:</p>
       <CodeBlock language="bash">{installCmd}</CodeBlock>
       <p>
-        And paste a messy payload like <code>"$1,234.56abc"</code> into this:
+        Paste a messy value like <code>"$1,234.56abc"</code> into the demo, then press Ctrl/Cmd+Z:
       </p>
       <ExampleWithDemo
         code={pkg === 'numora-react' ? reactExample : vanillaExample}
@@ -49,11 +49,12 @@ export function DropInUsageSection({ pkg }: SectionProps) {
           decimalMaxLength: 2,
           enableCompactNotation: true,
         }}
-        placeholder="Try $1,234.56abc, then Ctrl+Z…"
+        placeholder="$1,234.56abc"
+        label="Paste a messy value"
       />
       <p>
-        The full options reference lives on the <Link to={installPath}>installation page</Link>, and
-        every individual feature has its own deep-dive in the sidebar.
+        The full options reference is on the <Link to={installPath}>installation page</Link>. Each
+        feature has its own page in the sidebar.
       </p>
     </section>
   );

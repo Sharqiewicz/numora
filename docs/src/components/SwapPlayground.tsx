@@ -39,8 +39,8 @@ function Annotation({ side, title, description, delay, topOffset, skip }: Annota
   return (
     <div
       className={`
-        hidden md:block absolute w-44
-        ${isLeft ? '-left-52 text-right' : '-right-52 text-left'}
+        hidden lg:block absolute w-48
+        ${isLeft ? '-left-56 text-right' : '-right-56 text-left'}
         opacity-0
         ${isLeft ? 'animate-slide-in-left' : 'animate-slide-in-right'}
       `}
@@ -67,9 +67,9 @@ function Annotation({ side, title, description, delay, topOffset, skip }: Annota
         style={dotStyle}
       />
 
-      <div className="animate-float-gentle" style={{ animationDelay: `${delay + 600}ms` }}>
+      <div>
         <div className="text-secondary font-semibold text-sm mb-1 tracking-tight">{title}</div>
-        <div className="text-xs text-muted-foreground leading-relaxed">{description}</div>
+        <div className="text-sm text-muted-foreground leading-snug">{description}</div>
       </div>
     </div>
   );
@@ -91,12 +91,12 @@ export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {
 
   const defaultHeading = (
     <>
-      <span className="text-secondary">DeFi Swap Interface</span>
+      DeFi swap interface
     </>
   );
 
   const defaultDescription =
-    'One example of where numora shines. Handling numeric state in DeFi is deceptively hard - sanitize keystrokes, expand scientific notation, preserve cursor position, and more.';
+    'A swap form is a good test for a numeric input. It has to sanitize keystrokes, expand scientific notation and keep the cursor in place.';
 
   return (
     <div className="relative bg-radial-[at_50%_60%] from-white/10 via-white/0 to-white/0">
@@ -130,7 +130,7 @@ export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {
         className="text-center mb-12 mt-8 max-w-3xl mx-auto px-6 animate-fade-in opacity-0"
         style={d(150)}
       >
-        <h2 className="[text-wrap:balance] text-4xl mb-4">
+        <h2 className="text-4xl font-semibold tracking-tight text-foreground mb-4">
           {heading ? (
             <>
               Built for <br className="block sm:hidden" />
@@ -146,37 +146,37 @@ export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {
       <div className="relative max-w-md mx-auto">
         <Annotation
           side="left"
-          title="Real-time Formatting"
-          description="Auto-formats with commas as you type. Cursor stays in place. (on blur or on change)"
+          title="Real-time formatting"
+          description="Separators appear as you type. Your state gets the raw value."
           delay={100}
-          topOffset="1.25rem"
+          topOffset="2.75rem"
           skip={skipIntro}
         />
 
         <Annotation
           side="left"
-          title="Compact Notation"
-          description="Type 1k, 1m, 1b... Or paste scientific like 1e-5."
+          title="Compact notation"
+          description="Type 1.5k or 2m, or paste scientific like 1e-7."
           delay={500}
-          topOffset="10rem"
+          topOffset="8.875rem"
           skip={skipIntro}
         />
 
         <Annotation
           side="right"
           title="Cursor control"
-          description="No cursor jumping when typing/removing characters."
+          description="The cursor stays put when commas appear or disappear."
           delay={800}
-          topOffset="5rem"
+          topOffset="2.75rem"
           skip={skipIntro}
         />
 
         <Annotation
           side="right"
           title="Sanitization"
-          description="All inputs are sanitized instantly. No bad data gets through."
+          description="Letters, extra dots and stray symbols never reach your state."
           delay={1100}
-          topOffset="14rem"
+          topOffset="8.875rem"
           skip={skipIntro}
         />
 

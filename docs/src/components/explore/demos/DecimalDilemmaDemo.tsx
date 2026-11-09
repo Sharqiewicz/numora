@@ -21,14 +21,13 @@ export function DecimalDilemmaDemo() {
     <ProblemSection
       id="decimal-dilemma"
       problemNumber={5}
-      title="The Decimal Dilemma"
+      title="The decimal dilemma"
       subtitle="Is 1,234 one thousand or 1.234?"
       description={
         <p>
           In the US, <code className="px-1 py-0.5 rounded bg-muted font-mono">1,234.56</code> means
           one thousand two hundred thirty-four and 56 cents. In Europe, the same number is written
-          as <code className="px-1 py-0.5 rounded bg-muted font-mono">1.234,56</code>. Native inputs
-          have no idea which you mean.
+          as <code className="px-1 py-0.5 rounded bg-muted font-mono">1.234,56</code>. A native input can't tell which one you mean.
         </p>
       }
     >
@@ -56,8 +55,8 @@ export function DecimalDilemmaDemo() {
       <div className="mb-8 p-4 rounded-lg bg-muted/30 border border-border">
         <p className="text-sm text-muted-foreground mb-2">
           Try typing <code className="px-1 py-0.5 rounded bg-muted font-mono">1.2.3.4</code> or
-          <code className="px-1 py-0.5 rounded bg-muted font-mono ml-1">1,2,3,4</code> to see how
-          multiple separators are handled.
+          <code className="px-1 py-0.5 rounded bg-muted font-mono ml-1">1,2,3,4</code> to see what happens with
+          repeated separators.
         </p>
         <div className="grid grid-cols-2 gap-4 mt-3">
           <div>
@@ -72,8 +71,8 @@ export function DecimalDilemmaDemo() {
       </div>
 
       <InputComparison
-        leftLabel="Native type='number'"
-        rightLabel="Numora Input"
+        leftLabel={'Native <input type="number">'}
+        rightLabel="Numora"
         leftInput={
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
@@ -83,11 +82,11 @@ export function DecimalDilemmaDemo() {
               mode="native-number"
               value={nativeValue}
               onChange={setNativeValue}
-              placeholder={`Type ${exampleValid}...`}
+              placeholder={exampleValid}
             />
             <div className="p-3 rounded-lg bg-signal-red/10 border border-signal-red/30 text-sm">
               <p className="text-signal-red">
-                Native input rejects commas entirely and can't be configured for locale.
+                A native input rejects commas and has no locale setting.
               </p>
             </div>
           </div>
@@ -101,13 +100,12 @@ export function DecimalDilemmaDemo() {
               value={numoraValue}
               onChange={(e) => setNumoraValue(e.target.value)}
               decimalSeparator={decimalSeparator}
-              placeholder={`Type ${exampleValid}...`}
+              placeholder={exampleValid}
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
             <div className="p-3 rounded-lg bg-signal-green/10 border border-signal-green/30 text-sm">
               <p className="text-signal-green">
-                Configurable decimal separator. Multiple decimals are automatically prevented (only
-                the first is kept).
+                You set the decimal separator. Numora keeps the first decimal separator and drops the rest.
               </p>
             </div>
           </div>

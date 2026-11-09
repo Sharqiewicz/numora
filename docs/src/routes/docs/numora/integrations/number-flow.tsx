@@ -1,21 +1,22 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
+import { NumberFlowCaveats } from '@/components/docs/NumberFlowCaveats';
+import { OverlayExplainer } from '@/components/docs/OverlayExplainer';
 import { NumberFlowVanillaOverlayDemo } from '@/components/NumberFlowVanillaOverlayDemo';
 
 const PAGE_URL = 'https://numeric-input.com/docs/numora/integrations/number-flow';
 const LIB_URL = 'https://number-flow.barvian.me/vanilla';
 const AUTHOR_URL = 'https://barvian.me/';
 
-const META_TITLE = 'NumberFlow Vanilla Integration - Animated Numeric Input with Numora';
+const META_TITLE = 'NumberFlow integration | Numora';
 const META_DESCRIPTION =
-  'Integrate the vanilla NumberFlow web component by Maxwell Barvian with a vanilla Numora numeric input to animate each digit while the real input keeps owning the keyboard, undo, IME, and string precision.';
+  'Use the vanilla NumberFlow web component by Maxwell Barvian with a vanilla Numora numeric input to animate each digit while the real input keeps handling the keyboard, undo, IME and string precision.';
 
 const JSON_LD = [
   {
     '@context': 'https://schema.org',
     '@type': 'TechArticle',
-    headline:
-      'NumberFlow Vanilla Integration with Numora - Animated digits on a vanilla numeric input',
+    headline: 'NumberFlow integration: animated digits on a vanilla numeric input',
     description: META_DESCRIPTION,
     url: PAGE_URL,
     author: { '@type': 'Person', name: 'Kacper Szarkiewicz', url: 'https://x.com/sharqiewicz' },
@@ -48,7 +49,7 @@ const JSON_LD = [
         name: 'Numora',
         item: 'https://numeric-input.com/docs/numora',
       },
-      { '@type': 'ListItem', position: 3, name: 'NumberFlow', item: PAGE_URL },
+      { '@type': 'ListItem', position: 3, name: 'NumberFlow integration', item: PAGE_URL },
     ],
   },
   {
@@ -68,7 +69,7 @@ const JSON_LD = [
         name: 'Does NumberFlow work without React?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. This guide uses the `<number-flow>` web component from the `number-flow` package together with the vanilla NumoraInput class - no React in the runtime. The custom element is a standard browser primitive.',
+          text: 'Yes. This guide uses the `<number-flow>` web component from the `number-flow` package together with the vanilla NumoraInput class, with no React in the runtime. The custom element is a standard browser primitive and works in any framework or none.',
         },
       },
       {
@@ -76,15 +77,15 @@ const JSON_LD = [
         name: 'How does the NumberFlow + Numora overlay work?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'A transparent-text NumoraInput sits on top of a `<number-flow>` element. The input owns the keyboard, undo, IME, and mobile inputmode. A beforeinput microtask sync plus an input listener converts numora.value to a Number, sets flow.format with matching minimumFractionDigits, and calls flow.update() so NumberFlow animates the visible digits.',
+          text: 'A transparent-text NumoraInput sits on top of a `<number-flow>` element. The input owns the keyboard, undo, IME, and mobile inputmode. The onChange option receives the raw value, converts it to a Number, sets flow.format with a matching minimumFractionDigits, and calls flow.update() so NumberFlow animates the visible digits.',
         },
       },
       {
         '@type': 'Question',
-        name: 'Where can I find NumberFlow?',
+        name: 'Where can I install NumberFlow?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: `NumberFlow lives at ${LIB_URL} and is published on npm as \`number-flow\` (vanilla web component) and \`@number-flow/react\` (React).`,
+          text: `NumberFlow lives at ${LIB_URL} and is published on npm as \`number-flow\` (vanilla web component) and \`@number-flow/react\` (React). Install the vanilla pair with \`npm install numora number-flow\`.`,
         },
       },
     ],
@@ -115,90 +116,75 @@ export const Route = createFileRoute('/docs/numora/integrations/number-flow')({
 
 function NumberFlowIntegration() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">NumberFlow Vanilla Integration with Numora</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        <a href={LIB_URL} target="_blank" rel="noreferrer noopener" className="underline link-underline hover:text-foreground transition-colors">
+    <div className="docs-prose max-w-[40rem]">
+      <h1>NumberFlow integration</h1>
+      <p>
+        <a href={LIB_URL} target="_blank" rel="noreferrer noopener">
           <strong>NumberFlow</strong> by Maxwell Barvian
         </a>{' '}
-        ships a vanilla <code>&lt;number-flow&gt;</code> custom element alongside its React wrapper.
-        This guide layers it on top of a transparent-text vanilla <code>NumoraInput</code> so the
+        has a vanilla <code>&lt;number-flow&gt;</code> custom element alongside its React wrapper.
+        This guide layers it on top of a transparent-text vanilla <code>NumoraInput</code>, so the
         editable surface itself appears animated. The real <code>&lt;input&gt;</code> still handles
-        every keystroke; NumberFlow just renders what the user sees.
+        every keystroke, and NumberFlow renders what the user sees.
       </p>
-      <p className="text-muted-foreground text-base leading-6">
+      <p>
         Using React? See the{' '}
-        <Link to="/docs/numora-react/integrations/number-flow" className="underline link-underline hover:text-foreground transition-colors">
+        <Link to="/docs/numora-react/integrations/number-flow">
           Numora React NumberFlow integration
-        </Link>{' '}
-        - it wires the overlay through <code>onChange</code> instead of manual DOM listeners.
+        </Link>
+        .
       </p>
 
       <NumberFlowVanillaOverlayDemo />
-      <p className="text-muted-foreground text-base leading-6 text-center -mt-12 mb-12">
-        <code>FormatOn.Change</code> - digits animate on every keystroke.
+      <p className="text-center -mt-12 mb-12">
+        <code>FormatOn.Change</code>: digits animate on every keystroke.
       </p>
 
-      <p className="text-muted-foreground text-base leading-6">
-        The demo above is rendered inside this React docs site, but the code below is plain
-        TypeScript - no React. It uses the vanilla <code>NumoraInput</code> class and the{' '}
-        <code>&lt;number-flow&gt;</code> custom element directly.
-      </p>
-
-      <h2 className="text-foreground text-2xl">How the overlay works</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Native <code>&lt;input&gt;</code> elements render their <code>value</code> as a string with
-        no child DOM, so animation primitives can't inject animated spans into them directly. The
-        overlay sidesteps that by stacking two layers in the same box:
-      </p>
-      <ul>
-        <li>
-          <strong>Visible layer:</strong> a <code>&lt;number-flow&gt;</code> custom element that
-          animates the formatted display number.
-        </li>
-        <li>
-          <strong>Keyboard layer:</strong> the vanilla <code>NumoraInput</code> positioned on top
-          with <code>color: transparent</code> and a visible caret. It still owns focus, keystrokes,
-          undo, IME, and mobile <code>inputmode</code>.
-        </li>
-      </ul>
-      <p className="text-muted-foreground text-base leading-6">
-        Both layers render the same formatted number. The vanilla <code>NumoraInput</code> class
-        applies formatting in <code>beforeinput</code> via <code>setRangeText</code>, but only runs
-        listeners when an <code>input</code> event follows - which is not guaranteed on every path.
-        The bridge therefore syncs NumberFlow via a <code>beforeinput</code> microtask (typing) and
-        an <code>input</code> listener (undo/redo; paste, since Numora's paste handler dispatches a
-        synthetic <code>input</code> after sanitizing). Each call converts <code>numora.value</code>{' '}
-        to a <code>Number</code>, sets <code>flow.format</code> with a matching{' '}
-        <code>minimumFractionDigits</code> derived from the typed string, and calls{' '}
-        <code>flow.update()</code>. NumberFlow tweens each digit into place. The input itself never
-        animates - but because its text is transparent, you only see the NumberFlow layer.
-      </p>
+      <OverlayExplainer
+        visibleLayer={
+          <>
+            a <code>&lt;number-flow&gt;</code> custom element that animates the formatted display
+            number.
+          </>
+        }
+        input={
+          <>
+            the vanilla <code>NumoraInput</code>
+          </>
+        }
+      >
+        <p>
+          Both layers render the same formatted number. The vanilla <code>NumoraInput</code> class
+          calls its <code>onChange</code> option on every logical value change: typing, paste,
+          the focus-strip, undo/redo and blur reformatting. It receives{' '}
+          <code>{'{ value, formattedValue }'}</code>; <code>value</code> is the raw string (without
+          separators), which <code>Number()</code> can parse. The callback sets <code>flow.format</code> and calls <code>flow.update()</code>,
+          and NumberFlow tweens each digit into place. The input itself never animates, and because
+          its text is transparent, you only see the NumberFlow layer.
+        </p>
+      </OverlayExplainer>
 
       <div className="bg-signal-amber/10 border border-signal-amber/30 rounded-lg p-4 my-4">
-        <p className="text-muted-foreground text-base leading-6 m-0">
-          <strong>Experimental pattern.</strong> This works well for short, append-mostly numeric
-          fields. Unlike string-based morph libraries, NumberFlow animates numbers, which introduces
-          fidelity caveats around trailing decimals, partial input states, and very large values -
-          documented below.
+        <p className="m-0">
+          <strong>Caution:</strong> this pattern is experimental. It suits short, append-mostly numeric
+          fields. Unlike string-based morph libraries, NumberFlow animates numbers, which causes
+          precision caveats with trailing decimals, partial input states and very large values.
+          They are listed below.
         </p>
       </div>
 
-      <h2 className="text-foreground text-2xl">Installation</h2>
+      <h2>Installation</h2>
       <CodeBlock language="bash">
         {`pnpm add numora number-flow
 # or
 npm install numora number-flow`}
       </CodeBlock>
 
-      <h2 id="pattern-1-overlay" className="text-foreground text-2xl">Pattern 1 - Overlay (animated input surface)</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Two DOM nodes in a relative-positioned wrapper, one stylesheet, and a small sync bridge
-        between the two libraries.
-      </p>
+      <h2 id="overlay">Building the overlay</h2>
 
       <CodeBlock language="html">
-        {`<label class="numora-overlay">
+        {`<!-- aria-hidden: screen readers announce the <input> (it has an aria-label), not the decoration -->
+<label class="numora-overlay">
   <span class="numora-overlay-display" aria-hidden="true"></span>
   <div class="numora-overlay-host"></div>
 </label>`}
@@ -216,6 +202,7 @@ npm install numora number-flow`}
 .numora-overlay-display {
   pointer-events: none;
   white-space: pre;
+  /* Stable digit widths while NumberFlow animates, so less layout shift */
   font-variant-numeric: tabular-nums;
 }
 
@@ -228,20 +215,25 @@ npm install numora number-flow`}
 .numora-overlay-host input {
   width: 100%;
   height: 100%;
+  /* Zero margin/padding/border so the input's text origin matches the overlay's */
   margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
+  /* Hide the input's text, keep the cursor */
   color: transparent;
   caret-color: white;
   outline: none;
+  /* Same font on both layers, or the cursor drifts */
   font: inherit;
 }
 
+/* Translucent: an opaque selection would hide the NumberFlow layer */
 .numora-overlay-host input::selection {
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* Hide the input's own placeholder */
 .numora-overlay-host input::placeholder {
   color: transparent;
 }`}
@@ -257,20 +249,8 @@ const host = document.querySelector<HTMLDivElement>('.numora-overlay-host')!
 const flow = document.createElement('number-flow')
 display.appendChild(flow)
 
-const numora = new NumoraInput(host, {
-  formatOn: FormatOn.Change,
-  decimalMaxLength: 2,
-  thousandSeparator: ',',
-  value: '1234567',
-  groupingStyle: GroupingStyle.Thousand,
-})
-const input = numora.getElement()
-input.setAttribute('aria-label', 'Amount')
-
-function syncFlow() {
-  const raw = numora.value
+function syncFlow(raw: string) {
   const decimals = raw.includes('.') ? raw.split('.')[1].length : 0
-  // Mirror typed decimals so trailing zeros stay aligned with the caret.
   flow.format = {
     useGrouping: true,
     minimumFractionDigits: decimals,
@@ -279,204 +259,109 @@ function syncFlow() {
   flow.update(Number(raw) || 0)
 }
 
-syncFlow()
+const numora = new NumoraInput(host, {
+  formatOn: FormatOn.Change,
+  decimalMaxLength: 2,
+  value: '1234567',
+  groupingStyle: GroupingStyle.Thousand,
+  // onChange receives { value, formattedValue }; value is raw ("1234567"), safe for Number().
+  onChange: ({ value }) => syncFlow(value),
+})
+const input = numora.getElement()
+input.setAttribute('aria-label', 'Amount')
 
-// Numora mutates via setRangeText in beforeinput; the input event isn't guaranteed
-// on every path, so sync from both.
-input.addEventListener('beforeinput', () => queueMicrotask(syncFlow))
-input.addEventListener('input', syncFlow)`}
+// The initial value does not fire onChange, so prime the display.
+syncFlow(numora.getValue())`}
       </CodeBlock>
 
-      <h3 className="text-foreground">Why each line matters</h3>
+      <h3>Why each line matters</h3>
       <ul>
         <li>
           <strong>
             <code>import 'number-flow'</code>
           </strong>{' '}
-          - the side-effect import registers <code>&lt;number-flow&gt;</code> as a custom element on{' '}
-          <code>customElements</code>. The library guards the registration call so it's safe to
+          is a side-effect import that registers <code>&lt;number-flow&gt;</code> as a custom element on{' '}
+          <code>customElements</code>. The library guards the registration call, so it's safe to
           import in SSR bundles.
         </li>
         <li>
           <strong>
             <code>formatOn: FormatOn.Change</code>
           </strong>{' '}
-          - keeps the input's display as the formatted string at all times, matching what NumberFlow
+          keeps the input's display as the formatted string at all times, matching what NumberFlow
           shows.
+        </li>
+        <li>
+          <strong>
+            <code>onChange: ({'{ value }'})</code>
+          </strong>{' '}
+          reads the raw value (for example <code>"1234567.5"</code>) rather than{' '}
+          <code>formattedValue</code>. <code>Number("1,234,567")</code> is <code>NaN</code>, so the
+          callback needs the raw value.
         </li>
         <li>
           <strong>
             Dynamic <code>minimumFractionDigits</code>
           </strong>{' '}
-          - <code>Number("1.20") = 1.2</code>, so without this NumberFlow renders <code>"1.2"</code>{' '}
+          matters because <code>Number("1.20") = 1.2</code>, so without it NumberFlow renders <code>"1.2"</code>{' '}
           while the input contains <code>"1.20"</code>. Computing <code>decimals</code> from the raw
-          string and feeding it to NumberFlow keeps the visible width and the caret aligned.
+          value and passing it to NumberFlow keeps the visible width and the cursor aligned.
         </li>
         <li>
           <strong>
             <code>useGrouping: true</code>
           </strong>{' '}
-          - NumberFlow's grouping must match the input's thousand separator. The default en-US
-          locale uses <code>","</code>, lining up with <code>thousandSeparator=","</code> and{' '}
+          is needed because NumberFlow's grouping must match the input's thousand separator. The default en-US
+          locale uses <code>","</code>, which matches the default <code>thousandSeparator</code> and{' '}
           <code>GroupingStyle.Thousand</code>.
         </li>
         <li>
           <strong>
-            <code>beforeinput</code> microtask sync
+            <code>onChange</code> callback
           </strong>{' '}
-          - numora applies its formatted value inside <code>beforeinput</code> via{' '}
-          <code>setRangeText</code>. By the next microtask <code>numora.value</code> reflects the
-          post-format string. An <code>input</code> listener alone misses some paths (notably native
-          browser cancellation cases on certain devices).
-        </li>
-        <li>
-          <strong>Transparent text + visible caret on the input</strong> - hides the input's own
-          rendering while letting the caret show. The caret is the only thing the user sees from the
-          real input.
-        </li>
-        <li>
-          <strong>Matching typography on both layers</strong> - the caret position is computed from
-          the input's text layout. If fonts differ between the input and the NumberFlow output, the
-          caret drifts.
-        </li>
-        <li>
-          <strong>
-            <code>tabular-nums</code> on the overlay span
-          </strong>{' '}
-          - keeps digit widths stable while NumberFlow animates, reducing layout shift during
-          transitions.
-        </li>
-        <li>
-          <strong>
-            <code>aria-hidden</code> on the overlay span
-          </strong>{' '}
-          - screen readers should announce the <code>&lt;input&gt;</code>, not the visible
-          decoration. The input has <code>aria-label</code>.
+          fires for typing, paste, the focus-strip, undo/redo and blur reformatting, so you need no DOM{' '}
+          <code>beforeinput</code> or <code>input</code> listeners. It does not fire for
+          the initial <code>value</code>, so the code calls <code>syncFlow(numora.getValue())</code>{' '}
+          explicitly.
         </li>
       </ul>
 
-      <h2 className="text-foreground text-2xl">Caveats</h2>
+      <NumberFlowCaveats />
 
-      <div className="bg-muted/50 border border-border rounded-lg p-4 my-4">
-        <p className="text-muted-foreground text-base leading-6 m-0">
-          <strong>Partial-input states.</strong> NumberFlow takes a <code>number</code>. While the
-          user is typing <code>"1."</code> (a digit then a dot, no decimals yet),{' '}
-          <code>Number("1.")</code> is <code>1</code> and NumberFlow renders <code>"1"</code> with
-          no dot. The caret hovers just past the (invisible) input's dot, which is one character
-          beyond the visible <code>"1"</code>. Brief and self-correcting once a fractional digit is
-          typed.
-        </p>
-      </div>
-
-      <div className="bg-muted/50 border border-border rounded-lg p-4 my-4">
-        <p className="text-muted-foreground text-base leading-6 m-0">
-          <strong>Precision ceiling.</strong> Numora handles strings of any length.{' '}
-          <code>Number()</code> is safe up to 15 significant digits. For DeFi token amounts at
-          18-decimal precision the overlay loses tail digits at the display layer - but the editable
-          string (<code>numora.value</code>, what you pass to your math and contracts) is untouched.
-          The overlay is a display lie, not a state lie.
-        </p>
-      </div>
-
-      <div className="bg-muted/50 border border-border rounded-lg p-4 my-4">
-        <p className="text-muted-foreground text-base leading-6 m-0">
-          <strong>Caret drift during animation.</strong> The caret's pixel position is computed from
-          the input's invisible text layout, which jumps to the new value instantly. NumberFlow
-          animates digits into that final position over ~150ms. Mid-flight, the caret briefly floats
-          next to characters that haven't arrived yet.
-        </p>
-      </div>
-
-      <div className="bg-muted/50 border border-border rounded-lg p-4 my-4">
-        <p className="text-muted-foreground text-base leading-6 m-0">
-          <strong>Mid-string editing is limited.</strong> Clicking the overlay span passes the click
-          through to the input, but the browser's hit-test runs against the input's invisible text.
-          During NumberFlow's mid-animation width transitions, click-to-caret lands on the wrong
-          character. For append-only fields this doesn't matter; for fields where users edit
-          mid-number, this pattern isn't a fit.
-        </p>
-      </div>
-
-      <div className="bg-muted/50 border border-border rounded-lg p-4 my-4">
-        <p className="text-muted-foreground text-base leading-6 m-0">
-          <strong>Mobile selection handles.</strong> iOS draws magnifier loupes and selection
-          handles anchored to the input's text. With the text invisible, the loupe shows transparent
-          characters. Not a blocker for short numeric entry, but test on real devices.
-        </p>
-      </div>
-
-      <h2 id="pattern-2-readonly" className="text-foreground text-2xl">Pattern 2 - Read-only animated values</h2>
-      <p className="text-muted-foreground text-base leading-6">
+      <h2>Read-only animated values</h2>
+      <p>
         For dashboards or oracle-fed prices that update outside the input, skip{' '}
-        <code>NumoraInput</code> entirely and update <code>&lt;number-flow&gt;</code> directly from
-        your data source:
+        <code>NumoraInput</code> and update <code>&lt;number-flow&gt;</code> directly. See the{' '}
+        <a href={LIB_URL} target="_blank" rel="noreferrer noopener">
+          NumberFlow docs
+        </a>
+        .
+      </p>
+
+      <h2>Reducing motion</h2>
+      <p>
+        NumberFlow respects <code>prefers-reduced-motion</code> by default. If a user opts out of
+        animations at the OS level, the digit morph becomes an instant swap. You need no extra code.
+      </p>
+
+      <h2>Cleanup</h2>
+      <p>
+        The vanilla <code>NumoraInput</code> class has no destroy method; its listeners are bound to
+        the input it created. On teardown remove the <code>&lt;number-flow&gt;</code> element, then
+        the input element.
       </p>
 
       <CodeBlock language="ts">
-        {`import 'number-flow'
-
-const flow = document.querySelector<HTMLElement & {
-  format?: Intl.NumberFormatOptions
-  update(value: number): void
-}>('number-flow')!
-
-flow.format = { style: 'currency', currency: 'USD' }
-
-// Then whenever your data changes:
-flow.update(newBalance)`}
+        {`flow.remove()
+input.remove()`}
       </CodeBlock>
 
-      <p className="text-muted-foreground text-base leading-6">
-        This isn't really an integration - it's just the right tool for read-only animated numbers.
-        Use it wherever the value is a number that already exists in your state and you don't need
-        string-precision math at the display point.
-      </p>
+      <h2>FAQ</h2>
 
-      <h2 className="text-foreground text-2xl">Reducing motion</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        NumberFlow respects <code>prefers-reduced-motion</code> by default. If a user opts out of
-        animations at the OS level the digit morph becomes an instant swap - no extra code needed.
-      </p>
-
-      <h2 className="text-foreground text-2xl">Key points</h2>
-      <ul>
-        <li>
-          <strong>NumoraInput stays the source of truth.</strong> Read <code>numora.value</code> for
-          anything that needs precision (math libraries, API calls, blockchain transactions). The
-          overlay's <code>Number()</code> conversion is for display only.
-        </li>
-        <li>
-          <strong>The input still owns the keyboard.</strong> Undo, redo, IME, paste, mobile{' '}
-          <code>inputmode="decimal"</code>, native form submission all keep working. The overlay is
-          a display layer.
-        </li>
-        <li>
-          <strong>
-            Mirror typed decimals into <code>flow.format.minimumFractionDigits</code>.
-          </strong>{' '}
-          Without this NumberFlow drops trailing zeros and the caret drifts off the end of the
-          rendered number.
-        </li>
-        <li>
-          <strong>
-            Sync from <code>beforeinput</code> via <code>queueMicrotask</code>.
-          </strong>{' '}
-          An <code>input</code> listener alone misses some paths in the vanilla pipeline; the
-          microtask catches the post-<code>setRangeText</code> state.
-        </li>
-        <li>
-          <strong>Not a free upgrade.</strong> The overlay trades caret precision and mid-string
-          editing fidelity for an animated surface. For append-only inputs the trade is reasonable;
-          for general numeric fields, weigh the caveats above against the visual payoff.
-        </li>
-      </ul>
-
-      <h2 className="text-foreground text-2xl">FAQ</h2>
-
-      <h3 className="text-foreground">What is the NumberFlow vanilla web component?</h3>
-      <p className="text-muted-foreground text-base leading-6">
+      <h3>What is the NumberFlow vanilla web component?</h3>
+      <p>
         NumberFlow is an animated number transition library by{' '}
-        <a href={AUTHOR_URL} target="_blank" rel="noreferrer noopener" className="underline link-underline hover:text-foreground transition-colors">
+        <a href={AUTHOR_URL} target="_blank" rel="noreferrer noopener">
           Maxwell Barvian
         </a>
         . The vanilla <code>number-flow</code> package registers a <code>&lt;number-flow&gt;</code>{' '}
@@ -484,28 +369,18 @@ flow.update(newBalance)`}
         <code>Intl.NumberFormat</code> options for currency and grouping. No framework required.
       </p>
 
-      <h3 className="text-foreground">Does NumberFlow work without React?</h3>
-      <p className="text-muted-foreground text-base leading-6">
+      <h3>Does NumberFlow work without React?</h3>
+      <p>
         Yes. This guide uses the <code>&lt;number-flow&gt;</code> web component from the{' '}
-        <code>number-flow</code> package together with the vanilla <code>NumoraInput</code> class -
-        no React in the runtime. The custom element is a standard browser primitive and works in any
-        framework or none at all.
+        <code>number-flow</code> package together with the vanilla <code>NumoraInput</code> class,
+        with no React in the runtime. The custom element is a standard browser primitive and works in any
+        framework or none.
       </p>
 
-      <h3 className="text-foreground">How does the NumberFlow + Numora overlay work?</h3>
-      <p className="text-muted-foreground text-base leading-6">
-        A transparent-text <code>NumoraInput</code> sits on top of a{' '}
-        <code>&lt;number-flow&gt;</code> element. The input owns the keyboard, undo, IME, and mobile{' '}
-        <code>inputmode</code>. A <code>beforeinput</code> microtask plus an <code>input</code>{' '}
-        listener convert <code>numora.value</code> to a <code>Number</code>, set{' '}
-        <code>flow.format</code> with a matching <code>minimumFractionDigits</code>, and call{' '}
-        <code>flow.update()</code> so NumberFlow animates the visible digits.
-      </p>
-
-      <h3 className="text-foreground">Where can I install NumberFlow?</h3>
-      <p className="text-muted-foreground text-base leading-6">
+      <h3>Where can I install NumberFlow?</h3>
+      <p>
         NumberFlow lives at{' '}
-        <a href={LIB_URL} target="_blank" rel="noreferrer noopener" className="underline link-underline hover:text-foreground transition-colors">
+        <a href={LIB_URL} target="_blank" rel="noreferrer noopener">
           number-flow.barvian.me/vanilla
         </a>{' '}
         and is published on npm as <code>number-flow</code> (vanilla web component) and{' '}
