@@ -17,7 +17,7 @@ import { useIsomorphicLayoutEffect } from './use-isomorphic-layout-effect';
 // internal subpath.
 import {
   FormatOn,
-  GroupingStyle,
+  type GroupingStyle,
   applyLocale,
   formatValueForDisplay,
   sanitizeNumoraInput,
@@ -197,6 +197,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     ...rest
   } = props;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: callbacks are read via stateRef; a new onChange/isAllowed identity must not re-resolve options.
   const formattingOptions: ResolvedFormattingOptions = useMemo(() => {
     const separators = applyLocale(locale, { thousandSeparator, decimalSeparator, groupingStyle });
     // Resolve separator defaults BEFORE validating, exactly as the vanilla class does
@@ -333,6 +334,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   // Mount-only native listeners. `beforeinput` must be native: React's synthetic one fires
   // while bubbling, too late to cancel. The focus strip's mousedown/click/focus sequence is
   // native too, so React's batching can't reorder it. Options come from stateRef.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only; emit reads the latest props via stateRef.
   useEffect(() => {
     const input = internalInputRef.current as NumoraHTMLInputElement;
     input.formattedValue = input.value;

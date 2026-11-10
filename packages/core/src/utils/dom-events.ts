@@ -123,7 +123,7 @@ export function applyInputFallback(
     : formatForDisplay(value, opts, 'foreign');
   if (formatted === value) return { value: raw, formattedValue: formatted };
   // Max of start/end works around a mobile-browser caret bug where selectionStart lags.
-  const caret = Math.max(el.selectionStart!, el.selectionEnd!);
+  const caret = Math.max(el.selectionStart ?? 0, el.selectionEnd ?? 0);
   return write(
     el,
     formatted,

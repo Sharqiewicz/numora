@@ -24,12 +24,12 @@ import {
   DEFAULT_THOUSAND_SEPARATOR,
   DEFAULT_GROUPING_STYLE,
 } from './config';
-import {
+import type {
   FormatOn,
   GroupingStyle,
-  type FormattingOptions,
-  type LocaleTag,
-  type NumoraValues,
+  FormattingOptions,
+  LocaleTag,
+  NumoraValues,
 } from './types';
 import { validateNumoraInputOptions } from './validation';
 

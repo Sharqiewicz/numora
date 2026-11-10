@@ -57,7 +57,21 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "correctness": {
+        "noUnusedVariables": {
+          "level": "error",
+          "options": {
+            "ignoreRestSiblings": true
+          }
+        }
+      },
+      "style": {
+        "useTemplate": "off"
+      },
+      "complexity": {
+        "useSimpleNumberKeys": "off"
+      }
     }
   }
 }

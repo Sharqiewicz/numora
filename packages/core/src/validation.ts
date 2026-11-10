@@ -33,14 +33,14 @@ export function validateNumoraInputOptions(options: NumoraInputValidationOptions
 
 function assertNonNegativeInt(name: string, value: number | undefined): void {
   if (value === undefined) return;
-  if (!Number.isInteger(value) || value! < 0) {
+  if (!Number.isInteger(value) || value < 0) {
     throw new Error(`${name} must be a non-negative integer. Received: ${JSON.stringify(value)}`);
   }
 }
 
 function assertPositiveInt(name: string, value: number | undefined): void {
   if (value === undefined) return;
-  if (!Number.isInteger(value) || value! < 1) {
+  if (!Number.isInteger(value) || value < 1) {
     throw new Error(
       `${name} must be a positive integer (>= 1). Received: ${JSON.stringify(value)}`
     );

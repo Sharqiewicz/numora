@@ -56,6 +56,7 @@ function digitValue(code: number): string | undefined {
  */
 export function normalizeDigits(value: string): string {
   // Fast path: nothing at or above the first non-ASCII digit block (U+0660).
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: the range starts at U+0000 on purpose.
   if (!/[^\u0000-\u065f]/.test(value)) return value;
 
   let out = '';
