@@ -251,8 +251,7 @@ export class NumoraDirective implements ControlValueAccessor, OnInit, OnDestroy 
   }
 
   setDisabledState(isDisabled: boolean): void {
-    if (!this.instance) return;
-    isDisabled ? this.instance.disable() : this.instance.enable();
+    if (this.instance) this.instance.getElement().disabled = isDisabled;
   }
 }`}
       </CodeBlock>
@@ -330,7 +329,7 @@ export class AmountFormComponent {
         <code>ControlValueAccessor</code> bridge: <code>writeValue</code> calls{' '}
         <code>setValue</code>, <code>registerOnChange</code> passes the raw <code>value</code> to the
         form control (see <Link to="/docs/numora/features/value-types">value types</Link>), and{' '}
-        <code>setDisabledState</code> calls <code>disable()</code> / <code>enable()</code>.{' '}
+        <code>setDisabledState</code> sets the element's <code>disabled</code> property.{' '}
         <code>FormatOn.Change</code> formats on every keystroke (see{' '}
         <Link to="/docs/numora/features/formatting">formatting</Link>).
       </p>

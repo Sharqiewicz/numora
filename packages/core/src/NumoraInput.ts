@@ -288,7 +288,7 @@ export class NumoraInput {
 
   private setupEventListeners(): void {
     // Bind once and record each listener so destroy() can remove exactly what we added
-    // (without touching listeners a caller attached via the public addEventListener).
+    // (without touching listeners a caller attached to the element).
     const add = (type: string, handler: EventListener) => {
       this.element.addEventListener(type, handler);
       this.boundListeners.push([type, handler]);
@@ -344,8 +344,8 @@ export class NumoraInput {
    * element - otherwise each re-init stacks a fresh set of listeners that double-fire
    * onChange and duplicate every DOM write per keystroke.
    *
-   * Only removes listeners Numora added; anything attached via the public
-   * addEventListener is left untouched. Does not remove the element from the DOM.
+   * Only removes listeners Numora added; anything else attached to the element is left
+   * untouched. Does not remove the element from the DOM.
    * Idempotent - calling it more than once is a no-op.
    */
   public destroy(): void {
@@ -604,22 +604,6 @@ export class NumoraInput {
     this.withInternalWrite(() =>
       writeValuePreservingUndo(this.element, formatted, formatted.length)
     );
-  }
-
-  public disable(): void {
-    this.element.disabled = true;
-  }
-
-  public enable(): void {
-    this.element.disabled = false;
-  }
-
-  public addEventListener(event: string, callback: EventListenerOrEventListenerObject): void {
-    this.element.addEventListener(event, callback);
-  }
-
-  public removeEventListener(event: string, callback: EventListenerOrEventListenerObject): void {
-    this.element.removeEventListener(event, callback);
   }
 
   /**

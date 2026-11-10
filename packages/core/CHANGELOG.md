@@ -24,6 +24,9 @@
   wrappers and has no semver guarantee.
 - **`normalizeFullWidthDigits` removed:** use `normalizeDigits`, which it was a deprecated
   alias of.
+- **`NumoraInput` methods `disable`, `enable`, `addEventListener` and `removeEventListener`
+  removed:** they only forwarded to the element. Use `getElement().disabled` and
+  `getElement().addEventListener(...)` instead.
 - **`numora-react` re-exports `GroupingStyle`** instead of `ThousandStyle`, and ships a
   `'use client'` directive so Next.js server components can import it directly.
 
