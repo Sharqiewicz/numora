@@ -1,11 +1,22 @@
-import { getSeparators } from '@/features/decimals';
-import { removeThousandSeparators } from '@/features/sanitization';
-import {
-  computeCursorPosition,
-  skipOverThousandSeparatorOnDelete,
-} from '@/features/formatting';
-import { type FormattingOptions, type CaretPositionInfo, FormatOn, InputType } from '@/types';
+import { getSeparators } from '../features/decimals';
+import { sanitizeNumoraInput } from '../features/sanitization';
+import { normalizeForeignFormat, canonicalToDisplayText } from '../features/foreign-format';
+import { NON_ASCII_DECIMAL_SEPARATOR_GLYPHS } from '../features/decimal-separators';
+import { containsScientificNotation } from '../features/scientific-notation';
+import { skipOverThousandSeparatorOnDelete } from '../features/formatting';
+import { computeCaretFromEdit } from './caret';
+import { type FormattingOptions, InputType } from '../types';
 import { formatInputValue } from './format-utils';
+
+// Keys that, when typed, are candidates for remapping to the configured decimal separator:
+// the plain ASCII '.' and ',' plus every non-ASCII glyph that functions as a decimal mark
+// on some keyboard/locale (see `../features/decimal-separators` for the glyph table and
+// the matching sanitization-side fix for paste/IME-commit). A candidate is remapped to
+// `decimalSeparator` UNLESS it is itself the configured `thousandSeparator` (and differs
+// from `decimalSeparator`), in which case the keystroke is rejected outright -
+// otherwise typing "1,000,000" under an en-US config (thousand ',', decimal '.') would
+// have each comma parsed as a decimal point.
+const DECIMAL_KEY_CANDIDATES = new Set<string>(['.', ',', ...NON_ASCII_DECIMAL_SEPARATOR_GLYPHS]);
 
 /**
  * Outcome of `handleOnBeforeInputNumoraInput`. Pure: the helper does not mutate the
@@ -14,13 +25,53 @@ import { formatInputValue } from './format-utils';
  * - `handled`: caller should preventDefault, write `formatted` to the input via an
  *   undo-preserving write, set caret to `cursorPos`, and notify listeners.
  * - `reject`: caller should preventDefault. The input value is left untouched.
- * - `skip`: caller should NOT preventDefault. Includes paste/drop (handled by the
- *   dedicated paste listener) and any unrecognized inputType.
+ * - `skip`: caller should NOT preventDefault. Includes paste (handled by the dedicated
+ *   paste listener), native drop (no dedicated listener - it falls through to the
+ *   browser's own insertion and the generic `input`/handleChange fallback), and any
+ *   unrecognized inputType.
  */
 export type BeforeInputResult =
   | { type: 'handled'; formatted: string; raw: string; cursorPos: number }
   | { type: 'reject' }
   | { type: 'skip' };
+
+/**
+ * Invokes a user-supplied `isAllowed` validator, treating a throw as "not allowed".
+ *
+ * `isAllowed` runs synchronously inside `beforeinput`/paste handling, BEFORE the caller
+ * calls `preventDefault()`. If the validator throws and that exception is left to
+ * propagate, it unwinds out of the event listener before `preventDefault()` ever runs, so
+ * the browser proceeds to insert the raw keystroke natively - the exact bypass `isAllowed`
+ * exists to prevent. `console.error`-reporting the error (rather than swallowing it
+ * silently, and rather than rethrowing - which would surface as an unhandled exception
+ * outside this call stack, e.g. via `queueMicrotask`) keeps it visible to the developer
+ * without letting it interrupt the keystroke handling that must still return a `reject`
+ * result, or risk crashing an unrelated caller (a test runner, a host app's own global
+ * error handler) that isn't expecting an async throw from a keystroke.
+ */
+/**
+ * True when `enableScientificNotation` is `false` and user-typed/pasted/inserted text holds a
+ * number in scientific notation. Such input must be refused as a whole: the sanitizer would
+ * otherwise drop the `e` and turn `1.5e-7` into `1.57`. App-supplied values never go through
+ * this check (they always expand).
+ */
+export function isScientificNotationRejected(
+  text: string,
+  formattingOptions?: FormattingOptions
+): boolean {
+  return (
+    formattingOptions?.enableScientificNotation === false && containsScientificNotation(text)
+  );
+}
+
+function callIsAllowed(isAllowed: (rawValue: string) => boolean, rawValue: string): boolean {
+  try {
+    return isAllowed(rawValue);
+  } catch (err) {
+    console.error('[numora] isAllowed threw; treating the keystroke as not allowed:', err);
+    return false;
+  }
+}
 
 /**
  * Computes the formatted value, raw value, and target cursor position for a
@@ -38,10 +89,6 @@ export function handleOnBeforeInputNumoraInput(
   decimalMaxLength: number,
   formattingOptions?: FormattingOptions
 ): BeforeInputResult {
-  if (e.inputType === InputType.InsertFromPaste || e.inputType === InputType.InsertFromDrop) {
-    return { type: 'skip' };
-  }
-
   const target = e.target as HTMLInputElement;
   const currentValue = target.value;
   const selectionStart = target.selectionStart ?? 0;
@@ -50,9 +97,28 @@ export function handleOnBeforeInputNumoraInput(
 
   let inputData = e.data ?? '';
 
-  if (e.inputType === InputType.InsertText && (e.data === ',' || e.data === '.')) {
+  if (e.inputType === InputType.InsertText && DECIMAL_KEY_CANDIDATES.has(inputData)) {
     const decimalSep = separators.decimalSeparator;
-    const valueOutsideSelection = currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
+    const thousandSep = formattingOptions?.thousandSeparator;
+
+    // The typed key is configured as the thousand separator (and isn't ALSO the decimal
+    // separator, which would make remapping a no-op anyway). ADR 0005: in a comma-decimal
+    // locale (thousand '.', e.g. de-DE) a typed '.' is the decimal key - numpads and US
+    // keyboards emit it - so it falls through to the decimal handling below (inserted only
+    // while the value has no decimal yet, ignored otherwise). Any other key that equals
+    // the thousand separator (',' in en-US) stays rejected: remapping it
+    // would turn a grouping habit into a stray decimal point.
+    if (inputData === thousandSep && inputData !== '.') {
+      return { type: 'reject' };
+    }
+
+    // decimalMaxLength: 0 means no fractional part is allowed at all, so refuse the
+    // decimal-separator keystroke outright rather than insert-then-trim it away.
+    if (decimalMaxLength === 0) {
+      return { type: 'reject' };
+    }
+    const valueOutsideSelection =
+      currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
     if (valueOutsideSelection.includes(decimalSep)) {
       return { type: 'reject' };
     }
@@ -74,148 +140,147 @@ export function handleOnBeforeInputNumoraInput(
   }
 
   // intendedValue: what the input would contain if we let the browser apply the action.
-  // intendedCursorPos: where the caret would land in intendedValue.
-  // endOffset: chars deleted forward from the cursor (only matters for Delete-forward
-  // family with no selection). Used downstream by findChangedRangeFromCaretPositions.
+  // intendedCursorPos: where the caret would sit in it. The final caret is computed from the
+  // text left of that position (utils/caret.ts), so it is the only edit signal needed.
   let intendedValue: string;
   let intendedCursorPos: number;
-  let endOffset = 0;
   const hasSelection = selectionStart !== selectionEnd;
 
   switch (e.inputType) {
     case InputType.InsertText: {
-      intendedValue = currentValue.slice(0, selectionStart) + inputData + currentValue.slice(selectionEnd);
+      intendedValue =
+        currentValue.slice(0, selectionStart) + inputData + currentValue.slice(selectionEnd);
       intendedCursorPos = selectionStart + inputData.length;
       break;
     }
     case InputType.DeleteContentBackward: {
-      const deleteFrom = hasSelection ? selectionStart : Math.max(0, selectionStart - 1);
+      // Mobile fallback: separator skipping normally happens in handleOnKeyDownNumoraInput,
+      // but Android soft keyboards often report `key: 'Unidentified'` or fire no keydown at
+      // all, so `beforeinput` is the only signal. When the char immediately before the caret
+      // is the thousand separator, delete the digit behind it too - otherwise deleting just
+      // the separator re-formats back to the same string (a no-op backspace). Only applies
+      // with no active selection; a real keydown-driven caret skip has already moved the
+      // caret past the separator by the time this runs, so this branch is simply not taken.
+      const deletesOverSeparator =
+        currentValue[selectionStart - 1] === formattingOptions?.thousandSeparator;
+      const deleteFrom = hasSelection
+        ? selectionStart
+        : Math.max(0, selectionStart - (deletesOverSeparator ? 2 : 1));
       const deleteTo = hasSelection ? selectionEnd : selectionStart;
       intendedValue = currentValue.slice(0, deleteFrom) + currentValue.slice(deleteTo);
       intendedCursorPos = deleteFrom;
       break;
     }
     case InputType.DeleteContentForward: {
-      const deleteTo = hasSelection ? selectionEnd : selectionStart + 1;
+      // Same mobile fallback as DeleteContentBackward above, mirrored for forward delete:
+      // when the char at the caret is the thousand separator, delete the digit past it too.
+      const deletesOverSeparator =
+        currentValue[selectionStart] === formattingOptions?.thousandSeparator;
+      const deleteTo = hasSelection
+        ? selectionEnd
+        : selectionStart + (deletesOverSeparator ? 2 : 1);
       intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(deleteTo);
       intendedCursorPos = selectionStart;
-      if (!hasSelection) endOffset = 1;
       break;
     }
+    // Cut and drag always have a selection, so they delete exactly what a line deletion with a
+    // selection does.
     case InputType.DeleteByCut:
-    case InputType.DeleteByDrag: {
-      intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
-      intendedCursorPos = selectionStart;
-      break;
-    }
+    case InputType.DeleteByDrag:
     case InputType.DeleteSoftLineBackward:
-    case InputType.DeleteHardLineBackward: {
+    case InputType.DeleteHardLineBackward:
+    // A numeric field is always a single "word", so word-boundary deletion (Alt/Option +
+    // Backspace/Delete on desktop) behaves the same as line deletion here.
+    case InputType.DeleteWordBackward: {
       const deleteFrom = hasSelection ? selectionStart : 0;
       intendedValue = currentValue.slice(0, deleteFrom) + currentValue.slice(selectionEnd);
       intendedCursorPos = deleteFrom;
       break;
     }
     case InputType.DeleteSoftLineForward:
-    case InputType.DeleteHardLineForward: {
+    case InputType.DeleteHardLineForward:
+    case InputType.DeleteWordForward: {
       const deleteTo = hasSelection ? selectionEnd : currentValue.length;
       intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(deleteTo);
       intendedCursorPos = selectionStart;
-      if (!hasSelection) endOffset = currentValue.length - selectionStart;
       break;
     }
     default:
+      // Everything else — most notably IME composition (`insertCompositionText`) — is left to
+      // the browser. Skipping means no preventDefault, so the composition commits natively and
+      // the generic `input`/handleChange path re-derives the value from the committed DOM
+      // string. The VALUE stays correct (sanitization still runs); the CARET is best-effort
+      // during an active composition, because there is no pre-edit caret to map from. Known
+      // limit, not an oversight: intercepting composition would require buffering the
+      // composing text and is out of scope for a numeric field.
       return { type: 'skip' };
   }
 
+  // Multi-character insertText (IME, text replacement, some soft keyboards) can carry a whole
+  // "1.5e-7". With scientific notation off the field is left unchanged. The current value
+  // never holds an `e`, so checking the intended value only fires on the inserted text.
   if (
-    formattingOptions?.maxLength !== undefined &&
-    e.inputType === InputType.InsertText
+    e.inputType === InputType.InsertText &&
+    isScientificNotationRejected(intendedValue, formattingOptions)
   ) {
-    const sep = formattingOptions.thousandSeparator;
-    const intendedRawLength = sep
-      ? removeThousandSeparators(intendedValue, sep).length
-      : intendedValue.length;
-    if (intendedRawLength > formattingOptions.maxLength) {
+    return { type: 'reject' };
+  }
+
+  if (formattingOptions?.maxLength !== undefined && e.inputType === InputType.InsertText) {
+    // Check the length AFTER sanitization (grouping separators stripped, leading zeros
+    // collapsed, etc.), not the raw pre-sanitization intended value - otherwise a value
+    // that would sanitize down to fit under maxLength gets rejected anyway.
+    const sanitizedLength = sanitizeNumoraInput(intendedValue, {
+      ...formattingOptions,
+      maxLength: undefined,
+    }).length;
+    if (sanitizedLength > formattingOptions.maxLength) {
       return { type: 'reject' };
     }
   }
 
-  const shouldRemoveThousandSeparators = formattingOptions?.formatOn === FormatOn.Change;
   const { formatted: newValue, raw: rawValue } = formatInputValue(
     intendedValue,
     decimalMaxLength,
-    formattingOptions,
-    shouldRemoveThousandSeparators
+    formattingOptions
   );
 
-  if (formattingOptions?.isAllowed && !formattingOptions.isAllowed(rawValue)) {
+  if (formattingOptions?.isAllowed && !callIsAllowed(formattingOptions.isAllowed, rawValue)) {
     return { type: 'reject' };
   }
 
-  let cursorPos: number;
-  if (intendedValue !== newValue) {
-    const syntheticCaretInfo: CaretPositionInfo = {
-      selectionStart,
-      selectionEnd,
-      endOffset,
-    };
-    const computed = computeCursorPosition(
-      intendedValue,
-      newValue,
-      intendedCursorPos,
-      syntheticCaretInfo,
-      separators,
-      formattingOptions
-    );
-    cursorPos = computed ?? intendedCursorPos;
-  } else {
-    cursorPos = intendedCursorPos;
+  // Nothing actually changed (e.g. a rejected letter, Backspace at position 0, Delete at
+  // the end, Backspace on an empty field) - reject so the caller does not fire onChange
+  // for a no-op keystroke. Accepted consequence: a selection whose replacement sanitizes
+  // back to the exact same string (e.g. selecting the "," in "1,234" and typing a letter)
+  // keeps its selection instead of collapsing, since `reject` leaves the DOM untouched.
+  if (newValue === currentValue) {
+    return { type: 'reject' };
   }
+
+  // The caret rank is the rank of the sanitized text that stood left of the caret after the
+  // edit (see utils/caret.ts), selected in the final display string.
+  const cursorPos =
+    intendedValue !== newValue
+      ? computeCaretFromEdit(
+          intendedValue.slice(0, intendedCursorPos),
+          newValue,
+          decimalMaxLength,
+          formattingOptions
+        )
+      : intendedCursorPos;
 
   return { type: 'handled', formatted: newValue, raw: rawValue, cursorPos };
 }
 
 /**
- * Skips the cursor over thousand separators on Delete/Backspace and returns the caret
- * info the change handler needs to disambiguate Delete-forward (`endOffset: 1`) from
- * Backspace or non-deletion keys (`endOffset: 0`). Returns undefined for keys that
- * aren't Delete/Backspace so the caller can null out the stored caret info.
+ * Skips the cursor over thousand separators on Delete/Backspace.
  */
 export function handleOnKeyDownNumoraInput(
   e: KeyboardEvent,
   formattingOptions?: FormattingOptions
-): CaretPositionInfo | undefined {
-  const inputElement = e.target as HTMLInputElement;
-  skipOverThousandSeparatorOnDelete(e, inputElement, formattingOptions);
-
-  if (e.key !== 'Backspace' && e.key !== 'Delete') return undefined;
-
-  const selectionStart = inputElement.selectionStart ?? 0;
-  const selectionEnd = inputElement.selectionEnd ?? 0;
-  return {
-    selectionStart,
-    selectionEnd,
-    endOffset: e.key === 'Delete' && selectionStart === selectionEnd ? 1 : 0,
-  };
-}
-
-/**
- * Calculates the cursor position after paste, accounting for the net change in value length.
- *
- * @param selectionStart - The selection start position before paste
- * @param clipboardDataLength - Length of the pasted clipboard data
- * @param combinedValueLength - Length of the combined value (current + pasted)
- * @param formattedLength - Length after sanitization and formatting
- * @returns The new cursor position
- */
-function calculateCursorPositionAfterPaste(
-  selectionStart: number,
-  clipboardDataLength: number,
-  combinedValueLength: number,
-  formattedLength: number
-): number {
-  const netLengthChange = formattedLength - combinedValueLength;
-  return selectionStart + clipboardDataLength + netLengthChange;
+): void {
+  skipOverThousandSeparatorOnDelete(e, e.target as HTMLInputElement, formattingOptions);
 }
 
 /**
@@ -240,10 +305,24 @@ export function handleOnPasteNumoraInput(
 ): PasteResult {
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
+  const separators = getSeparators(formattingOptions);
 
-  const clipboardData = e.clipboardData?.getData('text/plain') || '';
-  const combinedValue =
-    value.slice(0, selectionStart || 0) + clipboardData + value.slice(selectionEnd || 0);
+  // Pasted text is read with foreign-format detection (ADR 0006), NOT strictly by the
+  // field's locale: de-DE `1.5` is 1.5 and `1,234,567.89` is 1234567.89. Only the clipboard
+  // slice is detected - the rest of the combined value is the field's own display text.
+  // The slice is rewritten to the field's locale text so the combined value then goes
+  // through the ordinary pipeline, and the caret math below uses its (rewritten) length.
+  const rawClipboard = e.clipboardData?.getData('text/plain') || '';
+  const canonicalClipboard = normalizeForeignFormat(rawClipboard, formattingOptions);
+  // Scientific notation is on unless explicitly disabled. With it off, the sanitizer would
+  // drop the `e` and turn `1.5e-7` into `1.57`, so refuse the paste instead.
+  if (isScientificNotationRejected(canonicalClipboard, formattingOptions)) {
+    return { type: 'reject' };
+  }
+  const clipboardData = canonicalToDisplayText(canonicalClipboard, separators.decimalSeparator);
+  const selStart = selectionStart ?? 0;
+  const selEnd = selectionEnd ?? 0;
+  const combinedValue = value.slice(0, selStart) + clipboardData + value.slice(selEnd);
 
   // Always strip thousand separators during paste: pasted content may contain separators
   // and the current value may have separators (blur mode); both need to be parsed together.
@@ -254,16 +333,22 @@ export function handleOnPasteNumoraInput(
     true
   );
 
-  if (formattingOptions?.isAllowed && !formattingOptions.isAllowed(rawValue)) {
+  if (formattingOptions?.isAllowed && !callIsAllowed(formattingOptions.isAllowed, rawValue)) {
     return { type: 'reject' };
   }
 
-  const newCursorPosition = calculateCursorPositionAfterPaste(
-    selectionStart || 0,
-    clipboardData.length,
-    combinedValue.length,
-    formattedValue.length
+  // Paste is the same shape as a keystroke: `combinedValue` is the post-edit value with
+  // stale separators and `intendedCursorPos` is the post-edit caret (just after the pasted
+  // text). Route both through the same rank/select mapping the typing path uses, so that a
+  // length change occurring away from the paste point (e.g. a decimal trim at the tail) is
+  // not misattributed to the insertion point.
+  const cursorPos = computeCaretFromEdit(
+    combinedValue.slice(0, selStart + clipboardData.length),
+    formattedValue,
+    decimalMaxLength,
+    formattingOptions,
+    true
   );
 
-  return { type: 'handled', formatted: formattedValue, raw: rawValue, cursorPos: newCursorPosition };
+  return { type: 'handled', formatted: formattedValue, raw: rawValue, cursorPos };
 }
