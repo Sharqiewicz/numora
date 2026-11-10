@@ -31,6 +31,11 @@
   `getElement().addEventListener(...)` instead.
 - **`numora-react` re-exports `GroupingStyle`** instead of `ThousandStyle`, and ships a
   `'use client'` directive so Next.js server components can import it directly.
+- **`numora-react`: `maxDecimals` is renamed `decimalMaxLength` and its default changes from
+  2 to 18; `thousandStyle` is renamed `groupingStyle`; `rawValueMode` is removed**
+  (`e.target.value` is always the raw value). The old props are ignored, so a v4
+  `maxDecimals={2}` field accepts 18 decimals until it is renamed. In development the
+  component logs a warning naming the replacement, and the old props no longer reach the DOM.
 
 ### Fixed
 - **React: browser-inserted text while focused keeps typing rules** (autofill, drop, IME
@@ -54,6 +59,22 @@
     of throwing;
   - underscore tags such as `de_DE` (Java, Python, Android) are read as `de-DE` instead of
     silently falling back to en-US separators.
+- **`decimalSeparator: ','` on its own no longer throws:** when no thousand separator or
+  locale is given, the thousand separator defaults to `.` (`1.234,5`). An explicit conflict
+  still throws.
+- **The `input` fallback no longer misreads a focused Change-mode field's own grouping as a
+  decimal:** an IME commit or drop that left `12,3456` gave `12.3456`; it now gives `123,456`.
+  Such a field reads browser-inserted text in its own format; Blur-mode and unfocused fields
+  keep foreign-format detection.
+- **The field is not rewritten during an IME composition** (`isComposing`); the final
+  `input` event formats the committed text.
+- **Re-initialising `NumoraInput` on an element after `destroy()` keeps the value:** the
+  leftover display text (`1.234,56`) was read as a canonical value (`1.23456`).
+- **React: focus is read from the input's own root**, so fields inside a shadow root or an
+  iframe keep typing rules while focused.
+- **`enableScientificNotation: false` is honoured when a paste completes a token:** pasting
+  `e-7` after `1.5` is rejected instead of expanding to `0.00000015`.
+- **A malformed token such as `1e3.5` is dropped whole** instead of leaving `.5`.
 
 ### Added
 - **`enableScientificNotation`** option (default `true`, same behaviour as v4). Set it to
