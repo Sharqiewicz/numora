@@ -15,23 +15,44 @@ npm install numora
 ## Usage
 
 ```typescript
-import { NumoraInput, FormatOn, GroupingStyle } from 'numora';
+import { NumoraInput } from 'numora';
 
-const input = new NumoraInput(document.querySelector('#amount'), {
+const target = document.querySelector<HTMLInputElement>('#amount');
+if (!target) throw new Error('#amount not found');
+
+const input = new NumoraInput(target, {
   decimalMaxLength: 2,
   decimalMinLength: 2,
-  thousandSeparator: ',',
-  groupingStyle: GroupingStyle.Thousand,
-  formatOn: FormatOn.Blur,
   onChange: ({ value, formattedValue }) => console.log(value, formattedValue),
 });
 
-// Get / set value (always the canonical raw value: digits, '.' decimal, '-' sign, no grouping)
-input.setValue('1234.56');
-console.log(input.getValue()); // '1234.56'
-console.log(input.getFormattedValue()); // '1,234.56'
-console.log(input.valueAsNumber); // 1234.56
+input.value = '1234.56';      // canonical raw value: digits, '.' decimal, '-' sign, no grouping
+input.value;                  // '1234.56'
+input.formattedValue;         // '1,234.56'
+input.element;                // the <input>, for any native attribute or listener
+
+input.update({ locale: 'de-DE' });   // change options on the live field: shows '1.234,56'
+input.destroy();                     // remove Numora's listeners
 ```
+
+`target` is either an `<input>` to adopt in place or any other element to mount a new
+`<input>` into. `options` is optional: `new NumoraInput(target)` works.
+
+### Without an input
+
+```typescript
+import { formatValue, parseValue } from 'numora';
+
+formatValue('1234.5');                                             // '1,234.5'
+formatValue('1234.5', { locale: 'de-DE', decimalMinLength: 2 });   // '1.234,50'
+parseValue('1.234,50', { locale: 'de-DE' });                       // '1234.50'
+```
+
+Both take the same options as the input and return strings. `formatValue` turns a canonical
+raw value into what a field shows at rest (grouped, padded to `decimalMinLength`, cut to
+`decimalMaxLength` without rounding). `parseValue` is its inverse and reads the configured
+format only, with no guessing: under the default options `,` is grouping, so
+`parseValue('1,5')` is `'15'`. Anything that is not a number gives `''`. `isAllowed` is ignored.
 
 ## Features
 
@@ -51,37 +72,44 @@ Pasted text (and text the browser inserts through a plain `input` event) is read
 | `decimalMaxLength` | `number` | `18` | Maximum decimal places allowed |
 | `decimalMinLength` | `number` | `0` | Minimum decimal places (pads with zeros) |
 | `decimalSeparator` | `string` | `'.'` | Decimal separator character |
-| `thousandSeparator` | `string` | `','` | Thousand separator character |
+| `thousandSeparator` | `string` | `','` | Thousand separator character (exactly one; use `groupingStyle: 'none'` to turn grouping off) |
 | `groupingStyle` | `GroupingStyle` | `GroupingStyle.Thousand` | Grouping style: `Thousand`, `Lakh`, `Wan`, or `None` |
 | `formatOn` | `FormatOn` | `FormatOn.Blur` | When to apply formatting: `Blur` or `Change` |
-| `enableCompactNotation` | `boolean` | `false` | Expand compact notation on paste/setValue |
-| `enableScientificNotation` | `boolean` | `true` | Expand scientific notation; when `false`, typed, pasted or inserted scientific notation is rejected (autofill restores the previous value). App values always expand |
-| `enableNegative` | `boolean` | `false` | Allow negative numbers |
-| `enableLeadingZeros` | `boolean` | `false` | Allow leading zeros |
-| `autoAddLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |
+| `allowCompactNotation` | `boolean` | `false` | Expand compact notation on paste/setValue |
+| `allowScientificNotation` | `boolean` | `true` | Expand scientific notation; when `false`, typed, pasted or inserted scientific notation is rejected (autofill restores the previous value). App values always expand |
+| `allowNegative` | `boolean` | `false` | Allow negative numbers |
+| `allowLeadingZeros` | `boolean` | `false` | Allow leading zeros |
+| `padLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |
 | `maxLength` | `number` | `undefined` | Max raw length (digits + decimal separator + leading `-`; thousand separators not counted) |
 | `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject a keystroke/paste when it returns false (called with the post-sanitization raw value). A callback that throws is treated as "not allowed" (the keystroke is rejected) and the error is reported via `console.error` |
 | `locale` | `string \| true` | `undefined` | Derive separators from `Intl.NumberFormat`; `true` uses the runtime default locale |
 | `onChange` | `(values: { value: string; formattedValue: string }) => void` | `undefined` | Called when value changes. `value` is the canonical raw value, `formattedValue` the display string |
-| `value` | `string` | `undefined` | Initial value (controlled) |
-| `defaultValue` | `string` | `undefined` | Initial value (uncontrolled) |
+| `value` | `string` | `undefined` | Initial value, as a canonical raw value. An adopted `<input>` keeps its own value unless this is passed |
+| `id`, `name`, `className`, `placeholder`, `disabled`, `readOnly`, `required`, `tabIndex`, `title`, `autofocus`, `ariaLabel` | | | Forwarded to the element. Set anything else on `input.element` |
 
 The `locale` option derives only `Thousand` and `Lakh` grouping; `Wan` is never inferred (set `groupingStyle` explicitly) and the `tok` locale's 2-2-2 grouping is unsupported.
 
 The raw value is canonical for every locale: ASCII digits, `.` as the decimal, a leading `-`, no
-grouping (`1.234.567,89` in de-DE is raw `1234567.89`). `onChange`, `getValue()` and `value`
-all emit it; `getFormattedValue()` returns the display string. `value` / `defaultValue` /
-`setValue` accept canonical raw values only - never locale text, never format-detected
-(`setValue('1.234')` in de-DE is the number 1.234, shown as `1,234`).
-`valueAsNumber` is `Number(raw)` (`NaN` for an empty field); its setter writes the number
-canonically (`valueAsNumber = 1234.5` under `locale: 'de-DE'` displays `"1.234,5"`) and throws `RangeError` if the value is negative while
-`enableNegative` is `false`, or if the value is non-finite (`Infinity`, `-Infinity`, `NaN`).
+grouping (`1.234.567,89` in de-DE is raw `1234567.89`). `onChange` and `input.value` report
+it; `input.formattedValue` is the display string. The `value` option, `input.value = ...` and
+`setValue()` accept canonical raw values only - never locale text, never format-detected
+(`setValue('1.234')` in de-DE is the number 1.234, shown as `1,234`). `setValue(value, {
+undoable: false })` writes without an undo step.
 
-A value that sanitizes to an all-zero negative (e.g. typing `-0` or `-0.00`) is normalized
-to `0` on blur. The same normalization is exported standalone as `normalizeNegativeZero(value,
-decimalSeparator)` for callers who need it outside a live `NumoraInput`.
+`onChange` fires when the raw value changes. A blur or an `update()` that only regroups the
+display emits nothing; one that changes the raw value does (trailing separator strip,
+`decimalMinLength` padding, `-0` to `0`, digits cut by a smaller `decimalMaxLength`).
 
-All standard `HTMLInputElement` properties are also supported (`placeholder`, `className`, `disabled`, etc.).
+Options removed or renamed since v4 are ignored and, in development, logged with their
+replacement. See the [migration guide](../../MIGRATION.md).
+
+## Entry points
+
+| Import | Contents |
+|--------|----------|
+| `numora` | `NumoraInput`, `FormatOn`, `GroupingStyle`, `getSeparatorsFromLocale`, `formatValue`, `parseValue`, types |
+| `numora/pipeline` | The individual sanitization steps as pure string functions (`normalizeDigits`, `expandScientificNotation`, `removeThousandSeparators`, ...) for a custom pipeline |
+| `numora/internal` | Plumbing shared with `numora-react`. No semver guarantee |
 
 ## Documentation
 

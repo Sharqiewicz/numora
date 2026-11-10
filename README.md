@@ -15,10 +15,10 @@ A precision-first numeric input library for any web application. Zero dependenci
 ## Install
 
 ```bash
-# Core (vanilla JS/TypeScript)
+# Vanilla JS/TypeScript
 npm install numora
 
-# React
+# React (includes numora)
 npm install numora-react
 ```
 
@@ -27,18 +27,32 @@ npm install numora-react
 ```typescript
 import { NumoraInput } from 'numora';
 
-const input = new NumoraInput(document.querySelector('#amount'), {
-  decimalMaxLength: 2,
-  thousandSeparator: ',',
-  onChange: (value) => console.log(value),
-});
+const target = document.querySelector<HTMLInputElement>('#amount');
+if (target) {
+  const input = new NumoraInput(target, {
+    decimalMaxLength: 2,
+    onChange: ({ value, formattedValue }) => console.log(value, formattedValue),
+  });
+  input.value; // canonical raw value, e.g. '1234.5'
+}
 ```
 
 ```tsx
 import { NumoraInput } from 'numora-react';
 
-<NumoraInput decimalMaxLength={2} thousandSeparator="," onChange={(e) => console.log(e.target.value)} />
+<NumoraInput decimalMaxLength={2} onValueChange={({ value }) => console.log(value)} />
 ```
+
+Format or parse without an input:
+
+```typescript
+import { formatValue, parseValue } from 'numora';
+
+formatValue('1234.5', { locale: 'de-DE', decimalMinLength: 2 }); // '1.234,50'
+parseValue('1.234,50', { locale: 'de-DE' });                      // '1234.50'
+```
+
+Coming from v4? See [MIGRATION.md](./MIGRATION.md).
 
 ## Features
 
@@ -49,7 +63,7 @@ import { NumoraInput } from 'numora-react';
 - [Scientific Notation](https://numora.xyz/docs/numora/features/scientific-notation) - automatically expands "1.5e-7" → "0.00000015"
 - [Leading Zeros](https://numora.xyz/docs/numora/features/leading-zeros) - configurable leading zero behavior
 
-Pasted text is sanitized under the field's *own* configured separators, not whatever locale it was copied from - the source locale can't be inferred from a bare string. Paste `"1 234,56"` into an en-US-configured input (`,` decimal not expected) and it becomes `123456`; paste `"12,34,567"` and it becomes `1234567`. Integrators who need to accept foreign-formatted clipboard text should pre-parse it themselves - in an `onPaste` handler (React) or before calling `setValue` - rather than relying on Numora to guess the source format.
+Pasted text is read with foreign-format detection: if `.` and `,` both appear, the last one is the decimal; a mark that forms groups of three digits is grouping; any other single mark is the decimal. So `"1.234,56"` pasted into an en-US field is `1,234.56`. Typed keys and values the app passes in are never detected.
 
 ## Documentation
 

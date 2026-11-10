@@ -2,13 +2,37 @@
 
 ## Unreleased
 
+See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
+
 ### Breaking
+- **Options renamed:** `enableNegative`, `enableLeadingZeros`, `enableCompactNotation` are now
+  `allowNegative`, `allowLeadingZeros`, `allowCompactNotation`; `autoAddLeadingZero` is
+  `padLeadingZero`. The type `FormattingOptions` is `NumoraOptions`. Old names are ignored
+  and, in development, logged with their replacement, in both packages.
+- **`groupingStyle: 'none'` is the only way to turn grouping off.** `thousandSeparator: ''`
+  throws.
+- **Vanilla `NumoraInput` exposes properties instead of getters:** `input.value` (get and
+  set), `input.formattedValue`, `input.element`. `getValue()`, `getFormattedValue()`,
+  `getElement()` and `valueAsNumber` are removed. `setValue(value, { undoable })` stays.
+- **Vanilla `defaultValue` is removed:** use `value`. The constructor forwards only a short
+  list of native attributes (`id`, `name`, `className`, `placeholder`, `disabled`, `readOnly`,
+  `required`, `tabIndex`, `title`, `autofocus`, `ariaLabel`); set anything else on
+  `input.element`.
+- **The root of `numora` exports only** `NumoraInput`, `FormatOn`, `GroupingStyle`,
+  `getSeparatorsFromLocale`, `formatValue`, `parseValue` and the types. The twelve
+  sanitization steps (`normalizeDigits`, `expandScientificNotation`, ...) moved unchanged to
+  `numora/pipeline`. `sanitizeNumoraInput`, `formatValueForDisplay`, `displayToRawValue`,
+  `normalizeNegativeZero`, `applyLocale`, `validateNumoraInputOptions` and `InputType` moved
+  to `numora/internal` (no semver guarantee); `numora-react` no longer re-exports `InputType`.
+- **`numora-react` depends on `numora` at an exact version** instead of listing it as a peer
+  (ADR 0007). The two packages are released together with the same version.
+- **React: a blur that only regroups the display no longer fires `onChange` /
+  `onValueChange`.** Both packages notify only when the raw value changed (ADR 0008).
 - **The raw value is canonical in every locale**: ASCII digits, `.` as the decimal mark, `-`
   as the sign, no grouping. A de-DE field showing `1.234.567,89` reports `1234567.89`, so
-  `Number(raw)` and decimal libraries work for every user. String `value`, `defaultValue` and
+  `Number(raw)` and decimal libraries work for every user. String `value`, React `defaultValue` and
   `setValue()` inputs use the same format: `value="1234.5"` means 1234.5 in every locale.
-- **Vanilla `onChange` receives `{ value, formattedValue }`** instead of a string. `getValue()`
-  returns the raw value; use the new `getFormattedValue()` for the display string.
+- **Vanilla `onChange` receives `{ value, formattedValue }`** instead of a string.
 - **`emitRawValue` is removed.** Read `value` or `formattedValue` from the payload instead.
 - **`ThousandStyle` is renamed `GroupingStyle`, and the `thousandStyle` option `groupingStyle`.**
   The string values (`'none'`, `'thousand'`, `'lakh'`, `'wan'`) are unchanged. An old
@@ -27,8 +51,8 @@
 - **`normalizeFullWidthDigits` removed:** use `normalizeDigits`, which it was a deprecated
   alias of.
 - **`NumoraInput` methods `disable`, `enable`, `addEventListener` and `removeEventListener`
-  removed:** they only forwarded to the element. Use `getElement().disabled` and
-  `getElement().addEventListener(...)` instead.
+  removed:** they only forwarded to the element. Use `input.element.disabled` and
+  `input.element.addEventListener(...)` instead.
 - **`numora-react` re-exports `GroupingStyle`** instead of `ThousandStyle`, and ships a
   `'use client'` directive so Next.js server components can import it directly.
 - **`numora-react`: `maxDecimals` is renamed `decimalMaxLength` and its default changes from
@@ -72,38 +96,42 @@
   leftover display text (`1.234,56`) was read as a canonical value (`1.23456`).
 - **React: focus is read from the input's own root**, so fields inside a shadow root or an
   iframe keep typing rules while focused.
-- **`enableScientificNotation: false` is honoured when a paste completes a token:** pasting
+- **`allowScientificNotation: false` is honoured when a paste completes a token:** pasting
   `e-7` after `1.5` is rejected instead of expanding to `0.00000015`.
 - **A malformed token such as `1e3.5` is dropped whole** instead of leaving `.5`.
 - **React: changing `locale` or a separator prop repaints a mounted field.** Switching de-DE
   to fr-FR left `1.234.567,89` on screen; an uncontrolled field never repainted at all.
 
 ### Added
-- **`enableScientificNotation`** option (default `true`, same behaviour as v4). Set it to
+- **`formatValue(value, options?)` and `parseValue(text, options?)`:** format a canonical raw
+  value for display, or read display text back, with no input element
+  (`formatValue('1234.5', { locale: 'de-DE', decimalMinLength: 2 })` is `'1.234,50'`). Also
+  re-exported from `numora-react`.
+- **`update(options)` on vanilla `NumoraInput`:** changes options on a live field. The raw
+  value is kept and re-formatted; `onChange` fires only if the raw value changed. React does
+  the same when formatting props change.
+- **The vanilla `options` argument is optional:** `new NumoraInput(target)`.
+- **React: `ref.current.rawValue`** reads the canonical raw value next to `formattedValue`.
+- **`allowScientificNotation`** option (default `true`, same behaviour as v4). Set it to
   `false` to reject scientific notation typed, pasted or inserted by the user instead of
   expanding it (`1.5e-7` would otherwise become `1.57`): paste and multi-character `beforeinput`
   insertions leave the field unchanged, and the `input` fallback (autofill, drop, IME commit)
   restores the previous value without firing `onChange`. Values the app passes in (`value`,
-  `defaultValue`, `setValue()`) always expand.
-- **New root exports:** `normalizeForeignFormat`, `normalizeDigits`, `normalizeUnicodeMinus`,
-  `displayToRawValue`, `normalizeNegativeZero` and the types `NumoraValues`, `ValueSource` and
-  `LocaleTag`.
+  React `defaultValue`, `setValue()`) always expand.
+- **New types on the root:** `NumoraValues` and `LocaleTag`.
 - **Dev-only warning for an invalid `locale`.** `Intl.NumberFormat` rejecting the tag used to
   fall back silently to `,` grouping and `.` decimal; it now logs a `console.warn` naming the
   tag, except when `NODE_ENV` is `production`.
 
 ### Changed
 - **`numora` and `numora-react` ship minified, without comments, with sourcemaps.** A React
-  consumer loads 10.0 KB gzip (was 19.6 KB).
+  consumer loads 9.7 KB gzip (was 19.6 KB).
 - **Vanilla and React share one DOM event implementation** (`beforeinput`, paste, `input`
   fallback, blur, focus strip), so the two behave the same by construction. Visible effects:
-  - vanilla Blur mode with `thousandSeparator: ''` now settles the value on blur (padding,
+  - vanilla Blur mode with `groupingStyle: 'none'` now settles the value on blur (padding,
     trailing separator strip, `-0` to `0`), as React already did;
   - when scientific notation is rejected in the `input` fallback, the restored value's caret
     goes to the end in both packages.
-  - Blur `onChange` still differs on purpose: vanilla fires only when the raw value changed,
-    React also fires when only the display changed, so mirrors of `formattedValue` stay in
-    sync.
 - **Caret computed from the edit itself.** The new caret rank is the rank of the text left of
   the edit plus the inserted text, sanitized with the same options, selected in the new display
   string (`computeCaretFromEdit`). Replaces the common-prefix / distance-from-end guess and

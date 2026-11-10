@@ -235,7 +235,7 @@ const input = new NumoraInput(container, {
   onChange: ({ value, formattedValue }) => console.log(value, formattedValue)
 });
 
-input.getValue();  // "123.456"
+input.value;  // "123.456"
 input.setValue("789.012");
 ```
 
@@ -323,17 +323,17 @@ export const sanitizeNumoraInput = (
     sanitized = removeThousandSeparators(sanitized, options.thousandSeparator);
   }
   // Expand compact notation (if enabled)
-  if (options?.enableCompactNotation) {
+  if (options?.allowCompactNotation) {
     sanitized = expandCompactNotation(sanitized);
   }
   // Expand scientific notation
   sanitized = expandScientificNotation(sanitized);
   // Remove non-numeric characters
-  sanitized = removeNonNumericCharacters(sanitized, options?.enableNegative, options?.decimalSeparator);
+  sanitized = removeNonNumericCharacters(sanitized, options?.allowNegative, options?.decimalSeparator);
   // Remove extra decimal separators
   sanitized = removeExtraDecimalSeparators(sanitized, options?.decimalSeparator || DEFAULT_DECIMAL_SEPARATOR);
   // Remove leading zeros (if not allowed)
-  if (!options?.enableLeadingZeros) {
+  if (!options?.allowLeadingZeros) {
     sanitized = removeLeadingZeros(sanitized);
   }
   return sanitized;
@@ -638,13 +638,13 @@ export const sanitizeNumoraInput = (
   if (options?.thousandSeparator) {
     sanitized = removeThousandSeparators(sanitized, options.thousandSeparator);
   }
-  if (options?.enableCompactNotation) {
+  if (options?.allowCompactNotation) {
     sanitized = expandCompactNotation(sanitized);  // 🆕 Add this
   }
   sanitized = expandScientificNotation(sanitized);
-  sanitized = removeNonNumericCharacters(sanitized, options?.enableNegative, options?.decimalSeparator);
+  sanitized = removeNonNumericCharacters(sanitized, options?.allowNegative, options?.decimalSeparator);
   sanitized = removeExtraDecimalSeparators(sanitized, options?.decimalSeparator || DEFAULT_DECIMAL_SEPARATOR);
-  if (!options?.enableLeadingZeros) {
+  if (!options?.allowLeadingZeros) {
     sanitized = removeLeadingZeros(sanitized);
   }
   return sanitized;

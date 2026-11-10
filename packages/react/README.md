@@ -12,22 +12,27 @@ npm install numora-react
 # or pnpm add numora-react / yarn add numora-react
 ```
 
+`numora` is installed with it; there is nothing else to add.
+
 ## Usage
 
 ```tsx
 import { NumoraInput } from 'numora-react';
 
 function App() {
+  const [amount, setAmount] = useState('');
   return (
     <NumoraInput
+      value={amount}
       decimalMaxLength={2}
-      thousandSeparator=","
-      groupingStyle="thousand"
-      onChange={(e) => console.log(e.target.value)}
+      onValueChange={({ value }) => setAmount(value)}
     />
   );
 }
 ```
+
+`onValueChange` receives `{ value, formattedValue }`: the canonical raw value and the display
+string. `onChange` is the event form of the same notification, for form libraries.
 
 ## Features
 
@@ -49,23 +54,35 @@ function App() {
 | `decimalMinLength` | `number` | `0` | Minimum decimal places (pads with zeros) |
 | `formatOn` | `'blur' \| 'change'` | `'blur'` | When to apply formatting |
 | `thousandSeparator` | `string` | `','` | Thousand separator character |
-| `groupingStyle` | `'thousand' \| 'lakh' \| 'wan'` | `'thousand'` | Grouping style |
-| `enableCompactNotation` | `boolean` | `false` | Expand compact notation on paste |
-| `enableScientificNotation` | `boolean` | `true` | Expand pasted scientific notation; when `false` the paste is rejected. `value` always expands |
-| `enableNegative` | `boolean` | `false` | Allow negative numbers |
-| `enableLeadingZeros` | `boolean` | `false` | Allow leading zeros |
-| `autoAddLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |
+| `groupingStyle` | `'thousand' \| 'lakh' \| 'wan' \| 'none'` | `'thousand'` | Grouping style; `'none'` turns grouping off |
+| `allowCompactNotation` | `boolean` | `false` | Expand compact notation on paste |
+| `allowScientificNotation` | `boolean` | `true` | Expand pasted scientific notation; when `false` the paste is rejected. `value` always expands |
+| `allowNegative` | `boolean` | `false` | Allow negative numbers |
+| `allowLeadingZeros` | `boolean` | `false` | Allow leading zeros |
+| `padLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |
 | `maxLength` | `number` | `undefined` | Max raw length (digits + decimal separator + leading `-`; thousand separators not counted) |
 | `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject a keystroke/paste when it returns false (called with the post-sanitization raw value). A callback that throws is treated as "not allowed" (the keystroke is rejected) and the error is reported via `console.error` |
 | `locale` | `LocaleTag \| true` | `undefined` | Derive separators from `Intl.NumberFormat`; `true` uses the runtime default locale |
-| `onChange` | `(e: NumoraInputChangeEvent) => void` | `undefined` | Synthetic change event. `e.target.value` is raw; `e.target.formattedValue` is the display string |
-| `onValueChange` | `(values: { value: string; formattedValue: string }) => void` | `undefined` | Plain-object value callback, fired alongside `onChange` |
+| `onValueChange` | `(values: { value: string; formattedValue: string }) => void` | `undefined` | Called when the raw value changes |
+| `onChange` | `(e: NumoraInputChangeEvent) => void` | `undefined` | Event form, fired alongside `onValueChange`. `e.target.value` is raw; `e.target.formattedValue` is the display string |
 
 All standard `HTMLInputElement` props are supported except `type` (always `'text'`) and `inputMode` (always `'decimal'`). `value` / `defaultValue` are canonical raw values (ASCII digits, `.` decimal, `-` sign, no grouping), never locale text and never format-detected: `<NumoraInput locale="de-DE" value="1234.5" />` (or `value={1234.5}`) displays `"1.234,5"`, and `value="1.234"` is the number 1.234 (`"1,234"`). The controlled echo pattern (`onChange={e => setV(e.target.value)}`) therefore round-trips in every locale. Pasted text is format-detected (a pasted `"1.234,56"` is 1234.56 in any locale); typed keys are not.
 
 In `onChange`, `e.target.value` is always the **raw** (unformatted) numeric string and `e.target.formattedValue` is the formatted display string (e.g. `"1,234.56"`). The raw value is canonical in every locale (de-DE display `1.234.567,89` is raw `1234567.89`), and there is no toggle: it is always available on the event.
 
-> **Note:** `e.target.value` (raw) is the inverse of reading the DOM node directly — `inputRef.current.value` returns the **formatted** string that's rendered. Use the `onChange` event or `onValueChange` for the raw value; read the ref only when you want the displayed text.
+On a ref, `ref.current.value` is the **displayed** text (it is the DOM input) and `ref.current.rawValue` is the canonical raw value.
+
+Both callbacks fire when the raw value changes. A blur that only regroups the display emits nothing; one that changes the raw value does (trailing separator strip, `decimalMinLength` padding, `-0` to `0`). Changing a formatting prop on a mounted field (`locale`, `decimalMaxLength`, ...) re-formats the current value and follows the same rule.
+
+`formatValue` and `parseValue` are re-exported from `numora` for formatting outside an input:
+
+```tsx
+import { formatValue } from 'numora-react';
+
+formatValue('1234.5', { locale: 'de-DE', decimalMinLength: 2 }); // '1.234,50'
+```
+
+Props removed or renamed since v4 are ignored and, in development, logged with their replacement. See the [migration guide](../../MIGRATION.md).
 
 A `readOnly` or `disabled` input ignores paste entirely (no write, no `onChange`), matching native `<input>` behavior.
 
