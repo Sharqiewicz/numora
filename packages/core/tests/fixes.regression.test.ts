@@ -5,11 +5,13 @@ import { FormatOn, GroupingStyle } from '../src/types';
 // Regression tests for the code-review fix pass. Each block references the finding it locks in.
 
 describe('Validation runs against resolved options (#3)', () => {
-  it('throws when decimalSeparator collides with the DEFAULT thousandSeparator', () => {
+  it('throws when decimalSeparator collides with an explicit thousandSeparator', () => {
     const container = document.createElement('div');
-    // Only decimalSeparator is passed; thousandSeparator resolves to the default ','.
-    // Before the fix this slipped through validation and silently swallowed the decimal.
-    expect(() => new NumoraInput(container, { decimalSeparator: ',' })).toThrow(
+    // A lone decimalSeparator ',' now resolves a '.' thousand separator instead (see
+    // review-fixes.vanilla.test.ts); only an explicit conflict throws.
+    expect(
+      () => new NumoraInput(container, { decimalSeparator: ',', thousandSeparator: ',' })
+    ).toThrow(
       /decimalSeparator cannot equal thousandSeparator/
     );
   });

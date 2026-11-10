@@ -1,4 +1,4 @@
-import { DEFAULT_GROUPING_STYLE } from '../config';
+import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_GROUPING_STYLE, DEFAULT_THOUSAND_SEPARATOR } from '../config';
 import { GroupingStyle } from '../types';
 
 // Probe value: wide enough that every locale groups it, and it carries a fraction, so a
@@ -162,7 +162,14 @@ export function applyLocale(
     groupingStyle?: GroupingStyle;
   }
 ): { thousandSeparator?: string; decimalSeparator?: string; groupingStyle?: GroupingStyle } {
-  if (!locale) return options;
+  if (!locale) {
+    // A lone decimalSeparator equal to the default thousand one would always conflict;
+    // pair it with the conventional other mark instead. An explicit thousandSeparator wins.
+    return options.thousandSeparator === undefined &&
+      options.decimalSeparator === DEFAULT_THOUSAND_SEPARATOR
+      ? { ...options, thousandSeparator: DEFAULT_DECIMAL_SEPARATOR }
+      : options;
+  }
   const tag = locale === true ? undefined : locale;
   const seps = getSeparatorsFromLocale(tag);
   return {

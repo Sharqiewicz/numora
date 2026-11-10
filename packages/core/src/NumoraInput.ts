@@ -79,6 +79,10 @@ export interface NumoraInputOptions
   defaultValue?: string;
 }
 
+// Display text destroy() leaves in a field, with its raw value, so a re-init can tell Numora's
+// own leftover text from an app-supplied canonical value (ADR 0004). Weak: no element leak.
+const leftovers = new WeakMap<HTMLInputElement, { text: string; raw: string }>();
+
 export class NumoraInput {
   private element!: HTMLInputElement;
 
@@ -160,7 +164,10 @@ export class NumoraInput {
     this.setupEventListeners();
     // The initial value (option, or a pre-set value on an adopted <input>) is supplied by
     // the app, so it is a canonical raw value (ADR 0004), not locale text. Also seeds `lastValue`.
-    this.setValue(this.element.value, { undoable: false });
+    const left = leftovers.get(this.element);
+    this.setValue(left?.text === this.element.value ? left.raw : this.element.value, {
+      undoable: false,
+    });
   }
 
   private createInputElement(
@@ -271,6 +278,9 @@ export class NumoraInput {
    */
   public destroy(): void {
     // splice empties the list, so a second destroy() is a no-op.
+    if (this.cleanups.length) {
+      leftovers.set(this.element, { text: this.element.value, raw: this.getValue() });
+    }
     for (const cleanup of this.cleanups.splice(0)) cleanup();
   }
 
