@@ -245,9 +245,8 @@ describe('input fallback', () => {
     expect(input.value).toBe('1,234');
     expect(input.selectionStart).toBe(4); // 1,23|4
   });
-  // BUG (React/vanilla divergence): the focused fallback uses formatValueForDisplay, which pads and
-  // strips the trailing separator mid-typing. Vanilla uses formatInputValue and keeps '1.'.
-  it.fails('focused fallback does not strip a trailing separator or pad (typing-time rules)', () => {
+  // Shared with vanilla: a focused field keeps typing-time rules, so no padding and no strip.
+  it('focused fallback does not strip a trailing separator or pad (typing-time rules)', () => {
     render(<NumoraInput data-testid="i" decimalMinLength={2} />);
     const input = screen.getByTestId('i') as HTMLInputElement;
     input.focus();

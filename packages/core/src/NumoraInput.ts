@@ -1,22 +1,14 @@
+import { handleOnKeyDownNumoraInput } from './utils/event-handlers';
+import { writeValuePreservingUndo } from './features/formatting';
+import { displayToRawValue } from './utils/format-utils';
 import {
-  handleOnBeforeInputNumoraInput,
-  handleOnKeyDownNumoraInput,
-  handleOnPasteNumoraInput,
-  isScientificNotationRejected,
-} from './utils/event-handlers';
-import {
-  computeStripSeparatorsResult,
-  writeStripPreservingUndo,
-  writeValuePreservingUndo,
-} from './features/formatting';
-import { computeCaretAfterRewrite } from './utils/caret';
-import {
-  displayToRawValue,
-  formatInputValue,
-  formatValueForDisplay,
-  normalizeNegativeZero,
-} from './utils/format-utils';
-import type { ValueSource } from './features/sanitization';
+  applyBeforeInput,
+  applyBlur,
+  applyInputFallback,
+  applyPaste,
+  attachFocusStrip,
+  formatForDisplay,
+} from './utils/dom-events';
 import { escapeRegExp } from './utils/escape-reg-exp';
 import { applyLocale } from './utils/locale';
 import {
@@ -34,7 +26,6 @@ import {
 } from './config';
 import {
   FormatOn,
-  InputType,
   GroupingStyle,
   type FormattingOptions,
   type LocaleTag,
@@ -93,26 +84,13 @@ export class NumoraInput {
 
   private resolvedOptions: ResolvedNumoraOptions;
 
-  // Mouse-driven focus: the browser commits the click→selection mapping AFTER focus
-  // fires, using the input's current value. If we strip separators in the focus handler,
-  // the click X-coord then maps to a position N digits too far right (where N = separators
-  // before the click point). Set on mousedown, cleared on click after we strip + map -
-  // click fires after the browser has finalised the caret, so selectionStart reflects
-  // the user's intended position when we read it.
-  private pendingMouseStrip: boolean = false;
-
-  // Tracked internally rather than read off `document.activeElement` - tests (and some
-  // non-browser embedders) dispatch synthetic `focus`/`blur` events directly without ever
-  // moving the real DOM focus, so `document.activeElement` would not reflect them. This
-  // flag mirrors whatever focus/blur events this instance's own listeners have actually
-  // seen, which is what `handleChange`'s resting-vs-typing branch needs.
-  private isFocused: boolean = false;
+  // Mirrors this instance's focus/blur listeners rather than `document.activeElement`: tests
+  // and some embedders dispatch synthetic focus/blur without moving real focus.
+  private isFocused = false;
   /** Field text after the last write this class made; restored when the `input` fallback must refuse a value. */
-  private lastValue: string = '';
-
-
-  // Bound listeners Numora attached, retained so destroy() can remove exactly them.
-  private boundListeners: Array<[string, EventListener]> = [];
+  private lastValue = '';
+  // Removes exactly the listeners Numora added, so destroy() leaves the caller's alone.
+  private cleanups: Array<() => void> = [];
 
   /**
    * @param target - Either an existing `<input>` to **adopt in place** (its listeners are
@@ -185,40 +163,10 @@ export class NumoraInput {
     this.lastValue = this.element.value;
   }
 
-  /** Display text (what is in the field) to the canonical raw value. */
-  private toRaw(display: string): string {
-    return displayToRawValue(display, this.resolvedOptions);
-  }
-
-  /**
-   * Runs the full sanitization + formatting pipeline on a value destined for the DOM
-   * (initial value, programmatic `setValue`, and blur). Forcing `formatOn: Change` makes
-   * grouping separators apply regardless of the field's edit-time mode, so a
-   * resting/programmatic value always shows the same formatting the typed value settles
-   * to. Delegates to `formatValueForDisplay` (rather than `formatInputValue` directly) so
-   * decimalMinLength padding and the trailing-separator strip - display/blur-only concerns
-   * - apply here too. Mirrors the React adapter's `formatForDisplay`, keeping the two
-   * packages' non-typing paths in parity.
-   *
-   * `source` says how to read `value`: `display` (the field's own text, e.g. on blur),
-   * `foreign` (browser-inserted text) or `canonical` (app-supplied, `.` is the decimal).
-   */
-  private formatForDisplay(
-    value: string,
-    source: ValueSource = 'display'
-  ): { formatted: string; raw: string } {
-    return formatValueForDisplay(
-      value,
-      this.resolvedOptions.decimalMaxLength,
-      { ...this.resolvedOptions, formatOn: FormatOn.Change },
-      source
-    );
-  }
-
   private setDefaultValue(): void {
     // The initial value (option, or a pre-set value on an adopted <input>) is supplied by
     // the app, so it is a canonical raw value (ADR 0004), not locale text.
-    this.element.value = this.formatForDisplay(this.element.value, 'canonical').formatted;
+    this.element.value = formatForDisplay(this.element.value, this.resolvedOptions, 'canonical').formatted;
   }
 
   private createInputElement(
@@ -279,53 +227,30 @@ export class NumoraInput {
   }
 
   private setupEventListeners(): void {
-    // Bind once and record each listener so destroy() can remove exactly what we added
-    // (without touching listeners a caller attached to the element).
-    const add = (type: string, handler: EventListener) => {
-      this.element.addEventListener(type, handler);
-      this.boundListeners.push([type, handler]);
+    const el = this.element;
+    const opts = this.resolvedOptions;
+    const add = <E extends Event>(type: string, handler: (e: E) => void) => {
+      el.addEventListener(type, handler as EventListener);
+      this.cleanups.push(() => el.removeEventListener(type, handler as EventListener));
     };
 
-    // beforeinput fires before the browser applies the user's action and is cancelable,
-    // which lets us apply the formatted value via setRangeText and preserve undo history.
-    add('beforeinput', this.handleBeforeInput.bind(this) as EventListener);
-    // The input listener stays as a fallback for programmatic value changes in tests or
-    // environments that dispatch 'input' without a preceding 'beforeinput'.
-    add('input', this.handleChange.bind(this) as EventListener);
-    add('keydown', this.handleKeyDown.bind(this) as EventListener);
-    add('paste', this.handlePaste.bind(this) as EventListener);
-
-    // `isFocused` bookkeeping is unconditional - independent of the formatOn/grouping/
-    // decimalMinLength/enableNegative combination below, `handleChange`'s resting-vs-typing
-    // branch needs an accurate focus state for every configuration, including a
-    // plain Change-mode field with none of those options set (which otherwise gets no
-    // focus/blur listener at all). Deliberately minimal - no formatting side effects - so
-    // it never changes behaviour for a config that doesn't also meet the condition below.
-    add('focus', () => {
-      this.isFocused = true;
-    });
+    // `beforeinput` is cancelable and fires before the browser edits, so the formatted value
+    // goes in through `setRangeText` and the undo history survives.
+    add<InputEvent>('beforeinput', (e) => this.emit(applyBeforeInput(e, opts)));
+    // Fallback for edits with no `beforeinput`: undo/redo, autofill, programmatic dispatch.
+    add<InputEvent>('input', (e) =>
+      this.emit(applyInputFallback(el, e.inputType, this.isFocused, this.lastValue, opts))
+    );
+    add<KeyboardEvent>('keydown', (e) => handleOnKeyDownNumoraInput(e, opts));
+    add<ClipboardEvent>('paste', (e) => this.emit(applyPaste(e, opts)));
+    add('focus', () => (this.isFocused = true));
     add('blur', () => {
       this.isFocused = false;
+      // Only a raw change notifies: regrouping alone is cosmetic.
+      const values = applyBlur(el, opts);
+      this.emit(values?.rawChanged ? values : undefined);
     });
-
-    // Focus/blur handlers are needed for 'blur' mode grouping, for decimalMinLength
-    // padding (applies on blur regardless of formatOn - see handleBlur below), AND for the
-    // -0 -> 0 normalization, which is likewise a blur-time concern independent of
-    // formatOn/grouping. The Blur-mode guard lives in stripSeparatorsAndMapCaret, so Change
-    // mode + decimalMinLength/enableNegative doesn't strip separators on focus.
-    if (
-      (this.resolvedOptions.formatOn === FormatOn.Blur && this.resolvedOptions.thousandSeparator) ||
-      this.resolvedOptions.decimalMinLength > 0 ||
-      this.resolvedOptions.enableNegative
-    ) {
-      add('focus', this.handleFocus.bind(this) as EventListener);
-      add('blur', this.handleBlur.bind(this) as EventListener);
-      // Mouse path: capture the intent on mousedown, defer strip until click so the
-      // browser's click→selection mapping runs against the still-formatted value and
-      // is committed to selectionStart before we read it. Caret is hidden until then.
-      add('mousedown', this.handleMouseDown.bind(this) as EventListener);
-      add('click', this.handleClick.bind(this) as EventListener);
-    }
+    this.cleanups.push(attachFocusStrip(el, () => opts, () => (this.lastValue = el.value)));
   }
 
   /**
@@ -341,208 +266,13 @@ export class NumoraInput {
    */
   public destroy(): void {
     // splice empties the list, so a second destroy() is a no-op.
-    for (const [type, handler] of this.boundListeners.splice(0)) {
-      this.element.removeEventListener(type, handler);
-    }
+    for (const cleanup of this.cleanups.splice(0)) cleanup();
   }
 
-  /**
-   * Runs an internal DOM write and records the result as `lastValue`. No `input` event
-   * follows: `setRangeText` does not dispatch one (HTML spec; verified in Chrome and
-   * jsdom), so `handleChange` only ever sees browser-native edits.
-   */
-  private trackWrite(fn: () => void): void {
-    fn();
+  /** Records a write the shared helpers made and reports it. */
+  private emit(values: NumoraValues | undefined): void {
     this.lastValue = this.element.value;
-  }
-
-  private handleValueChange(formattedValue: string, rawValue: string): void {
-    this.resolvedOptions.onChange?.({ value: rawValue, formattedValue });
-  }
-
-  private handleBeforeInput(e: InputEvent): void {
-    const result = handleOnBeforeInputNumoraInput(
-      e,
-      this.resolvedOptions.decimalMaxLength,
-      this.resolvedOptions
-    );
-
-    switch (result.type) {
-      case 'handled': {
-        e.preventDefault();
-        this.trackWrite(() =>
-          writeValuePreservingUndo(this.element, result.formatted, result.cursorPos)
-        );
-        this.handleValueChange(result.formatted, result.raw);
-        break;
-      }
-      case 'reject':
-        e.preventDefault();
-        break;
-    }
-  }
-
-  private handleChange(e: InputEvent): void {
-    const target = e.target as HTMLInputElement;
-
-    // Undo/redo: the browser has restored a prior value. Re-formatting here would push
-    // another setRangeText step onto the stack and break the natural Ctrl+Z walk-back.
-    // Just broadcast the restored value.
-    if (e.inputType === InputType.HistoryUndo || e.inputType === InputType.HistoryRedo) {
-      const raw = this.toRaw(target.value);
-      this.lastValue = target.value;
-      this.handleValueChange(target.value, raw);
-      return;
-    }
-
-    // Browser-inserted text (autofill, a programmatic `el.value = x` + dispatched `input`)
-    // can be in any locale's format, so it is read with foreign-format detection (ADR 0006).
-    // Programmatic input event (synthetic dispatch from external code or tests). Format
-    // the current value and route the write through writeValuePreservingUndo so undo stays
-    // intact instead of being wiped by `target.value = x`.
-    const oldValue = target.value;
-    // Autofill / programmatic input carrying scientific notation while the option is off:
-    // the DOM is already mutated, so put back the last value we wrote (no onChange).
-    if (isScientificNotationRejected(oldValue, this.resolvedOptions)) {
-      const caret = Math.min(this.lastValue.length, target.selectionStart!);
-      this.trackWrite(() => writeValuePreservingUndo(target, this.lastValue, caret));
-      return;
-    }
-    // Max of start/end works around a mobile-browser caret bug where selectionStart lags.
-    const oldCursorPosition = Math.max(target.selectionStart!, target.selectionEnd!);
-    // When the element isn't focused (autofill, a programmatic `el.value = x` + dispatched
-    // `input` from external code, a form library resetting the field), there is no typing
-    // caret to preserve and no "mid-edit" state to respect - format the same way the
-    // resting/display value is always formatted (formatForDisplay forces FormatOn.Change),
-    // so e.g. Blur mode doesn't leave an ungrouped value sitting in an unfocused field.
-    // The focused path is unchanged: format under the field's real formatOn mode.
-    //
-    // Tracked via the instance's own `isFocused` flag (set by handleFocus/handleBlur)
-    // rather than `document.activeElement` - a synthetic `focus`/`blur` event dispatched
-    // without moving real DOM focus (common in tests, and possible from non-browser
-    // embedders) still reaches those listeners and should count as focused/unfocused.
-    const isFocused = this.isFocused;
-    const { formatted: newValue, raw: rawValue } = isFocused
-      ? formatInputValue(
-          oldValue,
-          this.resolvedOptions.decimalMaxLength,
-          this.resolvedOptions,
-          this.resolvedOptions.formatOn === FormatOn.Change,
-          'foreign'
-        )
-      : this.formatForDisplay(oldValue, 'foreign');
-
-    if (oldValue !== newValue) {
-      const caret = computeCaretAfterRewrite(
-        oldValue,
-        oldCursorPosition,
-        newValue,
-        this.resolvedOptions.decimalMaxLength,
-        this.resolvedOptions,
-        this.resolvedOptions.formatOn === FormatOn.Change,
-        isFocused
-      );
-      this.trackWrite(() => writeValuePreservingUndo(target, newValue, caret));
-    }
-
-    this.lastValue = target.value;
-    this.handleValueChange(newValue, rawValue);
-  }
-
-  private handleKeyDown(e: KeyboardEvent): void {
-    // Moves the caret over a thousand separator on Delete/Backspace; the caret info it
-    // returns is not needed here (beforeinput derives its own edit).
-    handleOnKeyDownNumoraInput(e, this.resolvedOptions);
-  }
-
-  private handlePaste(e: ClipboardEvent): void {
-    e.preventDefault();
-    // A readOnly/disabled field must reject the paste outright - no write, no onChange -
-    // matching native <input> behaviour (a native readOnly/disabled input never accepts
-    // pasted text either).
-    if (this.element.readOnly || this.element.disabled) return;
-    const result = handleOnPasteNumoraInput(
-      e,
-      this.resolvedOptions.decimalMaxLength,
-      this.resolvedOptions
-    );
-
-    if (result.type === 'reject') return;
-
-    this.trackWrite(() =>
-      writeValuePreservingUndo(this.element, result.formatted, result.cursorPos)
-    );
-    this.handleValueChange(result.formatted, result.raw);
-  }
-
-  private stripSeparatorsAndMapCaret(target: HTMLInputElement): void {
-    // Change mode never groups mid-edit, so there is nothing to strip on focus even when
-    // focus/blur listeners are attached solely for decimalMinLength padding.
-    if (this.resolvedOptions.formatOn !== FormatOn.Blur) return;
-    const sep = this.resolvedOptions.thousandSeparator;
-    const displayStart = target.selectionStart!;
-    const displayEnd = target.selectionEnd!;
-    const result = computeStripSeparatorsResult(target.value, displayStart, displayEnd, sep);
-    if (!result) return;
-
-    this.trackWrite(() =>
-      writeStripPreservingUndo(target, result.raw, result.rawStart, result.rawEnd)
-    );
-    // Stripping separators changes only the display, never the canonical raw value, so no onChange.
-  }
-
-  private handleFocus(e: FocusEvent): void {
-    // Mouse-driven focus: skip - the strip happens on click, after the browser
-    // has placed the cursor based on where the user clicked in the formatted value.
-    if (this.pendingMouseStrip) return;
-    this.stripSeparatorsAndMapCaret(e.target as HTMLInputElement);
-  }
-
-  private handleMouseDown(e: MouseEvent): void {
-    // Only the primary (left) button dispatches a following `click`; right/middle button
-    // would set the flag with no `click` to clear it, wedging pendingMouseStrip true so
-    // every later focus skips the separator strip. (blur also clears it as a backstop.)
-    if (e.button !== 0) return;
-    this.pendingMouseStrip = true;
-  }
-
-  private handleClick(e: MouseEvent): void {
-    if (!this.pendingMouseStrip) return;
-    this.pendingMouseStrip = false;
-    this.stripSeparatorsAndMapCaret(e.target as HTMLInputElement);
-  }
-
-  private handleBlur(e: FocusEvent): void {
-    this.pendingMouseStrip = false;
-
-    const target = e.target as HTMLInputElement;
-    const rawBeforeBlur = this.toRaw(target.value);
-
-    // "-0" (and its decimal variants "-0.", "-0.00", "-.0") settle to the unsigned form at
-    // rest - a resting negative zero is not a meaningful distinct value, and leaving it
-    // means `valueAsNumber` reports -0 forever after. Runs before formatForDisplay so the
-    // padding/grouping pipeline sees the already-designed string.
-    const normalizedValue = normalizeNegativeZero(
-      target.value,
-      this.resolvedOptions.decimalSeparator
-    );
-
-    // formatForDisplay forces FormatOn.Change and strips existing separators before
-    // re-grouping, so it is idempotent on an already-formatted value - re-blurring
-    // "1,234,567.89" never re-groups it into "1,2,34,,567.89". It also pads to
-    // decimalMinLength, matching React's blur handler.
-    const { formatted, raw } = this.formatForDisplay(normalizedValue);
-    if (formatted === target.value) return;
-
-    this.trackWrite(() => writeValuePreservingUndo(target, formatted, formatted.length));
-    // Only broadcast onChange when the sanitized raw value actually changed - blur
-    // can otherwise be purely cosmetic (regrouping thousand separators onto an unchanged
-    // raw value), and firing onChange for that misleads consumers into thinking the value
-    // changed. A trailing-separator strip, decimalMinLength padding, and the -0
-    // normalization above are real raw changes and must still notify.
-    if (raw !== rawBeforeBlur) {
-      this.handleValueChange(formatted, raw);
-    }
+    if (values) this.resolvedOptions.onChange?.({ value: values.value, formattedValue: values.formattedValue });
   }
 
   /**
@@ -551,7 +281,7 @@ export class NumoraInput {
    * `Number()` or a decimal library. Use {@link getFormattedValue} for the display string.
    */
   public getValue(): string {
-    return this.toRaw(this.element.value);
+    return displayToRawValue(this.element.value, this.resolvedOptions);
   }
 
   /** The display string shown in the field (locale separators and grouping included). */
@@ -572,16 +302,15 @@ export class NumoraInput {
   public setValue(value: string, options?: { undoable?: boolean }): void {
     // Route through the same pipeline as typing/paste so programmatic writes honor
     // sanitization, decimalMaxLength, maxLength, enableNegative and grouping.
-    const { formatted } = this.formatForDisplay(value, 'canonical');
+    const { formatted } = formatForDisplay(value, this.resolvedOptions, 'canonical');
 
     if (options?.undoable === false) {
       this.element.value = formatted;
       this.lastValue = formatted;
       return;
     }
-    this.trackWrite(() =>
-      writeValuePreservingUndo(this.element, formatted, formatted.length)
-    );
+    writeValuePreservingUndo(this.element, formatted, formatted.length);
+    this.lastValue = formatted;
   }
 
   /**

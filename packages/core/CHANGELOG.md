@@ -15,10 +15,12 @@
   `thousandStyle` option is ignored and the field uses the default (`thousand`), so a v4
   `thousandStyle: 'lakh'`, `'wan'` or `'none'` silently changes grouping: rename it.
   `GroupingStyle` is now a const object plus a string union instead of a TypeScript `enum`.
-- **Event handlers and DOM writers moved from `numora` to `numora/internal`:**
-  `handleOnBeforeInputNumoraInput`, `handleOnPasteNumoraInput`, `handleOnKeyDownNumoraInput`,
-  `writeValuePreservingUndo`, `writeStripPreservingUndo`, `computeStripSeparatorsResult` and
-  `StripSeparatorsResult`. `handleOnKeyDownNumoraInput` now returns nothing, and the
+- **Event handlers and DOM writers are no longer exported from `numora`:**
+  `handleOnBeforeInputNumoraInput`, `handleOnPasteNumoraInput`, `writeStripPreservingUndo`,
+  `computeStripSeparatorsResult` and `StripSeparatorsResult` are gone;
+  `handleOnKeyDownNumoraInput` and `writeValuePreservingUndo` moved to `numora/internal`,
+  next to the shared DOM wiring (`applyBeforeInput`, `applyPaste`, `applyInputFallback`,
+  `applyBlur`, `attachFocusStrip`). `handleOnKeyDownNumoraInput` now returns nothing, and the
   `CaretPositionInfo` type it returned is removed from `numora` and `numora-react`.
   `numora/internal` exists for `numora-react` and other first-party
   wrappers and has no semver guarantee.
@@ -31,6 +33,8 @@
   `'use client'` directive so Next.js server components can import it directly.
 
 ### Fixed
+- **React: browser-inserted text while focused keeps typing rules** (autofill, drop, IME
+  commit): `1.` is no longer padded to `1.00` or stripped to `1` until blur, same as vanilla.
 - **Compact notation keeps small decimals:** `0.0001k` gives `0.1` (was `0000.1`) and
   `0.00001k` gives `0.01`.
 - **A leading `+` on a scientific-notation mantissa is a sign, not a digit:** `+1e-3` gives
@@ -57,8 +61,7 @@
   expanding it (`1.5e-7` would otherwise become `1.57`): paste and multi-character `beforeinput`
   insertions leave the field unchanged, and the `input` fallback (autofill, drop, IME commit)
   restores the previous value without firing `onChange`. Values the app passes in (`value`,
-  `defaultValue`, `setValue()`) always expand. `numora/internal` also exports
-  `isScientificNotationRejected` for wrappers.
+  `defaultValue`, `setValue()`) always expand.
 - **New root exports:** `normalizeForeignFormat`, `normalizeDigits`, `normalizeUnicodeMinus`,
   `displayToRawValue`, `normalizeNegativeZero` and the types `NumoraValues`, `ValueSource` and
   `LocaleTag`.
@@ -68,7 +71,16 @@
 
 ### Changed
 - **`numora` and `numora-react` ship minified, without comments, with sourcemaps.** A React
-  consumer loads 10.6 KB gzip (was 19.6 KB).
+  consumer loads 10.0 KB gzip (was 19.6 KB).
+- **Vanilla and React share one DOM event implementation** (`beforeinput`, paste, `input`
+  fallback, blur, focus strip), so the two behave the same by construction. Visible effects:
+  - vanilla Blur mode with `thousandSeparator: ''` now settles the value on blur (padding,
+    trailing separator strip, `-0` to `0`), as React already did;
+  - when scientific notation is rejected in the `input` fallback, the restored value's caret
+    goes to the end in both packages.
+  - Blur `onChange` still differs on purpose: vanilla fires only when the raw value changed,
+    React also fires when only the display changed, so mirrors of `formattedValue` stay in
+    sync.
 - **Caret computed from the edit itself.** The new caret rank is the rank of the text left of
   the edit plus the inserted text, sanitized with the same options, selected in the new display
   string (`computeCaretFromEdit`). Replaces the common-prefix / distance-from-end guess and

@@ -10,19 +10,17 @@
  * pipeline functions, locale helpers, formatValueForDisplay, validateNumoraInputOptions, ...)
  * stay on the package root, `'numora'`.
  */
+export { handleOnKeyDownNumoraInput } from './utils/event-handlers';
+export { writeValuePreservingUndo } from './features/formatting';
 export {
-  handleOnBeforeInputNumoraInput,
-  handleOnPasteNumoraInput,
-  handleOnKeyDownNumoraInput,
-  isScientificNotationRejected,
-} from './utils/event-handlers';
-export { computeCaretAfterRewrite } from './utils/caret';
-export {
-  writeValuePreservingUndo,
-  writeStripPreservingUndo,
-  computeStripSeparatorsResult,
-  type StripSeparatorsResult,
-} from './features/formatting';
+  applyBeforeInput,
+  applyBlur,
+  applyInputFallback,
+  applyPaste,
+  attachFocusStrip,
+  formatForDisplay,
+  type ResolvedFormattingOptions,
+} from './utils/dom-events';
 // Default separators so the React adapter resolves options identically to the vanilla
 // class before validation (single source of truth for the defaults).
 export {
