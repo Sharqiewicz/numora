@@ -75,6 +75,8 @@
 - **`enableScientificNotation: false` is honoured when a paste completes a token:** pasting
   `e-7` after `1.5` is rejected instead of expanding to `0.00000015`.
 - **A malformed token such as `1e3.5` is dropped whole** instead of leaving `.5`.
+- **React: changing `locale` or a separator prop repaints a mounted field.** Switching de-DE
+  to fr-FR left `1.234.567,89` on screen; an uncontrolled field never repainted at all.
 
 ### Added
 - **`enableScientificNotation`** option (default `true`, same behaviour as v4). Set it to

@@ -298,11 +298,16 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   // render. Equality guard short-circuits the common echo-back case. When the value
   // differs, route through writeValuePreservingUndo so external updates don't wipe undo.
   useIsomorphicLayoutEffect(() => {
+    const prev = stateRef.current.formattingOptions;
     stateRef.current = { onChange, onValueChange, isAllowed, formattingOptions };
 
-    if (controlledValue === undefined) return;
     const input = internalInputRef.current as NumoraHTMLInputElement;
-    const controlledValueString = String(controlledValue);
+    // Options changed (locale, separators): the DOM text is still in the OLD format, so it
+    // can't be compared under the new one. Repaint, reading an uncontrolled field's number
+    // under the old options.
+    const changed = prev !== formattingOptions;
+    if (controlledValue === undefined && !changed) return;
+    const controlledValueString = String(controlledValue ?? formatForDisplay(input.value, prev).raw);
 
     // Is this just the parent echoing the raw value straight back (the single most
     // common controlled pattern: onChange -> setState(e.target.value) -> value={state})?
@@ -315,6 +320,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // this the same number" check. Equal -> leave the DOM untouched. Different -> the parent
     // genuinely changed the value -> format and write it.
     if (
+      changed ||
       sanitizeNumoraInput(input.value, formattingOptions) !==
       sanitizeNumoraInput(controlledValueString, formattingOptions, 'canonical')
     ) {
