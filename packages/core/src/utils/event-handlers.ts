@@ -345,18 +345,13 @@ export function handleOnPasteNumoraInput(
   // text). Route both through the same rank/select mapping the typing path uses, so that a
   // length change occurring away from the paste point (e.g. a decimal trim at the tail) is
   // not misattributed to the insertion point.
-  const intendedCursorPos = selStart + clipboardData.length;
-
-  const cursorPos =
-    combinedValue !== formattedValue
-      ? computeCaretFromEdit(
-          combinedValue.slice(0, intendedCursorPos),
-          formattedValue,
-          decimalMaxLength,
-          formattingOptions,
-          true
-        )
-      : intendedCursorPos;
+  const cursorPos = computeCaretFromEdit(
+    combinedValue.slice(0, selStart + clipboardData.length),
+    formattedValue,
+    decimalMaxLength,
+    formattingOptions,
+    true
+  );
 
   return { type: 'handled', formatted: formattedValue, raw: rawValue, cursorPos };
 }
