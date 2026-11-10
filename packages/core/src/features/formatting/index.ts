@@ -19,7 +19,4 @@ export {
 } from './caret-position-utils';
 
 // === DOM WRITES (undo-preserving) ===
-export {
-  writeValuePreservingUndo,
-  writeStripPreservingUndo,
-} from './dom-writes';
+export { writeValuePreservingUndo } from './dom-writes';

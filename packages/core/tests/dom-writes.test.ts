@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  writeValuePreservingUndo,
-  writeStripPreservingUndo,
-} from '../src/features/formatting/dom-writes';
+import { writeValuePreservingUndo } from '../src/features/formatting/dom-writes';
 
 /**
  * Testing module: features/formatting/dom-writes.ts
@@ -50,7 +47,7 @@ describe('writeValuePreservingUndo', () => {
   });
 });
 
-describe('writeStripPreservingUndo', () => {
+describe("writeValuePreservingUndo with selectMode 'preserve' (focus-strip)", () => {
   it('fires no input event on the element', () => {
     const el = document.createElement('input');
     document.body.appendChild(el);
@@ -61,7 +58,7 @@ describe('writeStripPreservingUndo', () => {
       inputEventCount += 1;
     });
 
-    writeStripPreservingUndo(el, '1234', 4, 4);
+    writeValuePreservingUndo(el, '1234', 4, 4, 'preserve');
 
     expect(el.value).toBe('1234');
     expect(inputEventCount).toBe(0);

@@ -8,65 +8,35 @@
  */
 
 /**
- * Mobile Chrome occasionally resets the caret after setSelectionRange returns. Re-apply
- * the intended selection on next tick if it has drifted and the value is still ours.
- */
-function scheduleCaretRescue(
-  el: HTMLInputElement,
-  expectedValue: string,
-  start: number,
-  end: number
-): void {
-  setTimeout(() => {
-    if (el.value === expectedValue && (el.selectionStart !== start || el.selectionEnd !== end)) {
-      el.setSelectionRange(start, end);
-    }
-  }, 0);
-}
-
-function writePreservingUndo(
-  el: HTMLInputElement,
-  value: string,
-  start: number,
-  end: number,
-  selectMode: SelectionMode
-): void {
-  // Skip the write if the value and selection are already what we want - that avoids
-  // adding a noisy no-op undo step.
-  if (el.value === value && el.selectionStart === start && el.selectionEnd === end) return;
-  el.setRangeText(value, 0, el.value.length, selectMode);
-  el.setSelectionRange(start, end);
-  scheduleCaretRescue(el, value, start, end);
-}
-
-/**
- * Writes a new value to the input and sets the caret in one operation, preserving the
- * undo stack.
+ * Writes a new value to the input and sets the caret (or selection) in one operation,
+ * preserving the undo stack. Skips the write if the value and selection are already what we
+ * want - that avoids adding a noisy no-op undo step.
+ *
+ * `selectMode` defaults to `end`. The focus-strip passes `preserve` so setRangeText does not
+ * snap the caret to the end of the string before setSelectionRange runs - that snap is what
+ * causes the visible left-then-right flicker when external `input` listeners paint between
+ * the two calls.
  *
  * @param el - The input element
- * @param newValue - The value to write
- * @param cursorPos - The caret position to set after the write
+ * @param value - The value to write
+ * @param start - The selection start to set after the write (the caret)
+ * @param end - The selection end (defaults to `start`)
  */
 export function writeValuePreservingUndo(
   el: HTMLInputElement,
-  newValue: string,
-  cursorPos: number
+  value: string,
+  start: number,
+  end: number = start,
+  selectMode: SelectionMode = 'end'
 ): void {
-  writePreservingUndo(el, newValue, cursorPos, cursorPos, 'end');
-}
-
-/**
- * Writes a focus-strip result: replaces the formatted value with raw digits and maps
- * the caret/selection in one shot. Uses `preserve` (not `end`) so setRangeText does not
- * snap the caret to the end of the string before setSelectionRange runs - that snap is
- * what causes the visible left-then-right flicker when external `input` listeners paint
- * between the two calls.
- */
-export function writeStripPreservingUndo(
-  el: HTMLInputElement,
-  raw: string,
-  rawStart: number,
-  rawEnd: number
-): void {
-  writePreservingUndo(el, raw, rawStart, rawEnd, 'preserve');
+  if (el.value === value && el.selectionStart === start && el.selectionEnd === end) return;
+  el.setRangeText(value, 0, el.value.length, selectMode);
+  el.setSelectionRange(start, end);
+  // Mobile Chrome occasionally resets the caret after setSelectionRange returns. Re-apply
+  // the intended selection on next tick if it has drifted and the value is still ours.
+  setTimeout(() => {
+    if (el.value === value && (el.selectionStart !== start || el.selectionEnd !== end)) {
+      el.setSelectionRange(start, end);
+    }
+  });
 }

@@ -8,7 +8,6 @@ import {
 import type { ValueSource } from '../features/sanitization';
 import {
   computeStripSeparatorsResult,
-  writeStripPreservingUndo,
   writeValuePreservingUndo,
 } from '../features/formatting';
 import {
@@ -191,7 +190,7 @@ export function attachFocusStrip(
       thousandSeparator
     );
     if (!result) return;
-    writeStripPreservingUndo(el, result.raw, result.rawStart, result.rawEnd);
+    writeValuePreservingUndo(el, result.raw, result.rawStart, result.rawEnd, 'preserve');
     onStrip();
   };
   const listeners: [string, (e: Event) => void][] = [
