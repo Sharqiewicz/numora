@@ -16,7 +16,7 @@
  */
 import { positionAfterMatchedPrefix } from '../features/formatting/rank-select';
 import { sanitizeAndTrim } from './format-utils';
-import type { FormattingOptions } from '../types';
+import type { NumoraOptions } from '../types';
 
 /**
  * @param textBeforeCaret - the post-edit text up to the caret: left part + inserted text
@@ -28,7 +28,7 @@ export function computeCaretFromEdit(
   textBeforeCaret: string,
   formatted: string,
   decimalMaxLength: number,
-  formattingOptions: FormattingOptions | undefined,
+  formattingOptions: NumoraOptions | undefined,
   shouldRemoveThousandSeparators?: boolean
 ): number {
   const prefix = sanitizeAndTrim(
@@ -64,7 +64,7 @@ export function computeCaretAfterRewrite(
   caret: number,
   formatted: string,
   decimalMaxLength: number,
-  formattingOptions: FormattingOptions | undefined,
+  formattingOptions: NumoraOptions | undefined,
   focused: boolean
 ): number {
   if (!focused || caret >= value.length) return formatted.length;

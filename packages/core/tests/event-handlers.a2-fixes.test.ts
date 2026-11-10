@@ -15,7 +15,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { handleOnBeforeInputNumoraInput } from '@/utils/event-handlers';
 import { InputType } from '@/types';
-import type { FormattingOptions } from '@/types';
+import type { NumoraOptions } from '@/types';
 
 function makeInput(
   value = '',
@@ -48,7 +48,7 @@ function makeBeforeInput(
 describe('A2-04 — thousand-separator key is rejected, not remapped to decimal', () => {
   it('en-US (thousand ",", decimal "."): "," typed is rejected', () => {
     const input = makeInput('1', 1, 1);
-    const opts: FormattingOptions = { thousandSeparator: ',', decimalSeparator: '.' };
+    const opts: NumoraOptions = { thousandSeparator: ',', decimalSeparator: '.' };
     const result = handleOnBeforeInputNumoraInput(
       makeBeforeInput(input, InputType.InsertText, ','),
       18,
@@ -59,7 +59,7 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
 
   it('en-US: "." typed still inserts the decimal separator', () => {
     const input = makeInput('1', 1, 1);
-    const opts: FormattingOptions = { thousandSeparator: ',', decimalSeparator: '.' };
+    const opts: NumoraOptions = { thousandSeparator: ',', decimalSeparator: '.' };
     const result = handleOnBeforeInputNumoraInput(
       makeBeforeInput(input, InputType.InsertText, '.'),
       18,
@@ -73,7 +73,7 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
 
   it('de-DE (thousand ".", decimal ","): "." typed is the decimal key (ADR 0005, supersedes A2-04)', () => {
     const input = makeInput('1', 1, 1);
-    const opts: FormattingOptions = { thousandSeparator: '.', decimalSeparator: ',' };
+    const opts: NumoraOptions = { thousandSeparator: '.', decimalSeparator: ',' };
     const result = handleOnBeforeInputNumoraInput(
       makeBeforeInput(input, InputType.InsertText, '.'),
       18,
@@ -88,7 +88,7 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
 
   it('de-DE: "," typed still inserts the decimal separator', () => {
     const input = makeInput('1', 1, 1);
-    const opts: FormattingOptions = { thousandSeparator: '.', decimalSeparator: ',' };
+    const opts: NumoraOptions = { thousandSeparator: '.', decimalSeparator: ',' };
     const result = handleOnBeforeInputNumoraInput(
       makeBeforeInput(input, InputType.InsertText, ','),
       18,
@@ -102,7 +102,7 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
 
   it('thousandSeparator "" (unset/empty): both "," and "." still map to the decimal separator', () => {
     const input = makeInput('1', 1, 1);
-    const opts: FormattingOptions = { thousandSeparator: '', decimalSeparator: '.' };
+    const opts: NumoraOptions = { thousandSeparator: '', decimalSeparator: '.' };
     for (const key of [',', '.']) {
       const el = makeInput('1', 1, 1);
       const result = handleOnBeforeInputNumoraInput(
@@ -118,7 +118,7 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
   });
 
   it('thousandSeparator " " (space): both "," and "." still map to the decimal separator', () => {
-    const opts: FormattingOptions = { thousandSeparator: ' ', decimalSeparator: '.' };
+    const opts: NumoraOptions = { thousandSeparator: ' ', decimalSeparator: '.' };
     for (const key of [',', '.']) {
       const el = makeInput('1', 1, 1);
       const result = handleOnBeforeInputNumoraInput(
@@ -134,7 +134,7 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
   });
 
   it('custom decimal "·" with thousand ",": "." maps to "·", "," is rejected', () => {
-    const opts: FormattingOptions = { thousandSeparator: ',', decimalSeparator: '·' };
+    const opts: NumoraOptions = { thousandSeparator: ',', decimalSeparator: '·' };
 
     const dot = makeInput('1', 1, 1);
     const dotResult = handleOnBeforeInputNumoraInput(
@@ -157,7 +157,7 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
   });
 
   it('typing "1,000,000" digit-by-digit in en-US Change mode never inserts a decimal point', () => {
-    const opts: FormattingOptions = { thousandSeparator: ',', decimalSeparator: '.' };
+    const opts: NumoraOptions = { thousandSeparator: ',', decimalSeparator: '.' };
     const input = makeInput('', 0, 0);
     let raw = '';
     for (const ch of '1,000,000') {
@@ -184,7 +184,7 @@ describe('A2-05 — non-ASCII decimal-separator glyphs follow the same remap-or-
     'en-US: typing %s inserts the configured decimal separator',
     (glyph) => {
       const input = makeInput('12', 2, 2);
-      const opts: FormattingOptions = { thousandSeparator: ',', decimalSeparator: '.' };
+      const opts: NumoraOptions = { thousandSeparator: ',', decimalSeparator: '.' };
       const result = handleOnBeforeInputNumoraInput(
         makeBeforeInput(input, InputType.InsertText, glyph),
         18,
@@ -199,7 +199,7 @@ describe('A2-05 — non-ASCII decimal-separator glyphs follow the same remap-or-
 
   it('ar-EG (decimal "٫", thousand "٬"): typing the native decimal glyph keeps working', () => {
     const input = makeInput('12', 2, 2);
-    const opts: FormattingOptions = { thousandSeparator: '٬', decimalSeparator: '٫' };
+    const opts: NumoraOptions = { thousandSeparator: '٬', decimalSeparator: '٫' };
     const result = handleOnBeforeInputNumoraInput(
       makeBeforeInput(input, InputType.InsertText, '٫'),
       18,
@@ -213,7 +213,7 @@ describe('A2-05 — non-ASCII decimal-separator glyphs follow the same remap-or-
 
   it('a config whose thousandSeparator IS one of the glyphs rejects that glyph as a keystroke', () => {
     const input = makeInput('12', 2, 2);
-    const opts: FormattingOptions = { thousandSeparator: '，', decimalSeparator: '.' };
+    const opts: NumoraOptions = { thousandSeparator: '，', decimalSeparator: '.' };
     const result = handleOnBeforeInputNumoraInput(
       makeBeforeInput(input, InputType.InsertText, '，'),
       18,
@@ -226,7 +226,7 @@ describe('A2-05 — non-ASCII decimal-separator glyphs follow the same remap-or-
 describe('A2-08 — a throwing isAllowed is treated as reject, not swallowed', () => {
   it('returns reject when isAllowed throws', () => {
     const input = makeInput('1', 1, 1);
-    const opts: FormattingOptions = {
+    const opts: NumoraOptions = {
       isAllowed: () => {
         throw new Error('boom');
       },
@@ -244,7 +244,7 @@ describe('A2-08 — a throwing isAllowed is treated as reject, not swallowed', (
     try {
       const input = makeInput('1', 1, 1);
       const err = new Error('boom');
-      const opts: FormattingOptions = {
+      const opts: NumoraOptions = {
         isAllowed: () => {
           throw err;
         },
@@ -261,7 +261,7 @@ describe('A2-08 — a throwing isAllowed is treated as reject, not swallowed', (
     const input = makeInput('1', 1, 1);
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
-      const opts: FormattingOptions = {
+      const opts: NumoraOptions = {
         isAllowed: () => {
           throw new Error('boom');
         },

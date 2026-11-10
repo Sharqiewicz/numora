@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
 import { GroupingStyle } from '../src/types';
-import type { FormattingOptions } from '../src/types';
+import type { NumoraOptions } from '../src/types';
 import {
   makeOptions,
   format,
@@ -26,7 +26,7 @@ const nonZeroDigits = fc
   .array(fc.integer({ min: 1, max: 9 }), { minLength: 1, maxLength: 16 })
   .map((a) => a.join(''));
 
-const LOCALES: Array<{ name: string; o: FormattingOptions; sep: string }> = [
+const LOCALES: Array<{ name: string; o: NumoraOptions; sep: string }> = [
   { name: 'thousand', o: makeOptions(), sep: ',' },
   { name: 'lakh', o: makeOptions({ groupingStyle: GroupingStyle.Lakh }), sep: ',' },
   { name: 'wan', o: makeOptions({ groupingStyle: GroupingStyle.Wan }), sep: ',' },

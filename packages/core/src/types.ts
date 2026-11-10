@@ -73,7 +73,17 @@ export const InputType = {
 } as const;
 export type InputType = (typeof InputType)[keyof typeof InputType];
 
-export interface FormattingOptions {
+/**
+ * Every Numora option, defined once. The vanilla `NumoraInputOptions`, the React
+ * `NumoraInputProps` and the headless helpers all take this same shape.
+ */
+export interface NumoraOptions {
+  /**
+   * Derive `thousandSeparator`, `decimalSeparator` and `groupingStyle` from a BCP 47 tag
+   * (`'de-DE'`), or from the runtime's own locale (`true`). An explicitly passed separator
+   * or grouping style still wins.
+   */
+  locale?: LocaleTag | true;
   formatOn?: FormatOn;
   /**
    * Grouping mark. Exactly ONE character (UTF-16 code unit), or `''` for none; anything else
@@ -81,6 +91,11 @@ export interface FormattingOptions {
    * compares one character at a time.
    */
   thousandSeparator?: string;
+  /**
+   * Digit-grouping style. When `locale` is set and this is left unset, the style is derived
+   * from the locale (Indic locales -> `lakh`).
+   * @defaultValue 'thousand'
+   */
   groupingStyle?: GroupingStyle;
   enableCompactNotation?: boolean;
   /**
@@ -101,7 +116,12 @@ export interface FormattingOptions {
   autoAddLeadingZero?: boolean;
   /** Decimal mark. Exactly ONE character (enforced by `validateNumoraInputOptions`). */
   decimalSeparator?: string;
+  /**
+   * Maximum number of decimal places; extra digits are truncated, never rounded. Defaults to
+   * 18 (most ERC-20 tokens). Fiat/checkout fields typically set this to 2.
+   */
   decimalMaxLength?: number;
+  /** Minimum decimal places, zero-padded on display/blur only - never per keystroke. */
   decimalMinLength?: number;
   /**
    * Maximum length of the raw (unformatted) value. Counts digits, the decimal separator,

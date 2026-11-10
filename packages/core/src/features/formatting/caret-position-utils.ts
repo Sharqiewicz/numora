@@ -8,7 +8,7 @@
 
 import { removeThousandSeparators } from '../../features/sanitization';
 import { FormatOn } from '../../types';
-import type { FormattingOptions } from '../../types';
+import type { NumoraOptions } from '../../types';
 
 /**
  * Result of computing a focus-strip: the raw value with separators removed and the
@@ -64,7 +64,7 @@ export function computeStripSeparatorsResult(
 export function skipOverThousandSeparatorOnDelete(
   e: KeyboardEvent,
   inputElement: HTMLInputElement,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: NumoraOptions
 ): void {
   if (formattingOptions?.formatOn !== FormatOn.Change || !formattingOptions.thousandSeparator) {
     return;

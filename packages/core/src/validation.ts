@@ -1,10 +1,10 @@
-import { FormatOn, GroupingStyle, type FormattingOptions, type NumoraValues } from './types';
+import { FormatOn, GroupingStyle, type NumoraOptions } from './types';
 
-// Derived from FormattingOptions so adding a new field to that interface automatically
+// Derived from NumoraOptions so adding a new field to that interface automatically
 // flows into validation - no more drift between the option surface and the validator.
-type NumoraInputValidationOptions = FormattingOptions & {
-  onChange?: (values: NumoraValues) => void;
-};
+// `onChange` is `unknown`: only its `typeof` is checked, and the vanilla and React callbacks
+// have different signatures.
+type NumoraInputValidationOptions = NumoraOptions & { onChange?: unknown };
 
 /**
  * Validates all NumoraInput constructor parameters.

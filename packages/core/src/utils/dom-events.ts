@@ -2,7 +2,7 @@ import {
   FormatOn,
   GroupingStyle,
   InputType,
-  type FormattingOptions,
+  type NumoraOptions,
   type NumoraValues,
 } from '../types';
 import type { ValueSource } from '../features/sanitization';
@@ -30,11 +30,17 @@ import {
  * to notify.
  */
 
-/** Options as both wrappers resolve them: separators and `decimalMaxLength` filled in. */
-export type ResolvedFormattingOptions = FormattingOptions & {
-  decimalMaxLength: number;
-  decimalSeparator: string;
-};
+/**
+ * Options as `resolveOptions` returns them: `locale` already turned into separators, and
+ * everything the event steps read unconditionally filled in.
+ */
+export type ResolvedNumoraOptions = Omit<NumoraOptions, 'locale'> &
+  Required<
+    Pick<
+      NumoraOptions,
+      'formatOn' | 'thousandSeparator' | 'groupingStyle' | 'decimalSeparator' | 'decimalMaxLength'
+    >
+  >;
 
 /**
  * Resting format for values not being typed (initial, programmatic, blur): grouping always
@@ -43,7 +49,7 @@ export type ResolvedFormattingOptions = FormattingOptions & {
  */
 export function formatForDisplay(
   value: string,
-  opts: ResolvedFormattingOptions,
+  opts: ResolvedNumoraOptions,
   source?: ValueSource
 ): { formatted: string; raw: string } {
   return formatValueForDisplay(
@@ -67,7 +73,7 @@ const write = (
 /** `beforeinput`: cancels the edit when Numora handles or rejects it, and writes the result. */
 export function applyBeforeInput(
   e: InputEvent,
-  opts: ResolvedFormattingOptions
+  opts: ResolvedNumoraOptions
 ): NumoraValues | undefined {
   const result = handleOnBeforeInputNumoraInput(e, opts.decimalMaxLength, opts);
   if (result.type === 'skip') return;
@@ -80,7 +86,7 @@ export function applyBeforeInput(
 /** `paste`: always cancels the browser's paste. A readOnly or disabled field takes nothing. */
 export function applyPaste(
   e: ClipboardEvent,
-  opts: ResolvedFormattingOptions
+  opts: ResolvedNumoraOptions
 ): NumoraValues | undefined {
   e.preventDefault();
   const el = e.target as HTMLInputElement;
@@ -105,7 +111,7 @@ export function applyInputFallback(
   inputType: string,
   focused: boolean,
   previous: string,
-  opts: ResolvedFormattingOptions
+  opts: ResolvedNumoraOptions
 ): NumoraValues | undefined {
   const value = el.value;
   if (inputType === InputType.HistoryUndo || inputType === InputType.HistoryRedo) {
@@ -149,7 +155,7 @@ export function applyInputFallback(
  */
 export function applyBlur(
   el: HTMLInputElement,
-  opts: ResolvedFormattingOptions
+  opts: ResolvedNumoraOptions
 ): (NumoraValues & { rawChanged: boolean }) | undefined {
   if (opts.formatOn !== FormatOn.Blur && !opts.decimalMinLength && !opts.enableNegative) return;
   const before = displayToRawValue(el.value, opts);
@@ -176,7 +182,7 @@ export function applyBlur(
  */
 export function attachFocusStrip(
   el: HTMLInputElement,
-  getOpts: () => ResolvedFormattingOptions,
+  getOpts: () => ResolvedNumoraOptions,
   onStrip: () => void
 ): () => void {
   let pendingMouse = false;

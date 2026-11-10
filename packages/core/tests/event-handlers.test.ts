@@ -13,7 +13,7 @@
 import { describe, expect, it } from 'vitest';
 import { handleOnBeforeInputNumoraInput } from '@/utils/event-handlers';
 import { FormatOn, GroupingStyle, InputType } from '@/types';
-import type { FormattingOptions } from '@/types';
+import type { NumoraOptions } from '@/types';
 
 function makeInput(
   value = '',
@@ -43,7 +43,7 @@ function makeBeforeInput(
   return e;
 }
 
-const GROUPED: FormattingOptions = {
+const GROUPED: NumoraOptions = {
   thousandSeparator: ',',
   groupingStyle: GroupingStyle.Thousand,
   formatOn: FormatOn.Change,

@@ -259,20 +259,20 @@ the event. The caller owns `preventDefault()` and the DOM write.
 handleOnBeforeInputNumoraInput(
   e: InputEvent,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: NumoraOptions
 ): BeforeInputResult
 
 // 2. onKeyDown - Track caret & skip over separators
 handleOnKeyDownNumoraInput(
   e: KeyboardEvent,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: NumoraOptions
 ): void
 
 // 3. onPaste - Handle clipboard data
 handleOnPasteNumoraInput(
   e: ClipboardEvent,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: NumoraOptions
 ): PasteResult
 ```
 

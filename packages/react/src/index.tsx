@@ -16,13 +16,9 @@ import { useIsomorphicLayoutEffect } from './use-isomorphic-layout-effect';
 // Public types/enums come from the package root; the shared DOM-event steps come from the
 // internal subpath.
 import {
-  FormatOn,
-  type GroupingStyle,
-  applyLocale,
   formatValueForDisplay,
   sanitizeNumoraInput,
-  validateNumoraInputOptions,
-  type LocaleTag,
+  type NumoraOptions,
   type NumoraValues,
 } from 'numora';
 import {
@@ -34,10 +30,8 @@ import {
   formatForDisplay,
   handleOnKeyDownNumoraInput,
   writeValuePreservingUndo,
-  DEFAULT_THOUSAND_SEPARATOR,
-  DEFAULT_DECIMAL_SEPARATOR,
-  DEFAULT_GROUPING_STYLE,
-  type ResolvedFormattingOptions,
+  resolveOptions,
+  type ResolvedNumoraOptions,
 } from 'numora/internal';
 
 export interface NumoraHTMLInputElement extends HTMLInputElement {
@@ -129,15 +123,11 @@ const RENAMED: Record<string, string> = {
 const isFocused = (el: HTMLElement) => (el.getRootNode() as Document | ShadowRoot).activeElement === el;
 
 export interface NumoraInputProps
-  extends Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    'onChange' | 'type' | 'inputMode' | 'onFocus' | 'onBlur' | 'maxLength'
-  > {
-  /**
-   * Maximum number of decimal places. Defaults to 18 (DeFi-safe: most ERC-20 tokens use
-   * 18 decimals). Fiat/checkout fields typically set this to 2.
-   */
-  decimalMaxLength?: number;
+  extends NumoraOptions,
+    Omit<
+      InputHTMLAttributes<HTMLInputElement>,
+      'onChange' | 'type' | 'inputMode' | 'onFocus' | 'onBlur' | 'maxLength'
+    > {
   onChange?: (e: NumoraInputChangeEvent) => void;
   /**
    * Plain-object value callback: `{ value, formattedValue }`, fired on every change
@@ -147,44 +137,11 @@ export interface NumoraInputProps
   onValueChange?: (values: NumoraValues) => void;
   onFocus?: (e: FocusEvent<HTMLInputElement>) => void;
   onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
-
-  locale?: LocaleTag | true;
-  formatOn?: FormatOn;
-  thousandSeparator?: string;
-  /**
-   * Digit-grouping style for the thousand separator. When `locale` is set and this is
-   * left unset, the style is derived from the locale (Indic locales -> `Lakh`).
-   * @defaultValue GroupingStyle.Thousand
-   */
-  groupingStyle?: GroupingStyle;
-  decimalSeparator?: string;
-  decimalMinLength?: number;
-
-  enableCompactNotation?: boolean;
-  /** Expand pasted `1.5e-7` (default). Set `false` to reject such a paste instead. */
-  enableScientificNotation?: boolean;
-  enableNegative?: boolean;
-  enableLeadingZeros?: boolean;
-  autoAddLeadingZero?: boolean;
-
-  /**
-   * Max raw length (digits, decimal separator, and leading `-`). Thousand separators are
-   * NOT counted. Enforced at keystroke (typing past it is rejected) and on paste (the
-   * combined value is truncated). Does NOT set the native HTML `maxLength` attribute,
-   * which would count formatted characters and double-count separators.
-   */
-  maxLength?: number;
-  /**
-   * Custom validator. Called with the post-sanitization raw value the input would have
-   * after the keystroke or paste. Return false to reject the edit - no value change,
-   * no `onChange` fires, undo history is untouched.
-   */
-  isAllowed?: (rawValue: string) => boolean;
 }
 
 const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) => {
   const {
-    decimalMaxLength = 18,
+    decimalMaxLength,
     onChange,
     onValueChange,
     onPaste,
@@ -192,11 +149,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     onKeyDown,
     onFocus,
     locale,
-    formatOn = FormatOn.Blur,
+    formatOn,
     thousandSeparator,
-    // Deliberately NOT defaulted here: `applyLocale` can derive the grouping style from
-    // the locale (Indic locales -> Lakh), and a pre-applied default would always win the
-    // `?? ` below and swallow the derived value. Defaulted after locale resolution.
     groupingStyle,
     decimalSeparator,
     decimalMinLength,
@@ -215,19 +169,15 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   const stale = Object.keys(RENAMED).filter((k) => k in props && delete (rest as Record<string, unknown>)[k]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: callbacks are read via stateRef; a new onChange/isAllowed identity must not re-resolve options.
-  const formattingOptions: ResolvedFormattingOptions = useMemo(() => {
-    const separators = applyLocale(locale, { thousandSeparator, decimalSeparator, groupingStyle });
-    // Resolve separator defaults BEFORE validating, exactly as the vanilla class does
-    // (NumoraInput resolves then validates). Validating the unresolved options let a
-    // half-configured locale — e.g. thousandSeparator '.' with decimalSeparator left to
-    // default to '.' — slip past the separator-conflict check and silently swallow the
-    // decimal part at runtime. It also left thousandSeparator undefined, disabling grouping
-    // even though the README documents ',' as the default.
-    const options: ResolvedFormattingOptions = {
+  const formattingOptions: ResolvedNumoraOptions = useMemo(() => {
+    // Same resolver as the vanilla class: locale, defaults, then validation of the resolved
+    // options against this render's real `isAllowed`/`onChange`, so a wrong type still throws.
+    const options = resolveOptions({
+      locale,
       formatOn,
-      thousandSeparator: separators.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR,
-      groupingStyle: separators.groupingStyle ?? DEFAULT_GROUPING_STYLE,
-      decimalSeparator: separators.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
+      thousandSeparator,
+      groupingStyle,
+      decimalSeparator,
       decimalMaxLength,
       decimalMinLength,
       enableCompactNotation,
@@ -236,20 +186,12 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       enableLeadingZeros,
       autoAddLeadingZero,
       maxLength,
-      // Stable identity so `isAllowed` stays out of the memo's deps; delegates to the
-      // current `isAllowed` via stateRef (read only from event handlers, after commit).
-      isAllowed: (rawValue: string) => stateRef.current.isAllowed?.(rawValue) ?? true,
-    };
-    // Validate inside useMemo so misconfig throws early in both dev and prod, and we
-    // don't re-validate on every render. Validated against this render's real onChange/
-    // isAllowed (not the stable wrapper) so a genuine caller mistake (wrong type) still
-    // throws. The cast bridges the signature gap: vanilla's onChange takes a values object,
-    // React's takes an event - assertFunction only checks `typeof === 'function'`.
-    validateNumoraInputOptions({
-      ...options,
       isAllowed,
-      onChange: onChange as unknown as ((values: NumoraValues) => void) | undefined,
+      onChange,
     });
+    // Stable identity so `isAllowed` stays out of the memo's deps; delegates to the
+    // current `isAllowed` via stateRef (read only from event handlers, after commit).
+    options.isAllowed = (rawValue: string) => stateRef.current.isAllowed?.(rawValue) ?? true;
     return options;
   }, [
     locale,
@@ -329,7 +271,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       // otherwise format for the resting display (forced Change, with separators).
       const { formatted } =
         isFocused(input)
-          ? formatValueForDisplay(controlledValueString, decimalMaxLength, formattingOptions, 'canonical')
+          ? formatValueForDisplay(controlledValueString, formattingOptions.decimalMaxLength, formattingOptions, 'canonical')
           : formatForDisplay(controlledValueString, formattingOptions, 'canonical');
       if (formatted !== input.value) writeValuePreservingUndo(input, formatted, formatted.length);
     }
@@ -415,4 +357,4 @@ NumoraInput.displayName = 'NumoraInput';
 
 export { NumoraInput };
 export { FormatOn, GroupingStyle, InputType } from 'numora';
-export type { FormattingOptions, LocaleTag } from 'numora';
+export type { NumoraOptions, LocaleTag } from 'numora';

@@ -10,66 +10,13 @@ import {
   formatForDisplay,
 } from './utils/dom-events';
 import { escapeRegExp } from './utils/escape-reg-exp';
-import { applyLocale } from './utils/locale';
-import {
-  DEFAULT_AUTO_ADD_LEADING_ZERO,
-  DEFAULT_DECIMAL_MAX_LENGTH,
-  DEFAULT_DECIMAL_MIN_LENGTH,
-  DEFAULT_DECIMAL_SEPARATOR,
-  DEFAULT_ENABLE_COMPACT_NOTATION,
-  DEFAULT_ENABLE_SCIENTIFIC_NOTATION,
-  DEFAULT_ENABLE_LEADING_ZEROS,
-  DEFAULT_ENABLE_NEGATIVE,
-  DEFAULT_FORMAT_ON,
-  DEFAULT_THOUSAND_SEPARATOR,
-  DEFAULT_GROUPING_STYLE,
-} from './config';
-import type {
-  FormatOn,
-  GroupingStyle,
-  FormattingOptions,
-  LocaleTag,
-  NumoraValues,
-} from './types';
-import { validateNumoraInputOptions } from './validation';
-
-// maxLength and isAllowed are opt-in only - no sensible default - so they stay optional
-// in the resolved options. Everything else has a default in `config.ts`.
-type ResolvedNumoraOptions = Required<Omit<FormattingOptions, 'maxLength' | 'isAllowed'>> &
-  Pick<FormattingOptions, 'maxLength' | 'isAllowed'> & {
-    onChange?: (values: NumoraValues) => void;
-  };
+import { resolveOptions } from './utils/resolve-options';
+import type { ResolvedNumoraOptions } from './utils/dom-events';
+import type { NumoraOptions, NumoraValues } from './types';
 
 export interface NumoraInputOptions
-  extends Partial<Omit<HTMLInputElement, 'value' | 'defaultValue' | 'onChange' | 'maxLength'>> {
-  // Formatting options
-  formatOn?: FormatOn;
-
-  // Thousand options
-  thousandSeparator?: string;
-  groupingStyle?: GroupingStyle;
-
-  // Decimal options
-  decimalSeparator?: string;
-  decimalMaxLength?: number;
-  decimalMinLength?: number;
-
-  // Locale
-  locale?: LocaleTag | true;
-
-  // Parsing options
-  enableCompactNotation?: boolean;
-  enableScientificNotation?: boolean;
-  enableNegative?: boolean;
-  enableLeadingZeros?: boolean;
-  autoAddLeadingZero?: boolean;
-
-  // Validation
-  /** Max raw length (digits + decimal sep + leading `-`). Separators not counted. */
-  maxLength?: number;
-  /** Reject keystroke/paste if this returns false. Called with post-sanitization raw value. */
-  isAllowed?: (rawValue: string) => boolean;
-
+  extends NumoraOptions,
+    Partial<Omit<HTMLInputElement, 'value' | 'defaultValue' | 'onChange' | 'maxLength'>> {
   // Event handlers
   /** Fired on every change with `{ value, formattedValue }`: canonical raw + display string. */
   onChange?: (values: NumoraValues) => void;
@@ -87,6 +34,7 @@ export class NumoraInput {
   private element!: HTMLInputElement;
 
   private resolvedOptions: ResolvedNumoraOptions;
+  private onChange?: (values: NumoraValues) => void;
 
   // Mirrors this instance's focus/blur listeners rather than `document.activeElement`: tests
   // and some embedders dispatch synthetic focus/blur without moving real focus.
@@ -105,44 +53,15 @@ export class NumoraInput {
    */
   constructor(target: HTMLInputElement | HTMLElement, options: NumoraInputOptions) {
     const {
-      decimalMaxLength = DEFAULT_DECIMAL_MAX_LENGTH,
-      decimalMinLength = DEFAULT_DECIMAL_MIN_LENGTH,
-      formatOn = DEFAULT_FORMAT_ON,
+      // Numora's own options, pulled out so they never reach the native <input>
+      // (`maxLength` there would count separators).
+      locale,
+      formatOn,
       thousandSeparator,
-      // Deliberately NOT defaulted here: `applyLocale` can derive the grouping style from
-      // the locale (Indic locales -> Lakh), and a pre-applied default would always win the
-      // `?? ` below and swallow the derived value. Defaulted after locale resolution.
       groupingStyle,
       decimalSeparator,
-      locale,
-      enableCompactNotation = DEFAULT_ENABLE_COMPACT_NOTATION,
-      enableScientificNotation = DEFAULT_ENABLE_SCIENTIFIC_NOTATION,
-      enableNegative = DEFAULT_ENABLE_NEGATIVE,
-      enableLeadingZeros = DEFAULT_ENABLE_LEADING_ZEROS,
-      autoAddLeadingZero = DEFAULT_AUTO_ADD_LEADING_ZERO,
-      maxLength,
-      isAllowed,
-      onChange,
-      // Pulled out so they never reach the native <input> (maxLength would double-count
-      // separators; type/inputMode/spellcheck/autocomplete are set explicitly below).
-      value,
-      defaultValue,
-      type,
-      inputMode,
-      spellcheck,
-      autocomplete,
-      ...nativeProps
-    } = options;
-
-    const separators = applyLocale(locale, { thousandSeparator, decimalSeparator, groupingStyle });
-
-    this.resolvedOptions = {
       decimalMaxLength,
       decimalMinLength,
-      formatOn,
-      thousandSeparator: separators.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR,
-      groupingStyle: separators.groupingStyle ?? DEFAULT_GROUPING_STYLE,
-      decimalSeparator: separators.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
       enableCompactNotation,
       enableScientificNotation,
       enableNegative,
@@ -151,14 +70,34 @@ export class NumoraInput {
       maxLength,
       isAllowed,
       onChange,
-    };
+      value,
+      defaultValue,
+      // Set explicitly in createInputElement.
+      type,
+      inputMode,
+      spellcheck,
+      autocomplete,
+      ...nativeProps
+    } = options;
 
-    // Validate AFTER defaults + locale are resolved, not on the raw options. The
-    // separator-conflict and min/max-decimal checks only fire when both operands are
-    // present; validating raw options let, e.g., `{ decimalSeparator: ',' }` slip through
-    // (thousandSeparator undefined at that point) only to resolve to the default ','
-    // separator at runtime and silently swallow the decimal part.
-    validateNumoraInputOptions(this.resolvedOptions);
+    this.resolvedOptions = resolveOptions({
+      locale,
+      formatOn,
+      thousandSeparator,
+      groupingStyle,
+      decimalSeparator,
+      decimalMaxLength,
+      decimalMinLength,
+      enableCompactNotation,
+      enableScientificNotation,
+      enableNegative,
+      enableLeadingZeros,
+      autoAddLeadingZero,
+      maxLength,
+      isAllowed,
+      onChange,
+    });
+    this.onChange = onChange;
 
     this.createInputElement(target, nativeProps, value, defaultValue);
     this.setupEventListeners();
@@ -287,7 +226,7 @@ export class NumoraInput {
   /** Records a write the shared helpers made and reports it. */
   private emit(values: NumoraValues | undefined): void {
     this.lastValue = this.element.value;
-    if (values) this.resolvedOptions.onChange?.({ value: values.value, formattedValue: values.formattedValue });
+    if (values) this.onChange?.({ value: values.value, formattedValue: values.formattedValue });
   }
 
   /**

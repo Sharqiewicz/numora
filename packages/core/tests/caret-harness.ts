@@ -14,11 +14,11 @@ import {
 } from '../src/utils/event-handlers';
 import { formatWithSeparators } from '../src/features/formatting';
 import { GroupingStyle, FormatOn, InputType } from '../src/types';
-import type { FormattingOptions } from '../src/types';
+import type { NumoraOptions } from '../src/types';
 
 export const DEC_MAX = 8;
 
-export function makeOptions(over: Partial<FormattingOptions> = {}): FormattingOptions {
+export function makeOptions(over: Partial<NumoraOptions> = {}): NumoraOptions {
   return {
     thousandSeparator: ',',
     groupingStyle: GroupingStyle.Thousand,
@@ -57,7 +57,7 @@ export function edit(
   selEnd: number,
   data: string,
   inputType: string,
-  o: FormattingOptions
+  o: NumoraOptions
 ): CaretOutcome | null {
   return withInput(value, selStart, selEnd, (input) => {
     if (
@@ -80,13 +80,13 @@ export function edit(
   });
 }
 
-export const typeDigit = (v: string, at: number, ch: string, o: FormattingOptions) =>
+export const typeDigit = (v: string, at: number, ch: string, o: NumoraOptions) =>
   edit(v, at, at, ch, InputType.InsertText, o);
-export const selectReplace = (v: string, a: number, b: number, ch: string, o: FormattingOptions) =>
+export const selectReplace = (v: string, a: number, b: number, ch: string, o: NumoraOptions) =>
   edit(v, a, b, ch, InputType.InsertText, o);
-export const backspace = (v: string, at: number, o: FormattingOptions) =>
+export const backspace = (v: string, at: number, o: NumoraOptions) =>
   edit(v, at, at, '', InputType.DeleteContentBackward, o);
-export const forwardDelete = (v: string, at: number, o: FormattingOptions) =>
+export const forwardDelete = (v: string, at: number, o: NumoraOptions) =>
   edit(v, at, at, '', InputType.DeleteContentForward, o);
 
 export function paste(
@@ -94,7 +94,7 @@ export function paste(
   selStart: number,
   selEnd: number,
   clip: string,
-  o: FormattingOptions
+  o: NumoraOptions
 ): CaretOutcome | null {
   return withInput(value, selStart, selEnd, (input) => {
     const res = handleOnPasteNumoraInput(
@@ -120,7 +120,7 @@ export function significantBefore(str: string, pos: number, thousandSep: string)
 }
 
 /** Format a raw digit/decimal string the way the component would display it. */
-export function format(raw: string, o: FormattingOptions): string {
+export function format(raw: string, o: NumoraOptions): string {
   return formatWithSeparators(
     raw,
     o.thousandSeparator ?? ',',

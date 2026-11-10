@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { FormattingOptions } from '@/types';
+import type { NumoraOptions } from '@/types';
 import { FormatOn, GroupingStyle, InputType } from '@/types';
 import {
   applyInputFallback,
   attachFocusStrip,
-  type ResolvedFormattingOptions,
+  type ResolvedNumoraOptions,
 } from '@/utils/dom-events';
 import { handleOnBeforeInputNumoraInput, handleOnPasteNumoraInput } from '@/utils/event-handlers';
 import { sanitizeAndTrim } from '@/utils/format-utils';
@@ -12,7 +12,7 @@ import { getSeparatorsFromLocale } from '@/utils/locale';
 
 /** Second round of pins for src/utils: survivors of the r3 mutation run. */
 
-const en = (over: Partial<ResolvedFormattingOptions> = {}): ResolvedFormattingOptions => ({
+const en = (over: Partial<ResolvedNumoraOptions> = {}): ResolvedNumoraOptions => ({
   decimalMaxLength: 18,
   decimalSeparator: '.',
   thousandSeparator: ',',
@@ -38,7 +38,7 @@ const type = (
   el: HTMLInputElement,
   data: string | null,
   max: number,
-  opts: FormattingOptions,
+  opts: NumoraOptions,
   inputType: string = InputType.InsertText
 ) => handleOnBeforeInputNumoraInput(bi(el, inputType, data), max, opts);
 

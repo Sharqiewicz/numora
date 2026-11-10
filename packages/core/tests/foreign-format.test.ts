@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeForeignFormat } from '@/features/foreign-format';
 import { sanitizeNumoraInput } from '@/features/sanitization';
-import type { FormattingOptions } from '@/types';
+import type { NumoraOptions } from '@/types';
 
-const de: FormattingOptions = { decimalSeparator: ',', thousandSeparator: '.' };
-const en: FormattingOptions = { decimalSeparator: '.', thousandSeparator: ',' };
-const fr: FormattingOptions = { decimalSeparator: ',', thousandSeparator: ' ' };
-const enIn: FormattingOptions = { ...en, groupingStyle: 'lakh' };
+const de: NumoraOptions = { decimalSeparator: ',', thousandSeparator: '.' };
+const en: NumoraOptions = { decimalSeparator: '.', thousandSeparator: ',' };
+const fr: NumoraOptions = { decimalSeparator: ',', thousandSeparator: ' ' };
+const enIn: NumoraOptions = { ...en, groupingStyle: 'lakh' };
 
-const table: Array<[string, FormattingOptions, string, string]> = [
+const table: Array<[string, NumoraOptions, string, string]> = [
   ['de-DE', de, '1.234', '1234'],
   ['de-DE', de, '1.234.567', '1234567'],
   ['de-DE', de, '1.5', '1.5'],

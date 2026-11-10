@@ -5,7 +5,7 @@ import {
   type ValueSource,
 } from '../features/sanitization';
 import { formatWithSeparators } from '../features/formatting';
-import { type FormattingOptions, FormatOn } from '../types';
+import { type NumoraOptions, FormatOn } from '../types';
 import { DEFAULT_GROUPING_STYLE, DEFAULT_DECIMAL_SEPARATOR } from '../config';
 
 /**
@@ -20,7 +20,7 @@ import { DEFAULT_GROUPING_STYLE, DEFAULT_DECIMAL_SEPARATOR } from '../config';
  */
 export function displayToRawValue(
   display: string,
-  options?: Pick<FormattingOptions, 'decimalSeparator' | 'thousandSeparator'>
+  options?: Pick<NumoraOptions, 'decimalSeparator' | 'thousandSeparator'>
 ): string {
   const decimalSeparator = options?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR;
   const thousandSeparator = options?.thousandSeparator;
@@ -36,7 +36,7 @@ export function displayToRawValue(
 export function sanitizeAndTrim(
   rawValue: string,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions,
+  formattingOptions?: NumoraOptions,
   shouldRemoveThousandSeparators?: boolean,
   source: ValueSource = 'display'
 ): string {
@@ -76,7 +76,7 @@ export function sanitizeAndTrim(
 export function formatInputValue(
   rawValue: string,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions,
+  formattingOptions?: NumoraOptions,
   shouldRemoveThousandSeparators?: boolean,
   source: ValueSource = 'display'
 ): { formatted: string; raw: string } {
@@ -133,7 +133,7 @@ export function formatInputValue(
 export function formatValueForDisplay(
   value: string,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions,
+  formattingOptions?: NumoraOptions,
   source: ValueSource = 'display'
 ): { formatted: string; raw: string } {
   const { formatted, raw } = formatInputValue(

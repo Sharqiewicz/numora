@@ -5,7 +5,7 @@ import { NON_ASCII_DECIMAL_SEPARATOR_GLYPHS } from '../features/decimal-separato
 import { containsScientificNotation } from '../features/scientific-notation';
 import { skipOverThousandSeparatorOnDelete } from '../features/formatting';
 import { computeCaretFromEdit } from './caret';
-import { type FormattingOptions, InputType } from '../types';
+import { type NumoraOptions, InputType } from '../types';
 import { formatInputValue } from './format-utils';
 
 // Keys that, when typed, are candidates for remapping to the configured decimal separator:
@@ -57,7 +57,7 @@ export type BeforeInputResult =
  */
 export function isScientificNotationRejected(
   text: string,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: NumoraOptions
 ): boolean {
   return (
     formattingOptions?.enableScientificNotation === false && containsScientificNotation(text)
@@ -87,7 +87,7 @@ function callIsAllowed(isAllowed: (rawValue: string) => boolean, rawValue: strin
 export function handleOnBeforeInputNumoraInput(
   e: InputEvent,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: NumoraOptions
 ): BeforeInputResult {
   const target = e.target as HTMLInputElement;
   const currentValue = target.value;
@@ -278,7 +278,7 @@ export function handleOnBeforeInputNumoraInput(
  */
 export function handleOnKeyDownNumoraInput(
   e: KeyboardEvent,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: NumoraOptions
 ): void {
   skipOverThousandSeparatorOnDelete(e, e.target as HTMLInputElement, formattingOptions);
 }
@@ -301,7 +301,7 @@ export type PasteResult =
 export function handleOnPasteNumoraInput(
   e: ClipboardEvent,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: NumoraOptions
 ): PasteResult {
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;

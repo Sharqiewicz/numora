@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { GroupingStyle } from '../src/types';
-import type { FormattingOptions } from '../src/types';
+import type { NumoraOptions } from '../src/types';
 import {
   makeOptions,
   format,
@@ -29,7 +29,7 @@ import {
 
 interface Locale {
   name: string;
-  o: FormattingOptions;
+  o: NumoraOptions;
   sep: string;
   intRaws: string[];
   decRaws: string[]; // only where the decimal char is unambiguous for the harness

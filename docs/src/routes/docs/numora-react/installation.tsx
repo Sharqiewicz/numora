@@ -147,7 +147,7 @@ function AmountField() {
       </p>
       <CodeBlock language="typescript">
         {`import type {
-  FormattingOptions,
+  NumoraOptions,
   NumoraInputProps,
   NumoraInputChangeEvent,
   NumoraHTMLInputElement,

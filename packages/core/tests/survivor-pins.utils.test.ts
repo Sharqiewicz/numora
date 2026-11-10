@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { FormattingOptions } from '@/types';
+import type { NumoraOptions } from '@/types';
 import { FormatOn, GroupingStyle, InputType } from '@/types';
 import { computeCaretAfterRewrite } from '@/utils/caret';
 import {
   applyBlur,
   applyInputFallback,
   attachFocusStrip,
-  type ResolvedFormattingOptions,
+  type ResolvedNumoraOptions,
 } from '@/utils/dom-events';
 import { handleOnBeforeInputNumoraInput, handleOnPasteNumoraInput } from '@/utils/event-handlers';
 import { formatValueForDisplay, sanitizeAndTrim } from '@/utils/format-utils';
@@ -19,7 +19,7 @@ import {
 
 /** Behaviour in src/utils that mutation testing showed no other test pins. */
 
-const en = (over: Partial<ResolvedFormattingOptions> = {}): ResolvedFormattingOptions => ({
+const en = (over: Partial<ResolvedNumoraOptions> = {}): ResolvedNumoraOptions => ({
   decimalMaxLength: 18,
   decimalSeparator: '.',
   thousandSeparator: ',',
@@ -27,7 +27,7 @@ const en = (over: Partial<ResolvedFormattingOptions> = {}): ResolvedFormattingOp
   formatOn: FormatOn.Blur,
   ...over,
 });
-const de = (over: Partial<ResolvedFormattingOptions> = {}) =>
+const de = (over: Partial<ResolvedNumoraOptions> = {}) =>
   en({ thousandSeparator: '.', decimalSeparator: ',', ...over });
 
 function mk(value: string, start = value.length, end = start): HTMLInputElement {
@@ -48,11 +48,11 @@ const before = (
   inputType: string,
   data: string | null,
   max: number,
-  opts: FormattingOptions
+  opts: NumoraOptions
 ) => handleOnBeforeInputNumoraInput(bi(el, inputType, data), max, opts);
-const type = (el: HTMLInputElement, data: string, max: number, opts: FormattingOptions) =>
+const type = (el: HTMLInputElement, data: string, max: number, opts: NumoraOptions) =>
   before(el, InputType.InsertText, data, max, opts);
-function paste(el: HTMLInputElement, text: string | null, opts: FormattingOptions) {
+function paste(el: HTMLInputElement, text: string | null, opts: NumoraOptions) {
   const e = {
     target: el,
     preventDefault() {},
@@ -142,7 +142,7 @@ describe('dom-events.ts applyBlur', () => {
 });
 
 describe('dom-events.ts attachFocusStrip', () => {
-  const setup = (over: Partial<ResolvedFormattingOptions> = {}, value = '1,234') => {
+  const setup = (over: Partial<ResolvedNumoraOptions> = {}, value = '1,234') => {
     const el = mk(value, 1);
     const onStrip = vi.fn();
     attachFocusStrip(el, () => en(over), onStrip);
@@ -203,7 +203,7 @@ describe('dom-events.ts attachFocusStrip', () => {
 });
 
 describe('event-handlers.ts beforeinput', () => {
-  const e18 = en() as FormattingOptions;
+  const e18 = en() as NumoraOptions;
   it('L100: insertCompositionText "." is skipped, not treated as a decimal key', () => {
     expect(before(mk('1.5'), InputType.InsertCompositionText, '.', 18, e18)).toEqual({
       type: 'skip',
@@ -240,7 +240,7 @@ describe('event-handlers.ts beforeinput', () => {
     expect(before(mk('12345'), InputType.DeleteContentBackward, null, 18, o).type).toBe('handled');
   });
   it('L233: the maxLength check sanitizes with the field options (decimal separator counts)', () => {
-    const o = { ...de(), maxLength: 3 } as FormattingOptions;
+    const o = { ...de(), maxLength: 3 } as NumoraOptions;
     expect(type(mk('1,2'), '3', 18, o)).toEqual({ type: 'reject' });
     expect(type(mk('1,2'), '3', 18, { ...o, maxLength: 4 })).toMatchObject({
       type: 'handled',
@@ -258,7 +258,7 @@ describe('event-handlers.ts beforeinput', () => {
     const q = {
       ...en({ thousandSeparator: "'", formatOn: FormatOn.Change }),
       enableLeadingZeros: true,
-    } as FormattingOptions;
+    } as NumoraOptions;
     expect(
       before(mk("07'2997111", 3, 7), InputType.DeleteContentBackward, null, 18, q)
     ).toMatchObject({ formatted: "07'111", cursorPos: 3 });
@@ -292,8 +292,8 @@ describe('event-handlers.ts paste', () => {
 });
 
 describe('format-utils.ts', () => {
-  const blur = en() as FormattingOptions;
-  const change = en({ formatOn: FormatOn.Change }) as FormattingOptions;
+  const blur = en() as NumoraOptions;
+  const change = en({ formatOn: FormatOn.Change }) as NumoraOptions;
   it('L46: separator removal defaults to Change mode and is overridable', () => {
     // '1,e3': with the separator removed it is 1e3, kept it is 13
     expect(sanitizeAndTrim('1,e3', 18, change)).toBe('1000');

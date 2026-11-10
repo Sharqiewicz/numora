@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { handleOnBeforeInputNumoraInput } from '../src/utils/event-handlers';
 import { GroupingStyle, FormatOn, InputType } from '../src/types';
-import type { FormattingOptions } from '../src/types';
+import type { NumoraOptions } from '../src/types';
 
 /**
  * Systematic all-positions caret regression, driven through the REAL `beforeinput`
@@ -16,7 +16,7 @@ import type { FormattingOptions } from '../src/types';
  */
 
 const sep = ',';
-const opts: FormattingOptions = {
+const opts: NumoraOptions = {
   thousandSeparator: sep,
   groupingStyle: GroupingStyle.Thousand,
   formatOn: FormatOn.Change,

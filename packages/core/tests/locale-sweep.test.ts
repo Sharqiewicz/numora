@@ -12,7 +12,7 @@ import { handleOnPasteNumoraInput } from '../src/utils/event-handlers';
 import { normalizeDigits } from '../src/features/fullwidth-digits';
 import { sanitizeNumoraInput } from '../src/features/sanitization';
 import { FormatOn, GroupingStyle } from '../src/types';
-import type { FormattingOptions } from '../src/types';
+import type { NumoraOptions } from '../src/types';
 
 const supported = (tag: string): boolean => {
   try {
@@ -91,7 +91,7 @@ const UNSUPPORTED_GROUPING = /^tok(-|$)/;
 const canonicalRaw = (raw: string, decimalSeparator: string): string =>
   decimalSeparator === '.' ? raw : raw.split(decimalSeparator).join('.');
 
-function paste(text: string, options: FormattingOptions): string {
+function paste(text: string, options: NumoraOptions): string {
   const input = document.createElement('input');
   const event = { target: input, clipboardData: { getData: () => text } } as unknown as ClipboardEvent;
   const result = handleOnPasteNumoraInput(event, 20, options);
@@ -131,7 +131,7 @@ describe('locale sweep', () => {
           continue;
         }
 
-        const options: FormattingOptions = {
+        const options: NumoraOptions = {
           ...d,
           formatOn: FormatOn.Change,
           enableNegative: true,

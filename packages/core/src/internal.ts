@@ -19,12 +19,8 @@ export {
   applyPaste,
   attachFocusStrip,
   formatForDisplay,
-  type ResolvedFormattingOptions,
+  type ResolvedNumoraOptions,
 } from './utils/dom-events';
-// Default separators so the React adapter resolves options identically to the vanilla
-// class before validation (single source of truth for the defaults).
-export {
-  DEFAULT_THOUSAND_SEPARATOR,
-  DEFAULT_DECIMAL_SEPARATOR,
-  DEFAULT_GROUPING_STYLE,
-} from './config';
+// Locale + defaults + validation in one call, so the React adapter resolves options
+// identically to the vanilla class.
+export { resolveOptions } from './utils/resolve-options';

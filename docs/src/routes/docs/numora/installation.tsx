@@ -104,7 +104,7 @@ const numoraInput = new NumoraInput(container, {
       <h2>Options</h2>
       <p>
         Numora requires an options object (<code>NumoraInputOptions</code>) as the second argument. It extends{' '}
-        <code>FormattingOptions</code> with <code>locale</code>, <code>onChange</code>, <code>value</code> and <code>defaultValue</code>. Common
+        <code>NumoraOptions</code> with <code>locale</code>, <code>onChange</code>, <code>value</code> and <code>defaultValue</code>. Common
         options:
       </p>
       <ul>
@@ -158,9 +158,9 @@ const numoraInput = new NumoraInput(container, {
       </p>
       <CodeBlock language="typescript">
         {`import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
-import type { FormattingOptions } from 'numora'
+import type { NumoraOptions } from 'numora'
 
-const options: FormattingOptions = {
+const options: NumoraOptions = {
   decimalMaxLength: 6,
   formatOn: FormatOn.Change,
   groupingStyle: GroupingStyle.Thousand,

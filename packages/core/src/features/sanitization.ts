@@ -10,7 +10,7 @@ import { normalizeDigits } from './fullwidth-digits';
 import { normalizeUnicodeMinus } from './unicode-minus';
 import { normalizeDecimalSeparators } from './decimal-separators';
 import { normalizeForeignFormat, canonicalToDisplayText } from './foreign-format';
-import type { FormattingOptions } from '../types';
+import type { NumoraOptions } from '../types';
 
 // Upper bound on the raw input length sanitization will ever process. No numeric input a
 // person types or pastes is longer than this, and capping here bounds every downstream
@@ -73,7 +73,7 @@ export function removeThousandSeparators(value: string, thousandSeparator?: stri
  */
 export const sanitizeNumoraInput = (
   value: string,
-  formattingOptions?: FormattingOptions,
+  formattingOptions?: NumoraOptions,
   source: ValueSource = 'display'
 ): string => {
   const decimalSeparator = formattingOptions?.decimalSeparator;

@@ -4,7 +4,7 @@ import {
   handleOnPasteNumoraInput,
 } from '../src/utils/event-handlers';
 import { GroupingStyle, FormatOn, InputType } from '../src/types';
-import type { FormattingOptions } from '../src/types';
+import type { NumoraOptions } from '../src/types';
 
 /**
  * END-TO-END caret behavior — the behavioral source of truth for cursor positioning.
@@ -18,13 +18,13 @@ import type { FormattingOptions } from '../src/types';
  * after deletion it rests at the natural spot; separator reflow never shifts it.
  */
 
-const DEFAULT: FormattingOptions = {
+const DEFAULT: NumoraOptions = {
   thousandSeparator: ',',
   groupingStyle: GroupingStyle.Thousand,
   formatOn: FormatOn.Change,
   decimalSeparator: '.',
 };
-const EUROPEAN: FormattingOptions = {
+const EUROPEAN: NumoraOptions = {
   thousandSeparator: '.',
   groupingStyle: GroupingStyle.Thousand,
   formatOn: FormatOn.Change,
@@ -43,7 +43,7 @@ function typeOrDelete(
   selEnd: number,
   data: string,
   inputType: string,
-  options: FormattingOptions = DEFAULT
+  options: NumoraOptions = DEFAULT
 ): Outcome {
   const input = document.createElement('input');
   input.value = value;
@@ -62,7 +62,7 @@ function paste(
   selStart: number,
   selEnd: number,
   clip: string,
-  options: FormattingOptions = DEFAULT
+  options: NumoraOptions = DEFAULT
 ): Outcome {
   const input = document.createElement('input');
   input.value = value;
@@ -79,9 +79,9 @@ function paste(
   return { formatted: res.formatted, cursorPos: res.cursorPos };
 }
 
-const type = (v: string, at: number, ch: string, o?: FormattingOptions) =>
+const type = (v: string, at: number, ch: string, o?: NumoraOptions) =>
   typeOrDelete(v, at, at, ch, InputType.InsertText, o);
-const selectType = (v: string, s: number, e: number, ch: string, o?: FormattingOptions) =>
+const selectType = (v: string, s: number, e: number, ch: string, o?: NumoraOptions) =>
   typeOrDelete(v, s, e, ch, InputType.InsertText, o);
 const backspace = (v: string, at: number) =>
   typeOrDelete(v, at, at, '', InputType.DeleteContentBackward);
@@ -155,7 +155,7 @@ describe('caret e2e — European locale (decimal ",", thousand ".")', () => {
 });
 
 describe('caret e2e — value-normalizing transforms', () => {
-  const LZ: FormattingOptions = {
+  const LZ: NumoraOptions = {
     thousandSeparator: ',',
     groupingStyle: GroupingStyle.Thousand,
     formatOn: FormatOn.Change,
@@ -178,7 +178,7 @@ describe('caret e2e — value-normalizing transforms', () => {
   });
 
   it('compact expansion "15k" → "15,000" snaps caret to end', () => {
-    const COMPACT: FormattingOptions = {
+    const COMPACT: NumoraOptions = {
       ...LZ,
       autoAddLeadingZero: false,
       enableCompactNotation: true,
@@ -206,7 +206,7 @@ describe('caret e2e — value-normalizing transforms', () => {
   });
 
   it('negative: typing "5" before the sign of "-1,234" → "51,234" caret after the 5', () => {
-    const NEG: FormattingOptions = { ...LZ, autoAddLeadingZero: false, enableNegative: true };
+    const NEG: NumoraOptions = { ...LZ, autoAddLeadingZero: false, enableNegative: true };
     const r = type('-1,234', 0, '5', NEG);
     expect(r.formatted).toBe('51,234');
     expect(r.cursorPos).toBe(1); // "5|1,234"
@@ -245,7 +245,7 @@ describe('caret e2e — Lakh / Wan / decimal integer-part (digit-count invariant
   ];
 
   for (const [name, style, sepChar] of styles) {
-    const o: FormattingOptions = {
+    const o: NumoraOptions = {
       thousandSeparator: sepChar,
       groupingStyle: style,
       formatOn: FormatOn.Change,
