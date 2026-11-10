@@ -1,26 +1,17 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignoreWorkspaces": [
-    "docs"
-  ],
+  "ignoreWorkspaces": ["docs"],
   "workspaces": {
     ".": {
-      "entry": [
-        "scripts/*.mjs"
-      ]
+      "entry": ["scripts/*.mjs"],
+      "ignoreDependencies": ["fast-check"]
     },
     "packages/core": {
-      "project": [
-        "src/**/*.ts"
-      ]
+      "project": ["src/**/*.ts"]
     },
     "packages/react": {
-      "entry": [
-        "src/index.tsx"
-      ],
-      "project": [
-        "src/**/*.{ts,tsx}"
-      ]
+      "entry": ["src/index.tsx"],
+      "project": ["src/**/*.{ts,tsx}"]
     }
   }
 }
