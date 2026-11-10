@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { NumoraInput } from '../src/index';
 
@@ -129,5 +129,35 @@ describe('formatting props changing on a mounted field: notifications', () => {
     rerender(ui('2.999'));
     expect(field().value).toBe('2.99');
     expect(onValueChange).not.toHaveBeenCalled();
+  });
+});
+
+// `ref.current.value` is the display string; `rawValue` is the canonical raw value.
+describe('ref.rawValue', () => {
+  it('reads the canonical raw value in every state, under the current options', () => {
+    const ref = { current: null as (HTMLInputElement & { rawValue?: string; formattedValue?: string }) | null };
+    const ui = (locale: string) => <NumoraInput ref={ref} data-testid="amount" defaultValue={RAW} locale={locale} />;
+    const { rerender } = render(ui('de-DE'));
+    expect(ref.current?.value).toBe('1.234.567,89');
+    expect(ref.current?.formattedValue).toBe('1.234.567,89');
+    expect(ref.current?.rawValue).toBe(RAW);
+
+    // Focus strips the grouping: same raw value.
+    fireEvent.focus(field());
+    expect(field().value).toBe('1234567,89');
+    expect(ref.current?.rawValue).toBe(RAW);
+
+    rerender(ui('en-IN'));
+    expect(ref.current?.rawValue).toBe(RAW);
+  });
+
+  it('is empty for an empty field and cannot be assigned', () => {
+    const ref = { current: null as (HTMLInputElement & { rawValue?: string }) | null };
+    render(<NumoraInput ref={ref} data-testid="amount" />);
+    expect(ref.current?.rawValue).toBe('');
+    expect(() => {
+      'use strict';
+      (ref.current as { rawValue: string }).rawValue = '5';
+    }).toThrow(TypeError);
   });
 });

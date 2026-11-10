@@ -165,9 +165,7 @@ export class NumoraInput {
     });
     add('blur', () => {
       this.isFocused = false;
-      // Only a raw change notifies: regrouping alone is cosmetic.
-      const values = applyBlur(el, opts());
-      this.emit(values?.rawChanged ? values : undefined);
+      this.emit(applyBlur(el, opts()));
     });
     this.cleanups.push(
       attachFocusStrip(

@@ -16,6 +16,7 @@ import { useIsomorphicLayoutEffect } from './use-isomorphic-layout-effect';
 // Public types/enums come from the package root; the shared DOM-event steps come from the
 // internal subpath.
 import {
+  displayToRawValue,
   formatValueForDisplay,
   sanitizeNumoraInput,
   type NumoraOptions,
@@ -39,6 +40,11 @@ import {
 export interface NumoraHTMLInputElement extends HTMLInputElement {
   /** The formatted display string - the same value shown in the input, including thousand separators. */
   formattedValue?: string;
+  /**
+   * The canonical raw value of the field right now: ASCII digits, `.` decimal, no grouping.
+   * Read it from a ref (`ref.current.rawValue`), where `value` is the display string.
+   */
+  readonly rawValue?: string;
 }
 
 /**
@@ -130,7 +136,7 @@ export interface NumoraInputProps
   onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
 }
 
-const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) => {
+const NumoraInput = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((props, ref) => {
   const {
     decimalMaxLength,
     onChange,
@@ -225,7 +231,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   );
 
   // External ref -> internal input (function and object refs; nulled on unmount).
-  useImperativeHandle(ref, () => internalInputRef.current as HTMLInputElement, []);
+  useImperativeHandle(ref, () => internalInputRef.current as NumoraHTMLInputElement, []);
 
   // Layout effect 2: refresh stateRef every render so mount-only DOM listeners see the
   // latest props; re-sync the DOM value when controlled `value` changes. Runs on every
@@ -284,6 +290,11 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   useEffect(() => {
     const input = internalInputRef.current as NumoraHTMLInputElement;
     input.formattedValue = input.value;
+    // A getter, so it is never stale: it reads the field under the current options.
+    Object.defineProperty(input, 'rawValue', {
+      configurable: true,
+      get: () => displayToRawValue(input.value, stateRef.current.formattingOptions),
+    });
     warnRemovedOptions(stale);
     const onBeforeInput = (e: InputEvent) => {
       const values = applyBeforeInput(e, stateRef.current.formattingOptions);
@@ -325,8 +336,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     emit(el, values);
   };
 
-  // Blur reports display-only changes too (regrouping), unlike vanilla, so anything that
-  // mirrors `formattedValue` from onChange stays in sync with the field.
+  // Like vanilla, blur reports only a raw change (trailing separator strip, padding, `-0` to
+  // `0`); regrouping alone rewrites the field without a callback.
   const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
     emit(e.target, applyBlur(e.target, formattingOptions));
     onBlur?.(e);

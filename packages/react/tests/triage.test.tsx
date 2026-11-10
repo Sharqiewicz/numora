@@ -262,7 +262,7 @@ describe('paste / blur onValueChange', () => {
     paste(screen.getByTestId('i') as HTMLInputElement, '1234.5');
     expect(onValueChange).toHaveBeenCalledWith({ value: '1234.5', formattedValue: '1,234.5' });
   });
-  it('blur fires onValueChange when grouping is added', () => {
+  it('blur adds grouping without onValueChange (raw unchanged)', () => {
     const onValueChange = vi.fn();
     render(<NumoraInput data-testid="i" onValueChange={onValueChange} />);
     const input = screen.getByTestId('i') as HTMLInputElement;
@@ -271,7 +271,7 @@ describe('paste / blur onValueChange', () => {
     onValueChange.mockClear();
     act(() => input.blur());
     expect(input.value).toBe('1,234');
-    expect(onValueChange).toHaveBeenCalledWith({ value: '1234', formattedValue: '1,234' });
+    expect(onValueChange).not.toHaveBeenCalled();
   });
   it('Change mode (no decimalMinLength/allowNegative): blur leaves a trailing separator alone', () => {
     const onChange = vi.fn();

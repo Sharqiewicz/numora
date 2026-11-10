@@ -449,11 +449,11 @@ describe('NumoraInput', () => {
       fireEvent.blur(input);
 
       expect(input.value).toBe('1,234');
-      expect(onChange).toHaveBeenCalled();
-      const lastCall: NumoraInputChangeEvent = onChange.mock.calls.at(-1)![0];
-      // e.target.value is raw; e.target.formattedValue has the separator
-      expect(lastCall.target.value).toBe('1234');
-      expect((lastCall.target as NumoraHTMLInputElement).formattedValue).toBe('1,234');
+      // Regrouping leaves the raw value alone, so nothing is reported; the element's
+      // mirrors still follow the field.
+      expect(onChange).not.toHaveBeenCalled();
+      expect((input as NumoraHTMLInputElement).rawValue).toBe('1234');
+      expect((input as NumoraHTMLInputElement).formattedValue).toBe('1,234');
     });
 
     it('strips thousand separators on focus so the user can edit cleanly', () => {
@@ -1439,7 +1439,7 @@ describe('blur onChange guard', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('fires onChange exactly once on blur when the value has separators to add', async () => {
+  it('does NOT fire onChange on blur when only separators are added back', async () => {
     const onChange = vi.fn();
     render(
       <NumoraInput
@@ -1462,13 +1462,10 @@ describe('blur onChange guard', () => {
 
     onChange.mockClear();
 
-    // Blur adds separators back: "1234" → "1,234" — value changed, so onChange fires once.
+    // Blur adds separators back: "1234" → "1,234". The raw value is the same: no onChange.
     fireEvent.blur(input);
     expect(input.value).toBe('1,234');
-    expect(onChange).toHaveBeenCalledTimes(1);
-    const event: NumoraInputChangeEvent = onChange.mock.calls[0][0];
-    expect(event.target.value).toBe('1234');
-    expect((event.target as NumoraHTMLInputElement).formattedValue).toBe('1,234');
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   // A2-06

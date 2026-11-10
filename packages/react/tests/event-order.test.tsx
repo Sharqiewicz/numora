@@ -133,28 +133,28 @@ const PINNED: Record<string, string[]> = {
     '["onPaste dom=1.234.567,89","onChange value=1234567.89 formatted=1.234.567,89 dom=1.234.567,89","onValueChange value=1234567.89 formatted=1.234.567,89 dom=1.234.567,89"]',
     '"1.234.567,89 caret=12,12"',
   ],
-  'keyboard focus then blur > en-US Blur: focus strips without onChange; blur regroups, onChange only if the DISPLAY changed':
+  'keyboard focus then blur > en-US Blur: focus strips without onChange; blur regroups without onChange':
     [
       '"1,234,567.89"',
       '["onFocus dom=1234567.89"]',
       '"1234567.89 caret=10,10"',
-      '["onFocus dom=1234567.89","onChange value=1234567.89 formatted=1,234,567.89 dom=1,234,567.89","onValueChange value=1234567.89 formatted=1,234,567.89 dom=1,234,567.89","onBlur dom=1,234,567.89"]',
+      '["onFocus dom=1234567.89","onBlur dom=1,234,567.89"]',
       '"1,234,567.89 caret=12,12"',
     ],
   'keyboard focus then blur > de-DE Blur: focus strips without onChange; blur regroups': [
     '"1.234.567,89"',
     '["onFocus dom=1234567,89"]',
     '"1234567,89 caret=10,10"',
-    '["onFocus dom=1234567,89","onChange value=1234567.89 formatted=1.234.567,89 dom=1.234.567,89","onValueChange value=1234567.89 formatted=1.234.567,89 dom=1.234.567,89","onBlur dom=1.234.567,89"]',
+    '["onFocus dom=1234567,89","onBlur dom=1.234.567,89"]',
     '"1.234.567,89 caret=12,12"',
   ],
-  'keyboard focus then blur > en-US Blur: type then blur groups and fires onChange + onValueChange (display changed)':
+  'keyboard focus then blur > en-US Blur: type then blur groups without a callback (raw unchanged)':
     [
-      '["onChange value=1234567.5 formatted=1,234,567.5 dom=1,234,567.5","onValueChange value=1234567.5 formatted=1,234,567.5 dom=1,234,567.5","onBlur dom=1,234,567.5"]',
+      '["onBlur dom=1,234,567.5"]',
       '"1,234,567.5 caret=11,11"',
     ],
   'keyboard focus then blur > de-DE Blur: type then blur groups': [
-    '["onChange value=1234567.5 formatted=1.234.567,5 dom=1.234.567,5","onValueChange value=1234567.5 formatted=1.234.567,5 dom=1.234.567,5","onBlur dom=1.234.567,5"]',
+    '["onBlur dom=1.234.567,5"]',
     '"1.234.567,5 caret=11,11"',
   ],
   'blur cases > blur: decimalMinLength pads on blur': [
@@ -232,7 +232,7 @@ const PINNED: Record<string, string[]> = {
   'controlled value > external parent change > same number, extra trailing zero from the parent: IS rewritten (raw strings differ)':
     ['"1,234.50 caret=8,8"'],
   'StrictMode > typing, paste, focus and blur each fire exactly once': [
-    '["onFocus dom=","onKeyDown 1 dom=","onChange value=1 formatted=1 dom=1","onValueChange value=1 formatted=1 dom=1","onKeyDown 2 dom=1","onChange value=12 formatted=12 dom=12","onValueChange value=12 formatted=12 dom=12","onPaste dom=1234","onChange value=1234 formatted=1234 dom=1234","onValueChange value=1234 formatted=1234 dom=1234","onChange value=1234 formatted=1,234 dom=1,234","onValueChange value=1234 formatted=1,234 dom=1,234","onBlur dom=1,234"]',
+    '["onFocus dom=","onKeyDown 1 dom=","onChange value=1 formatted=1 dom=1","onValueChange value=1 formatted=1 dom=1","onKeyDown 2 dom=1","onChange value=12 formatted=12 dom=12","onValueChange value=12 formatted=12 dom=12","onPaste dom=1234","onChange value=1234 formatted=1234 dom=1234","onValueChange value=1234 formatted=1234 dom=1234","onBlur dom=1,234"]',
     '"1,234 caret=5,5"',
   ],
   'StrictMode > undo/redo and autofill fallbacks fire once': [
@@ -384,7 +384,7 @@ describe('paste', () => {
 });
 
 describe('keyboard focus then blur', () => {
-  it('en-US Blur: focus strips without onChange; blur regroups, onChange only if the DISPLAY changed', () => {
+  it('en-US Blur: focus strips without onChange; blur regroups without onChange', () => {
     mount({ defaultValue: '1234567.89' });
     pin(el.value);
     focus();
@@ -404,7 +404,7 @@ describe('keyboard focus then blur', () => {
     pin(log);
     pin(state());
   });
-  it('en-US Blur: type then blur groups and fires onChange + onValueChange (display changed)', () => {
+  it('en-US Blur: type then blur groups without a callback (raw unchanged)', () => {
     mount();
     focus();
     typeAll('1234567.5');

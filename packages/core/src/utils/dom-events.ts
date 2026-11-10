@@ -149,14 +149,14 @@ export function applyInputFallback(
 /**
  * Blur: settle the value at rest (grouping, padding, trailing separator strip, `-0` to `0`).
  * Runs in Blur mode, or when `decimalMinLength` or `allowNegative` need a resting fix-up; a
- * Change-mode field is otherwise already at rest. Returns `undefined` when the display didn't
- * change. `rawChanged` is false when only the grouping changed: vanilla reports only raw
- * changes, React also reports display changes so mirrors of `formattedValue` stay in sync.
+ * Change-mode field is otherwise already at rest. Returns the values only when the raw value
+ * changed (trailing separator strip, `decimalMinLength` padding, `-0` to `0`): regrouping
+ * alone is cosmetic, so it is written but not reported, in both packages.
  */
 export function applyBlur(
   el: HTMLInputElement,
   opts: ResolvedNumoraOptions
-): (NumoraValues & { rawChanged: boolean }) | undefined {
+): NumoraValues | undefined {
   if (opts.formatOn !== FormatOn.Blur && !opts.decimalMinLength && !opts.allowNegative) return;
   const before = displayToRawValue(el.value, opts);
   const { formatted, raw } = formatForDisplay(
@@ -165,7 +165,7 @@ export function applyBlur(
   );
   if (formatted === el.value) return;
   writeValuePreservingUndo(el, formatted, formatted.length);
-  return { value: raw, formattedValue: formatted, rawChanged: raw !== before };
+  if (raw !== before) return { value: raw, formattedValue: formatted };
 }
 
 /**
