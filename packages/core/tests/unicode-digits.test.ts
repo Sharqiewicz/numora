@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import * as fc from 'fast-check';
-import { normalizeDigits, normalizeFullWidthDigits } from '../src/features/fullwidth-digits';
+import { normalizeDigits } from '../src/features/fullwidth-digits';
 import { sanitizeNumoraInput } from '../src/features/sanitization';
 
 // Zero code point of each block covered by normalizeDigits, named for readability in the
@@ -56,11 +56,6 @@ describe('normalizeDigits', () => {
   it('leaves non-digit characters unchanged', () => {
     const arabicIndic1 = nativeDigits(BLOCKS['Arabic-Indic'], '1');
     expect(normalizeDigits(`${arabicIndic1}abc`)).toBe('1abc');
-  });
-
-  it('normalizeFullWidthDigits is an alias of normalizeDigits', () => {
-    expect(normalizeFullWidthDigits).toBe(normalizeDigits);
-    expect(normalizeFullWidthDigits(nativeDigits(BLOCKS.Fullwidth, '789'))).toBe('789');
   });
 });
 

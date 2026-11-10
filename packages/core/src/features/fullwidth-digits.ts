@@ -67,8 +67,3 @@ export function normalizeDigits(value: string): string {
   return out;
 }
 
-/**
- * @deprecated Alias of {@link normalizeDigits}, kept for backward compatibility. The
- * function now normalizes every supported Unicode decimal-digit block, not just fullwidth.
- */
-export const normalizeFullWidthDigits = normalizeDigits;

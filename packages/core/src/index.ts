@@ -22,7 +22,7 @@ export { sanitizeNumoraInput, removeThousandSeparators } from './features/saniti
 export type { ValueSource } from './features/sanitization';
 export { normalizeForeignFormat } from './features/foreign-format';
 export { filterMobileKeyboardArtifacts } from './features/mobile-keyboard-filtering';
-export { normalizeFullWidthDigits, normalizeDigits } from './features/fullwidth-digits';
+export { normalizeDigits } from './features/fullwidth-digits';
 export { normalizeUnicodeMinus } from './features/unicode-minus';
 export { expandCompactNotation } from './features/compact-notation';
 export { expandScientificNotation } from './features/scientific-notation';

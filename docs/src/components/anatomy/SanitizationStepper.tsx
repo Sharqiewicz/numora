@@ -4,7 +4,7 @@ import {
   expandCompactNotation,
   expandScientificNotation,
   filterMobileKeyboardArtifacts,
-  normalizeFullWidthDigits,
+  normalizeDigits,
   prependLeadingZero,
   removeExtraDecimalSeparators,
   removeLeadingZeros,
@@ -60,9 +60,9 @@ function pipeline(input: string): Step[] {
     'runs when thousandSeparator is set',
   );
   run(
-    'normalizeFullWidthDigits',
-    'Turn "１２３" into "123" (full-width digits from CJK keyboards)',
-    normalizeFullWidthDigits,
+    'normalizeDigits',
+    'Turn "１２３" or "١٢٣" into "123" (full-width and other Unicode digits)',
+    normalizeDigits,
   );
   run(
     'expandCompactNotation',

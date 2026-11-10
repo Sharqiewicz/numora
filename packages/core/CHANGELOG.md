@@ -22,6 +22,8 @@
   `CaretPositionInfo` type it returned is removed from `numora` and `numora-react`.
   `numora/internal` exists for `numora-react` and other first-party
   wrappers and has no semver guarantee.
+- **`normalizeFullWidthDigits` removed:** use `normalizeDigits`, which it was a deprecated
+  alias of.
 - **`numora-react` re-exports `GroupingStyle`** instead of `ThousandStyle`, and ships a
   `'use client'` directive so Next.js server components can import it directly.
 

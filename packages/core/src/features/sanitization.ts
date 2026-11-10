@@ -6,7 +6,7 @@ import { removeLeadingZeros } from './leading-zeros';
 import { prependLeadingZero } from './prepend-leading-zero';
 import { truncateToMaxLength } from './max-length';
 import { filterMobileKeyboardArtifacts } from './mobile-keyboard-filtering';
-import { normalizeFullWidthDigits } from './fullwidth-digits';
+import { normalizeDigits } from './fullwidth-digits';
 import { normalizeUnicodeMinus } from './unicode-minus';
 import { normalizeDecimalSeparators } from './decimal-separators';
 import { normalizeForeignFormat, canonicalToDisplayText } from './foreign-format';
@@ -82,58 +82,48 @@ export const sanitizeNumoraInput = (
   // Step 0 (slice is a no-op for anything shorter).
   let sanitized = filterMobileKeyboardArtifacts(value.slice(0, MAX_INPUT_LENGTH));
 
-  // Defense-in-depth: sanitization runs synchronously inside beforeinput/paste handlers
-  // that have already called preventDefault(). An unexpected throw here (e.g. an
-  // adversarial expansion the individual guards didn't anticipate) would propagate out of
-  // the event handler and leave the input in an undefined state. Fall back to the
-  // best-effort value computed so far rather than crashing the keystroke.
-  try {
-    // Source handling comes first so every later step sees plain locale text.
-    if (source !== 'display') {
-      sanitized = canonicalToDisplayText(
-        source === 'foreign' ? normalizeForeignFormat(sanitized, formattingOptions) : sanitized,
-        formattingOptions?.decimalSeparator
-      );
-    }
-
-    sanitized = removeThousandSeparators(sanitized, formattingOptions?.thousandSeparator);
-
-    sanitized = normalizeFullWidthDigits(sanitized);
-    sanitized = normalizeUnicodeMinus(sanitized);
-    sanitized = normalizeDecimalSeparators(sanitized, formattingOptions?.decimalSeparator);
-
-    if (formattingOptions?.enableCompactNotation) {
-      sanitized = expandCompactNotation(sanitized, formattingOptions.decimalSeparator);
-    }
-
-    sanitized = expandScientificNotation(sanitized, formattingOptions?.decimalSeparator);
-
-    sanitized = removeNonNumericCharacters(
-      sanitized,
-      formattingOptions?.enableNegative,
+  // Source handling comes first so every later step sees plain locale text.
+  if (source !== 'display') {
+    sanitized = canonicalToDisplayText(
+      source === 'foreign' ? normalizeForeignFormat(sanitized, formattingOptions) : sanitized,
       formattingOptions?.decimalSeparator
     );
+  }
 
-    sanitized = removeExtraDecimalSeparators(sanitized, formattingOptions?.decimalSeparator);
+  sanitized = removeThousandSeparators(sanitized, formattingOptions?.thousandSeparator);
 
-    if (!formattingOptions?.enableLeadingZeros) {
-      sanitized = removeLeadingZeros(sanitized, formattingOptions?.decimalSeparator);
-    }
+  sanitized = normalizeDigits(sanitized);
+  sanitized = normalizeUnicodeMinus(sanitized);
+  sanitized = normalizeDecimalSeparators(sanitized, formattingOptions?.decimalSeparator);
 
-    if (formattingOptions?.autoAddLeadingZero) {
-      sanitized = prependLeadingZero(sanitized, formattingOptions.decimalSeparator);
-    }
+  if (formattingOptions?.enableCompactNotation) {
+    sanitized = expandCompactNotation(sanitized, formattingOptions.decimalSeparator);
+  }
 
-    if (formattingOptions?.maxLength !== undefined) {
-      sanitized = truncateToMaxLength(
-        sanitized,
-        formattingOptions.maxLength,
-        formattingOptions.decimalSeparator
-      );
-    }
-  } catch {
-    // `sanitized` holds the last successfully-completed step's output.
-    return sanitized;
+  sanitized = expandScientificNotation(sanitized, formattingOptions?.decimalSeparator);
+
+  sanitized = removeNonNumericCharacters(
+    sanitized,
+    formattingOptions?.enableNegative,
+    formattingOptions?.decimalSeparator
+  );
+
+  sanitized = removeExtraDecimalSeparators(sanitized, formattingOptions?.decimalSeparator);
+
+  if (!formattingOptions?.enableLeadingZeros) {
+    sanitized = removeLeadingZeros(sanitized, formattingOptions?.decimalSeparator);
+  }
+
+  if (formattingOptions?.autoAddLeadingZero) {
+    sanitized = prependLeadingZero(sanitized, formattingOptions.decimalSeparator);
+  }
+
+  if (formattingOptions?.maxLength !== undefined) {
+    sanitized = truncateToMaxLength(
+      sanitized,
+      formattingOptions.maxLength,
+      formattingOptions.decimalSeparator
+    );
   }
 
   return sanitized;
