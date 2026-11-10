@@ -37,14 +37,14 @@ export function validateNumoraInputOptions(options: NumoraInputValidationOptions
 
 function assertNonNegativeInt(name: string, value: number | undefined): void {
   if (value === undefined) return;
-  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
+  if (!Number.isInteger(value) || value! < 0) {
     throw new Error(`${name} must be a non-negative integer. Received: ${JSON.stringify(value)}`);
   }
 }
 
 function assertPositiveInt(name: string, value: number | undefined): void {
   if (value === undefined) return;
-  if (typeof value !== 'number' || !Number.isInteger(value) || value < 1) {
+  if (!Number.isInteger(value) || value! < 1) {
     throw new Error(
       `${name} must be a positive integer (>= 1). Received: ${JSON.stringify(value)}`
     );
@@ -60,10 +60,9 @@ function assertSingleChar(name: string, value: string | undefined, allowEmpty = 
 }
 
 function assertSeparatorNotDigit(name: string, value: string | undefined): void {
-  if (value === undefined || value === '') return;
   // A digit separator is indistinguishable from a real digit at runtime: the strip/insert
   // logic would treat every matching digit in the value as a separator and scramble it.
-  if (/[0-9]/.test(value)) {
+  if (/[0-9]/.test(value!)) {
     throw new Error(`${name} cannot be a digit. Received: ${JSON.stringify(value)}`);
   }
 }
@@ -76,8 +75,7 @@ function assertSeparatorNotDigit(name: string, value: string | undefined): void 
 const RESERVED_SEPARATOR_CHARS = /[-+eEkKmMbBtT]/;
 
 function assertSeparatorNotReserved(name: string, value: string | undefined): void {
-  if (value === undefined || value === '') return;
-  if (RESERVED_SEPARATOR_CHARS.test(value)) {
+  if (value !== undefined && RESERVED_SEPARATOR_CHARS.test(value)) {
     throw new Error(
       `${name} cannot be one of the reserved characters -+eEkKmMbBtT (sign, exponent, or compact-notation suffix). Received: ${JSON.stringify(value)}`
     );
@@ -111,8 +109,7 @@ function assertEnumValue<T extends string>(
   }
 }
 
-function assertDecimalLengths(minLength: number | undefined, maxLength: number | undefined): void {
-  if (minLength === undefined || maxLength === undefined) return;
+function assertDecimalLengths(minLength = 0, maxLength = Infinity): void {
   if (minLength > maxLength) {
     throw new Error(
       `decimalMinLength (${minLength}) cannot be greater than decimalMaxLength (${maxLength}).`
@@ -124,8 +121,7 @@ function assertSeparatorConflict(
   thousandSeparator: string | undefined,
   decimalSeparator: string | undefined
 ): void {
-  if (thousandSeparator === undefined || decimalSeparator === undefined) return;
-  if (thousandSeparator === decimalSeparator) {
+  if (thousandSeparator && thousandSeparator === decimalSeparator) {
     throw new Error(
       `decimalSeparator cannot equal thousandSeparator. Both were ${JSON.stringify(thousandSeparator)}.`
     );
