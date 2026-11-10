@@ -113,6 +113,21 @@ function createSyntheticChangeEvent(
   } as NumoraInputChangeEvent;
 }
 
+// Bundlers replace `process.env.NODE_ENV`; the package has no @types/node.
+declare const process: { env?: { NODE_ENV?: string } } | undefined;
+
+// v4 props renamed/removed in v5. Not aliased (deliberate break): warned about in
+// development and kept off the DOM, where they would be silently ignored.
+const RENAMED: Record<string, string> = {
+  maxDecimals: 'decimalMaxLength',
+  thousandStyle: 'groupingStyle',
+  rawValueMode: 'e.target.value (always raw)',
+};
+
+// `activeElement` of the input's own root: `document.activeElement` is the host inside a
+// shadow root or the iframe element for a portaled input, never the input.
+const isFocused = (el: HTMLElement) => (el.getRootNode() as Document | ShadowRoot).activeElement === el;
+
 export interface NumoraInputProps
   extends Omit<
     InputHTMLAttributes<HTMLInputElement>,
@@ -196,6 +211,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     defaultValue,
     ...rest
   } = props;
+
+  const stale = Object.keys(RENAMED).filter((k) => k in props && delete (rest as Record<string, unknown>)[k]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: callbacks are read via stateRef; a new onChange/isAllowed identity must not re-resolve options.
   const formattingOptions: ResolvedFormattingOptions = useMemo(() => {
@@ -305,7 +322,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       // blur), so format for editing (real formatOn) to avoid injecting commas mid-typing;
       // otherwise format for the resting display (forced Change, with separators).
       const { formatted } =
-        document.activeElement === input
+        isFocused(input)
           ? formatValueForDisplay(controlledValueString, decimalMaxLength, formattingOptions, 'canonical')
           : formatForDisplay(controlledValueString, formattingOptions, 'canonical');
       if (formatted !== input.value) writeValuePreservingUndo(input, formatted, formatted.length);
@@ -320,6 +337,9 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   useEffect(() => {
     const input = internalInputRef.current as NumoraHTMLInputElement;
     input.formattedValue = input.value;
+    // Dev-only, like core's locale warning; `?.` covers a `process` without `env`.
+    if (typeof process === 'undefined' || process.env?.NODE_ENV !== 'production')
+      for (const k of stale) console.warn(`[numora] ${k} is removed in v5; use ${RENAMED[k]}`);
     const onBeforeInput = (e: InputEvent) => {
       const values = applyBeforeInput(e, stateRef.current.formattingOptions);
       if (values) emit(input, values);
@@ -341,7 +361,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     const inputType = (e.nativeEvent as InputEvent).inputType;
     // Mid-composition text is the IME's: the final non-composing `input` reconciles it.
     if ((e.nativeEvent as InputEvent).isComposing) return;
-    const focused = document.activeElement === el;
+    const focused = isFocused(el);
     emit(el, applyInputFallback(el, inputType, focused, el.formattedValue as string, formattingOptions));
   };
 

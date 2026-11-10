@@ -20,7 +20,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 // Budgets in KB (gzip, entry + the local chunks it imports).
 const BUDGETS = [
   { name: 'numora', file: 'packages/core/dist/index.mjs', budgetKb: 8.3 },
-  { name: 'numora-react', file: 'packages/react/dist/index.mjs', budgetKb: 1.56 },
+  { name: 'numora-react', file: 'packages/react/dist/index.mjs', budgetKb: 1.72 },
 ];
 
 // A React consumer ships core + core/internal + react. Budget the sum explicitly.
