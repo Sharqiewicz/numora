@@ -218,6 +218,10 @@ importers:
         version: 3.2.4(@types/node@22.19.15)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.31.1)(terser@5.51.2)(tsx@4.21.0)(yaml@2.8.2)
 
   packages/react:
+    dependencies:
+      numora:
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@rollup/plugin-commonjs':
         specifier: ^28.0.9
@@ -246,9 +250,6 @@ importers:
       jsdom:
         specifier: ^26.0.0
         version: 26.1.0
-      numora:
-        specifier: workspace:*
-        version: link:../core
       react:
         specifier: ^19.2.3
         version: 19.2.4

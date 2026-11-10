@@ -18,6 +18,11 @@
       "types": "./dist/internal.d.ts",
       "import": "./dist/internal.mjs",
       "require": "./dist/internal.js"
+    },
+    "./pipeline": {
+      "types": "./dist/pipeline.d.ts",
+      "import": "./dist/pipeline.mjs",
+      "require": "./dist/pipeline.js"
     }
   },
   "repository": {

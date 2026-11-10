@@ -17,10 +17,12 @@
     "dist",
     "README.md"
   ],
+  "dependencies": {
+    "numora": "workspace:*"
+  },
   "peerDependencies": {
     "react": ">=17.0.0",
-    "react-dom": ">=17.0.0",
-    "numora": "^5.0.0"
+    "react-dom": ">=17.0.0"
   },
   "peerDependenciesMeta": {
     "react-dom": {
@@ -84,7 +86,6 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "jsdom": "^26.0.0",
-    "numora": "workspace:*",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-hook-form": "^7.56.0",

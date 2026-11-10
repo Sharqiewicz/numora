@@ -161,3 +161,11 @@ describe('ref.rawValue', () => {
     }).toThrow(TypeError);
   });
 });
+
+describe('headless functions', () => {
+  it('numora-react re-exports formatValue and parseValue', async () => {
+    const { formatValue, parseValue } = await import('../src/index');
+    expect(formatValue('1234.5', { locale: 'de-DE', decimalMinLength: 2 })).toBe('1.234,50');
+    expect(parseValue('1.234,50', { locale: 'de-DE' })).toBe('1234.50');
+  });
+});

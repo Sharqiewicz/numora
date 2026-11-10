@@ -13,16 +13,13 @@ import {
 } from 'react';
 import { useIsomorphicLayoutEffect } from './use-isomorphic-layout-effect';
 
-// Public types/enums come from the package root; the shared DOM-event steps come from the
-// internal subpath.
+// Public types come from the package root; the shared DOM-event steps and pipeline helpers
+// come from the internal subpath.
+import type { NumoraOptions, NumoraValues } from 'numora';
 import {
   displayToRawValue,
   formatValueForDisplay,
   sanitizeNumoraInput,
-  type NumoraOptions,
-  type NumoraValues,
-} from 'numora';
-import {
   applyBeforeInput,
   applyBlur,
   applyInputFallback,
@@ -364,5 +361,5 @@ const NumoraInput = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((props,
 NumoraInput.displayName = 'NumoraInput';
 
 export { NumoraInput };
-export { FormatOn, GroupingStyle, InputType } from 'numora';
+export { FormatOn, GroupingStyle, formatValue, parseValue } from 'numora';
 export type { NumoraOptions, LocaleTag } from 'numora';

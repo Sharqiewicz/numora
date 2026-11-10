@@ -12,10 +12,11 @@ export default defineConfig({
       entry: {
         index: 'src/index.ts',
         internal: 'src/internal.ts',
+        pipeline: 'src/pipeline.ts',
       },
       formats: ['es', 'cjs'],
       // Multiple entries: emit `<name>.mjs` (es) and `<name>.js` (cjs) per entry so the
-      // package.json exports map for both '.' and './internal' resolves consistently.
+      // package.json exports map for '.', './internal' and './pipeline' resolves consistently.
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'mjs' : 'js'}`,
     },
     // Clear stale hashed `internal-*` chunks between builds: `files: ["dist"]` publishes
@@ -28,6 +29,10 @@ export default defineConfig({
     minify: false,
     rollupOptions: {
       output: {
+        // One shared chunk for everything the three entries have in common. Left to itself
+        // Rollup splits it in two (pipeline steps / the rest), which costs ~0.2 KB gzip for
+        // a consumer of the root entry, who loads both anyway.
+        manualChunks: (id) => (/src\/(index|internal|pipeline)\.ts$/.test(id) ? undefined : 'shared'),
         plugins: [
           {
             name: 'minify-lib',

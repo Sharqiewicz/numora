@@ -6,9 +6,7 @@
  * app code - build a `NumoraInput` (vanilla or React) instead. Anything here may change
  * between minor versions without a breaking-change note.
  *
- * Pure utilities that ARE part of the public surface (sanitizeNumoraInput, the expand/remove
- * pipeline functions, locale helpers, formatValueForDisplay, validateNumoraInputOptions, ...)
- * stay on the package root, `'numora'`.
+ * The public surface is the package root, `'numora'`, plus `'numora/pipeline'`.
  */
 export { handleOnKeyDownNumoraInput } from './utils/event-handlers';
 export { writeValuePreservingUndo } from './features/formatting';
@@ -25,3 +23,13 @@ export {
 // identically to the vanilla class.
 export { resolveOptions } from './utils/resolve-options';
 export { takeRemovedOptions, warnRemovedOptions } from './utils/removed-options';
+// Whole-pipeline helpers and option plumbing the adapters and the test suites reach for.
+export { InputType } from './types';
+export { validateNumoraInputOptions } from './validation';
+export { applyLocale } from './utils/locale';
+export { sanitizeNumoraInput, type ValueSource } from './features/sanitization';
+export {
+  formatValueForDisplay,
+  displayToRawValue,
+  normalizeNegativeZero,
+} from './utils/format-utils';

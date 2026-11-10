@@ -2,7 +2,7 @@
 /**
  * Bundle-size gate (gzip, ESM). Run after `pnpm build`; exits non-zero over budget.
  *
- * `numora-react` externalizes `numora` (a peerDependency), so a React consumer installs
+ * `numora-react` externalizes `numora` (an exact-version dependency), so a React consumer installs
  * both bundles: the consumer total is budgeted as a first-class number. Each core entry
  * also imports a hashed `internal-*.mjs` chunk Vite hoists shared code into, so every
  * entry is measured together with the chunks it imports.
