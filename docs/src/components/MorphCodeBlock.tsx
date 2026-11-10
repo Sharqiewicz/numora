@@ -27,7 +27,7 @@ interface MorphCodeBlockProps {
  */
 export function MorphCodeBlock({ code, language = 'typescript' }: MorphCodeBlockProps) {
   return (
-    <div className="relative w-full">
+    <div className="group relative w-full">
       <CopyButton
         className="absolute top-2 right-2 z-10 p-1.5! opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
         noBorder

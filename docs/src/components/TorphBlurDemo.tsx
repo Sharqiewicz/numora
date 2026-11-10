@@ -16,6 +16,7 @@ export function TorphBlurDemo() {
   // True from focus → first morph-complete, so the focus-strip morph hides the cursor
   // but later per-keystroke morphs do not (you need to see your cursor while typing).
   const postFocusMorphPendingRef = useRef(false);
+  const caretTimeoutRef = useRef<number | undefined>(undefined);
 
   useTypingLoop(inputRef, { mode: 'blur' });
 
@@ -38,6 +39,7 @@ export function TorphBlurDemo() {
     morphRef.current = morph;
 
     return () => {
+      window.clearTimeout(caretTimeoutRef.current);
       morph.destroy();
       morphRef.current = null;
     };
@@ -59,12 +61,17 @@ export function TorphBlurDemo() {
           onChange={(e: NumoraInputChangeEvent) => {
             setFormatted(e.target.formattedValue || '');
           }}
-          onFocus={() => {
+          // The focus-strip doesn't fire onChange (the number didn't change), so read the
+          // stripped text from the DOM: keyboard focus strips before onFocus, mouse focus on click.
+          onClick={(e) => setFormatted(e.currentTarget.value)}
+          onFocus={(e) => {
+            setFormatted(e.currentTarget.value);
             postFocusMorphPendingRef.current = true;
             setCaretHidden(true);
-            // Fallback if no morph fires (e.g. value already has no separators).
-            // Slightly longer than the expected morph duration so we don't reveal mid-flight.
-            window.setTimeout(() => {
+            // Fallback if no morph fires (e.g. value already has no separators), so the caret
+            // is never left hidden. Slightly longer than the expected morph duration so we don't reveal mid-flight.
+            window.clearTimeout(caretTimeoutRef.current);
+            caretTimeoutRef.current = window.setTimeout(() => {
               if (postFocusMorphPendingRef.current) {
                 postFocusMorphPendingRef.current = false;
                 setCaretHidden(false);

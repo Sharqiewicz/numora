@@ -167,25 +167,6 @@ body {
    ========================================================================== */
 
 /* Use transform3d for hardware acceleration across all animations */
-@keyframes fade-in-out {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 10px, 0);
-  }
-  33.33% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-  66.66% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(0, -10px, 0);
-  }
-}
-
 @keyframes fade-in {
   0% {
     opacity: 0;
@@ -220,28 +201,6 @@ body {
   }
 }
 
-/* Subtle floating animation - much more refined than bounce */
-@keyframes float-gentle {
-  0%, 100% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(0, -6px, 0);
-  }
-}
-
-/* Scroll-triggered reveal animation */
-@keyframes reveal-up {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 30px, 0);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
 /* Logo stagger animation for social proof */
 @keyframes logo-reveal {
   0% {
@@ -251,28 +210,6 @@ body {
   100% {
     opacity: 0.6;
     transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
-/* Docs page content transition */
-@keyframes content-enter {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 8px, 0);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-/* Button pulse glow effect */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--secondary) 0%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 20px 4px color-mix(in oklab, var(--secondary) 30%, transparent);
   }
 }
 
@@ -413,17 +350,12 @@ body {
   --ease-move: cubic-bezier(0.645, 0.045, 0.355, 1);
   /* Shadow-as-border token (dark-mode single ring; site is dark-only) */
   --shadow-border: 0 0 0 1px oklch(1 0 0 / 0.08);
-  --animate-fade-in-out: fade-in-out 1.5s ease forwards;
   --animate-fade-in: fade-in 1.5s ease forwards;
   --animate-fade-in-fast: fade-in 0.6s ease forwards;
   --animate-expand-line: expand-line 0.6s ease-out forwards;
   --animate-slide-in-left: slide-in-left 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-slide-in-right: slide-in-right 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-float-gentle: float-gentle 4s ease-in-out infinite;
-  --animate-reveal-up: reveal-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-logo-reveal: logo-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-content-enter: content-enter 0.4s ease-out forwards;
-  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
   --animate-draw-line: draw-line 0.4s ease-out forwards;
   --animate-draw-line-right: draw-line-right 0.4s ease-out forwards;
 }
@@ -459,17 +391,6 @@ body {
     font-family: var(--font-satoshi);
   }
 
-  /* GPU-accelerated animation utilities */
-  .gpu-accelerated {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
-  }
-
-  .will-animate {
-    will-change: transform, opacity;
-  }
-
   /* Staggered entrance animations */
   .animate-slide-in-left {
     animation: var(--animate-slide-in-left);
@@ -481,26 +402,9 @@ body {
     opacity: 0;
   }
 
-  .animate-float-gentle {
-    animation: var(--animate-float-gentle);
-  }
-
-  .animate-reveal-up {
-    animation: var(--animate-reveal-up);
-    opacity: 0;
-  }
-
   .animate-logo-reveal {
     animation: var(--animate-logo-reveal);
     opacity: 0;
-  }
-
-  .animate-content-enter {
-    animation: var(--animate-content-enter);
-  }
-
-  .animate-pulse-glow {
-    animation: var(--animate-pulse-glow);
   }
 
   .animate-draw-line {
@@ -533,14 +437,9 @@ body {
   /* Reduced motion preference */
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-in,
-    .animate-fade-in-out,
     .animate-slide-in-left,
     .animate-slide-in-right,
-    .animate-float-gentle,
-    .animate-reveal-up,
     .animate-logo-reveal,
-    .animate-content-enter,
-    .animate-pulse-glow,
     .animate-expand-line,
     .scroll-reveal {
       animation: none !important;
@@ -715,33 +614,6 @@ body {
   }
   :where(.docs-prose) :where(ul, ol) :where(ul, ol):not(:where(.not-prose, .not-prose *)) {
     margin: 0.375rem 0 0;
-  }
-
-  .prose-article {
-    @apply max-w-xl;
-  }
-
-  .prose-article h1,
-  .prose-article h2,
-  .prose-article h3 {
-    @apply text-stone-100;
-  }
-
-  .prose-article p {
-    @apply text-stone-400 leading-6;
-  }
-
-  .prose-article p:not(.text-sm) {
-    @apply text-base;
-  }
-
-  .prose-article ul,
-  .prose-article ol {
-    @apply text-stone-400 text-base leading-6;
-  }
-
-  .prose-article a {
-    @apply underline text-stone-400! hover:text-stone-100!;
   }
 }
 

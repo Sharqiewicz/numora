@@ -245,7 +245,11 @@ useEffect(() => {
 <NumoraInput
   formatOn={FormatOn.Blur}
   onChange={(e) => setFormatted(e.target.formattedValue || '')}
-  onFocus={() => {
+  // The focus-strip doesn't fire onChange, so read the stripped text from the DOM.
+  // Keyboard focus strips before onFocus; mouse focus strips on click.
+  onClick={(e) => setFormatted(e.currentTarget.value)}
+  onFocus={(e) => {
+    setFormatted(e.currentTarget.value)
     postFocusMorphPendingRef.current = true
     setCursorHidden(true)
     window.setTimeout(() => {
@@ -346,9 +350,10 @@ function AnimatedInput() {
           </strong>{' '}
           (used here) keeps the input's display as the formatted string at all times, so passing{' '}
           <code>formattedValue</code> to Torph on every <code>onChange</code> is enough.{' '}
-          <code>FormatOn.Blur</code> works with the same <code>onChange</code> handler: the
-          focus-strip and the blur reformat both call <code>onChange</code>, so you need no extra{' '}
-          <code>onFocus</code> wiring.
+          <code>FormatOn.Blur</code> also needs <code>onFocus</code> and <code>onClick</code>{' '}
+          handlers that pass <code>e.currentTarget.value</code> to Torph. The blur reformat calls{' '}
+          <code>onChange</code>, but the focus-strip doesn't, because the number itself
+          didn&apos;t change.
         </li>
         <li>
           <strong>Match typography.</strong> The browser computes the cursor position from the

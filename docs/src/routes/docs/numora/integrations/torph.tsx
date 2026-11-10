@@ -80,7 +80,7 @@ const JSON_LD = [
         name: 'How does Torph fit with Numora?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'A transparent-text NumoraInput sits on top of a Torph TextMorph. The input owns the keyboard, undo, IME and mobile inputmode. Its onChange option calls morph.update() on every typing, paste, focus-strip, blur and undo change, so Torph animates the formatted string. No Number() conversion is involved.',
+          text: 'A transparent-text NumoraInput sits on top of a Torph TextMorph. The input owns the keyboard, undo, IME and mobile inputmode. Its onChange option calls morph.update() whenever the raw value changes (typing, paste and undo/redo), so Torph animates the formatted string. In FormatOn.Blur mode, also bind focus and blur listeners, because the focus-strip and blur regroup do not change the raw value. No Number() conversion is involved.',
         },
       },
       {

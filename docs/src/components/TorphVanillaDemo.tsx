@@ -15,42 +15,29 @@ export function TorphVanillaDemo() {
     // instead of replacing it. Clear textContent so torph owns the span.
     displayRef.current.textContent = '';
 
+    const morph = new TextMorph({
+      element: displayRef.current,
+      ease: { stiffness: 400, damping: 30 },
+    });
+
     const numora = new NumoraInput(hostRef.current, {
       formatOn: FormatOn.Change,
       decimalMaxLength: 2,
       thousandSeparator: ',',
       value: '1234567',
       groupingStyle: GroupingStyle.Thousand,
+      onChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
     });
     const input = numora.getElement();
     input.setAttribute('aria-label', 'Amount');
 
-    const morph = new TextMorph({
-      element: displayRef.current,
-      ease: { stiffness: 400, damping: 30 },
-    });
-
-    const syncMorph = () => {
-      morph.update(numora.getFormattedValue() || '0');
-    };
-
-    syncMorph();
-
-    // Numora applies formatted values in beforeinput via setRangeText. Sync after that
-    // handler runs; an input listener alone is not guaranteed in every environment.
-    const scheduleMorphSync = () => {
-      queueMicrotask(syncMorph);
-    };
-
-    input.addEventListener('beforeinput', scheduleMorphSync);
-    input.addEventListener('input', syncMorph);
+    // The initial value does not fire onChange, so prime the morph once.
+    morph.update(numora.getFormattedValue() || '0');
 
     const stopTypingLoop = startTypingLoop(input, { mode: 'change' });
 
     return () => {
       stopTypingLoop();
-      input.removeEventListener('beforeinput', scheduleMorphSync);
-      input.removeEventListener('input', syncMorph);
       morph.destroy();
       input.remove();
     };

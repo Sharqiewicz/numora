@@ -129,7 +129,9 @@ const numoraInput = new NumoraInput(container, {
         via <code>Number(raw)</code>. Use it only when you need a number type. Read the string for everything else.
       </p>
       <CodeBlock language="typescript">
-        {`const num = numoraInput.valueAsNumber
+        {`const numoraInput = new NumoraInput(container, { value: '1234.56' })
+
+const num = numoraInput.valueAsNumber
 console.log(typeof num) // "number"
 console.log(num)        // 1234.56
 console.log(isNaN(numoraInput.valueAsNumber)) // true when input is empty`}

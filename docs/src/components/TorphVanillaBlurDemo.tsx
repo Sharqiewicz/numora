@@ -30,10 +30,9 @@ export function TorphVanillaBlurDemo() {
       },
     });
 
-    // Drive the morph via NumoraInput's onChange option. setRangeText fires a synchronous
-    // `input` event during writes, but withInternalWrite suppresses NumoraInput's own
-    // handler, so DOM `input` listeners would be racy in that window. onChange fires once
-    // per logical value change (typing, paste, focus-strip, blur-reformat).
+    // Drive the morph via NumoraInput's onChange option, which fires when the raw value
+    // changes (typing, paste, undo/redo). In Blur mode the focus-strip and blur-regroup
+    // leave the raw value unchanged, so focus/blur listeners below sync the morph too.
     const numora = new NumoraInput(hostRef.current, {
       formatOn: FormatOn.Blur,
       decimalMaxLength: 2,
@@ -49,11 +48,16 @@ export function TorphVanillaBlurDemo() {
     // onChange anyway), so prime the morph with the formatted initial value here.
     morph.update(numora.getFormattedValue() || '0');
 
+    let caretTimeout: number | undefined;
     const handleFocus = () => {
       postFocusMorphPending = true;
       updateCaret(true);
-      // Fallback if no morph fires (e.g. value already has no separators).
-      window.setTimeout(() => {
+      // Numora's own focus handler (bound in the constructor) already stripped separators.
+      morph.update(numora.getFormattedValue() || '0');
+      // Fallback if no morph fires (e.g. value already has no separators), so the caret
+      // is never left hidden. Slightly longer than the morph duration to avoid revealing mid-flight.
+      window.clearTimeout(caretTimeout);
+      caretTimeout = window.setTimeout(() => {
         if (postFocusMorphPending) {
           postFocusMorphPending = false;
           updateCaret(false);
@@ -61,13 +65,20 @@ export function TorphVanillaBlurDemo() {
       }, 600);
     };
 
+    const handleBlur = () => {
+      morph.update(numora.getFormattedValue() || '0');
+    };
+
     input.addEventListener('focus', handleFocus);
+    input.addEventListener('blur', handleBlur);
 
     const stopTypingLoop = startTypingLoop(input, { mode: 'blur' });
 
     return () => {
       stopTypingLoop();
+      window.clearTimeout(caretTimeout);
       input.removeEventListener('focus', handleFocus);
+      input.removeEventListener('blur', handleBlur);
       morph.destroy();
       input.remove();
     };

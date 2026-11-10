@@ -49,6 +49,10 @@ export function TorphBlurMinimal() {
           ref={inputRef}
           defaultValue="1234567"
           onChange={(e: NumoraInputChangeEvent) => setFormatted(e.target.formattedValue || '')}
+          // The focus-strip doesn't fire onChange (the number didn't change), so read the
+          // stripped text from the DOM: keyboard focus strips before onFocus, mouse focus on click.
+          onFocus={(e) => setFormatted(e.currentTarget.value)}
+          onClick={(e) => setFormatted(e.currentTarget.value)}
           formatOn={FormatOn.Blur}
           decimalMaxLength={2}
           thousandSeparator=","
