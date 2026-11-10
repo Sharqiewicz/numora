@@ -15,16 +15,33 @@ import { takeRemovedOptions, warnRemovedOptions } from './utils/removed-options'
 import type { ResolvedNumoraOptions } from './utils/dom-events';
 import type { NumoraOptions, NumoraValues } from './types';
 
+// Native attributes the constructor forwards to the element. Deliberately a short list:
+// anything else is set on `input.element` directly.
+const NATIVE_ATTRIBUTES = [
+  'id',
+  'name',
+  'className',
+  'placeholder',
+  'disabled',
+  'readOnly',
+  'required',
+  'tabIndex',
+  'title',
+  'autofocus',
+] as const;
+
 export interface NumoraInputOptions
   extends NumoraOptions,
-    Partial<Omit<HTMLInputElement, 'value' | 'defaultValue' | 'onChange' | 'maxLength'>> {
-  // Event handlers
+    Partial<Pick<HTMLInputElement, (typeof NATIVE_ATTRIBUTES)[number]>> {
+  /** Sets the `aria-label` attribute. */
+  ariaLabel?: string;
   /** Fired on every change with `{ value, formattedValue }`: canonical raw + display string. */
   onChange?: (values: NumoraValues) => void;
-
-  // Value initialization
+  /**
+   * Initial value, as a canonical raw value (`'1234.5'` in every locale). When adopting an
+   * existing `<input>`, its own value is kept unless this is passed.
+   */
   value?: string;
-  defaultValue?: string;
 }
 
 // Display text destroy() leaves in a field, with its raw value, so a re-init can tell Numora's
@@ -32,7 +49,7 @@ export interface NumoraInputOptions
 const leftovers = new WeakMap<HTMLInputElement, { text: string; raw: string }>();
 
 export class NumoraInput {
-  private element!: HTMLInputElement;
+  private el!: HTMLInputElement;
 
   private resolvedOptions: ResolvedNumoraOptions;
   private onChange?: (values: NumoraValues) => void;
@@ -50,63 +67,42 @@ export class NumoraInput {
    *   attached directly - ideal for a Svelte action / Vue directive / Solid ref), or any
    *   other element to **mount a new `<input>` into** as a child. Selected at runtime by an
    *   `instanceof HTMLInputElement` check.
-   * @param options - Numora formatting options plus any native `<input>` attributes.
+   * @param options - Numora options plus a few native `<input>` attributes. Optional.
    */
-  constructor(target: HTMLInputElement | HTMLElement, options: NumoraInputOptions) {
+  constructor(target: HTMLInputElement | HTMLElement, options: NumoraInputOptions = {}) {
     this.resolvedOptions = resolveOptions(options);
     this.onChange = options.onChange;
 
-    // Everything left over is a native attribute for the element. Numora's own options never
-    // reach it (`maxLength` there would count separators), nor do the attributes
-    // createInputElement sets itself.
-    const nativeProps: Record<string, unknown> = { ...options };
-    for (const key of [
-      ...Object.keys(this.resolvedOptions),
-      'locale',
-      'onChange',
-      'value',
-      'defaultValue',
-      'type',
-      'inputMode',
-      'spellcheck',
-      'autocomplete',
-    ]) {
-      delete nativeProps[key];
-    }
-    // Options removed since v4 are ignored, warned about, and kept off the element.
-    warnRemovedOptions(takeRemovedOptions(nativeProps));
+    // Options removed since v4 are ignored and warned about. Checked on a copy: the caller's
+    // object is left alone.
+    warnRemovedOptions(takeRemovedOptions({ ...options }));
 
-    this.createInputElement(target, nativeProps, options.value, options.defaultValue);
+    this.createInputElement(target, options);
     this.setupEventListeners();
     // The initial value (option, or a pre-set value on an adopted <input>) is supplied by
     // the app, so it is a canonical raw value (ADR 0004), not locale text. Also seeds `lastValue`.
-    const left = leftovers.get(this.element);
-    this.setValue(left?.text === this.element.value ? left.raw : this.element.value, {
+    const left = leftovers.get(this.el);
+    this.setValue(left?.text === this.el.value ? left.raw : this.el.value, {
       undoable: false,
     });
   }
 
-  private createInputElement(
-    container: HTMLElement,
-    nativeProps: Record<string, unknown>,
-    value?: string,
-    defaultValue?: string
-  ): void {
+  private createInputElement(container: HTMLElement, options: NumoraInputOptions): void {
     // If an <input> is passed directly (Svelte action, Vue directive, Angular directive,
     // Solid ref), adopt it instead of creating a new one so frameworks can use the
     // idiomatic <input use:numora> shape rather than a wrapping container <div>.
     const isExistingInput = container instanceof HTMLInputElement;
-    this.element = isExistingInput ? container : document.createElement('input');
+    this.el = isExistingInput ? container : document.createElement('input');
 
     // These attributes are REQUIRED for Numora to work correctly and must not be overridden:
     // - type='text': Using 'number' would cause browser-native validation/formatting that conflicts with Numora
     // - inputmode='decimal': Ensures mobile keyboards show numeric keypad
     // - spellcheck='false': Prevents spellcheck from interfering with numeric input
     // - autocomplete='off': Prevents browser autocomplete from interfering with formatting
-    this.element.setAttribute('type', 'text');
-    this.element.setAttribute('inputmode', 'decimal');
-    this.element.setAttribute('spellcheck', 'false');
-    this.element.setAttribute('autocomplete', 'off');
+    this.el.setAttribute('type', 'text');
+    this.el.setAttribute('inputmode', 'decimal');
+    this.el.setAttribute('spellcheck', 'false');
+    this.el.setAttribute('autocomplete', 'off');
 
     // Pattern helps with native validation but is optional.
     // HTML pattern attr: optional leading `-` (if negatives enabled) + digits optionally
@@ -121,30 +117,28 @@ export class NumoraInput {
     const negativePrefix = this.resolvedOptions.allowNegative ? '-?' : '';
     const thousandSeparator = this.resolvedOptions.thousandSeparator;
     const escapedThousand = escapeRegExp(thousandSeparator);
-    this.element.setAttribute(
+    this.el.setAttribute(
       'pattern',
       `^${negativePrefix}[0-9${escapedThousand}]*([${escapedDecimal}][0-9]*)?$`
     );
 
-    Object.assign(this.element, nativeProps);
-
-    // Handle value initialization. When adopting an existing <input>, any pre-set value
-    // (e.g. <input value="100" use:numora>) is preserved unless the caller passes value
-    // or defaultValue explicitly via options.
-    if (value !== undefined) {
-      this.element.value = value;
-    } else if (defaultValue !== undefined) {
-      this.element.defaultValue = defaultValue;
-      this.element.value = defaultValue;
+    for (const name of NATIVE_ATTRIBUTES) {
+      const attribute = options[name];
+      if (attribute !== undefined) (this.el as unknown as Record<string, unknown>)[name] = attribute;
     }
+    if (options.ariaLabel !== undefined) this.el.setAttribute('aria-label', options.ariaLabel);
+
+    // When adopting an existing <input>, any pre-set value (e.g. <input value="100"
+    // use:numora>) is kept unless the caller passes `value`.
+    if (options.value !== undefined) this.el.value = options.value;
 
     if (!isExistingInput) {
-      container.appendChild(this.element);
+      container.appendChild(this.el);
     }
   }
 
   private setupEventListeners(): void {
-    const el = this.element;
+    const el = this.el;
     const opts = this.resolvedOptions;
     const add = <E extends Event>(type: string, handler: (e: E) => void) => {
       el.addEventListener(type, handler as EventListener);
@@ -195,29 +189,38 @@ export class NumoraInput {
   public destroy(): void {
     // splice empties the list, so a second destroy() is a no-op.
     if (this.cleanups.length) {
-      leftovers.set(this.element, { text: this.element.value, raw: this.getValue() });
+      leftovers.set(this.el, { text: this.el.value, raw: this.value });
     }
     for (const cleanup of this.cleanups.splice(0)) cleanup();
   }
 
   /** Records a write the shared helpers made and reports it. */
   private emit(values: NumoraValues | undefined): void {
-    this.lastValue = this.element.value;
+    this.lastValue = this.el.value;
     if (values) this.onChange?.({ value: values.value, formattedValue: values.formattedValue });
   }
 
   /**
    * The canonical raw value: ASCII digits, `.` decimal, `-` sign, no grouping, identical for
-   * every locale (de-DE display `1.234.567,89` -> `1234567.89`). Safe to parse with
-   * `Number()` or a decimal library. Use {@link getFormattedValue} for the display string.
+   * every locale (de-DE display `1.234.567,89` -> `1234567.89`). Safe to pass to a decimal
+   * library. Assigning it is the same as {@link setValue}.
    */
-  public getValue(): string {
-    return displayToRawValue(this.element.value, this.resolvedOptions);
+  public get value(): string {
+    return displayToRawValue(this.el.value, this.resolvedOptions);
+  }
+
+  public set value(value: string) {
+    this.setValue(value);
   }
 
   /** The display string shown in the field (locale separators and grouping included). */
-  public getFormattedValue(): string {
-    return this.element.value;
+  public get formattedValue(): string {
+    return this.el.value;
+  }
+
+  /** The underlying `<input>`: set any native attribute or add listeners on it directly. */
+  public get element(): HTMLInputElement {
+    return this.el;
   }
 
   /**
@@ -235,83 +238,8 @@ export class NumoraInput {
     // sanitization, decimalMaxLength, maxLength, allowNegative and grouping.
     const { formatted } = formatForDisplay(value, this.resolvedOptions, 'canonical');
 
-    if (options?.undoable === false) this.element.value = formatted;
-    else writeValuePreservingUndo(this.element, formatted, formatted.length);
+    if (options?.undoable === false) this.el.value = formatted;
+    else writeValuePreservingUndo(this.el, formatted, formatted.length);
     this.lastValue = formatted;
-  }
-
-  /**
-   * Returns the underlying HTMLInputElement for direct access.
-   * This allows users to interact with the input as a normal HTMLInputElement.
-   */
-  public getElement(): HTMLInputElement {
-    return this.element;
-  }
-
-  /**
-   * The canonical raw value (same as {@link getValue}). Use {@link getFormattedValue} for
-   * the display string.
-   */
-  public get value(): string {
-    return this.getValue();
-  }
-
-  /**
-   * Sets the value of the input from a canonical raw value (same as {@link setValue}).
-   */
-  public set value(val: string) {
-    this.setValue(val);
-  }
-
-  /**
-   * Gets the value as a number, similar to HTMLInputElement.valueAsNumber.
-   * Returns NaN if the value cannot be converted to a number.
-   *
-   * **Precision warning**: this getter returns a JavaScript `number` (IEEE 754 double).
-   * Values beyond ~15 significant digits will lose precision. Numora is designed around
-   * string values for this reason - prefer {@link getValue} when exact precision matters.
-   * Treat `valueAsNumber` strictly as an escape hatch for arithmetic that you already know
-   * is safe at float precision.
-   */
-  public get valueAsNumber(): number {
-    const value = this.getValue();
-    if (!value) {
-      return NaN;
-    }
-    return Number(value);
-  }
-
-  /**
-   * Sets the value from a number, similar to HTMLInputElement.valueAsNumber.
-   *
-   * @throws {RangeError} if `num` is negative and `allowNegative` is false. A silent
-   * sign flip on a money field is worse than an exception - the field would otherwise
-   * display a positive value for a negative input with no indication anything was lost.
-   * @throws {RangeError} if `num` is `Infinity`, `-Infinity`, or `NaN` (passed directly as a
-   * number, not a non-numeric coercion - see below). Silently clearing the field for a
-   * non-finite number hides a bug in the caller's own arithmetic; a numeric field has no
-   * sensible display for "infinity" to silently normalize to, unlike -0.
-   */
-  public set valueAsNumber(num: number) {
-    // Untyped JS callers can pass a non-number here despite the `number` type. Only
-    // genuinely non-numeric input (typeof !== 'number' - a string, an object, ...) is
-    // treated leniently and silently clears the field, matching the pre-existing behaviour
-    // for e.g. `valueAsNumber = 'abc'`. A real `number` that happens to be `NaN` falls
-    // through to the finiteness check below and throws, same as `Infinity`/`-Infinity` -
-    // silently clearing the field for those hides a bug in the caller's own arithmetic; a
-    // numeric field has no sensible display to silently normalize a non-finite value to.
-    if (typeof num !== 'number' && Number.isNaN(Number(num))) {
-      this.setValue('');
-      return;
-    }
-    if (!Number.isFinite(num)) {
-      throw new RangeError(`valueAsNumber: value must be finite (received ${num})`);
-    }
-    if (num < 0 && !this.resolvedOptions.allowNegative) {
-      throw new RangeError('valueAsNumber: negative value but allowNegative is false');
-    }
-    // `num.toString()` is a canonical raw value (dot decimal, possibly exponent form that
-    // the sanitization pipeline expands), exactly what `setValue` takes.
-    this.setValue(num.toString());
   }
 }

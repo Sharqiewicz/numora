@@ -11,7 +11,7 @@ const mk = (options: object = {}) => {
   const host = document.createElement('div');
   document.body.appendChild(host);
   const n = new NumoraInput(host, options as never);
-  return { n, el: n.getElement() };
+  return { n, el: n.element };
 };
 
 describe('validateNumoraInputOptions throw branches', () => {
@@ -152,46 +152,8 @@ describe('config defaults', () => {
     const { n, el } = mk();
     el.value = '1k';
     el.dispatchEvent(new Event('input', { bubbles: true }));
-    expect(n.getValue()).not.toBe('1000');
+    expect(n.value).not.toBe('1000');
     expect(el.value).not.toContain('000');
-  });
-});
-
-describe('NumoraInput valueAsNumber setter', () => {
-  it('0 and -0 do not throw with allowNegative false (num < 0, not <= 0)', () => {
-    const { n } = mk();
-    expect(() => {
-      n.valueAsNumber = 0;
-    }).not.toThrow();
-    expect(n.getValue()).toBe('0');
-    expect(() => {
-      n.valueAsNumber = -0;
-    }).not.toThrow();
-    expect(n.getValue()).toBe('0');
-  });
-  it('negative throws only without allowNegative', () => {
-    expect(() => {
-      mk().n.valueAsNumber = -1;
-    }).toThrow(/allowNegative is false/);
-    const { n } = mk({ allowNegative: true });
-    n.valueAsNumber = -1;
-    expect(n.getValue()).toBe('-1');
-  });
-  it('Infinity, -Infinity and NaN throw a RangeError mentioning finite', () => {
-    const { n } = mk();
-    for (const bad of [Infinity, -Infinity, NaN]) {
-      expect(() => {
-        n.valueAsNumber = bad;
-      }).toThrow(RangeError);
-      expect(() => {
-        n.valueAsNumber = bad;
-      }).toThrow(/finite/);
-    }
-  });
-  it('a non-numeric string clears the field instead of throwing', () => {
-    const { n, el } = mk({ value: '5' });
-    n.valueAsNumber = 'abc' as never;
-    expect(el.value).toBe('');
   });
 });
 
@@ -199,9 +161,8 @@ describe('NumoraInput canonical source', () => {
   it('setValue and the initial value are canonical in de-DE', () => {
     const { n } = mk({ locale: 'de-DE' });
     n.setValue('1234.5');
-    expect(n.getFormattedValue()).toBe('1.234,5');
+    expect(n.formattedValue).toBe('1.234,5');
     expect(mk({ locale: 'de-DE', value: '1234.5' }).el.value).toBe('1.234,5');
-    expect(mk({ locale: 'de-DE', defaultValue: '1234.5' }).el.value).toBe('1.234,5');
   });
 });
 

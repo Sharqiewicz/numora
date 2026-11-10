@@ -14,7 +14,7 @@ describe('NumoraInput value API', () => {
   it('value getter returns the raw value, getFormattedValue the display string', () => {
     const n = new NumoraInput(container, { formatOn: FormatOn.Change, value: '1234567.5' });
     expect(n.value).toBe('1234567.5');
-    expect(n.getFormattedValue()).toBe('1,234,567.5');
+    expect(n.formattedValue).toBe('1,234,567.5');
   });
 
   it('value setter takes a canonical raw value and formats it like setValue', () => {
@@ -24,7 +24,7 @@ describe('NumoraInput value API', () => {
       decimalSeparator: ',',
     });
     n.value = '1234.5';
-    expect(n.getElement().value).toBe('1.234,5');
+    expect(n.element.value).toBe('1.234,5');
     expect(n.value).toBe('1234.5');
   });
 
@@ -36,18 +36,18 @@ describe('NumoraInput value API', () => {
 
   it('setValue writes through setRangeText by default (undoable)', () => {
     const n = new NumoraInput(container, { formatOn: FormatOn.Change });
-    const spy = vi.spyOn(n.getElement(), 'setRangeText');
+    const spy = vi.spyOn(n.element, 'setRangeText');
     n.setValue('1000');
     expect(spy).toHaveBeenCalled();
-    expect(n.getElement().value).toBe('1,000');
+    expect(n.element.value).toBe('1,000');
   });
 
   it('setValue({ undoable: false }) assigns .value directly and skips setRangeText', () => {
     const n = new NumoraInput(container, { formatOn: FormatOn.Change });
-    const spy = vi.spyOn(n.getElement(), 'setRangeText');
+    const spy = vi.spyOn(n.element, 'setRangeText');
     n.setValue('1000', { undoable: false });
     expect(spy).not.toHaveBeenCalled();
-    expect(n.getElement().value).toBe('1,000');
+    expect(n.element.value).toBe('1,000');
     expect(n.value).toBe('1000');
   });
 

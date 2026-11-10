@@ -13,7 +13,7 @@ describe('decimalSeparator alone', () => {
     const n = new NumoraInput(el, { decimalSeparator: ',', formatOn: FormatOn.Change });
     n.setValue('1234.5');
     expect(el.value).toBe('1.234,5');
-    expect(n.getValue()).toBe('1234.5');
+    expect(n.value).toBe('1234.5');
   });
   it('explicit conflict still throws', () => {
     expect(() => new NumoraInput(mk(), { decimalSeparator: ',', thousandSeparator: ',' })).toThrow();
@@ -41,7 +41,7 @@ describe('re-init after destroy', () => {
     a.destroy();
     const b = new NumoraInput(el, { locale: 'de-DE' });
     expect(el.value).toBe('1.234,56');
-    expect(b.getValue()).toBe('1234.56');
+    expect(b.value).toBe('1234.56');
   });
   it('re-init with a different locale reformats the raw value', () => {
     const el = mk();
@@ -49,7 +49,7 @@ describe('re-init after destroy', () => {
     new NumoraInput(el, { locale: 'de-DE' }).destroy();
     const b = new NumoraInput(el, { locale: 'en-US' });
     expect(el.value).toBe('1,234.56');
-    expect(b.getValue()).toBe('1234.56');
+    expect(b.value).toBe('1234.56');
   });
   it('a value the app wrote after destroy is read as canonical', () => {
     const el = mk();
@@ -59,7 +59,7 @@ describe('re-init after destroy', () => {
     el.value = '99.5';
     const b = new NumoraInput(el, { locale: 'de-DE' });
     expect(el.value).toBe('99,5');
-    expect(b.getValue()).toBe('99.5');
+    expect(b.value).toBe('99.5');
   });
   it('a second destroy() after an app write does not record the app text', () => {
     const el = mk();

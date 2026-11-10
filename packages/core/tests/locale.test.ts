@@ -191,12 +191,12 @@ describe('✅ locale-driven grouping end to end', () => {
 
   it('should format 12345678 as 1,23,45,678 for locale hi-IN', () => {
     instance = new NumoraInput(container, { locale: 'hi-IN', value: '12345678' });
-    expect(instance.getElement().value).toBe('1,23,45,678');
+    expect(instance.element.value).toBe('1,23,45,678');
   });
 
   it('should format 12345678 as 12,345,678 for locale en-US', () => {
     instance = new NumoraInput(container, { locale: 'en-US', value: '12345678' });
-    expect(instance.getElement().value).toBe('12,345,678');
+    expect(instance.element.value).toBe('12,345,678');
   });
 
   it('should keep an explicit groupingStyle over the hi-IN default', () => {
@@ -205,7 +205,7 @@ describe('✅ locale-driven grouping end to end', () => {
       groupingStyle: GroupingStyle.Thousand,
       value: '12345678',
     });
-    expect(instance.getElement().value).toBe('12,345,678');
+    expect(instance.element.value).toBe('12,345,678');
   });
 
   it('should still emit the raw value unchanged under lakh grouping', () => {
@@ -213,8 +213,8 @@ describe('✅ locale-driven grouping end to end', () => {
       locale: 'hi-IN',
       value: '12345678',
     });
-    expect(instance.getElement().value).toBe('1,23,45,678');
-    expect(instance.getValue()).toBe('12345678');
+    expect(instance.element.value).toBe('1,23,45,678');
+    expect(instance.value).toBe('12345678');
   });
 });
 

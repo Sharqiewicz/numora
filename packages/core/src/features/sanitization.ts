@@ -24,7 +24,7 @@ const MAX_INPUT_LENGTH = 10_000;
  *   `thousandSeparator` groups, `decimalSeparator` is the decimal.
  * - `foreign`: text of unknown format (paste, autofill, browser-inserted text). Read with
  *   foreign-format detection (ADR 0006), then continues as locale text.
- * - `canonical`: a value supplied by the app (`value`, `defaultValue`, `setValue`). `.` is
+ * - `canonical`: a value supplied by the app (`value`, `setValue`). `.` is
  *   ALWAYS the decimal (ADR 0004), never grouping and never detected.
  *
  * The output is always locale text (field decimal separator, no grouping); the

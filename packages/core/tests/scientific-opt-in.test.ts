@@ -66,7 +66,7 @@ describe('allowScientificNotation', () => {
     const container = document.createElement('div');
     const n = new NumoraInput(container, { formatOn: 'change' });
     n.setValue(String(1e21));
-    expect(n.getValue()).toBe('1000000000000000000000');
+    expect(n.value).toBe('1000000000000000000000');
   });
 
   it('validates the option type', () => {
@@ -109,7 +109,7 @@ describe('allowScientificNotation', () => {
         value: '12',
         onChange,
       });
-      const el = n.getElement();
+      const el = n.element;
       el.focus();
       el.value = '1.5e-7';
       el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -120,7 +120,7 @@ describe('allowScientificNotation', () => {
 
     it('input fallback still expands when on', () => {
       const n = new NumoraInput(document.body, { value: '12' });
-      const el = n.getElement();
+      const el = n.element;
       el.value = '1.5e-7';
       el.dispatchEvent(new Event('input', { bubbles: true }));
       expect(el.value).toBe('0.00000015');
@@ -130,7 +130,7 @@ describe('allowScientificNotation', () => {
     it('app-supplied values always expand', () => {
       const n = new NumoraInput(document.body, { allowScientificNotation: false });
       n.setValue('1.5e-7');
-      expect(n.getElement().value).toBe('0.00000015');
+      expect(n.element.value).toBe('0.00000015');
       n.destroy();
     });
   });

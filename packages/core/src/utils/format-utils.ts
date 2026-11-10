@@ -168,7 +168,7 @@ export function formatValueForDisplay(
 /**
  * Maps a negative value whose magnitude is exactly zero ("-0", "-0.", "-0.00", "-.0", ...)
  * to the same string with only the sign removed ("0", "0.", "0.00", ".0"). A resting
- * negative zero is not a meaningful distinct value - and left alone, `valueAsNumber` would
+ * negative zero is not a meaningful distinct value - and left alone, `Number(value)` would
  * report `-0` for it indefinitely.
  *
  * Pure and narrow: any digit other than `0` anywhere in the value (or a bare `-` with

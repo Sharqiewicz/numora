@@ -36,13 +36,7 @@ describe('entry survivors (round 3)', () => {
     expect(el.value).toBe('1.234,5');
     n.setValue('9876.25');
     expect(el.value).toBe('9.876,25');
-    expect(n.getValue()).toBe('9876.25');
+    expect(n.value).toBe('9876.25');
   });
 
-  it('NumoraInput.ts:386 - valueAsNumber = non-numeric clears the field', () => {
-    const { n, el } = mk({ allowCompactNotation: true }, '5');
-    (n as { valueAsNumber: unknown }).valueAsNumber = 'abc';
-    expect(el.value).toBe('');
-    expect(n.getValue()).toBe('');
-  });
 });

@@ -59,7 +59,7 @@ describe('destroy() removes Numora-internal listeners (#8)', () => {
       groupingStyle: GroupingStyle.Thousand,
       onChange,
     });
-    const input = numora.getElement();
+    const input = numora.element;
 
     input.value = '1234';
     input.dispatchEvent(new Event('input'));

@@ -9,7 +9,7 @@ function make(options: Record<string, unknown> = {}) {
   container = document.createElement('div');
   document.body.appendChild(container);
   const numora = new NumoraInput(container, options as never);
-  return { numora, el: numora.getElement() };
+  return { numora, el: numora.element };
 }
 function native(el: HTMLInputElement, value: string, init: InputEventInit = {}) {
   el.value = value;
@@ -26,14 +26,14 @@ describe('focused fallback in Change mode reads the field text as its own', () =
     el.focus();
     native(el, '12,3456');
     expect(el.value).toBe('123,456');
-    expect(numora.getValue()).toBe('123456');
+    expect(numora.value).toBe('123456');
   });
   it('de-DE: 1.2345 -> 12.345', () => {
     const { numora, el } = make({ formatOn: 'change', locale: 'de-DE', initialValue: '1234' });
     el.focus();
     native(el, '1.2345');
     expect(el.value).toBe('12.345');
-    expect(numora.getValue()).toBe('12345');
+    expect(numora.value).toBe('12345');
   });
   it('Blur mode focused still detects foreign text: 1,5 is a decimal', () => {
     const { el } = make({ initialValue: '12345' });
@@ -56,6 +56,6 @@ describe('IME composition', () => {
     expect(el.value).toBe('1234');
     native(el, '12345', { isComposing: false });
     expect(el.value).toBe('12,345');
-    expect(numora.getValue()).toBe('12345');
+    expect(numora.value).toBe('12345');
   });
 });

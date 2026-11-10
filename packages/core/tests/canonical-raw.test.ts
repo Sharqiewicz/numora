@@ -62,7 +62,7 @@ describe('canonical raw value', () => {
       onChange.mockClear();
       el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
       expect(el.value).toBe('1234567,89');
-      expect(n.getValue()).toBe('1234567.89');
+      expect(n.value).toBe('1234567.89');
       expect(onChange).not.toHaveBeenCalled();
     });
   });
@@ -72,8 +72,8 @@ describe('canonical raw value', () => {
       const { n, el, onChange } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       typeString(el, '1234567.89');
       expect(el.value).toBe('1.234.567,89');
-      expect(n.getValue()).toBe('1234567.89');
-      expect(n.getFormattedValue()).toBe('1.234.567,89');
+      expect(n.value).toBe('1234567.89');
+      expect(n.formattedValue).toBe('1.234.567,89');
       expect(onChange).toHaveBeenLastCalledWith({
         value: '1234567.89',
         formattedValue: '1.234.567,89',
@@ -86,14 +86,14 @@ describe('canonical raw value', () => {
       expect(el.value).toBe('1,5');
       typeChar(el, '.');
       expect(el.value).toBe('1,5');
-      expect(n.getValue()).toBe('1.5');
+      expect(n.value).toBe('1.5');
     });
 
     it('de-DE: the native "," key still works as the decimal', () => {
       const { el, n } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       typeString(el, '1234,5');
       expect(el.value).toBe('1.234,5');
-      expect(n.getValue()).toBe('1234.5');
+      expect(n.value).toBe('1234.5');
     });
 
     it('en-US: typing "," is rejected', () => {
@@ -109,7 +109,7 @@ describe('canonical raw value', () => {
       const { el, n } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       typeString(el, '1,');
       expect(el.value).toBe('1,');
-      expect(n.getValue()).toBe('1.');
+      expect(n.value).toBe('1.');
     });
   });
 
@@ -118,44 +118,26 @@ describe('canonical raw value', () => {
       const { n, el } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       n.setValue('1234.5');
       expect(el.value).toBe('1.234,5');
-      expect(n.getValue()).toBe('1234.5');
-      expect(n.getFormattedValue()).toBe('1.234,5');
+      expect(n.value).toBe('1234.5');
+      expect(n.formattedValue).toBe('1.234,5');
     });
 
     it('setValue("1.234") in de-DE is the number 1.234, not 1234', () => {
       const { n, el } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       n.setValue('1.234');
       expect(el.value).toBe('1,234');
-      expect(n.getValue()).toBe('1.234');
+      expect(n.value).toBe('1.234');
     });
 
     it('setValue round-trips a negative canonical value', () => {
       const { n, el } = make({ locale: 'de-DE', allowNegative: true, groupingStyle: GroupingStyle.Thousand });
       n.setValue('-1234.5');
       expect(el.value).toBe('-1.234,5');
-      expect(n.getValue()).toBe('-1234.5');
+      expect(n.value).toBe('-1234.5');
     });
   });
 
   describe('one value API', () => {
-    it('valueAsNumber is Number(raw) in comma-decimal locales', () => {
-      const { n } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
-      n.setValue('1234567.89');
-      expect(n.valueAsNumber).toBe(1234567.89);
-    });
-
-    it('valueAsNumber is NaN for an empty field', () => {
-      const { n } = make();
-      expect(n.valueAsNumber).toBeNaN();
-    });
-
-    it('valueAsNumber setter writes the number canonically (de-DE)', () => {
-      const { n, el } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
-      n.valueAsNumber = 1234.5;
-      expect(el.value).toBe('1.234,5');
-      expect(n.getValue()).toBe('1234.5');
-    });
-
     it('the value property mirrors getValue()', () => {
       const { n } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       n.setValue('9876.5');
@@ -166,7 +148,7 @@ describe('canonical raw value', () => {
       const { n, el } = make({ groupingStyle: GroupingStyle.Thousand });
       typeString(el, '1234567.5');
       expect(el.value).toBe('1,234,567.5');
-      expect(n.getValue()).toBe('1234567.5');
+      expect(n.value).toBe('1234567.5');
     });
   });
 
@@ -188,7 +170,7 @@ describe('canonical raw value', () => {
       const { el, n } = make({ locale, groupingStyle: GroupingStyle.Thousand });
       pasteInto(el, clip);
       expect(el.value).toBe(display);
-      expect(n.getValue()).toBe(raw);
+      expect(n.value).toBe(raw);
     });
 
     it('core paste handler returns canonical raw for de-DE 1.234,56', () => {
@@ -214,7 +196,7 @@ describe('canonical raw value', () => {
     it('de-DE paste 1,5e3 expands scientific notation to 1500', () => {
       const { el, n } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       pasteInto(el, '1,5e3');
-      expect(n.getValue()).toBe('1500');
+      expect(n.value).toBe('1500');
     });
 
     it('de-DE paste 1.5k expands compact notation to 1500', () => {
@@ -224,7 +206,7 @@ describe('canonical raw value', () => {
         groupingStyle: GroupingStyle.Thousand,
       });
       pasteInto(el, '1.5k');
-      expect(n.getValue()).toBe('1500');
+      expect(n.value).toBe('1500');
     });
   });
 

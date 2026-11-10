@@ -80,8 +80,7 @@ describe('✅ formatValueForDisplay - decimalMaxLength: 0 and trailing separator
 // a thousand separator. This test documents that behavior explicitly rather than leaving
 // it as an accidental side effect of the sanitizer. Callers who hold a real JS number
 // must convert it themselves before handing it to a de-DE-configured field - see
-// `numberToDisplayString` in the React package and the vanilla `valueAsNumber` setter,
-// both of which do this conversion for numeric inputs.
+// `numberToDisplayString` in the React package, which does this for numeric inputs.
 describe('✅ formatValueForDisplay - string value contract under locale separators', () => {
   // formatOn: Change mirrors formatForDisplay in both packages (see the comment on the
   // decimalMaxLength describe block above) so the regrouped result is visible below.

@@ -2264,7 +2264,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       // Display shows formatted value
       expect(inputElement.value).toBe('1,234');
       // getValue returns raw value
-      expect(input.getValue()).toBe('1234');
+      expect(input.value).toBe('1234');
       // onChange receives raw value
       expect(onChangeMock).toHaveBeenCalledWith(expect.objectContaining({ value: '1234' }));
     });
@@ -2277,8 +2277,8 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.dispatchEvent(new Event('input'));
 
       expect(inputElement.value).toBe('1,234,567');
-      expect(input.getValue()).toBe('1234567');
-      expect(input.getFormattedValue()).toBe('1,234,567');
+      expect(input.value).toBe('1234567');
+      expect(input.formattedValue).toBe('1,234,567');
     });
 
     it('getValue() is raw regardless of any option (there is no emitRawValue switch)', () => {
@@ -2299,7 +2299,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.dispatchEvent(new Event('input'));
 
       expect(inputElement.value).toBe('1,234,567');
-      expect(input.getValue()).toBe('1234567');
+      expect(input.value).toBe('1234567');
     });
   });
 
@@ -2313,7 +2313,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       // Display shows formatted
       expect(inputElement.value).toBe('1,234,567');
       // getValue returns raw
-      expect(input.getValue()).toBe('1234567');
+      expect(input.value).toBe('1234567');
     });
 
     it('should handle decimal values', () => {
@@ -2323,7 +2323,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       input.setValue('1234.56');
 
       expect(inputElement.value).toBe('1,234.56');
-      expect(input.getValue()).toBe('1234.56');
+      expect(input.value).toBe('1234.56');
     });
 
     it('should handle empty string', () => {
@@ -2333,7 +2333,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       input.setValue('');
 
       expect(inputElement.value).toBe('');
-      expect(input.getValue()).toBe('');
+      expect(input.value).toBe('');
     });
   });
 
@@ -2345,19 +2345,19 @@ describe('Canonical raw value + getFormattedValue', () => {
       // Simulate typing "1234"
       inputElement.value = '1';
       inputElement.dispatchEvent(new Event('input'));
-      expect(input.getValue()).toBe('1');
+      expect(input.value).toBe('1');
 
       inputElement.value = '12';
       inputElement.dispatchEvent(new Event('input'));
-      expect(input.getValue()).toBe('12');
+      expect(input.value).toBe('12');
 
       inputElement.value = '123';
       inputElement.dispatchEvent(new Event('input'));
-      expect(input.getValue()).toBe('123');
+      expect(input.value).toBe('123');
 
       inputElement.value = '1234';
       inputElement.dispatchEvent(new Event('input'));
-      expect(input.getValue()).toBe('1234');
+      expect(input.value).toBe('1234');
       expect(inputElement.value).toBe('1,234');
     });
 
@@ -2369,7 +2369,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.dispatchEvent(new Event('input'));
 
       expect(inputElement.value).toBe('1,234.56');
-      expect(input.getValue()).toBe('1234.56');
+      expect(input.value).toBe('1234.56');
     });
   });
 
@@ -2410,7 +2410,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.dispatchEvent(pasteEvent);
 
       expect(inputElement.value).toBe('1,234,567');
-      expect(input.getValue()).toBe('1234567');
+      expect(input.value).toBe('1234567');
     });
   });
 
@@ -2438,7 +2438,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       input.setValue('1234567');
 
       expect(inputElement.value).toBe('1,234,567');
-      expect(input.getValue()).toBe('1234567');
+      expect(input.value).toBe('1234567');
       // Note: setValue doesn't call onChange, only handleValueChange does (which is called by event handlers)
       // The onChange behavior is tested in other tests that verify the event flow
     });
@@ -2452,7 +2452,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.value = '';
       inputElement.dispatchEvent(new Event('input'));
 
-      expect(input.getValue()).toBe('');
+      expect(input.value).toBe('');
       expect(inputElement.value).toBe('');
     });
 
@@ -2467,7 +2467,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.value = '.';
       inputElement.dispatchEvent(new Event('input'));
 
-      expect(input.getValue()).toBe('.');
+      expect(input.value).toBe('.');
       expect(inputElement.value).toBe('.');
     });
 
@@ -2478,7 +2478,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.value = '0';
       inputElement.dispatchEvent(new Event('input'));
 
-      expect(input.getValue()).toBe('0');
+      expect(input.value).toBe('0');
       expect(inputElement.value).toBe('0');
     });
 
@@ -2499,7 +2499,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.value = '1234.56';
       inputElement.dispatchEvent(new Event('input'));
 
-      expect(input.getValue()).toBe('1234.56');
+      expect(input.value).toBe('1234.56');
       expect(inputElement.value).toBe('1234.56');
     });
   });
@@ -2523,8 +2523,8 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.dispatchEvent(new Event('input'));
 
       expect(inputElement.value).toBe('1,234,567');
-      expect(input.getValue()).toBe('1234567');
-      expect(input.getFormattedValue()).toBe('1,234,567');
+      expect(input.value).toBe('1234567');
+      expect(input.formattedValue).toBe('1,234,567');
       expect(onChangeMock).toHaveBeenCalledWith({ value: '1234567', formattedValue: '1,234,567' });
     });
 
@@ -2545,7 +2545,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.value = '1234567';
       inputElement.dispatchEvent(new Event('input'));
 
-      expect(input.getValue()).toBe('1234567');
+      expect(input.value).toBe('1234567');
     });
   });
 });
@@ -2746,7 +2746,7 @@ describe('Adopt existing <input> element', () => {
 
   it('adopts the passed input instead of creating a new one', () => {
     const instance = new NumoraInput(host, {});
-    expect(instance.getElement()).toBe(host);
+    expect(instance.element).toBe(host);
   });
 
   it('does not append a child input when the container is itself an input', () => {
@@ -2801,128 +2801,90 @@ describe('Adopt existing <input> element', () => {
   });
 });
 
-describe('valueAsNumber - separator round-trip', () => {
-  let host: HTMLInputElement;
+describe('vanilla class surface', () => {
+  let host: HTMLDivElement;
 
   beforeEach(() => {
-    host = document.createElement('input');
+    host = document.createElement('div');
     document.body.appendChild(host);
   });
 
   afterEach(() => {
-    if (host.parentNode) host.parentNode.removeChild(host);
+    host.remove();
   });
 
-  // Regression: the setter used `num.toString()` (always dot-decimal) unchanged, so under
-  // separator sets where `.` is the *thousand* separator the dot was stripped as grouping
-  // and the digits concatenated - 1234567.89 came back as 123456789, a silent 100x error.
-  it.each([
-    ['en-US style', ',', '.', '1,234,567.89'],
-    ['de-DE style', '.', ',', '1.234.567,89'],
-    ['fr-FR style', ' ', ',', '1 234 567,89'],
-    ['ch style', "'", '.', "1'234'567.89"],
-  ])(
-    'round-trips 1234567.89 through %s separators',
-    (_label, thousandSeparator, decimalSeparator, expectedDisplay) => {
-      const instance = new NumoraInput(host, {
-        decimalMaxLength: 18,
-        thousandSeparator,
-        decimalSeparator,
-        groupingStyle: GroupingStyle.Thousand,
-        formatOn: FormatOn.Change,
-      });
-
-      instance.valueAsNumber = 1234567.89;
-
-      expect(instance.getFormattedValue()).toBe(expectedDisplay);
-      expect(instance.getValue()).toBe('1234567.89');
-      expect(instance.valueAsNumber).toBe(1234567.89);
-    }
-  );
-
-  it('round-trips a negative value under comma-decimal separators', () => {
-    const instance = new NumoraInput(host, {
-      decimalMaxLength: 18,
-      thousandSeparator: '.',
-      decimalSeparator: ',',
-      allowNegative: true,
-      groupingStyle: GroupingStyle.Thousand,
-      formatOn: FormatOn.Change,
-    });
-
-    instance.valueAsNumber = -1234.5;
-
-    expect(instance.valueAsNumber).toBe(-1234.5);
+  it('options are optional', () => {
+    const instance = new NumoraInput(host);
+    instance.value = '1234.5';
+    expect(instance.formattedValue).toBe('1,234.5');
   });
 
-  it('round-trips an integer (no decimal mark) under comma-decimal separators', () => {
-    const instance = new NumoraInput(host, {
-      decimalMaxLength: 18,
-      thousandSeparator: '.',
-      decimalSeparator: ',',
-      groupingStyle: GroupingStyle.Thousand,
-      formatOn: FormatOn.Change,
-    });
+  it('value, formattedValue and element are properties', () => {
+    const instance = new NumoraInput(host, { locale: 'de-DE', value: '1234567.89' });
+    expect(instance.value).toBe('1234567.89');
+    expect(instance.formattedValue).toBe('1.234.567,89');
+    expect(instance.element).toBe(host.querySelector('input'));
 
-    instance.valueAsNumber = 1234567;
-
-    expect(instance.getFormattedValue()).toBe('1.234.567');
-    expect(instance.getValue()).toBe('1234567');
-    expect(instance.valueAsNumber).toBe(1234567);
+    instance.value = '42.5';
+    expect(instance.value).toBe('42.5');
+    expect(instance.element.value).toBe('42,5');
   });
 
-  // A2-12: a literal `NaN`/`Infinity`/`-Infinity` number now throws RangeError rather than
-  // silently clearing the field - clearing hid a bug in the caller's own arithmetic, and a
-  // numeric field has no sensible display to silently normalize a non-finite value to.
-  // Only a genuinely non-numeric value (untyped JS callers bypassing the `number` type,
-  // e.g. a string that itself coerces to NaN) still clears, unchanged from before.
-  it('throws RangeError when set to NaN, Infinity, or -Infinity', () => {
-    const instance = new NumoraInput(host, { decimalSeparator: ',', thousandSeparator: '.' });
-    instance.valueAsNumber = 1234.5;
+  it('assigning value goes through the same pipeline as setValue', () => {
+    const instance = new NumoraInput(host, { decimalMaxLength: 2 });
+    instance.value = '-1.239';
+    expect(instance.value).toBe('1.23');
+  });
 
-    for (const nonFinite of [NaN, Infinity, -Infinity]) {
-      expect(() => {
-        instance.valueAsNumber = nonFinite;
-      }).toThrow(RangeError);
-      // The field is untouched by the rejected assignment.
-      expect(instance.getFormattedValue()).toBe('1.234,5');
+  it('the method accessors and valueAsNumber are gone', () => {
+    const instance = new NumoraInput(host) as unknown as Record<string, unknown>;
+    for (const name of ['getValue', 'getFormattedValue', 'getElement', 'valueAsNumber']) {
+      expect(instance[name]).toBeUndefined();
     }
   });
 
-  it('still clears the value for a non-numeric (non-`number`-typed) input', () => {
-    const instance = new NumoraInput(host, { decimalSeparator: ',', thousandSeparator: '.' });
-
-    instance.valueAsNumber = 1234.5;
-    // @ts-expect-error - deliberately passing a non-numeric string to exercise the
-    // untyped-JS-caller fallback path.
-    instance.valueAsNumber = 'abc';
-
-    expect(instance.getValue()).toBe('');
-    expect(instance.valueAsNumber).toBeNaN();
+  it('forwards the listed native attributes and ariaLabel', () => {
+    const { element } = new NumoraInput(host, {
+      id: 'amount',
+      name: 'amount',
+      className: 'field',
+      placeholder: '0.0',
+      disabled: true,
+      readOnly: true,
+      required: true,
+      tabIndex: 3,
+      title: 'Amount',
+      autofocus: true,
+      ariaLabel: 'Amount to send',
+    });
+    expect(element.id).toBe('amount');
+    expect(element.name).toBe('amount');
+    expect(element.className).toBe('field');
+    expect(element.placeholder).toBe('0.0');
+    expect(element.disabled).toBe(true);
+    expect(element.readOnly).toBe(true);
+    expect(element.required).toBe(true);
+    expect(element.tabIndex).toBe(3);
+    expect(element.title).toBe('Amount');
+    expect(element.autofocus).toBe(true);
+    expect(element.getAttribute('aria-label')).toBe('Amount to send');
   });
 
-  // Regression: without this check, `valueAsNumber = -1` on a field with
-  // `allowNegative: false` silently dropped the sign (sanitization strips the `-`),
-  // so a caller could set a negative value and the field would display it as positive
-  // with no error - the exact silent-magnitude class of bug this library exists to catch.
-  it('throws RangeError when setting a negative valueAsNumber without allowNegative', () => {
-    const instance = new NumoraInput(host, { allowNegative: false });
-
-    expect(() => {
-      instance.valueAsNumber = -1;
-    }).toThrow(RangeError);
-    expect(() => {
-      instance.valueAsNumber = -1;
-    }).toThrow('valueAsNumber: negative value but allowNegative is false');
+  it('forwards nothing else: other attributes are set on element', () => {
+    const { element } = new NumoraInput(host, { dir: 'rtl', hidden: true, type: 'number' } as never);
+    expect(element.dir).toBe('');
+    expect(element.hidden).toBe(false);
+    expect(element.type).toBe('text');
   });
 
-  it('allows setting a negative valueAsNumber when allowNegative is true', () => {
-    const instance = new NumoraInput(host, { allowNegative: true });
-
-    instance.valueAsNumber = -1;
-
-    expect(instance.getValue()).toBe('-1');
-    expect(instance.valueAsNumber).toBe(-1);
+  it('an attribute left undefined does not overwrite an adopted input', () => {
+    const input = document.createElement('input');
+    input.placeholder = 'Amount';
+    input.setAttribute('aria-label', 'Kept');
+    host.appendChild(input);
+    new NumoraInput(input, { placeholder: undefined });
+    expect(input.placeholder).toBe('Amount');
+    expect(input.getAttribute('aria-label')).toBe('Kept');
   });
 });
 

@@ -12,6 +12,7 @@ const REMOVED: Record<string, string> = {
   maxDecimals: 'decimalMaxLength',
   rawValueMode: 'e.target.value',
   emitRawValue: 'the onChange `value`',
+  defaultValue: 'value',
 };
 
 /** Deletes every removed option from `options` (mutating it) and returns their names. */
