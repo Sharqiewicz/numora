@@ -76,6 +76,8 @@ export const sanitizeNumoraInput = (
   formattingOptions?: FormattingOptions,
   source: ValueSource = 'display'
 ): string => {
+  const decimalSeparator = formattingOptions?.decimalSeparator;
+
   // Step 1 also strips NBSP-family whitespace (incl. U+202F, the French thousand separator
   // from Intl.NumberFormat). For NBSP-using locales this means step 2 may already be a
   // no-op by the time it runs - benign, but worth knowing when debugging locale output.
@@ -86,44 +88,37 @@ export const sanitizeNumoraInput = (
   if (source !== 'display') {
     sanitized = canonicalToDisplayText(
       source === 'foreign' ? normalizeForeignFormat(sanitized, formattingOptions) : sanitized,
-      formattingOptions?.decimalSeparator
+      decimalSeparator
     );
   }
 
   sanitized = removeThousandSeparators(sanitized, formattingOptions?.thousandSeparator);
 
-  sanitized = normalizeDigits(sanitized);
-  sanitized = normalizeUnicodeMinus(sanitized);
-  sanitized = normalizeDecimalSeparators(sanitized, formattingOptions?.decimalSeparator);
-
-  if (formattingOptions?.enableCompactNotation) {
-    sanitized = expandCompactNotation(sanitized, formattingOptions.decimalSeparator);
-  }
-
-  sanitized = expandScientificNotation(sanitized, formattingOptions?.decimalSeparator);
-
-  sanitized = removeNonNumericCharacters(
-    sanitized,
-    formattingOptions?.enableNegative,
-    formattingOptions?.decimalSeparator
+  sanitized = normalizeDecimalSeparators(
+    normalizeUnicodeMinus(normalizeDigits(sanitized)),
+    decimalSeparator
   );
 
-  sanitized = removeExtraDecimalSeparators(sanitized, formattingOptions?.decimalSeparator);
+  if (formattingOptions?.enableCompactNotation) {
+    sanitized = expandCompactNotation(sanitized, decimalSeparator);
+  }
+
+  sanitized = expandScientificNotation(sanitized, decimalSeparator);
+
+  sanitized = removeNonNumericCharacters(sanitized, formattingOptions?.enableNegative, decimalSeparator);
+
+  sanitized = removeExtraDecimalSeparators(sanitized, decimalSeparator);
 
   if (!formattingOptions?.enableLeadingZeros) {
-    sanitized = removeLeadingZeros(sanitized, formattingOptions?.decimalSeparator);
+    sanitized = removeLeadingZeros(sanitized, decimalSeparator);
   }
 
   if (formattingOptions?.autoAddLeadingZero) {
-    sanitized = prependLeadingZero(sanitized, formattingOptions.decimalSeparator);
+    sanitized = prependLeadingZero(sanitized, decimalSeparator);
   }
 
   if (formattingOptions?.maxLength !== undefined) {
-    sanitized = truncateToMaxLength(
-      sanitized,
-      formattingOptions.maxLength,
-      formattingOptions.decimalSeparator
-    );
+    sanitized = truncateToMaxLength(sanitized, formattingOptions.maxLength, decimalSeparator);
   }
 
   return sanitized;

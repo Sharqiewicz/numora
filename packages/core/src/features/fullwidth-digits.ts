@@ -39,7 +39,7 @@ function digitValue(code: number): string | undefined {
     if (ZEROS[mid] <= code) lo = mid + 1;
     else hi = mid - 1;
   }
-  if (hi < 0) return undefined;
+  // hi === -1 (code below every zero): ZEROS[-1] is undefined, offset is NaN, `NaN <= 9` is false.
   const offset = code - ZEROS[hi];
   return offset <= 9 ? String(offset) : undefined;
 }

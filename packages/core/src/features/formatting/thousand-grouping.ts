@@ -35,7 +35,7 @@ export function formatWithSeparators(
   decimalSeparator: string = '.'
 ): string {
   const sign = value.startsWith('-') ? '-' : '';
-  const [integerPart, decimalPart = ''] = value.slice(sign.length).split(decimalSeparator);
+  const [integerPart, decimalPart] = value.slice(sign.length).split(decimalSeparator);
   const sizes = GROUP_SIZES[groupStyle];
 
   // Leading zeros are grouped as part of the full integer ("0001234" -> "0,001,234").
@@ -45,7 +45,7 @@ export function formatWithSeparators(
     sign +
     (sizes ? groupDigitsFromRight(integerPart, separator, sizes[0], sizes[1]) : integerPart) +
     // Keep the decimal separator even when no decimal digits follow.
-    (value.includes(decimalSeparator) ? decimalSeparator + decimalPart : '')
+    (decimalPart === undefined ? '' : decimalSeparator + decimalPart)
   );
 }
 
