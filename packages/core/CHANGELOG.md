@@ -67,6 +67,8 @@
   tag, except when `NODE_ENV` is `production`.
 
 ### Changed
+- **`numora` and `numora-react` ship minified, without comments, with sourcemaps.** A React
+  consumer loads 10.6 KB gzip (was 19.6 KB).
 - **Caret computed from the edit itself.** The new caret rank is the rank of the text left of
   the edit plus the inserted text, sanitized with the same options, selected in the new display
   string (`computeCaretFromEdit`). Replaces the common-prefix / distance-from-end guess and

@@ -24,18 +24,8 @@ const MAX_EXPANSION_DIGITS = 1000;
  * Handles formats like: 1.5e-7, 2e+5, 1.23e-4, etc.
  * Finds and expands scientific notation anywhere in the string.
  *
- * Implementation note: this used to be a single `String.replace` with a mantissa
- * alternation of the form `\d+sep?\d*|sep\d+`. That pattern lets the engine split a
- * digit run between `\d+` and `\d*` at every position, so a run of N digits with no
- * trailing `e` cost O(N^2) - a pasted string of a few thousand digits froze the main
- * thread for seconds. Tightening the alternation to `\d+(?:sep\d*)?|sep\d+` (the
- * optional group can only be entered by matching the separator literal first) removes
- * the ambiguity, but a hand-rolled single-pass scan is still meaningfully safer at
- * 10k+ digit inputs: when a maximal digit run isn't followed by `e`/`E`, no shorter
- * mantissa starting inside that same run can succeed either (the digit-run boundary is
- * a deterministic function of the start position, not something worth re-deriving one
- * character at a time), so the whole run is skipped in one jump instead of retried at
- * every offset.
+ * Scans left to right in linear time instead of using a regex (see `utils/mantissa-scan.ts`
+ * for why): a digit run not followed by `e`/`E` is skipped in one jump.
  *
  * See `utils/mantissa-scan.ts` for the re-anchoring rule applied when a mantissa is
  * followed by neither a valid token nor a plain boundary.

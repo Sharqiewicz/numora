@@ -13,7 +13,7 @@ import { formatInputValue } from './format-utils';
 // on some keyboard/locale (see `../features/decimal-separators` for the glyph table and
 // the matching sanitization-side fix for paste/IME-commit). A candidate is remapped to
 // `decimalSeparator` UNLESS it is itself the configured `thousandSeparator` (and differs
-// from `decimalSeparator`), in which case the keystroke is rejected outright (A2-04) -
+// from `decimalSeparator`), in which case the keystroke is rejected outright -
 // otherwise typing "1,000,000" under an en-US config (thousand ',', decimal '.') would
 // have each comma parsed as a decimal point.
 const DECIMAL_KEY_CANDIDATES = new Set<string>(['.', ',', ...NON_ASCII_DECIMAL_SEPARATOR_GLYPHS]);
@@ -36,7 +36,7 @@ export type BeforeInputResult =
   | { type: 'skip' };
 
 /**
- * Invokes a user-supplied `isAllowed` validator, treating a throw as "not allowed" (A2-08).
+ * Invokes a user-supplied `isAllowed` validator, treating a throw as "not allowed".
  *
  * `isAllowed` runs synchronously inside `beforeinput`/paste handling, BEFORE the caller
  * calls `preventDefault()`. If the validator throws and that exception is left to
@@ -106,7 +106,7 @@ export function handleOnBeforeInputNumoraInput(
     // locale (thousand '.', e.g. de-DE) a typed '.' is the decimal key - numpads and US
     // keyboards emit it - so it falls through to the decimal handling below (inserted only
     // while the value has no decimal yet, ignored otherwise). Any other key that equals
-    // the thousand separator (',' in en-US) stays rejected (A2-04/A2-05): remapping it
+    // the thousand separator (',' in en-US) stays rejected: remapping it
     // would turn a grouping habit into a stray decimal point.
     if (inputData === thousandSep && inputData !== '.') {
       return { type: 'reject' };

@@ -105,7 +105,7 @@ export class NumoraInput {
   // non-browser embedders) dispatch synthetic `focus`/`blur` events directly without ever
   // moving the real DOM focus, so `document.activeElement` would not reflect them. This
   // flag mirrors whatever focus/blur events this instance's own listeners have actually
-  // seen, which is what `handleChange`'s resting-vs-typing branch (A2-07) needs.
+  // seen, which is what `handleChange`'s resting-vs-typing branch needs.
   private isFocused: boolean = false;
   /** Field text after the last write this class made; restored when the `input` fallback must refuse a value. */
   private lastValue: string = '';
@@ -297,7 +297,7 @@ export class NumoraInput {
 
     // `isFocused` bookkeeping is unconditional - independent of the formatOn/grouping/
     // decimalMinLength/enableNegative combination below, `handleChange`'s resting-vs-typing
-    // branch (A2-07) needs an accurate focus state for every configuration, including a
+    // branch needs an accurate focus state for every configuration, including a
     // plain Change-mode field with none of those options set (which otherwise gets no
     // focus/blur listener at all). Deliberately minimal - no formatting side effects - so
     // it never changes behaviour for a config that doesn't also meet the condition below.
@@ -310,10 +310,9 @@ export class NumoraInput {
 
     // Focus/blur handlers are needed for 'blur' mode grouping, for decimalMinLength
     // padding (applies on blur regardless of formatOn - see handleBlur below), AND for the
-    // -0 -> 0 normalization (A2-11), which is likewise a blur-time concern independent of
-    // formatOn/grouping. The Blur-mode guard that used to live here now lives in
-    // stripSeparatorsAndMapCaret so Change mode + decimalMinLength/enableNegative doesn't
-    // strip separators on focus.
+    // -0 -> 0 normalization, which is likewise a blur-time concern independent of
+    // formatOn/grouping. The Blur-mode guard lives in stripSeparatorsAndMapCaret, so Change
+    // mode + decimalMinLength/enableNegative doesn't strip separators on focus.
     if (
       (this.resolvedOptions.formatOn === FormatOn.Blur && this.resolvedOptions.thousandSeparator) ||
       this.resolvedOptions.decimalMinLength > 0 ||
@@ -489,7 +488,7 @@ export class NumoraInput {
     this.trackWrite(() =>
       writeStripPreservingUndo(target, result.raw, result.rawStart, result.rawEnd)
     );
-    // Stripping separators changes only the display, never the canonical raw value, so no onChange (A2-06).
+    // Stripping separators changes only the display, never the canonical raw value, so no onChange.
   }
 
   private handleFocus(e: FocusEvent): void {
@@ -522,7 +521,7 @@ export class NumoraInput {
     // "-0" (and its decimal variants "-0.", "-0.00", "-.0") settle to the unsigned form at
     // rest - a resting negative zero is not a meaningful distinct value, and leaving it
     // means `valueAsNumber` reports -0 forever after. Runs before formatForDisplay so the
-    // padding/grouping pipeline sees the already-designed string (see A2-11).
+    // padding/grouping pipeline sees the already-designed string.
     const normalizedValue = normalizeNegativeZero(
       target.value,
       this.resolvedOptions.decimalSeparator
@@ -536,7 +535,7 @@ export class NumoraInput {
     if (formatted === target.value) return;
 
     this.trackWrite(() => writeValuePreservingUndo(target, formatted, formatted.length));
-    // Only broadcast onChange when the sanitized raw value actually changed (A2-06) - blur
+    // Only broadcast onChange when the sanitized raw value actually changed - blur
     // can otherwise be purely cosmetic (regrouping thousand separators onto an unchanged
     // raw value), and firing onChange for that misleads consumers into thinking the value
     // changed. A trailing-separator strip, decimalMinLength padding, and the -0

@@ -31,13 +31,8 @@ const ZERO_COUNTS: Record<string, number> = {
  * Handles formats like: 1k, 1.5m, 2B, 1M, 2.5T (case-insensitive)
  * Uses string arithmetic to avoid precision loss with large numbers.
  *
- * Implementation note: this used to be a single `String.replace` with a mantissa
- * alternation of the form `\d+sep?\d*|sep\d+` and no early exit at all, so any long
- * digit string - with `enableCompactNotation` on - cost O(N^2) in the regex engine
- * whether or not a suffix was ever found. This is now a single left-to-right scan (see
- * `matchMantissaAt`): a maximal digit run that isn't followed by (optional whitespace
- * and) a suffix letter is skipped in one jump rather than retried at every offset inside
- * it, which is what keeps this linear instead of quadratic on a pathological paste.
+ * Scans left to right in linear time instead of using a regex (see `utils/mantissa-scan.ts`
+ * for why): a digit run not followed by a suffix letter is skipped in one jump.
  *
  * See `utils/mantissa-scan.ts` for the re-anchoring rule applied when a mantissa is
  * followed by neither a valid token nor a plain boundary.
@@ -82,7 +77,7 @@ export function expandCompactNotation(value: string, decimalSeparator: string = 
     // A suffix immediately followed by a digit or another decimal separator is not a
     // standalone compact-notation token - it's a mid-number keystroke (e.g. typing "k" in
     // the middle of "1|234" produces "1k234", which must round-trip unchanged so the
-    // beforeinput caller can reject the keystroke - A2-10) rather than glue onto a longer
+    // beforeinput caller can reject the keystroke) rather than glue onto a longer
     // numeral. End of string, whitespace, or any other non-numeric character right after
     // the suffix is a valid boundary and still expands (e.g. "1k 2m", "1k USD", "1kk").
     const charAfterSuffix = value[s + 1];

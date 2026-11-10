@@ -319,7 +319,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
 
       writeStripPreservingUndo(input, result.raw, result.rawStart, result.rawEnd);
 
-      // A2-06: this strip only changes the DISPLAY (separators removed for editing) - the
+      // This strip only changes the DISPLAY (separators removed for editing) - the
       // raw numeric value is exactly the same before and after (stripping separators cannot
       // change the number). So unlike the beforeinput/paste/blur paths, no onChange/
       // onValueChange here: firing one would tell consumers the value changed when it did
@@ -358,7 +358,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     const controlledValueString = String(controlledValue);
     const numInput = input as NumoraHTMLInputElement;
 
-    // A2-01: is this just the parent echoing the raw value straight back (the single most
+    // Is this just the parent echoing the raw value straight back (the single most
     // common controlled pattern: onChange -> setState(e.target.value) -> value={state})?
     // `formatValueForDisplay`/`formatForDisplay` both strip a trailing decimal separator and
     // pad to `decimalMinLength` - display/blur-only concerns. Comparing THOSE formatted
@@ -477,7 +477,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       return;
     }
 
-    // A2-07: this is the native-`input` fallback path (undo/redo handled above; what's
+    // This is the native-`input` fallback path (undo/redo handled above; what's
     // left is IME commit, autofill, drag-drop, or a programmatic dispatch) - not the
     // keystroke path. A keystroke goes through beforeinput/handleOnBeforeInputNumoraInput,
     // which already knows it's mid-typing. Here we only have the DOM value, so we must
@@ -515,7 +515,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
 
   const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
     e.nativeEvent.preventDefault();
-    // A2-02: a readOnly/disabled input must not accept a paste - preventDefault (already
+    // A readOnly/disabled input must not accept a paste - preventDefault (already
     // done above) blocks the browser's own paste, and returning here skips writing the
     // clipboard content via setRangeText and skips onChange/onValueChange/onPaste, since
     // nothing was actually pasted.
@@ -548,7 +548,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // Runs on Blur mode (grouping applies on blur) and also whenever decimalMinLength is
     // set, since padding is a display/blur-only concern regardless of formatOn - matching
     // the vanilla package's widened focus/blur listener registration.
-    // enableNegative joins the guard for the -0 -> 0 normalization (A2-11), which is a
+    // enableNegative joins the guard for the -0 -> 0 normalization, which is a
     // blur-time concern independent of formatOn/grouping, matching the vanilla package.
     if (
       formattingOptions.formatOn === FormatOn.Blur ||

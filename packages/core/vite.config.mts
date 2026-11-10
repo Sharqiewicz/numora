@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, transformWithEsbuild } from 'vite';
 import path from 'path';
 
 export default defineConfig({
@@ -22,6 +22,25 @@ export default defineConfig({
     // the whole directory, so leftovers from earlier builds would ship to npm. Safe because
     // `tsc --emitDeclarationOnly` runs after Vite in the build script.
     emptyOutDir: true,
+    sourcemap: true,
+    // Vite never strips whitespace from ES library output, and its esbuild pass re-prints
+    // whatever a normal plugin minified. Output plugins run after it, so minify there.
+    minify: false,
+    rollupOptions: {
+      output: {
+        plugins: [
+          {
+            name: 'minify-lib',
+            renderChunk: (code, chunk) =>
+              transformWithEsbuild(code, chunk.fileName, {
+                minify: true,
+                sourcemap: true,
+                legalComments: 'none',
+              }),
+          },
+        ],
+      },
+    },
   },
   test: {
     environment: 'jsdom',

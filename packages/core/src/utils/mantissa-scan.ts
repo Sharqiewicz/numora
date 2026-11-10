@@ -1,10 +1,9 @@
 /**
  * Single-pass mantissa scanner shared by the scientific- and compact-notation expanders.
  *
- * Both expanders used to be a single `String.replace` with a mantissa alternation of the
- * form `\d+sep?\d*|sep\d+`. That pattern lets the regex engine split a digit run between
- * `\d+` and `\d*` at every position, so a pasted run of N digits with no matching suffix
- * cost O(N^2) - a few thousand digits froze the main thread for seconds. Computing the
+ * Why not a regex: a mantissa alternation such as `\d+sep?\d*|sep\d+` lets the engine
+ * split a digit run between `\d+` and `\d*` at every position, so a pasted run of N digits
+ * with no matching suffix costs O(N^2): a few thousand digits freeze the main thread. Computing the
  * digit-run boundary once, deterministically, from the start position is what keeps both
  * scans linear.
  */
