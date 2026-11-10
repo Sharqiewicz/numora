@@ -283,30 +283,13 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     decimalMaxLength,
     formattingOptions,
   });
-  // True while we're applying our own setRangeText. `setRangeText` does not synchronously
-  // dispatch `input` in current browsers or jsdom (verified) - this flag is defensive,
-  // for environments or polyfills that do dispatch `input` on a programmatic write, so
-  // that event can't re-enter handleChange and double-fire onChange on the typing path.
-  // It also guards React's value tracker: setRangeText mutates the DOM value without
-  // going through React's patched `value` setter, so if a native `input` event did fire
-  // afterward, React's tracker could see it as an external change and invoke handleChange
-  // on top of the onChange we already called directly (see the beforeinput handler below).
-  const suppressNextInputEventRef = useRef(false);
   // Mouse-driven focus: the browser commits click→selection AFTER focus, using the
   // input's current value. Defer the strip from focus to click so the browser places
   // the cursor against the still-formatted value before we map it to raw indices.
   const pendingMouseStripRef = useRef(false);
 
-  // withInternalWrite and stripSeparatorsAndMapCaret touch only refs, so the mount-only
-  // listeners below may safely keep the first render's copies.
-  const withInternalWrite = (fn: () => void): void => {
-    suppressNextInputEventRef.current = true;
-    try {
-      fn();
-    } finally {
-      suppressNextInputEventRef.current = false;
-    }
-  };
+  // stripSeparatorsAndMapCaret touches only refs, so the mount-only listeners below may
+  // safely keep the first render's copy.
 
   // The one place both React callbacks fire. Reads stateRef (current after commit).
   const emit = (el: NumoraHTMLInputElement, raw: string, formatted: string) => {
@@ -334,9 +317,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       );
       if (!result) return;
 
-      withInternalWrite(() => {
-        writeStripPreservingUndo(input, result.raw, result.rawStart, result.rawEnd);
-      });
+      writeStripPreservingUndo(input, result.raw, result.rawStart, result.rawEnd);
 
       // A2-06: this strip only changes the DISPLAY (separators removed for editing) - the
       // raw numeric value is exactly the same before and after (stripping separators cannot
@@ -412,7 +393,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       return;
     }
 
-    withInternalWrite(() => writeValuePreservingUndo(input, formatted, formatted.length));
+    writeValuePreservingUndo(input, formatted, formatted.length);
     numInput.formattedValue = formatted;
   });
 
@@ -437,7 +418,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       e.preventDefault();
       if (result.type === 'reject') return;
       const numInput = input as NumoraHTMLInputElement;
-      withInternalWrite(() => writeValuePreservingUndo(input, result.formatted, result.cursorPos));
+      writeValuePreservingUndo(input, result.formatted, result.cursorPos);
       numInput.formattedValue = result.formatted;
       // onChange is called directly with the raw value - guaranteed delivery regardless of
       // React's value-tracker diff (which can silently drop onChange when the tracker
@@ -474,8 +455,6 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   // the reader to mentally validate dep arrays.
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (suppressNextInputEventRef.current) return;
-
     const numInput = e.target as NumoraHTMLInputElement;
     const inputType = (e.nativeEvent as InputEvent).inputType;
 
@@ -494,7 +473,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // and report nothing: the value didn't change. Matches the vanilla input fallback.
     if (isScientificNotationRejected(numInput.value, formattingOptions)) {
       const previous = numInput.formattedValue as string;
-      withInternalWrite(() => writeValuePreservingUndo(numInput, previous, previous.length));
+      writeValuePreservingUndo(numInput, previous, previous.length);
       return;
     }
 
@@ -521,7 +500,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
         !!formattingOptions.thousandSeparator,
         isFocused
       );
-      withInternalWrite(() => writeValuePreservingUndo(numInput, formatted, caret));
+      writeValuePreservingUndo(numInput, formatted, caret);
     }
     numInput.formattedValue = formatted;
     emit(numInput, raw, formatted);
@@ -547,7 +526,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       return;
     }
     const numInput = e.target as NumoraHTMLInputElement;
-    withInternalWrite(() => writeValuePreservingUndo(numInput, result.formatted, result.cursorPos));
+    writeValuePreservingUndo(numInput, result.formatted, result.cursorPos);
     numInput.formattedValue = result.formatted;
     if (onPaste) onPaste(e);
     emit(numInput, result.raw, result.formatted);
@@ -582,7 +561,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       );
       const valueChanged = formatted !== numInput.value;
       if (valueChanged) {
-        withInternalWrite(() => writeValuePreservingUndo(numInput, formatted, formatted.length));
+        writeValuePreservingUndo(numInput, formatted, formatted.length);
       }
       numInput.formattedValue = formatted;
       if (valueChanged) emit(numInput, raw, formatted);

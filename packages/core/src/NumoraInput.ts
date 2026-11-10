@@ -93,14 +93,6 @@ export class NumoraInput {
 
   private resolvedOptions: ResolvedNumoraOptions;
 
-  // True while we're applying our own setRangeText. `setRangeText` does not synchronously
-  // dispatch `input` in current browsers or jsdom (verified); this flag is defensive, for
-  // environments or polyfills that do dispatch `input` on a programmatic write - such an
-  // event must NOT re-enter handleChange's broadcast path, or onChange double-fires and
-  // the cursor is recomputed against the post-write value.
-  // try/finally in withInternalWrite guarantees this clears even if the write throws.
-  private suppressNextInputEvent: boolean = false;
-
   // Mouse-driven focus: the browser commits the click→selection mapping AFTER focus
   // fires, using the input's current value. If we strip separators in the focus handler,
   // the click X-coord then maps to a position N digits too far right (where N = separators
@@ -356,21 +348,13 @@ export class NumoraInput {
   }
 
   /**
-   * Runs `fn` with `suppressNextInputEvent` set so `handleChange` short-circuits if an
-   * `input` event fires as a result. `setRangeText` does not synchronously dispatch
-   * `input` in current browsers or jsdom (verified) - this guard is defensive, for
-   * environments or polyfills that do dispatch `input` on a programmatic write. Exactly
-   * one set/clear pair per write; try/finally guarantees the flag clears even if `fn`
-   * throws.
+   * Runs an internal DOM write and records the result as `lastValue`. No `input` event
+   * follows: `setRangeText` does not dispatch one (HTML spec; verified in Chrome and
+   * jsdom), so `handleChange` only ever sees browser-native edits.
    */
-  private withInternalWrite(fn: () => void): void {
-    this.suppressNextInputEvent = true;
-    try {
-      fn();
-    } finally {
-      this.suppressNextInputEvent = false;
-      this.lastValue = this.element.value;
-    }
+  private trackWrite(fn: () => void): void {
+    fn();
+    this.lastValue = this.element.value;
   }
 
   private handleValueChange(formattedValue: string, rawValue: string): void {
@@ -387,7 +371,7 @@ export class NumoraInput {
     switch (result.type) {
       case 'handled': {
         e.preventDefault();
-        this.withInternalWrite(() =>
+        this.trackWrite(() =>
           writeValuePreservingUndo(this.element, result.formatted, result.cursorPos)
         );
         this.handleValueChange(result.formatted, result.raw);
@@ -400,11 +384,6 @@ export class NumoraInput {
   }
 
   private handleChange(e: InputEvent): void {
-    // Only reached via `input` if some environment/polyfill dispatched it off our own
-    // setRangeText write; the originating handler (beforeinput/paste/focus/blur) already
-    // broadcast. Skip to avoid double-firing.
-    if (this.suppressNextInputEvent) return;
-
     const target = e.target as HTMLInputElement;
 
     // Undo/redo: the browser has restored a prior value. Re-formatting here would push
@@ -427,7 +406,7 @@ export class NumoraInput {
     // the DOM is already mutated, so put back the last value we wrote (no onChange).
     if (isScientificNotationRejected(oldValue, this.resolvedOptions)) {
       const caret = Math.min(this.lastValue.length, target.selectionStart!);
-      this.withInternalWrite(() => writeValuePreservingUndo(target, this.lastValue, caret));
+      this.trackWrite(() => writeValuePreservingUndo(target, this.lastValue, caret));
       return;
     }
     // Max of start/end works around a mobile-browser caret bug where selectionStart lags.
@@ -464,7 +443,7 @@ export class NumoraInput {
         this.resolvedOptions.formatOn === FormatOn.Change,
         isFocused
       );
-      this.withInternalWrite(() => writeValuePreservingUndo(target, newValue, caret));
+      this.trackWrite(() => writeValuePreservingUndo(target, newValue, caret));
     }
 
     this.lastValue = target.value;
@@ -491,7 +470,7 @@ export class NumoraInput {
 
     if (result.type === 'reject') return;
 
-    this.withInternalWrite(() =>
+    this.trackWrite(() =>
       writeValuePreservingUndo(this.element, result.formatted, result.cursorPos)
     );
     this.handleValueChange(result.formatted, result.raw);
@@ -507,7 +486,7 @@ export class NumoraInput {
     const result = computeStripSeparatorsResult(target.value, displayStart, displayEnd, sep);
     if (!result) return;
 
-    this.withInternalWrite(() =>
+    this.trackWrite(() =>
       writeStripPreservingUndo(target, result.raw, result.rawStart, result.rawEnd)
     );
     // Stripping separators changes only the display, never the canonical raw value, so no onChange (A2-06).
@@ -556,7 +535,7 @@ export class NumoraInput {
     const { formatted, raw } = this.formatForDisplay(normalizedValue);
     if (formatted === target.value) return;
 
-    this.withInternalWrite(() => writeValuePreservingUndo(target, formatted, formatted.length));
+    this.trackWrite(() => writeValuePreservingUndo(target, formatted, formatted.length));
     // Only broadcast onChange when the sanitized raw value actually changed (A2-06) - blur
     // can otherwise be purely cosmetic (regrouping thousand separators onto an unchanged
     // raw value), and firing onChange for that misleads consumers into thinking the value
@@ -601,7 +580,7 @@ export class NumoraInput {
       this.lastValue = formatted;
       return;
     }
-    this.withInternalWrite(() =>
+    this.trackWrite(() =>
       writeValuePreservingUndo(this.element, formatted, formatted.length)
     );
   }

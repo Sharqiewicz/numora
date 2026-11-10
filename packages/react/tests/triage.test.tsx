@@ -317,18 +317,15 @@ describe('controlled value sync', () => {
   });
 });
 
-describe('write-suppression for environments that dispatch input on setRangeText', () => {
-  it('a synchronous input event from our own write does not double-fire onChange', () => {
+describe('internal writes fire no input event', () => {
+  it('typing calls onChange once and dispatches no input event (setRangeText is silent)', () => {
     const onChange = vi.fn();
     render(<NumoraInput data-testid="i" formatOn={FormatOn.Change} onChange={onChange} />);
     const input = screen.getByTestId('i') as HTMLInputElement;
-    const orig = HTMLInputElement.prototype.setRangeText as (...a: unknown[]) => void;
-    vi.spyOn(HTMLInputElement.prototype, 'setRangeText').mockImplementation(function (this: HTMLInputElement, ...a: unknown[]) {
-      orig.apply(this, a);
-      // Bypass React's tracker so React sees a change.
-      this.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
-    } as never);
+    const inputEvents = vi.fn();
+    input.addEventListener('input', inputEvents);
     typeChar(input, '5');
     expect(onChange).toHaveBeenCalledTimes(1);
+    expect(inputEvents).not.toHaveBeenCalled();
   });
 });

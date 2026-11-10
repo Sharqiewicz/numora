@@ -7,10 +7,9 @@ import {
 /**
  * Testing module: features/formatting/dom-writes.ts
  *
- * `setRangeText` fires no `input` event in jsdom (browsers agree per spec). These tests
- * pin that fact so the comments describing `withInternalWrite`'s guard in both packages
- * stay honest: the guard protects against environments that *would* dispatch one, not
- * against a real synchronous event from `setRangeText` itself.
+ * `setRangeText` fires no `input` event (HTML spec; verified in jsdom and Chrome). Both
+ * packages rely on this: internal writes call onChange themselves and have no guard
+ * against a second `onChange` from an `input` event, so these tests pin the fact.
  */
 
 describe('writeValuePreservingUndo', () => {

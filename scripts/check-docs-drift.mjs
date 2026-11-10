@@ -59,6 +59,12 @@ const DENYLIST = [
       'never existed; the pattern attribute is built inline in NumoraInput.createInputElement',
   },
   {
+    token: 'suppressNextInputEvent',
+    reason: 'removed in v5: setRangeText fires no input event, so the guard was dead code',
+  },
+  { token: 'withInternalWrite', reason: 'removed in v5 with the suppressNextInputEvent guard' },
+  { token: 'normalizeFullWidthDigits', reason: 'removed in v5; use normalizeDigits' },
+  {
     token: 'handleNumoraOnPaste',
     reason: 'never existed; the real handler is handleOnPasteNumoraInput',
   },

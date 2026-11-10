@@ -1,5 +1,4 @@
 import { CodeBlock } from '@/components/CodeBlock';
-import { WriteSuppressionDiagram } from '../diagrams/WriteSuppressionDiagram';
 
 const code = `// (trimmed)
 useEffect(() => {
@@ -22,9 +21,7 @@ useEffect(() => {
       case 'handled': {
         e.preventDefault()
         // setRangeText under the hood, so the browser's undo history survives.
-        withInternalWrite(() =>
-          writeValuePreservingUndo(input, result.formatted, result.cursorPos)
-        )
+        writeValuePreservingUndo(input, result.formatted, result.cursorPos)
         // Call onChange directly - guaranteed delivery, no dependency on
         // React's value-tracker diff or synthetic event pipeline.
         stateRef.current.onChange?.(createSyntheticChangeEvent(input, result.raw))
@@ -59,23 +56,13 @@ export function ReactSyntheticBypassSection() {
         re-registration:
       </p>
       <CodeBlock language="tsx">{code}</CodeBlock>
-      <h3 className="text-base">
-        <code>suppressNextInputEventRef</code> - preventing double-fire
-      </h3>
+      <h3 className="text-base">Why <code>onChange</code> fires only once</h3>
       <p>
         The handler writes the formatted value with <code>setRangeText</code> and calls{' '}
-        <code>onChange</code> itself. No <code>input</code> event is dispatched afterwards. But
-        some environments and polyfills fire a native <code>input</code> event on a programmatic
-        write, and that event would reach the React-side <code>handleChange</code> and call{' '}
-        <code>onChange</code> a <em>second</em> time.
-      </p>
-      <WriteSuppressionDiagram />
-      <p>
-        <code>withInternalWrite</code> is the gate: it sets <code>suppressNextInputEventRef</code>{' '}
-        to <code>true</code> for the duration of the write, and <code>handleChange</code> returns
-        early while the flag is up. Every internal write (typing, paste, focus-strip,
-        blur-regroup) goes through it, so <code>handleChange</code> only ever sees browser-native
-        edits such as undo, redo and autofill.
+        <code>onChange</code> itself. <code>setRangeText</code> dispatches no <code>input</code>{' '}
+        event (that is the HTML spec, and Chrome and jsdom both follow it), so nothing reaches
+        React's <code>handleChange</code> afterwards. <code>handleChange</code> only ever sees
+        edits the browser makes itself, such as undo, redo and autofill.
       </p>
     </section>
   );
