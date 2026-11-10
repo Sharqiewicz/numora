@@ -64,7 +64,7 @@ describe('sanitizeNumoraInput with foreign source', () => {
   });
   it('de-DE 1,5e3 and 1.5k expand to 1500', () => {
     expect(sanitizeNumoraInput('1,5e3', de, 'foreign')).toBe('1500');
-    expect(sanitizeNumoraInput('1.5k', { ...de, enableCompactNotation: true }, 'foreign')).toBe(
+    expect(sanitizeNumoraInput('1.5k', { ...de, allowCompactNotation: true }, 'foreign')).toBe(
       '1500'
     );
   });

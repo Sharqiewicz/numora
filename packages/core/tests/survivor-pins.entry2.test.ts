@@ -24,7 +24,7 @@ describe('entry survivors (round 3)', () => {
   });
 
   it('NumoraInput.ts:91 - lastValue is seeded from the (formatted) initial value, so a refused edit restores it', () => {
-    const { el } = mk({ enableScientificNotation: false }, '1234.5');
+    const { el } = mk({ allowScientificNotation: false }, '1234.5');
     expect(el.value).toBe('1,234.5');
     el.value = '1e5';
     el.dispatchEvent(new Event('input'));
@@ -40,7 +40,7 @@ describe('entry survivors (round 3)', () => {
   });
 
   it('NumoraInput.ts:386 - valueAsNumber = non-numeric clears the field', () => {
-    const { n, el } = mk({ enableCompactNotation: true }, '5');
+    const { n, el } = mk({ allowCompactNotation: true }, '5');
     (n as { valueAsNumber: unknown }).valueAsNumber = 'abc';
     expect(el.value).toBe('');
     expect(n.getValue()).toBe('');

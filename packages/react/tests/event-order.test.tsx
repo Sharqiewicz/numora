@@ -165,11 +165,11 @@ const PINNED: Record<string, string[]> = {
     '["onChange value=1234.50 formatted=1.234,50 dom=1.234,50","onValueChange value=1234.50 formatted=1.234,50 dom=1.234,50","onBlur dom=1.234,50"]',
     '"1.234,50 caret=8,8"',
   ],
-  'blur cases > blur: enableNegative "-0" normalizes on blur': [
+  'blur cases > blur: allowNegative "-0" normalizes on blur': [
     '["onChange value=0 formatted=0 dom=0","onValueChange value=0 formatted=0 dom=0","onBlur dom=0"]',
     '"0 caret=1,1"',
   ],
-  'blur cases > blur: enableNegative "-0.00" normalizes on blur': [
+  'blur cases > blur: allowNegative "-0.00" normalizes on blur': [
     '["onChange value=0.00 formatted=0.00 dom=0.00","onValueChange value=0.00 formatted=0.00 dom=0.00","onBlur dom=0.00"]',
     '"0.00 caret=4,4"',
   ],
@@ -181,11 +181,11 @@ const PINNED: Record<string, string[]> = {
     '["onChange value=1234.50 formatted=1.234,50 dom=1.234,50","onValueChange value=1234.50 formatted=1.234,50 dom=1.234,50","onBlur dom=1.234,50"]',
     '"1.234,50 caret=8,8"',
   ],
-  'blur cases > change: enableNegative "-0" normalizes on blur': [
+  'blur cases > change: allowNegative "-0" normalizes on blur': [
     '["onChange value=0 formatted=0 dom=0","onValueChange value=0 formatted=0 dom=0","onBlur dom=0"]',
     '"0 caret=1,1"',
   ],
-  'blur cases > change: enableNegative "-0.00" normalizes on blur': [
+  'blur cases > change: allowNegative "-0.00" normalizes on blur': [
     '["onChange value=0.00 formatted=0.00 dom=0.00","onValueChange value=0.00 formatted=0.00 dom=0.00","onBlur dom=0.00"]',
     '"0.00 caret=4,4"',
   ],
@@ -356,7 +356,7 @@ describe('paste', () => {
     expect(el.value).toBe('5');
   });
   it('rejected scientific notation: onPaste fires, no write, no onChange', () => {
-    mount({ defaultValue: '5', enableScientificNotation: false });
+    mount({ defaultValue: '5', allowScientificNotation: false });
     focus();
     log.length = 0;
     paste('1.5e-7');
@@ -569,8 +569,8 @@ describe('blur cases', () => {
       pin(log);
       pin(state());
     });
-    it(`${formatOn}: enableNegative "-0" normalizes on blur`, () => {
-      mount({ formatOn, enableNegative: true });
+    it(`${formatOn}: allowNegative "-0" normalizes on blur`, () => {
+      mount({ formatOn, allowNegative: true });
       focus();
       typeAll('-0');
       log.length = 0;
@@ -578,8 +578,8 @@ describe('blur cases', () => {
       pin(log);
       pin(state());
     });
-    it(`${formatOn}: enableNegative "-0.00" normalizes on blur`, () => {
-      mount({ formatOn, enableNegative: true });
+    it(`${formatOn}: allowNegative "-0.00" normalizes on blur`, () => {
+      mount({ formatOn, allowNegative: true });
       focus();
       typeAll('-0.00');
       log.length = 0;
@@ -603,8 +603,8 @@ describe('blur cases', () => {
     `);
     expect(state()).toMatchInlineSnapshot(`"7.00 caret=4,4"`);
   });
-  it('enableNegative + decimalMinLength: "-0" blur', () => {
-    mount({ enableNegative: true, decimalMinLength: 2 });
+  it('allowNegative + decimalMinLength: "-0" blur', () => {
+    mount({ allowNegative: true, decimalMinLength: 2 });
     focus();
     typeAll('-0');
     log.length = 0;
@@ -618,15 +618,15 @@ describe('blur cases', () => {
     `);
     expect(state()).toMatchInlineSnapshot(`"0.00 caret=4,4"`);
   });
-  it('enableNegative: "-5" blur is untouched', () => {
-    mount({ enableNegative: true });
+  it('allowNegative: "-5" blur is untouched', () => {
+    mount({ allowNegative: true });
     focus();
     typeAll('-5');
     log.length = 0;
     blur();
     expect(log).toEqual(['onBlur dom=-5']);
   });
-  it('Change mode without decimalMinLength/enableNegative: trailing "." stays', () => {
+  it('Change mode without decimalMinLength/allowNegative: trailing "." stays', () => {
     mount({ formatOn: FormatOn.Change });
     focus();
     typeAll('12.');
@@ -636,7 +636,7 @@ describe('blur cases', () => {
     expect(el.value).toBe('12.');
   });
   it('no-op blur on an empty field writes nothing', () => {
-    mount({ decimalMinLength: 2, enableNegative: true });
+    mount({ decimalMinLength: 2, allowNegative: true });
     const spy = vi.spyOn(HTMLInputElement.prototype, 'setRangeText');
     focus();
     blur();
@@ -644,7 +644,7 @@ describe('blur cases', () => {
     expect(log).toEqual(['onFocus dom=', 'onBlur dom=']);
   });
   it('no-op blur on an already formatted Change-mode value writes nothing', () => {
-    mount({ formatOn: FormatOn.Change, enableNegative: true, defaultValue: '1234.5' });
+    mount({ formatOn: FormatOn.Change, allowNegative: true, defaultValue: '1234.5' });
     const spy = vi.spyOn(HTMLInputElement.prototype, 'setRangeText');
     focus();
     blur();
@@ -655,7 +655,7 @@ describe('blur cases', () => {
     const seen: string[] = [];
     mount({
       formatOn: FormatOn.Change,
-      enableNegative: true,
+      allowNegative: true,
       defaultValue: '12',
       onChange: (e: NumoraInputChangeEvent) => seen.push(e.target.formattedValue),
     });
@@ -771,9 +771,9 @@ describe('input fallback', () => {
     `);
     expect(state()).toMatchInlineSnapshot(`"12.00 caret=5,5"`);
   });
-  describe('enableScientificNotation:false', () => {
+  describe('allowScientificNotation:false', () => {
     it('focused: restores the previous value (formattedValue), no callbacks', () => {
-      mount({ enableScientificNotation: false, defaultValue: '5' });
+      mount({ allowScientificNotation: false, defaultValue: '5' });
       focus();
       typeAll('7');
       log.length = 0;
@@ -782,14 +782,14 @@ describe('input fallback', () => {
       expect(state()).toMatchInlineSnapshot(`"57 caret=2,2"`);
     });
     it('unfocused: restores the previous value, no callbacks', () => {
-      mount({ enableScientificNotation: false, defaultValue: '1234' });
+      mount({ allowScientificNotation: false, defaultValue: '1234' });
       expect(el.value).toBe('1,234');
       nativeInput('1.5e-7', 6);
       expect(log).toEqual([]);
       expect(state()).toMatchInlineSnapshot(`"1,234 caret=5,5"`);
     });
     it('restores the value remembered after a blur regroup', () => {
-      mount({ enableScientificNotation: false });
+      mount({ allowScientificNotation: false });
       focus();
       typeAll('1234');
       blur();

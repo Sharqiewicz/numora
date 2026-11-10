@@ -101,7 +101,7 @@ export function applyPaste(
  *
  * - Undo/redo: the browser restored an earlier string. Report it, don't rewrite it: another
  *   write would push an undo step and break the Ctrl+Z walk-back.
- * - Scientific notation while `enableScientificNotation` is false: put back `previous` (the
+ * - Scientific notation while `allowScientificNotation` is false: put back `previous` (the
  *   last value Numora wrote) and report nothing, since the value didn't change.
  * - Otherwise reformat. While `focused` the text is mid-edit and keeps the field's typing
  *   rules; unfocused it is landing at rest (e.g. autofill), so it gets the resting format.
@@ -124,7 +124,7 @@ export function applyInputFallback(
   }
   // A focused Change-mode field already shows its own grouping, which foreign detection would
   // misread as a decimal (`12,3456`). Blur mode shows none while focused, so it stays foreign.
-  const own = focused && opts.formatOn === FormatOn.Change && !!opts.thousandSeparator;
+  const own = focused && opts.formatOn === FormatOn.Change;
   const { formatted, raw } = focused
     ? formatInputValue(value, opts.decimalMaxLength, opts, undefined, own ? 'display' : 'foreign')
     : formatForDisplay(value, opts, 'foreign');
@@ -148,7 +148,7 @@ export function applyInputFallback(
 
 /**
  * Blur: settle the value at rest (grouping, padding, trailing separator strip, `-0` to `0`).
- * Runs in Blur mode, or when `decimalMinLength` or `enableNegative` need a resting fix-up; a
+ * Runs in Blur mode, or when `decimalMinLength` or `allowNegative` need a resting fix-up; a
  * Change-mode field is otherwise already at rest. Returns `undefined` when the display didn't
  * change. `rawChanged` is false when only the grouping changed: vanilla reports only raw
  * changes, React also reports display changes so mirrors of `formattedValue` stay in sync.
@@ -157,7 +157,7 @@ export function applyBlur(
   el: HTMLInputElement,
   opts: ResolvedNumoraOptions
 ): (NumoraValues & { rawChanged: boolean }) | undefined {
-  if (opts.formatOn !== FormatOn.Blur && !opts.decimalMinLength && !opts.enableNegative) return;
+  if (opts.formatOn !== FormatOn.Blur && !opts.decimalMinLength && !opts.allowNegative) return;
   const before = displayToRawValue(el.value, opts);
   const { formatted, raw } = formatForDisplay(
     normalizeNegativeZero(el.value, opts.decimalSeparator),
@@ -188,8 +188,7 @@ export function attachFocusStrip(
   let pendingMouse = false;
   const strip = () => {
     const { formatOn, thousandSeparator, groupingStyle } = getOpts();
-    if (formatOn !== FormatOn.Blur || !thousandSeparator || groupingStyle === GroupingStyle.None)
-      return;
+    if (formatOn !== FormatOn.Blur || groupingStyle === GroupingStyle.None) return;
     const result = computeStripSeparatorsResult(
       el.value,
       el.selectionStart ?? 0,

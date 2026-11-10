@@ -28,7 +28,7 @@ describe('NumoraInput value API', () => {
     expect(n.value).toBe('1234.5');
   });
 
-  it('setValue sanitizes through the pipeline (decimalMaxLength, enableNegative)', () => {
+  it('setValue sanitizes through the pipeline (decimalMaxLength, allowNegative)', () => {
     const n = new NumoraInput(container, { formatOn: FormatOn.Change, decimalMaxLength: 2 });
     n.setValue('-12.3456');
     expect(n.value).toBe('12.34');

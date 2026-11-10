@@ -40,6 +40,6 @@ describe('sanitizeNumoraInput with fullwidth digits', () => {
   });
 
   it('should expand compact notation with fullwidth digits', () => {
-    expect(sanitizeNumoraInput('１.５k', { ...options, enableCompactNotation: true })).toBe('1500');
+    expect(sanitizeNumoraInput('１.５k', { ...options, allowCompactNotation: true })).toBe('1500');
   });
 });

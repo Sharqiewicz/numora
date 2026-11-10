@@ -31,6 +31,8 @@ import {
   handleOnKeyDownNumoraInput,
   writeValuePreservingUndo,
   resolveOptions,
+  takeRemovedOptions,
+  warnRemovedOptions,
   type ResolvedNumoraOptions,
 } from 'numora/internal';
 
@@ -107,17 +109,6 @@ function createSyntheticChangeEvent(
   } as NumoraInputChangeEvent;
 }
 
-// Bundlers replace `process.env.NODE_ENV`; the package has no @types/node.
-declare const process: { env?: { NODE_ENV?: string } } | undefined;
-
-// v4 props renamed/removed in v5. Not aliased (deliberate break): warned about in
-// development and kept off the DOM, where they would be silently ignored.
-const RENAMED: Record<string, string> = {
-  maxDecimals: 'decimalMaxLength',
-  thousandStyle: 'groupingStyle',
-  rawValueMode: 'e.target.value (always raw)',
-};
-
 // `activeElement` of the input's own root: `document.activeElement` is the host inside a
 // shadow root or the iframe element for a portaled input, never the input.
 const isFocused = (el: HTMLElement) => (el.getRootNode() as Document | ShadowRoot).activeElement === el;
@@ -154,11 +145,11 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     groupingStyle,
     decimalSeparator,
     decimalMinLength,
-    enableCompactNotation,
-    enableScientificNotation,
-    enableNegative,
-    enableLeadingZeros,
-    autoAddLeadingZero,
+    allowCompactNotation,
+    allowScientificNotation,
+    allowNegative,
+    allowLeadingZeros,
+    padLeadingZero,
     maxLength,
     isAllowed,
     value: controlledValue,
@@ -166,7 +157,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     ...rest
   } = props;
 
-  const stale = Object.keys(RENAMED).filter((k) => k in props && delete (rest as Record<string, unknown>)[k]);
+  // Props removed since v4: kept off the DOM here, warned about once on mount.
+  const stale = takeRemovedOptions(rest);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: callbacks are read via stateRef; a new onChange/isAllowed identity must not re-resolve options.
   const formattingOptions: ResolvedNumoraOptions = useMemo(() => {
@@ -180,11 +172,11 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       decimalSeparator,
       decimalMaxLength,
       decimalMinLength,
-      enableCompactNotation,
-      enableScientificNotation,
-      enableNegative,
-      enableLeadingZeros,
-      autoAddLeadingZero,
+      allowCompactNotation,
+      allowScientificNotation,
+      allowNegative,
+      allowLeadingZeros,
+      padLeadingZero,
       maxLength,
       isAllowed,
       onChange,
@@ -201,11 +193,11 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     decimalSeparator,
     decimalMaxLength,
     decimalMinLength,
-    enableCompactNotation,
-    enableScientificNotation,
-    enableNegative,
-    enableLeadingZeros,
-    autoAddLeadingZero,
+    allowCompactNotation,
+    allowScientificNotation,
+    allowNegative,
+    allowLeadingZeros,
+    padLeadingZero,
     maxLength,
   ]);
 
@@ -285,9 +277,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   useEffect(() => {
     const input = internalInputRef.current as NumoraHTMLInputElement;
     input.formattedValue = input.value;
-    // Dev-only, like core's locale warning; `?.` covers a `process` without `env`.
-    if (typeof process === 'undefined' || process.env?.NODE_ENV !== 'production')
-      for (const k of stale) console.warn(`[numora] ${k} is removed in v5; use ${RENAMED[k]}`);
+    warnRemovedOptions(stale);
     const onBeforeInput = (e: InputEvent) => {
       const values = applyBeforeInput(e, stateRef.current.formattingOptions);
       if (values) emit(input, values);

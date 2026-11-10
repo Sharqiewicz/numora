@@ -156,7 +156,7 @@ describe('Formatting Benchmarks', () => {
       sanitizeNumoraInput('1.5k', {
         thousandSeparator: ',',
         decimalSeparator: '.',
-        enableCompactNotation: true,
+        allowCompactNotation: true,
       });
     });
 
@@ -191,7 +191,7 @@ describe('Formatting Benchmarks', () => {
       const sanitized = sanitizeNumoraInput(value, {
         thousandSeparator: ',',
         decimalSeparator: '.',
-        enableCompactNotation: true,
+        allowCompactNotation: true,
       });
       formatWithSeparators(sanitized, ',', GroupingStyle.Thousand, '.');
     });

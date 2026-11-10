@@ -28,7 +28,7 @@ describe('validateNumoraInputOptions throw branches', () => {
         groupingStyle: undefined,
         thousandSeparator: undefined,
         decimalSeparator: undefined,
-        enableNegative: undefined,
+        allowNegative: undefined,
       })
     ).not.toThrow();
   });
@@ -69,11 +69,13 @@ describe('validateNumoraInputOptions throw branches', () => {
     expect(v({ decimalSeparator: '' })).toThrow(/decimalSeparator must be a single character/);
     expect(v({ decimalSeparator: ',' })).not.toThrow();
   });
-  it('thousandSeparator: multi-char rejected, empty allowed', () => {
+  it('thousandSeparator: multi-char and empty rejected', () => {
     expect(v({ thousandSeparator: 'ab' })).toThrow(
       /thousandSeparator must be a single character\. Received: "ab"/
     );
-    expect(v({ thousandSeparator: '' })).not.toThrow();
+    expect(v({ thousandSeparator: '' })).toThrow(
+      /thousandSeparator cannot be empty\. Use groupingStyle: 'none'/
+    );
     expect(v({ thousandSeparator: ' ' })).not.toThrow();
   });
   it('separator that is a digit or reserved char is rejected, naming the option', () => {
@@ -89,21 +91,20 @@ describe('validateNumoraInputOptions throw branches', () => {
   it('non-string separator is rejected', () => {
     expect(v({ decimalSeparator: 1 })).toThrow(/decimalSeparator must be a single character/);
   });
-  it('equal separators conflict; an empty thousandSeparator never conflicts', () => {
+  it('equal separators conflict', () => {
     expect(v({ thousandSeparator: '.', decimalSeparator: '.' })).toThrow(
       /decimalSeparator cannot equal thousandSeparator\. Both were "\."/
     );
-    expect(v({ thousandSeparator: '', decimalSeparator: '.' })).not.toThrow();
     expect(v({ thousandSeparator: '.', decimalSeparator: ',' })).not.toThrow();
   });
 
   // assertType
   it.each([
-    'enableCompactNotation',
-    'enableScientificNotation',
-    'enableNegative',
-    'enableLeadingZeros',
-    'autoAddLeadingZero',
+    'allowCompactNotation',
+    'allowScientificNotation',
+    'allowNegative',
+    'allowLeadingZeros',
+    'padLeadingZero',
   ])('%s must be a boolean', (name) => {
     expect(v({ [name]: 'yes' })).toThrow(
       new RegExp(`${name} must be a boolean\\. Received: "yes"`)
@@ -141,11 +142,11 @@ describe('validateNumoraInputOptions throw branches', () => {
 
 describe('config defaults', () => {
   it('pins the default values', () => {
-    expect(config.DEFAULT_ENABLE_COMPACT_NOTATION).toBe(false); // config.ts:16
-    expect(config.DEFAULT_ENABLE_SCIENTIFIC_NOTATION).toBe(true);
-    expect(config.DEFAULT_ENABLE_NEGATIVE).toBe(false);
-    expect(config.DEFAULT_ENABLE_LEADING_ZEROS).toBe(false);
-    expect(config.DEFAULT_AUTO_ADD_LEADING_ZERO).toBe(false);
+    expect(config.DEFAULT_ALLOW_COMPACT_NOTATION).toBe(false); // config.ts:16
+    expect(config.DEFAULT_ALLOW_SCIENTIFIC_NOTATION).toBe(true);
+    expect(config.DEFAULT_ALLOW_NEGATIVE).toBe(false);
+    expect(config.DEFAULT_ALLOW_LEADING_ZEROS).toBe(false);
+    expect(config.DEFAULT_PAD_LEADING_ZERO).toBe(false);
   });
   it('does not expand "1k" by default', () => {
     const { n, el } = mk();
@@ -157,7 +158,7 @@ describe('config defaults', () => {
 });
 
 describe('NumoraInput valueAsNumber setter', () => {
-  it('0 and -0 do not throw with enableNegative false (num < 0, not <= 0)', () => {
+  it('0 and -0 do not throw with allowNegative false (num < 0, not <= 0)', () => {
     const { n } = mk();
     expect(() => {
       n.valueAsNumber = 0;
@@ -168,11 +169,11 @@ describe('NumoraInput valueAsNumber setter', () => {
     }).not.toThrow();
     expect(n.getValue()).toBe('0');
   });
-  it('negative throws only without enableNegative', () => {
+  it('negative throws only without allowNegative', () => {
     expect(() => {
       mk().n.valueAsNumber = -1;
-    }).toThrow(/enableNegative is false/);
-    const { n } = mk({ enableNegative: true });
+    }).toThrow(/allowNegative is false/);
+    const { n } = mk({ allowNegative: true });
     n.valueAsNumber = -1;
     expect(n.getValue()).toBe('-1');
   });
@@ -216,7 +217,7 @@ describe('NumoraInput input-event fallback state', () => {
     expect(el.value).toBe('1,234,567');
   });
   it('a refused input after a focus-strip restores the stripped text, not the pre-strip text', () => {
-    const { el } = mk({ value: '1234', enableScientificNotation: false });
+    const { el } = mk({ value: '1234', allowScientificNotation: false });
     expect(el.value).toBe('1,234');
     el.dispatchEvent(new Event('focus'));
     expect(el.value).toBe('1234');

@@ -125,7 +125,7 @@ describe('beforeinput skip/reject leaves the formattedValue mirror alone (index.
     expect(onChange).toHaveBeenCalledTimes(1);
   });
   it('a rejected scientific-notation fallback restores the last written value from the mirror', () => {
-    render(<NumoraInput data-testid="i" enableScientificNotation={false} />);
+    render(<NumoraInput data-testid="i" allowScientificNotation={false} />);
     const el = screen.getByTestId('i') as HTMLInputElement;
     typeChar(el, '1');
     typeChar(el, '2');

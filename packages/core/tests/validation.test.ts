@@ -32,8 +32,11 @@ describe('validateNumoraInputOptions — separator constraints', () => {
     ).toThrow(/cannot equal/);
   });
 
-  it('empty-string thousandSeparator (grouping disabled) is not treated as a digit', () => {
-    expect(() => validateNumoraInputOptions({ thousandSeparator: '' })).not.toThrow();
+  it("empty-string thousandSeparator is rejected, pointing to groupingStyle: 'none'", () => {
+    expect(() => validateNumoraInputOptions({ thousandSeparator: '' })).toThrow(
+      /groupingStyle: 'none'/
+    );
+    expect(() => validateNumoraInputOptions({ groupingStyle: 'none' })).not.toThrow();
   });
 });
 

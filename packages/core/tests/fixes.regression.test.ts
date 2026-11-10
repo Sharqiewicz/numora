@@ -39,10 +39,13 @@ describe('Validation runs against resolved options (#3)', () => {
   });
 });
 
-describe('Empty-string thousandSeparator is valid (#6)', () => {
-  it('does not throw and disables grouping', () => {
+describe('Empty-string thousandSeparator is rejected (#6, reversed in v5)', () => {
+  it("throws and points to groupingStyle: 'none'", () => {
     const container = document.createElement('div');
-    expect(() => new NumoraInput(container, { thousandSeparator: '' })).not.toThrow();
+    expect(() => new NumoraInput(container, { thousandSeparator: '' })).toThrow(
+      /groupingStyle: 'none'/
+    );
+    expect(() => new NumoraInput(container, { groupingStyle: 'none' })).not.toThrow();
   });
 });
 

@@ -37,10 +37,10 @@ describe('caret computed from the edit (non-contiguous changes)', () => {
     expect(bar(forwardDelete('1,234', 1, en))).toBe('1|34');
   });
   it('sign toggle', () => {
-    expect(bar(typeDigit('1,234', 0, '-', makeOptions({ enableNegative: true })))).toBe('-|1,234');
+    expect(bar(typeDigit('1,234', 0, '-', makeOptions({ allowNegative: true })))).toBe('-|1,234');
   });
   it('compact expansion', () => {
-    expect(bar(typeDigit('1', 1, 'k', makeOptions({ enableCompactNotation: true })))).toBe('1,000|');
+    expect(bar(typeDigit('1', 1, 'k', makeOptions({ allowCompactNotation: true })))).toBe('1,000|');
   });
   it('a sign typed after "e" re-reads the whole value: caret goes to the end, not to 0', () => {
     // "1e|5" + "-" -> 1e-5 -> 0.00001; the sanitized prefix "1" matches nothing at the start

@@ -130,7 +130,7 @@ describe('canonical raw value', () => {
     });
 
     it('setValue round-trips a negative canonical value', () => {
-      const { n, el } = make({ locale: 'de-DE', enableNegative: true, groupingStyle: GroupingStyle.Thousand });
+      const { n, el } = make({ locale: 'de-DE', allowNegative: true, groupingStyle: GroupingStyle.Thousand });
       n.setValue('-1234.5');
       expect(el.value).toBe('-1.234,5');
       expect(n.getValue()).toBe('-1234.5');
@@ -220,7 +220,7 @@ describe('canonical raw value', () => {
     it('de-DE paste 1.5k expands compact notation to 1500', () => {
       const { el, n } = make({
         locale: 'de-DE',
-        enableCompactNotation: true,
+        allowCompactNotation: true,
         groupingStyle: GroupingStyle.Thousand,
       });
       pasteInto(el, '1.5k');

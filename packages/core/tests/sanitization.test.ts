@@ -8,16 +8,16 @@ import { describe, expect, it } from 'vitest';
 import { sanitizeNumoraInput } from '../src/features/sanitization';
 
 describe('✅ sanitizeNumoraInput — non-ASCII decimal separators (A2-05)', () => {
-  it('"٫٥" under en-US defaults to ".5" (no autoAddLeadingZero)', () => {
+  it('"٫٥" under en-US defaults to ".5" (no padLeadingZero)', () => {
     expect(sanitizeNumoraInput('٫٥', { decimalSeparator: '.', thousandSeparator: ',' })).toBe('.5');
   });
 
-  it('"٫٥" becomes "0.5" with autoAddLeadingZero', () => {
+  it('"٫٥" becomes "0.5" with padLeadingZero', () => {
     expect(
       sanitizeNumoraInput('٫٥', {
         decimalSeparator: '.',
         thousandSeparator: ',',
-        autoAddLeadingZero: true,
+        padLeadingZero: true,
       })
     ).toBe('0.5');
   });

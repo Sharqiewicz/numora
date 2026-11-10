@@ -1494,7 +1494,7 @@ describe('Negative Number Support', () => {
 
   function createInputWithNegatives(options = {}) {
     const input = new NumoraInput(container, {
-      enableNegative: true,
+      allowNegative: true,
       onChange: onChangeMock,
       ...options,
     });
@@ -1506,7 +1506,7 @@ describe('Negative Number Support', () => {
   }
 
   describe('Basic negative number input', () => {
-    it('should allow negative numbers when enableNegative is true', () => {
+    it('should allow negative numbers when allowNegative is true', () => {
       createInputWithNegatives();
       const inputElement = getInputElement();
 
@@ -1649,7 +1649,7 @@ describe('Negative Number Support', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      const result = handleOnPasteNumoraInput(mockEvent, 2, { enableNegative: true });
+      const result = handleOnPasteNumoraInput(mockEvent, 2, { allowNegative: true });
 
       expect(result.type).toBe('handled');
       if (result.type === 'handled') expect(result.formatted).toBe('-123.45');
@@ -1668,7 +1668,7 @@ describe('Negative Number Support', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      const result = handleOnPasteNumoraInput(mockEvent, 2, { enableNegative: true });
+      const result = handleOnPasteNumoraInput(mockEvent, 2, { allowNegative: true });
 
       expect(result.type).toBe('handled');
       if (result.type === 'handled') expect(result.formatted).toBe('-123.45');
@@ -1750,7 +1750,7 @@ describe('Negative Number Support', () => {
     });
 
     it('should handle negative number with leading zeros', () => {
-      createInputWithNegatives({ enableLeadingZeros: true });
+      createInputWithNegatives({ allowLeadingZeros: true });
       const inputElement = getInputElement();
 
       inputElement.value = '-007';
@@ -1788,7 +1788,7 @@ describe('Leading Zeros Support', () => {
 
   function createInputWithLeadingZeros(options = {}) {
     const input = new NumoraInput(container, {
-      enableLeadingZeros: true,
+      allowLeadingZeros: true,
       onChange: onChangeMock,
       ...options,
     });
@@ -1799,7 +1799,7 @@ describe('Leading Zeros Support', () => {
     return container.querySelector('input') as HTMLInputElement;
   }
 
-  describe('Default behavior (enableLeadingZeros: false)', () => {
+  describe('Default behavior (allowLeadingZeros: false)', () => {
     it('should remove leading zeros by default', () => {
       const input = new NumoraInput(container, { onChange: onChangeMock });
       const inputElement = getInputElement();
@@ -1842,7 +1842,7 @@ describe('Leading Zeros Support', () => {
 
     it('should remove leading zeros from negative numbers', () => {
       const input = new NumoraInput(container, {
-        enableNegative: true,
+        allowNegative: true,
         onChange: onChangeMock,
       });
       const inputElement = getInputElement();
@@ -1854,7 +1854,7 @@ describe('Leading Zeros Support', () => {
     });
   });
 
-  describe('With enableLeadingZeros: true', () => {
+  describe('With allowLeadingZeros: true', () => {
     it('should preserve leading zeros when enabled', () => {
       createInputWithLeadingZeros();
       const inputElement = getInputElement();
@@ -1890,7 +1890,7 @@ describe('Leading Zeros Support', () => {
     });
 
     it('should preserve leading zeros in negative numbers', () => {
-      createInputWithLeadingZeros({ enableNegative: true });
+      createInputWithLeadingZeros({ allowNegative: true });
       const inputElement = getInputElement();
 
       inputElement.value = '-007';
@@ -1926,7 +1926,7 @@ describe('Leading Zeros Support', () => {
       } as unknown as ClipboardEvent;
 
       inputElement.value = '';
-      const result = handleOnPasteNumoraInput(mockEvent, 2, { enableLeadingZeros: true });
+      const result = handleOnPasteNumoraInput(mockEvent, 2, { allowLeadingZeros: true });
 
       expect(result.type).toBe('handled');
       if (result.type === 'handled') expect(result.formatted).toBe('000123');
@@ -2240,9 +2240,9 @@ describe('Canonical raw value + getFormattedValue', () => {
       groupingStyle: GroupingStyle.Thousand,
       decimalSeparator: '.',
       decimalMaxLength: 8,
-      enableCompactNotation: false,
-      enableNegative: false,
-      enableLeadingZeros: false,
+      allowCompactNotation: false,
+      allowNegative: false,
+      allowLeadingZeros: false,
       onChange: onChangeMock,
       ...options,
     });
@@ -2288,9 +2288,9 @@ describe('Canonical raw value + getFormattedValue', () => {
         groupingStyle: GroupingStyle.Thousand,
         decimalSeparator: '.',
         decimalMaxLength: 8,
-        enableCompactNotation: false,
-        enableNegative: false,
-        enableLeadingZeros: false,
+        allowCompactNotation: false,
+        allowNegative: false,
+        allowLeadingZeros: false,
         onChange: onChangeMock,
       });
       const inputElement = getInputElement();
@@ -2422,9 +2422,9 @@ describe('Canonical raw value + getFormattedValue', () => {
         groupingStyle: GroupingStyle.Thousand,
         decimalSeparator: '.',
         decimalMaxLength: 8,
-        enableCompactNotation: false,
-        enableNegative: false,
-        enableLeadingZeros: false,
+        allowCompactNotation: false,
+        allowNegative: false,
+        allowLeadingZeros: false,
         onChange: onChangeMock,
       });
       const inputElement = getInputElement();
@@ -2489,9 +2489,9 @@ describe('Canonical raw value + getFormattedValue', () => {
         groupingStyle: GroupingStyle.None,
         decimalSeparator: '.',
         decimalMaxLength: 8,
-        enableCompactNotation: false,
-        enableNegative: false,
-        enableLeadingZeros: false,
+        allowCompactNotation: false,
+        allowNegative: false,
+        allowLeadingZeros: false,
         onChange: onChangeMock,
       });
       const inputElement = getInputElement();
@@ -2512,9 +2512,9 @@ describe('Canonical raw value + getFormattedValue', () => {
         groupingStyle: GroupingStyle.Thousand,
         decimalSeparator: '.',
         decimalMaxLength: 8,
-        enableCompactNotation: false,
-        enableNegative: false,
-        enableLeadingZeros: false,
+        allowCompactNotation: false,
+        allowNegative: false,
+        allowLeadingZeros: false,
         onChange: onChangeMock,
       });
       const inputElement = getInputElement();
@@ -2535,9 +2535,9 @@ describe('Canonical raw value + getFormattedValue', () => {
         groupingStyle: GroupingStyle.Thousand,
         decimalSeparator: '.',
         decimalMaxLength: 8,
-        enableCompactNotation: false,
-        enableNegative: false,
-        enableLeadingZeros: false,
+        allowCompactNotation: false,
+        allowNegative: false,
+        allowLeadingZeros: false,
         onChange: onChangeMock,
       });
       const inputElement = getInputElement();
@@ -2845,7 +2845,7 @@ describe('valueAsNumber - separator round-trip', () => {
       decimalMaxLength: 18,
       thousandSeparator: '.',
       decimalSeparator: ',',
-      enableNegative: true,
+      allowNegative: true,
       groupingStyle: GroupingStyle.Thousand,
       formatOn: FormatOn.Change,
     });
@@ -2902,22 +2902,22 @@ describe('valueAsNumber - separator round-trip', () => {
   });
 
   // Regression: without this check, `valueAsNumber = -1` on a field with
-  // `enableNegative: false` silently dropped the sign (sanitization strips the `-`),
+  // `allowNegative: false` silently dropped the sign (sanitization strips the `-`),
   // so a caller could set a negative value and the field would display it as positive
   // with no error - the exact silent-magnitude class of bug this library exists to catch.
-  it('throws RangeError when setting a negative valueAsNumber without enableNegative', () => {
-    const instance = new NumoraInput(host, { enableNegative: false });
+  it('throws RangeError when setting a negative valueAsNumber without allowNegative', () => {
+    const instance = new NumoraInput(host, { allowNegative: false });
 
     expect(() => {
       instance.valueAsNumber = -1;
     }).toThrow(RangeError);
     expect(() => {
       instance.valueAsNumber = -1;
-    }).toThrow('valueAsNumber: negative value but enableNegative is false');
+    }).toThrow('valueAsNumber: negative value but allowNegative is false');
   });
 
-  it('allows setting a negative valueAsNumber when enableNegative is true', () => {
-    const instance = new NumoraInput(host, { enableNegative: true });
+  it('allows setting a negative valueAsNumber when allowNegative is true', () => {
+    const instance = new NumoraInput(host, { allowNegative: true });
 
     instance.valueAsNumber = -1;
 
@@ -2977,8 +2977,8 @@ describe("pattern attribute accepts the component's own grouped output (A2-03)",
     expect(form.checkValidity()).toBe(true);
   });
 
-  it('accepts a grouped negative value when enableNegative is true', () => {
-    new NumoraInput(container, { enableNegative: true, value: '-1234' });
+  it('accepts a grouped negative value when allowNegative is true', () => {
+    new NumoraInput(container, { allowNegative: true, value: '-1234' });
     const el = getInputElement();
 
     expect(el.value).toBe('-1,234');

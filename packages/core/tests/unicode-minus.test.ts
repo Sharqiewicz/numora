@@ -23,13 +23,13 @@ describe('normalizeUnicodeMinus', () => {
 });
 
 describe('sanitizeNumoraInput preserves a non-ASCII minus sign', () => {
-  it('U+2212 leading minus is preserved when enableNegative is on (regression: was silently dropped)', () => {
-    expect(sanitizeNumoraInput('−5', { enableNegative: true } as never)).toBe('-5');
-    expect(sanitizeNumoraInput('−1234.56', { enableNegative: true } as never)).toBe('-1234.56');
+  it('U+2212 leading minus is preserved when allowNegative is on (regression: was silently dropped)', () => {
+    expect(sanitizeNumoraInput('−5', { allowNegative: true } as never)).toBe('-5');
+    expect(sanitizeNumoraInput('−1234.56', { allowNegative: true } as never)).toBe('-1234.56');
   });
 
   it('matches ASCII-minus behavior exactly', () => {
-    const opts = { enableNegative: true } as never;
+    const opts = { allowNegative: true } as never;
     expect(sanitizeNumoraInput('−5', opts)).toBe(sanitizeNumoraInput('-5', opts));
   });
 });

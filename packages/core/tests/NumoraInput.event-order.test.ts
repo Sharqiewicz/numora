@@ -262,8 +262,8 @@ describe('paste', () => {
       }
     `);
   });
-  it('rejected scientific notation (enableScientificNotation:false): no write, no onChange', () => {
-    const { el } = make({ defaultValue: '5', enableScientificNotation: false });
+  it('rejected scientific notation (allowScientificNotation:false): no write, no onChange', () => {
+    const { el } = make({ defaultValue: '5', allowScientificNotation: false });
     el.focus();
     paste(el, '1.5e-7');
     expect(log).toEqual([]);
@@ -454,8 +454,8 @@ describe('mouse focus', () => {
 });
 
 describe('blur cases', () => {
-  it('Blur mode with an empty thousandSeparator still settles on blur (same as React)', () => {
-    const { el } = make({ formatOn: 'blur', thousandSeparator: '' });
+  it('Blur mode with grouping off still settles on blur (same as React)', () => {
+    const { el } = make({ formatOn: 'blur', groupingStyle: 'none' });
     el.focus();
     typeAll(el, '1.');
     log.length = 0;
@@ -569,8 +569,8 @@ describe('blur cases', () => {
         }
       `);
     });
-    it(`${formatOn}: enableNegative "-0" normalizes on blur`, () => {
-      const { el } = make({ formatOn, enableNegative: true });
+    it(`${formatOn}: allowNegative "-0" normalizes on blur`, () => {
+      const { el } = make({ formatOn, allowNegative: true });
       el.focus();
       typeAll(el, '-0');
       log.length = 0;
@@ -595,8 +595,8 @@ describe('blur cases', () => {
         }
       `);
     });
-    it(`${formatOn}: enableNegative "-0.00" normalizes on blur`, () => {
-      const { el } = make({ formatOn, enableNegative: true });
+    it(`${formatOn}: allowNegative "-0.00" normalizes on blur`, () => {
+      const { el } = make({ formatOn, allowNegative: true });
       el.focus();
       typeAll(el, '-0.00');
       log.length = 0;
@@ -648,8 +648,8 @@ describe('blur cases', () => {
       }
     `);
   });
-  it('enableNegative + decimalMinLength: "-0" blur', () => {
-    const { el } = make({ enableNegative: true, decimalMinLength: 2 });
+  it('allowNegative + decimalMinLength: "-0" blur', () => {
+    const { el } = make({ allowNegative: true, decimalMinLength: 2 });
     el.focus();
     typeAll(el, '-0');
     log.length = 0;
@@ -674,8 +674,8 @@ describe('blur cases', () => {
       }
     `);
   });
-  it('enableNegative: "-5" blur is untouched', () => {
-    const { el } = make({ enableNegative: true });
+  it('allowNegative: "-5" blur is untouched', () => {
+    const { el } = make({ allowNegative: true });
     el.focus();
     typeAll(el, '-5');
     log.length = 0;
@@ -683,7 +683,7 @@ describe('blur cases', () => {
     expect(log).toEqual([]);
     expect(el.value).toBe('-5');
   });
-  it('Change mode without decimalMinLength/enableNegative: no blur handling, trailing "." stays', () => {
+  it('Change mode without decimalMinLength/allowNegative: no blur handling, trailing "." stays', () => {
     const { el } = make({ formatOn: FormatOn.Change });
     el.focus();
     typeAll(el, '12.');
@@ -693,7 +693,7 @@ describe('blur cases', () => {
     expect(el.value).toBe('12.');
   });
   it('no-op blur on an empty field writes nothing', () => {
-    const { el } = make({ decimalMinLength: 2, enableNegative: true });
+    const { el } = make({ decimalMinLength: 2, allowNegative: true });
     const spy = vi.spyOn(HTMLInputElement.prototype, 'setRangeText');
     el.focus();
     el.blur();
@@ -704,7 +704,7 @@ describe('blur cases', () => {
   it('no-op blur on an already formatted Change-mode value writes nothing', () => {
     const { el } = make({
       formatOn: FormatOn.Change,
-      enableNegative: true,
+      allowNegative: true,
       defaultValue: '1234.5',
     });
     const spy = vi.spyOn(HTMLInputElement.prototype, 'setRangeText');
@@ -949,9 +949,9 @@ describe('input fallback', () => {
       }
     `);
   });
-  describe('enableScientificNotation:false', () => {
+  describe('allowScientificNotation:false', () => {
     it('focused: restores the previous value, no onChange', () => {
-      const { el } = make({ enableScientificNotation: false, defaultValue: '5' });
+      const { el } = make({ allowScientificNotation: false, defaultValue: '5' });
       el.focus();
       typeAll(el, '7');
       log.length = 0;
@@ -968,7 +968,7 @@ describe('input fallback', () => {
       `);
     });
     it('unfocused: restores the previous value, no onChange', () => {
-      const { el } = make({ enableScientificNotation: false, defaultValue: '1234' });
+      const { el } = make({ allowScientificNotation: false, defaultValue: '1234' });
       expect(el.value).toBe('1,234');
       nativeInput(el, '1.5e-7', 6);
       expect(log).toEqual([]);
@@ -983,7 +983,7 @@ describe('input fallback', () => {
       `);
     });
     it('restores the value remembered after a blur regroup (lastValue tracks writes)', () => {
-      const { el } = make({ enableScientificNotation: false });
+      const { el } = make({ allowScientificNotation: false });
       el.focus();
       typeAll(el, '1234');
       el.blur();

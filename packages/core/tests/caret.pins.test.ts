@@ -21,7 +21,7 @@ const thousand = makeOptions();
 const lakh = makeOptions({ groupingStyle: GroupingStyle.Lakh });
 const wan = makeOptions({ groupingStyle: GroupingStyle.Wan });
 const european = makeOptions({ thousandSeparator: '.', decimalSeparator: ',' });
-const negative = makeOptions({ enableNegative: true });
+const negative = makeOptions({ allowNegative: true });
 const capped = makeOptions({ maxLength: 4 });
 
 describe('caret pins — Lakh/Wan deletion hug-side (emergent from select)', () => {

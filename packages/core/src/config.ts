@@ -13,8 +13,8 @@ export const DEFAULT_THOUSAND_SEPARATOR = ',';
 // already defaulted to Thousand). Pass GroupingStyle.None to disable grouping.
 export const DEFAULT_GROUPING_STYLE = GroupingStyle.Thousand;
 export const DEFAULT_DECIMAL_SEPARATOR = '.';
-export const DEFAULT_ENABLE_COMPACT_NOTATION = false;
-export const DEFAULT_ENABLE_SCIENTIFIC_NOTATION = true;
-export const DEFAULT_ENABLE_NEGATIVE = false;
-export const DEFAULT_ENABLE_LEADING_ZEROS = false;
-export const DEFAULT_AUTO_ADD_LEADING_ZERO = false;
+export const DEFAULT_ALLOW_COMPACT_NOTATION = false;
+export const DEFAULT_ALLOW_SCIENTIFIC_NOTATION = true;
+export const DEFAULT_ALLOW_NEGATIVE = false;
+export const DEFAULT_ALLOW_LEADING_ZEROS = false;
+export const DEFAULT_PAD_LEADING_ZERO = false;

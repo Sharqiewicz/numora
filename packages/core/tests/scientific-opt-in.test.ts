@@ -12,7 +12,7 @@ function paste(input: HTMLInputElement, text: string, options: object) {
   return handleOnPasteNumoraInput(e, 8, options);
 }
 
-describe('enableScientificNotation', () => {
+describe('allowScientificNotation', () => {
   let input: HTMLInputElement;
   beforeEach(() => {
     input = document.createElement('input');
@@ -27,7 +27,7 @@ describe('enableScientificNotation', () => {
   });
 
   it('when off, a pasted 1.5e-7 is rejected instead of becoming 1.57', () => {
-    expect(paste(input, '1.5e-7', { enableScientificNotation: false })).toEqual({
+    expect(paste(input, '1.5e-7', { allowScientificNotation: false })).toEqual({
       type: 'reject',
     });
   });
@@ -37,7 +37,7 @@ describe('enableScientificNotation', () => {
       paste(input, text, {
         decimalSeparator: ',',
         thousandSeparator: '.',
-        enableScientificNotation: false,
+        allowScientificNotation: false,
       })
     ).toEqual({
       type: 'reject',
@@ -45,19 +45,19 @@ describe('enableScientificNotation', () => {
   });
 
   it('still accepts ordinary pastes when off', () => {
-    const result = paste(input, '1,234.5', { thousandSeparator: ',', enableScientificNotation: false });
+    const result = paste(input, '1,234.5', { thousandSeparator: ',', allowScientificNotation: false });
     expect(result.type).toBe('handled');
     if (result.type === 'handled') expect(result.raw).toBe('1234.5');
   });
 
   it('does not treat words containing e as scientific notation', () => {
-    const result = paste(input, 'EUR 12.5', { enableScientificNotation: false });
+    const result = paste(input, 'EUR 12.5', { allowScientificNotation: false });
     expect(result.type).toBe('handled');
     if (result.type === 'handled') expect(result.raw).toBe('12.5');
   });
 
   it('expands pasted scientific notation when on', () => {
-    const result = paste(input, '1.5e-7', { enableScientificNotation: true });
+    const result = paste(input, '1.5e-7', { allowScientificNotation: true });
     expect(result.type).toBe('handled');
     if (result.type === 'handled') expect(result.raw).toBe('0.00000015');
   });
@@ -71,7 +71,7 @@ describe('enableScientificNotation', () => {
 
   it('validates the option type', () => {
     expect(() =>
-      validateNumoraInputOptions({ enableScientificNotation: 'yes' } as never)
+      validateNumoraInputOptions({ allowScientificNotation: 'yes' } as never)
     ).toThrow();
   });
 
@@ -80,7 +80,7 @@ describe('enableScientificNotation', () => {
       handleOnBeforeInputNumoraInput(
         { target: el, data, inputType } as unknown as InputEvent,
         8,
-        { enableScientificNotation: false }
+        { allowScientificNotation: false }
       );
 
     it('rejects a multi-char insertText carrying scientific notation', () => {
@@ -104,7 +104,7 @@ describe('enableScientificNotation', () => {
     it('input fallback (autofill) restores the previous value and does not fire onChange', () => {
       const onChange = vi.fn();
       const n = new NumoraInput(document.body, {
-        enableScientificNotation: false,
+        allowScientificNotation: false,
         formatOn: 'change' as never,
         value: '12',
         onChange,
@@ -128,7 +128,7 @@ describe('enableScientificNotation', () => {
     });
 
     it('app-supplied values always expand', () => {
-      const n = new NumoraInput(document.body, { enableScientificNotation: false });
+      const n = new NumoraInput(document.body, { allowScientificNotation: false });
       n.setValue('1.5e-7');
       expect(n.getElement().value).toBe('0.00000015');
       n.destroy();

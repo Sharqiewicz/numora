@@ -19,7 +19,7 @@ describe('✅ formatInputValue - decimalMinLength stays out of the typing path',
 
   it('leaves empty and sign-only values alone', () => {
     expect(formatInputValue('', 2, { decimalMinLength: 2 }).raw).toBe('');
-    expect(formatInputValue('-', 2, { enableNegative: true, decimalMinLength: 2 }).raw).toBe('-');
+    expect(formatInputValue('-', 2, { allowNegative: true, decimalMinLength: 2 }).raw).toBe('-');
   });
 });
 
@@ -32,7 +32,7 @@ describe('✅ formatValueForDisplay - decimalMinLength pads on display/blur', ()
   it('leaves empty and sign-only values unpadded', () => {
     expect(formatValueForDisplay('', 2, { decimalMinLength: 2 }).formatted).toBe('');
     expect(
-      formatValueForDisplay('-', 2, { enableNegative: true, decimalMinLength: 2 }).formatted
+      formatValueForDisplay('-', 2, { allowNegative: true, decimalMinLength: 2 }).formatted
     ).toBe('-');
   });
 

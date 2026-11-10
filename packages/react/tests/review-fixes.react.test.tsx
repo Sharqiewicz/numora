@@ -55,6 +55,11 @@ describe('renamed v4 props', () => {
     ['maxDecimals', 2, 'decimalMaxLength'],
     ['thousandStyle', 'lakh', 'groupingStyle'],
     ['rawValueMode', true, 'e.target.value'],
+    ['enableNegative', true, 'allowNegative'],
+    ['enableLeadingZeros', true, 'allowLeadingZeros'],
+    ['enableCompactNotation', true, 'allowCompactNotation'],
+    ['enableScientificNotation', false, 'allowScientificNotation'],
+    ['autoAddLeadingZero', true, 'padLeadingZero'],
   ])('warns once for %s, names the replacement, and keeps it off the DOM', (name, val, hint) => {
     setEnv('development');
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});

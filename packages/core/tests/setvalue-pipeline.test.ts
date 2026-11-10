@@ -54,8 +54,8 @@ describe('setValue runs the full pipeline in default mode', () => {
     expect(input.getValue()).toBe('12345');
   });
 
-  it('strips a sign when enableNegative is false', () => {
-    const input = make({ enableNegative: false });
+  it('strips a sign when allowNegative is false', () => {
+    const input = make({ allowNegative: false });
     input.setValue('-1234');
     expect(el().value).toBe('1,234');
   });

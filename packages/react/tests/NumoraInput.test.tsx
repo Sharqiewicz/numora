@@ -640,7 +640,7 @@ describe('NumoraInput', () => {
           data-testid="input"
           onChange={onChange}
           formatOn={FormatOn.Change}
-          enableCompactNotation
+          allowCompactNotation
         />
       );
       const input = screen.getByTestId('input') as HTMLInputElement;
@@ -715,8 +715,8 @@ describe('NumoraInput', () => {
   });
 
   describe('negative numbers', () => {
-    it('renders a negative initial value when enableNegative is true', () => {
-      render(<NumoraInput data-testid="input" enableNegative defaultValue="-50" />);
+    it('renders a negative initial value when allowNegative is true', () => {
+      render(<NumoraInput data-testid="input" allowNegative defaultValue="-50" />);
       expect((screen.getByTestId('input') as HTMLInputElement).value).toBe('-50');
     });
   });
@@ -731,9 +731,9 @@ describe('NumoraInput', () => {
     });
   });
 
-  describe('autoAddLeadingZero', () => {
+  describe('padLeadingZero', () => {
     it('prepends 0 before a bare leading decimal on typing', async () => {
-      render(<NumoraInput data-testid="input" autoAddLeadingZero formatOn={FormatOn.Change} />);
+      render(<NumoraInput data-testid="input" padLeadingZero formatOn={FormatOn.Change} />);
       const input = screen.getByTestId('input') as HTMLInputElement;
 
       await act(async () => {
@@ -1626,13 +1626,13 @@ describe('decimalMinLength', () => {
 // ---------------------------------------------------------------------------
 
 describe('decimalMaxLength: 0 and trailing separator on blur', () => {
-  it('normalizes -0 to 0 on blur with enableNegative (A2-11)', async () => {
+  it('normalizes -0 to 0 on blur with allowNegative (A2-11)', async () => {
     const onChange = vi.fn();
     render(
       <NumoraInput
         data-testid="input"
         onChange={onChange}
-        enableNegative
+        allowNegative
         formatOn={FormatOn.Change}
       />
     );
@@ -2073,14 +2073,14 @@ describe('canonical raw value', () => {
   });
 });
 
-describe('enableScientificNotation', () => {
+describe('allowScientificNotation', () => {
   it('rejects a pasted 1.5e-7 when disabled, leaving the field unchanged', () => {
     const onChange = vi.fn();
     render(
       <NumoraInput
         data-testid="i"
         defaultValue="7"
-        enableScientificNotation={false}
+        allowScientificNotation={false}
         onChange={onChange}
       />
     );
@@ -2105,7 +2105,7 @@ describe('enableScientificNotation', () => {
       <NumoraInput
         data-testid="i"
         defaultValue="7"
-        enableScientificNotation={false}
+        allowScientificNotation={false}
         onChange={onChange}
         onValueChange={onValueChange}
       />

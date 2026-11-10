@@ -118,7 +118,7 @@ describe('⚡ notation expansion gate', () => {
     // Exercises the `MAX_INPUT_LENGTH` cap in `sanitizeNumoraInput`: even a paste 5x the
     // cap must not reach the notation-expansion steps with an unbounded string.
     const elapsed = fastestOf(3, () =>
-      sanitizeNumoraInput(digitsOf(50_000) + 'e', { enableCompactNotation: true })
+      sanitizeNumoraInput(digitsOf(50_000) + 'e', { allowCompactNotation: true })
     );
     expect(elapsed).toBeLessThan(CEILING_MS);
   });

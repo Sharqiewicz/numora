@@ -104,16 +104,20 @@ function withLatinDigits(locale: string | undefined): string {
   return /-nu-/i.test(tag) ? tag.replace(/-nu-[a-z0-9]+/i, '-nu-latn') : `${tag}-u-nu-latn`;
 }
 
-/** Development-only: an invalid tag otherwise falls back to en-US separators silently. */
-function warnInvalidLocale(locale: string | undefined): void {
-  let isProduction = false;
+/** True in a production bundle. Guards every development-only warning. */
+export function isProduction(): boolean {
   try {
     // Bundlers replace this; unbundled ESM has no `process`, so guard the lookup.
-    isProduction = typeof process !== 'undefined' && process.env.NODE_ENV === 'production';
+    return typeof process !== 'undefined' && process.env.NODE_ENV === 'production';
   } catch {
     // Some environments expose a `process` without `env`.
+    return false;
   }
-  if (isProduction) return;
+}
+
+/** Development-only: an invalid tag otherwise falls back to en-US separators silently. */
+function warnInvalidLocale(locale: string | undefined): void {
+  if (isProduction()) return;
   console.warn(
     `[numora] Invalid locale "${locale}": Intl.NumberFormat rejected it, so the field uses "," grouping and "." decimal. Pass a BCP 47 tag such as "de-DE".`
   );

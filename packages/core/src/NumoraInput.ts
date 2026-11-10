@@ -11,6 +11,7 @@ import {
 } from './utils/dom-events';
 import { escapeRegExp } from './utils/escape-reg-exp';
 import { resolveOptions } from './utils/resolve-options';
+import { takeRemovedOptions, warnRemovedOptions } from './utils/removed-options';
 import type { ResolvedNumoraOptions } from './utils/dom-events';
 import type { NumoraOptions, NumoraValues } from './types';
 
@@ -52,54 +53,30 @@ export class NumoraInput {
    * @param options - Numora formatting options plus any native `<input>` attributes.
    */
   constructor(target: HTMLInputElement | HTMLElement, options: NumoraInputOptions) {
-    const {
-      // Numora's own options, pulled out so they never reach the native <input>
-      // (`maxLength` there would count separators).
-      locale,
-      formatOn,
-      thousandSeparator,
-      groupingStyle,
-      decimalSeparator,
-      decimalMaxLength,
-      decimalMinLength,
-      enableCompactNotation,
-      enableScientificNotation,
-      enableNegative,
-      enableLeadingZeros,
-      autoAddLeadingZero,
-      maxLength,
-      isAllowed,
-      onChange,
-      value,
-      defaultValue,
-      // Set explicitly in createInputElement.
-      type,
-      inputMode,
-      spellcheck,
-      autocomplete,
-      ...nativeProps
-    } = options;
+    this.resolvedOptions = resolveOptions(options);
+    this.onChange = options.onChange;
 
-    this.resolvedOptions = resolveOptions({
-      locale,
-      formatOn,
-      thousandSeparator,
-      groupingStyle,
-      decimalSeparator,
-      decimalMaxLength,
-      decimalMinLength,
-      enableCompactNotation,
-      enableScientificNotation,
-      enableNegative,
-      enableLeadingZeros,
-      autoAddLeadingZero,
-      maxLength,
-      isAllowed,
-      onChange,
-    });
-    this.onChange = onChange;
+    // Everything left over is a native attribute for the element. Numora's own options never
+    // reach it (`maxLength` there would count separators), nor do the attributes
+    // createInputElement sets itself.
+    const nativeProps: Record<string, unknown> = { ...options };
+    for (const key of [
+      ...Object.keys(this.resolvedOptions),
+      'locale',
+      'onChange',
+      'value',
+      'defaultValue',
+      'type',
+      'inputMode',
+      'spellcheck',
+      'autocomplete',
+    ]) {
+      delete nativeProps[key];
+    }
+    // Options removed since v4 are ignored, warned about, and kept off the element.
+    warnRemovedOptions(takeRemovedOptions(nativeProps));
 
-    this.createInputElement(target, nativeProps, value, defaultValue);
+    this.createInputElement(target, nativeProps, options.value, options.defaultValue);
     this.setupEventListeners();
     // The initial value (option, or a pre-set value on an adopted <input>) is supplied by
     // the app, so it is a canonical raw value (ADR 0004), not locale text. Also seeds `lastValue`.
@@ -111,7 +88,7 @@ export class NumoraInput {
 
   private createInputElement(
     container: HTMLElement,
-    nativeProps: Partial<HTMLInputElement>,
+    nativeProps: Record<string, unknown>,
     value?: string,
     defaultValue?: string
   ): void {
@@ -141,7 +118,7 @@ export class NumoraInput {
     // Lakh/Wan group sizes differ from Thousand and enforcing exact group widths here would
     // just re-implement (and risk diverging from) formatWithSeparators.
     const escapedDecimal = escapeRegExp(this.resolvedOptions.decimalSeparator);
-    const negativePrefix = this.resolvedOptions.enableNegative ? '-?' : '';
+    const negativePrefix = this.resolvedOptions.allowNegative ? '-?' : '';
     const thousandSeparator = this.resolvedOptions.thousandSeparator;
     const escapedThousand = escapeRegExp(thousandSeparator);
     this.element.setAttribute(
@@ -255,7 +232,7 @@ export class NumoraInput {
    */
   public setValue(value: string, options?: { undoable?: boolean }): void {
     // Route through the same pipeline as typing/paste so programmatic writes honor
-    // sanitization, decimalMaxLength, maxLength, enableNegative and grouping.
+    // sanitization, decimalMaxLength, maxLength, allowNegative and grouping.
     const { formatted } = formatForDisplay(value, this.resolvedOptions, 'canonical');
 
     if (options?.undoable === false) this.element.value = formatted;
@@ -307,7 +284,7 @@ export class NumoraInput {
   /**
    * Sets the value from a number, similar to HTMLInputElement.valueAsNumber.
    *
-   * @throws {RangeError} if `num` is negative and `enableNegative` is false. A silent
+   * @throws {RangeError} if `num` is negative and `allowNegative` is false. A silent
    * sign flip on a money field is worse than an exception - the field would otherwise
    * display a positive value for a negative input with no indication anything was lost.
    * @throws {RangeError} if `num` is `Infinity`, `-Infinity`, or `NaN` (passed directly as a
@@ -330,8 +307,8 @@ export class NumoraInput {
     if (!Number.isFinite(num)) {
       throw new RangeError(`valueAsNumber: value must be finite (received ${num})`);
     }
-    if (num < 0 && !this.resolvedOptions.enableNegative) {
-      throw new RangeError('valueAsNumber: negative value but enableNegative is false');
+    if (num < 0 && !this.resolvedOptions.allowNegative) {
+      throw new RangeError('valueAsNumber: negative value but allowNegative is false');
     }
     // `num.toString()` is a canonical raw value (dot decimal, possibly exponent form that
     // the sanitization pipeline expands), exactly what `setValue` takes.

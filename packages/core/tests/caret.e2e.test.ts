@@ -160,17 +160,17 @@ describe('caret e2e — value-normalizing transforms', () => {
     groupingStyle: GroupingStyle.Thousand,
     formatOn: FormatOn.Change,
     decimalSeparator: '.',
-    autoAddLeadingZero: true,
+    padLeadingZero: true,
   };
 
-  it('autoAddLeadingZero: typing "." → "0." with caret after the decimal', () => {
+  it('padLeadingZero: typing "." → "0." with caret after the decimal', () => {
     // caret must land at end so the next digit lands in the fraction (→ "0.5"), not "5."
     const r = type('', 0, '.', LZ);
     expect(r.formatted).toBe('0.');
     expect(r.cursorPos).toBe(2);
   });
 
-  it('autoAddLeadingZero: "." then "5" yields "0.5" with caret at end', () => {
+  it('padLeadingZero: "." then "5" yields "0.5" with caret at end', () => {
     const dot = type('', 0, '.', LZ);
     const r = type(dot.formatted, dot.cursorPos, '5', LZ);
     expect(r.formatted).toBe('0.5');
@@ -180,8 +180,8 @@ describe('caret e2e — value-normalizing transforms', () => {
   it('compact expansion "15k" → "15,000" snaps caret to end', () => {
     const COMPACT: NumoraOptions = {
       ...LZ,
-      autoAddLeadingZero: false,
-      enableCompactNotation: true,
+      padLeadingZero: false,
+      allowCompactNotation: true,
     };
     const r = type('15', 2, 'k', COMPACT);
     expect(r.formatted).toBe('15,000');
@@ -206,7 +206,7 @@ describe('caret e2e — value-normalizing transforms', () => {
   });
 
   it('negative: typing "5" before the sign of "-1,234" → "51,234" caret after the 5', () => {
-    const NEG: NumoraOptions = { ...LZ, autoAddLeadingZero: false, enableNegative: true };
+    const NEG: NumoraOptions = { ...LZ, padLeadingZero: false, allowNegative: true };
     const r = type('-1,234', 0, '5', NEG);
     expect(r.formatted).toBe('51,234');
     expect(r.cursorPos).toBe(1); // "5|1,234"

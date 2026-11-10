@@ -151,12 +151,12 @@ describe('Security Tests', () => {
       expect(duration).toBeLessThan(100);
     });
 
-    it('should handle a long digit run with enableCompactNotation reaching the regex without hanging (audit #01)', () => {
+    it('should handle a long digit run with allowCompactNotation reaching the regex without hanging (audit #01)', () => {
       // `expandCompactNotation` had no early exit at all before the fix, so with
-      // `enableCompactNotation` on, any long digit string reached the vulnerable pattern.
+      // `allowCompactNotation` on, any long digit string reached the vulnerable pattern.
       const longInput = '9'.repeat(5000) + 'e';
       const start = performance.now();
-      const result = sanitizeNumoraInput(longInput, { enableCompactNotation: true });
+      const result = sanitizeNumoraInput(longInput, { allowCompactNotation: true });
       const duration = performance.now() - start;
 
       expect(result).toBeDefined();

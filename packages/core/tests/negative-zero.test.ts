@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { normalizeNegativeZero } from '../src/utils/format-utils';
 import { NumoraInput } from '../src/NumoraInput';
 
-// A2-11: "-0" (and its decimal variants) typed with enableNegative survives blur, and
+// A2-11: "-0" (and its decimal variants) typed with allowNegative survives blur, and
 // valueAsNumber then reports -0 for it indefinitely. normalizeNegativeZero maps any
 // negative value whose magnitude is exactly zero down to the unsigned form - dropping only
 // the sign, never touching padding/leading zeros.
@@ -68,7 +68,7 @@ describe('NumoraInput blur normalizes -0 to 0 (A2-11)', () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     const onChangeMock = vi.fn();
-    const instance = new NumoraInput(container, { enableNegative: true, onChange: onChangeMock });
+    const instance = new NumoraInput(container, { allowNegative: true, onChange: onChangeMock });
     const el = getInputElement();
 
     el.focus();
@@ -89,7 +89,7 @@ describe('NumoraInput blur normalizes -0 to 0 (A2-11)', () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     const instance = new NumoraInput(container, {
-      enableNegative: true,
+      allowNegative: true,
       decimalMinLength: 2,
       decimalMaxLength: 2,
     });

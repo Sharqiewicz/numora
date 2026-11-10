@@ -86,9 +86,9 @@ export interface NumoraOptions {
   locale?: LocaleTag | true;
   formatOn?: FormatOn;
   /**
-   * Grouping mark. Exactly ONE character (UTF-16 code unit), or `''` for none; anything else
-   * throws in `validateNumoraInputOptions`. Caret and sanitization code relies on this and
-   * compares one character at a time.
+   * Grouping mark. Exactly ONE character (UTF-16 code unit); anything else throws in
+   * `validateNumoraInputOptions`. Caret and sanitization code relies on this and compares
+   * one character at a time. To turn grouping off, set `groupingStyle: 'none'`.
    */
   thousandSeparator?: string;
   /**
@@ -97,7 +97,7 @@ export interface NumoraOptions {
    * @defaultValue 'thousand'
    */
   groupingStyle?: GroupingStyle;
-  enableCompactNotation?: boolean;
+  allowCompactNotation?: boolean;
   /**
    * When true (the default), pasted scientific notation is expanded (`1.5e-7` →
    * `0.00000015`). When false, such a paste is rejected and the field is left unchanged,
@@ -105,15 +105,15 @@ export interface NumoraOptions {
    * the app (`value`, `defaultValue`, `setValue`) are always expanded, since JS prints large
    * and small numbers this way (`String(1e21)` is `"1e+21"`).
    */
-  enableScientificNotation?: boolean;
-  enableNegative?: boolean;
-  enableLeadingZeros?: boolean;
+  allowScientificNotation?: boolean;
+  allowNegative?: boolean;
+  allowLeadingZeros?: boolean;
   /**
    * When true, a bare leading decimal separator gets a `0` prepended (`.5` → `0.5`,
    * `-.5` → `-0.5`). Useful for currency-style fields where leading-decimal entry is
    * common but `0.` form is the canonical representation.
    */
-  autoAddLeadingZero?: boolean;
+  padLeadingZero?: boolean;
   /** Decimal mark. Exactly ONE character (enforced by `validateNumoraInputOptions`). */
   decimalSeparator?: string;
   /**

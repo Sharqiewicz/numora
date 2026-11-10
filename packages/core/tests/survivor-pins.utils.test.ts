@@ -134,7 +134,7 @@ describe('dom-events.ts applyBlur', () => {
     expect(applyBlur(el, en())).toBeUndefined();
     expect(spy).not.toHaveBeenCalled();
   });
-  it('early return: Change mode without decimalMinLength/enableNegative leaves the value alone', () => {
+  it('early return: Change mode without decimalMinLength/allowNegative leaves the value alone', () => {
     const el = mk('1234');
     expect(applyBlur(el, en({ formatOn: FormatOn.Change }))).toBeUndefined();
     expect(el.value).toBe('1234');
@@ -152,8 +152,8 @@ describe('dom-events.ts attachFocusStrip', () => {
     el.dispatchEvent(new MouseEvent('mousedown', { button }));
   const ev = (el: HTMLElement, t: string) => el.dispatchEvent(new Event(t));
 
-  it('L185: no strip with an empty thousandSeparator or GroupingStyle.None', () => {
-    for (const over of [{ thousandSeparator: '' }, { groupingStyle: GroupingStyle.None }]) {
+  it('L185: no strip with GroupingStyle.None', () => {
+    for (const over of [{ groupingStyle: GroupingStyle.None }]) {
       const { el, onStrip } = setup(over);
       ev(el, 'focus');
       expect(el.value).toBe('1,234');
@@ -227,7 +227,7 @@ describe('event-handlers.ts beforeinput', () => {
     });
   });
   it('L223: the scientific-notation rejection is for insertText only', () => {
-    const o = { ...e18, enableScientificNotation: false };
+    const o = { ...e18, allowScientificNotation: false };
     expect(before(mk('1e55', 4), InputType.DeleteContentBackward, null, 18, o).type).toBe(
       'handled'
     );
@@ -257,7 +257,7 @@ describe('event-handlers.ts beforeinput', () => {
   it('L266: caret stays at the edit when the intended value is already the final display', () => {
     const q = {
       ...en({ thousandSeparator: "'", formatOn: FormatOn.Change }),
-      enableLeadingZeros: true,
+      allowLeadingZeros: true,
     } as NumoraOptions;
     expect(
       before(mk("07'2997111", 3, 7), InputType.DeleteContentBackward, null, 18, q)

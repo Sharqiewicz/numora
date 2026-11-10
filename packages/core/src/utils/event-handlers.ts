@@ -50,7 +50,7 @@ export type BeforeInputResult =
  * error handler) that isn't expecting an async throw from a keystroke.
  */
 /**
- * True when `enableScientificNotation` is `false` and user-typed/pasted/inserted text holds a
+ * True when `allowScientificNotation` is `false` and user-typed/pasted/inserted text holds a
  * number in scientific notation. Such input must be refused as a whole: the sanitizer would
  * otherwise drop the `e` and turn `1.5e-7` into `1.57`. App-supplied values never go through
  * this check (they always expand).
@@ -60,7 +60,7 @@ export function isScientificNotationRejected(
   formattingOptions?: NumoraOptions
 ): boolean {
   return (
-    formattingOptions?.enableScientificNotation === false && containsScientificNotation(text)
+    formattingOptions?.allowScientificNotation === false && containsScientificNotation(text)
   );
 }
 

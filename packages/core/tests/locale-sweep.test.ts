@@ -125,7 +125,7 @@ describe('locale sweep', () => {
 
         const host = document.createElement('div');
         try {
-          new NumoraInput(host, { locale: tag, formatOn: FormatOn.Change, enableNegative: true });
+          new NumoraInput(host, { locale: tag, formatOn: FormatOn.Change, allowNegative: true });
         } catch (e) {
           failures.push(`${tag}: constructor threw ${(e as Error).message}`);
           continue;
@@ -134,7 +134,7 @@ describe('locale sweep', () => {
         const options: NumoraOptions = {
           ...d,
           formatOn: FormatOn.Change,
-          enableNegative: true,
+          allowNegative: true,
         };
         const pos = paste(nf.format(1234567.89), options);
         if (pos !== '1234567.89') failures.push(`${tag}: paste positive -> ${pos}`);
@@ -193,14 +193,14 @@ describe('targeted regressions', () => {
   it.each(['\u200E', '\u200F', '\u061C', '\u202A', '\u202E', '\u2066', '\u2069', '\u200C', '\u200D', '\u2060'])(
     'keeps the sign when an invisible mark (case %#) precedes the minus',
     (mark) => {
-      expect(sanitizeNumoraInput(`${mark}-1,234.5${mark}`, { thousandSeparator: ',', enableNegative: true })).toBe('-1234.5');
+      expect(sanitizeNumoraInput(`${mark}-1,234.5${mark}`, { thousandSeparator: ',', allowNegative: true })).toBe('-1234.5');
     }
   );
 
   it('pastes sat (Ol Chiki) and astral digit sets', () => {
-    const options = { ...getSeparatorsFromLocale('sat'), enableNegative: true };
+    const options = { ...getSeparatorsFromLocale('sat'), allowNegative: true };
     expect(paste(new Intl.NumberFormat('sat').format(1234.5), options)).toBe('1234.5');
-    const adlm = { ...getSeparatorsFromLocale('ff-Adlm'), enableNegative: true };
+    const adlm = { ...getSeparatorsFromLocale('ff-Adlm'), allowNegative: true };
     expect(paste(new Intl.NumberFormat('ff-Adlm').format(-1234.5), adlm)).toBe('-1234.5');
   });
 

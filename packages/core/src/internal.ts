@@ -24,3 +24,4 @@ export {
 // Locale + defaults + validation in one call, so the React adapter resolves options
 // identically to the vanilla class.
 export { resolveOptions } from './utils/resolve-options';
+export { takeRemovedOptions, warnRemovedOptions } from './utils/removed-options';

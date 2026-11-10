@@ -154,7 +154,7 @@ describe('callbacks and misc props', () => {
     typeChar(input, '-');
     expect(input.value).toBe('1');
   });
-  it('default enableLeadingZeros is off', () => {
+  it('default allowLeadingZeros is off', () => {
     render(<NumoraInput data-testid="i" />);
     const input = screen.getByTestId('i') as HTMLInputElement;
     typeChar(input, '0');
@@ -212,7 +212,7 @@ describe('undo / redo through the real input event', () => {
 describe('input fallback', () => {
   it('rejects scientific notation when disabled: restores previous value, no onChange', () => {
     const onChange = vi.fn();
-    render(<NumoraInput data-testid="i" enableScientificNotation={false} defaultValue="5" onChange={onChange} />);
+    render(<NumoraInput data-testid="i" allowScientificNotation={false} defaultValue="5" onChange={onChange} />);
     const input = screen.getByTestId('i') as HTMLInputElement;
     nativeInput(input, '1.5e-7', 6);
     expect(input.value).toBe('5');
@@ -273,7 +273,7 @@ describe('paste / blur onValueChange', () => {
     expect(input.value).toBe('1,234');
     expect(onValueChange).toHaveBeenCalledWith({ value: '1234', formattedValue: '1,234' });
   });
-  it('Change mode (no decimalMinLength/enableNegative): blur leaves a trailing separator alone', () => {
+  it('Change mode (no decimalMinLength/allowNegative): blur leaves a trailing separator alone', () => {
     const onChange = vi.fn();
     render(<NumoraInput data-testid="i" formatOn={FormatOn.Change} onChange={onChange} />);
     const input = screen.getByTestId('i') as HTMLInputElement;
@@ -285,7 +285,7 @@ describe('paste / blur onValueChange', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
   it('blur with an unchanged display does not rewrite the field', () => {
-    render(<NumoraInput data-testid="i" formatOn={FormatOn.Change} enableNegative />);
+    render(<NumoraInput data-testid="i" formatOn={FormatOn.Change} allowNegative />);
     const input = screen.getByTestId('i') as HTMLInputElement;
     input.focus();
     typeChar(input, '1'); typeChar(input, '2');

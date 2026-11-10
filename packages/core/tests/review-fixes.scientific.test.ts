@@ -20,10 +20,10 @@ function pasteInto(
   return handleOnPasteNumoraInput(e, 8, options);
 }
 
-const off = { enableScientificNotation: false, formatOn: 'change' };
+const off = { allowScientificNotation: false, formatOn: 'change' };
 const offDe = { ...off, decimalSeparator: ',', thousandSeparator: '.' };
 
-describe('paste with enableScientificNotation: false checks the combined value', () => {
+describe('paste with allowScientificNotation: false checks the combined value', () => {
   it('rejects `e-7` pasted after `1.5`', () => {
     expect(pasteInto('1.5', 3, 3, 'e-7', off)).toEqual({ type: 'reject' });
   });

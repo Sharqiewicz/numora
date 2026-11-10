@@ -99,21 +99,21 @@ export const sanitizeNumoraInput = (
     decimalSeparator
   );
 
-  if (formattingOptions?.enableCompactNotation) {
+  if (formattingOptions?.allowCompactNotation) {
     sanitized = expandCompactNotation(sanitized, decimalSeparator);
   }
 
   sanitized = expandScientificNotation(sanitized, decimalSeparator);
 
-  sanitized = removeNonNumericCharacters(sanitized, formattingOptions?.enableNegative, decimalSeparator);
+  sanitized = removeNonNumericCharacters(sanitized, formattingOptions?.allowNegative, decimalSeparator);
 
   sanitized = removeExtraDecimalSeparators(sanitized, decimalSeparator);
 
-  if (!formattingOptions?.enableLeadingZeros) {
+  if (!formattingOptions?.allowLeadingZeros) {
     sanitized = removeLeadingZeros(sanitized, decimalSeparator);
   }
 
-  if (formattingOptions?.autoAddLeadingZero) {
+  if (formattingOptions?.padLeadingZero) {
     sanitized = prependLeadingZero(sanitized, decimalSeparator);
   }
 
