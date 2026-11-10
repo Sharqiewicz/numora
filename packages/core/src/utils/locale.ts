@@ -57,8 +57,8 @@ function parseProbe(formatted: string, zeroCode: number): ProbeShape {
       separatorRun += char;
     }
   }
-  if (digitRun) digitRuns.push(digitRun);
-  if (separatorRun) separators.push(separatorRun);
+  // The probe ends in its fraction digits, so no separator run is pending here.
+  digitRuns.push(digitRun);
 
   return { digitRuns, separators };
 }
@@ -72,13 +72,10 @@ function parseProbe(formatted: string, zeroCode: number): ProbeShape {
  *
  * Reads run *lengths*, not digit values, so non-ASCII numbering systems are unaffected.
  */
-function deriveGroupingStyle({ digitRuns, separators }: ProbeShape): GroupingStyle {
-  // The final run is the fraction ("89"), which says nothing about integer grouping. It is
-  // only there if the probe actually produced a decimal separator.
-  const integerWidths = separators.length > 0 ? digitRuns.slice(0, -1) : digitRuns;
-  const penultimateWidth = integerWidths[integerWidths.length - 2];
-  if (penultimateWidth === undefined) return DEFAULT_GROUPING_STYLE;
-  return penultimateWidth === LAKH_PENULTIMATE_GROUP_WIDTH
+function deriveGroupingStyle({ digitRuns }: ProbeShape): GroupingStyle {
+  // The final run is the fraction ("89"), which says nothing about integer grouping.
+  const integerWidths = digitRuns.slice(0, -1);
+  return integerWidths[integerWidths.length - 2] === LAKH_PENULTIMATE_GROUP_WIDTH
     ? GroupingStyle.Lakh
     : GroupingStyle.Thousand;
 }
@@ -93,9 +90,7 @@ const BIDI_MARKS = /[\u200E\u200F\u061C\u202A-\u202E\u2066-\u2069]/g;
 function contiguousZero(formatter: Intl.NumberFormat): number | undefined {
   let zero: number | undefined;
   for (let i = 0; i <= 9; i++) {
-    const glyph = Array.from(formatter.format(i).replace(BIDI_MARKS, ''));
-    if (glyph.length !== 1) return undefined;
-    const code = glyph[0].codePointAt(0) ?? 0;
+    const code = formatter.format(i).replace(BIDI_MARKS, '').codePointAt(0) ?? 0;
     if (zero === undefined) zero = code;
     else if (code !== zero + i) return undefined;
   }
@@ -105,11 +100,8 @@ function contiguousZero(formatter: Intl.NumberFormat): number | undefined {
 /** Re-targets a tag to Latin digits. Separators do not depend on the digit set. */
 function withLatinDigits(locale: string | undefined): string {
   const tag = locale ?? new Intl.NumberFormat().resolvedOptions().locale;
-  if (/-u-/i.test(tag)) {
-    // Replace an existing nu keyword, otherwise append one to the extension.
-    return /-nu-[a-z0-9]+/i.test(tag) ? tag.replace(/-nu-[a-z0-9]+/i, '-nu-latn') : `${tag}-nu-latn`;
-  }
-  return `${tag}-u-nu-latn`;
+  // Replace an existing nu keyword, otherwise add the extension.
+  return /-nu-/i.test(tag) ? tag.replace(/-nu-[a-z0-9]+/i, '-nu-latn') : `${tag}-u-nu-latn`;
 }
 
 /** Development-only: an invalid tag otherwise falls back to en-US separators silently. */
@@ -141,7 +133,7 @@ export function getSeparatorsFromLocale(locale?: string): {
     let zeroCode = contiguousZero(formatter);
     if (zeroCode === undefined) {
       formatter = new Intl.NumberFormat(withLatinDigits(locale));
-      zeroCode = contiguousZero(formatter) ?? 0x30;
+      zeroCode = 0x30;
     }
     const shape = parseProbe(formatter.format(GROUPING_PROBE).replace(BIDI_MARKS, ''), zeroCode);
     const { separators } = shape;

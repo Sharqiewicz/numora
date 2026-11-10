@@ -140,12 +140,6 @@ export interface NumoraValues {
   formattedValue: string;
 }
 
-export interface CaretPositionInfo {
-  selectionStart?: number;
-  selectionEnd?: number;
-  endOffset?: number;
-}
-
 export interface SeparatorOptions {
   decimalSeparator?: string;
   thousandSeparator?: string;

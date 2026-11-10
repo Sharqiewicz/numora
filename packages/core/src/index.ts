@@ -8,7 +8,7 @@
  */
 export * from './NumoraInput';
 export { GroupingStyle, FormatOn, InputType } from './types';
-export type { FormattingOptions, CaretPositionInfo, LocaleTag, NumoraValues } from './types';
+export type { FormattingOptions, LocaleTag, NumoraValues } from './types';
 export { getSeparatorsFromLocale, applyLocale } from './utils/locale';
 export {
   formatValueForDisplay,

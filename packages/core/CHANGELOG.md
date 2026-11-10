@@ -18,12 +18,16 @@
 - **Event handlers and DOM writers moved from `numora` to `numora/internal`:**
   `handleOnBeforeInputNumoraInput`, `handleOnPasteNumoraInput`, `handleOnKeyDownNumoraInput`,
   `writeValuePreservingUndo`, `writeStripPreservingUndo`, `computeStripSeparatorsResult` and
-  `StripSeparatorsResult`. `numora/internal` exists for `numora-react` and other first-party
+  `StripSeparatorsResult`. `handleOnKeyDownNumoraInput` now returns nothing, and the
+  `CaretPositionInfo` type it returned is removed from `numora` and `numora-react`.
+  `numora/internal` exists for `numora-react` and other first-party
   wrappers and has no semver guarantee.
 - **`numora-react` re-exports `GroupingStyle`** instead of `ThousandStyle`, and ships a
   `'use client'` directive so Next.js server components can import it directly.
 
 ### Fixed
+- **Compact notation keeps small decimals:** `0.0001k` gives `0.1` (was `0000.1`) and
+  `0.00001k` gives `0.01`.
 - **A leading `+` on a scientific-notation mantissa is a sign, not a digit:** `+1e-3` gives
   `0.001` (was `0.01`) and `+1e3` gives `1000`.
 - **Comma-decimal locales accept a typed `.` as the decimal key** when the value has no
@@ -80,6 +84,11 @@
   separator.
 
 ### Removed (internal, not on the public API surface)
+- Smaller internals with identical behaviour (checked against the previous build with
+  differential fuzzing): one table-driven grouper replaces `formatting/constants.ts`, the
+  unused rank/select helpers `significantCharRank` and `positionAfterRank` are gone, the two
+  DOM writers share one implementation, and the notation, leading-zero and foreign-format
+  features each take a single code path.
 - Deleted `features/formatting/cursor-position.ts` (`calculateCursorPositionAfterFormatting`,
   the unreachable digit-counting handlers, and the `_dcCache` memo) — ~600 lines now made
   dead by the rank/select swap. This symbol was exported only from the internal

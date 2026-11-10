@@ -202,7 +202,6 @@ packages/core/src/
 │   ├── scientific-notation.ts    # Scientific notation expansion
 │   ├── non-numeric-characters.ts # Character filtering
 │   └── formatting/               # 🆕 MODULAR (recently refactored)
-│       ├── constants.ts          # Types & grouping configuration
 │       ├── thousand-grouping.ts  # Number formatting logic
 │       ├── cursor-position.ts    # Cursor calculation (complex!)
 │       ├── change-detection.ts   # Change tracking utilities
@@ -267,7 +266,7 @@ handleOnBeforeInputNumoraInput(
 handleOnKeyDownNumoraInput(
   e: KeyboardEvent,
   formattingOptions?: FormattingOptions
-): CaretPositionInfo | undefined
+): void
 
 // 3. onPaste - Handle clipboard data
 handleOnPasteNumoraInput(
@@ -407,18 +406,7 @@ See [`packages/core/src/features/formatting/README.md`](packages/core/src/featur
 
 **Sub-modules:**
 
-**a) constants.ts** - Types and configuration
-```typescript
-export type ThousandsGroupStyle = 'thousand' | 'lakh' | 'wan';
-
-export const GROUPING_CONFIG = {
-  thousand: { size: 3 },        // 1,234,567
-  lakh: { firstGroup: 3, restGroup: 2 },  // 12,34,567
-  wan: { size: 4 },             // 123,4567
-};
-```
-
-**b) thousands-grouping.ts** - Number formatting
+**a) thousand-grouping.ts** - Number formatting (group sizes live in a `GROUP_SIZES` table: thousand `[3, 3]`, lakh `[3, 2]`, wan `[4, 4]`)
 ```typescript
 formatWithSeparators("1234567", ",", "thousand")  // "1,234,567"
 formatWithSeparators("1234567", ",", "lakh")      // "12,34,567"

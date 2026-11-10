@@ -24,9 +24,8 @@ export function displayToRawValue(
 ): string {
   const decimalSeparator = options?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR;
   const thousandSeparator = options?.thousandSeparator;
-  let raw = thousandSeparator ? removeThousandSeparators(display, thousandSeparator) : display;
-  if (decimalSeparator !== '.') raw = raw.split(decimalSeparator).join('.');
-  return raw;
+  const raw = thousandSeparator ? removeThousandSeparators(display, thousandSeparator) : display;
+  return raw.split(decimalSeparator).join('.');
 }
 
 /**
@@ -182,22 +181,7 @@ export function formatValueForDisplay(
  * @returns `value` unchanged, or `value` with the leading `-` removed when the magnitude is zero.
  */
 export function normalizeNegativeZero(value: string, decimalSeparator: string): string {
-  if (!value.startsWith('-')) return value;
-
   const rest = value.slice(1);
-  if (!rest) return value;
-
-  let sawZeroDigit = false;
-  for (const ch of rest) {
-    if (ch === '0') {
-      sawZeroDigit = true;
-      continue;
-    }
-    if (decimalSeparator && ch === decimalSeparator) continue;
-    // Any other character (a nonzero digit, stray separator, etc.) means this isn't an
-    // all-zero magnitude - leave the original value untouched.
-    return value;
-  }
-
-  return sawZeroDigit ? rest : value;
+  // All zeros once the decimal separators are dropped, and at least one zero.
+  return value[0] === '-' && /^0+$/.test(rest.split(decimalSeparator).join('')) ? rest : value;
 }

@@ -5,7 +5,7 @@ import { NON_ASCII_DECIMAL_SEPARATOR_GLYPHS } from '../features/decimal-separato
 import { containsScientificNotation } from '../features/scientific-notation';
 import { skipOverThousandSeparatorOnDelete } from '../features/formatting';
 import { computeCaretFromEdit } from './caret';
-import { type FormattingOptions, type CaretPositionInfo, FormatOn, InputType } from '../types';
+import { type FormattingOptions, FormatOn, InputType } from '../types';
 import { formatInputValue } from './format-utils';
 
 // Keys that, when typed, are candidates for remapping to the configured decimal separator:
@@ -89,10 +89,6 @@ export function handleOnBeforeInputNumoraInput(
   decimalMaxLength: number,
   formattingOptions?: FormattingOptions
 ): BeforeInputResult {
-  if (e.inputType === InputType.InsertFromPaste || e.inputType === InputType.InsertFromDrop) {
-    return { type: 'skip' };
-  }
-
   const target = e.target as HTMLInputElement;
   const currentValue = target.value;
   const selectionStart = target.selectionStart ?? 0;
@@ -112,7 +108,7 @@ export function handleOnBeforeInputNumoraInput(
     // while the value has no decimal yet, ignored otherwise). Any other key that equals
     // the thousand separator (',' in en-US) stays rejected (A2-04/A2-05): remapping it
     // would turn a grouping habit into a stray decimal point.
-    if (inputData === thousandSep && inputData !== decimalSep && inputData !== '.') {
+    if (inputData === thousandSep && inputData !== '.') {
       return { type: 'reject' };
     }
 
@@ -165,16 +161,11 @@ export function handleOnBeforeInputNumoraInput(
       // the separator re-formats back to the same string (a no-op backspace). Only applies
       // with no active selection; a real keydown-driven caret skip has already moved the
       // caret past the separator by the time this runs, so this branch is simply not taken.
-      const thousandSep = formattingOptions?.thousandSeparator;
       const deletesOverSeparator =
-        !hasSelection &&
-        thousandSep !== undefined &&
-        currentValue[selectionStart - 1] === thousandSep;
+        currentValue[selectionStart - 1] === formattingOptions?.thousandSeparator;
       const deleteFrom = hasSelection
         ? selectionStart
-        : deletesOverSeparator
-          ? Math.max(0, selectionStart - 2)
-          : Math.max(0, selectionStart - 1);
+        : Math.max(0, selectionStart - (deletesOverSeparator ? 2 : 1));
       const deleteTo = hasSelection ? selectionEnd : selectionStart;
       intendedValue = currentValue.slice(0, deleteFrom) + currentValue.slice(deleteTo);
       intendedCursorPos = deleteFrom;
@@ -183,24 +174,19 @@ export function handleOnBeforeInputNumoraInput(
     case InputType.DeleteContentForward: {
       // Same mobile fallback as DeleteContentBackward above, mirrored for forward delete:
       // when the char at the caret is the thousand separator, delete the digit past it too.
-      const thousandSep = formattingOptions?.thousandSeparator;
       const deletesOverSeparator =
-        !hasSelection && thousandSep !== undefined && currentValue[selectionStart] === thousandSep;
+        currentValue[selectionStart] === formattingOptions?.thousandSeparator;
       const deleteTo = hasSelection
         ? selectionEnd
-        : deletesOverSeparator
-          ? selectionStart + 2
-          : selectionStart + 1;
+        : selectionStart + (deletesOverSeparator ? 2 : 1);
       intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(deleteTo);
       intendedCursorPos = selectionStart;
       break;
     }
+    // Cut and drag always have a selection, so they delete exactly what a line deletion with a
+    // selection does.
     case InputType.DeleteByCut:
-    case InputType.DeleteByDrag: {
-      intendedValue = currentValue.slice(0, selectionStart) + currentValue.slice(selectionEnd);
-      intendedCursorPos = selectionStart;
-      break;
-    }
+    case InputType.DeleteByDrag:
     case InputType.DeleteSoftLineBackward:
     case InputType.DeleteHardLineBackward:
     // A numeric field is always a single "word", so word-boundary deletion (Alt/Option +
@@ -291,27 +277,13 @@ export function handleOnBeforeInputNumoraInput(
 }
 
 /**
- * Skips the cursor over thousand separators on Delete/Backspace and returns the caret
- * info the change handler needs to disambiguate Delete-forward (`endOffset: 1`) from
- * Backspace or non-deletion keys (`endOffset: 0`). Returns undefined for keys that
- * aren't Delete/Backspace so the caller can null out the stored caret info.
+ * Skips the cursor over thousand separators on Delete/Backspace.
  */
 export function handleOnKeyDownNumoraInput(
   e: KeyboardEvent,
   formattingOptions?: FormattingOptions
-): CaretPositionInfo | undefined {
-  const inputElement = e.target as HTMLInputElement;
-  skipOverThousandSeparatorOnDelete(e, inputElement, formattingOptions);
-
-  if (e.key !== 'Backspace' && e.key !== 'Delete') return undefined;
-
-  const selectionStart = inputElement.selectionStart ?? 0;
-  const selectionEnd = inputElement.selectionEnd ?? 0;
-  return {
-    selectionStart,
-    selectionEnd,
-    endOffset: e.key === 'Delete' && selectionStart === selectionEnd ? 1 : 0,
-  };
+): void {
+  skipOverThousandSeparatorOnDelete(e, e.target as HTMLInputElement, formattingOptions);
 }
 
 /**

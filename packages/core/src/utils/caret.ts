@@ -41,16 +41,8 @@ export function computeCaretFromEdit(
   // Nothing matched although the caret had a non-zero digit to its left: the edit re-read the
   // whole value (`1e|5` + `-` -> `0.00001`), so no character of the old left context survives.
   // The end is the only sensible place; a prefix of zeros only (leading-zero removal) keeps 0.
-  if (pos === 0 && hasNonZeroDigit(prefix)) return formatted.length;
+  if (pos === 0 && /[1-9]/.test(prefix)) return formatted.length;
   return pos;
-}
-
-function hasNonZeroDigit(value: string): boolean {
-  for (let i = 0; i < value.length; i++) {
-    const c = value.charCodeAt(i);
-    if (c >= 49 && c <= 57) return true; // '1'..'9'
-  }
-  return false;
 }
 
 /**

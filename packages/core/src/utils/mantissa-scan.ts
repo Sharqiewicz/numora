@@ -9,14 +9,14 @@
  * scans linear.
  */
 
-export function isDigit(ch: string | undefined): boolean {
-  return ch !== undefined && ch >= '0' && ch <= '9';
+export function isDigit(ch: string): boolean {
+  return ch >= '0' && ch <= '9';
 }
 
 /**
  * Result of a mantissa match: `end` is the index just past the whole mantissa; `sepEnd`
- * is the index just past the FIRST decimal separator consumed while building it, or -1 if
- * the match consumed no separator at all (a plain digit run).
+ * is the index just past the FIRST decimal separator consumed while building it (equal to
+ * `end` for a plain digit run, which consumed none).
  */
 export interface MantissaMatch {
   end: number;
@@ -36,26 +36,24 @@ export function matchMantissaAt(
   start: number,
   decimalSeparator: string
 ): MantissaMatch | null {
-  const len = value.length;
-
   if (isDigit(value[start])) {
     let k = start;
-    while (k < len && isDigit(value[k])) k++;
+    while (isDigit(value[k])) k++;
 
     if (value[k] === decimalSeparator) {
       const sepEnd = k + 1;
       let m = sepEnd;
-      while (m < len && isDigit(value[m])) m++;
+      while (isDigit(value[m])) m++;
       return { end: m, sepEnd };
     }
-    return { end: k, sepEnd: -1 };
+    return { end: k, sepEnd: k };
   }
 
   if (value[start] === decimalSeparator) {
     const sepEnd = start + 1;
     if (isDigit(value[sepEnd])) {
       let m = sepEnd;
-      while (m < len && isDigit(value[m])) m++;
+      while (isDigit(value[m])) m++;
       return { end: m, sepEnd };
     }
   }
@@ -80,9 +78,7 @@ export function failedMantissaResumeIndex(
   match: MantissaMatch,
   decimalSeparator: string
 ): number {
-  return match.sepEnd !== -1 && value[match.end] === decimalSeparator
-    ? match.sepEnd
-    : match.end;
+  return value[match.end] === decimalSeparator ? match.sepEnd : match.end;
 }
 
 /**
@@ -92,8 +88,8 @@ export function failedMantissaResumeIndex(
  */
 export function trimTrailingZeroRun(value: string, decimalSeparator: string): string {
   let end = value.length;
-  while (end > 0 && value[end - 1] === '0') end--;
+  while (value[end - 1] === '0') end--;
   if (end === value.length) return value;
-  if (end > 0 && value[end - 1] === decimalSeparator) end--;
+  if (value[end - 1] === decimalSeparator) end--;
   return value.slice(0, end);
 }
