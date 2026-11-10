@@ -3,7 +3,7 @@ import {
   useState,
   useEffect,
   forwardRef,
-  useCallback,
+  useImperativeHandle,
   useMemo,
   type ClipboardEvent,
   type ChangeEvent,
@@ -189,35 +189,17 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     groupingStyle,
     decimalSeparator,
     decimalMinLength,
-    enableCompactNotation = false,
-    enableScientificNotation = true,
-    enableNegative = false,
-    enableLeadingZeros = false,
-    autoAddLeadingZero = false,
+    enableCompactNotation,
+    enableScientificNotation,
+    enableNegative,
+    enableLeadingZeros,
+    autoAddLeadingZero,
     maxLength,
     isAllowed,
     value: controlledValue,
     defaultValue,
     ...rest
   } = props;
-
-  // Latest onChange/isAllowed, refreshed synchronously every render (a plain ref mutation
-  // in the render body, not an effect - safe because these are only ever read later, from
-  // event handlers that run after this render has committed). Lets the formattingOptions
-  // memo below depend only on the formatting props: an inline `onChange`/`isAllowed` (a new
-  // function identity every parent render) would otherwise force `applyLocale` and
-  // `validateNumoraInputOptions` to re-run on every render for no reason (A2-09).
-  const latestCallbacksRef = useRef({ onChange, isAllowed });
-  latestCallbacksRef.current.onChange = onChange;
-  latestCallbacksRef.current.isAllowed = isAllowed;
-
-  // Stable identity (never changes) so it can sit in formattingOptions without pulling
-  // `isAllowed` into the memo's deps. Delegates to whatever `isAllowed` currently is via
-  // the ref above, so behavior for the core handlers is unchanged.
-  const stableIsAllowed = useCallback(
-    (rawValue: string) => latestCallbacksRef.current.isAllowed?.(rawValue) ?? true,
-    []
-  );
 
   const formattingOptions: FormattingOptions = useMemo(() => {
     const separators = applyLocale(locale, { thousandSeparator, decimalSeparator, groupingStyle });
@@ -240,21 +222,19 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       enableLeadingZeros,
       autoAddLeadingZero,
       maxLength,
-      isAllowed: stableIsAllowed,
+      // Stable identity so `isAllowed` stays out of the memo's deps; delegates to the
+      // current `isAllowed` via stateRef (read only from event handlers, after commit).
+      isAllowed: (rawValue: string) => stateRef.current.isAllowed?.(rawValue) ?? true,
     };
     // Validate inside useMemo so misconfig throws early in both dev and prod, and we
-    // don't re-validate on every render. Validated against the REAL current onChange/
-    // isAllowed (read from the ref, not the stable wrapper) so a genuine caller mistake
-    // (wrong type) still throws - this only runs when the formatting props themselves
-    // change, not on every inline-callback identity change. The cast bridges the signature
-    // gap: vanilla's onChange takes a values object, React's takes an event - assertFunction only
-    // checks `typeof === 'function'`, so either is fine.
+    // don't re-validate on every render. Validated against this render's real onChange/
+    // isAllowed (not the stable wrapper) so a genuine caller mistake (wrong type) still
+    // throws. The cast bridges the signature gap: vanilla's onChange takes a values object,
+    // React's takes an event - assertFunction only checks `typeof === 'function'`.
     validateNumoraInputOptions({
       ...options,
-      isAllowed: latestCallbacksRef.current.isAllowed,
-      onChange: latestCallbacksRef.current.onChange as unknown as
-        | ((values: NumoraValues) => void)
-        | undefined,
+      isAllowed,
+      onChange: onChange as unknown as ((values: NumoraValues) => void) | undefined,
     });
     return options;
   }, [
@@ -271,13 +251,12 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     enableLeadingZeros,
     autoAddLeadingZero,
     maxLength,
-    stableIsAllowed,
   ]);
 
   // Programmatic / restored values always want separators applied, regardless of whether
   // the user chose Blur mode (which suppresses separators during typing). Inline helper
   // avoids a second formatting-options object that callers would have to track.
-  const formatForDisplay = (value: string, source: ValueSource = 'display') =>
+  const formatForDisplay = (value: string, source?: ValueSource) =>
     formatValueForDisplay(
       value,
       decimalMaxLength,
@@ -285,11 +264,25 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       source
     );
 
+  // Focused: format for editing with the real `formatOn` (Blur mode stays ungrouped, so a
+  // controlled echo-back can't inject commas mid-typing; in Change mode this equals
+  // formatForDisplay). Unfocused: the value lands in its resting state, so format for display.
+  const formatByFocus = (input: HTMLInputElement, value: string, source: ValueSource) =>
+    document.activeElement === input
+      ? formatValueForDisplay(value, decimalMaxLength, formattingOptions, source)
+      : formatForDisplay(value, source);
+
   const internalInputRef = useRef<HTMLInputElement>(null);
-  // Mirror of props read by mount-only DOM listeners (beforeinput, mousedown/click) that
-  // would otherwise capture stale closures. Refreshed every render in the layout effect
+  // Mirror of props read by mount-only DOM listeners (beforeinput, mousedown/click) and the
+  // stable `isAllowed` wrapper, which would otherwise capture stale closures. Refreshed every render in the layout effect
   // below so the listeners always see the latest options/callbacks without re-registering.
-  const stateRef = useRef({ onChange, onValueChange, decimalMaxLength, formattingOptions });
+  const stateRef = useRef({
+    onChange,
+    onValueChange,
+    isAllowed,
+    decimalMaxLength,
+    formattingOptions,
+  });
   // True while we're applying our own setRangeText. `setRangeText` does not synchronously
   // dispatch `input` in current browsers or jsdom (verified) - this flag is defensive,
   // for environments or polyfills that do dispatch `input` on a programmatic write, so
@@ -304,19 +297,25 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   // the cursor against the still-formatted value before we map it to raw indices.
   const pendingMouseStripRef = useRef(false);
 
-  // Stable across renders: deps:[] + ref-only reads. Used as effect deps so we want
-  // identity stability rather than re-registration on every render.
-  const withInternalWrite = useCallback((fn: () => void): void => {
+  // withInternalWrite and stripSeparatorsAndMapCaret touch only refs, so the mount-only
+  // listeners below may safely keep the first render's copies.
+  const withInternalWrite = (fn: () => void): void => {
     suppressNextInputEventRef.current = true;
     try {
       fn();
     } finally {
       suppressNextInputEventRef.current = false;
     }
-  }, []);
+  };
 
-  const stripSeparatorsAndMapCaret = useCallback(
-    (input: HTMLInputElement) => {
+  // The one place both React callbacks fire. Reads stateRef (current after commit).
+  const emit = (el: NumoraHTMLInputElement, raw: string, formatted: string) => {
+    const { onChange: cb, onValueChange: vcb } = stateRef.current;
+    cb?.(createSyntheticChangeEvent(el, raw));
+    vcb?.({ value: raw, formattedValue: formatted });
+  };
+
+  const stripSeparatorsAndMapCaret = (input: HTMLInputElement) => {
       const opts = stateRef.current.formattingOptions;
       if (
         opts.formatOn !== FormatOn.Blur ||
@@ -348,9 +347,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       // new (stripped) display.
       const numInput = input as NumoraHTMLInputElement;
       numInput.formattedValue = input.value;
-    },
-    [withInternalWrite]
-  );
+  };
 
   // Computed once on mount. Uncontrolled defaultValue lets React leave the DOM value alone
   // on re-renders, which is what allows undo to work. Forces FormatOn.Change for the
@@ -359,36 +356,23 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   // defaultValue="1234567" lands in the DOM as "1234567" and the first focus has no
   // separators to strip (computeStripSeparatorsResult returns null), so onChange never
   // fires and overlay integrations like Torph can't sync until the next blur+focus cycle.
-  const [initialDisplayValue] = useState(() => {
-    const valueToFormat = controlledValue !== undefined ? controlledValue : defaultValue;
-    if (valueToFormat === undefined) return '';
-    // App-supplied values are canonical raw values ('1234.5', never locale text).
-    return formatForDisplay(String(valueToFormat), 'canonical').formatted;
-  });
+  // App-supplied values are canonical raw values ('1234.5', never locale text).
+  const [initialDisplayValue] = useState(
+    () => formatForDisplay(String(controlledValue ?? defaultValue ?? ''), 'canonical').formatted
+  );
 
-  // Layout effect 1: external ref → internal input.
-  useIsomorphicLayoutEffect(() => {
-    if (!ref) return;
-    if (typeof ref === 'function') {
-      ref(internalInputRef.current);
-      return () => ref(null);
-    }
-    ref.current = internalInputRef.current;
-    return () => {
-      ref.current = null;
-    };
-  }, [ref]);
+  // External ref -> internal input (function and object refs; nulled on unmount).
+  useImperativeHandle(ref, () => internalInputRef.current as HTMLInputElement, []);
 
   // Layout effect 2: refresh stateRef every render so mount-only DOM listeners see the
   // latest props; re-sync the DOM value when controlled `value` changes. Runs on every
   // render. Equality guard short-circuits the common echo-back case. When the value
   // differs, route through writeValuePreservingUndo so external updates don't wipe undo.
   useIsomorphicLayoutEffect(() => {
-    stateRef.current = { onChange, onValueChange, decimalMaxLength, formattingOptions };
+    stateRef.current = { onChange, onValueChange, isAllowed, decimalMaxLength, formattingOptions };
 
     if (controlledValue === undefined) return;
-    const input = internalInputRef.current;
-    if (!input) return;
+    const input = internalInputRef.current as HTMLInputElement;
 
     const controlledValueString = String(controlledValue);
     const numInput = input as NumoraHTMLInputElement;
@@ -422,13 +406,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // caret to the end, defeating Blur mode. So while the input is focused in Blur mode,
     // format for editing (no separators, via the real formatOn); otherwise format for the
     // resting display (forced Change, with separators).
-    const isEditingInBlurMode =
-      formattingOptions.formatOn === FormatOn.Blur &&
-      typeof document !== 'undefined' &&
-      document.activeElement === input;
-    const { formatted } = isEditingInBlurMode
-      ? formatValueForDisplay(controlledValueString, decimalMaxLength, formattingOptions, 'canonical')
-      : formatForDisplay(controlledValueString, 'canonical');
+    const { formatted } = formatByFocus(input, controlledValueString, 'canonical');
     if (formatted === input.value) {
       numInput.formattedValue = formatted;
       return;
@@ -445,8 +423,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   //     sequence the strip-deferral depends on.
   // Options are read via stateRef (kept current by the layout effect above).
   useEffect(() => {
-    const input = internalInputRef.current;
-    if (!input) return;
+    const input = internalInputRef.current as HTMLInputElement;
     (input as NumoraHTMLInputElement).formattedValue = input.value;
 
     const onBeforeInput = (e: InputEvent) => {
@@ -456,29 +433,16 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
         stateRef.current.formattingOptions
       );
 
-      switch (result.type) {
-        case 'skip':
-          return;
-        case 'reject':
-          e.preventDefault();
-          return;
-        case 'handled': {
-          e.preventDefault();
-          const numInput = input as NumoraHTMLInputElement;
-          withInternalWrite(() =>
-            writeValuePreservingUndo(input, result.formatted, result.cursorPos)
-          );
-          numInput.formattedValue = result.formatted;
-          // Call onChange directly with the raw value - guaranteed delivery regardless of
-          // React's value-tracker diff (which can silently drop onChange when the tracker
-          // and input.value happen to align after concurrent renders).
-          const cb = stateRef.current.onChange;
-          if (cb) cb(createSyntheticChangeEvent(numInput, result.raw));
-          const vcb = stateRef.current.onValueChange;
-          if (vcb) vcb({ value: result.raw, formattedValue: result.formatted });
-          break;
-        }
-      }
+      if (result.type === 'skip') return;
+      e.preventDefault();
+      if (result.type === 'reject') return;
+      const numInput = input as NumoraHTMLInputElement;
+      withInternalWrite(() => writeValuePreservingUndo(input, result.formatted, result.cursorPos));
+      numInput.formattedValue = result.formatted;
+      // onChange is called directly with the raw value - guaranteed delivery regardless of
+      // React's value-tracker diff (which can silently drop onChange when the tracker
+      // and input.value happen to align after concurrent renders).
+      emit(numInput, result.raw, result.formatted);
     };
 
     const onMouseDown = (e: MouseEvent) => {
@@ -486,14 +450,6 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       // button would set the flag with no `click` to clear it, wedging pendingMouseStrip
       // true so every later focus skips the separator strip.
       if (e.button !== 0) return;
-      const opts = stateRef.current.formattingOptions;
-      if (
-        opts.formatOn !== FormatOn.Blur ||
-        !opts.thousandSeparator ||
-        opts.groupingStyle === GroupingStyle.None
-      ) {
-        return;
-      }
       pendingMouseStripRef.current = true;
     };
 
@@ -511,7 +467,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       input.removeEventListener('mousedown', onMouseDown);
       input.removeEventListener('click', onClick);
     };
-  }, [withInternalWrite, stripSeparatorsAndMapCaret]);
+  }, []);
 
   // Inline React event handlers. No useCallback wrappers: these are attached to a single
   // <input> in this component's JSX, so memoizing identity buys nothing and only forces
@@ -529,8 +485,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     if (inputType === InputType.HistoryUndo || inputType === InputType.HistoryRedo) {
       const raw = displayToRawValue(numInput.value, formattingOptions);
       numInput.formattedValue = numInput.value;
-      if (onChange) onChange(createSyntheticChangeEvent(numInput, raw));
-      if (onValueChange) onValueChange({ value: raw, formattedValue: numInput.value });
+      emit(numInput, raw, numInput.value);
       return;
     }
 
@@ -538,7 +493,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // is already mutated, so put back the last value Numora wrote (kept on formattedValue)
     // and report nothing: the value didn't change. Matches the vanilla input fallback.
     if (isScientificNotationRejected(numInput.value, formattingOptions)) {
-      const previous = numInput.formattedValue ?? '';
+      const previous = numInput.formattedValue as string;
       withInternalWrite(() => writeValuePreservingUndo(numInput, previous, previous.length));
       return;
     }
@@ -552,16 +507,14 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // value is landing in its RESTING state (e.g. an autofill into a blurred field), so
     // format for resting display (`formatForDisplay`, forced Change) - otherwise Blur mode
     // would leave an autofilled value ungrouped until the next focus+blur cycle.
-    const isFocused = typeof document !== 'undefined' && document.activeElement === numInput;
-    const { formatted, raw } = isFocused
-      ? formatValueForDisplay(numInput.value, decimalMaxLength, formattingOptions, 'foreign')
-      : formatForDisplay(numInput.value, 'foreign');
+    const isFocused = document.activeElement === numInput;
+    const { formatted, raw } = formatByFocus(numInput, numInput.value, 'foreign');
     if (formatted !== numInput.value) {
       // Same rank logic as the vanilla class: mapped while focused, at the end otherwise.
       // (Undo/redo returned above: the browser restores its own caret there.)
       const caret = computeCaretAfterRewrite(
         numInput.value,
-        Math.max(numInput.selectionStart ?? 0, numInput.selectionEnd ?? 0),
+        Math.max(numInput.selectionStart as number, numInput.selectionEnd as number),
         formatted,
         decimalMaxLength,
         formattingOptions,
@@ -571,8 +524,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       withInternalWrite(() => writeValuePreservingUndo(numInput, formatted, caret));
     }
     numInput.formattedValue = formatted;
-    if (onChange) onChange(createSyntheticChangeEvent(numInput, raw));
-    if (onValueChange) onValueChange({ value: raw, formattedValue: formatted });
+    emit(numInput, raw, formatted);
   };
 
   // skipOverThousandSeparatorOnDelete moves the cursor past separators before beforeinput
@@ -598,8 +550,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     withInternalWrite(() => writeValuePreservingUndo(numInput, result.formatted, result.cursorPos));
     numInput.formattedValue = result.formatted;
     if (onPaste) onPaste(e);
-    if (onChange) onChange(createSyntheticChangeEvent(numInput, result.raw));
-    if (onValueChange) onValueChange({ value: result.raw, formattedValue: result.formatted });
+    emit(numInput, result.raw, result.formatted);
   };
 
   const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
@@ -622,21 +573,19 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // blur-time concern independent of formatOn/grouping, matching the vanilla package.
     if (
       formattingOptions.formatOn === FormatOn.Blur ||
-      (formattingOptions.decimalMinLength ?? 0) > 0 ||
+      (formattingOptions.decimalMinLength as number) > 0 ||
       formattingOptions.enableNegative
     ) {
-      const decimalSep = formattingOptions.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR;
-      const { formatted, raw } = formatForDisplay(
-        normalizeNegativeZero(e.target.value, decimalSep)
-      );
       const numInput = e.target as NumoraHTMLInputElement;
+      const { formatted, raw } = formatForDisplay(
+        normalizeNegativeZero(numInput.value, formattingOptions.decimalSeparator as string)
+      );
       const valueChanged = formatted !== numInput.value;
       if (valueChanged) {
         withInternalWrite(() => writeValuePreservingUndo(numInput, formatted, formatted.length));
       }
       numInput.formattedValue = formatted;
-      if (valueChanged && onChange) onChange(createSyntheticChangeEvent(numInput, raw));
-      if (valueChanged && onValueChange) onValueChange({ value: raw, formattedValue: formatted });
+      if (valueChanged) emit(numInput, raw, formatted);
     }
     if (onBlur) onBlur(e);
   };
