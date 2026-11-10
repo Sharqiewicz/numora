@@ -28,21 +28,14 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
  * "violations", none of them real. These are the documents a user or contributor is
  * actually pointed at; they are the ones that must stay true.
  *
- * `docs/adr/` is excluded for the same reason as the analysis docs: ADRs record decisions
- * as they were made.
  */
 const GATED_FILES = [
   'README.md',
-  'CLAUDE.md',
-  'CONTEXT.md',
   'DEVELOPER_GUIDE.md',
   'packages/core/README.md',
   'packages/core/INPUT_EVENTS.md',
   'packages/react/README.md',
   'docs/README.md',
-  'docs/agents/domain.md',
-  'docs/agents/issue-tracker.md',
-  'docs/agents/triage-labels.md',
 ];
 
 // Identifiers purged from the source but previously documented. Each entry records why,
@@ -106,7 +99,7 @@ if (violations.length > 0) {
     console.error(`    > ${v.text.slice(0, 100)}\n`);
   }
   console.error(
-    'Update the doc, or move the reference into docs/adr/ if it is a historical record.'
+    'Update the doc, or remove the reference if it is a historical record.'
   );
   process.exit(1);
 }

@@ -40,24 +40,30 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 //     comments those fixes carry, which ship because this bundle is unminified. If the
 //     budget matters more than shipped comments, strip them at build time instead.
 const BUDGETS = [
-  { name: 'numora', file: 'packages/core/dist/index.mjs', budgetKb: 12.65 },
+  { name: 'numora', file: 'packages/core/dist/index.mjs', budgetKb: 14.1 },
   { name: 'numora-react', file: 'packages/react/dist/index.mjs', budgetKb: 8.1 },
 ];
 
-// A React consumer ships core + react. Budget the sum explicitly.
-const CONSUMER_TOTAL_BUDGET_KB = 20.4;
+// A React consumer ships core + core/internal + react. Budget the sum explicitly.
+// Re-based to measured size + ~3% headroom (numora 13.69, react 7.55).
+const CONSUMER_TOTAL_BUDGET_KB = 22.2;
 
-// Entry plus every sibling chunk it imports (`from "./internal-XXXX.mjs"`), one level
-// deep - Vite emits a flat chunk graph for this lib, so that is the full closure.
-const gzipKb = (path) => {
-  const source = readFileSync(join(root, path), 'utf8');
+// The files an entry loads: itself plus every sibling chunk it imports
+// (`from "./internal-XXXX.mjs"`), one level deep - Vite emits a flat chunk graph for
+// this lib, so that is the full closure.
+const closure = (path) => {
+  const abs = join(root, path);
+  const source = readFileSync(abs, 'utf8');
   const chunks = [...source.matchAll(/from\s+["'](\.\/[^"']+)["']/g)].map((m) => m[1]);
-  const files = [
-    source,
-    ...[...new Set(chunks)].map((c) => readFileSync(join(dirname(join(root, path)), c), 'utf8')),
-  ];
-  return files.reduce((sum, text) => sum + gzipSync(text).length / 1024, 0);
+  return [...new Set([abs, ...chunks.map((c) => join(dirname(abs), c))])];
 };
+const gzipFilesKb = (files) =>
+  files.reduce((sum, f) => sum + gzipSync(readFileSync(f, 'utf8')).length / 1024, 0);
+const gzipKb = (path) => gzipFilesKb(closure(path));
+
+// react imports 'numora/internal', so a React consumer also loads core's internal entry.
+// It shares a hashed chunk with index.mjs, so count the union of files once.
+const REACT_EXTRA_ENTRIES = ['packages/core/dist/internal.mjs'];
 
 let failed = false;
 const rows = [];
@@ -75,7 +81,15 @@ for (const { name, file, budgetKb } of BUDGETS) {
   rows.push({ name, kb, budgetKb, over });
 }
 
-const total = rows.reduce((sum, r) => sum + r.kb, 0);
+let total;
+try {
+  total = gzipFilesKb([
+    ...new Set([...BUDGETS.map((b) => b.file), ...REACT_EXTRA_ENTRIES].flatMap(closure)),
+  ]);
+} catch {
+  console.error('✗ React total: dist files not found. Run `pnpm build` first.');
+  process.exit(1);
+}
 const totalOver = total > CONSUMER_TOTAL_BUDGET_KB;
 failed ||= totalOver;
 

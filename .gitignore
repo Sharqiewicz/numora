@@ -2,9 +2,6 @@
 **/dist
 **/coverage
 **/build
-**/dist
-**/coverage
-**/build
 **/.netlify
 **/.tanstack
 **/.vscode/*
@@ -28,6 +25,7 @@ THE_IMPORTANT_BUG.md
 VIRAL.md
 june_audit.md
 plans/
+SEO_IMPROVE.md
 docs/agents
 docs/adr
 
