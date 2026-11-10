@@ -65,7 +65,6 @@ export function computeCaretAfterRewrite(
   formatted: string,
   decimalMaxLength: number,
   formattingOptions: FormattingOptions | undefined,
-  shouldRemoveThousandSeparators: boolean,
   focused: boolean
 ): number {
   if (!focused || caret >= value.length) return formatted.length;
@@ -73,14 +72,14 @@ export function computeCaretAfterRewrite(
     value,
     decimalMaxLength,
     formattingOptions,
-    shouldRemoveThousandSeparators,
+    undefined,
     'display'
   );
   const asForeign = sanitizeAndTrim(
     value,
     decimalMaxLength,
     formattingOptions,
-    shouldRemoveThousandSeparators,
+    undefined,
     'foreign'
   );
   if (asDisplay !== asForeign) return formatted.length;
@@ -88,7 +87,6 @@ export function computeCaretAfterRewrite(
     value.slice(0, caret),
     formatted,
     decimalMaxLength,
-    formattingOptions,
-    shouldRemoveThousandSeparators
+    formattingOptions
   );
 }

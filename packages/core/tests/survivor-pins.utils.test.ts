@@ -71,7 +71,6 @@ describe('caret.ts', () => {
         '1,234.00',
         18,
         en({ formatOn: FormatOn.Change }),
-        true,
         true
       )
     ).toBe(8);
@@ -79,7 +78,7 @@ describe('caret.ts', () => {
   it('L77: a value read differently as display and as foreign text sends the caret to the end', () => {
     // de-DE '1.5': display = grouping (15), foreign = decimal (1,5)
     expect(
-      computeCaretAfterRewrite('1.5', 1, '1,5', 18, de({ formatOn: FormatOn.Change }), true, true)
+      computeCaretAfterRewrite('1.5', 1, '1,5', 18, de({ formatOn: FormatOn.Change }), true)
     ).toBe(3);
   });
 });

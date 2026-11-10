@@ -87,13 +87,13 @@ describe('computeCaretFromEdit / computeCaretAfterRewrite (unit)', () => {
     expect(computeCaretFromEdit('1.23', '1.234', 8, de, true)).toBe(4);
   });
   it('fallback: unfocused goes to the end, focused maps the rank', () => {
-    expect(computeCaretAfterRewrite('1234', 2, '1,234', 8, en, true, false)).toBe(5);
-    expect(computeCaretAfterRewrite('1234', 2, '1,234', 8, en, true, true)).toBe(3);
+    expect(computeCaretAfterRewrite('1234', 2, '1,234', 8, en, false)).toBe(5);
+    expect(computeCaretAfterRewrite('1234', 2, '1,234', 8, en, true)).toBe(3);
   });
   it('fallback: a wholesale foreign re-read puts the caret at the end', () => {
     // de-DE field, browser value "1,234.5" (en-US text): detection reads it differently than display
     const v = '1,234.5';
-    expect(computeCaretAfterRewrite(v, 3, '1.234,5', 8, de, true, true)).toBe(7);
+    expect(computeCaretAfterRewrite(v, 3, '1.234,5', 8, de, true)).toBe(7);
   });
 });
 

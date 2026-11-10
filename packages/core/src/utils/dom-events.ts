@@ -116,9 +116,8 @@ export function applyInputFallback(
     writeValuePreservingUndo(el, previous, previous.length);
     return;
   }
-  const changeMode = opts.formatOn === FormatOn.Change;
   const { formatted, raw } = focused
-    ? formatInputValue(value, opts.decimalMaxLength, opts, changeMode, 'foreign')
+    ? formatInputValue(value, opts.decimalMaxLength, opts, undefined, 'foreign')
     : formatForDisplay(value, opts, 'foreign');
   if (formatted === value) return { value: raw, formattedValue: formatted };
   // Max of start/end works around a mobile-browser caret bug where selectionStart lags.
@@ -133,7 +132,6 @@ export function applyInputFallback(
       formatted,
       opts.decimalMaxLength,
       opts,
-      changeMode,
       focused
     )
   );

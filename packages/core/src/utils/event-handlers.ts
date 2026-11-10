@@ -5,7 +5,7 @@ import { NON_ASCII_DECIMAL_SEPARATOR_GLYPHS } from '../features/decimal-separato
 import { containsScientificNotation } from '../features/scientific-notation';
 import { skipOverThousandSeparatorOnDelete } from '../features/formatting';
 import { computeCaretFromEdit } from './caret';
-import { type FormattingOptions, FormatOn, InputType } from '../types';
+import { type FormattingOptions, InputType } from '../types';
 import { formatInputValue } from './format-utils';
 
 // Keys that, when typed, are candidates for remapping to the configured decimal separator:
@@ -239,12 +239,10 @@ export function handleOnBeforeInputNumoraInput(
     }
   }
 
-  const shouldRemoveThousandSeparators = formattingOptions?.formatOn === FormatOn.Change;
   const { formatted: newValue, raw: rawValue } = formatInputValue(
     intendedValue,
     decimalMaxLength,
-    formattingOptions,
-    shouldRemoveThousandSeparators
+    formattingOptions
   );
 
   if (formattingOptions?.isAllowed && !callIsAllowed(formattingOptions.isAllowed, rawValue)) {
@@ -268,8 +266,7 @@ export function handleOnBeforeInputNumoraInput(
           intendedValue.slice(0, intendedCursorPos),
           newValue,
           decimalMaxLength,
-          formattingOptions,
-          shouldRemoveThousandSeparators
+          formattingOptions
         )
       : intendedCursorPos;
 
