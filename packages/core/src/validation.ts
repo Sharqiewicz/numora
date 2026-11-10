@@ -17,13 +17,9 @@ export function validateNumoraInputOptions(options: NumoraInputValidationOptions
   assertEnumValue('formatOn', options.formatOn, [FormatOn.Blur, FormatOn.Change]);
   // Empty string is a valid thousandSeparator: runtime treats a falsy separator as
   // "grouping disabled" (applyDisplaySeparators / sanitization both gate on truthiness).
-  assertSingleChar('thousandSeparator', options.thousandSeparator, true);
-  assertSeparatorNotDigit('thousandSeparator', options.thousandSeparator);
-  assertSeparatorNotReserved('thousandSeparator', options.thousandSeparator);
+  assertSeparator('thousandSeparator', options.thousandSeparator, true);
   assertEnumValue('groupingStyle', options.groupingStyle, Object.values(GroupingStyle));
-  assertSingleChar('decimalSeparator', options.decimalSeparator);
-  assertSeparatorNotDigit('decimalSeparator', options.decimalSeparator);
-  assertSeparatorNotReserved('decimalSeparator', options.decimalSeparator);
+  assertSeparator('decimalSeparator', options.decimalSeparator);
   assertSeparatorConflict(options.thousandSeparator, options.decimalSeparator);
   assertBoolean('enableCompactNotation', options.enableCompactNotation);
   assertBoolean('enableScientificNotation', options.enableScientificNotation);
@@ -51,22 +47,6 @@ function assertPositiveInt(name: string, value: number | undefined): void {
   }
 }
 
-function assertSingleChar(name: string, value: string | undefined, allowEmpty = false): void {
-  if (value === undefined) return;
-  if (allowEmpty && value === '') return;
-  if (typeof value !== 'string' || value.length !== 1) {
-    throw new Error(`${name} must be a single character. Received: ${JSON.stringify(value)}`);
-  }
-}
-
-function assertSeparatorNotDigit(name: string, value: string | undefined): void {
-  // A digit separator is indistinguishable from a real digit at runtime: the strip/insert
-  // logic would treat every matching digit in the value as a separator and scramble it.
-  if (/[0-9]/.test(value!)) {
-    throw new Error(`${name} cannot be a digit. Received: ${JSON.stringify(value)}`);
-  }
-}
-
 // Reserved parser-grammar characters: the sign (- +), the exponent marker (e E), and the
 // compact-notation suffixes (k K m M b B t T). Accepting any of these as a separator makes
 // the value ambiguous - the same character means something different to the sanitization
@@ -74,10 +54,18 @@ function assertSeparatorNotDigit(name: string, value: string | undefined): void 
 // U+202F NNBSP, used by locales such as fr-FR) is intentionally NOT reserved.
 const RESERVED_SEPARATOR_CHARS = /[-+eEkKmMbBtT]/;
 
-function assertSeparatorNotReserved(name: string, value: string | undefined): void {
-  if (value !== undefined && RESERVED_SEPARATOR_CHARS.test(value)) {
+function assertSeparator(name: string, value: string | undefined, allowEmpty = false): void {
+  if (value === undefined || (allowEmpty && value === '')) return;
+  const received = `Received: ${JSON.stringify(value)}`;
+  if (typeof value !== 'string' || value.length !== 1) {
+    throw new Error(`${name} must be a single character. ${received}`);
+  }
+  // A digit separator is indistinguishable from a real digit at runtime: the strip/insert
+  // logic would treat every matching digit in the value as a separator and scramble it.
+  if (/[0-9]/.test(value)) throw new Error(`${name} cannot be a digit. ${received}`);
+  if (RESERVED_SEPARATOR_CHARS.test(value)) {
     throw new Error(
-      `${name} cannot be one of the reserved characters -+eEkKmMbBtT (sign, exponent, or compact-notation suffix). Received: ${JSON.stringify(value)}`
+      `${name} cannot be one of the reserved characters -+eEkKmMbBtT (sign, exponent, or compact-notation suffix). ${received}`
     );
   }
 }
