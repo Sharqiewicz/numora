@@ -6,7 +6,7 @@ import {
 import { normalizeDigits } from './fullwidth-digits';
 import type { GroupingStyle } from '../types';
 
-export interface ForeignFormatOptions {
+interface ForeignFormatOptions {
   decimalSeparator?: string;
   thousandSeparator?: string;
   groupingStyle?: GroupingStyle;

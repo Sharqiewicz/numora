@@ -243,14 +243,24 @@ export class NumoraInput {
     );
     add<KeyboardEvent>('keydown', (e) => handleOnKeyDownNumoraInput(e, opts));
     add<ClipboardEvent>('paste', (e) => this.emit(applyPaste(e, opts)));
-    add('focus', () => (this.isFocused = true));
+    add('focus', () => {
+      this.isFocused = true;
+    });
     add('blur', () => {
       this.isFocused = false;
       // Only a raw change notifies: regrouping alone is cosmetic.
       const values = applyBlur(el, opts);
       this.emit(values?.rawChanged ? values : undefined);
     });
-    this.cleanups.push(attachFocusStrip(el, () => opts, () => (this.lastValue = el.value)));
+    this.cleanups.push(
+      attachFocusStrip(
+        el,
+        () => opts,
+        () => {
+          this.lastValue = el.value;
+        }
+      )
+    );
   }
 
   /**

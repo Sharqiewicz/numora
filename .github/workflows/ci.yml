@@ -47,3 +47,7 @@ jobs:
 
       - name: Docs drift
         run: pnpm docs:drift
+
+      # Unused files, exports and dependencies in packages/core and packages/react.
+      - name: Unused code
+        run: pnpm knip

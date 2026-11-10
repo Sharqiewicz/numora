@@ -195,10 +195,27 @@ export function attachFocusStrip(
     onStrip();
   };
   const listeners: [string, (e: Event) => void][] = [
-    ['mousedown', (e) => (pendingMouse ||= (e as MouseEvent).button === 0)],
-    ['click', () => pendingMouse && ((pendingMouse = false), strip())],
+    [
+      'mousedown',
+      (e) => {
+        if ((e as MouseEvent).button === 0) pendingMouse = true;
+      },
+    ],
+    [
+      'click',
+      () => {
+        if (!pendingMouse) return;
+        pendingMouse = false;
+        strip();
+      },
+    ],
     ['focus', () => pendingMouse || strip()],
-    ['blur', () => (pendingMouse = false)],
+    [
+      'blur',
+      () => {
+        pendingMouse = false;
+      },
+    ],
   ];
   for (const [type, fn] of listeners) el.addEventListener(type, fn);
   return () => {

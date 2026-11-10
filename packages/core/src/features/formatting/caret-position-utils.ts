@@ -14,7 +14,7 @@ import type { FormattingOptions } from '../../types';
  * Result of computing a focus-strip: the raw value with separators removed and the
  * caret positions mapped from the formatted display indices to the raw indices.
  */
-export interface StripSeparatorsResult {
+interface StripSeparatorsResult {
   raw: string;
   rawStart: number;
   rawEnd: number;

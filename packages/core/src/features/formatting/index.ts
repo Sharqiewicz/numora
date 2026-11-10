@@ -17,7 +17,6 @@ export {
   computeStripSeparatorsResult,
   skipOverThousandSeparatorOnDelete,
 } from './caret-position-utils';
-export type { StripSeparatorsResult } from './caret-position-utils';
 
 // === DOM WRITES (undo-preserving) ===
 export {

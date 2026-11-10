@@ -22,10 +22,12 @@
     "clean": "pnpm --filter \"./packages/*\" clean && pnpm --filter \"./docs\" clean",
     "docs:dev": "pnpm --filter \"./docs\" dev",
     "docs:build": "pnpm --filter \"./docs\" build",
-    "dev:all": "pnpm --filter numora build && pnpm --parallel --filter \"./packages/*\" --filter \"./docs\" dev"
+    "dev:all": "pnpm --filter numora build && pnpm --parallel --filter \"./packages/*\" --filter \"./docs\" dev",
+    "knip": "knip --no-progress"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
+    "knip": "^5.88.1",
     "typescript": "^5.8.2"
   }
 }

@@ -17,7 +17,7 @@ export function isDigit(ch: string): boolean {
  * is the index just past the FIRST decimal separator consumed while building it (equal to
  * `end` for a plain digit run, which consumed none).
  */
-export interface MantissaMatch {
+interface MantissaMatch {
   end: number;
   sepEnd: number;
 }

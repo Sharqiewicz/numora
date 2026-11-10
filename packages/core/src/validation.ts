@@ -2,7 +2,7 @@ import { FormatOn, GroupingStyle, type FormattingOptions, type NumoraValues } fr
 
 // Derived from FormattingOptions so adding a new field to that interface automatically
 // flows into validation - no more drift between the option surface and the validator.
-export type NumoraInputValidationOptions = FormattingOptions & {
+type NumoraInputValidationOptions = FormattingOptions & {
   onChange?: (values: NumoraValues) => void;
 };
 
