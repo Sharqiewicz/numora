@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
+import { RhfLocalePlayground } from '@/components/RhfLocalePlayground';
 
 export const Route = createFileRoute('/docs/numora-react/integrations/react-hook-form')({
   head: () => ({
@@ -87,8 +88,8 @@ function ReactHookFormIntegration() {
       </p>
 
       <p>
-        <code>numora-react</code> does not require <code>react-hook-form</code> as a dependency.
-        It works with React Hook Form when it is present in your project.
+        <code>numora-react</code> does not require <code>react-hook-form</code> as a dependency. It
+        works with React Hook Form when it is present in your project.
       </p>
 
       <h2>Controller pattern (recommended)</h2>
@@ -247,6 +248,13 @@ function SwapForm() {
   )
 }`}
       </CodeBlock>
+
+      <h2>Try it with any locale</h2>
+      <p>
+        A live React Hook Form form. Switch the locale and compare what the field shows with what
+        the form holds: the form state is the same raw value in every locale.
+      </p>
+      <RhfLocalePlayground />
 
       <h2>Why not register?</h2>
       <p>
