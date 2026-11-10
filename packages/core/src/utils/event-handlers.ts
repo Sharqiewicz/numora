@@ -314,15 +314,16 @@ export function handleOnPasteNumoraInput(
   // through the ordinary pipeline, and the caret math below uses its (rewritten) length.
   const rawClipboard = e.clipboardData?.getData('text/plain') || '';
   const canonicalClipboard = normalizeForeignFormat(rawClipboard, formattingOptions);
-  // Scientific notation is on unless explicitly disabled. With it off, the sanitizer would
-  // drop the `e` and turn `1.5e-7` into `1.57`, so refuse the paste instead.
-  if (isScientificNotationRejected(canonicalClipboard, formattingOptions)) {
-    return { type: 'reject' };
-  }
   const clipboardData = canonicalToDisplayText(canonicalClipboard, separators.decimalSeparator);
   const selStart = selectionStart ?? 0;
   const selEnd = selectionEnd ?? 0;
   const combinedValue = value.slice(0, selStart) + clipboardData + value.slice(selEnd);
+  // Scientific notation is on unless explicitly disabled. With it off, the sanitizer would
+  // drop the `e` and turn `1.5e-7` into `1.57`, so refuse the paste instead. Check the
+  // combined value: `e-7` pasted after `1.5` only forms a number once spliced in.
+  if (isScientificNotationRejected(combinedValue, formattingOptions)) {
+    return { type: 'reject' };
+  }
 
   // Always strip thousand separators during paste: pasted content may contain separators
   // and the current value may have separators (blur mode); both need to be parsed together.

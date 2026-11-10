@@ -239,15 +239,15 @@ describe('expandScientificNotation', () => {
       // fix the "1e3" portion silently expanded to "1000" and the unmatched ".5" was
       // concatenated by the pipeline, producing "1000.5" - a fabricated magnitude.
       expect(expandScientificNotation('1e3.5')).not.toBe('1000.5');
-      expect(expandScientificNotation('1e3.5')).toBe('.5');
+      expect(expandScientificNotation('1e3.5')).toBe('');
     });
 
     it('should reject a negative-exponent token followed by a fractional tail', () => {
-      expect(expandScientificNotation('1e-3.5')).toBe('.5');
+      expect(expandScientificNotation('1e-3.5')).toBe('');
     });
 
     it('should reject a signed base followed by a fractional tail', () => {
-      expect(expandScientificNotation('-1e3.5')).toBe('.5');
+      expect(expandScientificNotation('-1e3.5')).toBe('');
     });
 
     it('should still expand a token where the tail digit is not adjacent to a decimal separator', () => {
