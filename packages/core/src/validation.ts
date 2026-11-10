@@ -11,8 +11,8 @@ type NumoraInputValidationOptions = FormattingOptions & {
  * Throws descriptive errors for invalid values.
  */
 export function validateNumoraInputOptions(options: NumoraInputValidationOptions): void {
-  assertNonNegativeInt('decimalMaxLength', options.decimalMaxLength);
-  assertNonNegativeInt('decimalMinLength', options.decimalMinLength);
+  assertInt('decimalMaxLength', options.decimalMaxLength, 0, 'a non-negative integer');
+  assertInt('decimalMinLength', options.decimalMinLength, 0, 'a non-negative integer');
   assertDecimalLengths(options.decimalMinLength, options.decimalMaxLength);
   assertEnumValue('formatOn', options.formatOn, [FormatOn.Blur, FormatOn.Change]);
   // Empty string is a valid thousandSeparator: runtime treats a falsy separator as
@@ -21,29 +21,20 @@ export function validateNumoraInputOptions(options: NumoraInputValidationOptions
   assertEnumValue('groupingStyle', options.groupingStyle, Object.values(GroupingStyle));
   assertSeparator('decimalSeparator', options.decimalSeparator);
   assertSeparatorConflict(options.thousandSeparator, options.decimalSeparator);
-  assertBoolean('enableCompactNotation', options.enableCompactNotation);
-  assertBoolean('enableScientificNotation', options.enableScientificNotation);
-  assertBoolean('enableNegative', options.enableNegative);
-  assertBoolean('enableLeadingZeros', options.enableLeadingZeros);
-  assertBoolean('autoAddLeadingZero', options.autoAddLeadingZero);
-  assertPositiveInt('maxLength', options.maxLength);
-  assertFunction('isAllowed', options.isAllowed);
-  assertFunction('onChange', options.onChange);
+  assertType('enableCompactNotation', options.enableCompactNotation, 'boolean');
+  assertType('enableScientificNotation', options.enableScientificNotation, 'boolean');
+  assertType('enableNegative', options.enableNegative, 'boolean');
+  assertType('enableLeadingZeros', options.enableLeadingZeros, 'boolean');
+  assertType('autoAddLeadingZero', options.autoAddLeadingZero, 'boolean');
+  assertInt('maxLength', options.maxLength, 1, 'a positive integer (>= 1)');
+  assertType('isAllowed', options.isAllowed, 'function');
+  assertType('onChange', options.onChange, 'function');
 }
 
-function assertNonNegativeInt(name: string, value: number | undefined): void {
+function assertInt(name: string, value: number | undefined, min: number, expected: string): void {
   if (value === undefined) return;
-  if (!Number.isInteger(value) || value < 0) {
-    throw new Error(`${name} must be a non-negative integer. Received: ${JSON.stringify(value)}`);
-  }
-}
-
-function assertPositiveInt(name: string, value: number | undefined): void {
-  if (value === undefined) return;
-  if (!Number.isInteger(value) || value < 1) {
-    throw new Error(
-      `${name} must be a positive integer (>= 1). Received: ${JSON.stringify(value)}`
-    );
+  if (!Number.isInteger(value) || value < min) {
+    throw new Error(`${name} must be ${expected}. Received: ${JSON.stringify(value)}`);
   }
 }
 
@@ -70,17 +61,10 @@ function assertSeparator(name: string, value: string | undefined, allowEmpty = f
   }
 }
 
-function assertBoolean(name: string, value: boolean | undefined): void {
+function assertType(name: string, value: unknown, type: 'boolean' | 'function'): void {
   if (value === undefined) return;
-  if (typeof value !== 'boolean') {
-    throw new Error(`${name} must be a boolean. Received: ${JSON.stringify(value)}`);
-  }
-}
-
-function assertFunction(name: string, value: unknown): void {
-  if (value === undefined) return;
-  if (typeof value !== 'function') {
-    throw new Error(`${name} must be a function. Received: ${JSON.stringify(value)}`);
+  if (typeof value !== type) {
+    throw new Error(`${name} must be a ${type}. Received: ${JSON.stringify(value)}`);
   }
 }
 

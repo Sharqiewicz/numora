@@ -100,7 +100,6 @@ export class NumoraInput {
    * @param options - Numora formatting options plus any native `<input>` attributes.
    */
   constructor(target: HTMLInputElement | HTMLElement, options: NumoraInputOptions) {
-    const container = target;
     const {
       decimalMaxLength = DEFAULT_DECIMAL_MAX_LENGTH,
       decimalMinLength = DEFAULT_DECIMAL_MIN_LENGTH,
@@ -157,7 +156,7 @@ export class NumoraInput {
     // separator at runtime and silently swallow the decimal part.
     validateNumoraInputOptions(this.resolvedOptions);
 
-    this.createInputElement(container, nativeProps, value, defaultValue);
+    this.createInputElement(target, nativeProps, value, defaultValue);
     this.setupEventListeners();
     this.setDefaultValue();
     this.lastValue = this.element.value;
