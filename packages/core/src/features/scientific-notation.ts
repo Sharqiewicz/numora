@@ -146,19 +146,11 @@ function expandPositiveExponent(
   exponent: number,
   decimalSeparator: string
 ): string {
-  const allDigits = integerPart + decimalPart;
-  const currentDecimalPosition = decimalPart.length;
-
-  if (exponent <= currentDecimalPosition) {
-    const newIntegerPart = allDigits.slice(0, integerPart.length + exponent);
-    const newDecimalPart = allDigits.slice(integerPart.length + exponent);
-    return newDecimalPart
-      ? `${newIntegerPart}${decimalSeparator}${newDecimalPart}`
-      : newIntegerPart;
-  }
-
-  const zerosToAdd = exponent - currentDecimalPosition;
-  return allDigits + '0'.repeat(zerosToAdd);
+  // Move the point `exponent` places right, padding with zeros when the digits run out.
+  const digits = (integerPart + decimalPart).padEnd(integerPart.length + exponent, '0');
+  const newIntegerPart = digits.slice(0, integerPart.length + exponent);
+  const newDecimalPart = digits.slice(integerPart.length + exponent);
+  return newDecimalPart ? `${newIntegerPart}${decimalSeparator}${newDecimalPart}` : newIntegerPart;
 }
 
 function expandNegativeExponent(
@@ -167,21 +159,12 @@ function expandNegativeExponent(
   exponent: number,
   decimalSeparator: string
 ): string {
-  const allDigits = integerPart + decimalPart;
-  const currentDecimalPosition = integerPart.length;
-
-  const newDecimalPosition = currentDecimalPosition - exponent;
-
-  if (newDecimalPosition <= 0) {
-    const leadingZeros = Math.abs(newDecimalPosition);
-    const result = `0${decimalSeparator}${'0'.repeat(leadingZeros)}${allDigits}`;
-    return trimTrailingZeroRun(result, decimalSeparator);
-  }
-
-  // The exponent is > 0 here (expandToken returns early for 0), so the new decimal
-  // position is always strictly inside the integer part.
-  const newIntegerPart = allDigits.slice(0, newDecimalPosition);
-  const newDecimalPart = allDigits.slice(newDecimalPosition);
-  const result = `${newIntegerPart}${decimalSeparator}${newDecimalPart}`;
-  return trimTrailingZeroRun(result, decimalSeparator);
+  // Move the point `exponent` places left, padding with zeros when the digits run out.
+  const shortfall = Math.max(0, exponent - integerPart.length);
+  const digits = '0'.repeat(shortfall) + integerPart + decimalPart;
+  const pointAt = integerPart.length + shortfall - exponent;
+  return trimTrailingZeroRun(
+    `${digits.slice(0, pointAt) || '0'}${decimalSeparator}${digits.slice(pointAt)}`,
+    decimalSeparator
+  );
 }
