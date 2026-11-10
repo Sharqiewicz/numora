@@ -35,7 +35,6 @@ const GATED_FILES = [
   'packages/core/README.md',
   'packages/core/INPUT_EVENTS.md',
   'packages/react/README.md',
-  'docs/README.md',
 ];
 
 // Identifiers purged from the source but previously documented. Each entry records why,
