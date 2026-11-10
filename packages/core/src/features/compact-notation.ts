@@ -6,17 +6,7 @@ import {
   failedMantissaResumeIndex,
   isDigit,
   matchMantissaAt,
-  trimTrailingZeroRun,
 } from '../utils/mantissa-scan';
-
-// Remove leading zeros from integer part
-const LEADING_ZEROS_REGEX = /^0+/;
-
-// Remove leading zeros after sign, preserving at least one non-zero digit
-const LEADING_ZERO_REPLACE_REGEX = /^(-?)0+([1-9])/;
-
-// Match strings that are all zeros (with optional sign)
-const ALL_ZEROS_REGEX = /^-?0+$/;
 
 // Cheap presence check so the scan below never runs on the dominant case (no k/m/b/t
 // anywhere in the value).
@@ -85,11 +75,9 @@ export function expandCompactNotation(value: string, decimalSeparator: string = 
     const mantissaEnd = match.end;
 
     let s = mantissaEnd;
-    while (s < len && WHITESPACE_REGEX.test(value[s])) s++;
+    while (WHITESPACE_REGEX.test(value.charAt(s))) s++;
 
-    const suffixChar = value[s];
-    const suffixLower = suffixChar !== undefined ? suffixChar.toLowerCase() : '';
-    const zerosToAdd = ZERO_COUNTS[suffixLower];
+    const zerosToAdd = ZERO_COUNTS[value.charAt(s).toLowerCase()];
 
     // A suffix immediately followed by a digit or another decimal separator is not a
     // standalone compact-notation token - it's a mid-number keystroke (e.g. typing "k" in
@@ -118,44 +106,16 @@ export function expandCompactNotation(value: string, decimalSeparator: string = 
   return out;
 }
 
-function expandToken(
-  number: string,
-  zerosToAdd: number,
-  decimalSeparator: string
-): string {
+function expandToken(number: string, zerosToAdd: number, decimalSeparator: string): string {
   const [integerPart, decimalPart = ''] = number.split(decimalSeparator);
 
-  // Remove leading zeros from integer part (but keep at least one digit if it's all zeros)
-  const cleanedInteger = integerPart.replace(LEADING_ZEROS_REGEX, '') || '0';
+  // Shift the decimal point right by `zerosToAdd` places, padding with zeros.
+  const shifted = (integerPart + decimalPart.slice(0, zerosToAdd).padEnd(zerosToAdd, '0')).replace(
+    /^0+/,
+    ''
+  );
+  // Whatever is left of the fraction, without trailing zeros.
+  const remainder = decimalPart.slice(zerosToAdd).replace(/0+$/, '');
 
-  // Multiply by adding zeros: move decimal point right by zeroCount positions
-  let result: string;
-  if (decimalPart.length === 0) {
-    // No decimal part: just append zeros
-    result = cleanedInteger + '0'.repeat(zerosToAdd);
-  } else if (decimalPart.length <= zerosToAdd) {
-    // Decimal part fits within zeros to add: move all decimals to integer part
-    const zerosNeeded = zerosToAdd - decimalPart.length;
-    result = cleanedInteger + decimalPart + '0'.repeat(zerosNeeded);
-  } else {
-    // Decimal part is longer: split it
-    const decimalToMove = decimalPart.slice(0, zerosToAdd);
-    const remainingDecimal = decimalPart.slice(zerosToAdd);
-    result = cleanedInteger + decimalToMove + decimalSeparator + remainingDecimal;
-  }
-
-  // Remove leading zeros from the final result (but keep at least one digit)
-  result = result.replace(LEADING_ZERO_REPLACE_REGEX, '$1$2');
-
-  // If result is all zeros, keep one zero
-  if (ALL_ZEROS_REGEX.test(result)) {
-    result = '0';
-  }
-
-  // Trim trailing zeros from decimal part only (if decimal separator exists)
-  if (result.includes(decimalSeparator)) {
-    result = trimTrailingZeroRun(result, decimalSeparator);
-  }
-
-  return result;
+  return (shifted || '0') + (remainder ? decimalSeparator + remainder : '');
 }

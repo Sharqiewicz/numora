@@ -3,6 +3,7 @@ import {
   normalizeDecimalSeparators,
   NON_ASCII_DECIMAL_SEPARATOR_GLYPHS,
 } from '../src/features/decimal-separators';
+import { sanitizeNumoraInput } from '../src/features/sanitization';
 
 describe('✅ normalizeDecimalSeparators (A2-05)', () => {
   it('maps the Arabic decimal separator (٫) to the configured decimalSeparator', () => {
@@ -40,7 +41,10 @@ describe('✅ normalizeDecimalSeparators (A2-05)', () => {
   it('does not remap a glyph that equals the configured thousandSeparator', () => {
     // A config that (unusually) reuses the fullwidth comma as its grouping mark must keep
     // that glyph untouched rather than have it silently promoted to a decimal point.
-    expect(normalizeDecimalSeparators('1，234，5', '.', '，')).toBe('1，234，5');
+    // The pipeline strips the thousand separator before glyph normalization runs.
+    expect(sanitizeNumoraInput('1，234，5', { thousandSeparator: '，', decimalSeparator: '.' })).toBe(
+      '12345'
+    );
   });
 
   it('defaults decimalSeparator to "." when omitted', () => {

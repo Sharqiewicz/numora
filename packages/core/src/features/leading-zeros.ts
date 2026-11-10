@@ -18,33 +18,11 @@
  * removeLeadingZeros("00,5", ",")  // "0,5"
  */
 export function removeLeadingZeros(value: string, decimalSeparator: string = '.'): string {
-  if (!value || value === '0' || value === '-0' || value === '-' || value === decimalSeparator) {
-    return value;
-  }
-
-  const isNegative = value.startsWith('-');
-  const absoluteValue = isNegative ? value.slice(1) : value;
-
-  if (absoluteValue === decimalSeparator) {
-    return value;
-  }
-
+  const sign = value.startsWith('-') ? '-' : '';
+  const absoluteValue = value.slice(sign.length);
   const decimalIdx = absoluteValue.indexOf(decimalSeparator);
-  if (decimalIdx !== -1) {
-    const integerPart = absoluteValue.slice(0, decimalIdx);
-    const decimalPart = absoluteValue.slice(decimalIdx + 1);
-    if (integerPart) {
-      const cleanedInteger = integerPart.replace(/^0+/, '') || '0';
-      const result = cleanedInteger + decimalSeparator + decimalPart;
-      return isNegative ? '-' + result : result;
-    }
-    return value;
-  }
-
-  if (absoluteValue.startsWith('0')) {
-    const withoutLeadingZeros = absoluteValue.replace(/^0+/, '') || '0';
-    return isNegative ? '-' + withoutLeadingZeros : withoutLeadingZeros;
-  }
-
-  return value;
+  const integerPart = decimalIdx === -1 ? absoluteValue : absoluteValue.slice(0, decimalIdx);
+  // No integer digits ('', '-', '.5', '-.5'): nothing to strip.
+  if (!integerPart) return value;
+  return sign + (integerPart.replace(/^0+/, '') || '0') + absoluteValue.slice(integerPart.length);
 }

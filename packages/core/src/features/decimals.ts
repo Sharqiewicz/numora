@@ -13,27 +13,6 @@ export function getSeparators(
   };
 }
 
-interface NumberParts {
-  sign: string;
-  integer: string;
-  decimal: string;
-}
-
-/**
- * Splits a numeric string into sign, integer and decimal parts.
- */
-function splitNumber(value: string, decimalSeparator: string): NumberParts {
-  const isNegative = value.startsWith('-');
-  const absoluteValue = isNegative ? value.slice(1) : value;
-  const [integer = '', decimal = ''] = absoluteValue.split(decimalSeparator);
-
-  return {
-    sign: isNegative ? '-' : '',
-    integer,
-    decimal,
-  };
-}
-
 /**
  * Trims decimals to a maximum length.
  */
@@ -42,17 +21,16 @@ export const trimToDecimalMaxLength = (
   decimalMaxLength: number,
   decimalSeparator: string = DEFAULT_DECIMAL_SEPARATOR
 ): string => {
-  const { sign, integer, decimal } = splitNumber(value, decimalSeparator);
+  const [integer, decimal = ''] = value.split(decimalSeparator);
 
   // No decimals allowed at all: drop the separator outright, even when the fraction is
   // empty (e.g. "1." -> "1"), instead of only trimming an existing fraction. Reconstructing
-  // from sign+integer is a no-op for values that never had a separator.
-  if (decimalMaxLength === 0) return `${sign}${integer}`;
+  // from the integer is a no-op for values that never had a separator.
+  if (decimalMaxLength === 0) return integer;
 
   if (!decimal) return value;
 
-  const trimmedDecimal = decimal.slice(0, decimalMaxLength);
-  return `${sign}${integer}${decimalSeparator}${trimmedDecimal}`;
+  return `${integer}${decimalSeparator}${decimal.slice(0, decimalMaxLength)}`;
 };
 
 /**
@@ -64,19 +42,12 @@ export const removeExtraDecimalSeparators = (
 ): string => {
   const firstIdx = value.indexOf(decimalSeparator);
   if (firstIdx === -1) return value;
-  // Early exit: tail is empty (e.g. "123."), nothing to clean
-  if (firstIdx === value.length - 1) return value;
 
-  const head = value.slice(0, firstIdx + 1);
-  const tail = value.slice(firstIdx + 1);
-
-  // Single pass dropping every ',', '.' and decimal separator from the tail.
-  let cleaned = '';
-  for (let i = 0; i < tail.length; i++) {
-    const ch = tail[i];
-    if (ch !== ',' && ch !== '.' && ch !== decimalSeparator) cleaned += ch;
-  }
-  return head + cleaned;
+  // Drop every decimal separator, ',' and '.' after the first separator.
+  return (
+    value.slice(0, firstIdx + 1) +
+    value.slice(firstIdx + 1).split(decimalSeparator).join('').replace(/[,.]/g, '')
+  );
 };
 
 /**
@@ -87,18 +58,13 @@ export const ensureMinDecimals = (
   minDecimals: number = 0,
   decimalSeparator: string = DEFAULT_DECIMAL_SEPARATOR
 ): string => {
-  if (minDecimals <= 0) return value;
-
   // Nothing to pad: '', '-', '.', '-.' carry no digit, so padding them would fabricate a
   // number (e.g. '' -> '.00') out of a field that is actually empty or mid-entry.
   if (!/\d/.test(value)) return value;
 
-  const { sign, integer, decimal } = splitNumber(value, decimalSeparator);
+  const [integer, decimal = ''] = value.split(decimalSeparator);
 
-  if (decimal.length >= minDecimals) {
-    return value;
-  }
+  if (decimal.length >= minDecimals) return value;
 
-  const paddedDecimal = decimal.padEnd(minDecimals, '0');
-  return `${sign}${integer}${decimalSeparator}${paddedDecimal}`;
+  return `${integer}${decimalSeparator}${decimal.padEnd(minDecimals, '0')}`;
 };

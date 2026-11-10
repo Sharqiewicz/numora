@@ -70,7 +70,7 @@ describe('Formatting Properties', () => {
           ),
           ([intPart, decPart]) => {
             const numStr = `${intPart}.${decPart}`;
-            const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Thousand, false, '.');
+            const formatted = formatWithSeparators(numStr, ',', GroupingStyle.Thousand, '.');
 
             // Extract digits from both parts
             const [formattedInt, formattedDec] = formatted.split('.');

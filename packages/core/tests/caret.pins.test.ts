@@ -26,7 +26,7 @@ const capped = makeOptions({ maxLength: 4 });
 
 describe('caret pins — Lakh/Wan deletion hug-side (emergent from select)', () => {
   // rank/select hugs the LEFT of a regrouped separator on deletion (vs the old algorithm's
-  // right). This is NOT a grouping-style special case: `positionAfterRank` returns the index
+  // right). This is NOT a grouping-style special case: `positionAfterMatchedPrefix` returns the index
   // just after the k-th significant char, and when the next char is an injected separator
   // that index sits between digit and separator. Lakh/Wan only make it visible more often,
   // because their group sizes are irregular. Changing it means changing the select

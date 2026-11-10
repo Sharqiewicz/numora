@@ -71,14 +71,14 @@ export function skipOverThousandSeparatorOnDelete(
   }
 
   const { selectionStart, selectionEnd, value } = inputElement;
-  if (selectionStart === null || selectionEnd === null || selectionStart !== selectionEnd) {
+  if (selectionStart === null || selectionStart !== selectionEnd) {
     return;
   }
 
   const separator = formattingOptions.thousandSeparator;
 
   // Backspace: caret moves left past the separator.
-  if (e.key === 'Backspace' && selectionStart > 0 && value[selectionStart - 1] === separator) {
+  if (e.key === 'Backspace' && value[selectionStart - 1] === separator) {
     inputElement.setSelectionRange(selectionStart - 1, selectionStart - 1);
   }
 

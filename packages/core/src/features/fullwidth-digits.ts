@@ -56,20 +56,13 @@ function digitValue(code: number): string | undefined {
  */
 export function normalizeDigits(value: string): string {
   // Fast path: nothing at or above the first non-ASCII digit block (U+0660).
-  let needsWork = false;
-  for (let i = 0; i < value.length; i++) {
-    if (value.charCodeAt(i) >= 0x660) {
-      needsWork = true;
-      break;
-    }
-  }
-  if (!needsWork) return value;
+  if (!/[^\u0000-\u065f]/.test(value)) return value;
 
   let out = '';
   // for...of iterates by code point, so surrogate pairs arrive as one character.
   for (const char of value) {
     const code = char.codePointAt(0) as number;
-    out += (code >= 0x660 ? digitValue(code) : undefined) ?? char;
+    out += digitValue(code) ?? char;
   }
   return out;
 }

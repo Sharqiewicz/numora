@@ -19,10 +19,7 @@ const isDigit = (c: string): boolean => c >= '0' && c <= '9';
 
 function mapGlyphs(value: string, glyphs: readonly string[], to: string, keep: Array<string | undefined>) {
   let out = value;
-  for (const g of glyphs) {
-    if (keep.indexOf(g) !== -1 || out.indexOf(g) === -1) continue;
-    out = out.split(g).join(to);
-  }
+  for (const g of glyphs) if (keep.indexOf(g) === -1) out = out.split(g).join(to);
   return out;
 }
 
@@ -68,54 +65,44 @@ export function normalizeForeignFormat(value: string, options?: ForeignFormatOpt
 
   const customDecimal =
     decimalSeparator !== '.' && decimalSeparator !== ',' ? decimalSeparator : undefined;
-  const isMark = (c: string): boolean =>
-    c === '.' || c === ',' || c === ARABIC_DECIMAL || (customDecimal !== undefined && c === customDecimal);
-  const isDefiniteDecimal = (c: string): boolean =>
-    c === ARABIC_DECIMAL || (customDecimal !== undefined && c === customDecimal);
+  const isDefiniteDecimal = (c: string): boolean => c === ARABIC_DECIMAL || c === customDecimal;
+  const isMark = (c: string): boolean => c === '.' || c === ',' || isDefiniteDecimal(c);
 
   // Locate the first number: a run of digits and marks.
   let start = 0;
   while (start < v.length && !isDigit(v.charAt(start)) && !isMark(v.charAt(start))) start++;
-  if (start === v.length) return v;
   let end = start;
-  while (end < v.length && (isDigit(v.charAt(end)) || isMark(v.charAt(end)))) end++;
+  while (isDigit(v.charAt(end)) || isMark(v.charAt(end))) end++;
 
   const token = v.slice(start, end);
   // Marks without a single digit ("....") carry no number to interpret; leave them for
   // the rest of the pipeline.
   if (!/[0-9]/.test(token)) return v;
-  let decimalIdx = -1; // index in `token` of the decimal mark, -1 when there is none
-
   let lastDefinite = -1;
-  let dots = 0;
-  let commas = 0;
-  let lastDot = -1;
-  let lastComma = -1;
+  let marks = 0; // plain '.' / ',' marks
+  let last = -1; // index of the last plain mark
+  let kinds = ''; // which plain marks appear
   for (let i = 0; i < token.length; i++) {
     const c = token.charAt(i);
     if (isDefiniteDecimal(c)) lastDefinite = i;
-    else if (c === '.') {
-      dots++;
-      lastDot = i;
-    } else if (c === ',') {
-      commas++;
-      lastComma = i;
+    else if (c === '.' || c === ',') {
+      marks++;
+      last = i;
+      if (kinds.indexOf(c) === -1) kinds += c;
     }
   }
 
-  if (lastDefinite !== -1) {
-    decimalIdx = lastDefinite;
-  } else if (dots > 0 && commas > 0) {
-    decimalIdx = Math.max(lastDot, lastComma);
-  } else if (dots + commas === 1) {
-    const idx = dots === 1 ? lastDot : lastComma;
-    const mark = token.charAt(idx);
-    if (mark === decimalSeparator) decimalIdx = idx;
-    else if (formsValidGroups(token.slice(0, idx), token.slice(idx + 1), options?.groupingStyle)) {
-      decimalIdx = -1;
-    } else decimalIdx = idx;
-  }
-  // dots + commas > 1 of one kind: grouping, decimalIdx stays -1.
+  // Index in `token` of the decimal mark, -1 when there is none (grouping only).
+  const decimalIdx =
+    lastDefinite !== -1
+      ? lastDefinite
+      : kinds.length === 2
+        ? last
+        : marks === 1 &&
+            (token.charAt(last) === decimalSeparator ||
+              !formsValidGroups(token.slice(0, last), token.slice(last + 1), options?.groupingStyle))
+          ? last
+          : -1; // several marks of one kind: grouping
 
   let canonical = '';
   for (let i = 0; i < token.length; i++) {
@@ -129,5 +116,5 @@ export function normalizeForeignFormat(value: string, options?: ForeignFormatOpt
 
 /** Canonical text (`.` decimal) to the field's decimal separator. */
 export function canonicalToDisplayText(value: string, decimalSeparator: string = '.'): string {
-  return decimalSeparator === '.' ? value : value.split('.').join(decimalSeparator);
+  return value.split('.').join(decimalSeparator);
 }

@@ -24,10 +24,24 @@ function scheduleCaretRescue(
   }, 0);
 }
 
+function writePreservingUndo(
+  el: HTMLInputElement,
+  value: string,
+  start: number,
+  end: number,
+  selectMode: SelectionMode
+): void {
+  // Skip the write if the value and selection are already what we want - that avoids
+  // adding a noisy no-op undo step.
+  if (el.value === value && el.selectionStart === start && el.selectionEnd === end) return;
+  el.setRangeText(value, 0, el.value.length, selectMode);
+  el.setSelectionRange(start, end);
+  scheduleCaretRescue(el, value, start, end);
+}
+
 /**
  * Writes a new value to the input and sets the caret in one operation, preserving the
- * undo stack. Skips the write if the value and caret are already what we want - that
- * avoids adding a noisy no-op undo step.
+ * undo stack.
  *
  * @param el - The input element
  * @param newValue - The value to write
@@ -38,17 +52,7 @@ export function writeValuePreservingUndo(
   newValue: string,
   cursorPos: number
 ): void {
-  const currentValue = el.value;
-  if (
-    currentValue === newValue &&
-    el.selectionStart === cursorPos &&
-    el.selectionEnd === cursorPos
-  ) {
-    return;
-  }
-  el.setRangeText(newValue, 0, currentValue.length, 'end');
-  el.setSelectionRange(cursorPos, cursorPos);
-  scheduleCaretRescue(el, newValue, cursorPos, cursorPos);
+  writePreservingUndo(el, newValue, cursorPos, cursorPos, 'end');
 }
 
 /**
@@ -64,10 +68,5 @@ export function writeStripPreservingUndo(
   rawStart: number,
   rawEnd: number
 ): void {
-  if (el.value === raw && el.selectionStart === rawStart && el.selectionEnd === rawEnd) {
-    return;
-  }
-  el.setRangeText(raw, 0, el.value.length, 'preserve');
-  el.setSelectionRange(rawStart, rawEnd);
-  scheduleCaretRescue(el, raw, rawStart, rawEnd);
+  writePreservingUndo(el, raw, rawStart, rawEnd, 'preserve');
 }

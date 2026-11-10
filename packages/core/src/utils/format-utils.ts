@@ -106,7 +106,6 @@ export function formatInputValue(
         // package root, so a direct caller passing only `{ thousandSeparator: ',' }` and
         // relying on the documented Thousand default silently got no grouping at all.
         formattingOptions.groupingStyle ?? DEFAULT_GROUPING_STYLE,
-        formattingOptions.enableLeadingZeros,
         separators.decimalSeparator
       )
     : sanitizedAndTrimmedValue;

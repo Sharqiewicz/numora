@@ -39,7 +39,7 @@ export type ValueSource = 'display' | 'foreign' | 'canonical';
  * @param thousandSeparator - The thousand separator character to remove
  * @returns The string with all thousand separators removed
  */
-export function removeThousandSeparators(value: string, thousandSeparator: string): string {
+export function removeThousandSeparators(value: string, thousandSeparator?: string): string {
   // The separator is exactly one character, so split/join is a literal replace-all: no regex
   // to build, escape or cache.
   return thousandSeparator ? value.split(thousandSeparator).join('') : value;
@@ -76,15 +76,11 @@ export const sanitizeNumoraInput = (
   formattingOptions?: FormattingOptions,
   source: ValueSource = 'display'
 ): string => {
-  // Step 0.
-  if (value.length > MAX_INPUT_LENGTH) {
-    value = value.slice(0, MAX_INPUT_LENGTH);
-  }
-
   // Step 1 also strips NBSP-family whitespace (incl. U+202F, the French thousand separator
   // from Intl.NumberFormat). For NBSP-using locales this means step 2 may already be a
   // no-op by the time it runs - benign, but worth knowing when debugging locale output.
-  let sanitized = filterMobileKeyboardArtifacts(value);
+  // Step 0 (slice is a no-op for anything shorter).
+  let sanitized = filterMobileKeyboardArtifacts(value.slice(0, MAX_INPUT_LENGTH));
 
   // Defense-in-depth: sanitization runs synchronously inside beforeinput/paste handlers
   // that have already called preventDefault(). An unexpected throw here (e.g. an
@@ -93,32 +89,21 @@ export const sanitizeNumoraInput = (
   // best-effort value computed so far rather than crashing the keystroke.
   try {
     // Source handling comes first so every later step sees plain locale text.
-    if (source === 'foreign') {
+    if (source !== 'display') {
       sanitized = canonicalToDisplayText(
-        normalizeForeignFormat(sanitized, formattingOptions),
-        formattingOptions?.decimalSeparator
-      );
-    } else if (source === 'canonical') {
-      sanitized = canonicalToDisplayText(
-        normalizeFullWidthDigits(sanitized),
+        source === 'foreign' ? normalizeForeignFormat(sanitized, formattingOptions) : sanitized,
         formattingOptions?.decimalSeparator
       );
     }
 
-    if (formattingOptions?.thousandSeparator) {
-      sanitized = removeThousandSeparators(sanitized, formattingOptions.thousandSeparator);
-    }
+    sanitized = removeThousandSeparators(sanitized, formattingOptions?.thousandSeparator);
 
     sanitized = normalizeFullWidthDigits(sanitized);
     sanitized = normalizeUnicodeMinus(sanitized);
-    sanitized = normalizeDecimalSeparators(
-      sanitized,
-      formattingOptions?.decimalSeparator,
-      formattingOptions?.thousandSeparator
-    );
+    sanitized = normalizeDecimalSeparators(sanitized, formattingOptions?.decimalSeparator);
 
     if (formattingOptions?.enableCompactNotation) {
-      sanitized = expandCompactNotation(sanitized, formattingOptions?.decimalSeparator);
+      sanitized = expandCompactNotation(sanitized, formattingOptions.decimalSeparator);
     }
 
     sanitized = expandScientificNotation(sanitized, formattingOptions?.decimalSeparator);
@@ -136,14 +121,14 @@ export const sanitizeNumoraInput = (
     }
 
     if (formattingOptions?.autoAddLeadingZero) {
-      sanitized = prependLeadingZero(sanitized, formattingOptions?.decimalSeparator);
+      sanitized = prependLeadingZero(sanitized, formattingOptions.decimalSeparator);
     }
 
     if (formattingOptions?.maxLength !== undefined) {
       sanitized = truncateToMaxLength(
         sanitized,
         formattingOptions.maxLength,
-        formattingOptions?.decimalSeparator
+        formattingOptions.decimalSeparator
       );
     }
   } catch {

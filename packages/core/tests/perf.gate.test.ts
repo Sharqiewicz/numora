@@ -69,7 +69,7 @@ describe('⚡ formatting performance gate', () => {
   it('should stay under the ceiling when the value also has a decimal part', () => {
     const value = `${digits(160000)}.123456789012345678`;
     const elapsed = fastestOf(3, () =>
-      formatWithSeparators(value, ',', GroupingStyle.Thousand, false, '.')
+      formatWithSeparators(value, ',', GroupingStyle.Thousand, '.')
     );
     expect(elapsed).toBeLessThan(CEILING_MS);
   });

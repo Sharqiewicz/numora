@@ -17,10 +17,10 @@ export const removeNonNumericCharacters = (
   for (let i = 0; i < value.length; i++) {
     const ch = value[i];
     if ((ch >= '0' && ch <= '9') || ch === decimalSeparator) continue;
-    if (i > runStart) numericOnly += value.slice(runStart, i);
+    numericOnly += value.slice(runStart, i);
     runStart = i + 1;
   }
-  numericOnly = runStart === 0 ? value : numericOnly + value.slice(runStart);
+  numericOnly += value.slice(runStart);
 
   if (!enableNegative) return numericOnly;
 

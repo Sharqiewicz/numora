@@ -73,12 +73,12 @@ export function expandScientificNotation(value: string, decimalSeparator: string
 
     const mantissaEnd = match.end;
 
-    if (mantissaEnd < len && (value[mantissaEnd] === 'e' || value[mantissaEnd] === 'E')) {
+    if (value[mantissaEnd] === 'e' || value[mantissaEnd] === 'E') {
       let e = mantissaEnd + 1;
       const expSignChar = value[e];
       if (expSignChar === '+' || expSignChar === '-') e++;
       const expDigitsStart = e;
-      while (e < len && isDigit(value[e])) e++;
+      while (isDigit(value[e])) e++;
 
       if (e > expDigitsStart) {
         // Reject a token like "1e3.5": the exponent grammar is digits-only, so a decimal
@@ -134,6 +134,9 @@ function expandToken(
   const baseWithoutSign = isNegative ? base.slice(1) : base;
   const [integerPart, decimalPart = ''] = baseWithoutSign.split(decimalSeparator);
 
+  // A zero magnitude stays "0" whatever the exponent or sign: "-0e5" is 0, not "-0".
+  if (ALL_ZEROS_REGEX.test(integerPart + decimalPart)) return '0';
+
   const expanded =
     exponent > 0
       ? expandPositiveExponent(integerPart, decimalPart, exponent, decimalSeparator)
@@ -144,8 +147,7 @@ function expandToken(
           decimalSeparator
         );
 
-  // Don't carry the sign onto a magnitude that collapsed to zero: "-0e5" is 0, not "-0".
-  return isNegative && expanded !== '0' ? '-' + expanded : expanded;
+  return isNegative ? '-' + expanded : expanded;
 }
 
 function expandPositiveExponent(
@@ -155,11 +157,6 @@ function expandPositiveExponent(
   decimalSeparator: string
 ): string {
   const allDigits = integerPart + decimalPart;
-
-  if (allDigits === '0' || ALL_ZEROS_REGEX.test(allDigits)) {
-    return '0';
-  }
-
   const currentDecimalPosition = decimalPart.length;
 
   if (exponent <= currentDecimalPosition) {
@@ -181,11 +178,6 @@ function expandNegativeExponent(
   decimalSeparator: string
 ): string {
   const allDigits = integerPart + decimalPart;
-
-  if (allDigits === '0' || ALL_ZEROS_REGEX.test(allDigits)) {
-    return '0';
-  }
-
   const currentDecimalPosition = integerPart.length;
 
   const newDecimalPosition = currentDecimalPosition - exponent;
@@ -193,7 +185,7 @@ function expandNegativeExponent(
   if (newDecimalPosition <= 0) {
     const leadingZeros = Math.abs(newDecimalPosition);
     const result = `0${decimalSeparator}${'0'.repeat(leadingZeros)}${allDigits}`;
-    return trimTrailingZeros(result, decimalSeparator);
+    return trimTrailingZeroRun(result, decimalSeparator);
   }
 
   // The exponent is > 0 here (expandToken returns early for 0), so the new decimal
@@ -201,36 +193,5 @@ function expandNegativeExponent(
   const newIntegerPart = allDigits.slice(0, newDecimalPosition);
   const newDecimalPart = allDigits.slice(newDecimalPosition);
   const result = `${newIntegerPart}${decimalSeparator}${newDecimalPart}`;
-  return trimTrailingZeros(result, decimalSeparator);
-}
-
-function trimTrailingZeros(
-  value: string,
-  decimalSeparator: string
-): string {
-  if (!value.includes(decimalSeparator)) {
-    return value;
-  }
-
-  const zeroSep = '0' + decimalSeparator;
-  const negZeroSep = '-0' + decimalSeparator;
-
-  if (value === zeroSep) {
-    return '0';
-  }
-
-  if (value.startsWith(zeroSep)) {
-    const trimmed = trimTrailingZeroRun(value, decimalSeparator);
-    return trimmed === '0' ? '0' : trimmed || '0';
-  }
-
-  if (value.startsWith(negZeroSep)) {
-    const trimmed = trimTrailingZeroRun(value, decimalSeparator);
-    if (trimmed === '-0' || trimmed === '0') {
-      return '0';
-    }
-    return trimmed || '0';
-  }
-
-  return trimTrailingZeroRun(value, decimalSeparator) || value;
+  return trimTrailingZeroRun(result, decimalSeparator);
 }

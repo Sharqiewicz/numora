@@ -30,36 +30,25 @@ export const NON_ASCII_DECIMAL_SEPARATOR_GLYPHS = [
   ...DOT_LIKE_GLYPHS,
 ] as const;
 
+const NON_ASCII_DECIMAL_SEPARATOR_REGEX = new RegExp(
+  `[${NON_ASCII_DECIMAL_SEPARATOR_GLYPHS.join('')}]`,
+  'g'
+);
+
 /**
  * Maps the non-ASCII decimal-separator glyphs above to the configured `decimalSeparator`.
+ * A glyph that already equals `decimalSeparator` maps to itself (no-op). ar-EG's real
+ * thousands mark (U+066C) is not in the table, so it is never remapped.
  *
- * A glyph is left untouched when it is itself the configured `thousandSeparator` - a
- * config that (unusually) reuses one of these glyphs as its grouping mark must still be
- * respected, and ar-EG's real thousands mark (U+066C) is not in the table at all so it is
- * never a concern here. A glyph that already equals `decimalSeparator` maps to itself
- * (no-op).
- *
- * Runs in `sanitizeNumoraInput` right after digit/minus normalization and before
- * compact/scientific-notation expansion, so an expandable token like "١٫٥k" already has
- * its separator in the configured form by the time those expanders run.
+ * Runs in `sanitizeNumoraInput` after the thousand separator has been removed and after
+ * digit/minus normalization, and before compact/scientific-notation expansion, so an
+ * expandable token like "١٫٥k" already has its separator in the configured form by the
+ * time those expanders run.
  *
  * @example
  * normalizeDecimalSeparators("٫٥", ".") // Returns: ".5"
  * normalizeDecimalSeparators("１２３．４５", ".") // Returns: "123.45" (paired with normalizeDigits)
  */
-export function normalizeDecimalSeparators(
-  value: string,
-  decimalSeparator: string = '.',
-  thousandSeparator?: string
-): string {
-  let result = value;
-
-  for (const glyph of NON_ASCII_DECIMAL_SEPARATOR_GLYPHS) {
-    if (glyph === thousandSeparator) continue;
-    if (glyph === decimalSeparator) continue;
-    if (result.indexOf(glyph) === -1) continue;
-    result = result.split(glyph).join(decimalSeparator);
-  }
-
-  return result;
+export function normalizeDecimalSeparators(value: string, decimalSeparator: string = '.'): string {
+  return value.replace(NON_ASCII_DECIMAL_SEPARATOR_REGEX, () => decimalSeparator);
 }

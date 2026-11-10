@@ -222,11 +222,11 @@ describe('✅ formatWithSeparators', () => {
       });
 
       it('should format -1000.40 to -1,000.40', () => {
-        expect(formatWithSeparators('-1000.40', ',', 'thousand', false, '.')).toBe('-1,000.40');
+        expect(formatWithSeparators('-1000.40', ',', 'thousand', '.')).toBe('-1,000.40');
       });
 
       it('should format -100.40 to -100.40 (no separator needed)', () => {
-        expect(formatWithSeparators('-100.40', ',', 'thousand', false, '.')).toBe('-100.40');
+        expect(formatWithSeparators('-100.40', ',', 'thousand', '.')).toBe('-100.40');
       });
     });
 
@@ -236,15 +236,15 @@ describe('✅ formatWithSeparators', () => {
       });
 
       it('should format 100400.5 to 1,00,400.5', () => {
-        expect(formatWithSeparators('100400.5', ',', 'lakh', false, '.')).toBe('1,00,400.5');
+        expect(formatWithSeparators('100400.5', ',', 'lakh', '.')).toBe('1,00,400.5');
       });
 
       it('should format -100400.5 to -1,00,400.5', () => {
-        expect(formatWithSeparators('-100400.5', ',', 'lakh', false, '.')).toBe('-1,00,400.5');
+        expect(formatWithSeparators('-100400.5', ',', 'lakh', '.')).toBe('-1,00,400.5');
       });
 
       it('should format -100.40 to -100.40 (no separator needed)', () => {
-        expect(formatWithSeparators('-100.40', ',', 'lakh', false, '.')).toBe('-100.40');
+        expect(formatWithSeparators('-100.40', ',', 'lakh', '.')).toBe('-100.40');
       });
     });
 
@@ -254,7 +254,7 @@ describe('✅ formatWithSeparators', () => {
       });
 
       it('should format -12345.67 to -1,2345.67', () => {
-        expect(formatWithSeparators('-12345.67', ',', 'wan', false, '.')).toBe('-1,2345.67');
+        expect(formatWithSeparators('-12345.67', ',', 'wan', '.')).toBe('-1,2345.67');
       });
     });
   });

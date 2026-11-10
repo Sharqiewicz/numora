@@ -29,7 +29,7 @@ describe('Formatting Benchmarks', () => {
     });
 
     bench('with decimals (1234567.89)', () => {
-      formatWithSeparators('1234567.89', ',', GroupingStyle.Thousand, false, '.');
+      formatWithSeparators('1234567.89', ',', GroupingStyle.Thousand, '.');
     });
 
     bench('lakh style (1234567)', () => {
@@ -183,7 +183,7 @@ describe('Formatting Benchmarks', () => {
         thousandSeparator: ',',
         decimalSeparator: '.',
       });
-      formatWithSeparators(sanitized, ',', GroupingStyle.Thousand, false, '.');
+      formatWithSeparators(sanitized, ',', GroupingStyle.Thousand, '.');
     });
 
     bench('paste with compact notation', () => {
@@ -193,7 +193,7 @@ describe('Formatting Benchmarks', () => {
         decimalSeparator: '.',
         enableCompactNotation: true,
       });
-      formatWithSeparators(sanitized, ',', GroupingStyle.Thousand, false, '.');
+      formatWithSeparators(sanitized, ',', GroupingStyle.Thousand, '.');
     });
 
     bench('paste with scientific notation', () => {
@@ -202,7 +202,7 @@ describe('Formatting Benchmarks', () => {
         thousandSeparator: ',',
         decimalSeparator: '.',
       });
-      formatWithSeparators(sanitized, ',', GroupingStyle.Thousand, false, '.');
+      formatWithSeparators(sanitized, ',', GroupingStyle.Thousand, '.');
     });
   });
 });
