@@ -36,6 +36,7 @@ import {
   handleOnBeforeInputNumoraInput,
   handleOnKeyDownNumoraInput,
   handleOnPasteNumoraInput,
+  isScientificNotationRejected,
   writeStripPreservingUndo,
   writeValuePreservingUndo,
   DEFAULT_THOUSAND_SEPARATOR,
@@ -88,6 +89,12 @@ function createSyntheticChangeEvent(
       if (prop === 'value') return rawValue;
       const v = Reflect.get(t, prop) as unknown;
       return typeof v === 'function' ? (v as (...args: unknown[]) => unknown).bind(t) : v;
+    },
+    // Native accessors (disabled, value, ...) throw "Illegal invocation" if run with
+    // this=Proxy, so writes are forwarded with the real input as receiver. Assigning
+    // `value` writes through to the real input (the getter still reports the raw value).
+    set(t, prop: string | symbol, v: unknown) {
+      return Reflect.set(t, prop, v, t);
     },
   });
   return {
@@ -524,6 +531,15 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       numInput.formattedValue = numInput.value;
       if (onChange) onChange(createSyntheticChangeEvent(numInput, raw));
       if (onValueChange) onValueChange({ value: raw, formattedValue: numInput.value });
+      return;
+    }
+
+    // enableScientificNotation: false - autofill, drop or IME delivered '1.5e-7'. The DOM
+    // is already mutated, so put back the last value Numora wrote (kept on formattedValue)
+    // and report nothing: the value didn't change. Matches the vanilla input fallback.
+    if (isScientificNotationRejected(numInput.value, formattingOptions)) {
+      const previous = numInput.formattedValue ?? '';
+      withInternalWrite(() => writeValuePreservingUndo(numInput, previous, previous.length));
       return;
     }
 

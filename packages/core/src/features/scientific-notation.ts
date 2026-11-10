@@ -118,6 +118,9 @@ function expandToken(
 ): string {
   const exponent = parseInt(expStr, 10);
 
+  // A leading '+' is a sign, not a digit: "+1e-3" is 0.001, "+1e3" is 1000.
+  if (base.startsWith('+')) base = base.slice(1);
+
   if (exponent === 0) return base;
 
   // Reject the whole token rather than allocate/crash on a huge exponent. Returning the
@@ -193,14 +196,12 @@ function expandNegativeExponent(
     return trimTrailingZeros(result, decimalSeparator);
   }
 
-  if (newDecimalPosition < integerPart.length) {
-    const newIntegerPart = allDigits.slice(0, newDecimalPosition);
-    const newDecimalPart = allDigits.slice(newDecimalPosition);
-    const result = `${newIntegerPart}${decimalSeparator}${newDecimalPart}`;
-    return trimTrailingZeros(result, decimalSeparator);
-  }
-
-  return trimTrailingZeros(allDigits, decimalSeparator);
+  // The exponent is > 0 here (expandToken returns early for 0), so the new decimal
+  // position is always strictly inside the integer part.
+  const newIntegerPart = allDigits.slice(0, newDecimalPosition);
+  const newDecimalPart = allDigits.slice(newDecimalPosition);
+  const result = `${newIntegerPart}${decimalSeparator}${newDecimalPart}`;
+  return trimTrailingZeros(result, decimalSeparator);
 }
 
 function trimTrailingZeros(

@@ -8,7 +8,6 @@
  */
 
 // === TYPES & CONSTANTS ===
-export { GROUPING_CONFIG } from './constants';
 
 // === NUMBER FORMATTING ===
 export { formatWithSeparators } from './thousand-grouping';

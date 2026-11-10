@@ -49,6 +49,21 @@ export type BeforeInputResult =
  * result, or risk crashing an unrelated caller (a test runner, a host app's own global
  * error handler) that isn't expecting an async throw from a keystroke.
  */
+/**
+ * True when `enableScientificNotation` is `false` and user-typed/pasted/inserted text holds a
+ * number in scientific notation. Such input must be refused as a whole: the sanitizer would
+ * otherwise drop the `e` and turn `1.5e-7` into `1.57`. App-supplied values never go through
+ * this check (they always expand).
+ */
+export function isScientificNotationRejected(
+  text: string,
+  formattingOptions?: FormattingOptions
+): boolean {
+  return (
+    formattingOptions?.enableScientificNotation === false && containsScientificNotation(text)
+  );
+}
+
 function callIsAllowed(isAllowed: (rawValue: string) => boolean, rawValue: string): boolean {
   try {
     return isAllowed(rawValue);
@@ -215,6 +230,16 @@ export function handleOnBeforeInputNumoraInput(
       return { type: 'skip' };
   }
 
+  // Multi-character insertText (IME, text replacement, some soft keyboards) can carry a whole
+  // "1.5e-7". With scientific notation off the field is left unchanged. The current value
+  // never holds an `e`, so checking the intended value only fires on the inserted text.
+  if (
+    e.inputType === InputType.InsertText &&
+    isScientificNotationRejected(intendedValue, formattingOptions)
+  ) {
+    return { type: 'reject' };
+  }
+
   if (formattingOptions?.maxLength !== undefined && e.inputType === InputType.InsertText) {
     // Check the length AFTER sanitization (grouping separators stripped, leading zeros
     // collapsed, etc.), not the raw pre-sanitization intended value - otherwise a value
@@ -322,10 +347,7 @@ export function handleOnPasteNumoraInput(
   const canonicalClipboard = normalizeForeignFormat(rawClipboard, formattingOptions);
   // Scientific notation is on unless explicitly disabled. With it off, the sanitizer would
   // drop the `e` and turn `1.5e-7` into `1.57`, so refuse the paste instead.
-  if (
-    formattingOptions?.enableScientificNotation === false &&
-    containsScientificNotation(canonicalClipboard)
-  ) {
+  if (isScientificNotationRejected(canonicalClipboard, formattingOptions)) {
     return { type: 'reject' };
   }
   const clipboardData = canonicalToDisplayText(canonicalClipboard, separators.decimalSeparator);

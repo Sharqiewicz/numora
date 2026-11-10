@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NumoraInput } from '../src/NumoraInput';
-import { handleOnPasteNumoraInput } from '../src/utils/event-handlers';
+import { handleOnPasteNumoraInput, handleOnBeforeInputNumoraInput } from '../src/utils/event-handlers';
 import { validateNumoraInputOptions } from '../src/validation';
 
 function paste(input: HTMLInputElement, text: string, options: object) {
@@ -73,5 +73,65 @@ describe('enableScientificNotation', () => {
     expect(() =>
       validateNumoraInputOptions({ enableScientificNotation: 'yes' } as never)
     ).toThrow();
+  });
+
+  describe('every user-input path when off', () => {
+    const before = (el: HTMLInputElement, data: string, inputType = 'insertText') =>
+      handleOnBeforeInputNumoraInput(
+        { target: el, data, inputType } as unknown as InputEvent,
+        8,
+        { enableScientificNotation: false }
+      );
+
+    it('rejects a multi-char insertText carrying scientific notation', () => {
+      expect(before(input, '1.5e-7')).toEqual({ type: 'reject' });
+    });
+
+    it('still expands multi-char insertText when on', () => {
+      const r = handleOnBeforeInputNumoraInput(
+        { target: input, data: '1.5e-7', inputType: 'insertText' } as unknown as InputEvent,
+        8,
+        {}
+      );
+      expect(r.type).toBe('handled');
+      if (r.type === 'handled') expect(r.raw).toBe('0.00000015');
+    });
+
+    it('still accepts ordinary typing', () => {
+      expect(before(input, '5').type).toBe('handled');
+    });
+
+    it('input fallback (autofill) restores the previous value and does not fire onChange', () => {
+      const onChange = vi.fn();
+      const n = new NumoraInput(document.body, {
+        enableScientificNotation: false,
+        formatOn: 'change' as never,
+        value: '12',
+        onChange,
+      });
+      const el = n.getElement();
+      el.focus();
+      el.value = '1.5e-7';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      expect(el.value).toBe('12');
+      expect(onChange).not.toHaveBeenCalled();
+      n.destroy();
+    });
+
+    it('input fallback still expands when on', () => {
+      const n = new NumoraInput(document.body, { value: '12' });
+      const el = n.getElement();
+      el.value = '1.5e-7';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      expect(el.value).toBe('0.00000015');
+      n.destroy();
+    });
+
+    it('app-supplied values always expand', () => {
+      const n = new NumoraInput(document.body, { enableScientificNotation: false });
+      n.setValue('1.5e-7');
+      expect(n.getElement().value).toBe('0.00000015');
+      n.destroy();
+    });
   });
 });

@@ -24,6 +24,8 @@
   `'use client'` directive so Next.js server components can import it directly.
 
 ### Fixed
+- **A leading `+` on a scientific-notation mantissa is a sign, not a digit:** `+1e-3` gives
+  `0.001` (was `0.01`) and `+1e3` gives `1000`.
 - **Comma-decimal locales accept a typed `.` as the decimal key** when the value has no
   decimal yet (numpads and phones emit `.`). Before, de-DE silently dropped it and typing
   `1234567.89` gave 123 456 789. A typed `,` in dot-decimal locales is still rejected.
@@ -42,9 +44,15 @@
 
 ### Added
 - **`enableScientificNotation`** option (default `true`, same behaviour as v4). Set it to
-  `false` to reject pasted scientific notation instead of expanding it; the field is left
-  unchanged rather than dropping the `e` (`1.5e-7` would otherwise become `1.57`). Values
-  the app passes in (`value`, `defaultValue`, `setValue()`) always expand.
+  `false` to reject scientific notation typed, pasted or inserted by the user instead of
+  expanding it (`1.5e-7` would otherwise become `1.57`): paste and multi-character `beforeinput`
+  insertions leave the field unchanged, and the `input` fallback (autofill, drop, IME commit)
+  restores the previous value without firing `onChange`. Values the app passes in (`value`,
+  `defaultValue`, `setValue()`) always expand. `numora/internal` also exports
+  `isScientificNotationRejected` for wrappers.
+- **New root exports:** `normalizeForeignFormat`, `normalizeDigits`, `normalizeUnicodeMinus`,
+  `displayToRawValue`, `normalizeNegativeZero` and the types `NumoraValues`, `ValueSource` and
+  `LocaleTag`.
 - **Dev-only warning for an invalid `locale`.** `Intl.NumberFormat` rejecting the tag used to
   fall back silently to `,` grouping and `.` decimal; it now logs a `console.warn` naming the
   tag, except when `NODE_ENV` is `production`.
@@ -65,20 +73,11 @@
   and `removeExtraDecimalSeparators` now assume it.
 
 ### Changed (internal, earlier)
-- **Caret engine simplified to the standard rank/select mapping.** `computeCursorPosition`
-  now preserves the caret by anchoring on the separator-free ("raw") value: it maps the
-  caret's raw index from the old value to the new one, then re-finds that position (select).
-  This is the canonical masking-library technique (text-mask / imask / maskito). Two linear
-  passes, O(n), replacing the previous O(n·m) character-equivalence scan. The raw→raw mapping
-  uses rank (index-from-start) for pure separator reflow and for value-normalizing changes
-  that occur after the caret (e.g. decimal trim); it switches to distance-from-end when the
-  change occurs before the caret (leading-zero add/remove, sign, compact/scientific expansion).
-- **Behavior:** verified against a full old-vs-new differential over the real `beforeinput`
-  flow (~700 reachable real-edit scenarios). Formatted output is identical in every case. The
-  caret is identical except for **deletions in `Lakh`/`Wan` grouping**, where the caret now
-  rests on the left side of a regrouped thousand separator instead of the right (both are
-  valid positions; this matches the hug-left convention used elsewhere). Thousand grouping,
-  decimals, negatives, leading zeros, and compact expansion are caret-identical to before.
+- **Caret engine moved to a rank/select mapping** (anchoring on the separator-free value; O(n)
+  instead of the O(n·m) character-equivalence scan). Superseded by `computeCaretFromEdit`
+  above. Formatted output was identical in ~700 reachable real-edit scenarios; the caret
+  differed only for deletions in `Lakh`/`Wan` grouping, where it now rests left of a regrouped
+  separator.
 
 ### Removed (internal, not on the public API surface)
 - Deleted `features/formatting/cursor-position.ts` (`calculateCursorPositionAfterFormatting`,
@@ -92,8 +91,6 @@
 ### Notes
 - The deleted algorithm's tests (`formatting.cursor.test.ts`) validated a synthetic
   pre-keystroke calling convention the runtime never uses; they were retired in favour of the
-  real-flow `caret.e2e.test.ts`. See `plans/README.md` (Plan 008) and `june_audit.md` for the
-  full rationale.
-- `features/formatting/change-detection.ts` and `cursor-boundary.ts` became runtime-dead as a
-  side effect and are candidate follow-up removals (kept for now; each still carries its own
-  test suite, and `getCaretPosInBoundary` may serve future prefix/suffix caret work).
+  real-flow `caret.e2e.test.ts`.
+- `features/formatting/change-detection.ts`, `cursor-boundary.ts` and `digit-counting.ts`
+  became runtime-dead and have been deleted along with their tests.

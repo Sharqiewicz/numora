@@ -1242,6 +1242,28 @@ describe('e.target.value is always the raw string', () => {
   });
 });
 
+describe('synthetic event target is writable', () => {
+  it('forwards property writes to the real input instead of throwing Illegal invocation', async () => {
+    const onChange = vi.fn();
+    render(<NumoraInput data-testid="input" onChange={onChange} />);
+    const input = screen.getByTestId('input') as HTMLInputElement;
+
+    await act(async () => {
+      simulateTyping(input, '1');
+    });
+
+    const event: NumoraInputChangeEvent = onChange.mock.calls.at(-1)![0];
+    expect(() => {
+      event.target.disabled = true;
+    }).not.toThrow();
+    expect(input.disabled).toBe(true);
+    expect(() => {
+      event.target.value = '9';
+    }).not.toThrow();
+    expect(input.value).toBe('9');
+  });
+});
+
 describe('onValueChange', () => {
   it('fires with { value, formattedValue } alongside onChange', async () => {
     const onValueChange = vi.fn();
@@ -2073,6 +2095,36 @@ describe('enableScientificNotation', () => {
     render(<NumoraInput data-testid="i" decimalMaxLength={8} />);
     const input = screen.getByTestId('i') as HTMLInputElement;
     simulatePaste(input, '1.5e-7');
+    expect(input.value).toBe('0.00000015');
+  });
+
+  it('restores the previous value when autofill delivers 1.5e-7 and it is disabled', () => {
+    const onChange = vi.fn();
+    const onValueChange = vi.fn();
+    render(
+      <NumoraInput
+        data-testid="i"
+        defaultValue="7"
+        enableScientificNotation={false}
+        onChange={onChange}
+        onValueChange={onValueChange}
+      />
+    );
+    const input = screen.getByTestId('i') as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+    setter.call(input, '1.5e-7');
+    fireEvent.input(input);
+    expect(input.value).toBe('7');
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  it('still expands autofilled 1.5e-7 by default', () => {
+    render(<NumoraInput data-testid="i" decimalMaxLength={8} />);
+    const input = screen.getByTestId('i') as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
+    setter.call(input, '1.5e-7');
+    fireEvent.input(input);
     expect(input.value).toBe('0.00000015');
   });
 });

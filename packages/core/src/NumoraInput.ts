@@ -2,6 +2,7 @@ import {
   handleOnBeforeInputNumoraInput,
   handleOnKeyDownNumoraInput,
   handleOnPasteNumoraInput,
+  isScientificNotationRejected,
 } from './utils/event-handlers';
 import {
   computeStripSeparatorsResult,
@@ -143,6 +144,8 @@ export class NumoraInput {
   // flag mirrors whatever focus/blur events this instance's own listeners have actually
   // seen, which is what `handleChange`'s resting-vs-typing branch (A2-07) needs.
   private isFocused: boolean = false;
+  /** Field text after the last write this class made; restored when the `input` fallback must refuse a value. */
+  private lastValue: string = '';
 
 
   // Bound listeners Numora attached, retained so destroy() can remove exactly them.
@@ -208,6 +211,7 @@ export class NumoraInput {
     this.createInputElement(container, options);
     this.setupEventListeners();
     this.setDefaultValue();
+    this.lastValue = this.element.value;
   }
 
   /** Display text (what is in the field) to the canonical raw value. */
@@ -393,6 +397,7 @@ export class NumoraInput {
       fn();
     } finally {
       this.suppressNextInputEvent = false;
+      this.lastValue = this.element.value;
     }
   }
 
@@ -440,6 +445,7 @@ export class NumoraInput {
       (e.inputType === InputType.HistoryUndo || e.inputType === InputType.HistoryRedo)
     ) {
       const raw = this.toRaw(target.value);
+      this.lastValue = target.value;
       this.handleValueChange(target.value, raw);
       return;
     }
@@ -450,6 +456,13 @@ export class NumoraInput {
     // the current value and route the write through writeValuePreservingUndo so undo stays
     // intact instead of being wiped by `target.value = x`.
     const oldValue = target.value;
+    // Autofill / programmatic input carrying scientific notation while the option is off:
+    // the DOM is already mutated, so put back the last value we wrote (no onChange).
+    if (isScientificNotationRejected(oldValue, this.resolvedOptions)) {
+      const caret = Math.min(this.lastValue.length, target.selectionStart ?? this.lastValue.length);
+      this.withInternalWrite(() => writeValuePreservingUndo(target, this.lastValue, caret));
+      return;
+    }
     // Max of start/end works around a mobile-browser caret bug where selectionStart lags.
     const oldCursorPosition = Math.max(target.selectionStart ?? 0, target.selectionEnd ?? 0);
     // When the element isn't focused (autofill, a programmatic `el.value = x` + dispatched
@@ -487,6 +500,7 @@ export class NumoraInput {
       this.withInternalWrite(() => writeValuePreservingUndo(target, newValue, caret));
     }
 
+    this.lastValue = target.value;
     this.handleValueChange(newValue, rawValue);
   }
 
@@ -630,6 +644,7 @@ export class NumoraInput {
 
     if (options?.undoable === false) {
       this.element.value = formatted;
+      this.lastValue = formatted;
       return;
     }
     this.withInternalWrite(() =>

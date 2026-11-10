@@ -280,3 +280,15 @@ describe('expandScientificNotation', () => {
     });
   });
 });
+
+describe('leading + sign on the mantissa', () => {
+  it.each([
+    ['+1e-3', '0.001'],
+    ['+1.5e-7', '0.00000015'],
+    ['+1e3', '1000'],
+    ['+2e0', '2'],
+  ])('expands %s to %s', (input, expected) => {
+    expect(expandScientificNotation(input)).toBe(expected);
+    expect(sanitizeNumoraInput(input)).toBe(expected);
+  });
+});

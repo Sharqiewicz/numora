@@ -14,6 +14,7 @@ export {
   handleOnBeforeInputNumoraInput,
   handleOnPasteNumoraInput,
   handleOnKeyDownNumoraInput,
+  isScientificNotationRejected,
 } from './utils/event-handlers';
 export { computeCaretAfterRewrite } from './utils/caret';
 export {
