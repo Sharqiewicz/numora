@@ -136,12 +136,11 @@ export function formatValueForDisplay(
   formattingOptions?: FormattingOptions,
   source: ValueSource = 'display'
 ): { formatted: string; raw: string } {
-  const shouldRemoveThousandSeparators = !!formattingOptions?.thousandSeparator;
   const { formatted, raw } = formatInputValue(
     value,
     decimalMaxLength,
     formattingOptions,
-    shouldRemoveThousandSeparators,
+    true,
     source
   );
 

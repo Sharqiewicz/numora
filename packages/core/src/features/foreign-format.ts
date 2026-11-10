@@ -80,13 +80,13 @@ export function normalizeForeignFormat(value: string, options?: ForeignFormatOpt
     const last = Math.max(dot, comma);
     const mark = token.charAt(last);
     if (
-      last >= 0 &&
       // Both kinds: the last one is the decimal. One kind: several marks are grouping; a
       // single mark is decimal when it is the field's own or does not form valid groups.
-      (Math.min(dot, comma) >= 0 ||
-        (token.indexOf(mark) === last &&
-          (mark === decimalSeparator ||
-            !formsValidGroups(token.slice(0, last), token.slice(last + 1), options?.groupingStyle))))
+      // (No mark at all: last is -1, mark is '' and indexOf('') is 0, so this is false.)
+      Math.min(dot, comma) >= 0 ||
+      (token.indexOf(mark) === last &&
+        (mark === decimalSeparator ||
+          !formsValidGroups(token.slice(0, last), token.slice(last + 1), options?.groupingStyle)))
     ) {
       decimalIdx = last;
     }

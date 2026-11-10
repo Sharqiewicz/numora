@@ -88,7 +88,7 @@ export class NumoraInput {
   // and some embedders dispatch synthetic focus/blur without moving real focus.
   private isFocused = false;
   /** Field text after the last write this class made; restored when the `input` fallback must refuse a value. */
-  private lastValue = '';
+  private lastValue!: string;
   // Removes exactly the listeners Numora added, so destroy() leaves the caller's alone.
   private cleanups: Array<() => void> = [];
 
@@ -158,14 +158,9 @@ export class NumoraInput {
 
     this.createInputElement(target, nativeProps, value, defaultValue);
     this.setupEventListeners();
-    this.setDefaultValue();
-    this.lastValue = this.element.value;
-  }
-
-  private setDefaultValue(): void {
     // The initial value (option, or a pre-set value on an adopted <input>) is supplied by
-    // the app, so it is a canonical raw value (ADR 0004), not locale text.
-    this.element.value = formatForDisplay(this.element.value, this.resolvedOptions, 'canonical').formatted;
+    // the app, so it is a canonical raw value (ADR 0004), not locale text. Also seeds `lastValue`.
+    this.setValue(this.element.value, { undoable: false });
   }
 
   private createInputElement(
@@ -313,12 +308,8 @@ export class NumoraInput {
     // sanitization, decimalMaxLength, maxLength, enableNegative and grouping.
     const { formatted } = formatForDisplay(value, this.resolvedOptions, 'canonical');
 
-    if (options?.undoable === false) {
-      this.element.value = formatted;
-      this.lastValue = formatted;
-      return;
-    }
-    writeValuePreservingUndo(this.element, formatted, formatted.length);
+    if (options?.undoable === false) this.element.value = formatted;
+    else writeValuePreservingUndo(this.element, formatted, formatted.length);
     this.lastValue = formatted;
   }
 
