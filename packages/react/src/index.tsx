@@ -261,11 +261,18 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       // While focused in Blur mode the DOM carries no thousand separators (only added on
       // blur), so format for editing (real formatOn) to avoid injecting commas mid-typing;
       // otherwise format for the resting display (forced Change, with separators).
-      const { formatted } =
-        isFocused(input)
-          ? formatValueForDisplay(controlledValueString, formattingOptions.decimalMaxLength, formattingOptions, 'canonical')
-          : formatForDisplay(controlledValueString, formattingOptions, 'canonical');
+      const focused = isFocused(input);
+      const format = (options: ResolvedNumoraOptions) =>
+        focused
+          ? formatValueForDisplay(controlledValueString, options.decimalMaxLength, options, 'canonical')
+          : formatForDisplay(controlledValueString, options, 'canonical');
+      const { formatted, raw } = format(formattingOptions);
       if (formatted !== input.value) writeValuePreservingUndo(input, formatted, formatted.length);
+      // New options that change the number itself (a smaller `decimalMaxLength` cutting
+      // digits, `allowNegative` dropping the sign) are reported; a repaint alone is not.
+      if (changed && raw !== format(prev).raw) {
+        emit(input, { value: raw, formattedValue: formatted });
+      }
     }
     input.formattedValue = input.value;
   });

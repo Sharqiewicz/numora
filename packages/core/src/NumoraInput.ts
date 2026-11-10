@@ -1,6 +1,6 @@
 import { handleOnKeyDownNumoraInput } from './utils/event-handlers';
 import { writeValuePreservingUndo } from './features/formatting';
-import { displayToRawValue } from './utils/format-utils';
+import { displayToRawValue, formatValueForDisplay } from './utils/format-utils';
 import {
   applyBeforeInput,
   applyBlur,
@@ -51,8 +51,9 @@ const leftovers = new WeakMap<HTMLInputElement, { text: string; raw: string }>()
 export class NumoraInput {
   private el!: HTMLInputElement;
 
+  // Options as the caller gave them (merged by update()), and their resolved form.
+  private options: NumoraInputOptions;
   private resolvedOptions: ResolvedNumoraOptions;
-  private onChange?: (values: NumoraValues) => void;
 
   // Mirrors this instance's focus/blur listeners rather than `document.activeElement`: tests
   // and some embedders dispatch synthetic focus/blur without moving real focus.
@@ -71,13 +72,17 @@ export class NumoraInput {
    */
   constructor(target: HTMLInputElement | HTMLElement, options: NumoraInputOptions = {}) {
     this.resolvedOptions = resolveOptions(options);
-    this.onChange = options.onChange;
+    this.options = options;
 
     // Options removed since v4 are ignored and warned about. Checked on a copy: the caller's
     // object is left alone.
     warnRemovedOptions(takeRemovedOptions({ ...options }));
 
-    this.createInputElement(target, options);
+    this.createInputElement(target);
+    this.applyOptions(options);
+    // When adopting an existing <input>, any pre-set value (e.g. <input value="100"
+    // use:numora>) is kept unless the caller passes `value`.
+    if (options.value !== undefined) this.el.value = options.value;
     this.setupEventListeners();
     // The initial value (option, or a pre-set value on an adopted <input>) is supplied by
     // the app, so it is a canonical raw value (ADR 0004), not locale text. Also seeds `lastValue`.
@@ -87,7 +92,7 @@ export class NumoraInput {
     });
   }
 
-  private createInputElement(container: HTMLElement, options: NumoraInputOptions): void {
+  private createInputElement(container: HTMLElement): void {
     // If an <input> is passed directly (Svelte action, Vue directive, Angular directive,
     // Solid ref), adopt it instead of creating a new one so frameworks can use the
     // idiomatic <input use:numora> shape rather than a wrapping container <div>.
@@ -104,6 +109,13 @@ export class NumoraInput {
     this.el.setAttribute('spellcheck', 'false');
     this.el.setAttribute('autocomplete', 'off');
 
+    if (!isExistingInput) {
+      container.appendChild(this.el);
+    }
+  }
+
+  /** Writes what depends on the options onto the element: the `pattern` and the attributes given. */
+  private applyOptions(options: NumoraInputOptions): void {
     // Pattern helps with native validation but is optional.
     // HTML pattern attr: optional leading `-` (if negatives enabled) + digits optionally
     // interleaved with the configured thousand separator + optional decimal separator +
@@ -127,19 +139,12 @@ export class NumoraInput {
       if (attribute !== undefined) (this.el as unknown as Record<string, unknown>)[name] = attribute;
     }
     if (options.ariaLabel !== undefined) this.el.setAttribute('aria-label', options.ariaLabel);
-
-    // When adopting an existing <input>, any pre-set value (e.g. <input value="100"
-    // use:numora>) is kept unless the caller passes `value`.
-    if (options.value !== undefined) this.el.value = options.value;
-
-    if (!isExistingInput) {
-      container.appendChild(this.el);
-    }
   }
 
   private setupEventListeners(): void {
     const el = this.el;
-    const opts = this.resolvedOptions;
+    // Read per event: update() swaps the options.
+    const opts = () => this.resolvedOptions;
     const add = <E extends Event>(type: string, handler: (e: E) => void) => {
       el.addEventListener(type, handler as EventListener);
       this.cleanups.push(() => el.removeEventListener(type, handler as EventListener));
@@ -147,27 +152,27 @@ export class NumoraInput {
 
     // `beforeinput` is cancelable and fires before the browser edits, so the formatted value
     // goes in through `setRangeText` and the undo history survives.
-    add<InputEvent>('beforeinput', (e) => this.emit(applyBeforeInput(e, opts)));
+    add<InputEvent>('beforeinput', (e) => this.emit(applyBeforeInput(e, opts())));
     // Fallback for edits with no `beforeinput`: undo/redo, autofill, programmatic dispatch.
     // Mid-composition text is the IME's: the final non-composing `input` reconciles it.
     add<InputEvent>('input', (e) =>
-      e.isComposing || this.emit(applyInputFallback(el, e.inputType, this.isFocused, this.lastValue, opts))
+      e.isComposing || this.emit(applyInputFallback(el, e.inputType, this.isFocused, this.lastValue, opts()))
     );
-    add<KeyboardEvent>('keydown', (e) => handleOnKeyDownNumoraInput(e, opts));
-    add<ClipboardEvent>('paste', (e) => this.emit(applyPaste(e, opts)));
+    add<KeyboardEvent>('keydown', (e) => handleOnKeyDownNumoraInput(e, opts()));
+    add<ClipboardEvent>('paste', (e) => this.emit(applyPaste(e, opts())));
     add('focus', () => {
       this.isFocused = true;
     });
     add('blur', () => {
       this.isFocused = false;
       // Only a raw change notifies: regrouping alone is cosmetic.
-      const values = applyBlur(el, opts);
+      const values = applyBlur(el, opts());
       this.emit(values?.rawChanged ? values : undefined);
     });
     this.cleanups.push(
       attachFocusStrip(
         el,
-        () => opts,
+        opts,
         () => {
           this.lastValue = el.value;
         }
@@ -197,7 +202,7 @@ export class NumoraInput {
   /** Records a write the shared helpers made and reports it. */
   private emit(values: NumoraValues | undefined): void {
     this.lastValue = this.el.value;
-    if (values) this.onChange?.({ value: values.value, formattedValue: values.formattedValue });
+    if (values) this.options.onChange?.({ value: values.value, formattedValue: values.formattedValue });
   }
 
   /**
@@ -241,5 +246,33 @@ export class NumoraInput {
     if (options?.undoable === false) this.el.value = formatted;
     else writeValuePreservingUndo(this.el, formatted, formatted.length);
     this.lastValue = formatted;
+  }
+
+  /**
+   * Changes options on a live field. `options` is merged over the current ones; a key set
+   * to `undefined` goes back to its default (a native attribute left `undefined` is not
+   * touched). The current raw value is kept and re-run through the new options: the display
+   * is rewritten (undoable, like {@link setValue}), and `onChange` fires only if the raw
+   * value itself changed, e.g. a smaller `decimalMaxLength` cut digits off (ADR 0008).
+   *
+   * @throws when the merged options are invalid. Nothing is changed in that case.
+   */
+  public update(options: Omit<NumoraInputOptions, 'value'>): void {
+    const merged = { ...this.options, ...options };
+    const resolved = resolveOptions(merged);
+    warnRemovedOptions(takeRemovedOptions({ ...options }));
+
+    const before = this.value;
+    this.options = merged;
+    this.resolvedOptions = resolved;
+    this.applyOptions(options);
+
+    // A focused Blur-mode field shows no grouping, so it keeps its edit-time format.
+    const { formatted, raw } = this.isFocused
+      ? formatValueForDisplay(before, resolved.decimalMaxLength, resolved, 'canonical')
+      : formatForDisplay(before, resolved, 'canonical');
+    if (formatted !== this.el.value) writeValuePreservingUndo(this.el, formatted, formatted.length);
+    this.lastValue = formatted;
+    if (raw !== before) merged.onChange?.({ value: raw, formattedValue: formatted });
   }
 }
