@@ -19,21 +19,14 @@
  * mark, never a decimal mark, and must never be remapped to the decimal separator.
  */
 export const ARABIC_DECIMAL_SEPARATOR = '٫'; // ٫ ARABIC DECIMAL SEPARATOR
-/** Glyphs that read like `,`: ARABIC COMMA (،), FULLWIDTH COMMA (，). */
-export const COMMA_LIKE_GLYPHS = ['،', '，'] as const;
-/** Glyphs that read like `.`: FULLWIDTH FULL STOP (．), IDEOGRAPHIC FULL STOP (。). */
-export const DOT_LIKE_GLYPHS = ['．', '。'] as const;
+/**
+ * The other glyphs: comma-like ARABIC COMMA (،) and FULLWIDTH COMMA (，), then dot-like
+ * FULLWIDTH FULL STOP (．) and IDEOGRAPHIC FULL STOP (。).
+ */
+export const NON_ASCII_DECIMAL_SEPARATOR_GLYPHS = [ARABIC_DECIMAL_SEPARATOR, '،', '，', '．', '。'] as const;
 
-export const NON_ASCII_DECIMAL_SEPARATOR_GLYPHS = [
-  ARABIC_DECIMAL_SEPARATOR,
-  ...COMMA_LIKE_GLYPHS,
-  ...DOT_LIKE_GLYPHS,
-] as const;
-
-const NON_ASCII_DECIMAL_SEPARATOR_REGEX = new RegExp(
-  `[${NON_ASCII_DECIMAL_SEPARATOR_GLYPHS.join('')}]`,
-  'g'
-);
+// The same five glyphs as NON_ASCII_DECIMAL_SEPARATOR_GLYPHS (pinned together by tests).
+const NON_ASCII_DECIMAL_SEPARATOR_REGEX = /[٫،，．。]/g;
 
 /**
  * Maps the non-ASCII decimal-separator glyphs above to the configured `decimalSeparator`.

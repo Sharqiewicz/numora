@@ -1,9 +1,6 @@
-import {
-  ARABIC_DECIMAL_SEPARATOR as ARABIC_DECIMAL,
-  COMMA_LIKE_GLYPHS,
-  DOT_LIKE_GLYPHS,
-} from './decimal-separators';
+import { ARABIC_DECIMAL_SEPARATOR as ARABIC_DECIMAL } from './decimal-separators';
 import { normalizeDigits } from './fullwidth-digits';
+import { isDigit } from '../utils/mantissa-scan';
 import type { GroupingStyle } from '../types';
 
 interface ForeignFormatOptions {
@@ -15,13 +12,7 @@ interface ForeignFormatOptions {
 // ARABIC_DECIMAL is a decimal mark wherever it appears. The field's own decimal separator
 // joins it when that separator is not '.' or ','.
 
-const isDigit = (c: string): boolean => c >= '0' && c <= '9';
-
-function mapGlyphs(value: string, glyphs: readonly string[], to: string, keep: Array<string | undefined>) {
-  let out = value;
-  for (const g of glyphs) if (keep.indexOf(g) === -1) out = out.split(g).join(to);
-  return out;
-}
+const digitsOnly = (s: string): string => s.replace(/\D/g, '');
 
 /**
  * A single mark splits the digits into `head` and `tail`. It reads as grouping only when
@@ -31,9 +22,12 @@ function mapGlyphs(value: string, glyphs: readonly string[], to: string, keep: A
  * no special case here.
  */
 function formsValidGroups(head: string, tail: string, style?: GroupingStyle): boolean {
-  if (head.length === 0 || head.charAt(0) === '0') return false;
-  if (head.length <= 3 && tail.length === 3) return true;
-  return style === 'wan' && head.length <= 4 && tail.length === 4;
+  // `head >= '1'` rejects an empty head and a leading zero (head is digits only here).
+  return (
+    head >= '1' &&
+    ((head.length <= 3 && tail.length === 3) ||
+      (style === 'wan' && head.length <= 4 && tail.length === 4))
+  );
 }
 
 /**
@@ -53,20 +47,19 @@ function formsValidGroups(head: string, tail: string, style?: GroupingStyle): bo
 export function normalizeForeignFormat(value: string, options?: ForeignFormatOptions): string {
   const decimalSeparator = options?.decimalSeparator ?? '.';
   const thousandSeparator = options?.thousandSeparator;
-  const keep = [decimalSeparator, thousandSeparator];
 
   let v = normalizeDigits(value).replace(/[\s​]/g, '');
-  v = mapGlyphs(v, COMMA_LIKE_GLYPHS, ',', keep);
-  v = mapGlyphs(v, DOT_LIKE_GLYPHS, '.', keep);
-
+  // Strip the field's own grouping mark first, so the glyph remap below never sees it.
   if (thousandSeparator && thousandSeparator !== '.' && thousandSeparator !== ',') {
     v = v.split(thousandSeparator).join('');
   }
+  // Comma-like and dot-like glyphs read as ',' and '.', unless the field's own separator.
+  v = v.replace(/[،，．。]/g, (g) => (g === decimalSeparator ? g : '،，'.includes(g) ? ',' : '.'));
 
-  const customDecimal =
-    decimalSeparator !== '.' && decimalSeparator !== ',' ? decimalSeparator : undefined;
-  const isDefiniteDecimal = (c: string): boolean => c === ARABIC_DECIMAL || c === customDecimal;
-  const isMark = (c: string): boolean => c === '.' || c === ',' || isDefiniteDecimal(c);
+  // The field's own decimal separator is a definite mark when it is not '.' or ',';
+  // otherwise ARABIC_DECIMAL stands in (already definite), so there is always a value.
+  const custom = decimalSeparator === '.' || decimalSeparator === ',' ? ARABIC_DECIMAL : decimalSeparator;
+  const isMark = (c: string): boolean => c === '.' || c === ',' || c === ARABIC_DECIMAL || c === custom;
 
   // Locate the first number: a run of digits and marks.
   let start = 0;
@@ -78,38 +71,31 @@ export function normalizeForeignFormat(value: string, options?: ForeignFormatOpt
   // Marks without a single digit ("....") carry no number to interpret; leave them for
   // the rest of the pipeline.
   if (!/[0-9]/.test(token)) return v;
-  let lastDefinite = -1;
-  let marks = 0; // plain '.' / ',' marks
-  let last = -1; // index of the last plain mark
-  let kinds = ''; // which plain marks appear
-  for (let i = 0; i < token.length; i++) {
-    const c = token.charAt(i);
-    if (isDefiniteDecimal(c)) lastDefinite = i;
-    else if (c === '.' || c === ',') {
-      marks++;
-      last = i;
-      if (kinds.indexOf(c) === -1) kinds += c;
+
+  // Index in `token` of the decimal mark, -1 when there is none (grouping only).
+  let decimalIdx = Math.max(token.lastIndexOf(ARABIC_DECIMAL), token.lastIndexOf(custom));
+  if (decimalIdx < 0) {
+    const dot = token.lastIndexOf('.');
+    const comma = token.lastIndexOf(',');
+    const last = Math.max(dot, comma);
+    const mark = token.charAt(last);
+    if (
+      last >= 0 &&
+      // Both kinds: the last one is the decimal. One kind: several marks are grouping; a
+      // single mark is decimal when it is the field's own or does not form valid groups.
+      (Math.min(dot, comma) >= 0 ||
+        (token.indexOf(mark) === last &&
+          (mark === decimalSeparator ||
+            !formsValidGroups(token.slice(0, last), token.slice(last + 1), options?.groupingStyle))))
+    ) {
+      decimalIdx = last;
     }
   }
 
-  // Index in `token` of the decimal mark, -1 when there is none (grouping only).
-  const decimalIdx =
-    lastDefinite !== -1
-      ? lastDefinite
-      : kinds.length === 2
-        ? last
-        : marks === 1 &&
-            (token.charAt(last) === decimalSeparator ||
-              !formsValidGroups(token.slice(0, last), token.slice(last + 1), options?.groupingStyle))
-          ? last
-          : -1; // several marks of one kind: grouping
-
-  let canonical = '';
-  for (let i = 0; i < token.length; i++) {
-    const c = token.charAt(i);
-    if (isDigit(c)) canonical += c;
-    else if (i === decimalIdx) canonical += '.';
-  }
+  const canonical =
+    decimalIdx < 0
+      ? digitsOnly(token)
+      : `${digitsOnly(token.slice(0, decimalIdx))}.${digitsOnly(token.slice(decimalIdx + 1))}`;
 
   return v.slice(0, start) + canonical + v.slice(end);
 }
