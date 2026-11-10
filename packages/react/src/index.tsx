@@ -284,51 +284,33 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     stateRef.current = { onChange, onValueChange, isAllowed, formattingOptions };
 
     if (controlledValue === undefined) return;
-    const input = internalInputRef.current as HTMLInputElement;
-
+    const input = internalInputRef.current as NumoraHTMLInputElement;
     const controlledValueString = String(controlledValue);
-    const numInput = input as NumoraHTMLInputElement;
 
     // Is this just the parent echoing the raw value straight back (the single most
     // common controlled pattern: onChange -> setState(e.target.value) -> value={state})?
     // `formatValueForDisplay`/`formatForDisplay` both strip a trailing decimal separator and
     // pad to `decimalMinLength` - display/blur-only concerns. Comparing THOSE formatted
     // strings against the DOM's current value made "1." round-trip through the parent as
-    // "1" (the trailing dot stripped), "0.05" collapse mid-entry, and a decimalMinLength:2
-    // field snap to "1.00" after every keystroke - because the comparison itself, not just
-    // the write, was already lossy. `sanitizeNumoraInput` performs none of those
-    // display-only transforms (no trailing-separator strip, no padding, no grouping), so
-    // comparing ITS output for the DOM value and the controlled value is a faithful "is this
-    // the same number" check. Equal -> the parent didn't actually change anything -> leave
-    // the DOM untouched (don't strip trailing separators or pad while the user is mid-entry)
-    // and just refresh `formattedValue`. Different -> the parent genuinely changed the
-    // value (external update, clamping, a numeric-state round-trip that lost precision,
-    // etc.) -> fall through to the resting/editing formatting as before.
-    const domRaw = sanitizeNumoraInput(input.value, formattingOptions);
-    const controlledRaw = sanitizeNumoraInput(controlledValueString, formattingOptions, 'canonical');
-    if (domRaw === controlledRaw) {
-      numInput.formattedValue = input.value;
-      return;
+    // "1", "0.05" collapse mid-entry, and a decimalMinLength:2 field snap to "1.00" after
+    // every keystroke. `sanitizeNumoraInput` performs none of those display-only transforms,
+    // so comparing ITS output for the DOM value and the controlled value is a faithful "is
+    // this the same number" check. Equal -> leave the DOM untouched. Different -> the parent
+    // genuinely changed the value -> format and write it.
+    if (
+      sanitizeNumoraInput(input.value, formattingOptions) !==
+      sanitizeNumoraInput(controlledValueString, formattingOptions, 'canonical')
+    ) {
+      // While focused in Blur mode the DOM carries no thousand separators (only added on
+      // blur), so format for editing (real formatOn) to avoid injecting commas mid-typing;
+      // otherwise format for the resting display (forced Change, with separators).
+      const { formatted } =
+        document.activeElement === input
+          ? formatValueForDisplay(controlledValueString, decimalMaxLength, formattingOptions, 'canonical')
+          : formatForDisplay(controlledValueString, formattingOptions, 'canonical');
+      if (formatted !== input.value) writeValuePreservingUndo(input, formatted, formatted.length);
     }
-
-    // In Blur mode the DOM value carries no thousand separators while the field is being
-    // edited (they're only added on blur). Formatting the controlled echo-back WITH
-    // separators here - the single most common controlled pattern, where onChange feeds
-    // the parent's value prop straight back - would inject commas mid-typing and snap the
-    // caret to the end, defeating Blur mode. So while the input is focused in Blur mode,
-    // format for editing (no separators, via the real formatOn); otherwise format for the
-    // resting display (forced Change, with separators).
-    const { formatted } =
-      document.activeElement === input
-        ? formatValueForDisplay(controlledValueString, decimalMaxLength, formattingOptions, 'canonical')
-        : formatForDisplay(controlledValueString, formattingOptions, 'canonical');
-    if (formatted === input.value) {
-      numInput.formattedValue = formatted;
-      return;
-    }
-
-    writeValuePreservingUndo(input, formatted, formatted.length);
-    numInput.formattedValue = formatted;
+    input.formattedValue = input.value;
   });
 
   // Mount-only native listeners. `beforeinput` must be native: React's synthetic one fires
@@ -373,7 +355,7 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     if (el.readOnly || el.disabled) return;
     el.formattedValue = el.value;
     onPaste?.(e);
-    if (values) emit(el, values);
+    emit(el, values);
   };
 
   // Blur reports display-only changes too (regrouping), unlike vanilla, so anything that
