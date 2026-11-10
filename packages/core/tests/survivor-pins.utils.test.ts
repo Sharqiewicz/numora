@@ -103,11 +103,12 @@ describe('dom-events.ts applyInputFallback', () => {
     expect(applyInputFallback(el, 'x', false, '', en())?.formattedValue).toBe('1,234.5');
     expect(el.value).toBe('1,234.5');
   });
-  it('L122: the value is read as foreign-format text', () => {
+  it('L122: a focused Blur-mode value is read as foreign-format text', () => {
+    // Change mode reads a focused field's text as its own grouping (review-fixes.fallback).
     const el = mk('1.234,5');
-    expect(applyInputFallback(el, 'x', true, '', en({ formatOn: FormatOn.Change }))).toEqual({
+    expect(applyInputFallback(el, 'x', true, '', en())).toEqual({
       value: '1234.5',
-      formattedValue: '1,234.5',
+      formattedValue: '1234.5',
     });
   });
   it('L124: an already formatted value is reported without a write', () => {

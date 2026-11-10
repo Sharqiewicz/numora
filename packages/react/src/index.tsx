@@ -339,6 +339,8 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const el = e.target as NumoraHTMLInputElement;
     const inputType = (e.nativeEvent as InputEvent).inputType;
+    // Mid-composition text is the IME's: the final non-composing `input` reconciles it.
+    if ((e.nativeEvent as InputEvent).isComposing) return;
     const focused = document.activeElement === el;
     emit(el, applyInputFallback(el, inputType, focused, el.formattedValue as string, formattingOptions));
   };

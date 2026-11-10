@@ -116,8 +116,11 @@ export function applyInputFallback(
     writeValuePreservingUndo(el, previous, previous.length);
     return;
   }
+  // A focused Change-mode field already shows its own grouping, which foreign detection would
+  // misread as a decimal (`12,3456`). Blur mode shows none while focused, so it stays foreign.
+  const own = focused && opts.formatOn === FormatOn.Change && !!opts.thousandSeparator;
   const { formatted, raw } = focused
-    ? formatInputValue(value, opts.decimalMaxLength, opts, undefined, 'foreign')
+    ? formatInputValue(value, opts.decimalMaxLength, opts, undefined, own ? 'display' : 'foreign')
     : formatForDisplay(value, opts, 'foreign');
   if (formatted === value) return { value: raw, formattedValue: formatted };
   // Max of start/end works around a mobile-browser caret bug where selectionStart lags.

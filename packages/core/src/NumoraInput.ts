@@ -232,8 +232,9 @@ export class NumoraInput {
     // goes in through `setRangeText` and the undo history survives.
     add<InputEvent>('beforeinput', (e) => this.emit(applyBeforeInput(e, opts)));
     // Fallback for edits with no `beforeinput`: undo/redo, autofill, programmatic dispatch.
+    // Mid-composition text is the IME's: the final non-composing `input` reconciles it.
     add<InputEvent>('input', (e) =>
-      this.emit(applyInputFallback(el, e.inputType, this.isFocused, this.lastValue, opts))
+      e.isComposing || this.emit(applyInputFallback(el, e.inputType, this.isFocused, this.lastValue, opts))
     );
     add<KeyboardEvent>('keydown', (e) => handleOnKeyDownNumoraInput(e, opts));
     add<ClipboardEvent>('paste', (e) => this.emit(applyPaste(e, opts)));
