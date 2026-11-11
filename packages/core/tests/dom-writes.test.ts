@@ -5,8 +5,8 @@ import { writeValuePreservingUndo } from '../src/features/formatting/dom-writes'
  * Testing module: features/formatting/dom-writes.ts
  *
  * `setRangeText` fires no `input` event (HTML spec; verified in jsdom and Chrome). Both
- * packages rely on this: internal writes call onChange themselves and have no guard
- * against a second `onChange` from an `input` event, so these tests pin the fact.
+ * packages rely on this: internal writes call onValueChange themselves and have no guard
+ * against a second `onValueChange` from an `input` event, so these tests pin the fact.
  */
 
 describe('writeValuePreservingUndo', () => {

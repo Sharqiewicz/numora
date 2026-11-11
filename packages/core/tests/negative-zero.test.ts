@@ -68,7 +68,7 @@ describe('NumoraInput blur normalizes -0 to 0 (A2-11)', () => {
     container = document.createElement('div');
     document.body.appendChild(container);
     const onChangeMock = vi.fn();
-    const instance = new NumoraInput(container, { allowNegative: true, onChange: onChangeMock });
+    const instance = new NumoraInput(container, { allowNegative: true, onValueChange: onChangeMock });
     const el = getInputElement();
 
     el.focus();
@@ -79,8 +79,8 @@ describe('NumoraInput blur normalizes -0 to 0 (A2-11)', () => {
     el.blur();
 
     expect(el.value).toBe('0');
-    expect(instance.value).toBe('0');
-    expect(Object.is(Number(instance.value), -0)).toBe(false);
+    expect(instance.rawValue).toBe('0');
+    expect(Object.is(Number(instance.rawValue), -0)).toBe(false);
     document.body.removeChild(container);
   });
 

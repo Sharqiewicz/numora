@@ -50,32 +50,32 @@ describe('Empty-string thousandSeparator is rejected (#6, reversed in v5)', () =
 });
 
 describe('destroy() removes Numora-internal listeners (#8)', () => {
-  it('stops firing onChange after destroy()', () => {
+  it('stops firing onValueChange after destroy()', () => {
     const container = document.createElement('div');
-    const onChange = vi.fn();
+    const onValueChange = vi.fn();
     const numora = new NumoraInput(container, {
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
-      onChange,
+      onValueChange,
     });
     const input = numora.element;
 
     input.value = '1234';
     input.dispatchEvent(new Event('input'));
-    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onValueChange).toHaveBeenCalledTimes(1);
 
     numora.destroy();
-    onChange.mockClear();
+    onValueChange.mockClear();
 
     input.value = '5678';
     input.dispatchEvent(new Event('input'));
-    expect(onChange).not.toHaveBeenCalled();
+    expect(onValueChange).not.toHaveBeenCalled();
   });
 
   it('is idempotent', () => {
     const container = document.createElement('div');
-    const numora = new NumoraInput(container, { onChange: vi.fn() });
+    const numora = new NumoraInput(container, { onValueChange: vi.fn() });
     expect(() => {
       numora.destroy();
       numora.destroy();
@@ -89,7 +89,7 @@ describe('destroy() removes Numora-internal listeners (#8)', () => {
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
-      onChange: onChangeA,
+      onValueChange: onChangeA,
     });
     first.destroy();
 
@@ -99,13 +99,13 @@ describe('destroy() removes Numora-internal listeners (#8)', () => {
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
-      onChange: onChangeB,
+      onValueChange: onChangeB,
     });
 
     input.value = '1234';
     input.dispatchEvent(new Event('input'));
 
-    // Only the live instance's onChange fires; the destroyed one is fully detached.
+    // Only the live instance's onValueChange fires; the destroyed one is fully detached.
     expect(onChangeA).not.toHaveBeenCalled();
     expect(onChangeB).toHaveBeenCalledTimes(1);
   });

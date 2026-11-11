@@ -223,7 +223,7 @@ describe('Security Tests', () => {
     it('should handle empty string input', () => {
       const input = new NumoraInput(container, {});
       input.setValue('');
-      expect(input.value).toBe('');
+      expect(input.rawValue).toBe('');
     });
 
     it('should filter whitespace in removeNonNumericCharacters', () => {
@@ -258,7 +258,7 @@ describe('Security Tests', () => {
     it('should set and get value correctly on NumoraInput', () => {
       const input = new NumoraInput(container, {});
       input.setValue('123');
-      expect(input.value).toBe('123');
+      expect(input.rawValue).toBe('123');
     });
   });
 

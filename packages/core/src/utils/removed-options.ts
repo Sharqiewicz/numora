@@ -11,8 +11,10 @@ const REMOVED: Record<string, string> = {
   thousandStyle: 'groupingStyle',
   maxDecimals: 'decimalMaxLength',
   rawValueMode: 'e.target.value',
-  emitRawValue: 'the onChange `value`',
+  emitRawValue: 'the onValueChange `value`',
   defaultValue: 'value',
+  // Vanilla only: React destructures its own `onChange` before this list is consulted.
+  onChange: 'onValueChange',
 };
 
 /** Deletes every removed option from `options` (mutating it) and returns their names. */

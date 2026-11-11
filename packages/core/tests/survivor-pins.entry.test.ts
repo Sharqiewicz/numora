@@ -23,7 +23,7 @@ describe('validateNumoraInputOptions throw branches', () => {
         decimalMinLength: undefined,
         maxLength: undefined,
         isAllowed: undefined,
-        onChange: undefined,
+        onValueChange: undefined,
         formatOn: undefined,
         groupingStyle: undefined,
         thousandSeparator: undefined,
@@ -113,7 +113,7 @@ describe('validateNumoraInputOptions throw branches', () => {
     expect(v({ [name]: true })).not.toThrow();
     expect(v({ [name]: false })).not.toThrow();
   });
-  it.each(['isAllowed', 'onChange'])('%s must be a function', (name) => {
+  it.each(['isAllowed', 'onChange', 'onValueChange'])('%s must be a function', (name) => {
     expect(v({ [name]: 'x' })).toThrow(new RegExp(`${name} must be a function\\. Received: "x"`));
     expect(v({ [name]: 1 })).toThrow(new RegExp(`${name} must be a function`));
     expect(v({ [name]: () => true })).not.toThrow();
@@ -152,7 +152,7 @@ describe('config defaults', () => {
     const { n, el } = mk();
     el.value = '1k';
     el.dispatchEvent(new Event('input', { bubbles: true }));
-    expect(n.value).not.toBe('1000');
+    expect(n.rawValue).not.toBe('1000');
     expect(el.value).not.toContain('000');
   });
 });

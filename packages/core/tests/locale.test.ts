@@ -214,7 +214,7 @@ describe('✅ locale-driven grouping end to end', () => {
       value: '12345678',
     });
     expect(instance.element.value).toBe('1,23,45,678');
-    expect(instance.value).toBe('12345678');
+    expect(instance.rawValue).toBe('12345678');
   });
 });
 

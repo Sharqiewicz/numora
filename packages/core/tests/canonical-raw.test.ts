@@ -45,36 +45,36 @@ describe('canonical raw value', () => {
   });
 
   const make = (opts: ConstructorParameters<typeof NumoraInput>[1] = {}) => {
-    const onChange = vi.fn();
-    const n = new NumoraInput(container, { formatOn: FormatOn.Change, onChange, ...opts });
-    return { n, onChange, el: container.querySelector('input') as HTMLInputElement };
+    const onValueChange = vi.fn();
+    const n = new NumoraInput(container, { formatOn: FormatOn.Change, onValueChange, ...opts });
+    return { n, onValueChange, el: container.querySelector('input') as HTMLInputElement };
   };
 
   describe('focus strip (Blur mode)', () => {
-    it('de-DE: focusing a value with decimals does not fire onChange (raw is unchanged)', () => {
-      const { n, el, onChange } = make({
+    it('de-DE: focusing a value with decimals does not fire onValueChange (raw is unchanged)', () => {
+      const { n, el, onValueChange } = make({
         locale: 'de-DE',
         formatOn: FormatOn.Blur,
         groupingStyle: GroupingStyle.Thousand,
         value: '1234567.89',
       });
       expect(el.value).toBe('1.234.567,89');
-      onChange.mockClear();
+      onValueChange.mockClear();
       el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
       expect(el.value).toBe('1234567,89');
-      expect(n.value).toBe('1234567.89');
-      expect(onChange).not.toHaveBeenCalled();
+      expect(n.rawValue).toBe('1234567.89');
+      expect(onValueChange).not.toHaveBeenCalled();
     });
   });
 
   describe('typing (ADR 0005)', () => {
     it('de-DE: typing 1234567.89 with the "." key gives 1.234.567,89 and raw 1234567.89', () => {
-      const { n, el, onChange } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
+      const { n, el, onValueChange } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       typeString(el, '1234567.89');
       expect(el.value).toBe('1.234.567,89');
-      expect(n.value).toBe('1234567.89');
+      expect(n.rawValue).toBe('1234567.89');
       expect(n.formattedValue).toBe('1.234.567,89');
-      expect(onChange).toHaveBeenLastCalledWith({
+      expect(onValueChange).toHaveBeenLastCalledWith({
         value: '1234567.89',
         formattedValue: '1.234.567,89',
       });
@@ -86,30 +86,30 @@ describe('canonical raw value', () => {
       expect(el.value).toBe('1,5');
       typeChar(el, '.');
       expect(el.value).toBe('1,5');
-      expect(n.value).toBe('1.5');
+      expect(n.rawValue).toBe('1.5');
     });
 
     it('de-DE: the native "," key still works as the decimal', () => {
       const { el, n } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       typeString(el, '1234,5');
       expect(el.value).toBe('1.234,5');
-      expect(n.value).toBe('1234.5');
+      expect(n.rawValue).toBe('1234.5');
     });
 
     it('en-US: typing "," is rejected', () => {
-      const { el, onChange } = make({ locale: 'en-US', groupingStyle: GroupingStyle.Thousand });
+      const { el, onValueChange } = make({ locale: 'en-US', groupingStyle: GroupingStyle.Thousand });
       typeString(el, '12');
-      onChange.mockClear();
+      onValueChange.mockClear();
       typeChar(el, ',');
       expect(el.value).toBe('12');
-      expect(onChange).not.toHaveBeenCalled();
+      expect(onValueChange).not.toHaveBeenCalled();
     });
 
     it('de-DE trailing decimal keeps raw "1."', () => {
       const { el, n } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       typeString(el, '1,');
       expect(el.value).toBe('1,');
-      expect(n.value).toBe('1.');
+      expect(n.rawValue).toBe('1.');
     });
   });
 
@@ -118,7 +118,7 @@ describe('canonical raw value', () => {
       const { n, el } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       n.setValue('1234.5');
       expect(el.value).toBe('1.234,5');
-      expect(n.value).toBe('1234.5');
+      expect(n.rawValue).toBe('1234.5');
       expect(n.formattedValue).toBe('1.234,5');
     });
 
@@ -126,14 +126,14 @@ describe('canonical raw value', () => {
       const { n, el } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       n.setValue('1.234');
       expect(el.value).toBe('1,234');
-      expect(n.value).toBe('1.234');
+      expect(n.rawValue).toBe('1.234');
     });
 
     it('setValue round-trips a negative canonical value', () => {
       const { n, el } = make({ locale: 'de-DE', allowNegative: true, groupingStyle: GroupingStyle.Thousand });
       n.setValue('-1234.5');
       expect(el.value).toBe('-1.234,5');
-      expect(n.value).toBe('-1234.5');
+      expect(n.rawValue).toBe('-1234.5');
     });
   });
 
@@ -141,14 +141,14 @@ describe('canonical raw value', () => {
     it('the value property mirrors getValue()', () => {
       const { n } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       n.setValue('9876.5');
-      expect(n.value).toBe('9876.5');
+      expect(n.rawValue).toBe('9876.5');
     });
 
     it('en-US raw has no grouping', () => {
       const { n, el } = make({ groupingStyle: GroupingStyle.Thousand });
       typeString(el, '1234567.5');
       expect(el.value).toBe('1,234,567.5');
-      expect(n.value).toBe('1234567.5');
+      expect(n.rawValue).toBe('1234567.5');
     });
   });
 
@@ -170,7 +170,7 @@ describe('canonical raw value', () => {
       const { el, n } = make({ locale, groupingStyle: GroupingStyle.Thousand });
       pasteInto(el, clip);
       expect(el.value).toBe(display);
-      expect(n.value).toBe(raw);
+      expect(n.rawValue).toBe(raw);
     });
 
     it('core paste handler returns canonical raw for de-DE 1.234,56', () => {
@@ -196,7 +196,7 @@ describe('canonical raw value', () => {
     it('de-DE paste 1,5e3 expands scientific notation to 1500', () => {
       const { el, n } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       pasteInto(el, '1,5e3');
-      expect(n.value).toBe('1500');
+      expect(n.rawValue).toBe('1500');
     });
 
     it('de-DE paste 1.5k expands compact notation to 1500', () => {
@@ -206,7 +206,7 @@ describe('canonical raw value', () => {
         groupingStyle: GroupingStyle.Thousand,
       });
       pasteInto(el, '1.5k');
-      expect(n.value).toBe('1500');
+      expect(n.rawValue).toBe('1500');
     });
   });
 

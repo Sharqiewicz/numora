@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NumoraInput } from '../src/NumoraInput';
 import { FormatOn } from '../src/types';
 
-// Characterization tests: pin the exact order and payload of every onChange callback
+// Characterization tests: pin the exact order and payload of every onValueChange callback
 // (plus the element value/caret) for the vanilla event wiring, so a refactor of that
 // wiring cannot change behaviour silently. Typing uses the beforeinput path
 // (typeChar mirrors simulateTyping); `nativeInput` exercises the `input` fallback.
@@ -24,8 +24,8 @@ afterEach(() => {
 function make(options: Record<string, unknown> = {}) {
   let el!: HTMLInputElement;
   const numora = new NumoraInput(container, {
-    onChange: (v: { value: string; formattedValue: string }) =>
-      log.push({ ev: 'onChange', value: v.value, formattedValue: v.formattedValue, dom: el.value }),
+    onValueChange: (v: { value: string; formattedValue: string }) =>
+      log.push({ ev: 'onValueChange', value: v.value, formattedValue: v.formattedValue, dom: el.value }),
     ...options,
   } as never);
   el = numora.element;
@@ -72,57 +72,57 @@ function nativeInput(
 // Expected JSON for the table-driven cases below (looped tests cannot share inline snapshots).
 const PINNED: Record<string, string[]> = {
   'typing via beforeinput > en-US blur: digits and a decimal': [
-    '[{"ev":"onChange","value":"1","formattedValue":"1","dom":"1"},{"ev":"onChange","value":"12","formattedValue":"12","dom":"12"},{"ev":"onChange","value":"123","formattedValue":"123","dom":"123"},{"ev":"onChange","value":"1234","formattedValue":"1234","dom":"1234"},{"ev":"onChange","value":"12345","formattedValue":"12345","dom":"12345"},{"ev":"onChange","value":"12345.","formattedValue":"12345.","dom":"12345."},{"ev":"onChange","value":"12345.6","formattedValue":"12345.6","dom":"12345.6"}]',
+    '[{"ev":"onValueChange","value":"1","formattedValue":"1","dom":"1"},{"ev":"onValueChange","value":"12","formattedValue":"12","dom":"12"},{"ev":"onValueChange","value":"123","formattedValue":"123","dom":"123"},{"ev":"onValueChange","value":"1234","formattedValue":"1234","dom":"1234"},{"ev":"onValueChange","value":"12345","formattedValue":"12345","dom":"12345"},{"ev":"onValueChange","value":"12345.","formattedValue":"12345.","dom":"12345."},{"ev":"onValueChange","value":"12345.6","formattedValue":"12345.6","dom":"12345.6"}]',
     '{"value":"12345.6","caret":[7,7]}',
   ],
   'typing via beforeinput > de-DE blur: digits and a decimal': [
-    '[{"ev":"onChange","value":"1","formattedValue":"1","dom":"1"},{"ev":"onChange","value":"12","formattedValue":"12","dom":"12"},{"ev":"onChange","value":"123","formattedValue":"123","dom":"123"},{"ev":"onChange","value":"1234","formattedValue":"1234","dom":"1234"},{"ev":"onChange","value":"12345","formattedValue":"12345","dom":"12345"},{"ev":"onChange","value":"12345.","formattedValue":"12345,","dom":"12345,"},{"ev":"onChange","value":"12345.6","formattedValue":"12345,6","dom":"12345,6"}]',
+    '[{"ev":"onValueChange","value":"1","formattedValue":"1","dom":"1"},{"ev":"onValueChange","value":"12","formattedValue":"12","dom":"12"},{"ev":"onValueChange","value":"123","formattedValue":"123","dom":"123"},{"ev":"onValueChange","value":"1234","formattedValue":"1234","dom":"1234"},{"ev":"onValueChange","value":"12345","formattedValue":"12345","dom":"12345"},{"ev":"onValueChange","value":"12345.","formattedValue":"12345,","dom":"12345,"},{"ev":"onValueChange","value":"12345.6","formattedValue":"12345,6","dom":"12345,6"}]',
     '{"value":"12345,6","caret":[7,7]}',
   ],
   'typing via beforeinput > en-US change: digits and a decimal': [
-    '[{"ev":"onChange","value":"1","formattedValue":"1","dom":"1"},{"ev":"onChange","value":"12","formattedValue":"12","dom":"12"},{"ev":"onChange","value":"123","formattedValue":"123","dom":"123"},{"ev":"onChange","value":"1234","formattedValue":"1,234","dom":"1,234"},{"ev":"onChange","value":"12345","formattedValue":"12,345","dom":"12,345"},{"ev":"onChange","value":"12345.","formattedValue":"12,345.","dom":"12,345."},{"ev":"onChange","value":"12345.6","formattedValue":"12,345.6","dom":"12,345.6"}]',
+    '[{"ev":"onValueChange","value":"1","formattedValue":"1","dom":"1"},{"ev":"onValueChange","value":"12","formattedValue":"12","dom":"12"},{"ev":"onValueChange","value":"123","formattedValue":"123","dom":"123"},{"ev":"onValueChange","value":"1234","formattedValue":"1,234","dom":"1,234"},{"ev":"onValueChange","value":"12345","formattedValue":"12,345","dom":"12,345"},{"ev":"onValueChange","value":"12345.","formattedValue":"12,345.","dom":"12,345."},{"ev":"onValueChange","value":"12345.6","formattedValue":"12,345.6","dom":"12,345.6"}]',
     '{"value":"12,345.6","caret":[8,8]}',
   ],
   'typing via beforeinput > de-DE change: digits and a decimal': [
-    '[{"ev":"onChange","value":"1","formattedValue":"1","dom":"1"},{"ev":"onChange","value":"12","formattedValue":"12","dom":"12"},{"ev":"onChange","value":"123","formattedValue":"123","dom":"123"},{"ev":"onChange","value":"1234","formattedValue":"1.234","dom":"1.234"},{"ev":"onChange","value":"12345","formattedValue":"12.345","dom":"12.345"},{"ev":"onChange","value":"12345.","formattedValue":"12.345,","dom":"12.345,"},{"ev":"onChange","value":"12345.6","formattedValue":"12.345,6","dom":"12.345,6"}]',
+    '[{"ev":"onValueChange","value":"1","formattedValue":"1","dom":"1"},{"ev":"onValueChange","value":"12","formattedValue":"12","dom":"12"},{"ev":"onValueChange","value":"123","formattedValue":"123","dom":"123"},{"ev":"onValueChange","value":"1234","formattedValue":"1.234","dom":"1.234"},{"ev":"onValueChange","value":"12345","formattedValue":"12.345","dom":"12.345"},{"ev":"onValueChange","value":"12345.","formattedValue":"12.345,","dom":"12.345,"},{"ev":"onValueChange","value":"12345.6","formattedValue":"12.345,6","dom":"12.345,6"}]',
     '{"value":"12.345,6","caret":[8,8]}',
   ],
   'paste > en-US blur: normal paste': [
-    '[{"ev":"onChange","value":"1234567.891","formattedValue":"1234567.891","dom":"1234567.891"}]',
+    '[{"ev":"onValueChange","value":"1234567.891","formattedValue":"1234567.891","dom":"1234567.891"}]',
     '{"value":"1234567.891","caret":[11,11]}',
   ],
   'paste > de-DE blur: normal paste of a de-DE string': [
-    '[{"ev":"onChange","value":"1234567.89","formattedValue":"1234567,89","dom":"1234567,89"}]',
+    '[{"ev":"onValueChange","value":"1234567.89","formattedValue":"1234567,89","dom":"1234567,89"}]',
     '{"value":"1234567,89","caret":[10,10]}',
   ],
   'paste > en-US change: normal paste': [
-    '[{"ev":"onChange","value":"1234567.891","formattedValue":"1,234,567.891","dom":"1,234,567.891"}]',
+    '[{"ev":"onValueChange","value":"1234567.891","formattedValue":"1,234,567.891","dom":"1,234,567.891"}]',
     '{"value":"1,234,567.891","caret":[13,13]}',
   ],
   'paste > de-DE change: normal paste of a de-DE string': [
-    '[{"ev":"onChange","value":"1234567.89","formattedValue":"1.234.567,89","dom":"1.234.567,89"}]',
+    '[{"ev":"onValueChange","value":"1234567.89","formattedValue":"1.234.567,89","dom":"1.234.567,89"}]',
     '{"value":"1.234.567,89","caret":[12,12]}',
   ],
-  'keyboard focus then blur > en-US Blur: focus strips without onChange; blur regroups with no onChange (raw unchanged)':
+  'keyboard focus then blur > en-US Blur: focus strips without onValueChange; blur regroups with no onValueChange (raw unchanged)':
     [
       '"1,234,567.89"',
       '{"value":"1234567.89","caret":[10,10]}',
       '[]',
       '{"value":"1,234,567.89","caret":[12,12]}',
     ],
-  'keyboard focus then blur > en-US Blur: type then blur groups; blur does not fire onChange': [
-    '[{"ev":"onChange","value":"1","formattedValue":"1","dom":"1"},{"ev":"onChange","value":"12","formattedValue":"12","dom":"12"},{"ev":"onChange","value":"123","formattedValue":"123","dom":"123"},{"ev":"onChange","value":"1234","formattedValue":"1234","dom":"1234"},{"ev":"onChange","value":"12345","formattedValue":"12345","dom":"12345"},{"ev":"onChange","value":"123456","formattedValue":"123456","dom":"123456"},{"ev":"onChange","value":"1234567","formattedValue":"1234567","dom":"1234567"},{"ev":"onChange","value":"1234567.","formattedValue":"1234567.","dom":"1234567."},{"ev":"onChange","value":"1234567.5","formattedValue":"1234567.5","dom":"1234567.5"}]',
+  'keyboard focus then blur > en-US Blur: type then blur groups; blur does not fire onValueChange': [
+    '[{"ev":"onValueChange","value":"1","formattedValue":"1","dom":"1"},{"ev":"onValueChange","value":"12","formattedValue":"12","dom":"12"},{"ev":"onValueChange","value":"123","formattedValue":"123","dom":"123"},{"ev":"onValueChange","value":"1234","formattedValue":"1234","dom":"1234"},{"ev":"onValueChange","value":"12345","formattedValue":"12345","dom":"12345"},{"ev":"onValueChange","value":"123456","formattedValue":"123456","dom":"123456"},{"ev":"onValueChange","value":"1234567","formattedValue":"1234567","dom":"1234567"},{"ev":"onValueChange","value":"1234567.","formattedValue":"1234567.","dom":"1234567."},{"ev":"onValueChange","value":"1234567.5","formattedValue":"1234567.5","dom":"1234567.5"}]',
     '{"value":"1,234,567.5","caret":[11,11]}',
   ],
-  'keyboard focus then blur > de-DE Blur: focus strips without onChange; blur regroups with no onChange (raw unchanged)':
+  'keyboard focus then blur > de-DE Blur: focus strips without onValueChange; blur regroups with no onValueChange (raw unchanged)':
     [
       '"1.234.567,89"',
       '{"value":"1234567,89","caret":[10,10]}',
       '[]',
       '{"value":"1.234.567,89","caret":[12,12]}',
     ],
-  'keyboard focus then blur > de-DE Blur: type then blur groups; blur does not fire onChange': [
-    '[{"ev":"onChange","value":"1","formattedValue":"1","dom":"1"},{"ev":"onChange","value":"12","formattedValue":"12","dom":"12"},{"ev":"onChange","value":"123","formattedValue":"123","dom":"123"},{"ev":"onChange","value":"1234","formattedValue":"1234","dom":"1234"},{"ev":"onChange","value":"12345","formattedValue":"12345","dom":"12345"},{"ev":"onChange","value":"123456","formattedValue":"123456","dom":"123456"},{"ev":"onChange","value":"1234567","formattedValue":"1234567","dom":"1234567"},{"ev":"onChange","value":"1234567.","formattedValue":"1234567,","dom":"1234567,"},{"ev":"onChange","value":"1234567.5","formattedValue":"1234567,5","dom":"1234567,5"}]',
+  'keyboard focus then blur > de-DE Blur: type then blur groups; blur does not fire onValueChange': [
+    '[{"ev":"onValueChange","value":"1","formattedValue":"1","dom":"1"},{"ev":"onValueChange","value":"12","formattedValue":"12","dom":"12"},{"ev":"onValueChange","value":"123","formattedValue":"123","dom":"123"},{"ev":"onValueChange","value":"1234","formattedValue":"1234","dom":"1234"},{"ev":"onValueChange","value":"12345","formattedValue":"12345","dom":"12345"},{"ev":"onValueChange","value":"123456","formattedValue":"123456","dom":"123456"},{"ev":"onValueChange","value":"1234567","formattedValue":"1234567","dom":"1234567"},{"ev":"onValueChange","value":"1234567.","formattedValue":"1234567,","dom":"1234567,"},{"ev":"onValueChange","value":"1234567.5","formattedValue":"1234567,5","dom":"1234567,5"}]',
     '{"value":"1.234.567,5","caret":[11,11]}',
   ],
 };
@@ -164,7 +164,7 @@ describe('typing via beforeinput', () => {
       [
         {
           "dom": "19,234",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "19,234",
           "value": "19234",
         },
@@ -216,7 +216,7 @@ describe('paste', () => {
       [
         {
           "dom": "199,456",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "199,456",
           "value": "199456",
         },
@@ -232,21 +232,21 @@ describe('paste', () => {
       }
     `);
   });
-  it('readOnly: prevented, no write, no onChange', () => {
+  it('readOnly: prevented, no write, no onValueChange', () => {
     const { el } = make({ value: '5', readOnly: true });
     const ev = paste(el, '123');
     expect(ev.defaultPrevented).toBe(true);
     expect(log).toEqual([]);
     expect(el.value).toBe('5');
   });
-  it('disabled: prevented, no write, no onChange', () => {
+  it('disabled: prevented, no write, no onValueChange', () => {
     const { el } = make({ value: '5', disabled: true });
     const ev = paste(el, '123');
     expect(ev.defaultPrevented).toBe(true);
     expect(log).toEqual([]);
     expect(el.value).toBe('5');
   });
-  it('rejected by isAllowed: prevented, value untouched, no onChange', () => {
+  it('rejected by isAllowed: prevented, value untouched, no onValueChange', () => {
     const { el } = make({ value: '5', isAllowed: (r: string) => r.length < 3 });
     el.focus();
     const ev = paste(el, '123');
@@ -262,7 +262,7 @@ describe('paste', () => {
       }
     `);
   });
-  it('rejected scientific notation (allowScientificNotation:false): no write, no onChange', () => {
+  it('rejected scientific notation (allowScientificNotation:false): no write, no onValueChange', () => {
     const { el } = make({ value: '5', allowScientificNotation: false });
     el.focus();
     paste(el, '1.5e-7');
@@ -277,7 +277,7 @@ describe('paste', () => {
       [
         {
           "dom": "5",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "5",
           "value": "5",
         },
@@ -300,7 +300,7 @@ describe('keyboard focus then blur', () => {
     ['en-US', {}],
     ['de-DE', { locale: 'de-DE' }],
   ] as const) {
-    it(`${name} Blur: focus strips without onChange; blur regroups with no onChange (raw unchanged)`, () => {
+    it(`${name} Blur: focus strips without onValueChange; blur regroups with no onValueChange (raw unchanged)`, () => {
       const { el } = make({ value: '1234567.89', ...extra });
       pin('val', el.value);
       el.focus();
@@ -310,7 +310,7 @@ describe('keyboard focus then blur', () => {
       pin('log', log);
       pin('sta', state(el));
     });
-    it(`${name} Blur: type then blur groups; blur does not fire onChange`, () => {
+    it(`${name} Blur: type then blur groups; blur does not fire onValueChange`, () => {
       const { el } = make({ ...extra });
       el.focus();
       typeAll(el, name === 'en-US' ? '1234567.5' : '1234567,5');
@@ -362,7 +362,7 @@ describe('mouse focus', () => {
   const click = (el: HTMLInputElement) =>
     el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
-  it('left mousedown -> focus keeps grouping; click strips and maps the caret; no onChange', () => {
+  it('left mousedown -> focus keeps grouping; click strips and maps the caret; no onValueChange', () => {
     const { el } = make({ value: '1234567' });
     md(el);
     el.focus();
@@ -461,7 +461,7 @@ describe('blur cases', () => {
     log.length = 0;
     el.blur();
     expect(el.value).toBe('1');
-    expect(log).toEqual([{ ev: 'onChange', value: '1', formattedValue: '1', dom: '1' }]);
+    expect(log).toEqual([{ ev: 'onValueChange', value: '1', formattedValue: '1', dom: '1' }]);
   });
 
   it('trailing separator "1." is stripped on blur', () => {
@@ -474,7 +474,7 @@ describe('blur cases', () => {
       [
         {
           "dom": "1",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "1",
           "value": "1",
         },
@@ -500,7 +500,7 @@ describe('blur cases', () => {
       [
         {
           "dom": "1",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "1",
           "value": "1",
         },
@@ -527,7 +527,7 @@ describe('blur cases', () => {
         [
           {
             "dom": "1,234.50",
-            "ev": "onChange",
+            "ev": "onValueChange",
             "formattedValue": "1,234.50",
             "value": "1234.50",
           },
@@ -553,7 +553,7 @@ describe('blur cases', () => {
         [
           {
             "dom": "1.234,50",
-            "ev": "onChange",
+            "ev": "onValueChange",
             "formattedValue": "1.234,50",
             "value": "1234.50",
           },
@@ -579,7 +579,7 @@ describe('blur cases', () => {
         [
           {
             "dom": "0",
-            "ev": "onChange",
+            "ev": "onValueChange",
             "formattedValue": "0",
             "value": "0",
           },
@@ -605,7 +605,7 @@ describe('blur cases', () => {
         [
           {
             "dom": "0.00",
-            "ev": "onChange",
+            "ev": "onValueChange",
             "formattedValue": "0.00",
             "value": "0.00",
           },
@@ -632,7 +632,7 @@ describe('blur cases', () => {
       [
         {
           "dom": "7.00",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "7.00",
           "value": "7.00",
         },
@@ -658,7 +658,7 @@ describe('blur cases', () => {
       [
         {
           "dom": "0.00",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "0.00",
           "value": "0.00",
         },
@@ -713,7 +713,7 @@ describe('blur cases', () => {
     expect(spy).not.toHaveBeenCalled();
     expect(log).toEqual([]);
   });
-  it('blur after typing "1234" in Blur mode regroups the display but fires no onChange', () => {
+  it('blur after typing "1234" in Blur mode regroups the display but fires no onValueChange', () => {
     const { el } = make();
     el.focus();
     typeAll(el, '1234');
@@ -737,7 +737,7 @@ describe('undo / redo input events', () => {
           [
             {
               "dom": "1234",
-              "ev": "onChange",
+              "ev": "onValueChange",
               "formattedValue": "1234",
               "value": "1234",
             },
@@ -763,7 +763,7 @@ describe('undo / redo input events', () => {
       [
         {
           "dom": "1.234,5",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "1.234,5",
           "value": "1234.5",
         },
@@ -792,7 +792,7 @@ describe('input fallback', () => {
       [
         {
           "dom": "1234.5",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "1234.5",
           "value": "1234.5",
         },
@@ -816,7 +816,7 @@ describe('input fallback', () => {
       [
         {
           "dom": "1,234",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "1,234",
           "value": "1234",
         },
@@ -840,7 +840,7 @@ describe('input fallback', () => {
       [
         {
           "dom": "123",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "123",
           "value": "123",
         },
@@ -864,7 +864,7 @@ describe('input fallback', () => {
       [
         {
           "dom": "1.",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "1.",
           "value": "1.",
         },
@@ -880,14 +880,14 @@ describe('input fallback', () => {
       }
     `);
   });
-  it('unfocused (autofill) Blur mode: lands grouped, onChange fires', () => {
+  it('unfocused (autofill) Blur mode: lands grouped, onValueChange fires', () => {
     const { el } = make();
     nativeInput(el, '1234567.5', 0);
     expect(log).toMatchInlineSnapshot(`
       [
         {
           "dom": "1,234,567.5",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "1,234,567.5",
           "value": "1234567.5",
         },
@@ -910,7 +910,7 @@ describe('input fallback', () => {
       [
         {
           "dom": "1.234,56",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "1.234,56",
           "value": "1234.56",
         },
@@ -933,7 +933,7 @@ describe('input fallback', () => {
       [
         {
           "dom": "12.00",
-          "ev": "onChange",
+          "ev": "onValueChange",
           "formattedValue": "12.00",
           "value": "12.00",
         },
@@ -950,7 +950,7 @@ describe('input fallback', () => {
     `);
   });
   describe('allowScientificNotation:false', () => {
-    it('focused: restores the previous value, no onChange', () => {
+    it('focused: restores the previous value, no onValueChange', () => {
       const { el } = make({ allowScientificNotation: false, value: '5' });
       el.focus();
       typeAll(el, '7');
@@ -967,7 +967,7 @@ describe('input fallback', () => {
         }
       `);
     });
-    it('unfocused: restores the previous value, no onChange', () => {
+    it('unfocused: restores the previous value, no onValueChange', () => {
       const { el } = make({ allowScientificNotation: false, value: '1234' });
       expect(el.value).toBe('1,234');
       nativeInput(el, '1.5e-7', 6);
@@ -1005,7 +1005,7 @@ describe('input fallback', () => {
 });
 
 describe('setValue / destroy', () => {
-  it('setValue writes the formatted value and fires no onChange', () => {
+  it('setValue writes the formatted value and fires no onValueChange', () => {
     const { numora, el } = make();
     numora.setValue('1234567.5');
     expect(log).toEqual([]);

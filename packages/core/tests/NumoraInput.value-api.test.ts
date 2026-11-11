@@ -11,27 +11,27 @@ describe('NumoraInput value API', () => {
   });
   afterEach(() => container.remove());
 
-  it('value getter returns the raw value, getFormattedValue the display string', () => {
+  it('rawValue returns the raw value, formattedValue the display string', () => {
     const n = new NumoraInput(container, { formatOn: FormatOn.Change, value: '1234567.5' });
-    expect(n.value).toBe('1234567.5');
+    expect(n.rawValue).toBe('1234567.5');
     expect(n.formattedValue).toBe('1,234,567.5');
   });
 
-  it('value setter takes a canonical raw value and formats it like setValue', () => {
+  it('setValue takes a canonical raw value and formats it for the locale', () => {
     const n = new NumoraInput(container, {
       formatOn: FormatOn.Change,
       thousandSeparator: '.',
       decimalSeparator: ',',
     });
-    n.value = '1234.5';
+    n.setValue('1234.5');
     expect(n.element.value).toBe('1.234,5');
-    expect(n.value).toBe('1234.5');
+    expect(n.rawValue).toBe('1234.5');
   });
 
   it('setValue sanitizes through the pipeline (decimalMaxLength, allowNegative)', () => {
     const n = new NumoraInput(container, { formatOn: FormatOn.Change, decimalMaxLength: 2 });
     n.setValue('-12.3456');
-    expect(n.value).toBe('12.34');
+    expect(n.rawValue).toBe('12.34');
   });
 
   it('setValue writes through setRangeText by default (undoable)', () => {
@@ -48,14 +48,14 @@ describe('NumoraInput value API', () => {
     n.setValue('1000', { undoable: false });
     expect(spy).not.toHaveBeenCalled();
     expect(n.element.value).toBe('1,000');
-    expect(n.value).toBe('1000');
+    expect(n.rawValue).toBe('1000');
   });
 
-  it('setValue does not fire onChange (programmatic writes are not user edits)', () => {
-    const onChange = vi.fn();
-    const n = new NumoraInput(container, { formatOn: FormatOn.Change, onChange });
+  it('setValue does not fire onValueChange (programmatic writes are not user edits)', () => {
+    const onValueChange = vi.fn();
+    const n = new NumoraInput(container, { formatOn: FormatOn.Change, onValueChange });
     n.setValue('5');
     n.setValue('6', { undoable: false });
-    expect(onChange).not.toHaveBeenCalled();
+    expect(onValueChange).not.toHaveBeenCalled();
   });
 });

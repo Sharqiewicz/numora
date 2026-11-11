@@ -114,3 +114,27 @@ describe('entry points', () => {
     ]);
   });
 });
+
+// An explicit separator or grouping option wins; `locale` fills only the ones not set.
+describe('locale with explicit separator options', () => {
+  it('locale alone supplies both separators and the grouping', () => {
+    expect(formatValue('1234567.5', { locale: 'de-DE' })).toBe('1.234.567,5');
+    expect(formatValue('1234567.5', { locale: 'en-IN' })).toBe('12,34,567.5');
+  });
+
+  it('an explicit option overrides just that part of the locale', () => {
+    expect(formatValue('1234567.5', { locale: 'de-DE', thousandSeparator: ' ' })).toBe(
+      '1 234 567,5'
+    );
+    expect(formatValue('1234567.5', { locale: 'en-IN', groupingStyle: 'thousand' })).toBe(
+      '1,234,567.5'
+    );
+    expect(formatValue('1234567.5', { locale: 'en-US', groupingStyle: 'none' })).toBe('1234567.5');
+  });
+
+  it('an override that collides with the separator the locale fills in throws', () => {
+    expect(() => formatValue('1', { locale: 'de-DE', decimalSeparator: '.' })).toThrow(
+      /decimalSeparator cannot equal thousandSeparator/
+    );
+  });
+});

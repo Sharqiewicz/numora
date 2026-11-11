@@ -2,9 +2,11 @@ import { FormatOn, GroupingStyle, type NumoraOptions } from './types';
 
 // Derived from NumoraOptions so adding a new field to that interface automatically
 // flows into validation - no more drift between the option surface and the validator.
-// `onChange` is `unknown`: only its `typeof` is checked, and the vanilla and React callbacks
-// have different signatures.
-type NumoraInputValidationOptions = NumoraOptions & { onChange?: unknown };
+// The callbacks are `unknown`: only their `typeof` is checked. `onChange` is React's.
+type NumoraInputValidationOptions = NumoraOptions & {
+  onChange?: unknown;
+  onValueChange?: unknown;
+};
 
 /**
  * Validates all NumoraInput constructor parameters.
@@ -31,6 +33,7 @@ export function validateNumoraInputOptions(options: NumoraInputValidationOptions
   assertInt('maxLength', options.maxLength, 1, 'a positive integer (>= 1)');
   assertType('isAllowed', options.isAllowed, 'function');
   assertType('onChange', options.onChange, 'function');
+  assertType('onValueChange', options.onValueChange, 'function');
 }
 
 function assertInt(name: string, value: number | undefined, min: number, expected: string): void {

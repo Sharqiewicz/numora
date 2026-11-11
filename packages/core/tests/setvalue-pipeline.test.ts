@@ -51,7 +51,7 @@ describe('setValue runs the full pipeline in default mode', () => {
     const input = make({ maxLength: 5 });
     input.setValue('1234567890');
     // 5 raw chars -> "12345", then grouped
-    expect(input.value).toBe('12345');
+    expect(input.rawValue).toBe('12345');
   });
 
   it('strips a sign when allowNegative is false', () => {

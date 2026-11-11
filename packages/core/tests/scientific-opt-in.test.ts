@@ -66,7 +66,7 @@ describe('allowScientificNotation', () => {
     const container = document.createElement('div');
     const n = new NumoraInput(container, { formatOn: 'change' });
     n.setValue(String(1e21));
-    expect(n.value).toBe('1000000000000000000000');
+    expect(n.rawValue).toBe('1000000000000000000000');
   });
 
   it('validates the option type', () => {
@@ -101,20 +101,20 @@ describe('allowScientificNotation', () => {
       expect(before(input, '5').type).toBe('handled');
     });
 
-    it('input fallback (autofill) restores the previous value and does not fire onChange', () => {
-      const onChange = vi.fn();
+    it('input fallback (autofill) restores the previous value and does not fire onValueChange', () => {
+      const onValueChange = vi.fn();
       const n = new NumoraInput(document.body, {
         allowScientificNotation: false,
         formatOn: 'change' as never,
         value: '12',
-        onChange,
+        onValueChange,
       });
       const el = n.element;
       el.focus();
       el.value = '1.5e-7';
       el.dispatchEvent(new Event('input', { bubbles: true }));
       expect(el.value).toBe('12');
-      expect(onChange).not.toHaveBeenCalled();
+      expect(onValueChange).not.toHaveBeenCalled();
       n.destroy();
     });
 

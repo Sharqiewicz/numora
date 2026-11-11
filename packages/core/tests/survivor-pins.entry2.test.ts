@@ -36,7 +36,7 @@ describe('entry survivors (round 3)', () => {
     expect(el.value).toBe('1.234,5');
     n.setValue('9876.25');
     expect(el.value).toBe('9.876,25');
-    expect(n.value).toBe('9876.25');
+    expect(n.rawValue).toBe('9876.25');
   });
 
 });

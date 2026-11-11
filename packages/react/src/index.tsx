@@ -183,6 +183,7 @@ const NumoraInput = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((props,
       maxLength,
       isAllowed,
       onChange,
+      onValueChange,
     });
     // Stable identity so `isAllowed` stays out of the memo's deps; delegates to the
     // current `isAllowed` via stateRef (read only from event handlers, after commit).

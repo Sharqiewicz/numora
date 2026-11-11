@@ -19,7 +19,7 @@ describe('options removed since v4 (vanilla)', () => {
     ['autoAddLeadingZero', true, 'padLeadingZero'],
     ['thousandStyle', 'lakh', 'groupingStyle'],
     ['maxDecimals', 2, 'decimalMaxLength'],
-    ['emitRawValue', true, 'onChange'],
+    ['emitRawValue', true, 'onValueChange'],
   ])('warns for %s, names the replacement, and keeps it off the element', (name, val, hint) => {
     vi.stubEnv('NODE_ENV', 'development');
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -32,8 +32,8 @@ describe('options removed since v4 (vanilla)', () => {
 
   it('an old name has no effect: enableNegative does not allow a minus', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
-    expect(make({ enableNegative: true, value: '-5' }).value).toBe('5');
-    expect(make({ allowNegative: true, value: '-5' }).value).toBe('-5');
+    expect(make({ enableNegative: true, value: '-5' }).rawValue).toBe('5');
+    expect(make({ allowNegative: true, value: '-5' }).rawValue).toBe('-5');
   });
 
   it('defaultValue is removed in vanilla: warned about and not used as the initial value', () => {
@@ -41,7 +41,19 @@ describe('options removed since v4 (vanilla)', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const input = make({ defaultValue: '5' });
     expect(warn.mock.calls[0][0]).toContain('defaultValue is removed in v5; use value');
-    expect(input.value).toBe('');
+    expect(input.rawValue).toBe('');
+  });
+
+  it('onChange is removed in vanilla: warned about and never called', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const onChange = vi.fn();
+    const input = make({ onChange });
+    expect(warn.mock.calls[0][0]).toContain('onChange is removed in v5; use onValueChange');
+    input.element.value = '12';
+    input.element.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+    expect(input.rawValue).toBe('12');
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('leaves the caller\'s options object untouched', () => {

@@ -36,7 +36,7 @@ export interface NumoraInputOptions
   /** Sets the `aria-label` attribute. */
   ariaLabel?: string;
   /** Fired on every change with `{ value, formattedValue }`: canonical raw + display string. */
-  onChange?: (values: NumoraValues) => void;
+  onValueChange?: (values: NumoraValues) => void;
   /**
    * Initial value, as a canonical raw value (`'1234.5'` in every locale). When adopting an
    * existing `<input>`, its own value is kept unless this is passed.
@@ -183,7 +183,7 @@ export class NumoraInput {
    * tearing down an adopted `<input>` (Svelte action `destroy`, Vue `unmounted`, Angular
    * `ngOnDestroy`, Solid `onCleanup`) or before re-initialising Numora on the same
    * element - otherwise each re-init stacks a fresh set of listeners that double-fire
-   * onChange and duplicate every DOM write per keystroke.
+   * onValueChange and duplicate every DOM write per keystroke.
    *
    * Only removes listeners Numora added; anything else attached to the element is left
    * untouched. Does not remove the element from the DOM.
@@ -192,7 +192,7 @@ export class NumoraInput {
   public destroy(): void {
     // splice empties the list, so a second destroy() is a no-op.
     if (this.cleanups.length) {
-      leftovers.set(this.el, { text: this.el.value, raw: this.value });
+      leftovers.set(this.el, { text: this.el.value, raw: this.rawValue });
     }
     for (const cleanup of this.cleanups.splice(0)) cleanup();
   }
@@ -200,20 +200,16 @@ export class NumoraInput {
   /** Records a write the shared helpers made and reports it. */
   private emit(values: NumoraValues | undefined): void {
     this.lastValue = this.el.value;
-    if (values) this.options.onChange?.({ value: values.value, formattedValue: values.formattedValue });
+    if (values) this.options.onValueChange?.({ value: values.value, formattedValue: values.formattedValue });
   }
 
   /**
    * The canonical raw value: ASCII digits, `.` decimal, `-` sign, no grouping, identical for
    * every locale (de-DE display `1.234.567,89` -> `1234567.89`). Safe to pass to a decimal
-   * library. Assigning it is the same as {@link setValue}.
+   * library. Read-only: write with {@link setValue}. (`element.value` is the display string.)
    */
-  public get value(): string {
+  public get rawValue(): string {
     return displayToRawValue(this.el.value, this.resolvedOptions);
-  }
-
-  public set value(value: string) {
-    this.setValue(value);
   }
 
   /** The display string shown in the field (locale separators and grouping included). */
@@ -250,7 +246,7 @@ export class NumoraInput {
    * Changes options on a live field. `options` is merged over the current ones; a key set
    * to `undefined` goes back to its default (a native attribute left `undefined` is not
    * touched). The current raw value is kept and re-run through the new options: the display
-   * is rewritten (undoable, like {@link setValue}), and `onChange` fires only if the raw
+   * is rewritten (undoable, like {@link setValue}), and `onValueChange` fires only if the raw
    * value itself changed, e.g. a smaller `decimalMaxLength` cut digits off (ADR 0008).
    *
    * @throws when the merged options are invalid. Nothing is changed in that case.
@@ -260,7 +256,7 @@ export class NumoraInput {
     const resolved = resolveOptions(merged);
     warnRemovedOptions(takeRemovedOptions({ ...options }));
 
-    const before = this.value;
+    const before = this.rawValue;
     this.options = merged;
     this.resolvedOptions = resolved;
     this.applyOptions(options);
@@ -271,6 +267,6 @@ export class NumoraInput {
       : formatForDisplay(before, resolved, 'canonical');
     if (formatted !== this.el.value) writeValuePreservingUndo(this.el, formatted, formatted.length);
     this.lastValue = formatted;
-    if (raw !== before) merged.onChange?.({ value: raw, formattedValue: formatted });
+    if (raw !== before) merged.onValueChange?.({ value: raw, formattedValue: formatted });
   }
 }

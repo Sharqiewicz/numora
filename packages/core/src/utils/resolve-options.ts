@@ -22,10 +22,10 @@ import { applyLocale } from './locale';
  *
  * Validation runs on the RESOLVED options: the separator-conflict and min/max-decimal checks
  * need both operands, and `{ decimalSeparator: ',' }` alone only conflicts once the default
- * thousand separator is filled in. `onChange` is accepted only to be type-checked.
+ * thousand separator is filled in. The callbacks are accepted only to be type-checked.
  */
 export function resolveOptions(
-  options: NumoraOptions & { onChange?: unknown } = {}
+  options: NumoraOptions & { onChange?: unknown; onValueChange?: unknown } = {}
 ): ResolvedNumoraOptions {
   const {
     locale,
@@ -53,6 +53,10 @@ export function resolveOptions(
     maxLength: options.maxLength,
     isAllowed: options.isAllowed,
   };
-  validateNumoraInputOptions({ ...resolved, onChange: options.onChange });
+  validateNumoraInputOptions({
+    ...resolved,
+    onChange: options.onChange,
+    onValueChange: options.onValueChange,
+  });
   return resolved;
 }

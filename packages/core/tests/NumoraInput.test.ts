@@ -30,7 +30,7 @@ function simulateTyping(el: HTMLInputElement, char: string): void {
     // setRangeText does not synchronously dispatch 'input' in real browsers or jsdom
     // (verified) - handleBeforeInput already broadcast the change itself, so there is
     // nothing left to simulate. Dispatching a synthetic 'input' here would reach
-    // handleChange a second time and double-fire onChange for every keystroke.
+    // handleChange a second time and double-fire onValueChange for every keystroke.
     return;
   }
 
@@ -56,7 +56,7 @@ function simulateDelete(
 
   if (beforeInput.defaultPrevented) {
     // Same as simulateTyping: handleBeforeInput already broadcast the change; a synthetic
-    // 'input' dispatch here would only double-fire onChange via handleChange.
+    // 'input' dispatch here would only double-fire onValueChange via handleChange.
     return;
   }
 
@@ -93,7 +93,7 @@ describe('NumoraInput Component', () => {
   function createInputWithPlaceholder(options = {}) {
     const input = new NumoraInput(container, {
       placeholder: '0.0',
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       ...options,
     });
     return input;
@@ -184,9 +184,9 @@ describe('NumoraInput Component', () => {
   });
 
   // A2-02: a readOnly/disabled field must reject a paste outright, like a native <input> -
-  // no write to the field and no onChange, even though the handler still preventDefault()s
+  // no write to the field and no onValueChange, even though the handler still preventDefault()s
   // the paste (there is no native paste behaviour to fall back to once we've cancelled it).
-  it('should ignore paste and not call onChange when readOnly', () => {
+  it('should ignore paste and not call onValueChange when readOnly', () => {
     createInputWithPlaceholder({ readOnly: true, value: '5' });
     const inputElement = getInputElement();
 
@@ -200,7 +200,7 @@ describe('NumoraInput Component', () => {
     expect(onChangeMock).not.toHaveBeenCalled();
   });
 
-  it('should ignore paste and not call onChange when disabled', () => {
+  it('should ignore paste and not call onValueChange when disabled', () => {
     createInputWithPlaceholder({ disabled: true, value: '5' });
     const inputElement = getInputElement();
 
@@ -347,7 +347,7 @@ describe('beforeinput event path', () => {
 
   describe('digit insertion', () => {
     it('should insert a digit via beforeinput', () => {
-      new NumoraInput(container, { onChange: onChangeMock });
+      new NumoraInput(container, { onValueChange: onChangeMock });
       const el = getInputElement();
 
       simulateTyping(el, '5');
@@ -357,7 +357,7 @@ describe('beforeinput event path', () => {
     });
 
     it('should build a number character by character', () => {
-      new NumoraInput(container, { onChange: onChangeMock });
+      new NumoraInput(container, { onValueChange: onChangeMock });
       const el = getInputElement();
 
       simulateTyping(el, '1');
@@ -368,7 +368,7 @@ describe('beforeinput event path', () => {
     });
 
     it('should ignore non-numeric characters', () => {
-      new NumoraInput(container, { onChange: onChangeMock });
+      new NumoraInput(container, { onValueChange: onChangeMock });
       const el = getInputElement();
 
       simulateTyping(el, '1');
@@ -381,7 +381,7 @@ describe('beforeinput event path', () => {
 
   describe('decimal separator', () => {
     it('should insert decimal separator', () => {
-      new NumoraInput(container, { onChange: onChangeMock, decimalMaxLength: 2 });
+      new NumoraInput(container, { onValueChange: onChangeMock, decimalMaxLength: 2 });
       const el = getInputElement();
 
       simulateTyping(el, '1');
@@ -393,7 +393,7 @@ describe('beforeinput event path', () => {
 
     it('should reject comma when it equals the default thousand separator (A2-04)', () => {
       new NumoraInput(container, {
-        onChange: onChangeMock,
+        onValueChange: onChangeMock,
         decimalSeparator: '.',
         decimalMaxLength: 2,
       });
@@ -407,7 +407,7 @@ describe('beforeinput event path', () => {
 
     it('should map a typed dot to the decimal separator in a comma-decimal locale (ADR 0005)', () => {
       new NumoraInput(container, {
-        onChange: onChangeMock,
+        onValueChange: onChangeMock,
         decimalSeparator: ',',
         thousandSeparator: '.',
         decimalMaxLength: 2,
@@ -424,7 +424,7 @@ describe('beforeinput event path', () => {
     });
 
     it('should block a second decimal separator', () => {
-      new NumoraInput(container, { onChange: onChangeMock, decimalMaxLength: 2 });
+      new NumoraInput(container, { onValueChange: onChangeMock, decimalMaxLength: 2 });
       const el = getInputElement();
 
       simulateTyping(el, '1');
@@ -438,7 +438,7 @@ describe('beforeinput event path', () => {
 
     it('should reject comma as the thousand separator even with a decimal already present', () => {
       new NumoraInput(container, {
-        onChange: onChangeMock,
+        onValueChange: onChangeMock,
         decimalSeparator: '.',
         decimalMaxLength: 2,
       });
@@ -454,7 +454,7 @@ describe('beforeinput event path', () => {
 
   describe('delete', () => {
     it('should delete the last character with Backspace', () => {
-      new NumoraInput(container, { onChange: onChangeMock });
+      new NumoraInput(container, { onValueChange: onChangeMock });
       const el = getInputElement();
 
       simulateTyping(el, '1');
@@ -466,7 +466,7 @@ describe('beforeinput event path', () => {
     });
 
     it('should delete a character forward with Delete', () => {
-      new NumoraInput(container, { onChange: onChangeMock });
+      new NumoraInput(container, { onValueChange: onChangeMock });
       const el = getInputElement();
 
       simulateTyping(el, '1');
@@ -483,7 +483,7 @@ describe('beforeinput event path', () => {
   describe('FormatOn.Change - thousand separator', () => {
     it('should add thousand separator when typing 4th digit', () => {
       new NumoraInput(container, {
-        onChange: onChangeMock,
+        onValueChange: onChangeMock,
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
         groupingStyle: GroupingStyle.Thousand,
@@ -502,7 +502,7 @@ describe('beforeinput event path', () => {
       // Regression: setRangeText with 'preserve' mode selected the entire value
       // when the formatted result was longer than the raw input (e.g. 1234 → 1,234).
       new NumoraInput(container, {
-        onChange: onChangeMock,
+        onValueChange: onChangeMock,
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
         groupingStyle: GroupingStyle.Thousand,
@@ -521,7 +521,7 @@ describe('beforeinput event path', () => {
 
     it('should correctly emit raw value without thousand separators', () => {
       new NumoraInput(container, {
-        onChange: onChangeMock,
+        onValueChange: onChangeMock,
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
         groupingStyle: GroupingStyle.Thousand,
@@ -572,7 +572,7 @@ describe('keydown - skipOverThousandSeparatorOnDelete', () => {
     // the keydown handler should reposition the cursor to position 1 (before the comma)
     // so the subsequent beforeinput deletes the digit '1' instead of the separator.
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -599,7 +599,7 @@ describe('keydown - skipOverThousandSeparatorOnDelete', () => {
     // The keydown handler should move cursor to position 2 (past the comma) so
     // the subsequent beforeinput deletes the digit '2' instead of the separator.
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -624,7 +624,7 @@ describe('keydown - skipOverThousandSeparatorOnDelete', () => {
   it('should not skip in FormatOn.Blur mode', () => {
     // skipOverThousandSeparatorOnDelete only applies in FormatOn.Change mode.
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -641,7 +641,7 @@ describe('keydown - skipOverThousandSeparatorOnDelete', () => {
 
   it('should not skip when cursor is not adjacent to separator', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -692,7 +692,7 @@ describe('beforeinput - selection and cut/drag deletion', () => {
   }
 
   it('deleteContentBackward with selection removes the selected range', () => {
-    new NumoraInput(container, { onChange: onChangeMock });
+    new NumoraInput(container, { onValueChange: onChangeMock });
     const el = getInputElement();
 
     simulateTyping(el, '1');
@@ -710,7 +710,7 @@ describe('beforeinput - selection and cut/drag deletion', () => {
   });
 
   it('deleteContentForward with selection removes the selected range', () => {
-    new NumoraInput(container, { onChange: onChangeMock });
+    new NumoraInput(container, { onValueChange: onChangeMock });
     const el = getInputElement();
 
     simulateTyping(el, '1');
@@ -726,7 +726,7 @@ describe('beforeinput - selection and cut/drag deletion', () => {
   });
 
   it('deleteByCut removes the selected range', () => {
-    new NumoraInput(container, { onChange: onChangeMock });
+    new NumoraInput(container, { onValueChange: onChangeMock });
     const el = getInputElement();
 
     simulateTyping(el, '1');
@@ -743,7 +743,7 @@ describe('beforeinput - selection and cut/drag deletion', () => {
   });
 
   it('deleteByDrag removes the selected range', () => {
-    new NumoraInput(container, { onChange: onChangeMock });
+    new NumoraInput(container, { onValueChange: onChangeMock });
     const el = getInputElement();
 
     simulateTyping(el, '9');
@@ -760,7 +760,7 @@ describe('beforeinput - selection and cut/drag deletion', () => {
 
   it('deleteByCut on formatted value re-formats the remainder', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -859,7 +859,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
 
   it('focus strips thousand separators so the user edits raw digits', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -926,9 +926,9 @@ describe('focus/blur - FormatOn.Blur mode', () => {
     expect(el.selectionEnd).toBe(7);
   });
 
-  it('blur re-applies thousand separators without firing onChange (raw is unchanged, A2-06)', () => {
+  it('blur re-applies thousand separators without firing onValueChange (raw is unchanged, A2-06)', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -939,14 +939,14 @@ describe('focus/blur - FormatOn.Blur mode', () => {
     el.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
 
     expect(el.value).toBe('1,234,567');
-    // Purely cosmetic re-grouping - the underlying digits never changed, so onChange must
+    // Purely cosmetic re-grouping - the underlying digits never changed, so onValueChange must
     // not fire (A2-06); a consumer would otherwise be told the value changed when it didn't.
     expect(onChangeMock).not.toHaveBeenCalled();
   });
 
   it('focus → type → blur round-trip formats correctly', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -964,14 +964,14 @@ describe('focus/blur - FormatOn.Blur mode', () => {
 
     expect(el.value).toBe('12,345');
     // Blur only re-groups here - the raw digits ('12345') were already set by the last
-    // keystroke, so onChange does not fire again on blur (A2-06); the last notification a
+    // keystroke, so onValueChange does not fire again on blur (A2-06); the last notification a
     // consumer sees is the typed (ungrouped, Blur-mode-typing) value.
     expect(onChangeMock).toHaveBeenLastCalledWith(expect.objectContaining({ value: '12345' }));
   });
 
   it('focus on already-formatted value strips and blur re-adds', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1010,7 +1010,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
 
   it('click after mousedown strips separators and maps caret', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1029,13 +1029,13 @@ describe('focus/blur - FormatOn.Blur mode', () => {
     expect(el.selectionStart).toBe(5);
     expect(el.selectionEnd).toBe(5);
     // Stripping separators only changes the display, not the underlying digits, so
-    // onChange must not fire for it (A2-06) - the value hasn't actually changed.
+    // onValueChange must not fire for it (A2-06) - the value hasn't actually changed.
     expect(onChangeMock).not.toHaveBeenCalled();
   });
 
   it('click without preceding mousedown is a no-op', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1065,7 +1065,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
 
   it('click strip clears the pending flag so a second click is a no-op', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1080,7 +1080,7 @@ describe('focus/blur - FormatOn.Blur mode', () => {
 
     expect(el.value).toBe('1234567');
     // Stripping separators only changes the display, not the underlying digits, so
-    // onChange must not fire for it (A2-06) - the value hasn't actually changed.
+    // onValueChange must not fire for it (A2-06) - the value hasn't actually changed.
     expect(onChangeMock).toHaveBeenCalledTimes(0);
 
     // Synthetic spurious click - should not re-broadcast or alter the raw value.
@@ -1091,10 +1091,10 @@ describe('focus/blur - FormatOn.Blur mode', () => {
 
 // ---------------------------------------------------------------------------
 // handleBlur no longer re-groups an already-formatted value, and only fires
-// onChange when the value actually changed (ticket 02).
+// onValueChange when the value actually changed (ticket 02).
 // ---------------------------------------------------------------------------
 
-describe('handleBlur - no double-grouping, no spurious onChange', () => {
+describe('handleBlur - no double-grouping, no spurious onValueChange', () => {
   let container: HTMLElement;
   let onChangeMock: ReturnType<typeof vi.fn>;
 
@@ -1115,7 +1115,7 @@ describe('handleBlur - no double-grouping, no spurious onChange', () => {
 
   it('setValue while focused then blur groups correctly, never doubling separators', () => {
     const numora = new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1128,7 +1128,7 @@ describe('handleBlur - no double-grouping, no spurious onChange', () => {
     // grouped string immediately - this is the exact "MAX button that keeps focus" repro
     // from the ticket. blur must not re-group an already-formatted value into
     // '1,2,34,,567.89', and since nothing actually changes at blur time it must not
-    // spuriously re-fire onChange either.
+    // spuriously re-fire onValueChange either.
     numora.setValue('1234567.89');
     onChangeMock.mockClear();
     el.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
@@ -1140,7 +1140,7 @@ describe('handleBlur - no double-grouping, no spurious onChange', () => {
 
   it('an externally-set formatted value is left unchanged on blur (no re-grouping)', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1158,9 +1158,9 @@ describe('handleBlur - no double-grouping, no spurious onChange', () => {
     expect(onChangeMock).not.toHaveBeenCalled();
   });
 
-  it('an unformatted value present at blur time is grouped without a spurious onChange (A2-06)', () => {
+  it('an unformatted value present at blur time is grouped without a spurious onValueChange (A2-06)', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1177,14 +1177,14 @@ describe('handleBlur - no double-grouping, no spurious onChange', () => {
 
     expect(el.value).toBe('1,234,567.89');
     // Blur only adds grouping here - the raw digits were already set by the last keystroke,
-    // so onChange does not fire again on blur (A2-06); a consumer would otherwise be told
+    // so onValueChange does not fire again on blur (A2-06); a consumer would otherwise be told
     // the value changed when only its display did.
     expect(onChangeMock).not.toHaveBeenCalled();
   });
 
-  it('mousedown + focus + blur without a click leaves the value unchanged and does not fire onChange', () => {
+  it('mousedown + focus + blur without a click leaves the value unchanged and does not fire onValueChange', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1202,9 +1202,9 @@ describe('handleBlur - no double-grouping, no spurious onChange', () => {
     expect(onChangeMock).not.toHaveBeenCalled();
   });
 
-  it('blur on an already-formatted, unchanged value does not fire onChange', () => {
+  it('blur on an already-formatted, unchanged value does not fire onValueChange', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1218,9 +1218,9 @@ describe('handleBlur - no double-grouping, no spurious onChange', () => {
     expect(onChangeMock).not.toHaveBeenCalled();
   });
 
-  it('onChange emits the canonical raw value (and the display string) after blur', () => {
+  it('onValueChange emits the canonical raw value (and the display string) after blur', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1263,7 +1263,7 @@ describe('decimalMinLength - pads on blur/display only', () => {
 
   it('typing 1, 2, ., 5 shows 12.5 and pads to 12.50 only on blur', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       decimalMinLength: 2,
       decimalMaxLength: 2,
@@ -1288,7 +1288,7 @@ describe('decimalMinLength - pads on blur/display only', () => {
 
   it('select-all + delete clears the field instead of leaving a bare separator', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       decimalMinLength: 2,
       decimalMaxLength: 2,
@@ -1304,9 +1304,9 @@ describe('decimalMinLength - pads on blur/display only', () => {
     expect(el.value).toBe('');
   });
 
-  it('blur on an empty field stays empty and does not fire onChange', () => {
+  it('blur on an empty field stays empty and does not fire onValueChange', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       decimalMinLength: 2,
       decimalMaxLength: 2,
@@ -1322,7 +1322,7 @@ describe('decimalMinLength - pads on blur/display only', () => {
 
   it('Change mode + decimalMinLength + grouping pads on blur', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1342,7 +1342,7 @@ describe('decimalMinLength - pads on blur/display only', () => {
 
   it('Change mode does not strip separators on focus (no grouping-specific listener regression)', () => {
     new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Change,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1384,7 +1384,7 @@ describe('decimalMaxLength: 0 and trailing separator on blur', () => {
 
   it('blur strips a trailing separator: 1234. -> 1,234', () => {
     const numora = new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1404,7 +1404,7 @@ describe('decimalMaxLength: 0 and trailing separator on blur', () => {
 
   it('blur strips a trailing separator and pads when decimalMinLength is set: 1234. -> 1,234.00', () => {
     const numora = new NumoraInput(container, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Blur,
       thousandSeparator: ',',
       groupingStyle: GroupingStyle.Thousand,
@@ -1449,11 +1449,11 @@ describe('NumoraInput edge cases', () => {
     expect(inputElement.value.split('.').length - 1).toBe(1);
   });
 
-  it('should call onChange callback when value changes', () => {
-    const onChange = vi.fn();
+  it('should call onValueChange callback when value changes', () => {
+    const onValueChange = vi.fn();
     inputInstance = new NumoraInput(container, {
       decimalMaxLength: 2,
-      onChange,
+      onValueChange,
     });
 
     const inputElement = container.querySelector('input') as HTMLInputElement;
@@ -1461,7 +1461,7 @@ describe('NumoraInput edge cases', () => {
     inputElement.value = '42.5';
     inputElement.dispatchEvent(new Event('input'));
 
-    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ value: '42.5' }));
+    expect(onValueChange).toHaveBeenCalledWith(expect.objectContaining({ value: '42.5' }));
   });
 
   it('should allow navigation keys', () => {
@@ -1495,7 +1495,7 @@ describe('Negative Number Support', () => {
   function createInputWithNegatives(options = {}) {
     const input = new NumoraInput(container, {
       allowNegative: true,
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       ...options,
     });
     return input;
@@ -1789,7 +1789,7 @@ describe('Leading Zeros Support', () => {
   function createInputWithLeadingZeros(options = {}) {
     const input = new NumoraInput(container, {
       allowLeadingZeros: true,
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       ...options,
     });
     return input;
@@ -1801,7 +1801,7 @@ describe('Leading Zeros Support', () => {
 
   describe('Default behavior (allowLeadingZeros: false)', () => {
     it('should remove leading zeros by default', () => {
-      const input = new NumoraInput(container, { onChange: onChangeMock });
+      const input = new NumoraInput(container, { onValueChange: onChangeMock });
       const inputElement = getInputElement();
 
       inputElement.value = '007';
@@ -1811,7 +1811,7 @@ describe('Leading Zeros Support', () => {
     });
 
     it('should remove multiple leading zeros', () => {
-      const input = new NumoraInput(container, { onChange: onChangeMock });
+      const input = new NumoraInput(container, { onValueChange: onChangeMock });
       const inputElement = getInputElement();
 
       inputElement.value = '0001';
@@ -1821,7 +1821,7 @@ describe('Leading Zeros Support', () => {
     });
 
     it('should preserve single zero', () => {
-      const input = new NumoraInput(container, { onChange: onChangeMock });
+      const input = new NumoraInput(container, { onValueChange: onChangeMock });
       const inputElement = getInputElement();
 
       inputElement.value = '0';
@@ -1831,7 +1831,7 @@ describe('Leading Zeros Support', () => {
     });
 
     it('should handle leading zeros with decimals', () => {
-      const input = new NumoraInput(container, { onChange: onChangeMock });
+      const input = new NumoraInput(container, { onValueChange: onChangeMock });
       const inputElement = getInputElement();
 
       inputElement.value = '00.5';
@@ -1843,7 +1843,7 @@ describe('Leading Zeros Support', () => {
     it('should remove leading zeros from negative numbers', () => {
       const input = new NumoraInput(container, {
         allowNegative: true,
-        onChange: onChangeMock,
+        onValueChange: onChangeMock,
       });
       const inputElement = getInputElement();
 
@@ -2243,7 +2243,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       allowCompactNotation: false,
       allowNegative: false,
       allowLeadingZeros: false,
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       ...options,
     });
     return input;
@@ -2264,8 +2264,8 @@ describe('Canonical raw value + getFormattedValue', () => {
       // Display shows formatted value
       expect(inputElement.value).toBe('1,234');
       // getValue returns raw value
-      expect(input.value).toBe('1234');
-      // onChange receives raw value
+      expect(input.rawValue).toBe('1234');
+      // onValueChange receives raw value
       expect(onChangeMock).toHaveBeenCalledWith(expect.objectContaining({ value: '1234' }));
     });
 
@@ -2277,7 +2277,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.dispatchEvent(new Event('input'));
 
       expect(inputElement.value).toBe('1,234,567');
-      expect(input.value).toBe('1234567');
+      expect(input.rawValue).toBe('1234567');
       expect(input.formattedValue).toBe('1,234,567');
     });
 
@@ -2291,7 +2291,7 @@ describe('Canonical raw value + getFormattedValue', () => {
         allowCompactNotation: false,
         allowNegative: false,
         allowLeadingZeros: false,
-        onChange: onChangeMock,
+        onValueChange: onChangeMock,
       });
       const inputElement = getInputElement();
 
@@ -2299,7 +2299,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.dispatchEvent(new Event('input'));
 
       expect(inputElement.value).toBe('1,234,567');
-      expect(input.value).toBe('1234567');
+      expect(input.rawValue).toBe('1234567');
     });
   });
 
@@ -2313,7 +2313,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       // Display shows formatted
       expect(inputElement.value).toBe('1,234,567');
       // getValue returns raw
-      expect(input.value).toBe('1234567');
+      expect(input.rawValue).toBe('1234567');
     });
 
     it('should handle decimal values', () => {
@@ -2323,7 +2323,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       input.setValue('1234.56');
 
       expect(inputElement.value).toBe('1,234.56');
-      expect(input.value).toBe('1234.56');
+      expect(input.rawValue).toBe('1234.56');
     });
 
     it('should handle empty string', () => {
@@ -2333,7 +2333,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       input.setValue('');
 
       expect(inputElement.value).toBe('');
-      expect(input.value).toBe('');
+      expect(input.rawValue).toBe('');
     });
   });
 
@@ -2345,19 +2345,19 @@ describe('Canonical raw value + getFormattedValue', () => {
       // Simulate typing "1234"
       inputElement.value = '1';
       inputElement.dispatchEvent(new Event('input'));
-      expect(input.value).toBe('1');
+      expect(input.rawValue).toBe('1');
 
       inputElement.value = '12';
       inputElement.dispatchEvent(new Event('input'));
-      expect(input.value).toBe('12');
+      expect(input.rawValue).toBe('12');
 
       inputElement.value = '123';
       inputElement.dispatchEvent(new Event('input'));
-      expect(input.value).toBe('123');
+      expect(input.rawValue).toBe('123');
 
       inputElement.value = '1234';
       inputElement.dispatchEvent(new Event('input'));
-      expect(input.value).toBe('1234');
+      expect(input.rawValue).toBe('1234');
       expect(inputElement.value).toBe('1,234');
     });
 
@@ -2369,7 +2369,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.dispatchEvent(new Event('input'));
 
       expect(inputElement.value).toBe('1,234.56');
-      expect(input.value).toBe('1234.56');
+      expect(input.rawValue).toBe('1234.56');
     });
   });
 
@@ -2410,7 +2410,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.dispatchEvent(pasteEvent);
 
       expect(inputElement.value).toBe('1,234,567');
-      expect(input.value).toBe('1234567');
+      expect(input.rawValue).toBe('1234567');
     });
   });
 
@@ -2425,7 +2425,7 @@ describe('Canonical raw value + getFormattedValue', () => {
         allowCompactNotation: false,
         allowNegative: false,
         allowLeadingZeros: false,
-        onChange: onChangeMock,
+        onValueChange: onChangeMock,
       });
       const inputElement = getInputElement();
 
@@ -2438,9 +2438,9 @@ describe('Canonical raw value + getFormattedValue', () => {
       input.setValue('1234567');
 
       expect(inputElement.value).toBe('1,234,567');
-      expect(input.value).toBe('1234567');
-      // Note: setValue doesn't call onChange, only handleValueChange does (which is called by event handlers)
-      // The onChange behavior is tested in other tests that verify the event flow
+      expect(input.rawValue).toBe('1234567');
+      // Note: setValue doesn't call onValueChange, only handleValueChange does (which is called by event handlers)
+      // The onValueChange behavior is tested in other tests that verify the event flow
     });
   });
 
@@ -2452,7 +2452,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.value = '';
       inputElement.dispatchEvent(new Event('input'));
 
-      expect(input.value).toBe('');
+      expect(input.rawValue).toBe('');
       expect(inputElement.value).toBe('');
     });
 
@@ -2467,7 +2467,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.value = '.';
       inputElement.dispatchEvent(new Event('input'));
 
-      expect(input.value).toBe('.');
+      expect(input.rawValue).toBe('.');
       expect(inputElement.value).toBe('.');
     });
 
@@ -2478,7 +2478,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.value = '0';
       inputElement.dispatchEvent(new Event('input'));
 
-      expect(input.value).toBe('0');
+      expect(input.rawValue).toBe('0');
       expect(inputElement.value).toBe('0');
     });
 
@@ -2492,20 +2492,20 @@ describe('Canonical raw value + getFormattedValue', () => {
         allowCompactNotation: false,
         allowNegative: false,
         allowLeadingZeros: false,
-        onChange: onChangeMock,
+        onValueChange: onChangeMock,
       });
       const inputElement = getInputElement();
 
       inputElement.value = '1234.56';
       inputElement.dispatchEvent(new Event('input'));
 
-      expect(input.value).toBe('1234.56');
+      expect(input.rawValue).toBe('1234.56');
       expect(inputElement.value).toBe('1234.56');
     });
   });
 
   describe('One value API (Q11)', () => {
-    it('onChange receives { value, formattedValue }', () => {
+    it('onValueChange receives { value, formattedValue }', () => {
       const input = new NumoraInput(container, {
         formatOn: FormatOn.Change,
         thousandSeparator: ',',
@@ -2515,7 +2515,7 @@ describe('Canonical raw value + getFormattedValue', () => {
         allowCompactNotation: false,
         allowNegative: false,
         allowLeadingZeros: false,
-        onChange: onChangeMock,
+        onValueChange: onChangeMock,
       });
       const inputElement = getInputElement();
 
@@ -2523,7 +2523,7 @@ describe('Canonical raw value + getFormattedValue', () => {
       inputElement.dispatchEvent(new Event('input'));
 
       expect(inputElement.value).toBe('1,234,567');
-      expect(input.value).toBe('1234567');
+      expect(input.rawValue).toBe('1234567');
       expect(input.formattedValue).toBe('1,234,567');
       expect(onChangeMock).toHaveBeenCalledWith({ value: '1234567', formattedValue: '1,234,567' });
     });
@@ -2538,14 +2538,14 @@ describe('Canonical raw value + getFormattedValue', () => {
         allowCompactNotation: false,
         allowNegative: false,
         allowLeadingZeros: false,
-        onChange: onChangeMock,
+        onValueChange: onChangeMock,
       });
       const inputElement = getInputElement();
 
       inputElement.value = '1234567';
       inputElement.dispatchEvent(new Event('input'));
 
-      expect(input.value).toBe('1234567');
+      expect(input.rawValue).toBe('1234567');
     });
   });
 });
@@ -2663,7 +2663,7 @@ describe('beforeinput - whole-line deletes', () => {
     const ev = new InputEvent('beforeinput', { bubbles: true, cancelable: true, inputType });
     el.dispatchEvent(ev);
     // handleBeforeInput already broadcast the change when defaultPrevented - no synthetic
-    // 'input' dispatch needed (and dispatching one would double-fire onChange via
+    // 'input' dispatch needed (and dispatching one would double-fire onValueChange via
     // handleChange; see the same fix in simulateTyping/simulateDelete above).
     return ev;
   }
@@ -2786,7 +2786,7 @@ describe('Adopt existing <input> element', () => {
   it('formats typed input correctly when attached to existing element', () => {
     const onChangeMock = vi.fn();
     new NumoraInput(host, {
-      onChange: onChangeMock,
+      onValueChange: onChangeMock,
       formatOn: FormatOn.Change,
       groupingStyle: GroupingStyle.Thousand,
     });
@@ -2815,32 +2815,44 @@ describe('vanilla class surface', () => {
 
   it('options are optional', () => {
     const instance = new NumoraInput(host);
-    instance.value = '1234.5';
+    instance.setValue('1234.5');
     expect(instance.formattedValue).toBe('1,234.5');
   });
 
-  it('value, formattedValue and element are properties', () => {
+  it('rawValue, formattedValue and element are properties', () => {
     const instance = new NumoraInput(host, { locale: 'de-DE', value: '1234567.89' });
-    expect(instance.value).toBe('1234567.89');
+    expect(instance.rawValue).toBe('1234567.89');
     expect(instance.formattedValue).toBe('1.234.567,89');
     expect(instance.element).toBe(host.querySelector('input'));
 
-    instance.value = '42.5';
-    expect(instance.value).toBe('42.5');
+    instance.setValue('42.5');
+    expect(instance.rawValue).toBe('42.5');
     expect(instance.element.value).toBe('42,5');
   });
 
-  it('assigning value goes through the same pipeline as setValue', () => {
-    const instance = new NumoraInput(host, { decimalMaxLength: 2 });
-    instance.value = '-1.239';
-    expect(instance.value).toBe('1.23');
+  it('rawValue is read-only: setValue is the one way to write', () => {
+    const instance = new NumoraInput(host, { value: '5' });
+    expect(() => {
+      (instance as unknown as { rawValue: string }).rawValue = '9';
+    }).toThrow(TypeError);
+    expect(instance.rawValue).toBe('5');
   });
 
-  it('the method accessors and valueAsNumber are gone', () => {
+  it('value, the method accessors and valueAsNumber are gone', () => {
     const instance = new NumoraInput(host) as unknown as Record<string, unknown>;
-    for (const name of ['getValue', 'getFormattedValue', 'getElement', 'valueAsNumber']) {
+    for (const name of ['value', 'getValue', 'getFormattedValue', 'getElement', 'valueAsNumber']) {
       expect(instance[name]).toBeUndefined();
     }
+  });
+
+  // Pins the handle: a new public member is a deliberate API decision, not a side effect.
+  it('exposes exactly rawValue, formattedValue, element, setValue, update and destroy', () => {
+    const members = Object.getOwnPropertyNames(NumoraInput.prototype).filter(
+      (name) => !/^(constructor|createInputElement|applyOptions|setupEventListeners|emit)$/.test(name)
+    );
+    expect(members.sort()).toEqual(
+      ['destroy', 'element', 'formattedValue', 'rawValue', 'setValue', 'update'].sort()
+    );
   });
 
   it('forwards the listed native attributes and ariaLabel', () => {
@@ -2970,10 +2982,10 @@ describe("pattern attribute accepts the component's own grouped output (A2-03)",
   });
 });
 
-// A2-06: firing onChange on every focus (separator strip) and blur (regroup) even when the
+// A2-06: firing onValueChange on every focus (separator strip) and blur (regroup) even when the
 // underlying raw value hasn't changed is misleading - a consumer sees a "change" for a purely
-// cosmetic re-formatting. onChange should fire only when the sanitized raw value changed.
-describe('onChange only fires when the raw value actually changed (A2-06)', () => {
+// cosmetic re-formatting. onValueChange should fire only when the sanitized raw value changed.
+describe('onValueChange only fires when the raw value actually changed (A2-06)', () => {
   let container: HTMLElement;
   let onChangeMock: ReturnType<typeof vi.fn>;
 
@@ -2991,8 +3003,8 @@ describe('onChange only fires when the raw value actually changed (A2-06)', () =
     return container.querySelector('input') as HTMLInputElement;
   }
 
-  it('does not fire onChange on focus (separator strip), fires once for a real edit, and not again on blur (regroup only)', () => {
-    new NumoraInput(container, { value: '1234567', onChange: onChangeMock });
+  it('does not fire onValueChange on focus (separator strip), fires once for a real edit, and not again on blur (regroup only)', () => {
+    new NumoraInput(container, { value: '1234567', onValueChange: onChangeMock });
     const el = getInputElement();
 
     expect(el.value).toBe('1,234,567');
@@ -3009,8 +3021,8 @@ describe('onChange only fires when the raw value actually changed (A2-06)', () =
     expect(el.value).toBe('12,345,678');
   });
 
-  it('fires onChange on blur when the raw value actually changed (trailing separator stripped)', () => {
-    new NumoraInput(container, { onChange: onChangeMock });
+  it('fires onValueChange on blur when the raw value actually changed (trailing separator stripped)', () => {
+    new NumoraInput(container, { onValueChange: onChangeMock });
     const el = getInputElement();
 
     el.focus();

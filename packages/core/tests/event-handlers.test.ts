@@ -4,7 +4,7 @@
  * - 05: single-char deletion extends over a thousand separator when there is no
  *   preceding `keydown` (mobile fallback).
  * - 06: `{ type: 'reject' }` is returned when the formatted result equals the current
- *   value (no spurious `onChange`).
+ *   value (no spurious `onValueChange`).
  * - 09: `maxLength` is enforced against the *sanitized* value, not the raw intended one.
  * - 08 (step 2 only): typing `,`/`.` is rejected outright when `decimalMaxLength === 0`.
  * - 12 (last bullet): `deleteWordBackward` / `deleteWordForward` are treated like
@@ -132,7 +132,7 @@ describe('issue 05 — separator delete without keydown', () => {
   });
 });
 
-describe('issue 06 — no onChange when the result is unchanged', () => {
+describe('issue 06 — no onValueChange when the result is unchanged', () => {
   it('rejects a letter typed after a numeric value', () => {
     const input = makeInput('12', 2, 2);
     const result = handleOnBeforeInputNumoraInput(

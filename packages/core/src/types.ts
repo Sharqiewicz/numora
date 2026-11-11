@@ -145,13 +145,13 @@ export interface NumoraOptions {
   /**
    * Custom keystroke/paste validator. Called with the post-sanitization raw value the
    * input would have after the user's action. Return false to reject the edit (no value
-   * change, no onChange fires, undo history is untouched).
+   * change, no change notification fires, undo history is untouched).
    */
   isAllowed?: (rawValue: string) => boolean;
 }
 
 /**
- * Payload of every change notification (vanilla `onChange`, React `onValueChange`).
+ * Payload of every change notification (`onValueChange` in both packages).
  * `value` is the canonical raw value (ASCII digits, `.` decimal, `-` sign, no grouping, the
  * same for every locale); `formattedValue` is the string shown in the field.
  */
