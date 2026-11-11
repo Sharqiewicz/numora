@@ -31,9 +31,9 @@ const target = document.querySelector<HTMLInputElement>('#amount');
 if (target) {
   const input = new NumoraInput(target, {
     decimalMaxLength: 2,
-    onChange: ({ value, formattedValue }) => console.log(value, formattedValue),
+    onValueChange: ({ value, formattedValue }) => console.log(value, formattedValue),
   });
-  input.value; // canonical raw value, e.g. '1234.5'
+  input.rawValue; // canonical raw value, e.g. '1234.5'
 }
 ```
 

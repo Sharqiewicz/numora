@@ -23,11 +23,11 @@ if (!target) throw new Error('#amount not found');
 const input = new NumoraInput(target, {
   decimalMaxLength: 2,
   decimalMinLength: 2,
-  onChange: ({ value, formattedValue }) => console.log(value, formattedValue),
+  onValueChange: ({ value, formattedValue }) => console.log(value, formattedValue),
 });
 
-input.value = '1234.56';      // canonical raw value: digits, '.' decimal, '-' sign, no grouping
-input.value;                  // '1234.56'
+input.setValue('1234.56');    // canonical raw value: digits, '.' decimal, '-' sign, no grouping
+input.rawValue;               // '1234.56'
 input.formattedValue;         // '1,234.56'
 input.element;                // the <input>, for any native attribute or listener
 
@@ -69,39 +69,56 @@ Pasted text (and text the browser inserts through a plain `input` event) is read
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `decimalMaxLength` | `number` | `18` | Maximum decimal places allowed |
+| `decimalMaxLength` | `number` | `18` | Maximum decimal places allowed (counts digits after the decimal mark only) |
 | `decimalMinLength` | `number` | `0` | Minimum decimal places (pads with zeros) |
 | `decimalSeparator` | `string` | `'.'` | Decimal separator character |
 | `thousandSeparator` | `string` | `','` | Thousand separator character (exactly one; use `groupingStyle: 'none'` to turn grouping off) |
-| `groupingStyle` | `GroupingStyle` | `GroupingStyle.Thousand` | Grouping style: `Thousand`, `Lakh`, `Wan`, or `None` |
-| `formatOn` | `FormatOn` | `FormatOn.Blur` | When to apply formatting: `Blur` or `Change` |
+| `groupingStyle` | `'thousand' \| 'lakh' \| 'wan' \| 'none'` | `'thousand'` | Grouping style |
+| `formatOn` | `'blur' \| 'change'` | `'blur'` | When grouping is applied: on blur, or on every keystroke |
 | `allowCompactNotation` | `boolean` | `false` | Expand compact notation on paste/setValue |
 | `allowScientificNotation` | `boolean` | `true` | Expand scientific notation; when `false`, typed, pasted or inserted scientific notation is rejected (autofill restores the previous value). App values always expand |
 | `allowNegative` | `boolean` | `false` | Allow negative numbers |
 | `allowLeadingZeros` | `boolean` | `false` | Allow leading zeros |
 | `padLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |
-| `maxLength` | `number` | `undefined` | Max raw length (digits + decimal separator + leading `-`; thousand separators not counted) |
+| `maxLength` | `number` | `undefined` | Max length of the whole raw value (digits + decimal mark + leading `-`; grouping and `decimalMinLength` padding not counted) |
 | `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject a keystroke/paste when it returns false (called with the post-sanitization raw value). A callback that throws is treated as "not allowed" (the keystroke is rejected) and the error is reported via `console.error` |
-| `locale` | `string \| true` | `undefined` | Derive separators from `Intl.NumberFormat`; `true` uses the runtime default locale |
-| `onChange` | `(values: { value: string; formattedValue: string }) => void` | `undefined` | Called when value changes. `value` is the canonical raw value, `formattedValue` the display string |
+| `locale` | `string \| true` | `undefined` | Derive separators and grouping from `Intl.NumberFormat`; `true` uses the runtime default locale. An explicit `thousandSeparator`, `decimalSeparator` or `groupingStyle` wins; `locale` fills the ones you did not set |
+| `onValueChange` | `(values: { value: string; formattedValue: string }) => void` | `undefined` | Called when value changes. `value` is the canonical raw value, `formattedValue` the display string |
 | `value` | `string` | `undefined` | Initial value, as a canonical raw value. An adopted `<input>` keeps its own value unless this is passed |
 | `id`, `name`, `className`, `placeholder`, `disabled`, `readOnly`, `required`, `tabIndex`, `title`, `autofocus`, `ariaLabel` | | | Forwarded to the element. Set anything else on `input.element` |
 
 The `locale` option derives only `Thousand` and `Lakh` grouping; `Wan` is never inferred (set `groupingStyle` explicitly) and the `tok` locale's 2-2-2 grouping is unsupported.
 
 The raw value is canonical for every locale: ASCII digits, `.` as the decimal, a leading `-`, no
-grouping (`1.234.567,89` in de-DE is raw `1234567.89`). `onChange` and `input.value` report
-it; `input.formattedValue` is the display string. The `value` option, `input.value = ...` and
-`setValue()` accept canonical raw values only - never locale text, never format-detected
+grouping (`1.234.567,89` in de-DE is raw `1234567.89`). `onValueChange` and `input.rawValue` report
+it; `input.formattedValue` is the display string (the same text as `input.element.value`). The
+`value` option and `setValue()` accept canonical raw values only - never locale text, never format-detected
 (`setValue('1.234')` in de-DE is the number 1.234, shown as `1,234`). `setValue(value, {
 undoable: false })` writes without an undo step.
 
-`onChange` fires when the raw value changes. A blur or an `update()` that only regroups the
+`onValueChange` fires when the raw value changes. A blur or an `update()` that only regroups the
 display emits nothing; one that changes the raw value does (trailing separator strip,
 `decimalMinLength` padding, `-0` to `0`, digits cut by a smaller `decimalMaxLength`).
 
 Options removed or renamed since v4 are ignored and, in development, logged with their
 replacement. See the [migration guide](../../MIGRATION.md).
+
+## Recipes
+
+```typescript
+// Fiat amount: two decimals, padded on blur ('5' shows as '5.00')
+new NumoraInput(target, { decimalMaxLength: 2, decimalMinLength: 2 });
+
+// Token amount: as many decimals as the token has (USDC 6, ETH 18 is the default)
+new NumoraInput(target, { decimalMaxLength: 6 });
+
+// The user's own locale for separators and grouping
+new NumoraInput(target, { locale: true, decimalMaxLength: 2 });
+```
+
+In a framework wrapper (Svelte action, Vue directive), take the number from `onValueChange`
+or `input.rawValue`. Binding to the element itself (`bind:value`, `v-model`, a native form
+submit) reads the display text, grouping included.
 
 ## Entry points
 

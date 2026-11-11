@@ -51,32 +51,39 @@ input.getElement().disabled = true;
 input.valueAsNumber;
 
 // v5
-const input = new NumoraInput(container, { value: '1234.5', onChange: ({ value, formattedValue }) => {} });
-input.value;            // '1234.5' (assignable: input.value = '2')
+const input = new NumoraInput(container, { value: '1234.5', onValueChange: ({ value, formattedValue }) => {} });
+input.rawValue;         // '1234.5' (read-only: write with input.setValue('2'))
 input.formattedValue;   // '1,234.5'
 input.element.disabled = true;
-Number(input.value);
+Number(input.rawValue);
 ```
 
 | v4 | v5 |
 |---|---|
-| `getValue()` | `input.value` |
+| `getValue()` | `input.rawValue` |
 | `getFormattedValue()` | `input.formattedValue` |
 | `getElement()` | `input.element` |
-| `valueAsNumber` | removed: `Number(input.value)`, or a decimal library |
+| `valueAsNumber` | removed: `Number(input.rawValue)`, or a decimal library |
 | `defaultValue` option | `value` option |
 | `disable()`, `enable()`, `addEventListener()`, `removeEventListener()` | use `input.element` |
-| `onChange(value: string)` | `onChange({ value, formattedValue })` |
+| `onChange(value: string)` | `onValueChange({ value, formattedValue })`, the same name and payload as React |
 | any `HTMLInputElement` property as an option | `id`, `name`, `className`, `placeholder`, `disabled`, `readOnly`, `required`, `tabIndex`, `title`, `autofocus`, `ariaLabel`; set anything else on `input.element` |
 
 The `options` argument is now optional, and `update(options)` changes options on a live field.
+
+The handle has the same three names as a React ref: `rawValue`, `formattedValue` and the
+element. There is no `input.value`: on the element (`input.element.value`) `value` is the
+display text, so the raw value is always spelled `rawValue`. An `onChange` option is ignored
+and, in development, logged with its replacement.
 
 ## React `NumoraInput`
 
 - `onChange` and `onValueChange` no longer fire on a blur that only regroups the display.
   They fire when the raw value changed. If you mirror `formattedValue` in state, read
   `ref.current.value` on blur instead.
-- `ref.current.rawValue` is the canonical raw value; `ref.current.value` is the display text.
+- `ref.current.rawValue` is the canonical raw value; `ref.current.value` is the display text
+  (the ref is the DOM input). Inside `onChange`, `e.target.value` is the raw value, so form
+  libraries get the number. Do not feed `ref.current.value` back into the `value` prop.
 - Changing a formatting prop on a mounted field re-formats the current value, and reports a
   change only if the raw value changed.
 - `InputType` is no longer re-exported.

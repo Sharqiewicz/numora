@@ -232,10 +232,10 @@ packages/core/src/
 const input = new NumoraInput(container, {
   decimalMaxLength: 6,
   placeholder: "Enter amount",
-  onChange: ({ value, formattedValue }) => console.log(value, formattedValue)
+  onValueChange: ({ value, formattedValue }) => console.log(value, formattedValue)
 });
 
-input.value;  // "123.456"
+input.rawValue;  // "123.456"
 input.setValue("789.012");
 ```
 

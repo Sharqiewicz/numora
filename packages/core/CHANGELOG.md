@@ -11,8 +11,9 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   and, in development, logged with their replacement, in both packages.
 - **`groupingStyle: 'none'` is the only way to turn grouping off.** `thousandSeparator: ''`
   throws.
-- **Vanilla `NumoraInput` exposes properties instead of getters:** `input.value` (get and
-  set), `input.formattedValue`, `input.element`. `getValue()`, `getFormattedValue()`,
+- **Vanilla `NumoraInput` exposes properties instead of getters:** `input.rawValue`,
+  `input.formattedValue`, `input.element`, the same names as a React ref. They are read-only;
+  `setValue()` writes. `getValue()`, `getFormattedValue()`,
   `getElement()` and `valueAsNumber` are removed. `setValue(value, { undoable })` stays.
 - **Vanilla `defaultValue` is removed:** use `value`. The constructor forwards only a short
   list of native attributes (`id`, `name`, `className`, `placeholder`, `disabled`, `readOnly`,
@@ -32,7 +33,8 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   as the sign, no grouping. A de-DE field showing `1.234.567,89` reports `1234567.89`, so
   `Number(raw)` and decimal libraries work for every user. String `value`, React `defaultValue` and
   `setValue()` inputs use the same format: `value="1234.5"` means 1234.5 in every locale.
-- **Vanilla `onChange` receives `{ value, formattedValue }`** instead of a string.
+- **Vanilla `onChange` is renamed `onValueChange`** and receives `{ value, formattedValue }`
+  instead of a string: the same name and payload as React's `onValueChange`.
 - **`emitRawValue` is removed.** Read `value` or `formattedValue` from the payload instead.
 - **`ThousandStyle` is renamed `GroupingStyle`, and the `thousandStyle` option `groupingStyle`.**
   The string values (`'none'`, `'thousand'`, `'lakh'`, `'wan'`) are unchanged. An old
@@ -108,7 +110,7 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   (`formatValue('1234.5', { locale: 'de-DE', decimalMinLength: 2 })` is `'1.234,50'`). Also
   re-exported from `numora-react`.
 - **`update(options)` on vanilla `NumoraInput`:** changes options on a live field. The raw
-  value is kept and re-formatted; `onChange` fires only if the raw value changed. React does
+  value is kept and re-formatted; `onValueChange` fires only if the raw value changed. React does
   the same when formatting props change.
 - **The vanilla `options` argument is optional:** `new NumoraInput(target)`.
 - **React: `ref.current.rawValue`** reads the canonical raw value next to `formattedValue`.
