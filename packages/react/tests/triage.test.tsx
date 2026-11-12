@@ -65,7 +65,7 @@ describe('StrictMode / listener cleanup', () => {
     expect(onValueChange).toHaveBeenCalledTimes(1);
   });
   it('StrictMode: a mouse focus defers the strip to click once', () => {
-    render(<StrictMode><NumoraInput data-testid="i" defaultValue="1234567" /></StrictMode>);
+    render(<StrictMode><NumoraInput formatOn="blur" data-testid="i" defaultValue="1234567" /></StrictMode>);
     const input = screen.getByTestId('i') as HTMLInputElement;
     fireEvent.mouseDown(input);
     fireEvent.focus(input);
@@ -91,7 +91,7 @@ describe('mouse deferred strip', () => {
     return screen.getByTestId('i') as HTMLInputElement;
   };
   it('left mousedown -> focus keeps grouping; click strips and maps caret', () => {
-    const input = setup();
+    const input = setup({ formatOn: 'blur' });
     fireEvent.mouseDown(input, { button: 0 });
     fireEvent.focus(input);
     expect(input.value).toBe('1,234,567');
@@ -101,7 +101,7 @@ describe('mouse deferred strip', () => {
     expect(input.selectionStart).toBe(2);
   });
   it('mousedown + blur without click does not carry over to the next keyboard focus', () => {
-    const input = setup();
+    const input = setup({ formatOn: 'blur' });
     fireEvent.mouseDown(input, { button: 0 });
     fireEvent.focus(input);
     fireEvent.blur(input);
@@ -302,9 +302,9 @@ describe('controlled value sync', () => {
     expect((screen.getByTestId('i') as HTMLInputElement).value).toBe('1.234,5');
   });
   it('locale + focused Blur mode: external canonical value is formatted for editing', () => {
-    const { rerender } = render(<NumoraInput data-testid="i" locale="de-DE" value="1" onChange={() => {}} />);
+    const { rerender } = render(<NumoraInput formatOn="blur" data-testid="i" locale="de-DE" value="1" onChange={() => {}} />);
     (screen.getByTestId('i') as HTMLInputElement).focus();
-    rerender(<NumoraInput data-testid="i" locale="de-DE" value="1234.5" onChange={() => {}} />);
+    rerender(<NumoraInput formatOn="blur" data-testid="i" locale="de-DE" value="1234.5" onChange={() => {}} />);
     expect((screen.getByTestId('i') as HTMLInputElement).value).toBe('1234,5');
   });
   it('does not rewrite when the parent value differs only by padding already shown', () => {

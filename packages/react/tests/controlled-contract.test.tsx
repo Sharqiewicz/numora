@@ -286,7 +286,7 @@ describe('ref.setValue() is the app\'s own write', () => {
   });
 
   it('keeps the edit format on a focused blur-mode field', () => {
-    const { ref } = setup();
+    const { ref } = setup({ formatOn: 'blur' });
     act(() => field().focus());
     act(() => ref.current?.setValue('1234567'));
     expect(field().value).toBe('1234567');

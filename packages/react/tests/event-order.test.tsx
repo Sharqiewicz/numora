@@ -385,7 +385,7 @@ describe('paste', () => {
 
 describe('keyboard focus then blur', () => {
   it('en-US Blur: focus strips without onChange; blur regroups without onChange', () => {
-    mount({ defaultValue: '1234567.89' });
+    mount({ formatOn: 'blur', defaultValue: '1234567.89' });
     pin(el.value);
     focus();
     pin(log);
@@ -395,7 +395,7 @@ describe('keyboard focus then blur', () => {
     pin(state());
   });
   it('de-DE Blur: focus strips without onChange; blur regroups', () => {
-    mount({ defaultValue: '1234567.89', locale: 'de-DE' });
+    mount({ formatOn: 'blur', defaultValue: '1234567.89', locale: 'de-DE' });
     pin(el.value);
     focus();
     pin(log);
@@ -439,7 +439,7 @@ describe('keyboard focus then blur', () => {
 
 describe('mouse focus', () => {
   it('left mousedown -> focus keeps grouping; click strips and maps the caret; no onChange', () => {
-    mount({ defaultValue: '1234567' });
+    mount({ formatOn: 'blur', defaultValue: '1234567' });
     mouseDown();
     focus();
     expect(el.value).toBe('1,234,567');
@@ -453,7 +453,7 @@ describe('mouse focus', () => {
     expect(state()).toMatchInlineSnapshot(`"1234567 caret=2,2"`);
   });
   it('a second click does not strip again (flag cleared)', () => {
-    mount({ defaultValue: '1234567' });
+    mount({ formatOn: 'blur', defaultValue: '1234567' });
     mouseDown();
     focus();
     click();
@@ -465,7 +465,7 @@ describe('mouse focus', () => {
     expect(state()).toMatchInlineSnapshot(`"12345678 caret=0,0"`);
   });
   it('right-button mousedown does not wedge: focus still strips', () => {
-    mount({ defaultValue: '1234567' });
+    mount({ formatOn: 'blur', defaultValue: '1234567' });
     mouseDown(2);
     focus();
     expect(el.value).toBe('1234567');
@@ -479,7 +479,7 @@ describe('mouse focus', () => {
     expect(log).toEqual([]);
   });
   it('mousedown + blur without click clears pending: next keyboard focus strips', () => {
-    mount({ defaultValue: '1234567' });
+    mount({ formatOn: 'blur', defaultValue: '1234567' });
     mouseDown();
     focus();
     blur();
@@ -509,7 +509,7 @@ describe('mouse focus', () => {
     expect(log).toEqual(['onFocus dom=1,234,567']);
   });
   it('de-DE: click strips de-DE grouping', () => {
-    mount({ locale: 'de-DE', defaultValue: '1234567.5' });
+    mount({ formatOn: 'blur', locale: 'de-DE', defaultValue: '1234567.5' });
     expect(el.value).toBe('1.234.567,5');
     mouseDown();
     focus();
@@ -521,7 +521,7 @@ describe('mouse focus', () => {
 
 describe('blur cases', () => {
   it('trailing separator "1." is stripped on blur', () => {
-    mount();
+    mount({ formatOn: 'blur' });
     focus();
     typeAll('1.');
     log.length = 0;
@@ -536,7 +536,7 @@ describe('blur cases', () => {
     expect(state()).toMatchInlineSnapshot(`"1 caret=1,1"`);
   });
   it('de-DE trailing separator "1," is stripped on blur', () => {
-    mount({ locale: 'de-DE' });
+    mount({ formatOn: 'blur', locale: 'de-DE' });
     focus();
     typeAll('1,');
     log.length = 0;
@@ -698,7 +698,7 @@ describe('undo / redo input events', () => {
 
 describe('input fallback', () => {
   it('focused Blur mode: ungrouped value is broadcast, no rewrite', () => {
-    mount();
+    mount({ formatOn: 'blur' });
     focus();
     log.length = 0;
     const spy = vi.spyOn(HTMLInputElement.prototype, 'setRangeText');
@@ -825,7 +825,7 @@ describe('controlled value', () => {
   }
 
   it('parent echo while focused (Blur): no rewrite beyond the keystroke writes, no extra onChange', () => {
-    mountEcho();
+    mountEcho({ formatOn: 'blur' });
     focus();
     const spy = vi.spyOn(HTMLInputElement.prototype, 'setRangeText');
     typeAll('1234.5');
@@ -870,6 +870,7 @@ describe('controlled value', () => {
         {...callbacks()}
         onChange={callbacks().onChange}
         value={value}
+        formatOn="blur"
         {...extra}
       />
     );
@@ -936,7 +937,7 @@ describe('controlled value', () => {
 
 describe('StrictMode', () => {
   it('typing, paste, focus and blur each fire exactly once', () => {
-    mount({}, true);
+    mount({ formatOn: 'blur' }, true);
     focus();
     typeAll('12', true);
     paste('34');
@@ -945,7 +946,7 @@ describe('StrictMode', () => {
     pin(state());
   });
   it('mouse focus defers the strip to click once', () => {
-    mount({ defaultValue: '1234567' }, true);
+    mount({ formatOn: 'blur', defaultValue: '1234567' }, true);
     mouseDown();
     focus();
     expect(el.value).toBe('1,234,567');
@@ -954,7 +955,7 @@ describe('StrictMode', () => {
     expect(log).toEqual(['onFocus dom=1,234,567']);
   });
   it('undo/redo and autofill fallbacks fire once', () => {
-    mount({}, true);
+    mount({ formatOn: 'blur' }, true);
     focus();
     nativeInput('1234', 4, 4, 'historyUndo');
     nativeInput('5678', 4);

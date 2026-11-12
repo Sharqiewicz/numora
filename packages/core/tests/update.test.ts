@@ -128,7 +128,7 @@ describe('NumoraInput.update', () => {
   });
 
   it('a focused Blur-mode field keeps its ungrouped edit format', () => {
-    const input = make({ defaultValue: '1234567.5' });
+    const input = make({ formatOn: 'blur', defaultValue: '1234567.5' });
     const el = input.element;
     el.dispatchEvent(new Event('focus'));
     expect(el.value).toBe('1234567.5');

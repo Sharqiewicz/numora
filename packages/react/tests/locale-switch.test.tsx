@@ -136,7 +136,7 @@ describe('formatting props changing on a mounted field: notifications', () => {
 describe('ref.rawValue', () => {
   it('reads the canonical raw value in every state, under the current options', () => {
     const ref = { current: null as (HTMLInputElement & { rawValue?: string; formattedValue?: string }) | null };
-    const ui = (locale: string) => <NumoraInput ref={ref} data-testid="amount" defaultValue={RAW} locale={locale} />;
+    const ui = (locale: string) => <NumoraInput formatOn="blur" ref={ref} data-testid="amount" defaultValue={RAW} locale={locale} />;
     const { rerender } = render(ui('de-DE'));
     expect(ref.current?.value).toBe('1.234.567,89');
     expect(ref.current?.formattedValue).toBe('1.234.567,89');

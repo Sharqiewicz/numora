@@ -91,12 +91,12 @@ describe('canonical source for app-supplied values (index.tsx:273/308/323)', () 
   });
   it('a focused (Blur-mode) controlled change is canonical too and carries no separators', () => {
     const { rerender } = render(
-      <NumoraInput data-testid="i" value="1" decimalSeparator="," thousandSeparator="." />
+      <NumoraInput formatOn="blur" data-testid="i" value="1" decimalSeparator="," thousandSeparator="." />
     );
     const el = screen.getByTestId('i') as HTMLInputElement;
     el.focus();
     rerender(
-      <NumoraInput data-testid="i" value="1234.5" decimalSeparator="," thousandSeparator="." />
+      <NumoraInput formatOn="blur" data-testid="i" value="1234.5" decimalSeparator="," thousandSeparator="." />
     );
     expect(el.value).toBe('1234,5');
   });

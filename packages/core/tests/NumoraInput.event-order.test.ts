@@ -301,7 +301,7 @@ describe('keyboard focus then blur', () => {
     ['de-DE', { locale: 'de-DE' }],
   ] as const) {
     it(`${name} Blur: focus strips without onValueChange; blur regroups with no onValueChange (raw unchanged)`, () => {
-      const { el } = make({ defaultValue: '1234567.89', ...extra });
+      const { el } = make({ formatOn: 'blur', defaultValue: '1234567.89', ...extra });
       pin('val', el.value);
       el.focus();
       expect(log).toEqual([]);
@@ -311,7 +311,7 @@ describe('keyboard focus then blur', () => {
       pin('sta', state(el));
     });
     it(`${name} Blur: type then blur groups; blur does not fire onValueChange`, () => {
-      const { el } = make({ ...extra });
+      const { el } = make({ formatOn: 'blur', ...extra });
       el.focus();
       typeAll(el, name === 'en-US' ? '1234567.5' : '1234567,5');
       const before = log.length;
@@ -330,7 +330,7 @@ describe('keyboard focus then blur', () => {
     expect(log).toEqual([]);
   });
   it('Blur: caret at end of grouped value is mapped to end of stripped value', () => {
-    const { el } = make({ defaultValue: '1234567' });
+    const { el } = make({ formatOn: 'blur', defaultValue: '1234567' });
     el.focus();
     expect(state(el)).toMatchInlineSnapshot(`
       {
@@ -363,7 +363,7 @@ describe('mouse focus', () => {
     el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
   it('left mousedown -> focus keeps grouping; click strips and maps the caret; no onValueChange', () => {
-    const { el } = make({ defaultValue: '1234567' });
+    const { el } = make({ formatOn: 'blur', defaultValue: '1234567' });
     md(el);
     el.focus();
     expect(el.value).toBe('1,234,567');
@@ -381,7 +381,7 @@ describe('mouse focus', () => {
     expect(log).toEqual([]);
   });
   it('a second click does not strip again (flag cleared)', () => {
-    const { el } = make({ defaultValue: '1234567' });
+    const { el } = make({ formatOn: 'blur', defaultValue: '1234567' });
     md(el);
     el.focus();
     click(el);
@@ -401,7 +401,7 @@ describe('mouse focus', () => {
     expect(log).toEqual([]);
   });
   it('right-button mousedown does not wedge: focus still strips', () => {
-    const { el } = make({ defaultValue: '1234567' });
+    const { el } = make({ formatOn: 'blur', defaultValue: '1234567' });
     md(el, 2);
     el.focus();
     expect(el.value).toBe('1234567');
@@ -414,7 +414,7 @@ describe('mouse focus', () => {
     expect(el.value).toBe('1,234,567');
   });
   it('mousedown + blur without click clears pending: next keyboard focus strips', () => {
-    const { el } = make({ defaultValue: '1234567' });
+    const { el } = make({ formatOn: 'blur', defaultValue: '1234567' });
     md(el);
     el.focus();
     el.blur();
@@ -435,7 +435,7 @@ describe('mouse focus', () => {
     expect(el.value).toBe('1,234,567');
   });
   it('de-DE: click strips de-DE grouping', () => {
-    const { el } = make({ locale: 'de-DE', defaultValue: '1234567.5' });
+    const { el } = make({ formatOn: 'blur', locale: 'de-DE', defaultValue: '1234567.5' });
     expect(el.value).toBe('1.234.567,5');
     md(el);
     el.focus();
@@ -465,7 +465,7 @@ describe('blur cases', () => {
   });
 
   it('trailing separator "1." is stripped on blur', () => {
-    const { el } = make();
+    const { el } = make({ formatOn: 'blur' });
     el.focus();
     typeAll(el, '1.');
     log.length = 0;
@@ -491,7 +491,7 @@ describe('blur cases', () => {
     `);
   });
   it('de-DE trailing separator "1," is stripped on blur', () => {
-    const { el } = make({ locale: 'de-DE' });
+    const { el } = make({ formatOn: 'blur', locale: 'de-DE' });
     el.focus();
     typeAll(el, '1,');
     log.length = 0;
@@ -783,7 +783,7 @@ describe('undo / redo input events', () => {
 
 describe('input fallback', () => {
   it('focused Blur mode: ungrouped value, broadcast, no rewrite when already formatted', () => {
-    const { el } = make();
+    const { el } = make({ formatOn: 'blur' });
     el.focus();
     const spy = vi.spyOn(HTMLInputElement.prototype, 'setRangeText');
     nativeInput(el, '1234.5', 6);

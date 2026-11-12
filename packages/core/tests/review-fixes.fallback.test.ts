@@ -36,7 +36,7 @@ describe('focused fallback in Change mode reads the field text as its own', () =
     expect(numora.rawValue).toBe('12345');
   });
   it('Blur mode focused still detects foreign text: 1,5 is a decimal', () => {
-    const { el } = make({ initialValue: '12345' });
+    const { el } = make({ formatOn: 'blur', initialValue: '12345' });
     el.focus();
     native(el, '1,5', { inputType: 'insertFromDrop' });
     expect(el.value).toBe('1.5');

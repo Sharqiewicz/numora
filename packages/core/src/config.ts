@@ -6,7 +6,7 @@ import { FormatOn, GroupingStyle } from './types';
 // opt down (e.g. decimalMaxLength: 2).
 export const DEFAULT_DECIMAL_MAX_LENGTH = 18;
 export const DEFAULT_DECIMAL_MIN_LENGTH = 0;
-export const DEFAULT_FORMAT_ON = FormatOn.Blur;
+export const DEFAULT_FORMAT_ON = FormatOn.Change;
 export const DEFAULT_THOUSAND_SEPARATOR = ',';
 // A truthy thousandSeparator (the default is ',') implies grouping, so the grouping style
 // defaults to Thousand. This also aligns the core default with the React component (which

@@ -692,7 +692,7 @@ describe('beforeinput - selection and cut/drag deletion', () => {
   }
 
   it('deleteContentBackward with selection removes the selected range', () => {
-    new NumoraInput(container, { onValueChange: onChangeMock });
+    new NumoraInput(container, { formatOn: 'blur', onValueChange: onChangeMock });
     const el = getInputElement();
 
     simulateTyping(el, '1');
@@ -726,7 +726,7 @@ describe('beforeinput - selection and cut/drag deletion', () => {
   });
 
   it('deleteByCut removes the selected range', () => {
-    new NumoraInput(container, { onValueChange: onChangeMock });
+    new NumoraInput(container, { formatOn: 'blur', onValueChange: onChangeMock });
     const el = getInputElement();
 
     simulateTyping(el, '1');
@@ -1550,7 +1550,7 @@ describe('Negative Number Support', () => {
 
   describe('Minus sign position and multiple minus signs', () => {
     it('should only allow minus sign at the start', () => {
-      createInputWithNegatives();
+      createInputWithNegatives({ formatOn: 'blur' });
       const inputElement = getInputElement();
 
       // Focused: this exercises the typing-path sanitizer, not the resting/display
@@ -1573,7 +1573,7 @@ describe('Negative Number Support', () => {
     });
 
     it('should handle minus sign in the middle by removing it', () => {
-      createInputWithNegatives();
+      createInputWithNegatives({ formatOn: 'blur' });
       const inputElement = getInputElement();
 
       // Focused: see the comment in 'should only allow minus sign at the start' above.
@@ -1867,7 +1867,7 @@ describe('Leading Zeros Support', () => {
     });
 
     it('should preserve multiple leading zeros', () => {
-      createInputWithLeadingZeros();
+      createInputWithLeadingZeros({ formatOn: 'blur' });
       const inputElement = getInputElement();
 
       // Focused: a resting/unfocused 'input' event formats for display (A2-07), which
@@ -1976,7 +1976,7 @@ describe('Leading Zeros Support', () => {
     });
 
     it('should handle leading zeros after sanitization', () => {
-      createInputWithLeadingZeros();
+      createInputWithLeadingZeros({ formatOn: 'blur' });
       const inputElement = getInputElement();
 
       // Focused: a resting/unfocused 'input' event formats for display (A2-07), which
@@ -2077,7 +2077,7 @@ describe('Scientific Notation Expansion', () => {
 
   describe('Positive exponents (large numbers)', () => {
     it('should expand 2e+5 to 200000', () => {
-      inputInstance = new NumoraInput(container, { decimalMaxLength: 0 });
+      inputInstance = new NumoraInput(container, { formatOn: 'blur', decimalMaxLength: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       // Focused: a resting/unfocused 'input' event formats for display (A2-07), which
@@ -2120,7 +2120,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 12.34e+2 to 1234', () => {
-      inputInstance = new NumoraInput(container, { decimalMaxLength: 0 });
+      inputInstance = new NumoraInput(container, { formatOn: 'blur', decimalMaxLength: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       // Focused: a resting/unfocused 'input' event formats for display (A2-07), which
@@ -2133,7 +2133,7 @@ describe('Scientific Notation Expansion', () => {
     });
 
     it('should expand 1e+3 to 1000', () => {
-      inputInstance = new NumoraInput(container, { decimalMaxLength: 0 });
+      inputInstance = new NumoraInput(container, { formatOn: 'blur', decimalMaxLength: 0 });
       const inputElement = container.querySelector('input') as HTMLInputElement;
 
       // Focused: a resting/unfocused 'input' event formats for display (A2-07), which
@@ -2628,7 +2628,7 @@ describe('beforeinput - preventive decimal-cap', () => {
   });
 
   it('does not interfere when no decimal separator is present', () => {
-    new NumoraInput(container, { decimalMaxLength: 2 });
+    new NumoraInput(container, { formatOn: 'blur', decimalMaxLength: 2 });
     const el = getInputElement();
     el.value = '123';
     el.setSelectionRange(3, 3);
@@ -2721,7 +2721,7 @@ describe('beforeinput - whole-line deletes', () => {
   });
 
   it('deleteSoftLineBackward with selection deletes the selection only', () => {
-    new NumoraInput(container, {});
+    new NumoraInput(container, { formatOn: 'blur' });
     const el = getInputElement();
     el.value = '123456';
     el.setSelectionRange(2, 4);
@@ -2947,7 +2947,7 @@ describe('no pattern attribute', () => {
 
 describe('setValue() is the app\'s own write', () => {
   it('keeps the edit-time format on a focused Blur-mode field', () => {
-    const input = new NumoraInput(document.createElement('div'), { defaultValue: '1' });
+    const input = new NumoraInput(document.createElement('div'), { formatOn: 'blur', defaultValue: '1' });
     input.element.dispatchEvent(new FocusEvent('focus'));
     input.setValue('1234567');
     expect(input.element.value).toBe('1234567');
@@ -3037,7 +3037,7 @@ describe('onValueChange only fires when the raw value actually changed (A2-06)',
   });
 
   it('fires onValueChange on blur when the raw value actually changed (trailing separator stripped)', () => {
-    new NumoraInput(container, { onValueChange: onChangeMock });
+    new NumoraInput(container, { formatOn: 'blur', onValueChange: onChangeMock });
     const el = getInputElement();
 
     el.focus();

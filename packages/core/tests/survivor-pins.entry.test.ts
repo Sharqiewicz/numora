@@ -178,7 +178,7 @@ describe('NumoraInput input-event fallback state', () => {
     expect(el.value).toBe('1,234,567');
   });
   it('a refused input after a focus-strip restores the stripped text, not the pre-strip text', () => {
-    const { el } = mk({ defaultValue: '1234', allowScientificNotation: false });
+    const { el } = mk({ formatOn: 'blur', defaultValue: '1234', allowScientificNotation: false });
     expect(el.value).toBe('1,234');
     el.dispatchEvent(new Event('focus'));
     expect(el.value).toBe('1234');
