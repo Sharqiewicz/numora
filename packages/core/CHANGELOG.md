@@ -98,6 +98,9 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   component logs a warning naming the replacement, and the old props no longer reach the DOM.
 
 ### Fixed
+- **React: an `autoFocus` field in `formatOn: 'blur'` mounts without grouping**, like any
+  focused Blur-mode field. Before, it showed `1,234.5` while focused, because the field got
+  focus before Numora's `focus` listener existed.
 - **A `,` in a value you pass is the decimal mark in every field** (ADR 0015). `'1234,5'` as
   `value`, `defaultValue`, `setValue()` or `formatValue()` is 1234.5 whatever the field's
   separators, so one `defaultValue` is the same number for every visitor. Before, a default

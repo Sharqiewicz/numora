@@ -203,12 +203,15 @@ export function applyBlur(
  * there yet. Only the primary button is followed by a `click`; `blur` clears a pending strip
  * whose `click` never came (drag released outside).
  *
+ * `focused` strips straight away, for a field that got focus before the listeners existed.
+ *
  * Returns a function that removes the listeners.
  */
 export function attachFocusStrip(
   el: HTMLInputElement,
   getOpts: () => ResolvedNumoraOptions,
-  onStrip: () => void
+  onStrip: () => void,
+  focused?: boolean
 ): () => void {
   let pendingMouse = false;
   const strip = () => {
@@ -248,6 +251,9 @@ export function attachFocusStrip(
     ],
   ];
   for (const [type, fn] of listeners) el.addEventListener(type, fn);
+  // Already focused when attached (React `autoFocus` focuses before effects run): the
+  // `focus` event is gone, so strip now.
+  if (focused) strip();
   return () => {
     for (const [type, fn] of listeners) el.removeEventListener(type, fn);
   };

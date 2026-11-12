@@ -457,6 +457,37 @@ describe('NumoraInput', () => {
       expect((input as NumoraHTMLInputElement).formattedValue).toBe('1,234');
     });
 
+    it('an autoFocus field mounts with its separators already stripped', () => {
+      const onChange = vi.fn();
+      const onFormattedValueChange = vi.fn();
+      render(
+        <NumoraInput
+          data-testid="input"
+          autoFocus
+          formatOn={FormatOn.Blur}
+          value="1234.5"
+          onChange={onChange}
+          onFormattedValueChange={onFormattedValueChange}
+        />
+      );
+      const input = screen.getByTestId('input') as NumoraHTMLInputElement;
+
+      expect(document.activeElement).toBe(input);
+      expect(input.value).toBe('1234.5');
+      expect(input.rawValue).toBe('1234.5');
+      // The raw value did not change; the text did.
+      expect(onChange).not.toHaveBeenCalled();
+      expect(onFormattedValueChange.mock.calls).toEqual([['1234.5']]);
+
+      fireEvent.blur(input);
+      expect(input.value).toBe('1,234.5');
+    });
+
+    it('an autoFocus field in Change mode keeps its separators', () => {
+      render(<NumoraInput data-testid="input" autoFocus value="1234.5" />);
+      expect((screen.getByTestId('input') as HTMLInputElement).value).toBe('1,234.5');
+    });
+
     it('strips thousand separators on focus so the user can edit cleanly', () => {
       render(
         <NumoraInput

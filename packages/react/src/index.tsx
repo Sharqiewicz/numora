@@ -412,7 +412,13 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
     input.addEventListener('beforeinput', onBeforeInput);
     // A strip only removes separators, so the raw value is unchanged: refresh `lastValue`,
     // report nothing.
-    const detach = attachFocusStrip(input, () => stateRef.current.formattingOptions, () => emit(input));
+    const detach = attachFocusStrip(
+      input,
+      () => stateRef.current.formattingOptions,
+      () => emit(input),
+      // `autoFocus` focused the field before this effect ran.
+      isFocused(input)
+    );
     return () => {
       input.removeEventListener('beforeinput', onBeforeInput);
       detach();
