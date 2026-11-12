@@ -3,13 +3,13 @@
 [![npm version](https://img.shields.io/npm/v/numora.svg)](https://www.npmjs.com/package/numora)
 [![npm downloads](https://img.shields.io/npm/dm/numora.svg)](https://www.npmjs.com/package/numora)
 
-A precision-first numeric input library for any web application. Zero dependencies, TypeScript-first, framework agnostic.
+A numeric input library for the web. It keeps every value as a string, so an amount never passes through floating point. It has no runtime dependencies and works with any framework or none.
 
 ## Packages
 
 | Package | Version | Description |
 |---------|---------|-------------|
-| [`numora`](./packages/core) | [![npm version](https://img.shields.io/npm/v/numora.svg)](https://www.npmjs.com/package/numora) | Core - vanilla JS/TypeScript |
+| [`numora`](./packages/core) | [![npm version](https://img.shields.io/npm/v/numora.svg)](https://www.npmjs.com/package/numora) | Core, vanilla JS/TypeScript |
 | [`numora-react`](./packages/react) | [![npm version](https://img.shields.io/npm/v/numora-react.svg)](https://www.npmjs.com/package/numora-react) | React component wrapper |
 
 ## Install
@@ -56,18 +56,18 @@ Coming from v4? See [MIGRATION.md](./MIGRATION.md).
 
 ## Features
 
-- [Sanitization](https://numora.xyz/docs/numora/features/sanitization) - filters invalid characters, mobile keyboard artifacts, and non-numeric input
-- [Formatting](https://numora.xyz/docs/numora/features/formatting) - thousand separators with Thousand/Lakh/Wan grouping styles, format on blur or change
-- [Decimals](https://numora.xyz/docs/numora/features/decimals) - configurable min/max decimal places, custom decimal separator
-- [Compact Notation](https://numora.xyz/docs/numora/features/compact-notation) - expands "1k" → "1000", "1.5m" → "1500000" on paste/setValue; a suffix mid-number (e.g. "1k5") is left alone rather than scaling the prefix
-- [Scientific Notation](https://numora.xyz/docs/numora/features/scientific-notation) - automatically expands "1.5e-7" → "0.00000015"
-- [Leading Zeros](https://numora.xyz/docs/numora/features/leading-zeros) - configurable leading zero behavior
+- [Sanitization](https://numora.xyz/docs/numora/features/sanitization) removes non-numeric characters and mobile keyboard artifacts
+- [Formatting](https://numora.xyz/docs/numora/features/formatting) adds thousand separators in Thousand, Lakh or Wan grouping, on blur or on every keystroke
+- [Decimals](https://numora.xyz/docs/numora/features/decimals) sets the minimum and maximum decimal places and the decimal separator
+- [Compact notation](https://numora.xyz/docs/numora/features/compact-notation) expands "1k" → "1000" and "1.5m" → "1500000" on paste and `setValue`. A suffix in the middle of a number, such as "1k5", does not scale the prefix
+- [Scientific notation](https://numora.xyz/docs/numora/features/scientific-notation) expands "1.5e-7" → "0.00000015"
+- [Leading zeros](https://numora.xyz/docs/numora/features/leading-zeros) are stripped by default, and `allowLeadingZeros` keeps them
 
-Pasted text is read with foreign-format detection: if `.` and `,` both appear, the last one is the decimal; a mark that forms groups of three digits is grouping; any other single mark is the decimal. So `"1.234,56"` pasted into an en-US field is `1,234.56`. Typed keys and values the app passes in are never detected.
+Numora detects the format of pasted text. If `.` and `,` both appear, the last one is the decimal. A mark that forms groups of three digits is grouping. Any other single mark is the decimal. So `"1.234,56"` pasted into an en-US field is `1,234.56`. Numora never runs this detection on typed keys or on values the app passes in.
 
 ## Documentation
 
-Full documentation, live demo, and examples at [numora.xyz](https://numora.xyz/).
+The full documentation and a live demo are at [numora.xyz](https://numora.xyz/).
 
 ## License
 
