@@ -6,6 +6,7 @@ import {
   applyBlur,
   applyInputFallback,
   applyPaste,
+  applySetValue,
   attachFocusStrip,
   formatForDisplay,
 } from './utils/dom-events';
@@ -38,6 +39,14 @@ export interface NumoraInputOptions
   /** Fired on every change with `{ value, formattedValue }`: canonical raw + display string. */
   onValueChange?: (values: NumoraValues) => void;
   /**
+   * Fired with the display string every time Numora rewrites the field, including the
+   * rewrites `onValueChange` is silent about: the blur regroup, the focus strip, `setValue()`
+   * and an `update()` that only changes the format. Not fired on creation
+   * (`formatValue(defaultValue, options)` gives the first text) and never twice in a row for
+   * the same text. Use it to mirror the field, e.g. in an animated overlay.
+   */
+  onFormattedValueChange?: (formattedValue: string) => void;
+  /**
    * Initial value, as a canonical raw value (`'1234.5'` in every locale). When adopting an
    * existing `<input>`, its own value is kept unless this is passed. Later writes go through
    * {@link NumoraInput.setValue}. Same name and meaning as the React `defaultValue` prop.
@@ -61,6 +70,8 @@ export class NumoraInput {
   private isFocused = false;
   /** Field text after the last write this class made; restored when the `input` fallback must refuse a value. */
   private lastValue!: string;
+  /** Last text given to `onFormattedValueChange`; unset until the constructor is done. */
+  private reported?: string;
   // Removes exactly the listeners Numora added, so destroy() leaves the caller's alone.
   private cleanups: Array<() => void> = [];
 
@@ -91,6 +102,7 @@ export class NumoraInput {
     this.setValue(left?.text === this.el.value ? left.raw : this.el.value, {
       undoable: false,
     });
+    this.reported = this.el.value;
   }
 
   private createInputElement(container: HTMLElement): void {
@@ -154,13 +166,8 @@ export class NumoraInput {
       this.emit(applyBlur(el, opts()));
     });
     this.cleanups.push(
-      attachFocusStrip(
-        el,
-        opts,
-        () => {
-          this.lastValue = el.value;
-        }
-      )
+      // A strip leaves the raw value alone: only the display is reported.
+      attachFocusStrip(el, opts, () => this.emit(undefined))
     );
   }
 
@@ -183,10 +190,18 @@ export class NumoraInput {
     for (const cleanup of this.cleanups.splice(0)) cleanup();
   }
 
-  /** Records a write the shared helpers made and reports it. */
+  /**
+   * Records a write to the field and reports it: `onValueChange` when the caller passes the
+   * values of a raw change, then `onFormattedValueChange` when the text is new.
+   */
   private emit(values: NumoraValues | undefined): void {
-    this.lastValue = this.el.value;
+    const text = this.el.value;
+    this.lastValue = text;
     if (values) this.options.onValueChange?.({ value: values.value, formattedValue: values.formattedValue });
+    if (this.reported !== undefined && text !== this.reported) {
+      this.reported = text;
+      this.options.onFormattedValueChange?.(text);
+    }
   }
 
   /**
@@ -210,7 +225,8 @@ export class NumoraInput {
 
   /**
    * Sets the input's value programmatically. Like assigning `element.value`, it is the app's
-   * own write: it does not call `onValueChange` and is not checked by `isAllowed`.
+   * own write: it does not call `onValueChange` and is not checked by `isAllowed`. The new
+   * text still goes to `onFormattedValueChange`.
    *
    * @param value - A canonical raw value (ADR 0004): `.` is always the decimal mark and
    *   there is no grouping, whatever the field's locale (`'1234.5'` shows as `1.234,5` in
@@ -220,18 +236,10 @@ export class NumoraInput {
    *   `false` only when you intentionally want to wipe the undo history (e.g. form reset).
    */
   public setValue(value: string, options?: { undoable?: boolean }): void {
-    // Route through the same pipeline as typing/paste so programmatic writes honor
-    // sanitization, decimalMaxLength, maxLength, allowNegative and grouping.
-    // A focused Blur-mode field shows no grouping, so it keeps its edit-time format.
-    const raw = appValue(value, 'setValue()');
-    const opts = this.resolvedOptions;
-    const { formatted } = this.isFocused
-      ? formatValueForDisplay(raw, opts.decimalMaxLength, opts, 'canonical')
-      : formatForDisplay(raw, opts, 'canonical');
-
-    if (options?.undoable === false) this.el.value = formatted;
-    else writeValuePreservingUndo(this.el, formatted, formatted.length);
-    this.lastValue = formatted;
+    // Same pipeline as typing/paste, so programmatic writes honor sanitization,
+    // decimalMaxLength, maxLength, allowNegative and grouping.
+    applySetValue(this.el, value, this.isFocused, this.resolvedOptions, options?.undoable);
+    this.emit(undefined);
   }
 
   /**
@@ -258,7 +266,6 @@ export class NumoraInput {
       ? formatValueForDisplay(before, resolved.decimalMaxLength, resolved, 'canonical')
       : formatForDisplay(before, resolved, 'canonical');
     if (formatted !== this.el.value) writeValuePreservingUndo(this.el, formatted, formatted.length);
-    this.lastValue = formatted;
-    if (raw !== before) merged.onValueChange?.({ value: raw, formattedValue: formatted });
+    this.emit(raw !== before ? { value: raw, formattedValue: formatted } : undefined);
   }
 }

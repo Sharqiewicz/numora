@@ -15,6 +15,7 @@ export {
   applyBlur,
   applyInputFallback,
   applyPaste,
+  applySetValue,
   attachFocusStrip,
   formatForDisplay,
   type ResolvedNumoraOptions,

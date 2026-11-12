@@ -25,7 +25,11 @@ import { applyLocale } from './locale';
  * thousand separator is filled in. The callbacks are accepted only to be type-checked.
  */
 export function resolveOptions(
-  options: NumoraOptions & { onChange?: unknown; onValueChange?: unknown } = {}
+  options: NumoraOptions & {
+    onChange?: unknown;
+    onValueChange?: unknown;
+    onFormattedValueChange?: unknown;
+  } = {}
 ): ResolvedNumoraOptions {
   const {
     locale,
@@ -57,6 +61,7 @@ export function resolveOptions(
     ...resolved,
     onChange: options.onChange,
     onValueChange: options.onValueChange,
+    onFormattedValueChange: options.onFormattedValueChange,
   });
   return resolved;
 }

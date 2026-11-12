@@ -15,6 +15,7 @@ import {
   handleOnPasteNumoraInput,
   isScientificNotationRejected,
 } from './event-handlers';
+import { appValue } from './app-value';
 import { computeCaretAfterRewrite } from './caret';
 import {
   displayToRawValue,
@@ -58,6 +59,27 @@ export function formatForDisplay(
     { ...opts, formatOn: FormatOn.Change },
     source
   );
+}
+
+/**
+ * The app's own write (ADR 0011), shared by vanilla `setValue()` and the React ref's: a
+ * canonical raw value through the same pipeline as typing, in the edit format on a focused
+ * field and the resting format otherwise. Returns the text written.
+ */
+export function applySetValue(
+  el: HTMLInputElement,
+  value: string,
+  focused: boolean,
+  opts: ResolvedNumoraOptions,
+  undoable?: boolean
+): string {
+  const raw = appValue(value, 'setValue()');
+  const { formatted } = focused
+    ? formatValueForDisplay(raw, opts.decimalMaxLength, opts, 'canonical')
+    : formatForDisplay(raw, opts, 'canonical');
+  if (undoable === false) el.value = formatted;
+  else writeValuePreservingUndo(el, formatted, formatted.length);
+  return formatted;
 }
 
 const write = (

@@ -6,6 +6,7 @@ import { FormatOn, GroupingStyle, type NumoraOptions } from './types';
 type NumoraInputValidationOptions = NumoraOptions & {
   onChange?: unknown;
   onValueChange?: unknown;
+  onFormattedValueChange?: unknown;
 };
 
 /**
@@ -34,6 +35,7 @@ export function validateNumoraInputOptions(options: NumoraInputValidationOptions
   assertType('isAllowed', options.isAllowed, 'function');
   assertType('onChange', options.onChange, 'function');
   assertType('onValueChange', options.onValueChange, 'function');
+  assertType('onFormattedValueChange', options.onFormattedValueChange, 'function');
 }
 
 function assertInt(name: string, value: number | undefined, min: number, expected: string): void {
