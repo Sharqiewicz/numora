@@ -94,7 +94,7 @@ export function ScientificNotationDemo() {
             <NumoraInput
               value={numoraValue}
               onChange={(e) => setNumoraValue(e.target.value)}
-              enableCompactNotation
+              allowCompactNotation
               decimalMaxLength={18}
               placeholder="1e-18"
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"

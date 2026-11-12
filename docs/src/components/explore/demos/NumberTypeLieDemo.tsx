@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { NumoraInput } from 'numora-react';
-import { FormatOn, GroupingStyle } from 'numora';
 import { ProblemSection } from '../ProblemSection';
 import { InputComparison } from '../InputComparison';
 import {
@@ -149,9 +148,9 @@ export function NumberTypeLieDemo() {
             <NumoraInput
               value={numoraValue}
               onChange={(e) => setNumoraValue(e.target.value)}
-              formatOn={FormatOn.Change}
+              formatOn="change"
               thousandSeparator=","
-              groupingStyle={GroupingStyle.Thousand}
+              groupingStyle="thousand"
               placeholder="1234.56"
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />

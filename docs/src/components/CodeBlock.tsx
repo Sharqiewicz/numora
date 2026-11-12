@@ -41,41 +41,51 @@ interface CodeBlockProps {
   bare?: boolean;
 }
 
-export function CodeBlock({ children, className, language = 'typescript', bare = false }: CodeBlockProps) {
+export function CodeBlock({
+  children,
+  className,
+  language = 'typescript',
+  bare = false,
+}: CodeBlockProps) {
   const codeString = typeof children === 'string' ? children : String(children);
 
   return (
     <div
       className={cn(
         'group relative overflow-hidden bg-surface-1',
-        !bare && 'my-6 rounded-lg shadow-border',
+        !bare && 'my-6 rounded-lg shadow-border'
       )}
     >
+      {/* Opaque strip under the button so a long line never runs beneath or past it. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 right-0 z-10 h-11 w-14 bg-linear-to-l from-surface-1 from-75% to-transparent"
+      />
       <CopyButton
-        className="absolute top-2 right-2 z-10 p-1.5! opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
+        className="absolute top-2 right-2 z-10 p-1.5! after:-inset-2! bg-surface-1! hover:bg-surface-3! [&_svg]:opacity-60 group-hover:[&_svg]:opacity-100 focus-visible:[&_svg]:opacity-100 [&_svg]:transition-opacity [&_svg]:duration-150"
         noBorder
         text={codeString.trim()}
       />
-      <SyntaxHighlighter
-        language={language}
-        style={codeBlockStyle}
-        customStyle={{
-          margin: 0,
-          padding: '1rem',
-          paddingRight: '3rem',
-          background: 'var(--surface-1)',
-          fontSize: '0.875rem',
-          lineHeight: '1.5',
-        }}
-        preTagProps={{
-          className: 'bg-surface-1!',
-        }}
-        codeTagProps={{
-          className: cn('bg-transparent! p-0! rounded-none! text-sm', className),
-        }}
-      >
-        {codeString.trim()}
-      </SyntaxHighlighter>
+      {/* Thin dark scrollbar scoped to this block: long comment lines scroll, never wrap. */}
+      <div className="[&_pre]:[scrollbar-width:thin] [scrollbar-color:var(--surface-6)_transparent]">
+        <SyntaxHighlighter
+          language={language}
+          style={codeBlockStyle}
+          customStyle={{
+            margin: 0,
+            padding: '1rem',
+            paddingRight: '3rem',
+            background: 'var(--surface-1)',
+            fontSize: '0.875rem',
+            lineHeight: '1.5',
+          }}
+          codeTagProps={{
+            className: cn('bg-transparent! p-0! rounded-none! text-sm', className),
+          }}
+        >
+          {codeString.trim()}
+        </SyntaxHighlighter>
+      </div>
     </div>
   );
 }

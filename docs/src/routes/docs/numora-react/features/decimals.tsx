@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
-import { FormatOn } from 'numora';
 
 export const Route = createFileRoute('/docs/numora-react/features/decimals')({
   head: () => ({
@@ -76,11 +75,9 @@ export const Route = createFileRoute('/docs/numora-react/features/decimals')({
 
 function Decimals() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Decimals</h1>
-      <p>
-        Set how many decimal places are allowed and which separators the input uses.
-      </p>
+      <p>Set how many decimal places are allowed and which separators the input uses.</p>
 
       <h2>Precision limits</h2>
       <div className="space-y-4">
@@ -106,17 +103,14 @@ function Decimals() {
           title="European format"
           description='Type a number and it displays as "1.234,56"'
           language="tsx"
-          code={`<NumoraInput decimalSeparator="," thousandSeparator="." formatOn={FormatOn.Change} />`}
-          config={{ decimalSeparator: ',', thousandSeparator: '.', formatOn: FormatOn.Change }}
+          code={`<NumoraInput decimalSeparator="," thousandSeparator="." formatOn="change" />`}
+          config={{ decimalSeparator: ',', thousandSeparator: '.', formatOn: 'change' }}
         />
       </div>
 
       <p>
         For locale-aware separator detection, see{' '}
-        <Link to="/docs/numora-react/features/locale">
-          Locale
-        </Link>
-        .
+        <Link to="/docs/numora-react/features/locale">Locale</Link>.
       </p>
 
       <h2>Built-in behavior</h2>
@@ -126,9 +120,10 @@ function Decimals() {
           blocked if the value already has one.
         </li>
         <li>
-          Pasted text is read by its own format: when both <code>.</code> and <code>,</code> appear,
-          the last one is the decimal (<code>"1,234.56"</code> → <code>1234.56</code>), and a mark
-          that repeats is grouping (<code>"12.34.56"</code> → <code>123456</code>).
+          Numora reads pasted text by its own format. When both <code>.</code> and <code>,</code>{' '}
+          appear, the last one is the decimal, so <code>"1,234.56"</code> becomes{' '}
+          <code>1234.56</code>. A mark that repeats is grouping, so <code>"12.34.56"</code> becomes{' '}
+          <code>123456</code>.
         </li>
       </ul>
     </div>

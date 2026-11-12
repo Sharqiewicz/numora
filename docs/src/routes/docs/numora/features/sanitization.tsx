@@ -23,7 +23,8 @@ export const Route = createFileRoute('/docs/numora/features/sanitization')({
       { name: 'twitter:title', content: 'Sanitization | Numora' },
       {
         name: 'twitter:description',
-        content: 'Sanitize numeric inputs and block invalid characters with Numora. Clean pasted values from block explorers and block invalid keystrokes.',
+        content:
+          'Sanitize numeric inputs and block invalid characters with Numora. Clean pasted values from block explorers and block invalid keystrokes.',
       },
     ],
     links: [
@@ -74,7 +75,7 @@ export const Route = createFileRoute('/docs/numora/features/sanitization')({
 
 function Sanitization() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Sanitization</h1>
       <p>
         Numora runs every value through a sequential sanitization pipeline before it formats. For
@@ -82,7 +83,8 @@ function Sanitization() {
         <Link to="/docs/numora/anatomy" hash="sanitization">
           Anatomy: sanitization
         </Link>
-        . This page covers character filtering and the standalone <code>removeThousandSeparators</code> utility.
+        . This page covers character filtering and the standalone{' '}
+        <code>removeThousandSeparators</code> utility.
       </p>
 
       <h2>Non-numeric character filtering</h2>
@@ -93,20 +95,21 @@ function Sanitization() {
           Decimal separator (configured via <code>decimalSeparator</code>)
         </li>
         <li>
-          Negative sign (<code>-</code>) if <code>enableNegative</code> is true
+          Negative sign (<code>-</code>) if <code>allowNegative</code> is true
         </li>
       </ul>
       <p>
-        A sign character is only ever kept in the leading position: a <code>-</code> found anywhere
-        else in the string is removed rather than rejected (<code>"5-3"</code> → <code>"53"</code>), and a leading <code>+</code> is always removed (<code>"+5"</code> → <code>"5"</code>)
-        since Numora has no concept of an explicit positive sign.
+        Numora keeps a sign character only in the leading position. A <code>-</code> anywhere else
+        in the string is removed and the rest of the input stays, so <code>"5-3"</code> becomes{' '}
+        <code>"53"</code>. Numora also removes a leading <code>+</code>, so <code>"+5"</code>{' '}
+        becomes <code>"5"</code>, because it has no explicit positive sign.
       </p>
 
       <h2>removeThousandSeparators</h2>
       <p>
         Numora exports a standalone <code>removeThousandSeparators</code> utility that strips
-        thousand separators from a formatted string. Use it to get a raw numeric
-        value out of a display string.
+        thousand separators from a formatted string. Use it to get a raw numeric value out of a
+        display string.
       </p>
       <p>
         To read the raw value from the input, see{' '}

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { FormatOn, GroupingStyle } from 'numora';
 import { NumoraInput } from 'numora-react';
 import { InputPair } from '../InputPair';
 import { DemoInput, demoInputClass } from '../kit';
@@ -14,8 +13,8 @@ export function PlainVsNumoraSection() {
       </h2>
       <p>
         Type the same text into both inputs below, for example <code>$1,234.56abc</code>, then{' '}
-        <code>1.5e-7</code>, then <code>2.5k</code>. Numora cleans, expands and
-        groups the value as you type:
+        <code>1.5e-7</code>, then <code>2.5k</code>. Numora cleans, expands and groups the value as
+        you type:
       </p>
       <InputPair
         left={{
@@ -37,11 +36,11 @@ export function PlainVsNumoraSection() {
           tone: 'good',
           input: (
             <NumoraInput
-              formatOn={FormatOn.Change}
+              formatOn="change"
               thousandSeparator=","
-              groupingStyle={GroupingStyle.Thousand}
+              groupingStyle="thousand"
               decimalMaxLength={2}
-              enableCompactNotation
+              allowCompactNotation
               aria-label="Numora input"
               placeholder="$1,234.56abc"
               className={demoInputClass}

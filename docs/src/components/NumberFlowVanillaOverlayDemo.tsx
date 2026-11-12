@@ -1,8 +1,10 @@
-import { FormatOn, NumoraInput, GroupingStyle } from 'numora';
+import { NumoraInput } from 'numora';
 import 'number-flow';
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
+import { DemoFrame, demoOverlayBox } from './DemoFrame';
 
 export function NumberFlowVanillaOverlayDemo() {
+  const inputId = useId();
   const displayRef = useRef<HTMLSpanElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
 
@@ -28,26 +30,27 @@ export function NumberFlowVanillaOverlayDemo() {
     };
 
     const numora = new NumoraInput(hostRef.current, {
-      formatOn: FormatOn.Change,
+      formatOn: 'change',
       decimalMaxLength: 2,
       thousandSeparator: ',',
-      value: '1234567',
-      groupingStyle: GroupingStyle.Thousand,
+      defaultValue: '1234567',
+      groupingStyle: 'thousand',
       // NumberFlow formats the canonical raw `value` itself, so syncing on raw
       // changes is enough - separator-only rewrites don't change what it shows.
-      onChange: ({ value }) => syncFlow(value),
+      onValueChange: ({ value }) => syncFlow(value),
     });
-    const input = numora.getElement();
+    const input = numora.element;
+    input.id = inputId;
     input.setAttribute('aria-label', 'Amount');
 
-    // The initial value does not fire onChange, so prime the display.
-    syncFlow(numora.value);
+    // The initial value does not fire onValueChange, so prime the display.
+    syncFlow(numora.rawValue);
 
     return () => {
       flow.remove();
       input.remove();
     };
-  }, []);
+  }, [inputId]);
 
   return (
     <>
@@ -60,25 +63,21 @@ export function NumberFlowVanillaOverlayDemo() {
           border: 0;
           background: transparent;
           color: transparent;
-          caret-color: white;
+          caret-color: var(--color-foreground);
           outline: none;
           font: inherit;
         }
-        .nf-vanilla-input-host input::selection { background: rgba(255, 255, 255, 0.25); }
+        .nf-vanilla-input-host input::selection { background: color-mix(in oklab, var(--color-foreground) 25%, transparent); }
         .nf-vanilla-input-host input::placeholder { color: transparent; }
       `}</style>
-      <div className="my-16 py-12 flex justify-center items-center">
-        <label className="relative inline-flex items-center min-h-[44px] min-w-[6ch] rounded-md has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-muted-foreground text-4xl font-mono leading-none text-white">
-          <span
-            ref={displayRef}
-            className="pointer-events-none whitespace-pre tabular-nums"
-            aria-hidden="true"
-          >
+      <DemoFrame inputId={inputId}>
+        <div className={demoOverlayBox}>
+          <span ref={displayRef} className="pointer-events-none whitespace-pre" aria-hidden="true">
             1,234,567
           </span>
           <div ref={hostRef} className="nf-vanilla-input-host absolute inset-0" />
-        </label>
-      </div>
+        </div>
+      </DemoFrame>
     </>
   );
 }

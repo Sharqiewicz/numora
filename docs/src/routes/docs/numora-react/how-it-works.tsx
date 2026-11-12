@@ -7,7 +7,7 @@ export const Route = createFileRoute('/docs/numora-react/how-it-works')({
       {
         name: 'description',
         content:
-          "Quick reference for Numora React's pipeline: event handlers, the ten-step sanitization order, formatting stages, and value output. For the full narrative, see the Anatomy page.",
+          "Quick reference for Numora React's pipeline: event handlers, the ten-step sanitization order, formatting stages, and value output. The Anatomy page explains each step with diagrams and demos.",
       },
       {
         property: 'og:title',
@@ -39,7 +39,7 @@ export const Route = createFileRoute('/docs/numora-react/how-it-works')({
             '@type': 'TechArticle',
             headline: 'How it works | Numora React',
             description:
-              "Quick reference for Numora React's pipeline: event handlers, sanitization, formatting, and value output. The Anatomy page covers the same surface as a long-form narrative with diagrams and demos.",
+              "Quick reference for Numora React's pipeline: event handlers, sanitization, formatting, and value output. The Anatomy page explains each step with diagrams and demos.",
             url: 'https://numeric-input.com/docs/numora-react/how-it-works',
             author: {
               '@type': 'Person',
@@ -78,7 +78,7 @@ const ANATOMY = '/docs/numora-react/anatomy';
 
 function HowItWorks() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>How it works</h1>
       <p>
         A cheat sheet. Each row links to the section of <Link to={ANATOMY}>Anatomy</Link> that
@@ -127,7 +127,7 @@ function HowItWorks() {
           <Link to={ANATOMY} hash="format-mode">
             <code>focus</code> / <code>blur</code>
           </Link>
-          : strip and re-apply separators in <code>FormatOn.Blur</code> mode.
+          : strip and re-apply separators in <code>'blur'</code> mode.
         </li>
       </ul>
 
@@ -140,8 +140,8 @@ function HowItWorks() {
           : runs on every value before formatting. Options:{' '}
           <Link to="/docs/numora-react/features/sanitization">Sanitization</Link>,{' '}
           <Link to="/docs/numora-react/features/compact-notation">Compact notation</Link>,{' '}
-          <Link to="/docs/numora-react/features/scientific-notation">Scientific notation</Link>{' '}
-          (a paste is rejected when <code>enableScientificNotation</code> is <code>false</code>),{' '}
+          <Link to="/docs/numora-react/features/scientific-notation">Scientific notation</Link> (a
+          paste is rejected when <code>allowScientificNotation</code> is <code>false</code>),{' '}
           <Link to="/docs/numora-react/features/leading-zeros">Leading zeros</Link>,{' '}
           <Link to="/docs/numora-react/features/max-length">Max length</Link>.
         </li>
@@ -163,8 +163,8 @@ function HowItWorks() {
           <Link to={ANATOMY} hash="raw-vs-formatted">
             Value output
           </Link>
-          : <code>e.target.value</code> is the canonical raw value, <code>e.target.formattedValue</code> is the display
-          string (
+          : <code>e.target.value</code> is the canonical raw value,{' '}
+          <code>e.target.formattedValue</code> is the display string (
           <Link to={ANATOMY} hash="proxy-target">
             how
           </Link>
@@ -174,11 +174,11 @@ function HowItWorks() {
 
       <h2>Input value format</h2>
       <p>
-        A string <code>value</code> / <code>defaultValue</code> is the canonical raw value: ASCII
-        digits, <code>.</code> as the decimal mark, no grouping, in every locale. A JS{' '}
-        <code>number</code> is read the same way. Under <code>locale="de-DE"</code>, both{' '}
-        <code>{'value="1234.5"'}</code> and <code>{'value={1234.5}'}</code> display{' '}
-        <code>"1.234,5"</code>.
+        <code>value</code> / <code>defaultValue</code> take a string: the canonical raw value, with
+        ASCII digits, <code>.</code> as the decimal mark and no grouping, in every locale. Under{' '}
+        <code>locale="de-DE"</code>, <code>{'value="1234.5"'}</code> displays{' '}
+        <code>"1.234,5"</code>. A JS <code>number</code> is a type error, because it may already
+        have lost precision.
       </p>
     </div>
   );

@@ -52,7 +52,7 @@ function Row({
     <div>
       <div className="mb-2 flex flex-wrap items-baseline gap-x-2">
         <span className="text-[14px] font-medium">{label}</span>
-        <span className="text-[12px] text-muted-foreground">{sub}</span>
+        <span className="text-xs text-muted-foreground">{sub}</span>
       </div>
       <div className="relative flex" style={{ width: xAt(AFTER, AFTER.length), height: CHIP_H }}>
         {children}
@@ -144,7 +144,7 @@ export function CursorAnchorDiagram() {
         </Row>
 
         <motion.div
-          className="flex items-center gap-1.5 font-mono text-[12px] text-muted-foreground"
+          className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground"
           initial={b.initial()}
           animate={b.animate(show)}
           transition={b.t(fade(BEATS.hint))}
@@ -158,7 +158,7 @@ export function CursorAnchorDiagram() {
           sub="index-based"
           verdict={
             <motion.span
-              className="inline-flex items-center gap-1 text-[12px] text-signal-red-fg"
+              className="inline-flex items-center gap-1 text-xs text-signal-red-fg"
               initial={b.initial()}
               animate={b.animate(show)}
               transition={b.t(fade(BEATS.naiveVerdict))}
@@ -185,7 +185,7 @@ export function CursorAnchorDiagram() {
           sub="4 digits before the caret"
           verdict={
             <motion.span
-              className="inline-flex items-center gap-1 text-[12px] text-signal-green-fg"
+              className="inline-flex items-center gap-1 text-xs text-signal-green-fg"
               initial={b.initial()}
               animate={b.animate(show)}
               transition={b.t(fade(BEATS.numoraVerdict))}

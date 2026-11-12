@@ -23,7 +23,8 @@ export const Route = createFileRoute('/docs/numora/features/compact-notation')({
       { name: 'twitter:title', content: 'Compact notation | Numora' },
       {
         name: 'twitter:description',
-        content: 'Enable compact number notation in inputs with Numora. Users type "1k" for 1,000 or "1m" for 1,000,000. Shorthand number input for financial UIs.',
+        content:
+          'Enable compact number notation in inputs with Numora. Users type "1k" for 1,000 or "1m" for 1,000,000. Shorthand number input for financial UIs.',
       },
     ],
     links: [
@@ -74,52 +75,53 @@ export const Route = createFileRoute('/docs/numora/features/compact-notation')({
 
 function CompactNotation() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Compact notation</h1>
       <p>
-        Compact notation expands shorthand values like <code>"1k"</code> or <code>"2.5m"</code> to full
-        numbers when they are typed or pasted, once <code>enableCompactNotation</code> is on. Expansion uses string arithmetic, so no precision is lost.
+        Compact notation expands shorthand values like <code>"1k"</code> or <code>"2.5m"</code> to
+        full numbers when they are typed or pasted, once <code>allowCompactNotation</code> is on.
+        Expansion uses string arithmetic, so no precision is lost.
       </p>
 
       <div className="overflow-x-auto">
-      <table>
-        <thead>
-          <tr>
-            <th>Suffix</th>
-            <th>Multiplier</th>
-            <th>Example</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>k, K</td>
-            <td>×1,000</td>
-            <td>"1k" → "1000"</td>
-          </tr>
-          <tr>
-            <td>m, M</td>
-            <td>×1,000,000</td>
-            <td>"1.5m" → "1500000"</td>
-          </tr>
-          <tr>
-            <td>b, B</td>
-            <td>×1,000,000,000</td>
-            <td>"2B" → "2000000000"</td>
-          </tr>
-          <tr>
-            <td>t, T</td>
-            <td>×1,000,000,000,000</td>
-            <td>"2.5T" → "2500000000000"</td>
-          </tr>
-        </tbody>
-      </table>
+        <table>
+          <thead>
+            <tr>
+              <th>Suffix</th>
+              <th>Multiplier</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>k, K</td>
+              <td>×1,000</td>
+              <td>"1k" → "1000"</td>
+            </tr>
+            <tr>
+              <td>m, M</td>
+              <td>×1,000,000</td>
+              <td>"1.5m" → "1500000"</td>
+            </tr>
+            <tr>
+              <td>b, B</td>
+              <td>×1,000,000,000</td>
+              <td>"2B" → "2000000000"</td>
+            </tr>
+            <tr>
+              <td>t, T</td>
+              <td>×1,000,000,000,000</td>
+              <td>"2.5T" → "2500000000000"</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
 const input = new NumoraInput(container, {
-  enableCompactNotation: true,
+  allowCompactNotation: true,
   decimalMaxLength: 18,
   // "0.5k"  → "500"
   // "2.75m" → "2750000"

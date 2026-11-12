@@ -11,7 +11,7 @@ export function FloatVsString() {
     <DiagramFrame>
       <div className="grid gap-6 md:grid-cols-2">
         <div>
-          <div className="mb-2 flex items-center justify-between gap-2 text-[13px] font-medium text-foreground">
+          <div className="mb-2 flex items-center justify-between gap-2 text-caption font-medium text-foreground">
             JavaScript Number
             <Verdict tone="bad" />
           </div>
@@ -35,7 +35,7 @@ export function FloatVsString() {
           </pre>
         </div>
         <div>
-          <div className="mb-2 flex items-center justify-between gap-2 text-[13px] font-medium text-foreground">
+          <div className="mb-2 flex items-center justify-between gap-2 text-caption font-medium text-foreground">
             Numora (strings only)
             <Verdict tone="good" />
           </div>

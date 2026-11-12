@@ -23,7 +23,8 @@ export const Route = createFileRoute('/docs/numora/features/leading-zeros')({
       { name: 'twitter:title', content: 'Leading zeros | Numora' },
       {
         name: 'twitter:description',
-        content: 'Control leading zero behavior in numeric inputs with Numora. Strip or keep integer leading zeros, and prepend "0" before bare decimal points like ".5" → "0.5".',
+        content:
+          'Control leading zero behavior in numeric inputs with Numora. Strip or keep integer leading zeros, and prepend "0" before bare decimal points like ".5" → "0.5".',
       },
     ],
     links: [
@@ -38,7 +39,7 @@ export const Route = createFileRoute('/docs/numora/features/leading-zeros')({
             '@type': 'TechArticle',
             headline: 'Leading zero control in Numora numeric inputs',
             description:
-              'Control leading zero behavior in JavaScript numeric inputs with Numora. Strip leading zeros or keep them, depending on your use case.',
+              'Control leading zero behavior in JavaScript numeric inputs with Numora. Strip leading zeros, or keep them for IDs and product codes.',
             url: 'https://numeric-input.com/docs/numora/features/leading-zeros',
             author: {
               '@type': 'Person',
@@ -74,11 +75,11 @@ export const Route = createFileRoute('/docs/numora/features/leading-zeros')({
 
 function LeadingZeros() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Leading zeros</h1>
       <p>
         By default, Numora removes leading zeros from the integer part of a number. Set{' '}
-        <code>enableLeadingZeros: true</code> to keep them.
+        <code>allowLeadingZeros: true</code> to keep them.
       </p>
 
       <CodeBlock language="typescript">
@@ -87,13 +88,13 @@ function LeadingZeros() {
 // Default: leading zeros removed
 // "007" → "7", "0001" → "1"
 const input1 = new NumoraInput(container, {
-  enableLeadingZeros: false,
+  allowLeadingZeros: false,
 })
 
 // Leading zeros kept
 // "007" → "007", "0001" → "0001"
 const input2 = new NumoraInput(container, {
-  enableLeadingZeros: true,
+  allowLeadingZeros: true,
 })`}
       </CodeBlock>
 
@@ -107,7 +108,8 @@ const input2 = new NumoraInput(container, {
           Numora always keeps a bare <code>"0"</code>
         </li>
         <li>
-          Negative numbers keep their sign (<code>"-007"</code> → <code>"-7"</code>, with <code>enableNegative: true</code>)
+          Negative numbers keep their sign (<code>"-007"</code> → <code>"-7"</code>, with{' '}
+          <code>allowNegative: true</code>)
         </li>
       </ul>
 
@@ -118,28 +120,28 @@ const input2 = new NumoraInput(container, {
 
       <h2>Auto-prepend leading zero</h2>
       <p>
-        Set <code>autoAddLeadingZero: true</code> to prepend <code>0</code>{' '}
-        before a bare decimal separator. Use it when you want <code>.5</code> stored as{' '}
-        <code>0.5</code>, so the value parses the same way everywhere downstream.
+        Set <code>padLeadingZero: true</code> to prepend <code>0</code> before a bare decimal
+        separator. Use it when you want <code>.5</code> stored as <code>0.5</code>, so the value
+        parses the same way everywhere downstream.
       </p>
 
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
 const input = new NumoraInput(container, {
-  autoAddLeadingZero: true,
+  padLeadingZero: true,
 })
 
 // Typing ".5"        → "0.5"
-// Typing "-.5"       → "-0.5"  (requires enableNegative: true)
+// Typing "-.5"       → "-0.5"  (requires allowNegative: true)
 // Typing "."         → "0."
 // Typing "1.5"       → "1.5"   (unchanged)`}
       </CodeBlock>
 
       <ul>
         <li>
-          Runs after <code>enableLeadingZeros</code> trimming, so you can combine the two. Only the optional{' '}
-          <code>maxLength</code> truncation runs later.
+          Runs after <code>allowLeadingZeros</code> trimming, so you can combine the two. Only the
+          optional <code>maxLength</code> truncation runs later.
         </li>
         <li>
           Uses your <code>decimalSeparator</code> (e.g. <code>","</code> for European format)

@@ -168,7 +168,7 @@ export function GroupingStylesDiagram() {
       </div>
       <output className="sr-only">{announce}</output>
 
-      <div className="mt-3 flex min-h-10 flex-col gap-1 text-[13px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-3 flex min-h-10 flex-col gap-1 text-caption text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <span>{active.rule}</span>
       </div>
     </DiagramFrame>

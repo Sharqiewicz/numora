@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NumoraInput } from 'numora-react';
-import { sanitizeNumoraInput } from 'numora';
+import { sanitizeNumoraInput } from 'numora/internal';
 import { ProblemSection } from '../ProblemSection';
 import { InputComparison } from '../InputComparison';
 import { PasteButtonGroup } from '../PasteButton';
@@ -26,7 +26,7 @@ const INTENDED: Record<string, string> = {
 const SANITIZE_OPTIONS = {
   thousandSeparator: ',',
   decimalSeparator: '.',
-  enableCompactNotation: true,
+  allowCompactNotation: true,
 };
 
 export function PasteChaosDemo() {
@@ -84,7 +84,7 @@ export function PasteChaosDemo() {
             <NumoraInput
               value={numoraValue}
               onChange={(e) => setNumoraValue(e.target.value)}
-              enableCompactNotation
+              allowCompactNotation
               placeholder="1,234.56"
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { useSyncExternalStore } from 'react';
 import { CodeBlock } from '@/components/CodeBlock';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
-import { FormatOn, GroupingStyle } from 'numora';
 
 export const Route = createFileRoute('/docs/numora-react/features/locale')({
   head: () => ({
@@ -15,7 +15,8 @@ export const Route = createFileRoute('/docs/numora-react/features/locale')({
       { property: 'og:title', content: 'Locale | Numora React' },
       {
         property: 'og:description',
-        content: 'Auto-detect thousand and decimal separators from the browser locale using the locale prop and getSeparatorsFromLocale.',
+        content:
+          'Auto-detect thousand and decimal separators from the browser locale using the locale prop and getSeparatorsFromLocale.',
       },
       {
         property: 'og:url',
@@ -24,7 +25,8 @@ export const Route = createFileRoute('/docs/numora-react/features/locale')({
       { name: 'twitter:title', content: 'Locale | Numora React' },
       {
         name: 'twitter:description',
-        content: 'Auto-detect thousand and decimal separators from the browser locale using the locale prop and getSeparatorsFromLocale.',
+        content:
+          'Auto-detect thousand and decimal separators from the browser locale using the locale prop and getSeparatorsFromLocale.',
       },
     ],
     links: [
@@ -73,46 +75,53 @@ export const Route = createFileRoute('/docs/numora-react/features/locale')({
   component: Locale,
 });
 
+const subscribeNoop = () => () => {};
+const getBrowserLocale = () => Intl.NumberFormat().resolvedOptions().locale;
+// Browser locale is unknown on the server; the empty server snapshot keeps the first
+// client render identical to the SSR HTML, and the real value appears after hydration.
+const getServerLocale = () => '';
+
 function Locale() {
-  const usersLocale = Intl.NumberFormat().resolvedOptions().locale;
+  const usersLocale = useSyncExternalStore(subscribeNoop, getBrowserLocale, getServerLocale);
 
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Locale</h1>
       <p>
         The <code>locale</code> prop detects thousand and decimal separators, and the digit-grouping
-        style, via <code>Intl.NumberFormat</code>. An explicit <code>groupingStyle</code> always
-        overrides the detected one.
+        style, via <code>Intl.NumberFormat</code>. An explicit <code>groupingStyle</code> overrides
+        the detected one.
       </p>
 
       <h2>Browser locale (auto-detect)</h2>
       <p>
         Pass <code>locale={'{true}'}</code> to detect both separators from the browser's current
-        locale. Explicit <code>thousandSeparator</code> or <code>decimalSeparator</code> values
-        always take priority over locale-detected ones.
+        locale. Explicit <code>thousandSeparator</code> or <code>decimalSeparator</code> values win
+        over locale-detected ones.
       </p>
       <div className="space-y-4">
         <ExampleWithDemo
-          title={`Browser locale (yours: ${usersLocale})`}
+          title={usersLocale ? `Your browser: ${usersLocale}` : 'Your browser'}
           description="Both separators are resolved from your browser's locale setting"
           language="tsx"
           code={`<NumoraInput locale={true} />`}
-          config={{ locale: true, formatOn: FormatOn.Change }}
+          config={{ locale: true, formatOn: 'change' }}
         />
       </div>
 
       <h2>Specific locale tag</h2>
       <p>
-        Pass a BCP 47 locale tag to pin separators to a specific locale. Use this for SSR or
-        server-driven locale handling.
+        Pass a BCP 47 locale tag to pin separators to a specific locale. Use this whenever the
+        field is rendered on the server: <code>locale={'{true}'}</code> there resolves to the
+        server's locale, which may not match the browser, and logs a warning in development.
       </p>
       <div className="space-y-4">
         <ExampleWithDemo
-          title="Specific locale (de-DE)"
+          title="de-DE"
           description="Separators pinned to German locale: '.' thousand, ',' decimal"
           language="tsx"
           code={`<NumoraInput locale="de-DE" />`}
-          config={{ locale: 'de-DE', formatOn: FormatOn.Change }}
+          config={{ locale: 'de-DE', formatOn: 'change' }}
         />
       </div>
 
@@ -120,7 +129,7 @@ function Locale() {
       <p>
         Indic locales group as 3-2-2 (lakh/crore) rather than 3-3-3. When <code>groupingStyle</code>{' '}
         is left unset, it is derived from the locale, so <code>hi-IN</code> and <code>en-IN</code>{' '}
-        get <code>GroupingStyle.Lakh</code> automatically.
+        get <code>'lakh'</code> automatically.
       </p>
       <div className="space-y-4">
         <ExampleWithDemo
@@ -128,54 +137,50 @@ function Locale() {
           description="Grouping derived from the locale: 12345678 formats as 1,23,45,678"
           language="tsx"
           code={`<NumoraInput locale="en-IN" />`}
-          config={{ locale: 'en-IN', formatOn: FormatOn.Change }}
+          config={{ locale: 'en-IN', formatOn: 'change' }}
         />
         <ExampleWithDemo
           title="Explicit groupingStyle wins"
           description="Passing groupingStyle overrides the locale-derived one: 12,345,678"
           language="tsx"
-          code={`<NumoraInput locale="en-IN" groupingStyle={GroupingStyle.Thousand} />`}
+          code={`<NumoraInput locale="en-IN" groupingStyle="thousand" />`}
           config={{
             locale: 'en-IN',
-            groupingStyle: GroupingStyle.Thousand,
-            formatOn: FormatOn.Change,
+            groupingStyle: 'thousand',
+            formatOn: 'change',
           }}
         />
       </div>
       <p>
         Only <code>Thousand</code> and <code>Lakh</code> are inferrable.{' '}
-        <code>GroupingStyle.Wan</code> (4-4-4) is not derivable from <code>Intl.NumberFormat</code>{' '}
-        - <code>zh-CN</code> and <code>ja-JP</code> both report Western 3-3-3 grouping - so Wan must
-        be passed explicitly.
+        <code>'wan'</code> (4-4-4) cannot be derived from <code>Intl.NumberFormat</code>
+        , because <code>zh-CN</code> and <code>ja-JP</code> both report Western 3-3-3 grouping. Pass
+        Wan explicitly.
       </p>
 
       <h2>getSeparatorsFromLocale</h2>
       <p>To compute separators ahead of time and pass them explicitly:</p>
       <CodeBlock language="tsx">
-        {`import { NumoraInput } from 'numora-react'
-import { getSeparatorsFromLocale } from 'numora'
+        {`import { NumoraInput, getSeparatorsFromLocale } from 'numora-react'
 
 const { thousandSeparator, decimalSeparator } = getSeparatorsFromLocale('de-DE')
-// → { thousandSeparator: '.', decimalSeparator: ',', groupingStyle: GroupingStyle.Thousand }
+// → { thousandSeparator: '.', decimalSeparator: ',', groupingStyle: 'thousand' }
 
 getSeparatorsFromLocale('en-US')
-// → { thousandSeparator: ',', decimalSeparator: '.', groupingStyle: GroupingStyle.Thousand }
+// → { thousandSeparator: ',', decimalSeparator: '.', groupingStyle: 'thousand' }
 
 getSeparatorsFromLocale('fr-FR')
-// → { thousandSeparator: '\\u202f', decimalSeparator: ',', groupingStyle: GroupingStyle.Thousand }
+// → { thousandSeparator: '\\u202f', decimalSeparator: ',', groupingStyle: 'thousand' }
 
 getSeparatorsFromLocale('en-IN')
-// → { thousandSeparator: ',', decimalSeparator: '.', groupingStyle: GroupingStyle.Lakh }
+// → { thousandSeparator: ',', decimalSeparator: '.', groupingStyle: 'lakh' }
 
 <NumoraInput thousandSeparator={thousandSeparator} decimalSeparator={decimalSeparator} />`}
       </CodeBlock>
 
       <p>
         For decimal separator configuration without locale detection, see{' '}
-        <Link to="/docs/numora-react/features/decimals">
-          Decimals
-        </Link>
-        .
+        <Link to="/docs/numora-react/features/decimals">Decimals</Link>.
       </p>
 
       <h2>What the field displays</h2>
@@ -192,8 +197,8 @@ getSeparatorsFromLocale('en-IN')
       <p>
         <code>value</code> and <code>defaultValue</code> take the canonical raw value in every
         locale: ASCII digits, <code>.</code> as the decimal mark, no grouping. Under{' '}
-        <code>locale="de-DE"</code>, both <code>{'value="1234.5"'}</code> and{' '}
-        <code>{'value={1234.5}'}</code> display <code>"1.234,5"</code>, and{' '}
+        <code>locale="de-DE"</code>, <code>{'value="1234.5"'}</code> displays{' '}
+        <code>"1.234,5"</code>, and{' '}
         <code>e.target.value</code> is <code>"1234.5"</code>. See{' '}
         <Link to="/docs/numora-react/features/value-types">features/value-types</Link> for the full
         value contract.

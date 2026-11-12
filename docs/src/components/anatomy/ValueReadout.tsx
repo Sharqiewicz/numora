@@ -1,7 +1,5 @@
 import { motion, useReducedMotion } from 'motion/react';
-import { FormatOn, GroupingStyle } from 'numora';
 import {
-  type NumoraHTMLInputElement,
   NumoraInput,
   type NumoraInputChangeEvent,
 } from 'numora-react';
@@ -66,24 +64,23 @@ export function ValueReadout() {
   const [selectionStart, setSelectionStart] = useState<number | null>(0);
 
   const handleChange = (e: NumoraInputChangeEvent) => {
-    const target = e.target as NumoraHTMLInputElement;
-    setRawValue(target.value);
-    setFormattedValue(target.formattedValue ?? '');
-    setSelectionStart(target.selectionStart);
+    setRawValue(e.target.value);
+    setFormattedValue(e.target.formattedValue);
+    setSelectionStart(e.target.selectionStart);
   };
 
   return (
     <DiagramFrame variant="demo">
-      <label htmlFor={inputId} className="mb-2 block text-[13px] font-medium text-muted-foreground">
+      <label htmlFor={inputId} className="mb-2 block text-caption font-medium text-muted-foreground">
         Type a number
       </label>
       <NumoraInput
         id={inputId}
-        formatOn={FormatOn.Change}
+        formatOn="change"
         thousandSeparator=","
-        groupingStyle={GroupingStyle.Thousand}
+        groupingStyle="thousand"
         decimalMaxLength={2}
-        enableCompactNotation
+        allowCompactNotation
         onChange={handleChange}
         placeholder="1234567.89"
         className={demoInputClass}

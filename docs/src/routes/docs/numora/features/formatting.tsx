@@ -78,53 +78,54 @@ export const Route = createFileRoute('/docs/numora/features/formatting')({
 
 function Formatting() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Formatting</h1>
       <p>
-        Formatting groups the digits of the value with thousand separators (<code>groupingStyle</code>{' '}
-        defaults to <code>Thousand</code>; set <code>GroupingStyle.None</code> to turn grouping off). It runs on blur by default, or on every keystroke with{' '}
-        <code>FormatOn.Change</code>. Numora keeps the cursor in place either way.
+        Formatting groups the digits of the value with thousand separators.{' '}
+        <code>groupingStyle</code> defaults to <code>Thousand</code>, and <code>'none'</code> turns
+        grouping off. Formatting runs on every keystroke by default, or only on blur with{' '}
+        <code>'blur'</code>. Numora keeps the cursor in place either way.
       </p>
 
       <h2>Grouping styles</h2>
       <CodeBlock language="typescript">
-        {`import { NumoraInput, GroupingStyle } from 'numora'
+        {`import { NumoraInput } from 'numora'
 
 // Thousand (1,234,567)
 const input1 = new NumoraInput(container, {
-  groupingStyle: GroupingStyle.Thousand,
+  groupingStyle: 'thousand',
 })
 
 // Lakh (Indian, 12,34,567)
 const input2 = new NumoraInput(container, {
-  groupingStyle: GroupingStyle.Lakh,
+  groupingStyle: 'lakh',
 })
 
 // Wan (East Asian, 123,4567)
 const input3 = new NumoraInput(container, {
-  groupingStyle: GroupingStyle.Wan,
+  groupingStyle: 'wan',
 })
 
 // None (1234567)
 const input4 = new NumoraInput(container, {
-  groupingStyle: GroupingStyle.None,
+  groupingStyle: 'none',
 })`}
       </CodeBlock>
 
       <h2>When to format</h2>
       <CodeBlock language="typescript">
-        {`import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
+        {`import { NumoraInput } from 'numora'
 
 // Blur (default): format when the input loses focus
 const input1 = new NumoraInput(container, {
-  formatOn: FormatOn.Blur,
-  groupingStyle: GroupingStyle.Thousand,
+  formatOn: 'blur',
+  groupingStyle: 'thousand',
 })
 
 // Change: format on every keystroke
 const input2 = new NumoraInput(container, {
-  formatOn: FormatOn.Change,
-  groupingStyle: GroupingStyle.Thousand,
+  formatOn: 'change',
+  groupingStyle: 'thousand',
 })`}
       </CodeBlock>
 

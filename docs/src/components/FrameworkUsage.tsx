@@ -29,12 +29,12 @@ const FRAMEWORKS: Framework[] = [
     language: 'tsx',
     logo: <ReactLogo />,
     href: '/docs/numora-react',
-    example: `import { NumoraInput, FormatOn } from 'numora-react'
+    example: `import { NumoraInput } from 'numora-react'
 
 <NumoraInput
-  formatOn={FormatOn.Change}
+  formatOn="change"
   decimalMaxLength={2}
-  onChange={(e) => console.log(e.target.value)}
+  onValueChange={({ value }) => console.log(value)}
 />`,
   },
   {

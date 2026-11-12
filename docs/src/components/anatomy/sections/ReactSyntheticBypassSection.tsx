@@ -40,11 +40,11 @@ export function ReactSyntheticBypassSection() {
         Why <code>beforeinput</code> bypasses React's synthetic event system
       </h2>
       <p>
-        React's event system uses <strong>delegation</strong>: a single listener at the root
+        React's event system uses <strong>delegation</strong>. A single listener at the root
         container fires handlers during the bubbling phase. That works for most events, but not for{' '}
         <code>beforeinput</code>. React's <code>onBeforeInput</code> is not the native event. React
-        synthesizes it from <code>textInput</code>, <code>keypress</code> and composition events,
-        so it cannot reliably cancel the edit before the browser applies it.
+        synthesizes it from <code>textInput</code>, <code>keypress</code> and composition events, so
+        it cannot reliably cancel the edit before the browser applies it.
       </p>
       <p>
         Switching to React's <code>onBeforeInput</code> prop broke validation and sanitization, and
@@ -56,13 +56,15 @@ export function ReactSyntheticBypassSection() {
         re-registration:
       </p>
       <CodeBlock language="tsx">{code}</CodeBlock>
-      <h3 className="text-base">Why <code>onChange</code> fires only once</h3>
+      <h3 className="text-base">
+        Why <code>onChange</code> fires only once
+      </h3>
       <p>
         The handler writes the formatted value with <code>setRangeText</code> and calls{' '}
         <code>onChange</code> itself. <code>setRangeText</code> dispatches no <code>input</code>{' '}
-        event (that is the HTML spec, and Chrome and jsdom both follow it), so nothing reaches
-        React's <code>handleChange</code> afterwards. <code>handleChange</code> only ever sees
-        edits the browser makes itself, such as undo, redo and autofill.
+        event. The HTML spec says so, and Chrome and jsdom both follow it. Nothing reaches React's{' '}
+        <code>handleChange</code> afterwards. <code>handleChange</code> only ever sees edits the
+        browser makes itself, such as undo, redo and autofill.
       </p>
     </section>
   );

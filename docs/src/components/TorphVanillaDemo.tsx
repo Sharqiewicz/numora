@@ -1,9 +1,11 @@
-import { FormatOn, NumoraInput, GroupingStyle } from 'numora';
-import { useEffect, useRef } from 'react';
+import { NumoraInput } from 'numora';
+import { useEffect, useId, useRef } from 'react';
 import { TextMorph } from 'torph';
 import { startTypingLoop } from '@/hooks/use-typing-loop';
+import { DemoFrame, demoOverlayBox } from './DemoFrame';
 
 export function TorphVanillaDemo() {
+  const inputId = useId();
   const displayRef = useRef<HTMLSpanElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
 
@@ -21,18 +23,19 @@ export function TorphVanillaDemo() {
     });
 
     const numora = new NumoraInput(hostRef.current, {
-      formatOn: FormatOn.Change,
+      formatOn: 'change',
       decimalMaxLength: 2,
       thousandSeparator: ',',
-      value: '1234567',
-      groupingStyle: GroupingStyle.Thousand,
-      onChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
+      defaultValue: '1234567',
+      groupingStyle: 'thousand',
+      onFormattedValueChange: (text) => morph.update(text || '0'),
     });
-    const input = numora.getElement();
+    const input = numora.element;
+    input.id = inputId;
     input.setAttribute('aria-label', 'Amount');
 
-    // The initial value does not fire onChange, so prime the morph once.
-    morph.update(numora.getFormattedValue() || '0');
+    // Creation fires no callback, so show the first text here.
+    morph.update(numora.formattedValue || '0');
 
     const stopTypingLoop = startTypingLoop(input, { mode: 'change' });
 
@@ -41,7 +44,7 @@ export function TorphVanillaDemo() {
       morph.destroy();
       input.remove();
     };
-  }, []);
+  }, [inputId]);
 
   return (
     <>
@@ -50,27 +53,27 @@ export function TorphVanillaDemo() {
           width: 100%;
           height: 100%;
           margin: 0;
-          padding: 0.75rem 1rem;
+          padding: 0;
           box-sizing: border-box;
           border: 0;
-          text-align: right;
+          text-align: left;
           background: transparent;
           color: transparent;
-          caret-color: var(--secondary);
+          caret-color: var(--color-foreground);
           outline: none;
           font: inherit;
         }
-        .torph-vanilla-input-host input::selection { background: color-mix(in oklch, var(--secondary) 40%, transparent); }
+        .torph-vanilla-input-host input::selection { background: color-mix(in oklch, var(--color-foreground) 25%, transparent); }
         .torph-vanilla-input-host input::placeholder { color: transparent; }
       `}</style>
-      <div className="my-12 w-full max-w-lg mx-auto">
-        <label className="relative flex items-center justify-end w-full rounded-2xl has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-muted-foreground border border-surface-3 bg-surface-1 overflow-hidden px-4 py-3 text-xl font-mono tracking-wide text-white cursor-text">
+      <DemoFrame inputId={inputId}>
+        <div className={demoOverlayBox}>
           <span ref={displayRef} className="pointer-events-none whitespace-pre" aria-hidden="true">
             0
           </span>
           <div ref={hostRef} className="torph-vanilla-input-host absolute inset-0" />
-        </label>
-      </div>
+        </div>
+      </DemoFrame>
     </>
   );
 }

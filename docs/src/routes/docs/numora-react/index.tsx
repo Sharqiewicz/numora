@@ -62,41 +62,41 @@ export const Route = createFileRoute('/docs/numora-react/')({
 
 function GetStarted() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Numora React</h1>
       <p>
         <strong className="font-numora">Numora React</strong> is a replacement for{' '}
-        <code>{'<input>'}</code> that handles numeric formatting, sanitization and cursor
-        management in React. It is a <code>forwardRef</code> component that works controlled
-        and uncontrolled and accepts standard HTML input attributes (except <code>type</code> and{' '}
-        <code>inputMode</code>, which it manages; <code>maxLength</code> counts the raw value).
+        <code>{'<input>'}</code> that handles numeric formatting, sanitization and cursor management
+        in React. It is a <code>forwardRef</code> component that works controlled and uncontrolled
+        and accepts standard HTML input attributes. It manages <code>type</code> and{' '}
+        <code>inputMode</code> itself, and <code>maxLength</code> counts the raw value.
       </p>
 
       <h2>Raw and formatted values</h2>
       <p>
         On every change, <code>e.target.value</code> is the raw numeric string, with no thousand
-        separators or other formatting characters. With the default <code>.</code> decimal
-        separator you can pass it directly to BigNumber, ethers.js, viem or any precision math
-        library. With a custom <code>decimalSeparator</code> or a <code>locale</code>, the raw value
-        keeps that separator, so normalize it to <code>.</code> first.
+        separators or other formatting characters. With the default <code>.</code> decimal separator
+        you can pass it directly to BigNumber, ethers.js, viem or any precision math library. With a
+        custom <code>decimalSeparator</code> or a <code>locale</code>, the raw value keeps that
+        separator, so normalize it to <code>.</code> first.
       </p>
       <p>
-        <code>e.target.formattedValue</code> is the display string, with thousand separators
-        and decimal formatting, for showing to the user. One event gives you both values.
+        <code>e.target.formattedValue</code> is the display string, with thousand separators and
+        decimal formatting, for showing to the user. One callback gives you both values.
       </p>
 
       <CodeBlock language="tsx">
-        {`import { NumoraInput, FormatOn } from 'numora-react'
+        {`import { NumoraInput } from 'numora-react'
 
 function Amount() {
   return (
     <NumoraInput
-      formatOn={FormatOn.Change}
+      formatOn="change"
       decimalMaxLength={2}
       thousandSeparator=","
-      onChange={(e) => {
-        console.log(e.target.value)          // "1234.56" (raw)
-        console.log(e.target.formattedValue) // "1,234.56" (display)
+      onValueChange={({ value, formattedValue }) => {
+        console.log(value)          // "1234.56" (raw)
+        console.log(formattedValue) // "1,234.56" (display)
       }}
     />
   )
@@ -104,9 +104,9 @@ function Amount() {
       </CodeBlock>
 
       <p>
-        By default, grouping is <code>GroupingStyle.Thousand</code> with <code>,</code> as the
-        separator, the same as the vanilla <code>numora</code> package. Pass{' '}
-        <code>groupingStyle={'{GroupingStyle.None}'}</code> to turn grouping off.
+        By default, grouping is <code>'thousand'</code> with <code>,</code> as the separator, the
+        same as the vanilla <code>numora</code> package. Pass <code>groupingStyle="none"</code> to
+        turn grouping off.
       </p>
 
       <h2>Works with</h2>

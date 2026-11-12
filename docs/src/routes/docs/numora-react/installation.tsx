@@ -2,7 +2,6 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { InstallTabs } from '@/components/InstallTabs';
 import { CodeBlock } from '@/components/CodeBlock';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
-import { FormatOn } from 'numora';
 
 export const Route = createFileRoute('/docs/numora-react/installation')({
   head: () => ({
@@ -11,7 +10,7 @@ export const Route = createFileRoute('/docs/numora-react/installation')({
       {
         name: 'description',
         content:
-          'Add a React numeric input component to your project. Install Numora React, render NumoraInput, and get live number formatting with no dependencies beyond its peers react and numora.',
+          'Add a React numeric input component to your project. Install Numora React, render NumoraInput, and format numbers as the user types, with no dependencies beyond its peers react and numora.',
       },
       {
         property: 'og:title',
@@ -29,7 +28,7 @@ export const Route = createFileRoute('/docs/numora-react/installation')({
       },
       {
         name: 'twitter:description',
-        content: 'React numeric input component with live number formatting.',
+        content: 'React numeric input component that formats numbers as the user types.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora-react/installation' }],
@@ -41,8 +40,7 @@ export const Route = createFileRoute('/docs/numora-react/installation')({
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
             headline: 'Installation | Numora React',
-            description:
-              'Installation guide for Numora React, the React numeric input component.',
+            description: 'Installation guide for Numora React, the React numeric input component.',
             url: 'https://numeric-input.com/docs/numora-react/installation',
             author: {
               '@type': 'Person',
@@ -78,7 +76,7 @@ export const Route = createFileRoute('/docs/numora-react/installation')({
 
 function Installation() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Installation</h1>
       <p>
         Install Numora React and render <code>NumoraInput</code> in any React project.
@@ -96,19 +94,19 @@ function Installation() {
 
       <h2>Basic usage</h2>
       <ExampleWithDemo
-        code={`import { NumoraInput, FormatOn } from 'numora-react'
+        code={`import { NumoraInput } from 'numora-react'
 
 function App() {
   return (
     <NumoraInput
       decimalMaxLength={2}
-      formatOn={FormatOn.Change}
+      formatOn="change"
     />
   )
 }`}
         language="tsx"
         config={{
-          formatOn: FormatOn.Change,
+          formatOn: 'change',
           decimalMaxLength: 2,
         }}
         description="Type a number to see it formatted"
@@ -122,7 +120,7 @@ function App() {
       </p>
       <CodeBlock language="tsx">
         {`import { useState } from 'react'
-import { NumoraInput, FormatOn } from 'numora-react'
+import { NumoraInput } from 'numora-react'
 
 function AmountField() {
   const [amount, setAmount] = useState('')
@@ -131,9 +129,9 @@ function AmountField() {
     <>
       <NumoraInput
         value={amount}
-        onChange={(e) => setAmount(e.target.value)}
+        onValueChange={({ value }) => setAmount(value)}
         decimalMaxLength={6}
-        formatOn={FormatOn.Change}
+        formatOn="change"
       />
       <p>Raw value: {amount}</p>
     </>

@@ -14,8 +14,8 @@ export function FloatVsStringSection() {
       <FloatVsString />
       <p>
         On a price field, <code>0.30000000000000004</code> is not the number the user meant. Numora
-        has one rule here: every value in the input is <strong>a string</strong>. Numora never converts it to a <code>Number</code> in the input pipeline (the opt-in vanilla{' '}
-        <code>valueAsNumber</code> getter is the one exception). What the user typed is what your code reads back.
+        has one rule here. Every value in the input is <strong>a string</strong>. Numora never
+        converts it to a <code>Number</code>. What the user typed is what your code reads back.
       </p>
     </section>
   );

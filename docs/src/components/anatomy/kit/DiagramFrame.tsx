@@ -93,7 +93,7 @@ export function DiagramFrame({
       )}
     >
       {title && (
-        <div className="mb-4 flex min-h-8 items-center pr-10 text-[13px] font-medium text-muted-foreground">
+        <div className="mb-4 flex min-h-8 items-center pr-10 text-caption font-medium text-muted-foreground">
           {title}
         </div>
       )}
@@ -123,7 +123,7 @@ export function DiagramFrame({
         <div style={minWidth ? { minWidth } : undefined}>{children}</div>
       </div>
       {caption && (
-        <figcaption className="mt-4 text-[13px] leading-relaxed text-muted-foreground">
+        <figcaption className="mt-4 text-caption leading-relaxed text-muted-foreground">
           {caption}
         </figcaption>
       )}

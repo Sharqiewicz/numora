@@ -5,30 +5,27 @@ import { CORE_SIZE_GZIP } from '@/lib/constants/package';
 const PAGE_URL = 'https://numeric-input.com/docs/numora/frameworks/angular';
 
 const META_TITLE = 'Angular numeric input | Numora';
-const META_DESCRIPTION =
-  `Angular numeric input library with thousand separators, decimal limits, paste sanitization and cursor preservation. Use Numora in Angular through a standalone directive that implements ControlValueAccessor for Reactive Forms. It is a framework-agnostic vanilla package with zero dependencies, ${CORE_SIZE_GZIP} gzipped.`;
+const META_DESCRIPTION = `Angular numeric input library with thousand separators, decimal limits, paste sanitization and cursor preservation. Use Numora in Angular through a standalone directive that implements ControlValueAccessor for Reactive Forms. It is a framework-agnostic vanilla package with zero dependencies, ${CORE_SIZE_GZIP} gzipped.`;
 
 // Single source for the visible FAQ and the JSON-LD FAQPage. Backticks mark inline code.
 const FAQ = [
   {
     question: 'What is the best Angular numeric input library?',
-    answer:
-      `Numora is an Angular numeric input library: framework-agnostic TypeScript, ${CORE_SIZE_GZIP} gzipped, with no runtime dependencies. In Angular you wrap \`NumoraInput\` in a standalone directive that implements \`ControlValueAccessor\`, so it works with Reactive Forms.`,
+    answer: `Numora is framework-agnostic TypeScript, ${CORE_SIZE_GZIP} gzipped, with no runtime dependencies. In Angular you wrap \`NumoraInput\` in a standalone directive that implements \`ControlValueAccessor\`, so it works with Reactive Forms.`,
   },
   {
     question: 'How do I add thousand separators to an Angular number input?',
     answer:
-      "Pass `groupingStyle: GroupingStyle.Thousand` and `formatOn: FormatOn.Change` through the directive's `@Input`. Numora formats as the user types and keeps the cursor stable through the inserted comma. `onChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators. You can write it straight into a signal or a `FormControl<string>`.",
+      "Pass `groupingStyle: 'thousand'` and `formatOn: 'change'` through the directive's `@Input`. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators. You can write it straight into a signal or a `FormControl<string>`.",
   },
   {
     question: 'Is there a numora-angular package?',
-    answer:
-      'No, and you do not need one. The standalone directive is the entire Angular adapter.',
+    answer: 'No, and you do not need one. The standalone directive is the entire Angular adapter.',
   },
   {
     question: 'Does Numora integrate with Angular Reactive Forms?',
     answer:
-      'Yes. The `NumoraDirective` implements `ControlValueAccessor`, so `<input numora>` works with `[formControl]` and `[(ngModel)]` (import `FormsModule`) with no extra wiring. The raw value is a string, which matches what `FormControl<string>` stores, so currency amounts never go through floating-point numbers.',
+      'Yes. The `NumoraDirective` implements `ControlValueAccessor`, so `<input numora>` works with `[formControl]` and `[(ngModel)]` (import `FormsModule`). The raw value is a string, which matches what `FormControl<string>` stores, so currency amounts never go through floating-point numbers.',
   },
   {
     question: 'Does it work with Angular SSR?',
@@ -141,7 +138,7 @@ export const Route = createFileRoute('/docs/numora/frameworks/angular')({
 
 function AngularIntegration() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Angular numeric input</h1>
       <p>
         <strong className="font-numora">Numora</strong> is a precision-first{' '}
@@ -150,8 +147,8 @@ function AngularIntegration() {
         standalone directive. Numora&apos;s value is a string end to end, so the directive works
         with <code>ControlValueAccessor</code> and <code>FormControl&lt;string&gt;</code> directly,
         and currency amounts never pass through IEEE 754 floating-point numbers. You need no{' '}
-        <code>numora-angular</code> wrapper. The package is {CORE_SIZE_GZIP} gzipped with zero runtime
-        dependencies.
+        <code>numora-angular</code> wrapper. The package is {CORE_SIZE_GZIP} gzipped with zero
+        runtime dependencies.
       </p>
 
       <h2>Installation</h2>
@@ -162,7 +159,7 @@ function AngularIntegration() {
         <code>NumoraInput</code> attaches directly to an existing <code>&lt;input&gt;</code>{' '}
         element. Implementing Angular&apos;s <code>ControlValueAccessor</code> on the directive lets
         the same <code>&lt;input numora&gt;</code> work with <code>[(ngModel)]</code> and Reactive
-        Forms with no extra glue:
+        Forms:
       </p>
 
       <p>
@@ -212,9 +209,9 @@ export class NumoraDirective implements ControlValueAccessor, OnInit, OnDestroy 
     this.instance = new NumoraInput(this.el.nativeElement, {
       ...this.options,
       // The form control stores the raw string, so forward the raw \`value\`.
-      onChange: (values) => {
+      onValueChange: (values) => {
         this.onChangeCb(values.value);
-        this.options.onChange?.(values);
+        this.options.onValueChange?.(values);
       },
     });
     if (this.pendingValue !== null) {
@@ -251,7 +248,7 @@ export class NumoraDirective implements ControlValueAccessor, OnInit, OnDestroy 
   }
 
   setDisabledState(isDisabled: boolean): void {
-    if (this.instance) this.instance.getElement().disabled = isDisabled;
+    if (this.instance) this.instance.element.disabled = isDisabled;
   }
 }`}
       </CodeBlock>
@@ -263,7 +260,6 @@ export class NumoraDirective implements ControlValueAccessor, OnInit, OnDestroy 
       <CodeBlock language="ts">
         {`import { Component, signal } from '@angular/core';
 import { NumoraDirective } from './numora.directive';
-import { FormatOn, GroupingStyle } from 'numora';
 
 @Component({
   selector: 'app-amount',
@@ -274,10 +270,10 @@ import { FormatOn, GroupingStyle } from 'numora';
       Amount
       <input
         [numora]="{
-          formatOn: FormatOn.Change,
-          groupingStyle: GroupingStyle.Thousand,
+          formatOn: 'change',
+          groupingStyle: 'thousand',
           decimalMaxLength: 2,
-          onChange: handleChange,
+          onValueChange: handleChange,
         }"
       />
     </label>
@@ -285,8 +281,6 @@ import { FormatOn, GroupingStyle } from 'numora';
   \`,
 })
 export class AmountComponent {
-  protected readonly FormatOn = FormatOn;
-  protected readonly GroupingStyle = GroupingStyle;
   protected readonly value = signal('');
   protected readonly handleChange = ({ value }: { value: string }) => this.value.set(value);
 }`}
@@ -300,7 +294,6 @@ export class AmountComponent {
         {`import { Component } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { NumoraDirective } from './numora.directive';
-import { FormatOn, GroupingStyle } from 'numora';
 
 @Component({
   selector: 'app-amount-form',
@@ -311,15 +304,13 @@ import { FormatOn, GroupingStyle } from 'numora';
       Amount
       <input
         [formControl]="amount"
-        [numora]="{ formatOn: FormatOn.Change, groupingStyle: GroupingStyle.Thousand, decimalMaxLength: 2 }"
+        [numora]="{ formatOn: 'change', groupingStyle: 'thousand', decimalMaxLength: 2 }"
       />
     </label>
     <p>Raw value: {{ amount.value }}</p>
   \`,
 })
 export class AmountFormComponent {
-  protected readonly FormatOn = FormatOn;
-  protected readonly GroupingStyle = GroupingStyle;
   protected readonly amount = new FormControl('0', { nonNullable: true });
 }`}
       </CodeBlock>
@@ -327,10 +318,10 @@ export class AmountFormComponent {
       <p>
         Numora adopts the <code>&lt;input&gt;</code> and sets the attributes it needs. The{' '}
         <code>ControlValueAccessor</code> bridge: <code>writeValue</code> calls{' '}
-        <code>setValue</code>, <code>registerOnChange</code> passes the raw <code>value</code> to the
-        form control (see <Link to="/docs/numora/features/value-types">value types</Link>), and{' '}
+        <code>setValue</code>, <code>registerOnChange</code> passes the raw <code>value</code> to
+        the form control (see <Link to="/docs/numora/features/value-types">value types</Link>), and{' '}
         <code>setDisabledState</code> sets the element's <code>disabled</code> property.{' '}
-        <code>FormatOn.Change</code> formats on every keystroke (see{' '}
+        <code>'change'</code> formats on every keystroke (see{' '}
         <Link to="/docs/numora/features/formatting">formatting</Link>).
       </p>
 
@@ -352,7 +343,7 @@ import {
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
-import { NumoraInput, FormatOn, GroupingStyle } from 'numora';
+import { NumoraInput } from 'numora';
 import { TextMorph } from 'torph';
 
 @Component({
@@ -388,14 +379,14 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
     morph.update('0');
     this.morph = morph;
 
-    // FormatOn.Change: onChange fires on every edit. In Blur mode also sync on focus and blur.
+    // 'change': onValueChange fires on every edit. In Blur mode also sync on focus and blur.
     const numora = new NumoraInput(this.host.nativeElement, {
-      formatOn: FormatOn.Change,
-      groupingStyle: GroupingStyle.Thousand,
+      formatOn: 'change',
+      groupingStyle: 'thousand',
       decimalMaxLength: 2,
-      onChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
+      onValueChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
     });
-    this.input = numora.getElement();
+    this.input = numora.element;
     this.input.setAttribute('aria-label', 'Amount');
   }
 

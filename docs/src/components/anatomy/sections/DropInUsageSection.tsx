@@ -1,29 +1,28 @@
 import { Link } from '@tanstack/react-router';
-import { FormatOn, GroupingStyle } from 'numora';
 import { CodeBlock } from '@/components/CodeBlock';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
 import type { SectionProps } from './types';
 
-const reactExample = `import { NumoraInput, FormatOn, GroupingStyle } from 'numora-react'
+const reactExample = `import { NumoraInput } from 'numora-react'
 
 <NumoraInput
-  formatOn={FormatOn.Change}
+  formatOn="change"
   thousandSeparator=","
-  groupingStyle={GroupingStyle.Thousand}
+  groupingStyle="thousand"
   decimalMaxLength={2}
-  enableCompactNotation
-  onChange={(e) => console.log(e.target.value)}
+  allowCompactNotation
+  onValueChange={({ value }) => console.log(value)}
 />`;
 
-const vanillaExample = `import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
+const vanillaExample = `import { NumoraInput } from 'numora'
 
 new NumoraInput(container, {
-  formatOn: FormatOn.Change,
+  formatOn: 'change',
   thousandSeparator: ',',
-  groupingStyle: GroupingStyle.Thousand,
+  groupingStyle: 'thousand',
   decimalMaxLength: 2,
-  enableCompactNotation: true,
-  onChange: ({ value }) => console.log(value),
+  allowCompactNotation: true,
+  onValueChange: ({ value }) => console.log(value),
 })`;
 
 export function DropInUsageSection({ pkg }: SectionProps) {
@@ -43,11 +42,11 @@ export function DropInUsageSection({ pkg }: SectionProps) {
         code={pkg === 'numora-react' ? reactExample : vanillaExample}
         language={pkg === 'numora-react' ? 'tsx' : 'typescript'}
         config={{
-          formatOn: FormatOn.Change,
+          formatOn: 'change',
           thousandSeparator: ',',
-          groupingStyle: GroupingStyle.Thousand,
+          groupingStyle: 'thousand',
           decimalMaxLength: 2,
-          enableCompactNotation: true,
+          allowCompactNotation: true,
         }}
         placeholder="$1,234.56abc"
         label="Paste a messy value"

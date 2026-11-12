@@ -20,7 +20,8 @@ export const Route = createFileRoute('/docs/numora/features/decimals')({
       { name: 'twitter:title', content: 'Decimals | Numora' },
       {
         name: 'twitter:description',
-        content: 'Enforce decimal place limits and validate decimal inputs with Numora. Set max and min decimal places, choose separators, and block invalid decimal entries.',
+        content:
+          'Enforce decimal place limits and validate decimal inputs with Numora. Set max and min decimal places, choose separators, and block invalid decimal entries.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora/features/decimals' }],
@@ -69,10 +70,11 @@ export const Route = createFileRoute('/docs/numora/features/decimals')({
 
 function Decimals() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Decimals</h1>
       <p>
-        Decimal options limit how many decimal digits a value can have and set the separator between the integer and decimal parts.
+        Decimal options limit how many decimal digits a value can have and set the separator between
+        the integer and decimal parts.
       </p>
 
       <h2>Precision limits</h2>
@@ -94,24 +96,21 @@ const input2 = new NumoraInput(container, {
 
       <h2>Separators</h2>
       <CodeBlock language="typescript">
-        {`import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
+        {`import { NumoraInput } from 'numora'
 
 // European format
 const input = new NumoraInput(container, {
   decimalSeparator: ',',
   thousandSeparator: '.',
-  groupingStyle: GroupingStyle.Thousand,
-  formatOn: FormatOn.Change,
+  groupingStyle: 'thousand',
+  formatOn: 'change',
   // typing "1234,56" displays "1.234,56"
 })`}
       </CodeBlock>
 
       <p>
         To detect separators from a locale, see{' '}
-        <Link to="/docs/numora/features/locale">
-          Locale
-        </Link>
-        .
+        <Link to="/docs/numora/features/locale">Locale</Link>.
       </p>
 
       <h2>Automatic behaviors</h2>
@@ -121,10 +120,10 @@ const input = new NumoraInput(container, {
           configured decimal separator. Numora blocks it if the value already has one.
         </li>
         <li>
-          <strong>Paste cleanup.</strong> Pasted text is read by its own format: when both{' '}
-          <code>.</code> and <code>,</code> appear, the last one is the decimal (
-          <code>"1,234.56"</code> → <code>1234.56</code>), and a mark that repeats is grouping (
-          <code>"12.34.56"</code> → <code>123456</code>).
+          <strong>Paste cleanup.</strong> Numora reads pasted text by its own format. When both{' '}
+          <code>.</code> and <code>,</code> appear, the last one is the decimal, so{' '}
+          <code>"1,234.56"</code> becomes <code>1234.56</code>. A mark that repeats is grouping, so{' '}
+          <code>"12.34.56"</code> becomes <code>123456</code>.
         </li>
       </ul>
     </div>

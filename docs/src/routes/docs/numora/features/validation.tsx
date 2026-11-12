@@ -20,7 +20,8 @@ export const Route = createFileRoute('/docs/numora/features/validation')({
       { name: 'twitter:title', content: 'Validation | Numora' },
       {
         name: 'twitter:description',
-        content: 'Reject numeric input pre-commit with a custom isAllowed validator in Numora. Cap values, enforce business rules, and stop invalid keystrokes before they reach your state.',
+        content:
+          'Reject numeric input pre-commit with a custom isAllowed validator in Numora. Cap values, enforce business rules, and stop invalid keystrokes before they reach your state.',
       },
     ],
     links: [
@@ -71,7 +72,7 @@ export const Route = createFileRoute('/docs/numora/features/validation')({
 
 function Validation() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Validation</h1>
       <p>
         An <code>isAllowed</code> predicate rejects keystrokes and pastes <em>before</em> they
@@ -83,9 +84,9 @@ function Validation() {
       </CodeBlock>
 
       <p>
-        <code>rawValue</code> is the sanitized, raw (no-separator) string that <em>would</em>{' '}
-        be committed. Return <code>true</code> to accept it, <code>false</code> to discard it. The
-        input keeps its previous value and no <code>onChange</code> fires.
+        <code>rawValue</code> is the sanitized, raw (no-separator) string that <em>would</em> be
+        committed. Return <code>true</code> to accept it, <code>false</code> to discard it. The
+        input keeps its previous value and no <code>onValueChange</code> fires.
       </p>
 
       <h2>Example: cap at 100</h2>

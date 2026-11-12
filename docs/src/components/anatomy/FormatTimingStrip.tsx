@@ -6,7 +6,7 @@ type Props =
   | { mode: 'change'; keystrokes: number };
 
 const base =
-  'flex items-center gap-1.5 rounded-md border px-2 py-1 text-[12px] transition-colors duration-150 ease-out-expo motion-reduce:transition-none';
+  'flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors duration-150 ease-out-expo motion-reduce:transition-none';
 const on = `${ROLE.numora.bg} ${ROLE.numora.border} ${ROLE.numora.text}`;
 const off = 'border-border text-muted-foreground';
 

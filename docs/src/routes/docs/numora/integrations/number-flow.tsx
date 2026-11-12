@@ -69,7 +69,7 @@ const JSON_LD = [
         name: 'Does NumberFlow work without React?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. This guide uses the `<number-flow>` web component from the `number-flow` package together with the vanilla NumoraInput class, with no React in the runtime. The custom element is a standard browser primitive and works in any framework or none.',
+          text: 'Yes. This guide uses the `<number-flow>` web component from the `number-flow` package together with the vanilla NumoraInput class, with no React in the runtime. Custom elements are a browser standard, so it works in any framework or none.',
         },
       },
       {
@@ -77,7 +77,7 @@ const JSON_LD = [
         name: 'How does the NumberFlow + Numora overlay work?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'A transparent-text NumoraInput sits on top of a `<number-flow>` element. The input owns the keyboard, undo, IME, and mobile inputmode. The onChange option receives the raw value, converts it to a Number, sets flow.format with a matching minimumFractionDigits, and calls flow.update() so NumberFlow animates the visible digits.',
+          text: 'A transparent-text NumoraInput sits on top of a `<number-flow>` element. The input owns the keyboard, undo, IME, and mobile inputmode. The onValueChange option receives the raw value, converts it to a Number, sets flow.format with a matching minimumFractionDigits, and calls flow.update() so NumberFlow animates the visible digits.',
         },
       },
       {
@@ -116,7 +116,7 @@ export const Route = createFileRoute('/docs/numora/integrations/number-flow')({
 
 function NumberFlowIntegration() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>NumberFlow integration</h1>
       <p>
         <a href={LIB_URL} target="_blank" rel="noreferrer noopener">
@@ -136,8 +136,8 @@ function NumberFlowIntegration() {
       </p>
 
       <NumberFlowVanillaOverlayDemo />
-      <p className="text-center -mt-12 mb-12">
-        <code>FormatOn.Change</code>: digits animate on every keystroke.
+      <p className="mx-auto -mt-6 mb-12 max-w-lg text-sm text-muted-foreground">
+        With <code>'change'</code>, digits animate on every keystroke.
       </p>
 
       <OverlayExplainer
@@ -155,21 +155,22 @@ function NumberFlowIntegration() {
       >
         <p>
           Both layers render the same formatted number. The vanilla <code>NumoraInput</code> class
-          calls its <code>onChange</code> option on every logical value change: typing, paste,
+          calls its <code>onValueChange</code> option on every logical value change: typing, paste,
           the focus-strip, undo/redo and blur reformatting. It receives{' '}
-          <code>{'{ value, formattedValue }'}</code>; <code>value</code> is the raw string (without
-          separators), which <code>Number()</code> can parse. The callback sets <code>flow.format</code> and calls <code>flow.update()</code>,
-          and NumberFlow tweens each digit into place. The input itself never animates, and because
-          its text is transparent, you only see the NumberFlow layer.
+          <code>{'{ value, formattedValue }'}</code>. <code>value</code> is the raw string without
+          separators, which <code>Number()</code> can parse. The callback sets{' '}
+          <code>flow.format</code> and calls <code>flow.update()</code>, and NumberFlow tweens each
+          digit into place. The input itself never animates, and because its text is transparent,
+          you only see the NumberFlow layer.
         </p>
       </OverlayExplainer>
 
       <div className="bg-signal-amber/10 border border-signal-amber/30 rounded-lg p-4 my-4">
         <p className="m-0">
-          <strong>Caution:</strong> this pattern is experimental. It suits short, append-mostly numeric
-          fields. Unlike string-based morph libraries, NumberFlow animates numbers, which causes
-          precision caveats with trailing decimals, partial input states and very large values.
-          They are listed below.
+          <strong>Caution:</strong> this pattern is experimental. It suits short, append-mostly
+          numeric fields. Torph animates strings. NumberFlow animates numbers, which causes
+          precision caveats with trailing decimals, partial input states and very large values. They
+          are listed below.
         </p>
       </div>
 
@@ -240,7 +241,7 @@ npm install numora number-flow`}
       </CodeBlock>
 
       <CodeBlock language="ts">
-        {`import { FormatOn, NumoraInput, GroupingStyle } from 'numora'
+        {`import { NumoraInput } from 'numora'
 import 'number-flow' // registers the <number-flow> custom element
 
 const display = document.querySelector<HTMLSpanElement>('.numora-overlay-display')!
@@ -260,18 +261,18 @@ function syncFlow(raw: string) {
 }
 
 const numora = new NumoraInput(host, {
-  formatOn: FormatOn.Change,
+  formatOn: 'change',
   decimalMaxLength: 2,
-  value: '1234567',
-  groupingStyle: GroupingStyle.Thousand,
-  // onChange receives { value, formattedValue }; value is raw ("1234567"), safe for Number().
-  onChange: ({ value }) => syncFlow(value),
+  defaultValue: '1234567',
+  groupingStyle: 'thousand',
+  // onValueChange receives { value, formattedValue }; value is raw ("1234567"), safe for Number().
+  onValueChange: ({ value }) => syncFlow(value),
 })
-const input = numora.getElement()
+const input = numora.element
 input.setAttribute('aria-label', 'Amount')
 
-// The initial value does not fire onChange, so prime the display.
-syncFlow(numora.getValue())`}
+// The initial value does not fire onValueChange, so prime the display.
+syncFlow(numora.rawValue)`}
       </CodeBlock>
 
       <h3>Why each line matters</h3>
@@ -280,20 +281,20 @@ syncFlow(numora.getValue())`}
           <strong>
             <code>import 'number-flow'</code>
           </strong>{' '}
-          is a side-effect import that registers <code>&lt;number-flow&gt;</code> as a custom element on{' '}
-          <code>customElements</code>. The library guards the registration call, so it's safe to
-          import in SSR bundles.
+          is a side-effect import that registers <code>&lt;number-flow&gt;</code> as a custom
+          element on <code>customElements</code>. The library guards the registration call, so it's
+          safe to import in SSR bundles.
         </li>
         <li>
           <strong>
-            <code>formatOn: FormatOn.Change</code>
+            <code>formatOn: 'change'</code>
           </strong>{' '}
           keeps the input's display as the formatted string at all times, matching what NumberFlow
           shows.
         </li>
         <li>
           <strong>
-            <code>onChange: ({'{ value }'})</code>
+            <code>onValueChange: ({'{ value }'})</code>
           </strong>{' '}
           reads the raw value (for example <code>"1234567.5"</code>) rather than{' '}
           <code>formattedValue</code>. <code>Number("1,234,567")</code> is <code>NaN</code>, so the
@@ -301,27 +302,39 @@ syncFlow(numora.getValue())`}
         </li>
         <li>
           <strong>
+            <code>Number(value)</code> suits fiat-sized amounts only.
+          </strong>{' '}
+          NumberFlow takes a JavaScript number, so the overlay is exact up to about 15 significant
+          digits. Past that, for example an 18-decimal token amount, the animated digits can differ
+          from what the input holds. Keep the string from <code>onValueChange</code> as the value
+          you store and send. For long amounts use the{' '}
+          <a href="/docs/numora/integrations/torph">Torph</a> overlay, which animates the display
+          string and never converts it.
+        </li>
+        <li>
+          <strong>
             Dynamic <code>minimumFractionDigits</code>
           </strong>{' '}
-          matters because <code>Number("1.20") = 1.2</code>, so without it NumberFlow renders <code>"1.2"</code>{' '}
-          while the input contains <code>"1.20"</code>. Computing <code>decimals</code> from the raw
-          value and passing it to NumberFlow keeps the visible width and the cursor aligned.
+          matters because <code>Number("1.20") = 1.2</code>, so without it NumberFlow renders{' '}
+          <code>"1.2"</code> while the input contains <code>"1.20"</code>. Computing{' '}
+          <code>decimals</code> from the raw value and passing it to NumberFlow keeps the visible
+          width and the cursor aligned.
         </li>
         <li>
           <strong>
             <code>useGrouping: true</code>
           </strong>{' '}
-          is needed because NumberFlow's grouping must match the input's thousand separator. The default en-US
-          locale uses <code>","</code>, which matches the default <code>thousandSeparator</code> and{' '}
-          <code>GroupingStyle.Thousand</code>.
+          is needed because NumberFlow's grouping must match the input's thousand separator. The
+          default en-US locale uses <code>","</code>, which matches the default{' '}
+          <code>thousandSeparator</code> and <code>'thousand'</code>.
         </li>
         <li>
           <strong>
-            <code>onChange</code> callback
+            <code>onValueChange</code> callback
           </strong>{' '}
-          fires for typing, paste, the focus-strip, undo/redo and blur reformatting, so you need no DOM{' '}
-          <code>beforeinput</code> or <code>input</code> listeners. It does not fire for
-          the initial <code>value</code>, so the code calls <code>syncFlow(numora.getValue())</code>{' '}
+          fires for typing, paste, the focus-strip, undo/redo and blur reformatting, so you need no
+          DOM <code>beforeinput</code> or <code>input</code> listeners. It does not fire for the
+          initial <code>value</code>, so the code calls <code>syncFlow(numora.rawValue)</code>{' '}
           explicitly.
         </li>
       </ul>
@@ -373,7 +386,7 @@ input.remove()`}
       <p>
         Yes. This guide uses the <code>&lt;number-flow&gt;</code> web component from the{' '}
         <code>number-flow</code> package together with the vanilla <code>NumoraInput</code> class,
-        with no React in the runtime. The custom element is a standard browser primitive and works in any
+        with no React in the runtime. Custom elements are a browser standard, so it works in any
         framework or none.
       </p>
 

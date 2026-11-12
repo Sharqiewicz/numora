@@ -23,7 +23,8 @@ export const Route = createFileRoute('/docs/numora/features/scientific-notation'
       { name: 'twitter:title', content: 'Scientific notation | Numora' },
       {
         name: 'twitter:description',
-        content: "Handle scientific notation in numeric inputs with Numora. Avoid JavaScript's automatic 1e-6 conversion and keep the full expanded string for DeFi token amounts.",
+        content:
+          "Handle scientific notation in numeric inputs with Numora. Avoid JavaScript's automatic 1e-6 conversion and keep the full expanded string for DeFi token amounts.",
       },
     ],
     links: [
@@ -41,7 +42,7 @@ export const Route = createFileRoute('/docs/numora/features/scientific-notation'
             '@type': 'TechArticle',
             headline: 'Scientific notation in Numora: safe paste for numeric input',
             description:
-              'Handle scientific notation safely in JavaScript numeric inputs. Numora expands 1.5e-7 to 0.00000015 when you paste from block explorers or APIs.',
+              'Handle scientific notation in JavaScript numeric inputs. Numora expands 1.5e-7 to 0.00000015 when you paste from block explorers or APIs.',
             url: 'https://numeric-input.com/docs/numora/features/scientific-notation',
             author: {
               '@type': 'Person',
@@ -77,7 +78,7 @@ export const Route = createFileRoute('/docs/numora/features/scientific-notation'
 
 function ScientificNotation() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Scientific notation</h1>
       <p>
         Numora expands values like <code>1.5e-7</code> to decimal notation. Typing <code>e</code> is
@@ -86,8 +87,8 @@ function ScientificNotation() {
       </p>
       <p>
         To refuse pasted scientific notation instead, set{' '}
-        <code>enableScientificNotation: false</code> (default <code>true</code>): such a paste leaves
-        the field unchanged. Values your app passes in (<code>value</code>, <code>defaultValue</code>,{' '}
+        <code>allowScientificNotation: false</code> (default <code>true</code>). Such a paste then
+        leaves the field unchanged. Values your app passes in (<code>value</code>,{' '}
         <code>setValue()</code>) are expanded either way, because <code>String(1e21)</code> is{' '}
         <code>"1e+21"</code> in JavaScript.
       </p>
@@ -104,12 +105,12 @@ const input = new NumoraInput(container, {
 // "2e+5"     → "200000"
 // "1.23e-4"  → "0.000123"
 // "5e3"      → "5000"
-// "-1.5e-7"  → "-0.00000015"  (with enableNegative: true)
+// "-1.5e-7"  → "-0.00000015"  (with allowNegative: true)
 // "1.5e-18"  → "0.0000000000000000015"  (no precision lost)`}
       </CodeBlock>
 
       <p>
-        Both <code>e</code> and <code>E</code> are supported.
+        Both <code>e</code> and <code>E</code> work.
       </p>
     </div>
   );

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { FormatOn, GroupingStyle } from 'numora';
 import { NumoraInput } from 'numora-react';
 import { DiagramFrame, demoInputClass } from '../kit';
 
@@ -35,8 +34,8 @@ export function PasteSection() {
       <p>
         When the user pastes, <code>beforeinput</code> fires first with{' '}
         <code>inputType: 'insertFromPaste'</code>. Numora returns immediately. The dedicated{' '}
-        <code>paste</code> handler takes over because it has the full{' '}
-        <code>ClipboardData</code> object.
+        <code>paste</code> handler takes over because it has the full <code>ClipboardData</code>{' '}
+        object.
       </p>
       <p>The paste handler:</p>
       <ol>
@@ -50,16 +49,16 @@ export function PasteSection() {
         <li>
           Run the combined value through the full pipeline with{' '}
           <code>shouldRemoveThousandSeparators: true</code>. This is unconditional, because the
-          clipboard text and the current value (in blur mode) can both carry separators that must
-          be parsed together.
+          clipboard text and the current value (in blur mode) can both carry separators that must be
+          parsed together.
         </li>
         <li>
-          Write the result with <code>setRangeText</code> (via{' '}
-          <code>writeValuePreservingUndo</code>) so Ctrl/Cmd+Z still works, then place the cursor.
+          Write the result with <code>setRangeText</code> (via <code>writeValuePreservingUndo</code>
+          ) so Ctrl/Cmd+Z still works, then place the cursor.
         </li>
         <li>
           Call <code>onChange</code> directly. In React, <code>e.target.value</code> is the raw
-          value and <code>e.target.formattedValue</code> the display string; in vanilla, the
+          value and <code>e.target.formattedValue</code> the display string. In vanilla, the
           callback receives <code>{'{ value, formattedValue }'}</code>. No synthetic{' '}
           <code>input</code> event is dispatched.
         </li>
@@ -79,7 +78,7 @@ export function PasteSection() {
                 <button
                   type="button"
                   onClick={() => copySample(s.value)}
-                  className="inline-flex min-h-6 items-center py-1 text-left text-[13px] transition-[color,scale] duration-150 ease-out-expo hover:text-foreground active:scale-[0.97] motion-reduce:transition-none [@media(pointer:coarse)]:min-h-11"
+                  className="inline-flex min-h-6 items-center py-1 text-left text-caption transition-[color,scale] duration-150 ease-out-expo hover:text-foreground active:scale-[0.97] motion-reduce:transition-none [@media(pointer:coarse)]:min-h-11"
                   aria-label={`${s.label}: ${s.value}. Copy`}
                 >
                   <span className="text-muted-foreground">{s.label}: </span>
@@ -96,7 +95,7 @@ export function PasteSection() {
             );
           })}
         </ul>
-        <output className="mb-2 block min-h-4 text-[13px] text-muted-foreground">
+        <output className="mb-2 block min-h-4 text-caption text-muted-foreground">
           {copyState?.status === 'failed'
             ? 'Copy failed. Select the text and copy it manually'
             : copyState?.status === 'copied'
@@ -104,11 +103,11 @@ export function PasteSection() {
               : ''}
         </output>
         <NumoraInput
-          formatOn={FormatOn.Change}
+          formatOn="change"
           thousandSeparator=","
-          groupingStyle={GroupingStyle.Thousand}
+          groupingStyle="thousand"
           decimalMaxLength={2}
-          enableCompactNotation
+          allowCompactNotation
           aria-label="Paste test input"
           placeholder="$1,234.56 USD"
           className={demoInputClass}

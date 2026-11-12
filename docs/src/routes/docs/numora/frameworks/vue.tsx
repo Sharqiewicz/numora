@@ -5,35 +5,32 @@ import { CORE_SIZE_GZIP } from '@/lib/constants/package';
 const PAGE_URL = 'https://numeric-input.com/docs/numora/frameworks/vue';
 
 const META_TITLE = 'Vue numeric input | Numora';
-const META_DESCRIPTION =
-  `Vue numeric input library with thousand separators, decimal limits, paste sanitization and cursor preservation. Use Numora in Vue 3 or Nuxt through a v-numora directive. It is a framework-agnostic vanilla package with zero dependencies, ${CORE_SIZE_GZIP} gzipped.`;
+const META_DESCRIPTION = `Vue numeric input library with thousand separators, decimal limits, paste sanitization and cursor preservation. Use Numora in Vue 3 or Nuxt through a v-numora directive. It is a framework-agnostic vanilla package with zero dependencies, ${CORE_SIZE_GZIP} gzipped.`;
 
 // Single source for the visible FAQ and the JSON-LD FAQPage. Backticks mark inline code.
 const FAQ = [
   {
     question: 'What is the best Vue numeric input library?',
-    answer:
-      `Numora is a Vue 3 numeric input library: framework-agnostic TypeScript, ${CORE_SIZE_GZIP} gzipped, with no runtime dependencies. In Vue you register a \`v-numora\` directive once, then write \`<input v-numora="opts" />\` anywhere.`,
+    answer: `Numora is framework-agnostic TypeScript, ${CORE_SIZE_GZIP} gzipped, with no runtime dependencies. In Vue you register a \`v-numora\` directive once, then write \`<input v-numora="opts" />\` anywhere.`,
   },
   {
     question: 'Is there a numora-vue package?',
-    answer:
-      'No, and you do not need one. The `v-numora` directive is the entire Vue adapter.',
+    answer: 'No, and you do not need one. The `v-numora` directive is the entire Vue adapter.',
   },
   {
     question: 'Does Numora work with Nuxt 3 and SSR?',
     answer:
-      'Yes. `NumoraInput` touches the DOM, so the `v-numora` directive only initializes in the `mounted` hook, which only runs in the browser. Nuxt renders the empty `<input>` on the server and Numora adopts it on hydration. No Nuxt-specific configuration is needed.',
+      'Yes. `NumoraInput` touches the DOM, so the `v-numora` directive only initializes in the `mounted` hook, which only runs in the browser. Nuxt renders the empty `<input>` on the server and Numora adopts it on hydration. You need no Nuxt-specific configuration.',
   },
   {
     question: 'How do I add thousand separators to a Vue number input?',
     answer:
-      'Pass `groupingStyle: GroupingStyle.Thousand` and `formatOn: FormatOn.Change` inside the `v-numora` binding. Numora formats as the user types and keeps the cursor stable through the inserted comma. `onChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can store in a `ref`, Pinia, VeeValidate or FormKit.',
+      'Pass `groupingStyle: "thousand"` and `formatOn: "change"` inside the `v-numora` binding. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can store in a `ref`, Pinia, VeeValidate or FormKit.',
   },
   {
     question: 'Does it work with VeeValidate, FormKit or Pinia in Vue?',
     answer:
-      "Yes. `onChange` receives `{ value, formattedValue }`, and `value` is the raw string. Pass it to VeeValidate, FormKit, Pinia or any other state library as you would a `v-model` value.",
+      'Yes. `onValueChange` receives `{ value, formattedValue }`, and `value` is the raw string. Pass it to VeeValidate, FormKit, Pinia or any other state library as you would a `v-model` value.',
   },
   {
     question: 'Does it support i18n (decimal commas, currency formatting) in Vue?',
@@ -142,16 +139,16 @@ export const Route = createFileRoute('/docs/numora/frameworks/vue')({
 
 function VueIntegration() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Vue numeric input</h1>
       <p>
         <strong className="font-numora">Numora</strong> is a precision-first{' '}
         <strong>Vue numeric input</strong> library. It handles thousand separators, decimal limits,
         paste sanitization, scientific-notation expansion and cursor preservation through a{' '}
         <code>v-numora</code> custom directive that mounts directly on an <code>&lt;input&gt;</code>
-        . The vanilla package is framework-agnostic TypeScript, {CORE_SIZE_GZIP} gzipped, with zero runtime
-        dependencies. The same engine works in Vue 3, Nuxt 3, VeeValidate, FormKit and Pinia, with
-        no wrapper package.
+        . The vanilla package is framework-agnostic TypeScript, {CORE_SIZE_GZIP} gzipped, with zero
+        runtime dependencies. The same engine works in Vue 3, Nuxt 3, VeeValidate, FormKit and
+        Pinia, with no wrapper package.
       </p>
 
       <h2>Installation</h2>
@@ -196,7 +193,6 @@ createApp(App).directive('numora', vNumora).mount('#app');`}
       </p>
       <CodeBlock language="ts">
         {`import { ref } from 'vue';
-import { FormatOn, GroupingStyle } from 'numora';
 
 const value = ref('');`}
       </CodeBlock>
@@ -209,10 +205,10 @@ const value = ref('');`}
   Amount
   <input
     v-numora="{
-      formatOn: FormatOn.Change,
-      groupingStyle: GroupingStyle.Thousand,
+      formatOn: 'change',
+      groupingStyle: 'thousand',
       decimalMaxLength: 2,
-      onChange: ({ value: v }) => (value = v),
+      onValueChange: ({ value: v }) => (value = v),
     }"
   />
 </label>
@@ -221,26 +217,34 @@ const value = ref('');`}
 
       <p>
         Numora adopts the <code>&lt;input&gt;</code> and sets the attributes it needs (
-        <code>type</code>, <code>inputmode</code>, <code>pattern</code> and others).{' '}
-        <code>onChange</code> receives <code>{`{ value, formattedValue }`}</code>, where{' '}
+        <code>type</code>, <code>inputmode</code>, <code>autocomplete</code> and others).{' '}
+        <code>onValueChange</code> receives <code>{`{ value, formattedValue }`}</code>, where{' '}
         <code>value</code> is the raw string (see{' '}
         <Link to="/docs/numora/features/value-types">value types</Link>).{' '}
-        <code>FormatOn.Change</code> formats on every keystroke (see{' '}
+        <code>'change'</code> formats on every keystroke (see{' '}
         <Link to="/docs/numora/features/formatting">formatting</Link>).
+      </p>
+
+      <p>
+        Read the value from <code>onValueChange</code>, not from <code>v-model</code>: the element's
+        own
+        <code>value</code> is the display string (<code>"1,234.56"</code>), while
+        <code>onValueChange</code> gives you the raw value (<code>"1234.56"</code>).
       </p>
 
       <h2>Animated example: Numora + Torph in Vue 3</h2>
       <p>
         Stack a Torph <code>TextMorph</code> over a transparent-text <code>NumoraInput</code>. The{' '}
         <Link to="/docs/numora/integrations/torph">Torph integration</Link> explains the overlay and
-        has the shared CSS and install steps. Below is the Vue 3 lifecycle and the scoped-style note.
+        has the shared CSS and install steps. Below is the Vue 3 lifecycle and the scoped-style
+        note.
       </p>
       <p>
         Script block (inside <code>&lt;script setup lang=&quot;ts&quot;&gt;</code>):
       </p>
       <CodeBlock language="ts">
         {`import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { NumoraInput, FormatOn, GroupingStyle } from 'numora';
+import { NumoraInput } from 'numora';
 import { TextMorph } from 'torph';
 
 const display = ref<HTMLSpanElement | null>(null);
@@ -260,15 +264,15 @@ onMounted(() => {
   });
   morph.update('0');
 
-  // FormatOn.Change: onChange fires on every edit (in Blur mode also sync on focus/blur). Torph shows
+  // 'change': onValueChange fires on every edit (in Blur mode also sync on focus/blur). Torph shows
   // the formatted string, so read formattedValue.
   const numora = new NumoraInput(host.value, {
-    formatOn: FormatOn.Change,
-    groupingStyle: GroupingStyle.Thousand,
+    formatOn: 'change',
+    groupingStyle: 'thousand',
     decimalMaxLength: 2,
-    onChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
+    onValueChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
   });
-  const input = numora.getElement();
+  const input = numora.element;
   input.setAttribute('aria-label', 'Amount');
 
   cleanup = () => {
@@ -292,12 +296,10 @@ onBeforeUnmount(() => cleanup?.());`}
 
       <p>
         Use the overlay CSS from the Torph page in <code>&lt;style scoped&gt;</code>. Wrap the
-        selectors that target the runtime-created <code>&lt;input&gt;</code> in{' '}
-        <code>:deep()</code>, because scoped styles cannot reach it otherwise:
+        selectors that target the runtime-created <code>&lt;input&gt;</code> in <code>:deep()</code>
+        , because scoped styles cannot reach it otherwise:
       </p>
-      <CodeBlock language="css">
-        {`.numora-overlay-host :deep(input) { /* ... */ }`}
-      </CodeBlock>
+      <CodeBlock language="css">{`.numora-overlay-host :deep(input) { /* ... */ }`}</CodeBlock>
 
       <h2>FAQ</h2>
       {FAQ.map(({ question, answer }) => (

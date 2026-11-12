@@ -32,9 +32,7 @@ export const Route = createFileRoute('/docs/numora/anatomy')({
       { name: 'twitter:title', content: TITLE },
       { name: 'twitter:description', content: DESCRIPTION },
     ],
-    links: [
-      { rel: 'canonical', href: 'https://numeric-input.com/docs/numora/anatomy' },
-    ],
+    links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora/anatomy' }],
     scripts: [
       {
         type: 'application/ld+json',
@@ -85,7 +83,7 @@ export const Route = createFileRoute('/docs/numora/anatomy')({
 function Anatomy() {
   const pkg = 'numora' as const;
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <Hero pkg={pkg} />
       <div className="space-y-16">
         {/* Act 1: why this exists */}

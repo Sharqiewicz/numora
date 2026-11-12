@@ -1,45 +1,24 @@
-import { FormatOn, NumoraInput } from 'numora-react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { type FormatOn, NumoraInput } from 'numora-react';
+import { useId, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-
-const LOCALES = [
-  ['en-US', 'English (US)'],
-  ['de-DE', 'German'],
-  ['fr-FR', 'French'],
-  ['pl-PL', 'Polish'],
-  ['de-CH', 'Swiss German'],
-  ['es-ES', 'Spanish'],
-  ['pt-BR', 'Portuguese (Brazil)'],
-  ['sv-SE', 'Swedish'],
-  ['ja-JP', 'Japanese'],
-  ['en-IN', 'English (India)'],
-  ['hi-IN', 'Hindi'],
-  ['ar-EG', 'Arabic (Egypt)'],
-  ['fa-IR', 'Persian'],
-] as const;
+import {
+  buttonClass,
+  FORMAT_ON_OPTIONS,
+  fieldBoxClass,
+  fieldInputClass,
+  LOCALE_OPTIONS,
+  Row,
+  Select,
+  useFieldText,
+} from './locale-playground-parts';
 
 type Values = { amount: string };
-
-const buttonClass =
-  'rounded-md border border-surface-5 bg-surface-3 px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-surface-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
-const selectClass =
-  'rounded-md border border-surface-5 bg-surface-3 px-2 py-1.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-4 py-1.5">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 truncate font-mono text-sm text-foreground tabular-nums">{value}</dd>
-    </div>
-  );
-}
 
 /** A real React Hook Form form around NumoraInput, with the locale switchable live. */
 export function RhfLocalePlayground() {
   const id = useId();
   const [locale, setLocale] = useState<string>('de-DE');
-  const [formatOn, setFormatOn] = useState<FormatOn>(FormatOn.Change);
-  const [shown, setShown] = useState('');
+  const [formatOn, setFormatOn] = useState<FormatOn>('change');
   const [submitted, setSubmitted] = useState<string | null>(null);
   const {
     control,
@@ -52,12 +31,7 @@ export function RhfLocalePlayground() {
   const amount = watch('amount');
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Mirror what the field displays. Numora writes the DOM value itself (after setValue, reset
-  // or a locale switch too), so read it back after every render rather than from an event.
-  useEffect(() => {
-    const value = inputRef.current?.value ?? '';
-    setShown((current) => (current === value ? current : value));
-  });
+  const { text: shown, handlers } = useFieldText(inputRef);
 
   return (
     <figure className="not-prose my-8">
@@ -66,44 +40,25 @@ export function RhfLocalePlayground() {
         className="overflow-hidden rounded-xl bg-surface-1 shadow-border"
       >
         <div className="flex flex-wrap items-end gap-3 p-4">
-          <label
-            className="flex flex-col gap-1 text-sm text-muted-foreground"
-            htmlFor={`${id}-locale`}
-          >
-            Locale
-            <select
-              id={`${id}-locale`}
-              className={selectClass}
-              value={locale}
-              onChange={(e) => setLocale(e.target.value)}
-            >
-              {LOCALES.map(([tag, name]) => (
-                <option key={tag} value={tag}>
-                  {name} ({tag})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label
-            className="flex flex-col gap-1 text-sm text-muted-foreground"
-            htmlFor={`${id}-mode`}
-          >
-            Format on
-            <select
-              id={`${id}-mode`}
-              className={selectClass}
-              value={formatOn}
-              onChange={(e) => setFormatOn(e.target.value as FormatOn)}
-            >
-              <option value={FormatOn.Change}>change</option>
-              <option value={FormatOn.Blur}>blur</option>
-            </select>
-          </label>
+          <Select
+            id={`${id}-locale`}
+            label="Locale"
+            value={locale}
+            onChange={setLocale}
+            options={LOCALE_OPTIONS}
+          />
+          <Select
+            id={`${id}-mode`}
+            label="Format on"
+            value={formatOn}
+            onChange={(v) => setFormatOn(v as FormatOn)}
+            options={FORMAT_ON_OPTIONS}
+          />
         </div>
 
         <div className="px-4 pb-4">
-          <div className="flex flex-col gap-1 rounded-md border border-surface-5 bg-surface-3 p-3 transition-colors hover:bg-surface-5 has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-brand">
-            <label htmlFor={`${id}-amount`} className="text-sm text-muted-foreground">
+          <div className={fieldBoxClass}>
+            <label htmlFor={`${id}-amount`} className="sr-only">
               Amount
             </label>
             <Controller
@@ -125,18 +80,15 @@ export function RhfLocalePlayground() {
                   decimalMaxLength={8}
                   value={field.value}
                   onChange={(e) => field.onChange(e.target.value)}
+                  onFocus={handlers.onFocus}
                   onBlur={() => {
                     field.onBlur();
-                    setShown(inputRef.current?.value ?? '');
+                    handlers.onBlur();
                   }}
-                  // Blur mode strips the grouping right after this event: read on the next frame.
-                  onFocus={() =>
-                    requestAnimationFrame(() => setShown(inputRef.current?.value ?? ''))
-                  }
                   aria-invalid={errors.amount ? true : undefined}
                   aria-describedby={errors.amount ? `${id}-error` : undefined}
                   placeholder="0"
-                  className="flex w-full min-w-0 border-none bg-transparent text-2xl text-foreground tabular-nums placeholder-muted-icon focus:outline-none"
+                  className={fieldInputClass}
                 />
               )}
             />
@@ -148,7 +100,7 @@ export function RhfLocalePlayground() {
           <div className="mt-2 flex flex-wrap gap-2">
             <button
               type="button"
-              className={buttonClass}
+              className={`${buttonClass} font-mono`}
               onClick={() =>
                 setValue('amount', '9876543.21', { shouldDirty: true, shouldValidate: true })
               }
@@ -157,14 +109,14 @@ export function RhfLocalePlayground() {
             </button>
             <button
               type="button"
-              className={buttonClass}
+              className={`${buttonClass} font-mono`}
               onClick={() =>
                 setValue('amount', '0.00000015', { shouldDirty: true, shouldValidate: true })
               }
             >
               setValue("0.00000015")
             </button>
-            <button type="button" className={buttonClass} onClick={() => reset()}>
+            <button type="button" className={`${buttonClass} font-mono`} onClick={() => reset()}>
               reset()
             </button>
             <button type="submit" className={buttonClass}>

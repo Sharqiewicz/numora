@@ -33,7 +33,7 @@ export function MorphCodeBlock({ code, language = 'typescript' }: MorphCodeBlock
         noBorder
         text={code}
       />
-      <pre className="relative block w-full m-0 px-4 py-3 text-white bg-surface-1 rounded-xl [corner-shape:superellipse(1.25)] font-mono text-[0.8125rem] font-light leading-[1.4] max-h-[11.75rem] overflow-y-auto">
+      <pre className="relative block w-full m-0 px-4 py-3 text-white bg-surface-1 rounded-xl [corner-shape:superellipse(1.25)] font-mono text-caption font-light leading-[1.4] max-h-[11.75rem] overflow-y-auto">
         <MorphCode code={code} language={language} />
       </pre>
     </div>

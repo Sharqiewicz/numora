@@ -20,7 +20,8 @@ export const Route = createFileRoute('/docs/numora/features/max-length')({
       { name: 'twitter:title', content: 'Max length | Numora' },
       {
         name: 'twitter:description',
-        content: 'Cap numeric input length by raw digits with Numora. Thousand separators are not counted, so the limit applies to the digits and not to the formatted character count.',
+        content:
+          'Cap numeric input length by raw digits with Numora. Thousand separators are not counted, so the limit applies to the digits and not to the formatted character count.',
       },
     ],
     links: [
@@ -71,22 +72,22 @@ export const Route = createFileRoute('/docs/numora/features/max-length')({
 
 function MaxLength() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Max length</h1>
       <p>
-        Max length caps the input by raw character count, so thousand separators are excluded.
-        The native <code>maxLength</code> attribute counts formatted characters:{' '}
-        <code>1,234,567</code> is 9 characters but only 7 digits, and Numora counts 7.
+        Max length caps the input by raw character count, so thousand separators are excluded. The
+        native <code>maxLength</code> attribute counts formatted characters: <code>1,234,567</code>{' '}
+        is 9 characters but only 7 digits, and Numora counts 7.
       </p>
 
       <CodeBlock language="typescript">
-        {`import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
+        {`import { NumoraInput } from 'numora'
 
 const input = new NumoraInput(container, {
   maxLength: 7,
-  groupingStyle: GroupingStyle.Thousand,
+  groupingStyle: 'thousand',
   thousandSeparator: ',',
-  formatOn: FormatOn.Change,
+  formatOn: 'change',
 })
 
 // User types: 1, 2, 3, 4, 5, 6, 7  → "1,234,567"  (allowed)
@@ -100,14 +101,14 @@ const input = new NumoraInput(container, {
           <code>decimalMinLength</code> padding are excluded
         </li>
         <li>
-          The decimal separator <em>is</em> counted (it is part of the raw value)
+          The decimal separator <em>is</em> counted, because it is part of the raw value
         </li>
         <li>
           A leading <code>-</code> sign <em>is</em> counted
         </li>
         <li>
-          Truncation happens from the right; if it would leave a trailing decimal separator, that
-          separator is also removed (<code>"1234.56"</code> capped at 5 → <code>"1234"</code>)
+          Numora truncates from the right. If that would leave a trailing decimal separator, it
+          removes the separator too (<code>"1234.56"</code> capped at 5 → <code>"1234"</code>)
         </li>
         <li>
           If truncation would leave a bare <code>"-"</code>, the result is <code>""</code>
@@ -116,8 +117,8 @@ const input = new NumoraInput(container, {
 
       <h2>Pasted values</h2>
       <p>
-        Pastes are truncated after sanitization. Pasting <code>"99999999"</code> into an input with{' '}
-        <code>maxLength: 4</code> commits <code>"9999"</code>.
+        Numora truncates a paste after sanitizing it. Pasting <code>"99999999"</code> into an input
+        with <code>maxLength: 4</code> commits <code>"9999"</code>.
       </p>
 
       <h2>Standalone utility</h2>

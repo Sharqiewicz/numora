@@ -7,7 +7,7 @@ export const Route = createFileRoute('/docs/numora/how-it-works')({
       {
         name: 'description',
         content:
-          "Quick reference for Numora's pipeline: event handlers, the ten-step sanitization order, formatting stages, and value output. For the full narrative, see the Anatomy page.",
+          "Quick reference for Numora's pipeline: event handlers, the ten-step sanitization order, formatting stages, and value output. The Anatomy page explains each step with diagrams and demos.",
       },
       { property: 'og:title', content: 'How it works | Numora' },
       {
@@ -33,7 +33,7 @@ export const Route = createFileRoute('/docs/numora/how-it-works')({
             '@type': 'TechArticle',
             headline: 'How it works | Numora',
             description:
-              "Quick reference for Numora's pipeline: event handlers, sanitization, formatting, and value output. The Anatomy page covers the same surface as a long-form narrative with diagrams.",
+              "Quick reference for Numora's pipeline: event handlers, sanitization, formatting, and value output. The Anatomy page explains each step with diagrams.",
             url: 'https://numeric-input.com/docs/numora/how-it-works',
             author: {
               '@type': 'Person',
@@ -72,7 +72,7 @@ const ANATOMY = '/docs/numora/anatomy';
 
 function HowItWorks() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>How it works</h1>
       <p>
         A cheat sheet. Each row links to the section of <Link to={ANATOMY}>Anatomy</Link> that
@@ -109,7 +109,7 @@ function HowItWorks() {
           <Link to={ANATOMY} hash="format-mode">
             <code>focus</code> / <code>blur</code>
           </Link>
-          : strip and re-apply separators in <code>FormatOn.Blur</code> mode.
+          : strip and re-apply separators in <code>'blur'</code> mode.
         </li>
       </ul>
 
@@ -122,8 +122,8 @@ function HowItWorks() {
           : runs on every value before formatting. Options:{' '}
           <Link to="/docs/numora/features/sanitization">Sanitization</Link>,{' '}
           <Link to="/docs/numora/features/compact-notation">Compact notation</Link>,{' '}
-          <Link to="/docs/numora/features/scientific-notation">Scientific notation</Link>{' '}
-          (<code>enableScientificNotation</code>),{' '}
+          <Link to="/docs/numora/features/scientific-notation">Scientific notation</Link> (
+          <code>allowScientificNotation</code>),{' '}
           <Link to="/docs/numora/features/leading-zeros">Leading zeros</Link>,{' '}
           <Link to="/docs/numora/features/max-length">Max length</Link>.
         </li>
@@ -145,11 +145,10 @@ function HowItWorks() {
           <Link to={ANATOMY} hash="raw-vs-formatted">
             Value output
           </Link>
-          : values are always strings. <code>onChange</code> gets both the raw <code>value</code>{' '}
-          (canonical in every locale: ASCII digits, <code>.</code> decimal, no grouping) and the{' '}
-          <code>formattedValue</code>. See{' '}
-          <Link to="/docs/numora/features/value-types">Value types</Link> and{' '}
-          <code>valueAsNumber</code>.
+          : values are always strings. <code>onValueChange</code> gets both the raw{' '}
+          <code>value</code> (canonical in every locale: ASCII digits, <code>.</code> decimal, no
+          grouping) and the <code>formattedValue</code>. See{' '}
+          <Link to="/docs/numora/features/value-types">Value types</Link>.
         </li>
       </ul>
     </div>

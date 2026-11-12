@@ -11,7 +11,7 @@ import {
   removeNonNumericCharacters,
   removeThousandSeparators,
   truncateToMaxLength,
-} from 'numora';
+} from 'numora/pipeline';
 import { cn } from '@/lib/utils';
 import { DemoInput, DiagramFrame, DUR, EASE, ROLE, SCAN_STEP, useScene } from './kit';
 
@@ -27,10 +27,10 @@ interface Step {
 const config = {
   thousandSeparator: ',',
   decimalSeparator: '.',
-  enableCompactNotation: true,
-  enableNegative: false,
-  enableLeadingZeros: false,
-  autoAddLeadingZero: true,
+  allowCompactNotation: true,
+  allowNegative: false,
+  allowLeadingZeros: false,
+  padLeadingZero: true,
   maxLength: 20,
 };
 
@@ -68,7 +68,7 @@ function pipeline(input: string): Step[] {
     'expandCompactNotation',
     'Expand "1k" to "1000" and "2.5M" to "2500000"',
     expandCompactNotation,
-    'runs when enableCompactNotation is on',
+    'runs when allowCompactNotation is on',
   );
   run(
     'expandScientificNotation',
@@ -78,7 +78,7 @@ function pipeline(input: string): Step[] {
   run(
     'removeNonNumericCharacters',
     'Remove everything that is not a digit or the decimal separator',
-    (s) => removeNonNumericCharacters(s, config.enableNegative, config.decimalSeparator),
+    (s) => removeNonNumericCharacters(s, config.allowNegative, config.decimalSeparator),
   );
   run(
     'removeExtraDecimalSeparators',
@@ -89,13 +89,13 @@ function pipeline(input: string): Step[] {
     'removeLeadingZeros',
     'Turn "007" into "7"',
     removeLeadingZeros,
-    'skipped when enableLeadingZeros is on',
+    'skipped when allowLeadingZeros is on',
   );
   run(
     'prependLeadingZero',
     'Turn ".5" into "0.5"',
     (s) => prependLeadingZero(s, config.decimalSeparator),
-    'runs when autoAddLeadingZero is on',
+    'runs when padLeadingZero is on',
   );
   run(
     'truncateToMaxLength',
@@ -199,7 +199,7 @@ export function SanitizationStepper() {
             aria-label={`Use example ${preset}`}
             aria-current={value === preset ? 'true' : undefined}
             className={cn(
-              'inline-flex min-h-6 items-center py-1 font-mono text-[13px] underline-offset-4 transition-colors duration-150 ease-out-expo hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none [@media(pointer:coarse)]:min-h-11',
+              'inline-flex min-h-6 items-center py-1 font-mono text-caption underline-offset-4 transition-colors duration-150 ease-out-expo hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none [@media(pointer:coarse)]:min-h-11',
               value === preset
                 ? 'text-foreground underline decoration-border'
                 : 'text-muted-foreground',
@@ -217,11 +217,11 @@ export function SanitizationStepper() {
         <span aria-hidden className="pointer-events-none absolute bottom-3 left-[15px] top-3 w-px bg-border" />
 
         <li className="relative grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 min-[560px]:grid-cols-[2rem_minmax(0,1fr)_minmax(7rem,10rem)] px-1 py-1.5">
-          <span className="relative z-10 flex h-6 items-center justify-center bg-surface-2 font-mono text-[12px] text-muted-foreground">
+          <span className="relative z-10 flex h-6 items-center justify-center bg-surface-2 font-mono text-xs text-muted-foreground">
             in
           </span>
-          <span className="self-center text-[13px] text-muted-foreground">Raw input</span>
-          <div className="col-start-2 min-w-0 font-mono text-[13px] text-muted-foreground [overflow-wrap:anywhere] min-[560px]:col-start-3 min-[560px]:text-right">
+          <span className="self-center text-caption text-muted-foreground">Raw input</span>
+          <div className="col-start-2 min-w-0 font-mono text-caption text-muted-foreground [overflow-wrap:anywhere] min-[560px]:col-start-3 min-[560px]:text-right">
             <Output text={value} range={removedRange(value, steps[0].output)} marked={marked} />
           </div>
         </li>
@@ -265,7 +265,7 @@ export function SanitizationStepper() {
               )}
               <span
                 className={cn(
-                  'relative z-10 flex h-6 items-center justify-center bg-surface-2 font-mono text-[12px]',
+                  'relative z-10 flex h-6 items-center justify-center bg-surface-2 font-mono text-xs',
                   changed ? 'text-foreground' : 'text-muted-foreground',
                 )}
               >
@@ -275,25 +275,25 @@ export function SanitizationStepper() {
                 <div className="flex flex-wrap items-center gap-x-2">
                   <span
                     className={cn(
-                      'whitespace-nowrap font-mono text-[13px]',
+                      'whitespace-nowrap font-mono text-caption',
                       changed ? 'text-foreground' : 'text-muted-foreground',
                     )}
                   >
                     {step.name}
                   </span>
                 </div>
-                <div className="text-[13px] leading-snug text-muted-foreground">
+                <div className="text-caption leading-snug text-muted-foreground">
                   {step.description}
                 </div>
                 {step.option && (
-                  <div className="text-[12px] text-muted-foreground">
+                  <div className="text-xs text-muted-foreground">
                     {step.option}
                   </div>
                 )}
               </div>
               <div
                 className={cn(
-                  'relative col-start-2 mt-1 min-w-0 font-mono text-[13px] [overflow-wrap:anywhere] min-[560px]:col-start-3 min-[560px]:mt-0 min-[560px]:self-center min-[560px]:text-right',
+                  'relative col-start-2 mt-1 min-w-0 font-mono text-caption [overflow-wrap:anywhere] min-[560px]:col-start-3 min-[560px]:mt-0 min-[560px]:self-center min-[560px]:text-right',
                   i === steps.length - 1 ? ROLE.good.text : changed ? 'text-foreground' : 'text-muted-foreground',
                 )}
               >

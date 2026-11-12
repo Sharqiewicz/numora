@@ -74,7 +74,7 @@ export function TokenSelector({
       <ul
         id={listId}
         inert={!isOpen}
-        className={`w-full !mt-0 no-scrollbar absolute left-0 right-0 top-full origin-top rounded-xl rounded-tl-none rounded-tr-none shadow-lg overflow-hidden z-100 transition-[opacity,scale,max-height] duration-200 ease-out border-t-0 bg-surface-1 border border-brand ${
+        className={`w-full !mt-0 no-scrollbar absolute left-0 right-0 top-full origin-top rounded-xl rounded-tl-none rounded-tr-none shadow-lg overflow-hidden z-50 transition-[opacity,scale,max-height] duration-200 ease-out border-t-0 bg-surface-1 border border-brand ${
           isOpen ? 'max-h-64 scale-100 opacity-100' : 'max-h-0 scale-95 opacity-0'
         }`}
       >

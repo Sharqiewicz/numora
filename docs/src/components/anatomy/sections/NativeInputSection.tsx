@@ -1,7 +1,7 @@
 import { AnnotatedInput } from '../AnnotatedInput';
 import type { SectionProps } from './types';
 
-export function NativeInputSection({ pkg }: SectionProps) {
+export function NativeInputSection(_props: SectionProps) {
   return (
     <section id="native-input" className="space-y-4 scroll-mt-24">
       <h2>
@@ -33,18 +33,9 @@ export function NativeInputSection({ pkg }: SectionProps) {
         <code>selectionEnd</code>, <code>setRangeText</code> and <code>inputMode</code>. See{' '}
         <a href="#before-input">beforeinput</a> and <a href="#cursor-preservation">cursor
         preservation</a> for how.
-        {pkg === 'numora' && (
-          <>
-            {' '}
-            The vanilla class also sets a <code>pattern</code> regex that matches its runtime rules.
-          </>
-        )}
-        {pkg === 'numora-react' && (
-          <>
-            {' '}
-            The React component renders no <code>pattern</code> attribute.
-          </>
-        )}
+        {' '}
+        Numora sets no <code>pattern</code> attribute, so native constraint validation never
+        rejects a value the field itself produced. Add your own if you need one.
       </p>
       <AnnotatedInput />
     </section>

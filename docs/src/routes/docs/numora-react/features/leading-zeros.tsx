@@ -23,7 +23,8 @@ export const Route = createFileRoute('/docs/numora-react/features/leading-zeros'
       { name: 'twitter:title', content: 'Leading zeros | Numora React' },
       {
         name: 'twitter:description',
-        content: 'Control leading zeros using the NumoraInput React component. Strip or preserve integer leading zeros, and auto-prepend "0" before bare decimal points like ".5" → "0.5".',
+        content:
+          'Control leading zeros using the NumoraInput React component. Strip or preserve integer leading zeros, and auto-prepend "0" before bare decimal points like ".5" → "0.5".',
       },
     ],
     links: [
@@ -41,7 +42,7 @@ export const Route = createFileRoute('/docs/numora-react/features/leading-zeros'
             '@type': 'TechArticle',
             headline: 'Leading zeros | Numora React',
             description:
-              'Control leading zeros in React numeric inputs with Numora React. Leading zeros are stripped by default, and enableLeadingZeros keeps them.',
+              'Control leading zeros in React numeric inputs with Numora React. It strips leading zeros by default, and allowLeadingZeros keeps them.',
             url: 'https://numeric-input.com/docs/numora-react/features/leading-zeros',
             author: {
               '@type': 'Person',
@@ -77,11 +78,11 @@ export const Route = createFileRoute('/docs/numora-react/features/leading-zeros'
 
 function LeadingZeros() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Leading zeros</h1>
       <p>
         By default, Numora React strips leading zeros from the integer part of a number. Set{' '}
-        <code>enableLeadingZeros</code> to preserve them.
+        <code>allowLeadingZeros</code> to preserve them.
       </p>
 
       <div className="space-y-4">
@@ -96,8 +97,8 @@ function LeadingZeros() {
           title="Preserved"
           description={'Type "007" and it stays "007"'}
           language="tsx"
-          code={`<NumoraInput enableLeadingZeros />`}
-          config={{ enableLeadingZeros: true }}
+          code={`<NumoraInput allowLeadingZeros />`}
+          config={{ allowLeadingZeros: true }}
         />
       </div>
 
@@ -108,38 +109,38 @@ function LeadingZeros() {
           stays <code>"0.05"</code>)
         </li>
         <li>
-          A bare <code>"0"</code> is always preserved
+          Numora React always keeps a bare <code>"0"</code>
         </li>
         <li>
-          The sign is preserved for negative numbers (<code>"-007"</code> → <code>"-7"</code>)
+          Negative numbers keep their sign (<code>"-007"</code> → <code>"-7"</code>)
         </li>
       </ul>
 
       <p>
-        Keep the default for currency and numeric inputs. Preserve zeros for product codes, IDs
-        and other formats where zero-padding matters.
+        Keep the default for currency and numeric inputs. Preserve zeros for product codes, IDs and
+        other formats where zero-padding matters.
       </p>
 
       <h2>Auto-prepend leading zero</h2>
       <p>
-        Set <code>autoAddLeadingZero</code> to prepend <code>0</code> before a bare
-        decimal separator. Use it when you want <code>.5</code> stored as <code>0.5</code>{' '}
-        so downstream code can parse the value unambiguously.
+        Set <code>padLeadingZero</code> to prepend <code>0</code> before a bare decimal separator.
+        Use it when you want <code>.5</code> stored as <code>0.5</code>, so the value parses the
+        same way everywhere downstream.
       </p>
 
       <div className="space-y-4">
         <ExampleWithDemo
           description={'Type ".5" and it becomes "0.5"'}
           language="tsx"
-          code={`<NumoraInput autoAddLeadingZero />`}
-          config={{ autoAddLeadingZero: true }}
+          code={`<NumoraInput padLeadingZero />`}
+          config={{ padLeadingZero: true }}
         />
       </div>
 
       <ul>
         <li>
-          Runs after <code>enableLeadingZeros</code> trimming (and before the{' '}
-          <code>maxLength</code> cap), so the options combine safely
+          Runs after <code>allowLeadingZeros</code> trimming, so you can combine the two. Only the
+          optional <code>maxLength</code> truncation runs later
         </li>
         <li>
           Respects <code>decimalSeparator</code> (e.g. <code>","</code> for European format)

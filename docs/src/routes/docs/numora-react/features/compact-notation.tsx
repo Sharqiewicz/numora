@@ -23,7 +23,8 @@ export const Route = createFileRoute('/docs/numora-react/features/compact-notati
       { name: 'twitter:title', content: 'Compact notation | Numora React' },
       {
         name: 'twitter:description',
-        content: 'Enable compact number notation in the NumoraInput React component. Users can type "1k", "1m" or "1b" as shorthand for the full number.',
+        content:
+          'Enable compact number notation in the NumoraInput React component. Users can type "1k", "1m" or "1b" as shorthand for the full number.',
       },
     ],
     links: [
@@ -77,52 +78,53 @@ export const Route = createFileRoute('/docs/numora-react/features/compact-notati
 
 function CompactNotation() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Compact notation</h1>
       <p>
-        With <code>enableCompactNotation</code> set, typing or pasting shorthand like <code>"1k"</code> or{' '}
-        <code>"2.5m"</code> expands it to the full number. Expansion uses string arithmetic, so there is no precision loss.
+        With <code>allowCompactNotation</code> set, typing or pasting shorthand like{' '}
+        <code>"1k"</code> or <code>"2.5m"</code> expands it to the full number. Expansion uses
+        string arithmetic, so there is no precision loss.
       </p>
 
       <div className="overflow-x-auto">
-      <table>
-        <thead>
-          <tr>
-            <th>Suffix</th>
-            <th>Multiplier</th>
-            <th>Example</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>k, K</td>
-            <td>×1,000</td>
-            <td>"1k" → "1000"</td>
-          </tr>
-          <tr>
-            <td>m, M</td>
-            <td>×1,000,000</td>
-            <td>"1.5m" → "1500000"</td>
-          </tr>
-          <tr>
-            <td>b, B</td>
-            <td>×1,000,000,000</td>
-            <td>"2B" → "2000000000"</td>
-          </tr>
-          <tr>
-            <td>t, T</td>
-            <td>×1,000,000,000,000</td>
-            <td>"2.5T" → "2500000000000"</td>
-          </tr>
-        </tbody>
-      </table>
+        <table>
+          <thead>
+            <tr>
+              <th>Suffix</th>
+              <th>Multiplier</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>k, K</td>
+              <td>×1,000</td>
+              <td>"1k" → "1000"</td>
+            </tr>
+            <tr>
+              <td>m, M</td>
+              <td>×1,000,000</td>
+              <td>"1.5m" → "1500000"</td>
+            </tr>
+            <tr>
+              <td>b, B</td>
+              <td>×1,000,000,000</td>
+              <td>"2B" → "2000000000"</td>
+            </tr>
+            <tr>
+              <td>t, T</td>
+              <td>×1,000,000,000,000</td>
+              <td>"2.5T" → "2500000000000"</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <ExampleWithDemo
         description={'Type or paste "1k", "1.5m", "2B", or "2.5T" to see expansion'}
         language="tsx"
-        code={`<NumoraInput enableCompactNotation decimalMaxLength={18} />`}
-        config={{ enableCompactNotation: true, decimalMaxLength: 18 }}
+        code={`<NumoraInput allowCompactNotation decimalMaxLength={18} />`}
+        config={{ allowCompactNotation: true, decimalMaxLength: 18 }}
       />
 
       <p>

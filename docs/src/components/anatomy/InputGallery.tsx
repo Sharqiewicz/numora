@@ -1,4 +1,4 @@
-import { sanitizeNumoraInput } from 'numora';
+import { sanitizeNumoraInput } from 'numora/internal';
 import { DiagramFrame } from './kit';
 
 const cases: { input: string; label: string }[] = [
@@ -13,7 +13,7 @@ const cases: { input: string; label: string }[] = [
   { input: '12,34,567', label: 'Lakh grouping (Indian)' },
 ];
 
-const th = 'px-3 py-2 text-left text-[13px] font-normal text-muted-foreground';
+const th = 'px-3 py-2 text-left text-caption font-normal text-muted-foreground';
 
 export function InputGallery() {
   return (
@@ -29,9 +29,9 @@ export function InputGallery() {
         <tbody>
           {cases.map((c) => {
             const cleaned = sanitizeNumoraInput(c.input, {
-              enableCompactNotation: true,
-              enableNegative: true,
-              enableLeadingZeros: false,
+              allowCompactNotation: true,
+              allowNegative: true,
+              allowLeadingZeros: false,
               decimalSeparator: '.',
               thousandSeparator: ',',
             });
@@ -39,12 +39,12 @@ export function InputGallery() {
               <tr key={c.input} className="border-t border-border align-top">
                 <td className="px-3 py-2 font-mono">
                   "{c.input}"
-                  <div className="mt-0.5 font-sans text-[13px] text-muted-foreground sm:hidden">
+                  <div className="mt-0.5 font-sans text-caption text-muted-foreground sm:hidden">
                     {c.label}
                   </div>
                 </td>
                 <td className="px-3 py-2 font-mono text-foreground">"{cleaned}"</td>
-                <td className="hidden px-3 py-2 text-[13px] text-muted-foreground sm:table-cell">
+                <td className="hidden px-3 py-2 text-caption text-muted-foreground sm:table-cell">
                   {c.label}
                 </td>
               </tr>

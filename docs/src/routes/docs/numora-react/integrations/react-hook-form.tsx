@@ -80,11 +80,11 @@ export const Route = createFileRoute('/docs/numora-react/integrations/react-hook
 
 function ReactHookFormIntegration() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>React Hook Form integration</h1>
       <p>
-        Use <code>NumoraInput</code> with React Hook Form through the recommended{' '}
-        <code>Controller</code> pattern.
+        Use <code>NumoraInput</code> with React Hook Form through its <code>Controller</code>{' '}
+        component.
       </p>
 
       <p>
@@ -94,9 +94,9 @@ function ReactHookFormIntegration() {
 
       <h2>Controller pattern (recommended)</h2>
       <p>
-        Always forward all four field properties: <code>onChange</code>, <code>onBlur</code>,{' '}
+        Forward all four field properties: <code>onChange</code>, <code>onBlur</code>,{' '}
         <code>ref</code> and <code>disabled</code>. Omitting <code>onBlur</code> breaks
-        touched-state tracking; omitting <code>ref</code> breaks auto-focus on validation errors.
+        touched-state tracking. Omitting <code>ref</code> breaks auto-focus on validation errors.
       </p>
 
       <ExampleWithDemo
@@ -139,14 +139,22 @@ function Form() {
 
       <h3>Validation errors</h3>
       <p>
-        Use <code>fieldState.error</code> from the render prop to display validation messages:
+        Use <code>fieldState.error</code> from the render prop to display validation messages.
+        Validate with a <code>validate</code> function that works on the string. React Hook Form's{' '}
+        <code>min</code> and <code>max</code> rules convert the value to a JavaScript number, which
+        loses precision on long amounts.
       </p>
 
       <CodeBlock language="tsx">
         {`<Controller
   control={control}
   name="amount"
-  rules={{ required: 'Amount is required', min: { value: 1, message: 'Must be at least 1' } }}
+  rules={{
+    required: 'Amount is required',
+    // The form value is a string. Compare it as text or with a decimal library;
+    // \`min\` would convert it to a float.
+    validate: (value) => /^[1-9]/.test(value) || 'Must be at least 1',
+  }}
   render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error } }) => (
     <>
       <NumoraInput
@@ -252,7 +260,7 @@ function SwapForm() {
       <h2>Try it with any locale</h2>
       <p>
         A live React Hook Form form. Switch the locale and compare what the field shows with what
-        the form holds: the form state is the same raw value in every locale.
+        the form holds. The form state is the same raw value in every locale.
       </p>
       <RhfLocalePlayground />
 

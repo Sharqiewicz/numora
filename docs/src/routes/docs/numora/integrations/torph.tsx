@@ -80,7 +80,7 @@ const JSON_LD = [
         name: 'How does Torph fit with Numora?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'A transparent-text NumoraInput sits on top of a Torph TextMorph. The input owns the keyboard, undo, IME and mobile inputmode. Its onChange option calls morph.update() whenever the raw value changes (typing, paste and undo/redo), so Torph animates the formatted string. In FormatOn.Blur mode, also bind focus and blur listeners, because the focus-strip and blur regroup do not change the raw value. No Number() conversion is involved.',
+          text: 'A transparent-text NumoraInput sits on top of a Torph TextMorph. The input owns the keyboard, undo, IME and mobile inputmode. Its onFormattedValueChange option calls morph.update() every time Numora rewrites the field (typing, paste, undo/redo, the focus strip and the blur regroup), so Torph animates the formatted string. The value never passes through Number().',
         },
       },
       {
@@ -121,7 +121,7 @@ function TorphIntegration() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Torph integration</h1>
       <p>
         <a href={TORPH_LIB_URL} target="_blank" rel="noreferrer noopener">
@@ -129,9 +129,9 @@ function TorphIntegration() {
         </a>{' '}
         is an animated text-morphing library. This guide layers a Torph <code>TextMorph</code> on
         top of a transparent-text vanilla <code>NumoraInput</code> so the editable surface itself
-        appears animated. The real <code>&lt;input&gt;</code> still handles every keystroke, and Torph
-        renders what the user sees. With <code>FormatOn.Blur</code>, focusing the input removes the
-        separators so the user can edit the plain digits; this guide calls that step the
+        appears animated. The real <code>&lt;input&gt;</code> still handles every keystroke, and
+        Torph renders what the user sees. With <code>'blur'</code>, focusing the input removes the
+        separators so the user can edit the plain digits. This guide calls that step the
         &quot;focus-strip&quot;.
       </p>
       <p>
@@ -140,11 +140,11 @@ function TorphIntegration() {
       </p>
 
       <TorphVanillaDemo />
-      <p className="text-center -mt-8 mb-12">
-        <code>FormatOn.Change</code>: separators animate on every keystroke.
+      <p className="mx-auto -mt-6 mb-12 max-w-lg text-sm text-muted-foreground">
+        With <code>'change'</code>, separators animate on every keystroke.
       </p>
 
-      <hr/>
+      <hr />
 
       <TorphBlurSection>
         {(variant) => (
@@ -165,8 +165,8 @@ function TorphIntegration() {
                 }}
               >
                 {variant === 'minimal' ? <TorphVanillaBlurMinimal /> : <TorphVanillaBlurDemo />}
-                <p className="text-center -mt-8 mb-12">
-                  <code>FormatOn.Blur</code>:{' '}
+                <p className="mx-auto -mt-6 mb-12 max-w-lg text-sm text-muted-foreground">
+                  <code>'blur'</code>:{' '}
                   {variant === 'minimal'
                     ? 'minimal integration. The cursor drifts during the focus-strip morph.'
                     : 'polished variant. It hides the cursor during the focus-strip morph.'}
@@ -193,13 +193,13 @@ function TorphIntegration() {
                 >
                   <p>
                     <strong>Hiding the cursor during the focus-strip morph.</strong> With{' '}
-                    <code>FormatOn.Blur</code>, focusing the input swaps <code>1,234,567</code> to{' '}
+                    <code>'blur'</code>, focusing the input swaps <code>1,234,567</code> to{' '}
                     <code>1234567</code> in one DOM call. The cursor jumps to its final index
                     instantly, but Torph takes ~400ms to morph the visible digits there, so the
-                    cursor looks like it drifts past stationary text. Hide the native cursor on focus
-                    and show it again on the next <code>onAnimationComplete</code>. A timeout fallback
-                    covers the case where focus fires but no morph follows (the value already has no
-                    separators):
+                    cursor looks like it drifts past stationary text. Hide the native cursor on
+                    focus and show it again on the next <code>onAnimationComplete</code>. A timeout
+                    fallback covers the case where focus fires but no morph follows (the value
+                    already has no separators):
                   </p>
 
                   <CodeBlock language="ts">
@@ -261,11 +261,12 @@ input.addEventListener('focus', () => {
       >
         <p>
           Both layers render the same formatted string. The vanilla <code>NumoraInput</code> class
-          calls its <code>onChange</code> option whenever the raw value changes: typing (from{' '}
-          <code>beforeinput</code>), paste and undo/redo. The bridge is a single line: <code>onChange: ({'{ formattedValue }'}) =&gt; morph.update(formattedValue || '0')</code>.
-          Torph diffs the old and new strings and animates each digit and separator into place. The
-          input itself never animates, and because its text is transparent, you only see the Torph
-          layer.
+          calls its <code>onFormattedValueChange</code> option every time it rewrites the field:
+          typing (from <code>beforeinput</code>), paste, undo/redo, the focus strip and the blur
+          regroup. The bridge is a single line:{' '}
+          <code>onFormattedValueChange: (text) =&gt; morph.update(text || '0')</code>. Torph diffs
+          the old and new strings and animates each digit and separator into place. The input itself
+          never animates, and because its text is transparent, you only see the Torph layer.
         </p>
       </OverlayExplainer>
 
@@ -320,7 +321,7 @@ input.addEventListener('focus', () => {
       </CodeBlock>
 
       <CodeBlock language="ts">
-        {`import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
+        {`import { NumoraInput } from 'numora'
 import { TextMorph } from 'torph'
 
 const wrap = document.querySelector<HTMLElement>('.numora-overlay')!
@@ -335,14 +336,14 @@ const morph = new TextMorph({
   ease: { stiffness: 400, damping: 30 },
 })
 
-// onChange also receives the formatted string, which is what Torph should display.
+// onFormattedValueChange gives the display string, which is what Torph should show.
 const numora = new NumoraInput(host, {
-  formatOn: FormatOn.Change,
+  formatOn: 'change',
   decimalMaxLength: 2,
-  groupingStyle: GroupingStyle.Thousand,
-  onChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
+  groupingStyle: 'thousand',
+  onFormattedValueChange: (text) => morph.update(text || '0'),
 })
-const input = numora.getElement()
+const input = numora.element
 input.setAttribute('aria-label', 'Amount')
 
 morph.update('0')`}
@@ -354,34 +355,33 @@ morph.update('0')`}
           <strong>
             <code>display.textContent = ''</code>
           </strong>{' '}
-          is needed because a placeholder text node (e.g. SSR <code>0</code>) is not an element child. Torph's{' '}
-          <code>createTextGroup</code> only replaces element children, so it would append animated
-          spans beside a stuck <code>0</code> instead of owning the span.
+          is needed because a placeholder text node (e.g. SSR <code>0</code>) is not an element
+          child. Torph's <code>createTextGroup</code> only replaces element children, so it would
+          append animated spans beside a stuck <code>0</code> instead of owning the span.
         </li>
         <li>
           <strong>
-            <code>onChange</code>
+            <code>onFormattedValueChange</code>
           </strong>{' '}
-          fires for every path that changes the raw value, so you need no DOM <code>input</code> or{' '}
-          <code>beforeinput</code> listeners. It does not fire for the initial{' '}
-          <code>value</code>, so call <code>morph.update()</code> once after construction (with{' '}
-          <code>numora.getFormattedValue()</code> if you pass an initial value).
+          fires every time Numora rewrites the field, so you need no DOM <code>input</code>,{' '}
+          <code>focus</code> or <code>blur</code> listeners. It does not fire on creation, so call{' '}
+          <code>morph.update()</code> once after construction (with{' '}
+          <code>numora.formattedValue</code> if you pass an initial value).
         </li>
         <li>
           <strong>
-            <code>formatOn: FormatOn.Change</code>
+            <code>formatOn: 'change'</code>
           </strong>{' '}
-          (used here) keeps the input's display as the formatted string at all times.{' '}
-          With <code>FormatOn.Blur</code>, the focus-strip and the blur reformat only add or remove
-          separators, so the raw value is unchanged and <code>onChange</code> does not fire. Also
-          bind <code>focus</code> and <code>blur</code> listeners that call{' '}
-          <code>morph.update(numora.getFormattedValue())</code>.
+          (used here) keeps the input's display as the formatted string at all times. With{' '}
+          <code>'blur'</code>, the focus strip and the blur regroup only add or remove separators.{' '}
+          <code>onValueChange</code> does not report them, because the raw value is unchanged, but{' '}
+          <code>onFormattedValueChange</code> does, so the same line covers both modes.
         </li>
         <li>
           <strong>Match typography.</strong> Set <code>font: inherit</code> plus{' '}
-          <code>margin: 0; padding: 0; border: 0</code> on the input. The browser computes the cursor position from the
-          input's invisible text layout, so any difference in font metrics or text origin shows up
-          as cursor drift.
+          <code>margin: 0; padding: 0; border: 0</code> on the input. The browser computes the
+          cursor position from the input's invisible text layout, so any difference in font metrics
+          or text origin shows up as cursor drift.
         </li>
       </ul>
 
@@ -394,9 +394,9 @@ morph.update('0')`}
       <h2>Cleanup</h2>
       <p>
         On teardown call <code>morph.destroy()</code> to detach Torph's observers, then remove the
-        input element. The vanilla <code>NumoraInput</code> doesn't
-        expose an explicit destroy method. Its internal listeners are bound to the input it
-        created, so removing that element from the DOM is enough for Numora itself.
+        input element. The vanilla <code>NumoraInput</code> doesn't expose an explicit destroy
+        method. Its internal listeners are bound to the input it created, so removing that element
+        from the DOM is enough for Numora itself.
       </p>
 
       <CodeBlock language="ts">

@@ -27,6 +27,18 @@ export function NumberFlowCaveats() {
 
       <div className={BOX}>
         <p className="m-0">
+          <strong>Locales.</strong> NumberFlow formats the number itself with <code>Intl</code>, so
+          give it the same locale as the input. In Spanish and Polish <code>Intl</code> leaves a
+          four-digit number ungrouped (<code>1234,5</code>) while Numora groups it (
+          <code>1.234,5</code>). Pass <code>useGrouping: 'always'</code> in <code>format</code> and
+          the two match. One difference remains. For Arabic and Persian locales NumberFlow prints
+          native digits (<code>١٬٢٣٤</code>) while Numora shows ASCII digits (<code>1٬234</code>),
+          so the overlay's characters do not line up with the input's.
+        </p>
+      </div>
+
+      <div className={BOX}>
+        <p className="m-0">
           <strong>Cursor drift during animation.</strong> The cursor's pixel position is computed
           from the input's invisible text layout, which jumps to the new value instantly. NumberFlow
           animates digits into that final position over ~150ms. During the animation, the cursor
@@ -39,16 +51,16 @@ export function NumberFlowCaveats() {
           <strong>Mid-string editing is limited.</strong> Clicking the overlay span passes the click
           through to the input, but the browser's hit-test runs against the input's invisible text.
           During NumberFlow's mid-animation width transitions, click-to-cursor lands on the wrong
-          character. This doesn't matter for append-only fields. If users edit mid-number, don't
-          use this pattern.
+          character. This doesn't matter for append-only fields. If users edit mid-number, don't use
+          this pattern.
         </p>
       </div>
 
       <div className={BOX}>
         <p className="m-0">
           <strong>Mobile selection handles.</strong> iOS draws magnifier loupes and selection
-          handles anchored to the input's text. With the text invisible, the loupe shows
-          transparent characters. This is fine for short numeric entry, but test on real devices.
+          handles anchored to the input's text. With the text invisible, the loupe shows transparent
+          characters. This is fine for short numeric entry, but test on real devices.
         </p>
       </div>
     </>

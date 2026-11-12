@@ -75,7 +75,7 @@ export function EventPipelineDiagram() {
               }`}
             >
               <div
-                className={`font-mono text-[13px] ${
+                className={`font-mono text-caption ${
                   focus ? ROLE.focus.text : ghost ? 'text-muted-foreground' : 'text-foreground'
                 }`}
               >

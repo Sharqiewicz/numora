@@ -1,173 +1,25 @@
-import { useEffect } from 'react';
-import { Link, useRouter, useRouterState, useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate, useRouter, useRouterState } from '@tanstack/react-router';
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
-import {
-  Rocket,
-  Download,
-  Shield,
-  Type,
-  Dot,
-  Minimize2,
-  FunctionSquare,
-  Hash,
-  Plug,
-  Wand2,
-  Workflow,
-  FileDigit,
-  Globe,
-  Layers,
-  Ruler,
-  CheckCircle,
-  Binary,
-} from 'lucide-react';
+import { useEffect } from 'react';
 import {
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { usePackage } from '@/contexts/PackageContext';
+import { buildPackagePath, extractPageFromPath, getPackageHref } from '@/utils/packageRoutes';
+import { getVisibleNavigation } from './docs-nav';
+import { Socials } from './socials';
 import { TabsClipPath } from './TabsClipPath';
-import { PackageTab, usePackage } from '@/contexts/PackageContext';
-import { getPackageHref, extractPageFromPath, buildPackagePath } from '@/utils/packageRoutes';
 
-const navigation = [
-  {
-    title: 'Overview',
-    items: [
-      {
-        title: 'Get started',
-        href: '/docs',
-        icon: Rocket,
-      },
-      {
-        title: 'Installation',
-        href: '/docs/installation',
-        icon: Download,
-      },
-      {
-        title: 'How it works',
-        href: '/docs/how-it-works',
-        icon: Workflow,
-      },
-      {
-        title: 'Anatomy',
-        href: '/docs/anatomy',
-        icon: Layers,
-      },
-    ],
-  },
-  {
-    title: 'Features',
-    items: [
-      {
-        title: 'Sanitization',
-        href: '/docs/features/sanitization',
-        icon: Shield,
-      },
-      {
-        title: 'Formatting',
-        href: '/docs/features/formatting',
-        icon: Type,
-      },
-      {
-        title: 'Value types',
-        href: '/docs/features/value-types',
-        icon: FileDigit,
-      },
-      {
-        title: 'Decimals',
-        href: '/docs/features/decimals',
-        icon: Dot,
-      },
-      {
-        title: 'Locale',
-        href: '/docs/features/locale',
-        icon: Globe,
-      },
-      {
-        title: 'Compact notation',
-        href: '/docs/features/compact-notation',
-        icon: Minimize2,
-      },
-      {
-        title: 'Scientific notation',
-        href: '/docs/features/scientific-notation',
-        icon: FunctionSquare,
-      },
-      {
-        title: 'Leading zeros',
-        href: '/docs/features/leading-zeros',
-        icon: Hash,
-      },
-      {
-        title: 'Max length',
-        href: '/docs/features/max-length',
-        icon: Ruler,
-      },
-      {
-        title: 'Validation',
-        href: '/docs/features/validation',
-        icon: CheckCircle,
-      },
-    ],
-  },
-  {
-    title: 'Integrations',
-    items: [
-      {
-        title: 'React Hook Form',
-        href: '/docs/integrations/react-hook-form',
-        icon: Plug,
-        packages: ['react'] as PackageTab[],
-      },
-      {
-        title: 'Torph',
-        href: '/docs/integrations/torph',
-        icon: Wand2,
-      },
-      {
-        title: 'NumberFlow',
-        href: '/docs/integrations/number-flow',
-        icon: Binary,
-      },
-    ],
-  },
-  {
-    title: 'Frameworks',
-    items: [
-      {
-        title: 'Svelte',
-        href: '/docs/frameworks/svelte',
-        icon: Layers,
-        packages: ['core'] as PackageTab[],
-      },
-      {
-        title: 'Vue',
-        href: '/docs/frameworks/vue',
-        icon: Globe,
-        packages: ['core'] as PackageTab[],
-      },
-      {
-        title: 'Angular',
-        href: '/docs/frameworks/angular',
-        icon: Workflow,
-        packages: ['core'] as PackageTab[],
-      },
-      {
-        title: 'Solid',
-        href: '/docs/frameworks/solid',
-        icon: Plug,
-        packages: ['core'] as PackageTab[],
-      },
-    ],
-  },
-];
-
-const frameworkTabs: PackageTab[] = ['core', 'react'];
+const frameworkTabs = ['core', 'react'];
 
 export function DocsSidebar() {
   const router = useRouterState();
@@ -202,69 +54,85 @@ export function DocsSidebar() {
   };
 
   return (
-    <SidebarContent role="navigation" aria-label="Documentation">
-      <TabsClipPath
-        tabs={frameworkTabs}
-        activeTab={selectedPackage}
-        onChange={handlePackageChange}
-      />
-      <LayoutGroup>
-        {navigation.map((group) => {
-          // Filter items by selected package (items with no `packages` field are shown for all)
-          const visibleItems = group.items.filter(
-            (item) =>
-              !('packages' in item) ||
-              (item as { packages?: PackageTab[] }).packages?.includes(selectedPackage)
-          );
-          if (visibleItems.length === 0) return null;
+    <>
+      <SidebarHeader className="gap-3 px-4 py-3">
+        <Link to="/" aria-label="Numora home">
+          <span
+            className="
+              block text-4xl font-numora
+              transition-[color,filter] duration-300
+              [@media(hover:hover)]:hover:drop-shadow-[0_2px_20px_oklch(0.694_0.131_276.5_/_0.5)]
+            "
+          >
+            numora.
+          </span>
+        </Link>
+        <TabsClipPath
+          tabs={frameworkTabs}
+          activeTab={selectedPackage}
+          onChange={handlePackageChange}
+        />
+      </SidebarHeader>
+      <SidebarContent role="navigation" aria-label="Documentation" className="docs-sidebar-scroll">
+        <LayoutGroup>
+          {getVisibleNavigation(selectedPackage).map((group) => {
+            const visibleItems = group.items;
 
-          return (
-            <SidebarGroup key={group.title}>
-              <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {visibleItems.map((item) => {
-                    const packageHref = getPackageHref(item.href, packagePrefix);
-                    const isActive =
-                      currentPath === packageHref ||
-                      (packageHref !== `/docs/${packagePrefix}` &&
-                        currentPath.startsWith(packageHref + '/'));
-                    const Icon = item.icon;
-                    return (
-                      <SidebarMenuItem key={item.href}>
-                        {isActive &&
-                          (shouldReduceMotion ? (
-                            <span
-                              aria-hidden
-                              className="absolute inset-0 -z-10 rounded-xl bg-sidebar-accent"
-                            />
-                          ) : (
-                            <motion.span
-                              aria-hidden
-                              layoutId="docs-nav-active"
-                              className="absolute inset-0 -z-10 rounded-xl bg-sidebar-accent"
-                              transition={{ type: 'tween', duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                            />
-                          ))}
-                        <SidebarMenuButton
-                          asChild
-                          isActive={isActive}
-                          className="data-[active=true]:bg-transparent max-md:h-10"
-                        >
-                          <Link to={packageHref}>
-                            <Icon />
-                            <span>{item.title}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          );
-        })}
-      </LayoutGroup>
-    </SidebarContent>
+            return (
+              <SidebarGroup key={group.title}>
+                <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {visibleItems.map((item) => {
+                      const packageHref = getPackageHref(item.href, packagePrefix);
+                      const isActive =
+                        currentPath === packageHref ||
+                        (packageHref !== `/docs/${packagePrefix}` &&
+                          currentPath.startsWith(packageHref + '/'));
+                      const Icon = item.icon;
+                      return (
+                        <SidebarMenuItem key={item.href}>
+                          {isActive &&
+                            (shouldReduceMotion ? (
+                              <span
+                                aria-hidden
+                                className="absolute inset-0 -z-10 rounded-xl bg-sidebar-accent"
+                              />
+                            ) : (
+                              <motion.span
+                                aria-hidden
+                                layoutId="docs-nav-active"
+                                className="absolute inset-0 -z-10 rounded-xl bg-sidebar-accent"
+                                transition={{
+                                  type: 'tween',
+                                  duration: 0.2,
+                                  ease: [0.16, 1, 0.3, 1],
+                                }}
+                              />
+                            ))}
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isActive}
+                            className="data-[active=true]:bg-transparent max-md:h-11"
+                          >
+                            <Link to={packageHref}>
+                              <Icon />
+                              <span>{item.title}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            );
+          })}
+        </LayoutGroup>
+      </SidebarContent>
+      <SidebarFooter className="px-4 py-4 max-md:hidden">
+        <Socials />
+      </SidebarFooter>
+    </>
   );
 }

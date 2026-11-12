@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
-import { FormatOn, GroupingStyle } from 'numora';
 
 export const Route = createFileRoute('/docs/numora-react/features/formatting')({
   head: () => ({
@@ -9,7 +8,7 @@ export const Route = createFileRoute('/docs/numora-react/features/formatting')({
       {
         name: 'description',
         content:
-          'Format numbers as you type with the NumoraInput React component. Thousand separators, several grouping styles and real-time formatting that keeps the cursor position.',
+          'Format numbers as you type with the NumoraInput React component. Thousand separators, three grouping styles, and formatting on every keystroke that keeps the cursor position.',
       },
       {
         property: 'og:title',
@@ -18,7 +17,7 @@ export const Route = createFileRoute('/docs/numora-react/features/formatting')({
       {
         property: 'og:description',
         content:
-          'Format numbers as you type with the NumoraInput React component. Thousand separators, several grouping styles and real-time formatting that keeps the cursor position.',
+          'Format numbers as you type with the NumoraInput React component. Thousand separators, three grouping styles, and formatting on every keystroke that keeps the cursor position.',
       },
       {
         property: 'og:url',
@@ -30,7 +29,8 @@ export const Route = createFileRoute('/docs/numora-react/features/formatting')({
       },
       {
         name: 'twitter:description',
-        content: 'Format numbers as you type with the NumoraInput React component. Thousand separators, several grouping styles and real-time formatting that keeps the cursor position.',
+        content:
+          'Format numbers as you type with the NumoraInput React component. Thousand separators, three grouping styles, and formatting on every keystroke that keeps the cursor position.',
       },
     ],
     links: [
@@ -81,18 +81,17 @@ export const Route = createFileRoute('/docs/numora-react/features/formatting')({
 
 function Formatting() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Formatting</h1>
       <p>
-        Numora React adds thousand separators on blur by default, or as the user
-        types with <code>formatOn={'{FormatOn.Change}'}</code>. It keeps the cursor position in
-        both modes.
+        Numora React adds thousand separators as the user types by default, or only on blur with{' '}
+        <code>formatOn="blur"</code>. It keeps the cursor position in both modes.
       </p>
       <p>
-        By default, grouping is <code>GroupingStyle.Thousand</code> with <code>,</code> as the
-        thousand separator, in both the React component and the vanilla <code>numora</code> package.
-        Pass <code>groupingStyle={'{GroupingStyle.None}'}</code> to turn grouping off. Thousand
-        (1,234,567) is the default, so the demos below show the other two styles.
+        By default, grouping is <code>'thousand'</code> with <code>,</code> as the thousand
+        separator, in both the React component and the vanilla <code>numora</code> package. Pass{' '}
+        <code>groupingStyle="none"</code> to turn grouping off. Thousand (1,234,567) is the default,
+        so the demos below show the other two styles.
       </p>
 
       <h2>Other grouping styles</h2>
@@ -101,19 +100,19 @@ function Formatting() {
           title="Lakh (Indian, 12,34,567)"
           description="Type a large number to see Lakh grouping"
           language="tsx"
-          code={`import { NumoraInput, GroupingStyle } from 'numora-react'
+          code={`import { NumoraInput } from 'numora-react'
 
-<NumoraInput groupingStyle={GroupingStyle.Lakh} />`}
-          config={{ groupingStyle: GroupingStyle.Lakh }}
+<NumoraInput groupingStyle="lakh" />`}
+          config={{ groupingStyle: 'lakh' }}
         />
         <ExampleWithDemo
           title="Wan (East Asian, 123,4567)"
           description="Type a large number to see Wan grouping"
           language="tsx"
-          code={`import { NumoraInput, GroupingStyle } from 'numora-react'
+          code={`import { NumoraInput } from 'numora-react'
 
-<NumoraInput groupingStyle={GroupingStyle.Wan} />`}
-          config={{ groupingStyle: GroupingStyle.Wan }}
+<NumoraInput groupingStyle="wan" />`}
+          config={{ groupingStyle: 'wan' }}
         />
       </div>
 
@@ -123,15 +122,15 @@ function Formatting() {
           title="Blur (default)"
           description="Type a number and click away to see the separators appear"
           language="tsx"
-          code={`<NumoraInput formatOn={FormatOn.Blur} />`}
-          config={{ formatOn: FormatOn.Blur }}
+          code={`<NumoraInput formatOn="blur" />`}
+          config={{ formatOn: 'blur' }}
         />
         <ExampleWithDemo
           title="Change"
           description="Separators update on every keystroke"
           language="tsx"
-          code={`<NumoraInput formatOn={FormatOn.Change} />`}
-          config={{ formatOn: FormatOn.Change }}
+          code={`<NumoraInput formatOn="change" />`}
+          config={{ formatOn: 'change' }}
         />
       </div>
 

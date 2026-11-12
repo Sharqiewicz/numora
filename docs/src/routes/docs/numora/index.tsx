@@ -7,21 +7,18 @@ export const Route = createFileRoute('/docs/numora/')({
       { title: 'Numeric input library | Numora' },
       {
         name: 'description',
-        content:
-          `Get started with Numora, the zero-dependency TypeScript numeric input library. Attach it to any input element. Works with React, Vue, Svelte, Angular, and vanilla JS. ${CORE_SIZE_GZIP} gzipped.`,
+        content: `Get started with Numora, the zero-dependency TypeScript numeric input library. Attach it to any input element. Works with React, Vue, Svelte, Angular, and vanilla JS. ${CORE_SIZE_GZIP} gzipped.`,
       },
       { property: 'og:title', content: 'Numeric input library | Numora' },
       {
         property: 'og:description',
-        content:
-          `Get started with Numora, the zero-dependency TypeScript numeric input library. Attach it to any input element. Works with React, Vue, Svelte, Angular, and vanilla JS. ${CORE_SIZE_GZIP} gzipped.`,
+        content: `Get started with Numora, the zero-dependency TypeScript numeric input library. Attach it to any input element. Works with React, Vue, Svelte, Angular, and vanilla JS. ${CORE_SIZE_GZIP} gzipped.`,
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora' },
       { name: 'twitter:title', content: 'Numeric input library | Numora' },
       {
         name: 'twitter:description',
-        content:
-          `Get started with Numora, the zero-dependency TypeScript numeric input library. Attach it to any input element. Works with React, Vue, Svelte, Angular, and vanilla JS. ${CORE_SIZE_GZIP} gzipped.`,
+        content: `Get started with Numora, the zero-dependency TypeScript numeric input library. Attach it to any input element. Works with React, Vue, Svelte, Angular, and vanilla JS. ${CORE_SIZE_GZIP} gzipped.`,
       },
     ],
     links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora' }],
@@ -37,8 +34,7 @@ export const Route = createFileRoute('/docs/numora/')({
             programmingLanguage: 'TypeScript',
             runtimePlatform: 'Browser',
             url: 'https://numeric-input.com/docs/numora',
-            description:
-              `Zero-dependency TypeScript numeric input library. Precision-first, framework-agnostic, ${CORE_SIZE_GZIP} gzipped.`,
+            description: `Zero-dependency TypeScript numeric input library. Precision-first, framework-agnostic, ${CORE_SIZE_GZIP} gzipped.`,
           },
           {
             '@context': 'https://schema.org',
@@ -62,13 +58,13 @@ export const Route = createFileRoute('/docs/numora/')({
 
 function GetStarted() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Numeric input library</h1>
       <p>
         <strong className="font-numora">Numora</strong> is a zero-dependency TypeScript library that
         turns any <code>{'<input>'}</code> element into a precision numeric input. Unlike{' '}
-        <code>{'<input type="number">'}</code>, Numora uses <code>type="text"</code> under the hood
-        so you decide which characters can be typed, pasted, and shown.
+        <code>{'<input type="number">'}</code>, Numora uses <code>type="text"</code>, so you decide
+        which characters can be typed, pasted and shown.
       </p>
 
       <h2>What you get</h2>
@@ -125,12 +121,10 @@ function GetStarted() {
           <Link to="/docs/numora-react">
             <strong>React numeric input</strong>
           </Link>
-          . The <code>numora-react</code> package has a drop-in{' '}
-          <code>&lt;NumoraInput /&gt;</code> component with TypeScript types and React Hook
-          Form support.
+          . The <code>numora-react</code> package has a drop-in <code>&lt;NumoraInput /&gt;</code>{' '}
+          component with TypeScript types and React Hook Form support.
         </li>
       </ul>
-
     </div>
   );
 }

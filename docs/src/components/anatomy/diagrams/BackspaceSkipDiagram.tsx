@@ -64,7 +64,7 @@ function Verdict({
 }) {
   return (
     <motion.span
-      className={`inline-flex items-center gap-1 text-[12px] ${good ? 'text-signal-green-fg' : 'text-signal-red-fg'}`}
+      className={`inline-flex items-center gap-1 text-xs ${good ? 'text-signal-green-fg' : 'text-signal-red-fg'}`}
       initial={false}
       animate={{ opacity: show ? 1 : 0 }}
       transition={{ duration: DUR.base, ease: EASE.outExpo, delay }}
@@ -90,7 +90,7 @@ function Row({
     <div>
       <div className="mb-2 flex flex-wrap items-baseline gap-x-2">
         <span className="text-[14px] font-medium">{label}</span>
-        <span className="text-[12px] text-muted-foreground">{sub}</span>
+        <span className="text-xs text-muted-foreground">{sub}</span>
       </div>
       <div className="relative" style={{ width: WIDTH, height: CHIP_H }}>
         {children}

@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from 'motion/react';
-import { useEffect, useLayoutEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { DiagramFrame, demoInputClass, demoInsetClass, SPRING_FAST } from './kit';
 import { FlashValue, ReadoutRow } from './ValueReadout';
 
@@ -53,7 +53,10 @@ export function AnnotatedInput() {
 
   return (
     <DiagramFrame>
-      <label htmlFor={inputId} className="mb-2 block text-[13px] font-medium text-muted-foreground">
+      <label
+        htmlFor={inputId}
+        className="mb-2 block text-caption font-medium text-muted-foreground"
+      >
         Plain input. Type or click
       </label>
       <input
@@ -76,7 +79,7 @@ export function AnnotatedInput() {
       <div className="relative mt-1.5 h-4" aria-hidden>
         <span
           ref={measureRef}
-          className="invisible absolute top-0 left-0 whitespace-pre font-mono text-[15px]"
+          className="invisible absolute top-0 left-0 whitespace-pre font-mono text-base"
         />
         <motion.span
           className="absolute top-0 left-0 h-4 w-px origin-left bg-signal-violet-line"
@@ -97,12 +100,8 @@ export function AnnotatedInput() {
         <ReadoutRow name="value">
           <FlashValue value={value}>"{value}"</FlashValue>
         </ReadoutRow>
-        <ReadoutRow name="selectionStart">
-          {selectionStart}
-        </ReadoutRow>
-        <ReadoutRow name="selectionEnd">
-          {selectionEnd}
-        </ReadoutRow>
+        <ReadoutRow name="selectionStart">{selectionStart}</ReadoutRow>
+        <ReadoutRow name="selectionEnd">{selectionEnd}</ReadoutRow>
         <ReadoutRow name="type">"text"</ReadoutRow>
         <ReadoutRow name="inputMode" note="mobile numeric pad">
           "decimal"

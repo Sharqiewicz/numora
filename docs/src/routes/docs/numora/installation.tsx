@@ -71,11 +71,9 @@ export const Route = createFileRoute('/docs/numora/installation')({
 
 function Installation() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Install Numora</h1>
-      <p>
-        Add the Numora TypeScript numeric input library to any project. No framework required.
-      </p>
+      <p>Add the Numora TypeScript numeric input library to any project. No framework required.</p>
 
       <h2>Install</h2>
       <p>Numora has zero runtime dependencies. Pick your package manager:</p>
@@ -87,83 +85,82 @@ function Installation() {
         Import the <code>NumoraInput</code> class and pass it a container element:
       </p>
       <CodeBlock language="typescript">
-        {`import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
+        {`import { NumoraInput } from 'numora'
 
 const container = document.querySelector('#my-input-container')
 
 const numoraInput = new NumoraInput(container, {
   decimalMaxLength: 2,
-  groupingStyle: GroupingStyle.Thousand,
+  groupingStyle: 'thousand',
   thousandSeparator: ',',
   decimalSeparator: '.',
-  formatOn: FormatOn.Change,
+  formatOn: 'change',
   // typing 1234.56 displays "1,234.56"
 })`}
       </CodeBlock>
 
       <h2>Options</h2>
       <p>
-        Numora requires an options object (<code>NumoraInputOptions</code>) as the second argument. It extends{' '}
-        <code>NumoraOptions</code> with <code>locale</code>, <code>onChange</code>, <code>value</code> and <code>defaultValue</code>. Common
-        options:
+        The second argument is an optional options object (<code>NumoraInputOptions</code>). It
+        extends <code>NumoraOptions</code> with <code>onValueChange</code>, <code>value</code> and a
+        few native attributes. Common options:
       </p>
       <ul>
         <li>
-          <code>decimalSeparator</code>: the character between the integer and decimal parts (default{' '}
-          <code>'.'</code>)
+          <code>decimalSeparator</code>: the character between the integer and decimal parts
+          (default <code>'.'</code>)
         </li>
         <li>
           <code>thousandSeparator</code>: the character between digit groups (default{' '}
           <code>','</code>). Separators only appear when <code>groupingStyle</code> is not{' '}
-          <code>None</code>
+          <code>'none'</code>
         </li>
         <li>
-          <code>groupingStyle</code>: <code>None</code>, <code>Thousand</code> (default),{' '}
-          <code>Lakh</code>, or <code>Wan</code>
+          <code>groupingStyle</code>: <code>'thousand'</code> (default), <code>'lakh'</code>,{' '}
+          <code>'wan'</code> or <code>'none'</code>
         </li>
         <li>
-          <code>formatOn</code>: when separators are applied, <code>FormatOn.Blur</code> (default)
-          or <code>FormatOn.Change</code>
+          <code>formatOn</code>: when separators are applied, <code>'change'</code> (default) or{' '}
+          <code>'blur'</code>
         </li>
         <li>
           <code>decimalMaxLength</code>: maximum number of decimal digits (default <code>18</code>)
         </li>
         <li>
-          <code>decimalMinLength</code>: pad decimals to a minimum number of digits as you type (default <code>0</code>)
+          <code>decimalMinLength</code>: pad decimals to a minimum number of digits on blur (default{' '}
+          <code>0</code>)
         </li>
         <li>
-          <code>enableNegative</code>: allow negative values (default <code>false</code>)
+          <code>allowNegative</code>: allow negative values (default <code>false</code>)
         </li>
         <li>
-          <code>enableCompactNotation</code>: expand <code>1k → 1000</code> on input
+          <code>allowCompactNotation</code>: expand <code>1k → 1000</code> on input
         </li>
         <li>
-          <code>enableScientificNotation</code>: expand pasted <code>1.5e-7</code> (default{' '}
+          <code>allowScientificNotation</code>: expand pasted <code>1.5e-7</code> (default{' '}
           <code>true</code>); <code>false</code> rejects such a paste
         </li>
         <li>
-          <code>onChange</code>: receives <code>{'{ value, formattedValue }'}</code>. The raw value
-          has no separators
+          <code>onValueChange</code>: receives <code>{'{ value, formattedValue }'}</code>. The raw
+          value has no separators
         </li>
       </ul>
       <p>
         See the <Link to="/docs/numora/features/formatting">Formatting</Link> and{' '}
-        <Link to="/docs/numora/features/sanitization">Sanitization</Link> docs for details on
-        these options.
+        <Link to="/docs/numora/features/sanitization">Sanitization</Link> docs for details on these
+        options.
       </p>
 
       <h2>TypeScript</h2>
-      <p>
-        Numora ships its own declarations. Import types directly:
-      </p>
+      <p>Numora ships its own declarations. Import types directly:</p>
       <CodeBlock language="typescript">
-        {`import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
+        {`import { NumoraInput } from 'numora'
 import type { NumoraOptions } from 'numora'
 
 const options: NumoraOptions = {
   decimalMaxLength: 6,
-  formatOn: FormatOn.Change,
-  groupingStyle: GroupingStyle.Thousand,
+  formatOn: 'change',
+  groupingStyle: 'thousand',
   thousandSeparator: ',',
 }`}
       </CodeBlock>

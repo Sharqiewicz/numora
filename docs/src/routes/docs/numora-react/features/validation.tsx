@@ -76,11 +76,11 @@ export const Route = createFileRoute('/docs/numora-react/features/validation')({
 
 function Validation() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Validation</h1>
       <p>
-        Use an <code>isAllowed</code> predicate to reject keystrokes and pastes <em>before</em>{' '}
-        they commit. It fits business rules and format rules that no built-in prop covers.
+        Use an <code>isAllowed</code> predicate to reject keystrokes and pastes <em>before</em> they
+        commit. It fits business rules and format rules that no built-in prop covers.
       </p>
 
       <CodeBlock language="typescript">
@@ -88,8 +88,8 @@ function Validation() {
       </CodeBlock>
 
       <p>
-        <code>rawValue</code> is the sanitized, raw (no-separator) string that <em>would</em>{' '}
-        be committed. Return <code>true</code> to accept it or <code>false</code> to discard it. A
+        <code>rawValue</code> is the sanitized, raw (no-separator) string that <em>would</em> be
+        committed. Return <code>true</code> to accept it or <code>false</code> to discard it. A
         discarded value leaves the input at its previous value, and <code>onChange</code> does not
         fire.
       </p>
@@ -116,9 +116,7 @@ function Validation() {
       />
 
       <h2>Example: whole numbers, up to 6 digits</h2>
-      <p>
-        This predicate is safe for every prefix, so users can type and delete freely.
-      </p>
+      <p>This predicate is safe for every prefix, so users can type and delete freely.</p>
       <CodeBlock language="tsx">
         {`<NumoraInput
   isAllowed={(raw) => /^\\d{0,6}$/.test(raw)}

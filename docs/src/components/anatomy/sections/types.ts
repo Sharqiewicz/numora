@@ -11,5 +11,5 @@ export interface SectionProps {
 
 export const importLine = (pkg: Pkg) =>
   pkg === 'numora-react'
-    ? `import { NumoraInput, FormatOn, GroupingStyle } from 'numora-react'`
-    : `import { NumoraInput, FormatOn, GroupingStyle } from 'numora'`;
+    ? `import { NumoraInput } from 'numora-react'`
+    : `import { NumoraInput } from 'numora'`;

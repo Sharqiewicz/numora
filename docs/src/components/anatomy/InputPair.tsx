@@ -20,7 +20,7 @@ export function Verdict({ tone }: { tone: 'bad' | 'good' }) {
   const Icon = bad ? X : Check;
   return (
     <span
-      className="inline-flex items-center gap-1 text-[12px] font-medium text-muted-foreground"
+      className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground"
     >
       <Icon
         className={`size-3.5 ${bad ? 'text-signal-red-fg' : 'text-signal-green-fg'}`}
@@ -39,7 +39,7 @@ export function InputPair({ left, right }: InputPairProps) {
           <div key={pane.label} className="space-y-2">
             {/* biome-ignore lint/a11y/noLabelWithoutControl: the input is passed in as pane.input */}
             <label className="block space-y-2">
-              <span className="flex items-center justify-between gap-2 text-[13px] font-medium text-foreground">
+              <span className="flex items-center justify-between gap-2 text-caption font-medium text-foreground">
                 {pane.label}
                 {pane.tone && pane.tone !== 'neutral' && (
                   <span aria-hidden>
@@ -49,7 +49,7 @@ export function InputPair({ left, right }: InputPairProps) {
               </span>
               {pane.input}
             </label>
-            {pane.note && <div className="text-[13px] text-muted-foreground">{pane.note}</div>}
+            {pane.note && <div className="text-caption text-muted-foreground">{pane.note}</div>}
           </div>
         ))}
       </div>

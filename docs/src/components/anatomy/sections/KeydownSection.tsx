@@ -13,7 +13,7 @@ export function KeydownSection() {
       <ul>
         <li>
           <strong>Skip the cursor over thousand separators on Backspace and Delete</strong> (in{' '}
-          <code>FormatOn.Change</code> mode only). With the cursor just after the comma in{' '}
+          <code>'change'</code> mode only). With the cursor just after the comma in{' '}
           <code>1,234</code> (<code>1,|234</code>), Backspace first moves the cursor to the left of
           the comma, so the digit <code>1</code> gets deleted, not the comma.
         </li>

@@ -5,30 +5,27 @@ import { CORE_SIZE_GZIP } from '@/lib/constants/package';
 const PAGE_URL = 'https://numeric-input.com/docs/numora/frameworks/solid';
 
 const META_TITLE = 'Solid numeric input | Numora';
-const META_DESCRIPTION =
-  `Solid numeric input library with thousand separators, decimal limits, paste sanitization and cursor preservation. Use Numora in Solid or SolidStart through a use:numora directive. It is a framework-agnostic vanilla package with zero dependencies, ${CORE_SIZE_GZIP} gzipped.`;
+const META_DESCRIPTION = `Solid numeric input library with thousand separators, decimal limits, paste sanitization and cursor preservation. Use Numora in Solid or SolidStart through a use:numora directive. It is a framework-agnostic vanilla package with zero dependencies, ${CORE_SIZE_GZIP} gzipped.`;
 
 // Single source for the visible FAQ and the JSON-LD FAQPage. Backticks mark inline code.
 const FAQ = [
   {
     question: 'What is the best Solid numeric input library?',
-    answer:
-      `Numora is a Solid numeric input library: framework-agnostic TypeScript, ${CORE_SIZE_GZIP} gzipped, with no runtime dependencies. In Solid you write a \`use:numora\` directive once, then use \`<input use:numora={opts} />\` anywhere.`,
+    answer: `Numora is framework-agnostic TypeScript, ${CORE_SIZE_GZIP} gzipped, with no runtime dependencies. In Solid you write a \`use:numora\` directive once, then use \`<input use:numora={opts} />\` anywhere.`,
   },
   {
     question: 'Is there a numora-solid package?',
-    answer:
-      'No, and you do not need one. The `use:numora` directive is the entire Solid adapter.',
+    answer: 'No, and you do not need one. The `use:numora` directive is the entire Solid adapter.',
   },
   {
     question: 'Does Numora work with SolidStart and SSR?',
     answer:
-      'Yes. The `use:numora` directive only runs on the client. SolidStart renders the empty `<input>` on the server and Numora adopts it on hydration. No SolidStart-specific configuration is needed.',
+      'Yes. The `use:numora` directive only runs on the client. SolidStart renders the empty `<input>` on the server and Numora adopts it on hydration. You need no SolidStart-specific configuration.',
   },
   {
     question: 'How do I add thousand separators to a Solid number input?',
     answer:
-      'Pass `groupingStyle: GroupingStyle.Thousand` and `formatOn: FormatOn.Change` inside the `use:numora` binding. Numora formats as the user types and keeps the cursor stable through the inserted comma. `onChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can write straight into a `createSignal` setter.',
+      'Pass `groupingStyle: "thousand"` and `formatOn: "change"` inside the `use:numora` binding. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can write straight into a `createSignal` setter.',
   },
   {
     question: 'Does it support i18n (decimal commas, currency formatting) in Solid?',
@@ -141,7 +138,7 @@ export const Route = createFileRoute('/docs/numora/frameworks/solid')({
 
 function SolidIntegration() {
   return (
-    <div className="docs-prose max-w-[40rem]">
+    <div className="docs-prose max-w-[36rem]">
       <h1>Solid numeric input</h1>
       <p>
         <strong className="font-numora">Numora</strong> is a precision-first{' '}
@@ -150,8 +147,8 @@ function SolidIntegration() {
         <code>use:numora</code> directive that mounts directly on an <code>&lt;input&gt;</code>.
         Write the raw value into a <code>createSignal</code> setter, and Solid&apos;s fine-grained
         reactivity updates whatever reads the signal. You need no <code>numora-solid</code> wrapper
-        and no peer dependencies. The vanilla package is framework-agnostic TypeScript, {CORE_SIZE_GZIP}
-        gzipped, with zero runtime dependencies.
+        and no peer dependencies. The vanilla package is framework-agnostic TypeScript,{' '}
+        {CORE_SIZE_GZIP} gzipped, with zero runtime dependencies.
       </p>
 
       <h2>Installation</h2>
@@ -189,7 +186,6 @@ declare module 'solid-js' {
       <p>Component:</p>
       <CodeBlock language="tsx">
         {`import { createSignal } from 'solid-js';
-import { FormatOn, GroupingStyle } from 'numora';
 import { numora } from './directives/numora';
 // Solid's compiler must see the 'numora' import to keep it. The directive
 // looks unused otherwise and tree-shaking would drop it.
@@ -204,10 +200,10 @@ export function AmountInput() {
         Amount
         <input
           use:numora={{
-            formatOn: FormatOn.Change,
-            groupingStyle: GroupingStyle.Thousand,
+            formatOn: 'change',
+            groupingStyle: 'thousand',
             decimalMaxLength: 2,
-            onChange: ({ value: v }) => setValue(v),
+            onValueChange: ({ value: v }) => setValue(v),
           }}
         />
       </label>
@@ -219,11 +215,18 @@ export function AmountInput() {
 
       <p>
         The directive gets the <code>&lt;input&gt;</code> and an accessor for its options. Numora
-        adopts the input and sets the attributes it needs. <code>onChange</code> receives{' '}
+        adopts the input and sets the attributes it needs. <code>onValueChange</code> receives{' '}
         <code>{`{ value, formattedValue }`}</code>, where <code>value</code> is the raw string (see{' '}
         <Link to="/docs/numora/features/value-types">value types</Link>).{' '}
-        <code>FormatOn.Change</code> formats on every keystroke (see{' '}
+        <code>'change'</code> formats on every keystroke (see{' '}
         <Link to="/docs/numora/features/formatting">formatting</Link>).
+      </p>
+
+      <p>
+        Read the value from <code>onValueChange</code>, not from the element's <code>value</code>:
+        the element's own
+        <code>value</code> is the display string (<code>"1,234.56"</code>), while
+        <code>onValueChange</code> gives you the raw value (<code>"1234.56"</code>).
       </p>
 
       <h2>Animated example: Numora + Torph in Solid</h2>
@@ -234,7 +237,7 @@ export function AmountInput() {
       </p>
       <CodeBlock language="tsx">
         {`import { onCleanup, onMount } from 'solid-js';
-import { NumoraInput, FormatOn, GroupingStyle } from 'numora';
+import { NumoraInput } from 'numora';
 import { TextMorph } from 'torph';
 import './numora-overlay.css'; // overlay CSS from the Torph page
 
@@ -252,14 +255,14 @@ export function AnimatedAmountInput() {
     });
     morph.update('0');
 
-    // FormatOn.Change: onChange fires on every edit. In Blur mode also sync on focus and blur.
+    // 'change': onValueChange fires on every edit. In Blur mode also sync on focus and blur.
     const numora = new NumoraInput(host, {
-      formatOn: FormatOn.Change,
-      groupingStyle: GroupingStyle.Thousand,
+      formatOn: 'change',
+      groupingStyle: 'thousand',
       decimalMaxLength: 2,
-      onChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
+      onValueChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
     });
-    const input = numora.getElement();
+    const input = numora.element;
     input.setAttribute('aria-label', 'Amount');
 
     onCleanup(() => {
