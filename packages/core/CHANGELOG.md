@@ -5,6 +5,11 @@
 See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
 
 ### Breaking
+- **`formatOn` defaults to `'change'`** (was `'blur'`), in both packages: digits are grouped as
+  the user types. Pass `formatOn: 'blur'` to keep the v4 behavior.
+- **React: invalid options no longer crash a production render.** They still throw in
+  development. In a production build the component logs the error and keeps the last valid
+  options (the defaults on a first render). The vanilla constructor and `update()` still throw.
 - **Options renamed:** `enableNegative`, `enableLeadingZeros`, `enableCompactNotation` are now
   `allowNegative`, `allowLeadingZeros`, `allowCompactNotation`; `autoAddLeadingZero` is
   `padLeadingZero`. The type `FormattingOptions` is `NumoraOptions`. Old names are ignored
@@ -25,7 +30,7 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
 - **The root of `numora` exports only** `NumoraInput`, `FormatOn`, `GroupingStyle`,
   `getSeparatorsFromLocale`, `formatValue`, `parseValue` and the types. The twelve
   sanitization steps (`normalizeDigits`, `expandScientificNotation`, ...) moved unchanged to
-  `numora/pipeline`. `sanitizeNumoraInput`, `formatValueForDisplay`, `displayToRawValue`,
+  `numora/pipeline` (no semver guarantee). `sanitizeNumoraInput`, `formatValueForDisplay`, `displayToRawValue`,
   `normalizeNegativeZero`, `applyLocale`, `validateNumoraInputOptions` and `InputType` moved
   to `numora/internal` (no semver guarantee); `numora-react` no longer re-exports `InputType`.
 - **`numora-react` depends on `numora` at an exact version** instead of listing it as a peer
@@ -126,6 +131,12 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   to fr-FR left `1.234.567,89` on screen; an uncontrolled field never repainted at all.
 
 ### Added
+- **`onFormattedValueChange(formattedValue)` in both packages.** It is called with the display
+  string every time Numora rewrites the field and the text is new: typing, paste, undo/redo,
+  the blur regroup, the focus strip, `setValue()`, an option or locale change, and in React a
+  new `value` prop. It is not called on creation or mount. `onValueChange` is unchanged and
+  still reports raw changes only. The Torph integration docs and demos use it in place of
+  `focus`, `blur` and `click` listeners.
 - **React: `ref.current.setValue(value, { undoable })`,** the same write as the vanilla
   `setValue()`: no callback, no `isAllowed`, ungrouped text on a focused `formatOn: 'blur'`
   field. A controlled field goes back to its `value` prop.

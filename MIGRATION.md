@@ -31,6 +31,7 @@ If your React app also lists `numora`, keep it at the same version as `numora-re
 | `thousandSeparator: ''` | `groupingStyle: 'none'` (an empty separator now throws) |
 | `emitRawValue`, `rawValueMode` | removed: the raw value is always reported |
 | type `FormattingOptions` | `NumoraOptions` |
+| `formatOn` left out (was `'blur'`) | the default is now `'change'`; pass `formatOn: 'blur'` to keep grouping on blur only |
 
 New in v5: `allowScientificNotation` (default `true`).
 
@@ -127,11 +128,28 @@ The root of `numora` now exports only `NumoraInput`, `FormatOn`, `GroupingStyle`
 
 | You imported from `numora` | v5 |
 |---|---|
-| `removeThousandSeparators`, `normalizeForeignFormat`, `filterMobileKeyboardArtifacts`, `normalizeDigits`, `normalizeUnicodeMinus`, `expandCompactNotation`, `expandScientificNotation`, `removeNonNumericCharacters`, `removeExtraDecimalSeparators`, `removeLeadingZeros`, `prependLeadingZero`, `truncateToMaxLength` | same names from `numora/pipeline` |
+| `removeThousandSeparators`, `normalizeForeignFormat`, `filterMobileKeyboardArtifacts`, `normalizeDigits`, `normalizeUnicodeMinus`, `expandCompactNotation`, `expandScientificNotation`, `removeNonNumericCharacters`, `removeExtraDecimalSeparators`, `removeLeadingZeros`, `prependLeadingZero`, `truncateToMaxLength` | same names from `numora/pipeline`, which has no semver guarantee. Prefer `parseValue` when you only need the result |
 | `formatValueForDisplay` | `formatValue(raw, options)` |
 | `sanitizeNumoraInput`, `displayToRawValue` | `parseValue(text, options)` for text in the configured format |
 | `normalizeFullWidthDigits` | `normalizeDigits` from `numora/pipeline` |
 | `handleOnBeforeInputNumoraInput`, `handleOnPasteNumoraInput`, `handleOnKeyDownNumoraInput`, `writeValuePreservingUndo`, `validateNumoraInputOptions`, `applyLocale`, `InputType` | not public. Some remain on `numora/internal`, which has no semver guarantee |
+
+## New: `onFormattedValueChange`
+
+Both packages have a callback for the display string. It fires every time Numora rewrites the
+field, including the blur regroup, the focus strip, `setValue()` and a locale change, which
+`onValueChange` does not report. If you kept an overlay or a label in sync with `focus`, `blur`
+or `click` listeners, replace them with it:
+
+```ts
+new NumoraInput(host, { onFormattedValueChange: (text) => overlay.update(text) });
+```
+
+```tsx
+<NumoraInput onFormattedValueChange={setText} />
+```
+
+It does not fire on creation or mount. `formatValue(defaultValue, options)` gives the first text.
 
 ## New: format and parse without an input
 

@@ -86,7 +86,7 @@ A `readOnly` or `disabled` field ignores paste, as a native `<input>` does. Numo
 | `decimalSeparator` | `string` | `'.'` | Decimal separator character |
 | `thousandSeparator` | `string` | `','` | Thousand separator character (exactly one; use `groupingStyle: 'none'` to turn grouping off) |
 | `groupingStyle` | `'thousand' \| 'lakh' \| 'wan' \| 'none'` | `'thousand'` | Grouping style |
-| `formatOn` | `'blur' \| 'change'` | `'blur'` | When grouping is applied: on blur, or on every keystroke |
+| `formatOn` | `'change' \| 'blur'` | `'change'` | When grouping is applied: on every keystroke, or on blur |
 | `allowCompactNotation` | `boolean` | `false` | Expand compact notation ("1k" → "1000") on paste and in `setValue` |
 | `allowScientificNotation` | `boolean` | `true` | Expand scientific notation; when `false`, typed, pasted or inserted scientific notation is rejected (autofill restores the previous value). App values (`defaultValue`, `setValue`) always expand |
 | `allowNegative` | `boolean` | `false` | Allow negative numbers |
@@ -96,6 +96,7 @@ A `readOnly` or `disabled` field ignores paste, as a native `<input>` does. Numo
 | `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject a keystroke/paste when it returns false (called with the post-sanitization raw value). A callback that throws is treated as "not allowed" (the keystroke is rejected) and the error is reported via `console.error` |
 | `locale` | `LocaleTag \| boolean` | `undefined` | Derive separators and grouping from `Intl.NumberFormat`; `true` uses the runtime default locale and `false` is the same as leaving it out. An explicit `thousandSeparator`, `decimalSeparator` or `groupingStyle` wins; `locale` fills the ones you did not set |
 | `onValueChange` | `(values: { value: string; formattedValue: string }) => void` | `undefined` | Called when value changes. `value` is the canonical raw value, `formattedValue` the display string |
+| `onFormattedValueChange` | `(formattedValue: string) => void` | `undefined` | Called with the display string every time Numora rewrites the field, including the blur regroup, the focus strip, `setValue()` and a format-only `update()`. Not called on creation |
 | `defaultValue` | `string` | `undefined` | Initial value, as a canonical raw value (the same name as the React prop). An adopted `<input>` keeps its own value unless this is passed. Write later with `setValue()` |
 | `id`, `name`, `className`, `placeholder`, `disabled`, `readOnly`, `required`, `tabIndex`, `title`, `autofocus`, `ariaLabel` | | | Forwarded to the element. Set anything else on `input.element` |
 
@@ -112,7 +113,8 @@ in development, because it may already have lost precision. `setValue(value, { u
 writes without an undo step.
 
 `setValue()` is your own write, so it does not call `onValueChange` and is not checked by
-`isAllowed`. Both exist for edits the user makes. On a focused `formatOn: 'blur'` field it writes
+`isAllowed`. Both exist for edits the user makes. The new text still reaches
+`onFormattedValueChange`. On a focused `formatOn: 'blur'` field it writes
 the ungrouped editing text, and grouping is applied on blur as usual.
 
 Invalid options throw, from the constructor and from `update()`: for example a separator longer
@@ -124,6 +126,20 @@ Numora sets no `pattern` attribute and leaves alone one you set yourself.
 `onValueChange` fires when the raw value changes. A blur or an `update()` that only regroups the
 display emits nothing. One that changes the raw value does: a trailing separator strip,
 `decimalMinLength` padding, `-0` to `0`, or digits cut by a smaller `decimalMaxLength`.
+
+`onFormattedValueChange` fires when the text in the field changes, whatever the cause. Use it
+to mirror the field, for example in an animated overlay:
+
+```ts
+const input = new NumoraInput(host, {
+  defaultValue: '1234567',
+  onFormattedValueChange: (text) => morph.update(text),
+});
+morph.update(input.formattedValue); // creation calls no callback
+```
+
+It also fires for the rewrites `onValueChange` leaves out: the blur regroup, the focus strip,
+`setValue()` and a new locale. The same text is never reported twice in a row.
 
 Options removed or renamed since v4 are ignored and, in development, logged with their
 replacement. See the [migration guide](../../MIGRATION.md).
@@ -150,7 +166,7 @@ submit) reads the display text, grouping included.
 | Import | Contents |
 |--------|----------|
 | `numora` | `NumoraInput`, `FormatOn`, `GroupingStyle`, `getSeparatorsFromLocale`, `formatValue`, `parseValue`, types |
-| `numora/pipeline` | The individual sanitization steps as pure string functions (`normalizeDigits`, `expandScientificNotation`, `removeThousandSeparators`, ...) for a custom pipeline |
+| `numora/pipeline` | The individual sanitization steps as pure string functions (`normalizeDigits`, `expandScientificNotation`, `removeThousandSeparators`, ...) for a custom pipeline. No semver guarantee: a step can change or go in a minor release. Use `parseValue` when you only need the result |
 | `numora/internal` | Plumbing shared with `numora-react`. No semver guarantee |
 
 ## Documentation
