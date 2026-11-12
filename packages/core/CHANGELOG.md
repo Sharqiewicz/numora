@@ -1,4 +1,4 @@
-# Changelog — `numora`
+# Changelog for `numora`
 
 ## Unreleased
 
@@ -15,7 +15,10 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   `input.formattedValue`, `input.element`, the same names as a React ref. They are read-only;
   `setValue()` writes. `getValue()`, `getFormattedValue()`,
   `getElement()` and `valueAsNumber` are removed. `setValue(value, { undoable })` stays.
-- **Vanilla `defaultValue` is removed:** use `value`. The constructor forwards only a short
+- **Vanilla `defaultValue` is the initial value**, the same name as the React prop. A `value`
+  option is ignored and, in development, logged. `setValue()` writes later; it does not call
+  `onValueChange`, is not checked by `isAllowed`, and on a focused `formatOn: 'blur'` field
+  writes the ungrouped editing text. The constructor forwards only a short
   list of native attributes (`id`, `name`, `className`, `placeholder`, `disabled`, `readOnly`,
   `required`, `tabIndex`, `title`, `autofocus`, `ariaLabel`); set anything else on
   `input.element`.
@@ -27,6 +30,24 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   to `numora/internal` (no semver guarantee); `numora-react` no longer re-exports `InputType`.
 - **`numora-react` depends on `numora` at an exact version** instead of listing it as a peer
   (ADR 0007). The two packages are released together with the same version.
+- **Vanilla `NumoraInput` no longer sets a `pattern` attribute.** The React component never
+  did, and the generated regex could not describe every option combination. A `pattern` you
+  set on the element yourself is left alone.
+- **`value`, React `defaultValue` and `setValue()` are typed `string`.** A `number` is a type
+  error. At runtime it is still converted with `String()`, and logged in development, because
+  a JS number may already have lost precision.
+- **React: `NumoraHTMLInputElement.rawValue` and `.formattedValue` are required and
+  read-only.** `formattedValue` always reads the field's current text (the same as
+  `ref.current.value`) instead of the last value Numora wrote, and assigning to it throws.
+- **React: a controlled field always shows its `value` prop.** An edit that `onChange` /
+  `onValueChange` does not store is put back (typing, paste, undo), with the caret at the end,
+  as a native controlled `<input>` does.
+- **React: your `onKeyDown` and `onPaste` run before Numora's handling**, and
+  `e.preventDefault()` in either skips it. `onPaste` sees the field before the write.
+- **React: `autoComplete="off"` and `spellCheck={false}` are defaults** that your props
+  override; `type` and `inputMode` stay fixed.
+- **React: `react-dom` is no longer a peer dependency**, and the package ships separate
+  type declarations for `import` and `require`.
 - **React: a blur that only regroups the display no longer fires `onChange` /
   `onValueChange`.** Both packages notify only when the raw value changed (ADR 0008).
 - **The raw value is canonical in every locale**: ASCII digits, `.` as the decimal mark, `-`
@@ -105,6 +126,16 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   to fr-FR left `1.234.567,89` on screen; an uncontrolled field never repainted at all.
 
 ### Added
+- **React: `ref.current.setValue(value, { undoable })`,** the same write as the vanilla
+  `setValue()`: no callback, no `isAllowed`, ungrouped text on a focused `formatOn: 'blur'`
+  field. A controlled field goes back to its `value` prop.
+- **Type declarations for both module formats.** `numora` ships one bundled `.d.mts` and
+  `.d.cts` per entry, and `numora/internal` and `numora/pipeline` also resolve under legacy
+  `node10` resolution. Both packages pass publint and arethetypeswrong.
+- **`locale` accepts a boolean** (`LocaleTag | boolean`), so `locale={flag}` type-checks; `false`
+  is the same as leaving it out.
+- **React: `ref.current.rawValue` and `formattedValue` exist as soon as the ref is set**, so a
+  parent layout effect or a callback ref can read them.
 - **`formatValue(value, options?)` and `parseValue(text, options?)`:** format a canonical raw
   value for display, or read display text back, with no input element
   (`formatValue('1234.5', { locale: 'de-DE', decimalMinLength: 2 })` is `'1.234,50'`). Also
@@ -114,6 +145,9 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   the same when formatting props change.
 - **The vanilla `options` argument is optional:** `new NumoraInput(target)`.
 - **React: `ref.current.rawValue`** reads the canonical raw value next to `formattedValue`.
+- **`numora-react` re-exports `getSeparatorsFromLocale`.**
+- **React: a development warning when `locale={true}` is rendered on the server,** where it
+  resolves to the server's locale. Pass an explicit tag for a server-rendered field.
 - **`allowScientificNotation`** option (default `true`, same behaviour as v4). Set it to
   `false` to reject scientific notation typed, pasted or inserted by the user instead of
   expanding it (`1.5e-7` would otherwise become `1.57`): paste and multi-character `beforeinput`
@@ -162,7 +196,7 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   DOM writers share one implementation, and the notation, leading-zero and foreign-format
   features each take a single code path.
 - Deleted `features/formatting/cursor-position.ts` (`calculateCursorPositionAfterFormatting`,
-  the unreachable digit-counting handlers, and the `_dcCache` memo) — ~600 lines now made
+  the unreachable digit-counting handlers, and the `_dcCache` memo), ~600 lines now made
   dead by the rank/select swap. This symbol was exported only from the internal
   `features/formatting` barrel, **not** from the package entry (`src/index.ts`), so consumers
   importing from `numora` are unaffected. Deep imports of
