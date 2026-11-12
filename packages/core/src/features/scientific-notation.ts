@@ -71,14 +71,16 @@ export function expandScientificNotation(value: string, decimalSeparator: string
       while (isDigit(value[e])) e++;
 
       if (e > expDigitsStart) {
-        // Reject a token like "1e3.5": the exponent grammar is digits-only, so a decimal
-        // separator immediately followed by a digit right after the exponent digits would
-        // otherwise leak through untouched and get silently concatenated by
-        // `removeNonNumericCharacters` downstream, fabricating a magnitude
-        // ("1e3.5" -> "1000.5"). Treat it the same as an over-range exponent: drop the
-        // base+exponent token (the leftover ".5" is untouched here and handled, or not,
-        // by later pipeline steps - same as the huge-exponent path below).
+        // Reject a token like "1e3.5": the exponent grammar is digits-only, so a leftover
+        // ".5" would otherwise be concatenated by `removeNonNumericCharacters` downstream
+        // ("1e3.5" -> "1000.5"). Drop the whole token, including its separator-plus-digits
+        // tail, so the result is visibly wrong rather than a plausible ".5". Like the
+        // huge-exponent path below, this is a deliberate rejection.
         if (value[e] === decimalSeparator && isDigit(value[e + 1])) {
+          while (value[e] === decimalSeparator && isDigit(value[e + 1])) {
+            e++;
+            while (isDigit(value[e])) e++;
+          }
           i = e;
           continue;
         }

@@ -73,35 +73,55 @@ export const InputType = {
 } as const;
 export type InputType = (typeof InputType)[keyof typeof InputType];
 
-export interface FormattingOptions {
+/**
+ * Every Numora option, defined once. The vanilla `NumoraInputOptions`, the React
+ * `NumoraInputProps` and the headless helpers all take this same shape.
+ */
+export interface NumoraOptions {
+  /**
+   * Derive `thousandSeparator`, `decimalSeparator` and `groupingStyle` from a BCP 47 tag
+   * (`'de-DE'`), or from the runtime's own locale (`true`). `false` is the same as leaving
+   * it out. An explicitly passed separator or grouping style still wins.
+   */
+  locale?: LocaleTag | boolean;
   formatOn?: FormatOn;
   /**
-   * Grouping mark. Exactly ONE character (UTF-16 code unit), or `''` for none; anything else
-   * throws in `validateNumoraInputOptions`. Caret and sanitization code relies on this and
-   * compares one character at a time.
+   * Grouping mark. Exactly ONE character (UTF-16 code unit); anything else throws in
+   * `validateNumoraInputOptions`. Caret and sanitization code relies on this and compares
+   * one character at a time. To turn grouping off, set `groupingStyle: 'none'`.
    */
   thousandSeparator?: string;
+  /**
+   * Digit-grouping style. When `locale` is set and this is left unset, the style is derived
+   * from the locale (Indic locales -> `lakh`).
+   * @defaultValue 'thousand'
+   */
   groupingStyle?: GroupingStyle;
-  enableCompactNotation?: boolean;
+  allowCompactNotation?: boolean;
   /**
    * When true (the default), pasted scientific notation is expanded (`1.5e-7` →
    * `0.00000015`). When false, such a paste is rejected and the field is left unchanged,
    * because dropping the `e` would silently change the number (`1.5e-7` → `1.57`). Values supplied by
-   * the app (`value`, `defaultValue`, `setValue`) are always expanded, since JS prints large
+   * the app (`value`, `setValue`) are always expanded, since JS prints large
    * and small numbers this way (`String(1e21)` is `"1e+21"`).
    */
-  enableScientificNotation?: boolean;
-  enableNegative?: boolean;
-  enableLeadingZeros?: boolean;
+  allowScientificNotation?: boolean;
+  allowNegative?: boolean;
+  allowLeadingZeros?: boolean;
   /**
    * When true, a bare leading decimal separator gets a `0` prepended (`.5` → `0.5`,
    * `-.5` → `-0.5`). Useful for currency-style fields where leading-decimal entry is
    * common but `0.` form is the canonical representation.
    */
-  autoAddLeadingZero?: boolean;
+  padLeadingZero?: boolean;
   /** Decimal mark. Exactly ONE character (enforced by `validateNumoraInputOptions`). */
   decimalSeparator?: string;
+  /**
+   * Maximum number of decimal places; extra digits are truncated, never rounded. Defaults to
+   * 18 (most ERC-20 tokens). Fiat/checkout fields typically set this to 2.
+   */
   decimalMaxLength?: number;
+  /** Minimum decimal places, zero-padded on display/blur only - never per keystroke. */
   decimalMinLength?: number;
   /**
    * Maximum length of the raw (unformatted) value. Counts digits, the decimal separator,
@@ -125,13 +145,13 @@ export interface FormattingOptions {
   /**
    * Custom keystroke/paste validator. Called with the post-sanitization raw value the
    * input would have after the user's action. Return false to reject the edit (no value
-   * change, no onChange fires, undo history is untouched).
+   * change, no change notification fires, undo history is untouched).
    */
   isAllowed?: (rawValue: string) => boolean;
 }
 
 /**
- * Payload of every change notification (vanilla `onChange`, React `onValueChange`).
+ * Payload of every change notification (`onValueChange` in both packages).
  * `value` is the canonical raw value (ASCII digits, `.` decimal, `-` sign, no grouping, the
  * same for every locale); `formattedValue` is the string shown in the field.
  */

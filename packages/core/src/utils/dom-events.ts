@@ -2,7 +2,7 @@ import {
   FormatOn,
   GroupingStyle,
   InputType,
-  type FormattingOptions,
+  type NumoraOptions,
   type NumoraValues,
 } from '../types';
 import type { ValueSource } from '../features/sanitization';
@@ -15,6 +15,7 @@ import {
   handleOnPasteNumoraInput,
   isScientificNotationRejected,
 } from './event-handlers';
+import { appValue } from './app-value';
 import { computeCaretAfterRewrite } from './caret';
 import {
   displayToRawValue,
@@ -30,11 +31,17 @@ import {
  * to notify.
  */
 
-/** Options as both wrappers resolve them: separators and `decimalMaxLength` filled in. */
-export type ResolvedFormattingOptions = FormattingOptions & {
-  decimalMaxLength: number;
-  decimalSeparator: string;
-};
+/**
+ * Options as `resolveOptions` returns them: `locale` already turned into separators, and
+ * everything the event steps read unconditionally filled in.
+ */
+export type ResolvedNumoraOptions = Omit<NumoraOptions, 'locale'> &
+  Required<
+    Pick<
+      NumoraOptions,
+      'formatOn' | 'thousandSeparator' | 'groupingStyle' | 'decimalSeparator' | 'decimalMaxLength'
+    >
+  >;
 
 /**
  * Resting format for values not being typed (initial, programmatic, blur): grouping always
@@ -43,7 +50,7 @@ export type ResolvedFormattingOptions = FormattingOptions & {
  */
 export function formatForDisplay(
   value: string,
-  opts: ResolvedFormattingOptions,
+  opts: ResolvedNumoraOptions,
   source?: ValueSource
 ): { formatted: string; raw: string } {
   return formatValueForDisplay(
@@ -52,6 +59,27 @@ export function formatForDisplay(
     { ...opts, formatOn: FormatOn.Change },
     source
   );
+}
+
+/**
+ * The app's own write (ADR 0011), shared by vanilla `setValue()` and the React ref's: a
+ * canonical raw value through the same pipeline as typing, in the edit format on a focused
+ * field and the resting format otherwise. Returns the text written.
+ */
+export function applySetValue(
+  el: HTMLInputElement,
+  value: string,
+  focused: boolean,
+  opts: ResolvedNumoraOptions,
+  undoable?: boolean
+): string {
+  const raw = appValue(value, 'setValue()');
+  const { formatted } = focused
+    ? formatValueForDisplay(raw, opts.decimalMaxLength, opts, 'canonical')
+    : formatForDisplay(raw, opts, 'canonical');
+  if (undoable === false) el.value = formatted;
+  else writeValuePreservingUndo(el, formatted, formatted.length);
+  return formatted;
 }
 
 const write = (
@@ -67,7 +95,7 @@ const write = (
 /** `beforeinput`: cancels the edit when Numora handles or rejects it, and writes the result. */
 export function applyBeforeInput(
   e: InputEvent,
-  opts: ResolvedFormattingOptions
+  opts: ResolvedNumoraOptions
 ): NumoraValues | undefined {
   const result = handleOnBeforeInputNumoraInput(e, opts.decimalMaxLength, opts);
   if (result.type === 'skip') return;
@@ -80,7 +108,7 @@ export function applyBeforeInput(
 /** `paste`: always cancels the browser's paste. A readOnly or disabled field takes nothing. */
 export function applyPaste(
   e: ClipboardEvent,
-  opts: ResolvedFormattingOptions
+  opts: ResolvedNumoraOptions
 ): NumoraValues | undefined {
   e.preventDefault();
   const el = e.target as HTMLInputElement;
@@ -95,7 +123,7 @@ export function applyPaste(
  *
  * - Undo/redo: the browser restored an earlier string. Report it, don't rewrite it: another
  *   write would push an undo step and break the Ctrl+Z walk-back.
- * - Scientific notation while `enableScientificNotation` is false: put back `previous` (the
+ * - Scientific notation while `allowScientificNotation` is false: put back `previous` (the
  *   last value Numora wrote) and report nothing, since the value didn't change.
  * - Otherwise reformat. While `focused` the text is mid-edit and keeps the field's typing
  *   rules; unfocused it is landing at rest (e.g. autofill), so it gets the resting format.
@@ -105,7 +133,7 @@ export function applyInputFallback(
   inputType: string,
   focused: boolean,
   previous: string,
-  opts: ResolvedFormattingOptions
+  opts: ResolvedNumoraOptions
 ): NumoraValues | undefined {
   const value = el.value;
   if (inputType === InputType.HistoryUndo || inputType === InputType.HistoryRedo) {
@@ -116,8 +144,11 @@ export function applyInputFallback(
     writeValuePreservingUndo(el, previous, previous.length);
     return;
   }
+  // A focused Change-mode field already shows its own grouping, which foreign detection would
+  // misread as a decimal (`12,3456`). Blur mode shows none while focused, so it stays foreign.
+  const own = focused && opts.formatOn === FormatOn.Change;
   const { formatted, raw } = focused
-    ? formatInputValue(value, opts.decimalMaxLength, opts, undefined, 'foreign')
+    ? formatInputValue(value, opts.decimalMaxLength, opts, undefined, own ? 'display' : 'foreign')
     : formatForDisplay(value, opts, 'foreign');
   if (formatted === value) return { value: raw, formattedValue: formatted };
   // Max of start/end works around a mobile-browser caret bug where selectionStart lags.
@@ -139,16 +170,16 @@ export function applyInputFallback(
 
 /**
  * Blur: settle the value at rest (grouping, padding, trailing separator strip, `-0` to `0`).
- * Runs in Blur mode, or when `decimalMinLength` or `enableNegative` need a resting fix-up; a
- * Change-mode field is otherwise already at rest. Returns `undefined` when the display didn't
- * change. `rawChanged` is false when only the grouping changed: vanilla reports only raw
- * changes, React also reports display changes so mirrors of `formattedValue` stay in sync.
+ * Runs in Blur mode, or when `decimalMinLength` or `allowNegative` need a resting fix-up; a
+ * Change-mode field is otherwise already at rest. Returns the values only when the raw value
+ * changed (trailing separator strip, `decimalMinLength` padding, `-0` to `0`): regrouping
+ * alone is cosmetic, so it is written but not reported, in both packages.
  */
 export function applyBlur(
   el: HTMLInputElement,
-  opts: ResolvedFormattingOptions
-): (NumoraValues & { rawChanged: boolean }) | undefined {
-  if (opts.formatOn !== FormatOn.Blur && !opts.decimalMinLength && !opts.enableNegative) return;
+  opts: ResolvedNumoraOptions
+): NumoraValues | undefined {
+  if (opts.formatOn !== FormatOn.Blur && !opts.decimalMinLength && !opts.allowNegative) return;
   const before = displayToRawValue(el.value, opts);
   const { formatted, raw } = formatForDisplay(
     normalizeNegativeZero(el.value, opts.decimalSeparator),
@@ -156,7 +187,7 @@ export function applyBlur(
   );
   if (formatted === el.value) return;
   writeValuePreservingUndo(el, formatted, formatted.length);
-  return { value: raw, formattedValue: formatted, rawChanged: raw !== before };
+  if (raw !== before) return { value: raw, formattedValue: formatted };
 }
 
 /**
@@ -173,14 +204,13 @@ export function applyBlur(
  */
 export function attachFocusStrip(
   el: HTMLInputElement,
-  getOpts: () => ResolvedFormattingOptions,
+  getOpts: () => ResolvedNumoraOptions,
   onStrip: () => void
 ): () => void {
   let pendingMouse = false;
   const strip = () => {
     const { formatOn, thousandSeparator, groupingStyle } = getOpts();
-    if (formatOn !== FormatOn.Blur || !thousandSeparator || groupingStyle === GroupingStyle.None)
-      return;
+    if (formatOn !== FormatOn.Blur || groupingStyle === GroupingStyle.None) return;
     const result = computeStripSeparatorsResult(
       el.value,
       el.selectionStart ?? 0,

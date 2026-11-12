@@ -9,40 +9,60 @@ import {
   type ChangeEvent,
   type FocusEvent,
   type KeyboardEvent,
+  type ForwardRefExoticComponent,
   type InputHTMLAttributes,
+  type Ref,
+  type RefObject,
 } from 'react';
 import { useIsomorphicLayoutEffect } from './use-isomorphic-layout-effect';
 
-// Public types/enums come from the package root; the shared DOM-event steps come from the
-// internal subpath.
+// Public types come from the package root; the shared DOM-event steps and pipeline helpers
+// come from the internal subpath.
+import type { NumoraOptions, NumoraValues } from 'numora';
 import {
-  FormatOn,
-  type GroupingStyle,
-  applyLocale,
+  displayToRawValue,
   formatValueForDisplay,
   sanitizeNumoraInput,
-  validateNumoraInputOptions,
-  type LocaleTag,
-  type NumoraValues,
-} from 'numora';
-import {
   applyBeforeInput,
   applyBlur,
   applyInputFallback,
   applyPaste,
+  applySetValue,
   attachFocusStrip,
   formatForDisplay,
   handleOnKeyDownNumoraInput,
   writeValuePreservingUndo,
-  DEFAULT_THOUSAND_SEPARATOR,
-  DEFAULT_DECIMAL_SEPARATOR,
-  DEFAULT_GROUPING_STYLE,
-  type ResolvedFormattingOptions,
+  isProduction,
+  resolveOptions,
+  takeRemovedOptions,
+  warnRemovedOptions,
+  appValue,
+  warnServerLocale,
+  type ResolvedNumoraOptions,
 } from 'numora/internal';
 
 export interface NumoraHTMLInputElement extends HTMLInputElement {
-  /** The formatted display string - the same value shown in the input, including thousand separators. */
-  formattedValue?: string;
+  /**
+   * The display string shown in the field right now, grouping included. Same as `value` on
+   * the element. Available as soon as the ref is set.
+   */
+  readonly formattedValue: string;
+  /**
+   * The canonical raw value of the field right now: ASCII digits, `.` decimal, no grouping.
+   * Read it from a ref (`ref.current.rawValue`), where `value` is the display string.
+   * Available as soon as the ref is set.
+   */
+  readonly rawValue: string;
+  /**
+   * Writes a canonical raw value into the field, the same as the vanilla `setValue()`. It is
+   * the app's own write: it calls neither `onChange` nor `onValueChange` and is not checked
+   * by `isAllowed`. For uncontrolled fields. A controlled field goes straight back to its
+   * `value` prop, so change that prop instead.
+   *
+   * @param options.undoable - Defaults to `true` (Ctrl+Z reverts the write). `false` wipes
+   *   the undo history, e.g. for a form reset.
+   */
+  setValue(value: string, options?: { undoable?: boolean }): void;
 }
 
 /**
@@ -72,8 +92,7 @@ export type { NumoraValues };
 
 /**
  * Creates a synthetic change event where `target.value` returns the raw (unformatted)
- * numeric string via a Proxy, and `target.formattedValue` exposes the formatted display
- * value (already set on the element before this is called).
+ * numeric string via a Proxy, and `target.formattedValue` is the element's display string.
  */
 function createSyntheticChangeEvent(
   input: NumoraHTMLInputElement,
@@ -113,16 +132,24 @@ function createSyntheticChangeEvent(
   } as NumoraInputChangeEvent;
 }
 
+// `activeElement` of the input's own root: `document.activeElement` is the host inside a
+// shadow root or the iframe element for a portaled input, never the input.
+const isFocused = (el: HTMLElement) => (el.getRootNode() as Document | ShadowRoot).activeElement === el;
+
 export interface NumoraInputProps
-  extends Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    'onChange' | 'type' | 'inputMode' | 'onFocus' | 'onBlur' | 'maxLength'
-  > {
+  extends NumoraOptions,
+    Omit<
+      InputHTMLAttributes<HTMLInputElement>,
+      'onChange' | 'type' | 'inputMode' | 'onFocus' | 'onBlur' | 'maxLength' | 'value' | 'defaultValue'
+    > {
   /**
-   * Maximum number of decimal places. Defaults to 18 (DeFi-safe: most ERC-20 tokens use
-   * 18 decimals). Fiat/checkout fields typically set this to 2.
+   * Controlled value, as a canonical raw string (`'1234.5'` in every locale). Never a number.
+   * The field shows this value after every change: an edit your handler does not store is
+   * put back.
    */
-  decimalMaxLength?: number;
+  value?: string;
+  /** Initial value of an uncontrolled field, as a canonical raw string. Never a number. */
+  defaultValue?: string;
   onChange?: (e: NumoraInputChangeEvent) => void;
   /**
    * Plain-object value callback: `{ value, formattedValue }`, fired on every change
@@ -130,66 +157,39 @@ export interface NumoraInputProps
    * data callback (mirrors react-number-format's `onValueChange`).
    */
   onValueChange?: (values: NumoraValues) => void;
+  /**
+   * Fired with the display string every time Numora rewrites the field, including the
+   * rewrites `onChange` / `onValueChange` are silent about: the blur regroup, the focus strip,
+   * `ref.setValue()`, a new `value` prop and a formatting-prop change. Not fired on mount
+   * (`formatValue(value, options)` gives the first text) and never twice in a row for the
+   * same text. Use it to mirror the field, e.g. in an animated overlay.
+   */
+  onFormattedValueChange?: (formattedValue: string) => void;
   onFocus?: (e: FocusEvent<HTMLInputElement>) => void;
   onBlur?: (e: FocusEvent<HTMLInputElement>) => void;
-
-  locale?: LocaleTag | true;
-  formatOn?: FormatOn;
-  thousandSeparator?: string;
-  /**
-   * Digit-grouping style for the thousand separator. When `locale` is set and this is
-   * left unset, the style is derived from the locale (Indic locales -> `Lakh`).
-   * @defaultValue GroupingStyle.Thousand
-   */
-  groupingStyle?: GroupingStyle;
-  decimalSeparator?: string;
-  decimalMinLength?: number;
-
-  enableCompactNotation?: boolean;
-  /** Expand pasted `1.5e-7` (default). Set `false` to reject such a paste instead. */
-  enableScientificNotation?: boolean;
-  enableNegative?: boolean;
-  enableLeadingZeros?: boolean;
-  autoAddLeadingZero?: boolean;
-
-  /**
-   * Max raw length (digits, decimal separator, and leading `-`). Thousand separators are
-   * NOT counted. Enforced at keystroke (typing past it is rejected) and on paste (the
-   * combined value is truncated). Does NOT set the native HTML `maxLength` attribute,
-   * which would count formatted characters and double-count separators.
-   */
-  maxLength?: number;
-  /**
-   * Custom validator. Called with the post-sanitization raw value the input would have
-   * after the keystroke or paste. Return false to reject the edit - no value change,
-   * no `onChange` fires, undo history is untouched.
-   */
-  isAllowed?: (rawValue: string) => boolean;
 }
 
-const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) => {
+const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((props, ref) => {
   const {
-    decimalMaxLength = 18,
+    decimalMaxLength,
     onChange,
     onValueChange,
+    onFormattedValueChange,
     onPaste,
     onBlur,
     onKeyDown,
     onFocus,
     locale,
-    formatOn = FormatOn.Blur,
+    formatOn,
     thousandSeparator,
-    // Deliberately NOT defaulted here: `applyLocale` can derive the grouping style from
-    // the locale (Indic locales -> Lakh), and a pre-applied default would always win the
-    // `?? ` below and swallow the derived value. Defaulted after locale resolution.
     groupingStyle,
     decimalSeparator,
     decimalMinLength,
-    enableCompactNotation,
-    enableScientificNotation,
-    enableNegative,
-    enableLeadingZeros,
-    autoAddLeadingZero,
+    allowCompactNotation,
+    allowScientificNotation,
+    allowNegative,
+    allowLeadingZeros,
+    padLeadingZero,
     maxLength,
     isAllowed,
     value: controlledValue,
@@ -197,42 +197,47 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     ...rest
   } = props;
 
+  // Props removed since v4: kept off the DOM here, warned about once on mount.
+  const stale = takeRemovedOptions(rest);
+
+  const lastValidOptions = useRef<ResolvedNumoraOptions | undefined>(undefined);
   // biome-ignore lint/correctness/useExhaustiveDependencies: callbacks are read via stateRef; a new onChange/isAllowed identity must not re-resolve options.
-  const formattingOptions: ResolvedFormattingOptions = useMemo(() => {
-    const separators = applyLocale(locale, { thousandSeparator, decimalSeparator, groupingStyle });
-    // Resolve separator defaults BEFORE validating, exactly as the vanilla class does
-    // (NumoraInput resolves then validates). Validating the unresolved options let a
-    // half-configured locale — e.g. thousandSeparator '.' with decimalSeparator left to
-    // default to '.' — slip past the separator-conflict check and silently swallow the
-    // decimal part at runtime. It also left thousandSeparator undefined, disabling grouping
-    // even though the README documents ',' as the default.
-    const options: ResolvedFormattingOptions = {
-      formatOn,
-      thousandSeparator: separators.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR,
-      groupingStyle: separators.groupingStyle ?? DEFAULT_GROUPING_STYLE,
-      decimalSeparator: separators.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
-      decimalMaxLength,
-      decimalMinLength,
-      enableCompactNotation,
-      enableScientificNotation,
-      enableNegative,
-      enableLeadingZeros,
-      autoAddLeadingZero,
-      maxLength,
-      // Stable identity so `isAllowed` stays out of the memo's deps; delegates to the
-      // current `isAllowed` via stateRef (read only from event handlers, after commit).
-      isAllowed: (rawValue: string) => stateRef.current.isAllowed?.(rawValue) ?? true,
-    };
-    // Validate inside useMemo so misconfig throws early in both dev and prod, and we
-    // don't re-validate on every render. Validated against this render's real onChange/
-    // isAllowed (not the stable wrapper) so a genuine caller mistake (wrong type) still
-    // throws. The cast bridges the signature gap: vanilla's onChange takes a values object,
-    // React's takes an event - assertFunction only checks `typeof === 'function'`.
-    validateNumoraInputOptions({
-      ...options,
-      isAllowed,
-      onChange: onChange as unknown as ((values: NumoraValues) => void) | undefined,
-    });
+  const formattingOptions: ResolvedNumoraOptions = useMemo(() => {
+    warnServerLocale(locale);
+    // Same resolver as the vanilla class: locale, defaults, then validation of the resolved
+    // options against this render's real `isAllowed`/`onChange`, so a wrong type still throws.
+    let options: ResolvedNumoraOptions;
+    try {
+      options = resolveOptions({
+        locale,
+        formatOn,
+        thousandSeparator,
+        groupingStyle,
+        decimalSeparator,
+        decimalMaxLength,
+        decimalMinLength,
+        allowCompactNotation,
+        allowScientificNotation,
+        allowNegative,
+        allowLeadingZeros,
+        padLeadingZero,
+        maxLength,
+        isAllowed,
+        onChange,
+        onValueChange,
+        onFormattedValueChange,
+      });
+    } catch (error) {
+      // Invalid options throw in development. In production a bad prop must not take the
+      // page down: log it and keep the last valid options (the defaults on a first render).
+      if (!isProduction()) throw error;
+      console.error(error);
+      options = lastValidOptions.current ?? resolveOptions({});
+    }
+    lastValidOptions.current = options;
+    // Stable identity so `isAllowed` stays out of the memo's deps; delegates to the
+    // current `isAllowed` via stateRef (read only from event handlers, after commit).
+    options.isAllowed = (rawValue: string) => stateRef.current.isAllowed?.(rawValue) ?? true;
     return options;
   }, [
     locale,
@@ -242,27 +247,52 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     decimalSeparator,
     decimalMaxLength,
     decimalMinLength,
-    enableCompactNotation,
-    enableScientificNotation,
-    enableNegative,
-    enableLeadingZeros,
-    autoAddLeadingZero,
+    allowCompactNotation,
+    allowScientificNotation,
+    allowNegative,
+    allowLeadingZeros,
+    padLeadingZero,
     maxLength,
   ]);
 
   const internalInputRef = useRef<HTMLInputElement>(null);
   // Latest props for the mount-only DOM listeners and the stable `isAllowed` wrapper,
   // refreshed every render by the layout effect below.
-  const stateRef = useRef({ onChange, onValueChange, isAllowed, formattingOptions });
+  const stateRef = useRef({
+    onChange,
+    onValueChange,
+    onFormattedValueChange,
+    isAllowed,
+    formattingOptions,
+    controlledValue,
+  });
+  // Re-renders this component alone; see `emit`.
+  const [, resync] = useState(0);
+  // Field text after the last write Numora made; restored when the `input` fallback must
+  // refuse a value. Private: the public `formattedValue` reads the element.
+  const lastValue = useRef('');
+  // Last text given to `onFormattedValueChange`; seeded on mount, so mount reports nothing.
+  const reported = useRef('');
 
-  // The one place both React callbacks fire. Every caller first wrote the field, so the
-  // element's `formattedValue` mirror is refreshed here too.
+  // The one place the React callbacks fire. Every caller first wrote the field, so
+  // `lastValue` is refreshed here too. `values` are passed for a raw change only; a new
+  // display text is reported either way.
   const emit = (el: NumoraHTMLInputElement, values?: NumoraValues) => {
-    el.formattedValue = el.value;
+    const text = el.value;
+    lastValue.current = text;
+    const { onChange: cb, onValueChange: vcb, onFormattedValueChange: fcb } = stateRef.current;
+    if (values) {
+      cb?.(createSyntheticChangeEvent(el, values.value));
+      vcb?.({ value: values.value, formattedValue: values.formattedValue });
+    }
+    if (text !== reported.current) {
+      reported.current = text;
+      fcb?.(text);
+    }
     if (!values) return;
-    const { onChange: cb, onValueChange: vcb } = stateRef.current;
-    cb?.(createSyntheticChangeEvent(el, values.value));
-    vcb?.({ value: values.value, formattedValue: values.formattedValue });
+    // Controlled: render again even if the parent kept its state, so the layout effect below
+    // puts the field back to `value`. Batched with the parent's own update when it accepts.
+    if (stateRef.current.controlledValue !== undefined) resync((n) => n + 1);
   };
 
   // Computed once on mount. Uncontrolled defaultValue lets React leave the DOM value alone
@@ -270,22 +300,58 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   // field paints with separators like vanilla and the first focus has separators to strip.
   // App-supplied values are canonical raw values ('1234.5', never locale text).
   const [initialDisplayValue] = useState(
-    () => formatForDisplay(String(controlledValue ?? defaultValue ?? ''), formattingOptions, 'canonical').formatted
+    () => formatForDisplay(appValue(controlledValue ?? defaultValue, 'value'), formattingOptions, 'canonical').formatted
   );
 
+  // Before the ref is handed out, so a callback ref and a parent's layout effect can already
+  // read both. Getters, so they are never stale: both read the field, `rawValue` under the
+  // current options. Read-only, like the vanilla handle: an assignment throws.
+  useIsomorphicLayoutEffect(() => {
+    const input = internalInputRef.current as NumoraHTMLInputElement;
+    reported.current = input.value;
+    Object.defineProperties(input, {
+      formattedValue: { configurable: true, get: () => input.value },
+      rawValue: {
+        configurable: true,
+        get: () => displayToRawValue(input.value, stateRef.current.formattingOptions),
+      },
+      setValue: {
+        configurable: true,
+        value: (value: string, options?: { undoable?: boolean }) => {
+          applySetValue(input, value, isFocused(input), stateRef.current.formattingOptions, options?.undoable);
+          emit(input);
+          // Controlled: render again so the layout effect puts the field back to `value`.
+          if (stateRef.current.controlledValue !== undefined) resync((n) => n + 1);
+        },
+      },
+    });
+  }, []);
+
   // External ref -> internal input (function and object refs; nulled on unmount).
-  useImperativeHandle(ref, () => internalInputRef.current as HTMLInputElement, []);
+  useImperativeHandle(ref, () => internalInputRef.current as NumoraHTMLInputElement, []);
 
   // Layout effect 2: refresh stateRef every render so mount-only DOM listeners see the
   // latest props; re-sync the DOM value when controlled `value` changes. Runs on every
   // render. Equality guard short-circuits the common echo-back case. When the value
   // differs, route through writeValuePreservingUndo so external updates don't wipe undo.
   useIsomorphicLayoutEffect(() => {
-    stateRef.current = { onChange, onValueChange, isAllowed, formattingOptions };
+    const prev = stateRef.current.formattingOptions;
+    stateRef.current = {
+      onChange,
+      onValueChange,
+      onFormattedValueChange,
+      isAllowed,
+      formattingOptions,
+      controlledValue,
+    };
 
-    if (controlledValue === undefined) return;
     const input = internalInputRef.current as NumoraHTMLInputElement;
-    const controlledValueString = String(controlledValue);
+    // Options changed (locale, separators): the DOM text is still in the OLD format, so it
+    // can't be compared under the new one. Repaint, reading an uncontrolled field's number
+    // under the old options.
+    const changed = prev !== formattingOptions;
+    if (controlledValue === undefined && !changed) return;
+    const controlledValueString = String(controlledValue ?? formatForDisplay(input.value, prev).raw);
 
     // Is this just the parent echoing the raw value straight back (the single most
     // common controlled pattern: onChange -> setState(e.target.value) -> value={state})?
@@ -298,19 +364,28 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     // this the same number" check. Equal -> leave the DOM untouched. Different -> the parent
     // genuinely changed the value -> format and write it.
     if (
+      changed ||
       sanitizeNumoraInput(input.value, formattingOptions) !==
       sanitizeNumoraInput(controlledValueString, formattingOptions, 'canonical')
     ) {
       // While focused in Blur mode the DOM carries no thousand separators (only added on
       // blur), so format for editing (real formatOn) to avoid injecting commas mid-typing;
       // otherwise format for the resting display (forced Change, with separators).
-      const { formatted } =
-        document.activeElement === input
-          ? formatValueForDisplay(controlledValueString, decimalMaxLength, formattingOptions, 'canonical')
-          : formatForDisplay(controlledValueString, formattingOptions, 'canonical');
+      const focused = isFocused(input);
+      const format = (options: ResolvedNumoraOptions) =>
+        focused
+          ? formatValueForDisplay(controlledValueString, options.decimalMaxLength, options, 'canonical')
+          : formatForDisplay(controlledValueString, options, 'canonical');
+      const { formatted, raw } = format(formattingOptions);
       if (formatted !== input.value) writeValuePreservingUndo(input, formatted, formatted.length);
+      // New options that change the number itself (a smaller `decimalMaxLength` cutting
+      // digits, `allowNegative` dropping the sign) are reported; a repaint alone is not.
+      if (changed && raw !== format(prev).raw) {
+        emit(input, { value: raw, formattedValue: formatted });
+      }
     }
-    input.formattedValue = input.value;
+    // Reports the text when this effect rewrote it (new `value`, new options).
+    emit(input);
   });
 
   // Mount-only native listeners. `beforeinput` must be native: React's synthetic one fires
@@ -319,13 +394,14 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
   // biome-ignore lint/correctness/useExhaustiveDependencies: mount-only; emit reads the latest props via stateRef.
   useEffect(() => {
     const input = internalInputRef.current as NumoraHTMLInputElement;
-    input.formattedValue = input.value;
+    lastValue.current = input.value;
+    warnRemovedOptions(stale);
     const onBeforeInput = (e: InputEvent) => {
       const values = applyBeforeInput(e, stateRef.current.formattingOptions);
       if (values) emit(input, values);
     };
     input.addEventListener('beforeinput', onBeforeInput);
-    // A strip only removes separators, so the raw value is unchanged: refresh the mirror,
+    // A strip only removes separators, so the raw value is unchanged: refresh `lastValue`,
     // report nothing.
     const detach = attachFocusStrip(input, () => stateRef.current.formattingOptions, () => emit(input));
     return () => {
@@ -334,39 +410,42 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
     };
   }, []);
 
-  // `input` fallback: undo/redo, autofill, drop, IME commit. `formattedValue` still holds
-  // the last value Numora wrote, which a refused scientific-notation insert restores.
+  // `input` fallback: undo/redo, autofill, drop, IME commit. `lastValue` still holds the
+  // last value Numora wrote, which a refused scientific-notation insert restores.
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const el = e.target as NumoraHTMLInputElement;
     const inputType = (e.nativeEvent as InputEvent).inputType;
-    const focused = document.activeElement === el;
-    emit(el, applyInputFallback(el, inputType, focused, el.formattedValue as string, formattingOptions));
+    // Mid-composition text is the IME's: the final non-composing `input` reconciles it.
+    if ((e.nativeEvent as InputEvent).isComposing) return;
+    const focused = isFocused(el);
+    emit(el, applyInputFallback(el, inputType, focused, lastValue.current, formattingOptions));
   };
 
+  // The app's handler runs first; `preventDefault()` in it turns Numora's handling off.
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    handleOnKeyDownNumoraInput(e.nativeEvent, formattingOptions);
     onKeyDown?.(e);
+    if (!e.defaultPrevented) handleOnKeyDownNumoraInput(e.nativeEvent, formattingOptions);
   };
 
   const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
     const el = e.currentTarget as NumoraHTMLInputElement;
-    const values = applyPaste(e.nativeEvent, formattingOptions);
     // Nothing reaches a readOnly or disabled field, so its `onPaste` doesn't run either.
-    if (el.readOnly || el.disabled) return;
-    el.formattedValue = el.value;
+    if (el.readOnly || el.disabled) return e.preventDefault();
     onPaste?.(e);
-    emit(el, values);
+    if (!e.defaultPrevented) emit(el, applyPaste(e.nativeEvent, formattingOptions));
   };
 
-  // Blur reports display-only changes too (regrouping), unlike vanilla, so anything that
-  // mirrors `formattedValue` from onChange stays in sync with the field.
+  // Like vanilla, blur reports only a raw change (trailing separator strip, padding, `-0` to
+  // `0`); regrouping alone rewrites the field without a callback.
   const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
-    emit(e.target, applyBlur(e.target, formattingOptions));
+    emit(e.target as NumoraHTMLInputElement, applyBlur(e.target, formattingOptions));
     onBlur?.(e);
   };
 
   return (
     <input
+      spellCheck={false}
+      autoComplete="off"
       {...rest}
       ref={internalInputRef}
       defaultValue={initialDisplayValue}
@@ -377,14 +456,23 @@ const NumoraInput = forwardRef<HTMLInputElement, NumoraInputProps>((props, ref) 
       onBlur={handleBlur}
       type="text"
       inputMode="decimal"
-      spellCheck={false}
-      autoComplete="off"
     />
   );
 });
 
-NumoraInput.displayName = 'NumoraInput';
+NumoraInputImpl.displayName = 'NumoraInput';
+
+/**
+ * The ref is typed `NumoraHTMLInputElement` (with `rawValue` / `formattedValue`), but a plain
+ * `useRef<HTMLInputElement>` object ref is accepted too, so existing refs keep compiling.
+ * Callback refs receive `NumoraHTMLInputElement | null`.
+ */
+const NumoraInput = NumoraInputImpl as ForwardRefExoticComponent<
+  NumoraInputProps & {
+    ref?: Ref<NumoraHTMLInputElement> | RefObject<HTMLInputElement | null>;
+  }
+>;
 
 export { NumoraInput };
-export { FormatOn, GroupingStyle, InputType } from 'numora';
-export type { FormattingOptions, LocaleTag } from 'numora';
+export { FormatOn, GroupingStyle, formatValue, parseValue, getSeparatorsFromLocale } from 'numora';
+export type { NumoraOptions, LocaleTag } from 'numora';

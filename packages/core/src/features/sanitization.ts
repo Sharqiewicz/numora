@@ -10,7 +10,7 @@ import { normalizeDigits } from './fullwidth-digits';
 import { normalizeUnicodeMinus } from './unicode-minus';
 import { normalizeDecimalSeparators } from './decimal-separators';
 import { normalizeForeignFormat, canonicalToDisplayText } from './foreign-format';
-import type { FormattingOptions } from '../types';
+import type { NumoraOptions } from '../types';
 
 // Upper bound on the raw input length sanitization will ever process. No numeric input a
 // person types or pastes is longer than this, and capping here bounds every downstream
@@ -24,7 +24,7 @@ const MAX_INPUT_LENGTH = 10_000;
  *   `thousandSeparator` groups, `decimalSeparator` is the decimal.
  * - `foreign`: text of unknown format (paste, autofill, browser-inserted text). Read with
  *   foreign-format detection (ADR 0006), then continues as locale text.
- * - `canonical`: a value supplied by the app (`value`, `defaultValue`, `setValue`). `.` is
+ * - `canonical`: a value supplied by the app (`value`, `setValue`). `.` is
  *   ALWAYS the decimal (ADR 0004), never grouping and never detected.
  *
  * The output is always locale text (field decimal separator, no grouping); the
@@ -73,7 +73,7 @@ export function removeThousandSeparators(value: string, thousandSeparator?: stri
  */
 export const sanitizeNumoraInput = (
   value: string,
-  formattingOptions?: FormattingOptions,
+  formattingOptions?: NumoraOptions,
   source: ValueSource = 'display'
 ): string => {
   const decimalSeparator = formattingOptions?.decimalSeparator;
@@ -99,21 +99,21 @@ export const sanitizeNumoraInput = (
     decimalSeparator
   );
 
-  if (formattingOptions?.enableCompactNotation) {
+  if (formattingOptions?.allowCompactNotation) {
     sanitized = expandCompactNotation(sanitized, decimalSeparator);
   }
 
   sanitized = expandScientificNotation(sanitized, decimalSeparator);
 
-  sanitized = removeNonNumericCharacters(sanitized, formattingOptions?.enableNegative, decimalSeparator);
+  sanitized = removeNonNumericCharacters(sanitized, formattingOptions?.allowNegative, decimalSeparator);
 
   sanitized = removeExtraDecimalSeparators(sanitized, decimalSeparator);
 
-  if (!formattingOptions?.enableLeadingZeros) {
+  if (!formattingOptions?.allowLeadingZeros) {
     sanitized = removeLeadingZeros(sanitized, decimalSeparator);
   }
 
-  if (formattingOptions?.autoAddLeadingZero) {
+  if (formattingOptions?.padLeadingZero) {
     sanitized = prependLeadingZero(sanitized, decimalSeparator);
   }
 

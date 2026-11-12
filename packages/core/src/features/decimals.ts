@@ -1,11 +1,11 @@
 import { DEFAULT_DECIMAL_SEPARATOR } from '../config';
-import type { SeparatorOptions, Separators, FormattingOptions } from '../types';
+import type { SeparatorOptions, Separators, NumoraOptions } from '../types';
 
 /**
  * Normalizes separator configuration with defaults.
  */
 export function getSeparators(
-  options: SeparatorOptions | FormattingOptions | undefined
+  options: SeparatorOptions | NumoraOptions | undefined
 ): Separators {
   return {
     decimalSeparator: options?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,

@@ -6,9 +6,7 @@
  * app code - build a `NumoraInput` (vanilla or React) instead. Anything here may change
  * between minor versions without a breaking-change note.
  *
- * Pure utilities that ARE part of the public surface (sanitizeNumoraInput, the expand/remove
- * pipeline functions, locale helpers, formatValueForDisplay, validateNumoraInputOptions, ...)
- * stay on the package root, `'numora'`.
+ * The public surface is the package root, `'numora'`, plus `'numora/pipeline'`.
  */
 export { handleOnKeyDownNumoraInput } from './utils/event-handlers';
 export { writeValuePreservingUndo } from './features/formatting';
@@ -17,14 +15,23 @@ export {
   applyBlur,
   applyInputFallback,
   applyPaste,
+  applySetValue,
   attachFocusStrip,
   formatForDisplay,
-  type ResolvedFormattingOptions,
+  type ResolvedNumoraOptions,
 } from './utils/dom-events';
-// Default separators so the React adapter resolves options identically to the vanilla
-// class before validation (single source of truth for the defaults).
+// Locale + defaults + validation in one call, so the React adapter resolves options
+// identically to the vanilla class.
+export { resolveOptions } from './utils/resolve-options';
+export { takeRemovedOptions, warnRemovedOptions } from './utils/removed-options';
+// Whole-pipeline helpers and option plumbing the adapters and the test suites reach for.
+export { InputType } from './types';
+export { validateNumoraInputOptions } from './validation';
+export { applyLocale, isProduction } from './utils/locale';
+export { appValue, warnServerLocale } from './utils/app-value';
+export { sanitizeNumoraInput, type ValueSource } from './features/sanitization';
 export {
-  DEFAULT_THOUSAND_SEPARATOR,
-  DEFAULT_DECIMAL_SEPARATOR,
-  DEFAULT_GROUPING_STYLE,
-} from './config';
+  formatValueForDisplay,
+  displayToRawValue,
+  normalizeNegativeZero,
+} from './utils/format-utils';

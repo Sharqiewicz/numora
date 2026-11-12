@@ -1,9 +1,12 @@
-import { FormatOn, GroupingStyle, type FormattingOptions, type NumoraValues } from './types';
+import { FormatOn, GroupingStyle, type NumoraOptions } from './types';
 
-// Derived from FormattingOptions so adding a new field to that interface automatically
+// Derived from NumoraOptions so adding a new field to that interface automatically
 // flows into validation - no more drift between the option surface and the validator.
-type NumoraInputValidationOptions = FormattingOptions & {
-  onChange?: (values: NumoraValues) => void;
+// The callbacks are `unknown`: only their `typeof` is checked. `onChange` is React's.
+type NumoraInputValidationOptions = NumoraOptions & {
+  onChange?: unknown;
+  onValueChange?: unknown;
+  onFormattedValueChange?: unknown;
 };
 
 /**
@@ -15,20 +18,24 @@ export function validateNumoraInputOptions(options: NumoraInputValidationOptions
   assertInt('decimalMinLength', options.decimalMinLength, 0, 'a non-negative integer');
   assertDecimalLengths(options.decimalMinLength, options.decimalMaxLength);
   assertEnumValue('formatOn', options.formatOn, [FormatOn.Blur, FormatOn.Change]);
-  // Empty string is a valid thousandSeparator: runtime treats a falsy separator as
-  // "grouping disabled" (applyDisplaySeparators / sanitization both gate on truthiness).
-  assertSeparator('thousandSeparator', options.thousandSeparator, true);
+  // One way to turn grouping off: `groupingStyle: 'none'`. An empty separator is rejected.
+  if (options.thousandSeparator === '') {
+    throw new Error("thousandSeparator cannot be empty. Use groupingStyle: 'none'.");
+  }
+  assertSeparator('thousandSeparator', options.thousandSeparator);
   assertEnumValue('groupingStyle', options.groupingStyle, Object.values(GroupingStyle));
   assertSeparator('decimalSeparator', options.decimalSeparator);
   assertSeparatorConflict(options.thousandSeparator, options.decimalSeparator);
-  assertType('enableCompactNotation', options.enableCompactNotation, 'boolean');
-  assertType('enableScientificNotation', options.enableScientificNotation, 'boolean');
-  assertType('enableNegative', options.enableNegative, 'boolean');
-  assertType('enableLeadingZeros', options.enableLeadingZeros, 'boolean');
-  assertType('autoAddLeadingZero', options.autoAddLeadingZero, 'boolean');
+  assertType('allowCompactNotation', options.allowCompactNotation, 'boolean');
+  assertType('allowScientificNotation', options.allowScientificNotation, 'boolean');
+  assertType('allowNegative', options.allowNegative, 'boolean');
+  assertType('allowLeadingZeros', options.allowLeadingZeros, 'boolean');
+  assertType('padLeadingZero', options.padLeadingZero, 'boolean');
   assertInt('maxLength', options.maxLength, 1, 'a positive integer (>= 1)');
   assertType('isAllowed', options.isAllowed, 'function');
   assertType('onChange', options.onChange, 'function');
+  assertType('onValueChange', options.onValueChange, 'function');
+  assertType('onFormattedValueChange', options.onFormattedValueChange, 'function');
 }
 
 function assertInt(name: string, value: number | undefined, min: number, expected: string): void {
@@ -45,8 +52,8 @@ function assertInt(name: string, value: number | undefined, min: number, expecte
 // U+202F NNBSP, used by locales such as fr-FR) is intentionally NOT reserved.
 const RESERVED_SEPARATOR_CHARS = /[-+eEkKmMbBtT]/;
 
-function assertSeparator(name: string, value: string | undefined, allowEmpty = false): void {
-  if (value === undefined || (allowEmpty && value === '')) return;
+function assertSeparator(name: string, value: string | undefined): void {
+  if (value === undefined) return;
   const received = `Received: ${JSON.stringify(value)}`;
   if (typeof value !== 'string' || value.length !== 1) {
     throw new Error(`${name} must be a single character. ${received}`);

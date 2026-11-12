@@ -1,4 +1,4 @@
-import { DEFAULT_GROUPING_STYLE } from '../config';
+import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_GROUPING_STYLE, DEFAULT_THOUSAND_SEPARATOR } from '../config';
 import { GroupingStyle } from '../types';
 
 // Probe value: wide enough that every locale groups it, and it carries a fraction, so a
@@ -104,16 +104,20 @@ function withLatinDigits(locale: string | undefined): string {
   return /-nu-/i.test(tag) ? tag.replace(/-nu-[a-z0-9]+/i, '-nu-latn') : `${tag}-u-nu-latn`;
 }
 
-/** Development-only: an invalid tag otherwise falls back to en-US separators silently. */
-function warnInvalidLocale(locale: string | undefined): void {
-  let isProduction = false;
+/** True in a production bundle. Guards every development-only warning. */
+export function isProduction(): boolean {
   try {
     // Bundlers replace this; unbundled ESM has no `process`, so guard the lookup.
-    isProduction = typeof process !== 'undefined' && process.env.NODE_ENV === 'production';
+    return typeof process !== 'undefined' && process.env.NODE_ENV === 'production';
   } catch {
     // Some environments expose a `process` without `env`.
+    return false;
   }
-  if (isProduction) return;
+}
+
+/** Development-only: an invalid tag otherwise falls back to en-US separators silently. */
+function warnInvalidLocale(locale: string | undefined): void {
+  if (isProduction()) return;
   console.warn(
     `[numora] Invalid locale "${locale}": Intl.NumberFormat rejected it, so the field uses "," grouping and "." decimal. Pass a BCP 47 tag such as "de-DE".`
   );
@@ -155,14 +159,21 @@ export function getSeparatorsFromLocale(locale?: string): {
 }
 
 export function applyLocale(
-  locale: string | true | undefined,
+  locale: string | boolean | undefined,
   options: {
     thousandSeparator?: string;
     decimalSeparator?: string;
     groupingStyle?: GroupingStyle;
   }
 ): { thousandSeparator?: string; decimalSeparator?: string; groupingStyle?: GroupingStyle } {
-  if (!locale) return options;
+  if (!locale) {
+    // A lone decimalSeparator equal to the default thousand one would always conflict;
+    // pair it with the conventional other mark instead. An explicit thousandSeparator wins.
+    return options.thousandSeparator === undefined &&
+      options.decimalSeparator === DEFAULT_THOUSAND_SEPARATOR
+      ? { ...options, thousandSeparator: DEFAULT_DECIMAL_SEPARATOR }
+      : options;
+  }
   const tag = locale === true ? undefined : locale;
   const seps = getSeparatorsFromLocale(tag);
   return {

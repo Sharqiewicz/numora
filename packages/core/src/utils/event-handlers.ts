@@ -5,7 +5,7 @@ import { NON_ASCII_DECIMAL_SEPARATOR_GLYPHS } from '../features/decimal-separato
 import { containsScientificNotation } from '../features/scientific-notation';
 import { skipOverThousandSeparatorOnDelete } from '../features/formatting';
 import { computeCaretFromEdit } from './caret';
-import { type FormattingOptions, InputType } from '../types';
+import { type NumoraOptions, InputType } from '../types';
 import { formatInputValue } from './format-utils';
 
 // Keys that, when typed, are candidates for remapping to the configured decimal separator:
@@ -50,17 +50,17 @@ export type BeforeInputResult =
  * error handler) that isn't expecting an async throw from a keystroke.
  */
 /**
- * True when `enableScientificNotation` is `false` and user-typed/pasted/inserted text holds a
+ * True when `allowScientificNotation` is `false` and user-typed/pasted/inserted text holds a
  * number in scientific notation. Such input must be refused as a whole: the sanitizer would
  * otherwise drop the `e` and turn `1.5e-7` into `1.57`. App-supplied values never go through
  * this check (they always expand).
  */
 export function isScientificNotationRejected(
   text: string,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: NumoraOptions
 ): boolean {
   return (
-    formattingOptions?.enableScientificNotation === false && containsScientificNotation(text)
+    formattingOptions?.allowScientificNotation === false && containsScientificNotation(text)
   );
 }
 
@@ -87,7 +87,7 @@ function callIsAllowed(isAllowed: (rawValue: string) => boolean, rawValue: strin
 export function handleOnBeforeInputNumoraInput(
   e: InputEvent,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: NumoraOptions
 ): BeforeInputResult {
   const target = e.target as HTMLInputElement;
   const currentValue = target.value;
@@ -278,7 +278,7 @@ export function handleOnBeforeInputNumoraInput(
  */
 export function handleOnKeyDownNumoraInput(
   e: KeyboardEvent,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: NumoraOptions
 ): void {
   skipOverThousandSeparatorOnDelete(e, e.target as HTMLInputElement, formattingOptions);
 }
@@ -301,7 +301,7 @@ export type PasteResult =
 export function handleOnPasteNumoraInput(
   e: ClipboardEvent,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions
+  formattingOptions?: NumoraOptions
 ): PasteResult {
   const inputElement = e.target as HTMLInputElement;
   const { value, selectionStart, selectionEnd } = inputElement;
@@ -314,15 +314,16 @@ export function handleOnPasteNumoraInput(
   // through the ordinary pipeline, and the caret math below uses its (rewritten) length.
   const rawClipboard = e.clipboardData?.getData('text/plain') || '';
   const canonicalClipboard = normalizeForeignFormat(rawClipboard, formattingOptions);
-  // Scientific notation is on unless explicitly disabled. With it off, the sanitizer would
-  // drop the `e` and turn `1.5e-7` into `1.57`, so refuse the paste instead.
-  if (isScientificNotationRejected(canonicalClipboard, formattingOptions)) {
-    return { type: 'reject' };
-  }
   const clipboardData = canonicalToDisplayText(canonicalClipboard, separators.decimalSeparator);
   const selStart = selectionStart ?? 0;
   const selEnd = selectionEnd ?? 0;
   const combinedValue = value.slice(0, selStart) + clipboardData + value.slice(selEnd);
+  // Scientific notation is on unless explicitly disabled. With it off, the sanitizer would
+  // drop the `e` and turn `1.5e-7` into `1.57`, so refuse the paste instead. Check the
+  // combined value: `e-7` pasted after `1.5` only forms a number once spliced in.
+  if (isScientificNotationRejected(combinedValue, formattingOptions)) {
+    return { type: 'reject' };
+  }
 
   // Always strip thousand separators during paste: pasted content may contain separators
   // and the current value may have separators (blur mode); both need to be parsed together.

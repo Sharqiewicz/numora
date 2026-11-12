@@ -5,7 +5,7 @@ import {
   type ValueSource,
 } from '../features/sanitization';
 import { formatWithSeparators } from '../features/formatting';
-import { type FormattingOptions, FormatOn } from '../types';
+import { type NumoraOptions, FormatOn } from '../types';
 import { DEFAULT_GROUPING_STYLE, DEFAULT_DECIMAL_SEPARATOR } from '../config';
 
 /**
@@ -20,7 +20,7 @@ import { DEFAULT_GROUPING_STYLE, DEFAULT_DECIMAL_SEPARATOR } from '../config';
  */
 export function displayToRawValue(
   display: string,
-  options?: Pick<FormattingOptions, 'decimalSeparator' | 'thousandSeparator'>
+  options?: Pick<NumoraOptions, 'decimalSeparator' | 'thousandSeparator'>
 ): string {
   const decimalSeparator = options?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR;
   const thousandSeparator = options?.thousandSeparator;
@@ -36,7 +36,7 @@ export function displayToRawValue(
 export function sanitizeAndTrim(
   rawValue: string,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions,
+  formattingOptions?: NumoraOptions,
   shouldRemoveThousandSeparators?: boolean,
   source: ValueSource = 'display'
 ): string {
@@ -76,7 +76,7 @@ export function sanitizeAndTrim(
 export function formatInputValue(
   rawValue: string,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions,
+  formattingOptions?: NumoraOptions,
   shouldRemoveThousandSeparators?: boolean,
   source: ValueSource = 'display'
 ): { formatted: string; raw: string } {
@@ -133,7 +133,7 @@ export function formatInputValue(
 export function formatValueForDisplay(
   value: string,
   decimalMaxLength: number,
-  formattingOptions?: FormattingOptions,
+  formattingOptions?: NumoraOptions,
   source: ValueSource = 'display'
 ): { formatted: string; raw: string } {
   const { formatted, raw } = formatInputValue(
@@ -168,7 +168,7 @@ export function formatValueForDisplay(
 /**
  * Maps a negative value whose magnitude is exactly zero ("-0", "-0.", "-0.00", "-.0", ...)
  * to the same string with only the sign removed ("0", "0.", "0.00", ".0"). A resting
- * negative zero is not a meaningful distinct value - and left alone, `valueAsNumber` would
+ * negative zero is not a meaningful distinct value - and left alone, `Number(value)` would
  * report `-0` for it indefinitely.
  *
  * Pure and narrow: any digit other than `0` anywhere in the value (or a bare `-` with

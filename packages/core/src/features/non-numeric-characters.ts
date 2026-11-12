@@ -3,13 +3,13 @@
  * A single character loop: no regex is built or escaped per call.
  *
  * @param value - The string to sanitize
- * @param enableNegative - Whether to allow negative sign
+ * @param allowNegative - Whether to allow negative sign
  * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The sanitized string with only numbers and the decimal separator
  */
 export const removeNonNumericCharacters = (
   value: string,
-  enableNegative = false,
+  allowNegative = false,
   decimalSeparator: string = '.'
 ): string => {
   let numericOnly = '';
@@ -22,7 +22,7 @@ export const removeNonNumericCharacters = (
   }
   numericOnly += value.slice(runStart);
 
-  if (!enableNegative) return numericOnly;
+  if (!allowNegative) return numericOnly;
 
   if (value.startsWith('-') && (numericOnly.length > 0 || value === '-')) {
     return '-' + numericOnly;
