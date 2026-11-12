@@ -8,9 +8,14 @@
   "homepage": "https://numora.xyz/",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
   "files": [
@@ -21,13 +26,7 @@
     "numora": "workspace:*"
   },
   "peerDependencies": {
-    "react": ">=17.0.0",
-    "react-dom": ">=17.0.0"
-  },
-  "peerDependenciesMeta": {
-    "react-dom": {
-      "optional": true
-    }
+    "react": ">=17.0.0"
   },
   "sideEffects": false,
   "repository": {
@@ -35,7 +34,7 @@
     "url": "https://github.com/Sharqiewicz/numora"
   },
   "scripts": {
-    "build": "rollup -c",
+    "build": "rollup -c && cp dist/index.d.ts dist/index.d.cts",
     "watch": "rollup -c -w",
     "dev": "rollup -c -w",
     "pretest": "pnpm --filter numora build",

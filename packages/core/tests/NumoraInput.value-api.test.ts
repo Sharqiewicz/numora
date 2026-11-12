@@ -12,7 +12,7 @@ describe('NumoraInput value API', () => {
   afterEach(() => container.remove());
 
   it('rawValue returns the raw value, formattedValue the display string', () => {
-    const n = new NumoraInput(container, { formatOn: FormatOn.Change, value: '1234567.5' });
+    const n = new NumoraInput(container, { formatOn: FormatOn.Change, defaultValue: '1234567.5' });
     expect(n.rawValue).toBe('1234567.5');
     expect(n.formattedValue).toBe('1,234,567.5');
   });

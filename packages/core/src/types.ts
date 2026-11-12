@@ -80,10 +80,10 @@ export type InputType = (typeof InputType)[keyof typeof InputType];
 export interface NumoraOptions {
   /**
    * Derive `thousandSeparator`, `decimalSeparator` and `groupingStyle` from a BCP 47 tag
-   * (`'de-DE'`), or from the runtime's own locale (`true`). An explicitly passed separator
-   * or grouping style still wins.
+   * (`'de-DE'`), or from the runtime's own locale (`true`). `false` is the same as leaving
+   * it out. An explicitly passed separator or grouping style still wins.
    */
-  locale?: LocaleTag | true;
+  locale?: LocaleTag | boolean;
   formatOn?: FormatOn;
   /**
    * Grouping mark. Exactly ONE character (UTF-16 code unit); anything else throws in

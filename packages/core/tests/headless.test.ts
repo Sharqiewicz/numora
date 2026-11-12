@@ -15,7 +15,7 @@ describe('formatValue', () => {
   it('reads `.` as the decimal mark in every locale: the input is never detected as locale text', () => {
     expect(formatValue('1.5', { locale: 'de-DE' })).toBe('1,5');
     expect(formatValue('1234.5', { locale: 'fr-FR' })).toBe(
-      new NumoraInput(document.createElement('div'), { locale: 'fr-FR', value: '1234.5' }).formattedValue
+      new NumoraInput(document.createElement('div'), { locale: 'fr-FR', defaultValue: '1234.5' }).formattedValue
     );
   });
 

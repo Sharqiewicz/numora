@@ -9,7 +9,7 @@ import {
   attachFocusStrip,
   formatForDisplay,
 } from './utils/dom-events';
-import { escapeRegExp } from './utils/escape-reg-exp';
+import { appValue } from './utils/app-value';
 import { resolveOptions } from './utils/resolve-options';
 import { takeRemovedOptions, warnRemovedOptions } from './utils/removed-options';
 import type { ResolvedNumoraOptions } from './utils/dom-events';
@@ -39,9 +39,10 @@ export interface NumoraInputOptions
   onValueChange?: (values: NumoraValues) => void;
   /**
    * Initial value, as a canonical raw value (`'1234.5'` in every locale). When adopting an
-   * existing `<input>`, its own value is kept unless this is passed.
+   * existing `<input>`, its own value is kept unless this is passed. Later writes go through
+   * {@link NumoraInput.setValue}. Same name and meaning as the React `defaultValue` prop.
    */
-  value?: string;
+  defaultValue?: string;
 }
 
 // Display text destroy() leaves in a field, with its raw value, so a re-init can tell Numora's
@@ -81,8 +82,8 @@ export class NumoraInput {
     this.createInputElement(target);
     this.applyOptions(options);
     // When adopting an existing <input>, any pre-set value (e.g. <input value="100"
-    // use:numora>) is kept unless the caller passes `value`.
-    if (options.value !== undefined) this.el.value = options.value;
+    // use:numora>) is kept unless the caller passes `defaultValue`.
+    if (options.defaultValue !== undefined) this.el.value = appValue(options.defaultValue, 'defaultValue');
     this.setupEventListeners();
     // The initial value (option, or a pre-set value on an adopted <input>) is supplied by
     // the app, so it is a canonical raw value (ADR 0004), not locale text. Also seeds `lastValue`.
@@ -114,26 +115,11 @@ export class NumoraInput {
     }
   }
 
-  /** Writes what depends on the options onto the element: the `pattern` and the attributes given. */
+  /**
+   * Writes the native attributes given onto the element. No `pattern` is set: the field can
+   * only hold what Numora wrote, and a `pattern` of your own on the element is left alone.
+   */
   private applyOptions(options: NumoraInputOptions): void {
-    // Pattern helps with native validation but is optional.
-    // HTML pattern attr: optional leading `-` (if negatives enabled) + digits optionally
-    // interleaved with the configured thousand separator + optional decimal separator +
-    // digits. Must accept the component's OWN grouped output ("1,234", "1.234,5" in de-DE,
-    // "12,34,567" in Lakh grouping, ...) or native constraint validation
-    // (validity.patternMismatch / form.checkValidity()) fails on a value Numora itself
-    // produced. Deliberately permissive about *where* the thousand separator falls -
-    // Lakh/Wan group sizes differ from Thousand and enforcing exact group widths here would
-    // just re-implement (and risk diverging from) formatWithSeparators.
-    const escapedDecimal = escapeRegExp(this.resolvedOptions.decimalSeparator);
-    const negativePrefix = this.resolvedOptions.allowNegative ? '-?' : '';
-    const thousandSeparator = this.resolvedOptions.thousandSeparator;
-    const escapedThousand = escapeRegExp(thousandSeparator);
-    this.el.setAttribute(
-      'pattern',
-      `^${negativePrefix}[0-9${escapedThousand}]*([${escapedDecimal}][0-9]*)?$`
-    );
-
     for (const name of NATIVE_ATTRIBUTES) {
       const attribute = options[name];
       if (attribute !== undefined) (this.el as unknown as Record<string, unknown>)[name] = attribute;
@@ -223,7 +209,8 @@ export class NumoraInput {
   }
 
   /**
-   * Sets the input's value programmatically.
+   * Sets the input's value programmatically. Like assigning `element.value`, it is the app's
+   * own write: it does not call `onValueChange` and is not checked by `isAllowed`.
    *
    * @param value - A canonical raw value (ADR 0004): `.` is always the decimal mark and
    *   there is no grouping, whatever the field's locale (`'1234.5'` shows as `1.234,5` in
@@ -235,7 +222,12 @@ export class NumoraInput {
   public setValue(value: string, options?: { undoable?: boolean }): void {
     // Route through the same pipeline as typing/paste so programmatic writes honor
     // sanitization, decimalMaxLength, maxLength, allowNegative and grouping.
-    const { formatted } = formatForDisplay(value, this.resolvedOptions, 'canonical');
+    // A focused Blur-mode field shows no grouping, so it keeps its edit-time format.
+    const raw = appValue(value, 'setValue()');
+    const opts = this.resolvedOptions;
+    const { formatted } = this.isFocused
+      ? formatValueForDisplay(raw, opts.decimalMaxLength, opts, 'canonical')
+      : formatForDisplay(raw, opts, 'canonical');
 
     if (options?.undoable === false) this.el.value = formatted;
     else writeValuePreservingUndo(this.el, formatted, formatted.length);
@@ -251,7 +243,7 @@ export class NumoraInput {
    *
    * @throws when the merged options are invalid. Nothing is changed in that case.
    */
-  public update(options: Omit<NumoraInputOptions, 'value'>): void {
+  public update(options: Omit<NumoraInputOptions, 'defaultValue'>): void {
     const merged = { ...this.options, ...options };
     const resolved = resolveOptions(merged);
     warnRemovedOptions(takeRemovedOptions({ ...options }));

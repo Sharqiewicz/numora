@@ -12,8 +12,9 @@ const REMOVED: Record<string, string> = {
   maxDecimals: 'decimalMaxLength',
   rawValueMode: 'e.target.value',
   emitRawValue: 'the onValueChange `value`',
-  defaultValue: 'value',
-  // Vanilla only: React destructures its own `onChange` before this list is consulted.
+  // Vanilla only: React destructures its own `value` and `onChange` before this list is
+  // consulted.
+  value: 'defaultValue for the initial value, setValue() to write later',
   onChange: 'onValueChange',
 };
 

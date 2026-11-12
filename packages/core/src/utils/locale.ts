@@ -159,7 +159,7 @@ export function getSeparatorsFromLocale(locale?: string): {
 }
 
 export function applyLocale(
-  locale: string | true | undefined,
+  locale: string | boolean | undefined,
   options: {
     thousandSeparator?: string;
     decimalSeparator?: string;

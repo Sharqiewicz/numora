@@ -32,16 +32,20 @@ describe('options removed since v4 (vanilla)', () => {
 
   it('an old name has no effect: enableNegative does not allow a minus', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
-    expect(make({ enableNegative: true, value: '-5' }).rawValue).toBe('5');
-    expect(make({ allowNegative: true, value: '-5' }).rawValue).toBe('-5');
+    expect(make({ enableNegative: true, defaultValue: '-5' }).rawValue).toBe('5');
+    expect(make({ allowNegative: true, defaultValue: '-5' }).rawValue).toBe('-5');
   });
 
-  it('defaultValue is removed in vanilla: warned about and not used as the initial value', () => {
+  it('value is removed in vanilla: warned about and not used as the initial value', () => {
     vi.stubEnv('NODE_ENV', 'development');
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const input = make({ defaultValue: '5' });
-    expect(warn.mock.calls[0][0]).toContain('defaultValue is removed in v5; use value');
+    const input = make({ value: '5' });
+    expect(warn.mock.calls[0][0]).toContain('value is removed in v5; use defaultValue');
     expect(input.rawValue).toBe('');
+  });
+
+  it('defaultValue is the initial value', () => {
+    expect(make({ defaultValue: '5' }).rawValue).toBe('5');
   });
 
   it('onChange is removed in vanilla: warned about and never called', () => {

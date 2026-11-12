@@ -160,7 +160,7 @@ describe('locale sweep', () => {
       const input = new NumoraInput(document.createElement('div'), {
         locale: tag,
         formatOn: FormatOn.Change,
-        value: '1234',
+        defaultValue: '1234',
       });
       expect(input.element.value, tag).toContain(d.thousandSeparator);
       expect(new Intl.NumberFormat(tag).format(1234), tag).not.toContain(d.thousandSeparator);

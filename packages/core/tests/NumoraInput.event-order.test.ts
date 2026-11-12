@@ -156,7 +156,7 @@ describe('typing via beforeinput', () => {
     });
   }
   it('Change mode: typing in the middle keeps the caret after the typed digit', () => {
-    const { el } = make({ formatOn: FormatOn.Change, value: '1234' });
+    const { el } = make({ formatOn: FormatOn.Change, defaultValue: '1234' });
     el.focus();
     el.setSelectionRange(2, 2);
     typeChar(el, '9');
@@ -181,7 +181,7 @@ describe('typing via beforeinput', () => {
     `);
   });
   it('a rejected keystroke is prevented and logs nothing', () => {
-    const { el } = make({ value: '1' });
+    const { el } = make({ defaultValue: '1' });
     el.focus();
     expect(typeChar(el, 'a')).toBe(true);
     expect(log).toEqual([]);
@@ -208,7 +208,7 @@ describe('paste', () => {
     });
   }
   it('paste replaces the selection', () => {
-    const { el } = make({ formatOn: FormatOn.Change, value: '123456' });
+    const { el } = make({ formatOn: FormatOn.Change, defaultValue: '123456' });
     el.focus();
     el.setSelectionRange(1, 3);
     paste(el, '99');
@@ -233,21 +233,21 @@ describe('paste', () => {
     `);
   });
   it('readOnly: prevented, no write, no onValueChange', () => {
-    const { el } = make({ value: '5', readOnly: true });
+    const { el } = make({ defaultValue: '5', readOnly: true });
     const ev = paste(el, '123');
     expect(ev.defaultPrevented).toBe(true);
     expect(log).toEqual([]);
     expect(el.value).toBe('5');
   });
   it('disabled: prevented, no write, no onValueChange', () => {
-    const { el } = make({ value: '5', disabled: true });
+    const { el } = make({ defaultValue: '5', disabled: true });
     const ev = paste(el, '123');
     expect(ev.defaultPrevented).toBe(true);
     expect(log).toEqual([]);
     expect(el.value).toBe('5');
   });
   it('rejected by isAllowed: prevented, value untouched, no onValueChange', () => {
-    const { el } = make({ value: '5', isAllowed: (r: string) => r.length < 3 });
+    const { el } = make({ defaultValue: '5', isAllowed: (r: string) => r.length < 3 });
     el.focus();
     const ev = paste(el, '123');
     expect(ev.defaultPrevented).toBe(true);
@@ -263,14 +263,14 @@ describe('paste', () => {
     `);
   });
   it('rejected scientific notation (allowScientificNotation:false): no write, no onValueChange', () => {
-    const { el } = make({ value: '5', allowScientificNotation: false });
+    const { el } = make({ defaultValue: '5', allowScientificNotation: false });
     el.focus();
     paste(el, '1.5e-7');
     expect(log).toEqual([]);
     expect(el.value).toBe('5');
   });
   it('paste of non-numeric text (pinned as-is)', () => {
-    const { el } = make({ value: '5' });
+    const { el } = make({ defaultValue: '5' });
     el.focus();
     paste(el, 'abc');
     expect(log).toMatchInlineSnapshot(`
@@ -301,7 +301,7 @@ describe('keyboard focus then blur', () => {
     ['de-DE', { locale: 'de-DE' }],
   ] as const) {
     it(`${name} Blur: focus strips without onValueChange; blur regroups with no onValueChange (raw unchanged)`, () => {
-      const { el } = make({ value: '1234567.89', ...extra });
+      const { el } = make({ defaultValue: '1234567.89', ...extra });
       pin('val', el.value);
       el.focus();
       expect(log).toEqual([]);
@@ -322,7 +322,7 @@ describe('keyboard focus then blur', () => {
     });
   }
   it('Change mode: focus does not strip; blur is a no-op', () => {
-    const { el } = make({ formatOn: FormatOn.Change, value: '1234567' });
+    const { el } = make({ formatOn: FormatOn.Change, defaultValue: '1234567' });
     el.focus();
     expect(el.value).toBe('1,234,567');
     el.blur();
@@ -330,7 +330,7 @@ describe('keyboard focus then blur', () => {
     expect(log).toEqual([]);
   });
   it('Blur: caret at end of grouped value is mapped to end of stripped value', () => {
-    const { el } = make({ value: '1234567' });
+    const { el } = make({ defaultValue: '1234567' });
     el.focus();
     expect(state(el)).toMatchInlineSnapshot(`
       {
@@ -363,7 +363,7 @@ describe('mouse focus', () => {
     el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
   it('left mousedown -> focus keeps grouping; click strips and maps the caret; no onValueChange', () => {
-    const { el } = make({ value: '1234567' });
+    const { el } = make({ defaultValue: '1234567' });
     md(el);
     el.focus();
     expect(el.value).toBe('1,234,567');
@@ -381,7 +381,7 @@ describe('mouse focus', () => {
     expect(log).toEqual([]);
   });
   it('a second click does not strip again (flag cleared)', () => {
-    const { el } = make({ value: '1234567' });
+    const { el } = make({ defaultValue: '1234567' });
     md(el);
     el.focus();
     click(el);
@@ -401,20 +401,20 @@ describe('mouse focus', () => {
     expect(log).toEqual([]);
   });
   it('right-button mousedown does not wedge: focus still strips', () => {
-    const { el } = make({ value: '1234567' });
+    const { el } = make({ defaultValue: '1234567' });
     md(el, 2);
     el.focus();
     expect(el.value).toBe('1234567');
     expect(log).toEqual([]);
   });
   it('right-button mousedown followed by click is a no-op', () => {
-    const { el } = make({ value: '1234567' });
+    const { el } = make({ defaultValue: '1234567' });
     md(el, 2);
     click(el);
     expect(el.value).toBe('1,234,567');
   });
   it('mousedown + blur without click clears pending: next keyboard focus strips', () => {
-    const { el } = make({ value: '1234567' });
+    const { el } = make({ defaultValue: '1234567' });
     md(el);
     el.focus();
     el.blur();
@@ -423,19 +423,19 @@ describe('mouse focus', () => {
     expect(el.value).toBe('1234567');
   });
   it('click without mousedown is a no-op', () => {
-    const { el } = make({ value: '1234567' });
+    const { el } = make({ defaultValue: '1234567' });
     click(el);
     expect(el.value).toBe('1,234,567');
   });
   it('Change mode: mouse focus + click never strip', () => {
-    const { el } = make({ formatOn: FormatOn.Change, value: '1234567' });
+    const { el } = make({ formatOn: FormatOn.Change, defaultValue: '1234567' });
     md(el);
     el.focus();
     click(el);
     expect(el.value).toBe('1,234,567');
   });
   it('de-DE: click strips de-DE grouping', () => {
-    const { el } = make({ locale: 'de-DE', value: '1234567.5' });
+    const { el } = make({ locale: 'de-DE', defaultValue: '1234567.5' });
     expect(el.value).toBe('1.234.567,5');
     md(el);
     el.focus();
@@ -705,7 +705,7 @@ describe('blur cases', () => {
     const { el } = make({
       formatOn: FormatOn.Change,
       allowNegative: true,
-      value: '1234.5',
+      defaultValue: '1234.5',
     });
     const spy = vi.spyOn(HTMLInputElement.prototype, 'setRangeText');
     el.focus();
@@ -728,7 +728,7 @@ describe('undo / redo input events', () => {
   for (const inputType of ['historyUndo', 'historyRedo']) {
     for (const formatOn of [FormatOn.Blur, FormatOn.Change]) {
       it(`${inputType} ${formatOn}: broadcasts the restored string, no rewrite`, () => {
-        const { el } = make({ formatOn, value: '5' });
+        const { el } = make({ formatOn, defaultValue: '5' });
         el.focus();
         const spy = vi.spyOn(HTMLInputElement.prototype, 'setRangeText');
         nativeInput(el, '1234', 4, 4, inputType);
@@ -951,7 +951,7 @@ describe('input fallback', () => {
   });
   describe('allowScientificNotation:false', () => {
     it('focused: restores the previous value, no onValueChange', () => {
-      const { el } = make({ allowScientificNotation: false, value: '5' });
+      const { el } = make({ allowScientificNotation: false, defaultValue: '5' });
       el.focus();
       typeAll(el, '7');
       log.length = 0;
@@ -968,7 +968,7 @@ describe('input fallback', () => {
       `);
     });
     it('unfocused: restores the previous value, no onValueChange', () => {
-      const { el } = make({ allowScientificNotation: false, value: '1234' });
+      const { el } = make({ allowScientificNotation: false, defaultValue: '1234' });
       expect(el.value).toBe('1,234');
       nativeInput(el, '1.5e-7', 6);
       expect(log).toEqual([]);

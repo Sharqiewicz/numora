@@ -106,7 +106,7 @@ describe('allowScientificNotation', () => {
       const n = new NumoraInput(document.body, {
         allowScientificNotation: false,
         formatOn: 'change' as never,
-        value: '12',
+        defaultValue: '12',
         onValueChange,
       });
       const el = n.element;
@@ -119,7 +119,7 @@ describe('allowScientificNotation', () => {
     });
 
     it('input fallback still expands when on', () => {
-      const n = new NumoraInput(document.body, { value: '12' });
+      const n = new NumoraInput(document.body, { defaultValue: '12' });
       const el = n.element;
       el.value = '1.5e-7';
       el.dispatchEvent(new Event('input', { bubbles: true }));

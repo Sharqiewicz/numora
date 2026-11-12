@@ -117,20 +117,20 @@ const PINNED: Record<string, string[]> = {
     '["onFocus dom=1,234","onChange value=19234 formatted=19,234 dom=19,234","onValueChange value=19234 formatted=19,234 dom=19,234"]',
     '"19,234 caret=2,2"',
   ],
-  'paste > en-US blur: normal paste (onPaste before onChange)': [
-    '["onPaste dom=1234567.891","onChange value=1234567.891 formatted=1234567.891 dom=1234567.891","onValueChange value=1234567.891 formatted=1234567.891 dom=1234567.891"]',
+  'paste > en-US blur: normal paste (onPaste before the write and onChange)': [
+    '["onPaste dom=","onChange value=1234567.891 formatted=1234567.891 dom=1234567.891","onValueChange value=1234567.891 formatted=1234567.891 dom=1234567.891"]',
     '"1234567.891 caret=11,11"',
   ],
   'paste > de-DE blur: paste of a de-DE string': [
-    '["onPaste dom=1234567,89","onChange value=1234567.89 formatted=1234567,89 dom=1234567,89","onValueChange value=1234567.89 formatted=1234567,89 dom=1234567,89"]',
+    '["onPaste dom=","onChange value=1234567.89 formatted=1234567,89 dom=1234567,89","onValueChange value=1234567.89 formatted=1234567,89 dom=1234567,89"]',
     '"1234567,89 caret=10,10"',
   ],
-  'paste > en-US change: normal paste (onPaste before onChange)': [
-    '["onPaste dom=1,234,567.891","onChange value=1234567.891 formatted=1,234,567.891 dom=1,234,567.891","onValueChange value=1234567.891 formatted=1,234,567.891 dom=1,234,567.891"]',
+  'paste > en-US change: normal paste (onPaste before the write and onChange)': [
+    '["onPaste dom=","onChange value=1234567.891 formatted=1,234,567.891 dom=1,234,567.891","onValueChange value=1234567.891 formatted=1,234,567.891 dom=1,234,567.891"]',
     '"1,234,567.891 caret=13,13"',
   ],
   'paste > de-DE change: paste of a de-DE string': [
-    '["onPaste dom=1.234.567,89","onChange value=1234567.89 formatted=1.234.567,89 dom=1.234.567,89","onValueChange value=1234567.89 formatted=1.234.567,89 dom=1.234.567,89"]',
+    '["onPaste dom=","onChange value=1234567.89 formatted=1.234.567,89 dom=1.234.567,89","onValueChange value=1234567.89 formatted=1.234.567,89 dom=1.234.567,89"]',
     '"1.234.567,89 caret=12,12"',
   ],
   'keyboard focus then blur > en-US Blur: focus strips without onChange; blur regroups without onChange':
@@ -232,7 +232,7 @@ const PINNED: Record<string, string[]> = {
   'controlled value > external parent change > same number, extra trailing zero from the parent: IS rewritten (raw strings differ)':
     ['"1,234.50 caret=8,8"'],
   'StrictMode > typing, paste, focus and blur each fire exactly once': [
-    '["onFocus dom=","onKeyDown 1 dom=","onChange value=1 formatted=1 dom=1","onValueChange value=1 formatted=1 dom=1","onKeyDown 2 dom=1","onChange value=12 formatted=12 dom=12","onValueChange value=12 formatted=12 dom=12","onPaste dom=1234","onChange value=1234 formatted=1234 dom=1234","onValueChange value=1234 formatted=1234 dom=1234","onBlur dom=1,234"]',
+    '["onFocus dom=","onKeyDown 1 dom=","onChange value=1 formatted=1 dom=1","onValueChange value=1 formatted=1 dom=1","onKeyDown 2 dom=1","onChange value=12 formatted=12 dom=12","onValueChange value=12 formatted=12 dom=12","onPaste dom=12","onChange value=1234 formatted=1234 dom=1234","onValueChange value=1234 formatted=1234 dom=1234","onBlur dom=1,234"]',
     '"1,234 caret=5,5"',
   ],
   'StrictMode > undo/redo and autofill fallbacks fire once': [
@@ -295,7 +295,7 @@ describe('typing via beforeinput', () => {
 
 describe('paste', () => {
   for (const formatOn of [FormatOn.Blur, FormatOn.Change]) {
-    it(`en-US ${formatOn}: normal paste (onPaste before onChange)`, () => {
+    it(`en-US ${formatOn}: normal paste (onPaste before the write and onChange)`, () => {
       mount({ formatOn });
       focus();
       log.length = 0;
@@ -321,7 +321,7 @@ describe('paste', () => {
     paste('99');
     expect(log).toMatchInlineSnapshot(`
       [
-        "onPaste dom=199,456",
+        "onPaste dom=123,456",
         "onChange value=199456 formatted=199,456 dom=199,456",
         "onValueChange value=199456 formatted=199,456 dom=199,456",
       ]

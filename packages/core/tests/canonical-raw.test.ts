@@ -56,7 +56,7 @@ describe('canonical raw value', () => {
         locale: 'de-DE',
         formatOn: FormatOn.Blur,
         groupingStyle: GroupingStyle.Thousand,
-        value: '1234567.89',
+        defaultValue: '1234567.89',
       });
       expect(el.value).toBe('1.234.567,89');
       onValueChange.mockClear();

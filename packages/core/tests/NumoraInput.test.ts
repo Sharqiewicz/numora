@@ -187,7 +187,7 @@ describe('NumoraInput Component', () => {
   // no write to the field and no onValueChange, even though the handler still preventDefault()s
   // the paste (there is no native paste behaviour to fall back to once we've cancelled it).
   it('should ignore paste and not call onValueChange when readOnly', () => {
-    createInputWithPlaceholder({ readOnly: true, value: '5' });
+    createInputWithPlaceholder({ readOnly: true, defaultValue: '5' });
     const inputElement = getInputElement();
 
     const pasteEvent = new Event('paste', { bubbles: true, cancelable: true });
@@ -201,7 +201,7 @@ describe('NumoraInput Component', () => {
   });
 
   it('should ignore paste and not call onValueChange when disabled', () => {
-    createInputWithPlaceholder({ disabled: true, value: '5' });
+    createInputWithPlaceholder({ disabled: true, defaultValue: '5' });
     const inputElement = getInputElement();
 
     const pasteEvent = new Event('paste', { bubbles: true, cancelable: true });
@@ -251,7 +251,7 @@ describe('NumoraInput Component', () => {
   });
 
   it('should initialize with default value', () => {
-    createInputWithPlaceholder({ value: '123.45' });
+    createInputWithPlaceholder({ defaultValue: '123.45' });
     const inputElement = getInputElement();
 
     expect(inputElement.value).toBe('123.45');
@@ -2820,7 +2820,7 @@ describe('vanilla class surface', () => {
   });
 
   it('rawValue, formattedValue and element are properties', () => {
-    const instance = new NumoraInput(host, { locale: 'de-DE', value: '1234567.89' });
+    const instance = new NumoraInput(host, { locale: 'de-DE', defaultValue: '1234567.89' });
     expect(instance.rawValue).toBe('1234567.89');
     expect(instance.formattedValue).toBe('1.234.567,89');
     expect(instance.element).toBe(host.querySelector('input'));
@@ -2831,7 +2831,7 @@ describe('vanilla class surface', () => {
   });
 
   it('rawValue is read-only: setValue is the one way to write', () => {
-    const instance = new NumoraInput(host, { value: '5' });
+    const instance = new NumoraInput(host, { defaultValue: '5' });
     expect(() => {
       (instance as unknown as { rawValue: string }).rawValue = '9';
     }).toThrow(TypeError);
@@ -2900,12 +2900,10 @@ describe('vanilla class surface', () => {
   });
 });
 
-// A2-03: the `pattern` attribute used to be built with fixed `[0-9]*` groups (no thousand
-// separator at all), so the component's OWN grouped output failed its own native constraint
-// validation - `validity.patternMismatch` was `true` and `form.checkValidity()` was `false`
-// for a freshly-grouped "1,234,567". The pattern must accept whatever separators the
-// instance is actually configured with.
-describe("pattern attribute accepts the component's own grouped output (A2-03)", () => {
+// Numora sets no `pattern` attribute (v5): the field can only hold what Numora wrote, so a
+// second validator could only disagree with the sanitizer. Native constraint validation
+// therefore passes on Numora's own output, and a `pattern` the app sets is its own.
+describe('no pattern attribute', () => {
   let container: HTMLElement;
   let form: HTMLFormElement;
 
@@ -2920,65 +2918,82 @@ describe("pattern attribute accepts the component's own grouped output (A2-03)",
     document.body.removeChild(form);
   });
 
-  function getInputElement() {
-    return container.querySelector('input') as HTMLInputElement;
-  }
+  it.each([
+    [{ defaultValue: '1234567' }, '1,234,567'],
+    [{ formatOn: FormatOn.Change, defaultValue: '1234567.5' }, '1,234,567.5'],
+    [{ locale: 'de-DE', defaultValue: '1234.5' }, '1.234,5'],
+    [{ locale: 'en-IN', defaultValue: '1234567' }, '12,34,567'],
+    [{ allowNegative: true, defaultValue: '-1234' }, '-1,234'],
+  ])('%j sets no pattern and passes native validation', (options, shown) => {
+    const el = new NumoraInput(container, options).element;
 
-  it('accepts a grouped value in default (Blur) mode', () => {
-    new NumoraInput(container, { value: '1234567' });
-    const el = getInputElement();
-
-    expect(el.value).toBe('1,234,567');
+    expect(el.value).toBe(shown);
+    expect(el.hasAttribute('pattern')).toBe(false);
     expect(el.validity.patternMismatch).toBe(false);
     expect(form.checkValidity()).toBe(true);
   });
 
-  it('accepts a grouped value in Change mode with a decimal part', () => {
-    new NumoraInput(container, { formatOn: FormatOn.Change, value: '1234567.5' });
-    const el = getInputElement();
+  it("leaves an adopted input's own pattern alone, on init and on update()", () => {
+    const el = document.createElement('input');
+    el.setAttribute('pattern', '[0-9]{4}');
+    form.appendChild(el);
+    const input = new NumoraInput(el, { defaultValue: '1234' });
 
-    expect(el.value).toBe('1,234,567.5');
-    expect(el.validity.patternMismatch).toBe(false);
-    expect(form.checkValidity()).toBe(true);
+    expect(el.getAttribute('pattern')).toBe('[0-9]{4}');
+    input.update({ locale: 'de-DE' });
+    expect(el.getAttribute('pattern')).toBe('[0-9]{4}');
+  });
+});
+
+describe('setValue() is the app\'s own write', () => {
+  it('keeps the edit-time format on a focused Blur-mode field', () => {
+    const input = new NumoraInput(document.createElement('div'), { defaultValue: '1' });
+    input.element.dispatchEvent(new FocusEvent('focus'));
+    input.setValue('1234567');
+    expect(input.element.value).toBe('1234567');
+    input.element.dispatchEvent(new FocusEvent('blur'));
+    expect(input.element.value).toBe('1,234,567');
   });
 
-  it('accepts a grouped value under de-DE separators (. thousand, , decimal)', () => {
-    new NumoraInput(container, { locale: 'de-DE', value: '1234,5' });
-    const el = getInputElement();
+  it('groups on a focused Change-mode field and on an unfocused field', () => {
+    const change = new NumoraInput(document.createElement('div'), { formatOn: FormatOn.Change });
+    change.element.dispatchEvent(new FocusEvent('focus'));
+    change.setValue('1234567');
+    expect(change.element.value).toBe('1,234,567');
 
-    expect(el.value).toBe('1.234,5');
-    expect(el.validity.patternMismatch).toBe(false);
-    expect(form.checkValidity()).toBe(true);
+    const blur = new NumoraInput(document.createElement('div'));
+    blur.setValue('1234567');
+    expect(blur.element.value).toBe('1,234,567');
   });
 
-  it('accepts a grouped negative value when allowNegative is true', () => {
-    new NumoraInput(container, { allowNegative: true, value: '-1234' });
-    const el = getInputElement();
-
-    expect(el.value).toBe('-1,234');
-    expect(el.validity.patternMismatch).toBe(false);
-    expect(form.checkValidity()).toBe(true);
+  it('does not call onValueChange and is not checked by isAllowed', () => {
+    const onValueChange = vi.fn();
+    const input = new NumoraInput(document.createElement('div'), {
+      onValueChange,
+      isAllowed: (raw) => Number(raw) <= 100,
+    });
+    input.setValue('500');
+    expect(input.rawValue).toBe('500');
+    expect(onValueChange).not.toHaveBeenCalled();
   });
+});
 
-  it('accepts a grouped value typed by the user, not just an initial value', () => {
-    new NumoraInput(container, { formatOn: FormatOn.Change });
-    const el = getInputElement();
+describe('a number passed where a string is expected', () => {
+  it('is shown, with a development warning, for the initial value and setValue()', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const host = document.createElement('div');
+    const input = new NumoraInput(host, { defaultValue: 1234.5 as never });
+    expect(input.rawValue).toBe('1234.5');
+    expect(warn).toHaveBeenCalledWith(expect.stringMatching(/defaultValue received a number \(1234\.5\)/));
 
-    for (const ch of '1234567') simulateTyping(el, ch);
+    input.setValue(7 as never);
+    expect(input.rawValue).toBe('7');
+    expect(warn).toHaveBeenCalledWith(expect.stringMatching(/setValue\(\) received a number/));
 
-    expect(el.value).toBe('1,234,567');
-    expect(el.validity.patternMismatch).toBe(false);
-    expect(form.checkValidity()).toBe(true);
-  });
-
-  it('still flags a value with non-numeric characters set natively as a pattern mismatch', () => {
-    new NumoraInput(container, { value: '123' });
-    const el = getInputElement();
-
-    el.value = 'abc';
-
-    expect(el.validity.patternMismatch).toBe(true);
-    expect(form.checkValidity()).toBe(false);
+    warn.mockClear();
+    input.setValue('8');
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 });
 
@@ -3004,7 +3019,7 @@ describe('onValueChange only fires when the raw value actually changed (A2-06)',
   }
 
   it('does not fire onValueChange on focus (separator strip), fires once for a real edit, and not again on blur (regroup only)', () => {
-    new NumoraInput(container, { value: '1234567', onValueChange: onChangeMock });
+    new NumoraInput(container, { defaultValue: '1234567', onValueChange: onChangeMock });
     const el = getInputElement();
 
     expect(el.value).toBe('1,234,567');

@@ -27,6 +27,7 @@ export { takeRemovedOptions, warnRemovedOptions } from './utils/removed-options'
 export { InputType } from './types';
 export { validateNumoraInputOptions } from './validation';
 export { applyLocale } from './utils/locale';
+export { appValue, warnServerLocale } from './utils/app-value';
 export { sanitizeNumoraInput, type ValueSource } from './features/sanitization';
 export {
   formatValueForDisplay,

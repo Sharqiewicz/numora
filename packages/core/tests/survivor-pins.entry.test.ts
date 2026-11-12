@@ -162,7 +162,7 @@ describe('NumoraInput canonical source', () => {
     const { n } = mk({ locale: 'de-DE' });
     n.setValue('1234.5');
     expect(n.formattedValue).toBe('1.234,5');
-    expect(mk({ locale: 'de-DE', value: '1234.5' }).el.value).toBe('1.234,5');
+    expect(mk({ locale: 'de-DE', defaultValue: '1234.5' }).el.value).toBe('1.234,5');
   });
 });
 
@@ -178,7 +178,7 @@ describe('NumoraInput input-event fallback state', () => {
     expect(el.value).toBe('1,234,567');
   });
   it('a refused input after a focus-strip restores the stripped text, not the pre-strip text', () => {
-    const { el } = mk({ value: '1234', allowScientificNotation: false });
+    const { el } = mk({ defaultValue: '1234', allowScientificNotation: false });
     expect(el.value).toBe('1,234');
     el.dispatchEvent(new Event('focus'));
     expect(el.value).toBe('1234');

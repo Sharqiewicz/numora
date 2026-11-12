@@ -1,6 +1,6 @@
 import { act, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { NumoraInput, type NumoraInputChangeEvent } from '../src/index';
+import { NumoraInput, type NumoraHTMLInputElement, type NumoraInputChangeEvent } from '../src/index';
 
 /** Behaviour that mutation testing showed no other test pins (packages/react/src/index.tsx). */
 
@@ -102,11 +102,18 @@ describe('canonical source for app-supplied values (index.tsx:273/308/323)', () 
   });
 });
 
-describe('beforeinput skip/reject leaves the formattedValue mirror alone (index.tsx:343)', () => {
-  it('a rejected edit does not refresh the mirror from the DOM', () => {
+describe('the last written value is private; formattedValue reads the field', () => {
+  it('a rejected edit does not refresh the last written value from the DOM', () => {
     const onChange = vi.fn();
-    render(<NumoraInput data-testid="i" isAllowed={(r) => r !== '12'} onChange={onChange} />);
-    const el = screen.getByTestId('i') as HTMLInputElement & { formattedValue?: string };
+    render(
+      <NumoraInput
+        data-testid="i"
+        allowScientificNotation={false}
+        isAllowed={(r) => r !== '12'}
+        onChange={onChange}
+      />
+    );
+    const el = screen.getByTestId('i') as NumoraHTMLInputElement;
     typeChar(el, '1');
     expect(el.formattedValue).toBe('1');
     // The browser text drifts from what Numora last wrote (e.g. a pending native edit).
@@ -121,15 +128,47 @@ describe('beforeinput skip/reject leaves the formattedValue mirror alone (index.
     el.dispatchEvent(be);
     expect(be.defaultPrevented).toBe(true);
     expect(el.value).toBe('1x');
-    expect(el.formattedValue).toBe('1');
+    // The public property is live; the remembered write is still '1', so a refused input
+    // restores '1', not the drifted text.
+    expect(el.formattedValue).toBe('1x');
+    nativeInput(el, '1e5');
+    expect(el.value).toBe('1');
     expect(onChange).toHaveBeenCalledTimes(1);
   });
-  it('a rejected scientific-notation fallback restores the last written value from the mirror', () => {
+  it('formattedValue cannot be assigned, and a refused input still restores the field', () => {
+    render(<NumoraInput data-testid="i" allowScientificNotation={false} />);
+    const el = screen.getByTestId('i') as NumoraHTMLInputElement;
+    typeChar(el, '1');
+    typeChar(el, '2');
+    expect(() => {
+      (el as { formattedValue: string }).formattedValue = '999';
+    }).toThrow(TypeError);
+    expect(el.formattedValue).toBe('12');
+    nativeInput(el, '12e5');
+    expect(el.value).toBe('12');
+  });
+  it('a rejected scientific-notation fallback restores the last written value', () => {
     render(<NumoraInput data-testid="i" allowScientificNotation={false} />);
     const el = screen.getByTestId('i') as HTMLInputElement;
     typeChar(el, '1');
     typeChar(el, '2');
     nativeInput(el, '12e5');
     expect(el.value).toBe('12');
+  });
+});
+
+describe('ref typing', () => {
+  it('accepts a NumoraHTMLInputElement ref and a plain HTMLInputElement ref', () => {
+    const typed = { current: null } as { current: NumoraHTMLInputElement | null };
+    const plain = { current: null } as { current: HTMLInputElement | null };
+    render(
+      <>
+        <NumoraInput ref={typed} defaultValue="1234.5" formatOn="change" />
+        <NumoraInput ref={plain} defaultValue="2" />
+      </>
+    );
+    expect(typed.current?.rawValue).toBe('1234.5');
+    expect(typed.current?.formattedValue).toBe('1,234.5');
+    expect(plain.current?.value).toBe('2');
   });
 });

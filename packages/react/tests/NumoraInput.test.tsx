@@ -373,8 +373,8 @@ describe('NumoraInput', () => {
       // platform limitation, not something A2-01 can fix (there is no display-formatting
       // choice that changes what a native DOM getter returns for a text input). Use
       // `e.target.value` (the raw string) instead, or parse it yourself with `Number(...)`.
-      // What A2-01 still guarantees: the field does not corrupt into a literal "NaN" and
-      // stays usable - it resets to empty and keeps accepting further digits normally.
+      // What A2-01 still guarantees: the field does not corrupt into a literal "NaN". It
+      // shows the (empty) controlled value, like any controlled field.
       it('valueAsNumber cannot round-trip a text input - documents the platform limitation', () => {
         function Wrapper() {
           const [val, setVal] = useState<number>(0);
@@ -396,9 +396,10 @@ describe('NumoraInput', () => {
         // collapses - but it collapses to an EMPTY field, not to a corrupted/garbage one.
         expect(input.value).toBe('');
 
-        // The field is still fully usable afterwards - no digits get stuck or rejected.
+        // The parent's state stays NaN whatever is typed, and a controlled field shows its
+        // `value`: the field stays empty rather than drifting away from the state.
         act(() => simulateTyping(input, '5'));
-        expect(input.value).toBe('5');
+        expect(input.value).toBe('');
       });
     });
   });
@@ -1343,21 +1344,34 @@ describe('locale', () => {
     expect(input.value).toBe('12.345.678');
   });
 
-  // Regression (ticket 04): a numeric `value`/`defaultValue` is always dot-decimal
-  // (`String(1234.5)` -> `'1234.5'`), so under de-DE - where '.' is the *thousand*
-  // separator - passing it straight through got silently reinterpreted as grouping and
-  // concatenated: 1234.5 displayed as "12.345", a silent 10x error. The initializer must
-  // convert a JS number to the field's display format before formatting it.
-  it('converts a numeric controlled value to de-DE display format', () => {
+  // `value`/`defaultValue` are typed as strings. A number that gets past the types (plain
+  // JS, `as any`) is still read as a canonical value (`String(1234.5)` -> `'1234.5'`, shown
+  // as "1.234,5" under de-DE, never "12.345"), with a development warning.
+  it('a numeric controlled value is a type error, is still shown, and warns', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // @ts-expect-error - value is a string, never a number.
     render(<NumoraInput data-testid="input" locale="de-DE" value={1234.5} onChange={() => {}} />);
     const input = screen.getByTestId('input') as HTMLInputElement;
     expect(input.value).toBe('1.234,5');
+    expect(warn).toHaveBeenCalledWith(expect.stringMatching(/value received a number \(1234\.5\)/));
+    warn.mockRestore();
   });
 
-  it('converts a numeric defaultValue to de-DE display format', () => {
+  it('a numeric defaultValue is a type error, is still shown, and warns', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // @ts-expect-error - defaultValue is a string, never a number.
     render(<NumoraInput data-testid="input" locale="de-DE" defaultValue={0.5} />);
     const input = screen.getByTestId('input') as HTMLInputElement;
     expect(input.value).toBe('0,5');
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('a string value does not warn', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    render(<NumoraInput data-testid="input" value="1234.5" onChange={() => {}} />);
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 
   // App-supplied values are canonical raw values (ADR 0004/0006): a string is never read as

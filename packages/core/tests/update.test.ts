@@ -17,7 +17,7 @@ describe('NumoraInput.update', () => {
   afterEach(() => host.remove());
 
   it('re-formats the live value under a new locale without notifying', () => {
-    const input = make({ value: '1234567.89' });
+    const input = make({ defaultValue: '1234567.89' });
     expect(input.formattedValue).toBe('1,234,567.89');
 
     input.update({ locale: 'de-DE' });
@@ -28,7 +28,7 @@ describe('NumoraInput.update', () => {
   });
 
   it('notifies when the new options change the raw value', () => {
-    const input = make({ value: '1.23456789' });
+    const input = make({ defaultValue: '1.23456789' });
 
     input.update({ decimalMaxLength: 2 });
 
@@ -38,14 +38,14 @@ describe('NumoraInput.update', () => {
   });
 
   it('dropping allowNegative removes the sign and notifies', () => {
-    const input = make({ allowNegative: true, value: '-5' });
+    const input = make({ allowNegative: true, defaultValue: '-5' });
     input.update({ allowNegative: false });
     expect(input.rawValue).toBe('5');
     expect(onValueChange).toHaveBeenCalledWith({ value: '5', formattedValue: '5' });
   });
 
   it('merges: options not mentioned are kept', () => {
-    const input = make({ locale: 'de-DE', decimalMaxLength: 2, value: '1234.5' });
+    const input = make({ locale: 'de-DE', decimalMaxLength: 2, defaultValue: '1234.5' });
     input.update({ decimalMinLength: 2 });
     expect(input.formattedValue).toBe('1.234,50');
     input.setValue('1.999');
@@ -53,7 +53,7 @@ describe('NumoraInput.update', () => {
   });
 
   it('undefined restores the default', () => {
-    const input = make({ locale: 'de-DE', decimalMaxLength: 2, value: '1234.5' });
+    const input = make({ locale: 'de-DE', decimalMaxLength: 2, defaultValue: '1234.5' });
     input.update({ locale: undefined, decimalMaxLength: undefined });
     expect(input.formattedValue).toBe('1,234.5');
     input.setValue('0.123456');
@@ -61,7 +61,7 @@ describe('NumoraInput.update', () => {
   });
 
   it('later typing, paste and blur use the new options', () => {
-    const input = make({ value: '1234' });
+    const input = make({ defaultValue: '1234' });
     input.update({ locale: 'de-DE', formatOn: FormatOn.Change });
     const el = input.element;
     el.setSelectionRange(el.value.length, el.value.length);
@@ -79,41 +79,38 @@ describe('NumoraInput.update', () => {
 
   it('swaps onValueChange', () => {
     const next = vi.fn();
-    const input = make({ value: '1.239' });
+    const input = make({ defaultValue: '1.239' });
     input.update({ onValueChange: next });
     input.update({ decimalMaxLength: 2 });
     expect(onValueChange).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledWith({ value: '1.23', formattedValue: '1.23' });
   });
 
-  it('applies native attributes and rebuilds the pattern', () => {
+  it('applies native attributes and sets no pattern', () => {
     const input = make({ placeholder: '0.0' });
     input.update({ placeholder: 'Amount', disabled: true, ariaLabel: 'Amount', locale: 'de-DE' });
     const el = input.element;
     expect(el.placeholder).toBe('Amount');
     expect(el.disabled).toBe(true);
     expect(el.getAttribute('aria-label')).toBe('Amount');
-    expect(el.getAttribute('pattern')).toBe('^[0-9\\.]*([,][0-9]*)?$');
+    expect(el.hasAttribute('pattern')).toBe(false);
 
     input.update({ placeholder: undefined });
     expect(el.placeholder).toBe('Amount');
   });
 
   it('ignores value: the live value is kept', () => {
-    const input = make({ value: '5' });
+    const input = make({ defaultValue: '5' });
     input.update({ value: '9' } as never);
     expect(input.rawValue).toBe('5');
   });
 
   it('an invalid combination throws and changes nothing', () => {
-    const input = make({ locale: 'de-DE', value: '1234.5' });
-    const pattern = input.element.getAttribute('pattern');
-
+    const input = make({ locale: 'de-DE', defaultValue: '1234.5' });
     expect(() => input.update({ thousandSeparator: ',' })).toThrow(/cannot equal/);
     expect(() => input.update({ decimalMaxLength: -1, placeholder: 'x' })).toThrow();
 
     expect(input.formattedValue).toBe('1.234,5');
-    expect(input.element.getAttribute('pattern')).toBe(pattern);
     expect(input.element.placeholder).toBe('');
     input.setValue('99.5');
     expect(input.formattedValue).toBe('99,5');
@@ -121,7 +118,7 @@ describe('NumoraInput.update', () => {
   });
 
   it('the rewrite is undoable: it goes through setRangeText', () => {
-    const input = make({ value: '1234' });
+    const input = make({ defaultValue: '1234' });
     const spy = vi.spyOn(input.element, 'setRangeText');
     input.update({ locale: 'de-DE' });
     expect(spy).toHaveBeenCalled();
@@ -131,7 +128,7 @@ describe('NumoraInput.update', () => {
   });
 
   it('a focused Blur-mode field keeps its ungrouped edit format', () => {
-    const input = make({ value: '1234567.5' });
+    const input = make({ defaultValue: '1234567.5' });
     const el = input.element;
     el.dispatchEvent(new Event('focus'));
     expect(el.value).toBe('1234567.5');
@@ -145,7 +142,7 @@ describe('NumoraInput.update', () => {
   });
 
   it('a refused input after update restores the re-formatted text', () => {
-    const input = make({ value: '1234', allowScientificNotation: false });
+    const input = make({ defaultValue: '1234', allowScientificNotation: false });
     input.update({ locale: 'de-DE' });
     const el = input.element;
     el.value = '1e5';
