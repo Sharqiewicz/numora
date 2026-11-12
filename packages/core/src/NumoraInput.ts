@@ -110,15 +110,13 @@ export class NumoraInput {
     const isExistingInput = container instanceof HTMLInputElement;
     this.el = isExistingInput ? container : document.createElement('input');
 
-    // These attributes are REQUIRED for Numora to work correctly and must not be overridden:
-    // - type='text': Using 'number' would cause browser-native validation/formatting that conflicts with Numora
-    // - inputmode='decimal': Ensures mobile keyboards show numeric keypad
-    // - spellcheck='false': Prevents spellcheck from interfering with numeric input
-    // - autocomplete='off': Prevents browser autocomplete from interfering with formatting
+    // Fixed, because Numora needs them: `type="number"` would bring the browser's own
+    // validation and formatting, and `inputmode="decimal"` gives the numeric keypad.
     this.el.setAttribute('type', 'text');
     this.el.setAttribute('inputmode', 'decimal');
-    this.el.setAttribute('spellcheck', 'false');
-    this.el.setAttribute('autocomplete', 'off');
+    // Defaults only, as in React: an adopted <input> keeps its own (`autocomplete="cc-number"`).
+    if (!this.el.hasAttribute('spellcheck')) this.el.setAttribute('spellcheck', 'false');
+    if (!this.el.hasAttribute('autocomplete')) this.el.setAttribute('autocomplete', 'off');
 
     if (!isExistingInput) {
       container.appendChild(this.el);

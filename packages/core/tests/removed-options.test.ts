@@ -20,6 +20,7 @@ describe('options removed since v4 (vanilla)', () => {
     ['thousandStyle', 'lakh', 'groupingStyle'],
     ['maxDecimals', 2, 'decimalMaxLength'],
     ['emitRawValue', true, 'onValueChange'],
+    ['rawValueMode', true, 'onValueChange'],
   ])('warns for %s, names the replacement, and keeps it off the element', (name, val, hint) => {
     vi.stubEnv('NODE_ENV', 'development');
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});

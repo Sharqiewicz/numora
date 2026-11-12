@@ -138,6 +138,14 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   `decimalSeparator: ','` and `thousandSeparator: '.'` both give `1.234,5`, and
   `{ locale: 'de-DE', decimalSeparator: '.' }` gives `1,234.5`. Passing the same character
   for both still throws.
+- **`formatValue` and `parseValue` warn about options removed since v4**, like the input does:
+  `formatValue('1.5', { maxDecimals: 2 })` used to ignore `maxDecimals` silently. The warning
+  is development-only and shown once per option name.
+- **An adopted `<input>` keeps its own `autocomplete` and `spellcheck`.** The vanilla class
+  used to overwrite both with `off` and `false`; they are now defaults for an input that sets
+  neither, as the React props already were. `type` and `inputmode` are still fixed.
+- **The `rawValueMode` removal warning no longer sends vanilla users to `e.target.value`:** it
+  names the `onValueChange` `value`, which both packages have.
 - **`formatValue` and `parseValue` take a value that is not a string the way the input does:**
   `null` and `undefined` give `''`, and a number is formatted with a development warning.
   Both threw a `TypeError` before.
@@ -193,9 +201,12 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   restores the previous value without firing `onChange`. Values the app passes in (`value`,
   React `defaultValue`, `setValue()`) always expand.
 - **New types on the root:** `NumoraValues` and `LocaleTag`.
-- **Dev-only warning for an invalid `locale`.** `Intl.NumberFormat` rejecting the tag used to
-  fall back silently to `,` grouping and `.` decimal; it now logs a `console.warn` naming the
-  tag, except when `NODE_ENV` is `production`.
+- **An invalid `locale` throws, like any other invalid option.** A tag `Intl.NumberFormat`
+  rejects (`'bad!'`) used to fall back silently to `,` grouping and `.` decimal, and a value
+  that is not a string (`locale: 5`) failed with `e.replace is not a function`. Both now throw
+  an error naming what was received, from the input, `formatValue`, `parseValue` and
+  `getSeparatorsFromLocale`. A well-formed tag for a locale the runtime does not know still
+  resolves the way `Intl` resolves it.
 
 ### Changed
 - **`numora` and `numora-react` ship minified, without comments, with sourcemaps.** A React

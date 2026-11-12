@@ -1,3 +1,4 @@
+import { appValue } from '@/utils/app-value';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { NumoraOptions } from '@/types';
 import { FormatOn, GroupingStyle, InputType } from '@/types';
@@ -196,22 +197,22 @@ describe('locale.ts', () => {
     });
   });
 
-  it('L109-112: the invalid-locale warning is on when NODE_ENV cannot be read, off in production', () => {
+  it('development warnings are on when NODE_ENV cannot be read, off in production', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     vi.stubGlobal('process', {
       get env(): never {
         throw new Error('no env');
       },
     });
-    getSeparatorsFromLocale('not a locale!');
+    appValue(5, 'setValue()');
     expect(warn).toHaveBeenCalledTimes(1);
     vi.unstubAllGlobals();
 
     vi.stubEnv('NODE_ENV', 'production');
-    getSeparatorsFromLocale('not a locale!');
+    appValue(5, 'setValue()');
     expect(warn).toHaveBeenCalledTimes(1);
     vi.stubEnv('NODE_ENV', 'test');
-    getSeparatorsFromLocale('not a locale!');
+    appValue(5, 'setValue()');
     expect(warn).toHaveBeenCalledTimes(2);
   });
 });

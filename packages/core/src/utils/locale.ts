@@ -115,14 +115,6 @@ export function isProduction(): boolean {
   }
 }
 
-/** Development-only: an invalid tag otherwise falls back to en-US separators silently. */
-function warnInvalidLocale(locale: string | undefined): void {
-  if (isProduction()) return;
-  console.warn(
-    `[numora] Invalid locale "${locale}": Intl.NumberFormat rejected it, so the field uses "," grouping and "." decimal. Pass a BCP 47 tag such as "de-DE".`
-  );
-}
-
 export function getSeparatorsFromLocale(locale?: string): {
   thousandSeparator: string;
   decimalSeparator: string;
@@ -130,7 +122,8 @@ export function getSeparatorsFromLocale(locale?: string): {
 } {
   // Java, Python and Android write tags with `_` (`de_DE`), which Intl rejects with a
   // RangeError. Read them as the BCP 47 tag they name instead of falling back to en-US.
-  if (locale) locale = locale.replace(/_/g, '-');
+  // `String`: a non-string that got past the types fails as an invalid tag, not a TypeError.
+  if (locale) locale = String(locale).replace(/_/g, '-');
   try {
     let formatter = new Intl.NumberFormat(locale);
     // The locale's own zero digit anchors digit classification for the probe.
@@ -148,8 +141,12 @@ export function getSeparatorsFromLocale(locale?: string): {
       thousandSeparator: separators.length >= 2 ? separators[0] : ',',
       groupingStyle: deriveGroupingStyle(shape),
     };
-  } catch {
-    warnInvalidLocale(locale);
+  } catch (error) {
+    // A malformed tag is an invalid option and throws like one. Anything else is an engine
+    // without the `Intl` support needed, which gets the default separators.
+    if (error instanceof RangeError) {
+      throw new Error(`locale must be a BCP 47 tag such as "de-DE". Received: ${JSON.stringify(locale)}`);
+    }
     return {
       thousandSeparator: ',',
       decimalSeparator: '.',

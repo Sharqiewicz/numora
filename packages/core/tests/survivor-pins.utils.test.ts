@@ -328,17 +328,20 @@ describe('locale.ts', () => {
     vi.unstubAllEnvs();
     vi.restoreAllMocks();
   });
-  it('L109-116: an invalid locale warns once outside production and is silent in production', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    expect(getSeparatorsFromLocale('bad!')).toMatchObject({
+  it('a malformed locale tag throws, in production too', () => {
+    expect(() => getSeparatorsFromLocale('bad!')).toThrow('Received: "bad!"');
+    vi.stubEnv('NODE_ENV', 'production');
+    expect(() => getSeparatorsFromLocale('bad!')).toThrow('Received: "bad!"');
+  });
+  it('an engine failure that is not a malformed tag gets the default separators', () => {
+    vi.spyOn(Intl, 'NumberFormat').mockImplementation(() => {
+      throw new TypeError('not supported');
+    });
+    expect(getSeparatorsFromLocale('de-DE')).toEqual({
       thousandSeparator: ',',
       decimalSeparator: '.',
+      groupingStyle: GroupingStyle.Thousand,
     });
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0][0]).toContain('bad!');
-    vi.stubEnv('NODE_ENV', 'production');
-    getSeparatorsFromLocale('bad!');
-    expect(warn).toHaveBeenCalledTimes(1);
   });
   it('L166: applyLocale(true) uses the default locale', () => {
     expect(applyLocale(true, {})).toEqual(getSeparatorsFromLocale());

@@ -10,7 +10,7 @@ const REMOVED: Record<string, string> = {
   autoAddLeadingZero: 'padLeadingZero',
   thousandStyle: 'groupingStyle',
   maxDecimals: 'decimalMaxLength',
-  rawValueMode: 'e.target.value',
+  rawValueMode: 'the onValueChange `value` (React: or e.target.value)',
   emitRawValue: 'the onValueChange `value`',
   // Vanilla only: React destructures its own `value` and `onChange` before this list is
   // consulted.

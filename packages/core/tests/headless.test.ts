@@ -173,3 +173,53 @@ describe('locale with explicit separator options', () => {
     }
   });
 });
+
+describe('an invalid locale throws, like any other invalid option', () => {
+  it.each([[5], [{}]])('a locale that is not a string or boolean: %j', (locale) => {
+    expect(() => formatValue('1', { locale: locale as never })).toThrow(
+      /locale must be a BCP 47 tag/
+    );
+    expect(() => new NumoraInput(document.createElement('div'), { locale: locale as never })).toThrow(
+      /locale must be a BCP 47 tag/
+    );
+  });
+
+  it('a malformed tag names the value it received', () => {
+    expect(() => formatValue('1', { locale: 'bad!' })).toThrow(
+      'locale must be a BCP 47 tag such as "de-DE". Received: "bad!"'
+    );
+  });
+
+  it('update() with a malformed tag throws and leaves the field as it was', () => {
+    const input = new NumoraInput(document.createElement('div'), { defaultValue: '1234.5' });
+    expect(() => input.update({ locale: 'bad!' })).toThrow(/locale must be a BCP 47 tag/);
+    expect(input.formattedValue).toBe('1,234.5');
+  });
+
+  it('valid forms still pass: a tag, an underscore tag, true, false and undefined', () => {
+    expect(formatValue('1234.5', { locale: 'de-DE' })).toBe('1.234,5');
+    expect(formatValue('1234.5', { locale: 'de_DE' })).toBe('1.234,5');
+    expect(() => formatValue('1234.5', { locale: true })).not.toThrow();
+    expect(formatValue('1234.5', { locale: false })).toBe('1,234.5');
+    expect(formatValue('1234.5', { locale: undefined })).toBe('1,234.5');
+  });
+});
+
+describe('options removed since v4 (headless)', () => {
+  it('warns once per name, names the replacement, and ignores the option', () => {
+    vi.stubEnv('NODE_ENV', 'development');
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const stale = { maxDecimals: 2 } as never;
+
+    expect(formatValue('1.2345', stale)).toBe('1.2345');
+    expect(parseValue('1.2345', stale)).toBe('1.2345');
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toContain('maxDecimals is removed in v5; use decimalMaxLength');
+
+    formatValue('1', { thousandStyle: 'lakh' } as never);
+    expect(warn).toHaveBeenCalledTimes(2);
+
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+});

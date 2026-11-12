@@ -1,8 +1,21 @@
 import type { NumoraOptions } from './types';
 import { appValue } from './utils/app-value';
 import { formatForDisplay } from './utils/dom-events';
+import { takeRemovedOptions, warnRemovedOptions } from './utils/removed-options';
 import { resolveOptions } from './utils/resolve-options';
 
+// Removed v4 option names already warned about here: these functions can run on every render.
+const warned = new Set<string>();
+
+/** Resolves options, warning once per name for an option removed since v4 (it is ignored). */
+function resolve(options?: NumoraOptions) {
+  if (options) {
+    const fresh = takeRemovedOptions({ ...options }).filter((name) => !warned.has(name));
+    for (const name of fresh) warned.add(name);
+    warnRemovedOptions(fresh);
+  }
+  return resolveOptions(options);
+}
 
 /**
  * Formats a canonical raw value (`'1234.5'`: ASCII digits, `.` decimal, optional `-`) the way
@@ -18,7 +31,7 @@ import { resolveOptions } from './utils/resolve-options';
  * @throws when `options` are invalid, like the input does.
  */
 export function formatValue(value: string, options?: NumoraOptions): string {
-  return formatForDisplay(appValue(value, 'formatValue()'), resolveOptions(options), 'canonical')
+  return formatForDisplay(appValue(value, 'formatValue()'), resolve(options), 'canonical')
     .formatted;
 }
 
@@ -35,5 +48,5 @@ export function formatValue(value: string, options?: NumoraOptions): string {
  * @throws when `options` are invalid, like the input does.
  */
 export function parseValue(text: string, options?: NumoraOptions): string {
-  return formatForDisplay(appValue(text, 'parseValue()'), resolveOptions(options)).raw;
+  return formatForDisplay(appValue(text, 'parseValue()'), resolve(options)).raw;
 }

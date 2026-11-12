@@ -2760,17 +2760,31 @@ describe('Adopt existing <input> element', () => {
     expect(host.querySelector('input')).toBeNull();
   });
 
-  it('forces required attributes on an adopted input', () => {
+  it('forces type and inputmode on an adopted input', () => {
     host.setAttribute('type', 'number');
-    host.setAttribute('spellcheck', 'true');
-    host.setAttribute('autocomplete', 'on');
+    host.setAttribute('inputmode', 'text');
 
     new NumoraInput(host, {});
 
     expect(host.getAttribute('type')).toBe('text');
     expect(host.getAttribute('inputmode')).toBe('decimal');
+  });
+
+  it('defaults spellcheck and autocomplete on an adopted input that sets neither', () => {
+    new NumoraInput(host, {});
+
     expect(host.getAttribute('spellcheck')).toBe('false');
     expect(host.getAttribute('autocomplete')).toBe('off');
+  });
+
+  it("keeps an adopted input's own spellcheck and autocomplete, like the React props", () => {
+    host.setAttribute('spellcheck', 'true');
+    host.setAttribute('autocomplete', 'cc-number');
+
+    new NumoraInput(host, {});
+
+    expect(host.getAttribute('spellcheck')).toBe('true');
+    expect(host.getAttribute('autocomplete')).toBe('cc-number');
   });
 
   it('preserves pre-set value attribute on adopted input when no options.value is given', () => {

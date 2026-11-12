@@ -51,13 +51,10 @@ describe('✅ getSeparatorsFromLocale', () => {
       expect(getSeparatorsFromLocale('xx-INVALID').groupingStyle).toBe(GroupingStyle.Thousand);
     });
 
-    it('should fall back to Thousand for a malformed tag without throwing', () => {
-      expect(() => getSeparatorsFromLocale('!!')).not.toThrow();
-      expect(getSeparatorsFromLocale('!!')).toEqual({
-        thousandSeparator: ',',
-        decimalSeparator: '.',
-        groupingStyle: GroupingStyle.Thousand,
-      });
+    it('should throw for a malformed tag', () => {
+      expect(() => getSeparatorsFromLocale('!!')).toThrow(
+        'locale must be a BCP 47 tag such as "de-DE". Received: "!!"'
+      );
     });
   });
 });
@@ -229,14 +226,10 @@ describe('getSeparatorsFromLocale: underscore tags', () => {
 });
 
 describe('getSeparatorsFromLocale: invalid tags', () => {
-  it('warns once in development and falls back to en-US separators', () => {
+  it('throws, naming the tag, and does not also warn', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    expect(getSeparatorsFromLocale('not a locale!')).toMatchObject({
-      thousandSeparator: ',',
-      decimalSeparator: '.',
-    });
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0][0]).toContain('not a locale!');
+    expect(() => getSeparatorsFromLocale('not a locale!')).toThrow('Received: "not a locale!"');
+    expect(warn).not.toHaveBeenCalled();
     warn.mockRestore();
   });
   it('does not warn for a valid tag', () => {
