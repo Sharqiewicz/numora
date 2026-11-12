@@ -93,6 +93,40 @@ function Locale() {
         the detected one.
       </p>
 
+      <h2>Where the separators come from</h2>
+      <p>
+        By default the field uses <code>,</code> for thousands and <code>.</code> for decimals.
+        Numora does not read the browser's locale unless you ask it to. There are two ways to change
+        the separators.
+      </p>
+      <p>
+        Pass them yourself with <code>thousandSeparator</code> and <code>decimalSeparator</code>. Or
+        set <code>locale</code> and Numora derives them. <code>locale="de-DE"</code> uses that
+        locale and <code>locale={'{true}'}</code> uses the browser's.
+      </p>
+      <p>
+        You can mix the two. A separator you pass wins, and <code>locale</code> fills in the ones
+        you did not set.
+      </p>
+      <p>
+        Each separator is exactly one character. It cannot be a digit or one of{' '}
+        <code>- + e E k K m M b B t T</code>, which Numora reads as a sign, an exponent or a
+        compact-notation suffix. The two separators must be different. Numora throws on an invalid
+        separator in development. In a production build it logs the error and keeps the last valid
+        options.
+      </p>
+      <p>
+        A separator you pass never clashes with one you did not. If it is the character the defaults
+        or the locale would use for the other separator, the other one switches:{' '}
+        <code>thousandSeparator="."</code> on its own gives a <code>,</code> decimal, and{' '}
+        <code>decimalSeparator=","</code> on its own gives a <code>.</code> thousand separator.
+        Numora only throws when you pass the same character for both.
+      </p>
+      <p>
+        The separators only change what the field shows. The value you get back has the same format
+        in every locale. See <Link to="/docs/numora-react/features/value-types">Value types</Link>.
+      </p>
+
       <h2>Browser locale (auto-detect)</h2>
       <p>
         Pass <code>locale={'{true}'}</code> to detect both separators from the browser's current
@@ -111,9 +145,9 @@ function Locale() {
 
       <h2>Specific locale tag</h2>
       <p>
-        Pass a BCP 47 locale tag to pin separators to a specific locale. Use this whenever the
-        field is rendered on the server: <code>locale={'{true}'}</code> there resolves to the
-        server's locale, which may not match the browser, and logs a warning in development.
+        Pass a BCP 47 locale tag to pin separators to a specific locale. Use this whenever the field
+        is rendered on the server: <code>locale={'{true}'}</code> there resolves to the server's
+        locale, which may not match the browser, and logs a warning in development.
       </p>
       <div className="space-y-4">
         <ExampleWithDemo
@@ -152,10 +186,9 @@ function Locale() {
         />
       </div>
       <p>
-        Only <code>Thousand</code> and <code>Lakh</code> are inferrable.{' '}
-        <code>'wan'</code> (4-4-4) cannot be derived from <code>Intl.NumberFormat</code>
-        , because <code>zh-CN</code> and <code>ja-JP</code> both report Western 3-3-3 grouping. Pass
-        Wan explicitly.
+        Only <code>Thousand</code> and <code>Lakh</code> are inferrable. <code>'wan'</code> (4-4-4)
+        cannot be derived from <code>Intl.NumberFormat</code>, because <code>zh-CN</code> and{' '}
+        <code>ja-JP</code> both report Western 3-3-3 grouping. Pass Wan explicitly.
       </p>
 
       <h2>getSeparatorsFromLocale</h2>
@@ -197,9 +230,8 @@ getSeparatorsFromLocale('en-IN')
       <p>
         <code>value</code> and <code>defaultValue</code> take the canonical raw value in every
         locale: ASCII digits, <code>.</code> as the decimal mark, no grouping. Under{' '}
-        <code>locale="de-DE"</code>, <code>{'value="1234.5"'}</code> displays{' '}
-        <code>"1.234,5"</code>, and{' '}
-        <code>e.target.value</code> is <code>"1234.5"</code>. See{' '}
+        <code>locale="de-DE"</code>, <code>{'value="1234.5"'}</code> displays <code>"1.234,5"</code>
+        , and <code>e.target.value</code> is <code>"1234.5"</code>. See{' '}
         <Link to="/docs/numora-react/features/value-types">features/value-types</Link> for the full
         value contract.
       </p>

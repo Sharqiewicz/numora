@@ -1,7 +1,7 @@
 /**
  * `numora/internal` - low-level wiring shared with `numora-react`.
  *
- * These are the DOM-event and undo-preserving-write primitives the React component reuses
+ * These are the DOM-event and DOM-write primitives the React component reuses
  * to drive an `<input>`. They are NOT a stable consumer-facing API and are not meant for
  * app code - build a `NumoraInput` (vanilla or React) instead. Anything here may change
  * between minor versions without a breaking-change note.
@@ -9,7 +9,7 @@
  * The public surface is the package root, `'numora'`, plus `'numora/pipeline'`.
  */
 export { handleOnKeyDownNumoraInput } from './utils/event-handlers';
-export { writeValuePreservingUndo } from './features/formatting';
+export { writeValue } from './features/formatting';
 export {
   applyBeforeInput,
   applyBlur,

@@ -107,7 +107,9 @@ describe('NumoraInput.update', () => {
 
   it('an invalid combination throws and changes nothing', () => {
     const input = make({ locale: 'de-DE', defaultValue: '1234.5' });
-    expect(() => input.update({ thousandSeparator: ',' })).toThrow(/cannot equal/);
+    expect(() => input.update({ thousandSeparator: ',', decimalSeparator: ',' })).toThrow(
+      /cannot equal/
+    );
     expect(() => input.update({ decimalMaxLength: -1, placeholder: 'x' })).toThrow();
 
     expect(input.formattedValue).toBe('1.234,5');
@@ -117,7 +119,7 @@ describe('NumoraInput.update', () => {
     expect(onValueChange).not.toHaveBeenCalled();
   });
 
-  it('the rewrite is undoable: it goes through setRangeText', () => {
+  it('the rewrite goes through setRangeText, and only when the text changes', () => {
     const input = make({ defaultValue: '1234' });
     const spy = vi.spyOn(input.element, 'setRangeText');
     input.update({ locale: 'de-DE' });

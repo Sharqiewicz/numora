@@ -886,7 +886,7 @@ describe('handleChange fallback (non-beforeinput edits)', () => {
 
     // Simulate drop/autofill: use fireEvent.change so React's synthetic onChange fires,
     // then verify the value was sanitized. The nativeEvent is faked with insertFromDrop
-    // inputType so handleChange routes to the fallback (not undo) branch.
+    // inputType so handleChange routes to the fallback.
     fireEvent.change(input, {
       target: { value: '12a3.4x5' },
       nativeEvent: new InputEvent('input', { bubbles: true, inputType: 'insertFromDrop' }),
@@ -929,37 +929,6 @@ describe('handleChange fallback (non-beforeinput edits)', () => {
     nativeInputEvent(input, '1234', 2);
     expect(input.value).toBe('1,234');
     expect(input.selectionStart).toBe(5);
-  });
-
-  it('does not re-format on undo (undo branch is still a pass-through)', () => {
-    const onChange = vi.fn();
-    render(
-      <NumoraInput
-        data-testid="input"
-        onChange={onChange}
-        thousandSeparator=","
-        formatOn={FormatOn.Change}
-        defaultValue="1234"
-      />
-    );
-    const input = screen.getByTestId('input') as HTMLInputElement;
-    onChange.mockClear();
-
-    // Dispatch historyUndo via fireEvent.change with a prior raw value.
-    // The undo branch should be a pass-through (no re-format, no write-back).
-    fireEvent.change(input, {
-      target: { value: '123' },
-      nativeEvent: new InputEvent('input', { bubbles: true, inputType: 'historyUndo' }),
-    });
-
-    // onChange must fire with the stripped raw value.
-    expect(onChange).toHaveBeenCalledTimes(1);
-    const event: NumoraInputChangeEvent = onChange.mock.calls[0][0];
-    // Raw value = DOM value (no separators present).
-    expect(event.target.value).toBe('123');
-
-    // The DOM value must NOT be rewritten (no extra formatting step).
-    expect(input.value).toBe('123');
   });
 
   // A2-07
@@ -1028,68 +997,6 @@ function simulateDelete(
   }
   el.dispatchEvent(new InputEvent('input', { bubbles: true, inputType }));
 }
-
-// ---------------------------------------------------------------------------
-// undo / redo
-// ---------------------------------------------------------------------------
-
-describe('undo/redo', () => {
-  it('broadcasts the raw value on historyUndo without re-formatting', () => {
-    const onChange = vi.fn();
-    render(
-      <NumoraInput
-        data-testid="input"
-        onChange={onChange}
-        thousandSeparator=","
-        formatOn={FormatOn.Change}
-        defaultValue="1234"
-      />
-    );
-    const input = screen.getByTestId('input') as HTMLInputElement;
-    onChange.mockClear();
-
-    // Simulate undo restoring "123"
-    fireEvent.change(input, {
-      target: { value: '123' },
-      nativeEvent: new InputEvent('input', { bubbles: true, inputType: 'historyUndo' }),
-    });
-
-    expect(onChange).toHaveBeenCalledTimes(1);
-    const event: NumoraInputChangeEvent = onChange.mock.calls[0][0];
-    // Raw value stripped of separators
-    expect(event.target.value).toBe('123');
-    // DOM value is the literal restored string (not re-formatted)
-    expect(input.value).toBe('123');
-  });
-
-  it('broadcasts the raw value on historyRedo without re-formatting', () => {
-    const onChange = vi.fn();
-    render(
-      <NumoraInput
-        data-testid="input"
-        onChange={onChange}
-        thousandSeparator=","
-        formatOn={FormatOn.Change}
-        defaultValue="123"
-      />
-    );
-    const input = screen.getByTestId('input') as HTMLInputElement;
-    onChange.mockClear();
-
-    // Simulate redo restoring "1234"
-    fireEvent.change(input, {
-      target: { value: '1,234' },
-      nativeEvent: new InputEvent('input', { bubbles: true, inputType: 'historyRedo' }),
-    });
-
-    expect(onChange).toHaveBeenCalledTimes(1);
-    const event: NumoraInputChangeEvent = onChange.mock.calls[0][0];
-    // Raw value has separators stripped
-    expect(event.target.value).toBe('1234');
-    // DOM retains the literal restored string
-    expect(input.value).toBe('1,234');
-  });
-});
 
 // ---------------------------------------------------------------------------
 // onPaste callback
@@ -1978,15 +1885,9 @@ describe('separator default resolution (parity with vanilla)', () => {
     expect((screen.getByTestId('d') as HTMLInputElement).value).toBe('1,234,567');
   });
 
-  it('throws when thousandSeparator="." is given without decimalSeparator (would collide with the "." default)', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    try {
-      expect(() => render(<NumoraInput thousandSeparator="." defaultValue="1234567" />)).toThrow(
-        /cannot equal|separator/i
-      );
-    } finally {
-      spy.mockRestore();
-    }
+  it('pairs a lone thousandSeparator="." with a "," decimal instead of colliding with the "." default', () => {
+    render(<NumoraInput data-testid="lone" thousandSeparator="." defaultValue="1234567.5" />);
+    expect((screen.getByTestId('lone') as HTMLInputElement).value).toBe('1.234.567,5');
   });
 
   it('accepts the European pair (thousandSeparator="." + decimalSeparator=",")', () => {

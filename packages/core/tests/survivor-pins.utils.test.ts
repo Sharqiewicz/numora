@@ -86,13 +86,13 @@ describe('caret.ts', () => {
 describe('dom-events.ts applyInputFallback', () => {
   it('L120: focused Change mode groups, focused Blur mode does not', () => {
     const c = mk('1234.5', 3);
-    expect(applyInputFallback(c, 'x', true, '', en({ formatOn: FormatOn.Change }))).toEqual({
+    expect(applyInputFallback(c, true, '', en({ formatOn: FormatOn.Change }))).toEqual({
       value: '1234.5',
       formattedValue: '1,234.5',
     });
     expect(c.value).toBe('1,234.5');
     const b = mk('1234.5', 3);
-    expect(applyInputFallback(b, 'x', true, '', en())).toEqual({
+    expect(applyInputFallback(b, true, '', en())).toEqual({
       value: '1234.5',
       formattedValue: '1234.5',
     });
@@ -100,13 +100,13 @@ describe('dom-events.ts applyInputFallback', () => {
   });
   it('L120: unfocused text lands with the resting format even in Blur mode', () => {
     const el = mk('1234.5');
-    expect(applyInputFallback(el, 'x', false, '', en())?.formattedValue).toBe('1,234.5');
+    expect(applyInputFallback(el, false, '', en())?.formattedValue).toBe('1,234.5');
     expect(el.value).toBe('1,234.5');
   });
   it('L122: a focused Blur-mode value is read as foreign-format text', () => {
     // Change mode reads a focused field's text as its own grouping (review-fixes.fallback).
     const el = mk('1.234,5');
-    expect(applyInputFallback(el, 'x', true, '', en())).toEqual({
+    expect(applyInputFallback(el, true, '', en())).toEqual({
       value: '1234.5',
       formattedValue: '1234.5',
     });
@@ -114,7 +114,7 @@ describe('dom-events.ts applyInputFallback', () => {
   it('L124: an already formatted value is reported without a write', () => {
     const el = mk('1,234', 1);
     const spy = vi.spyOn(el, 'setRangeText');
-    expect(applyInputFallback(el, 'x', true, '', en({ formatOn: FormatOn.Change }))).toEqual({
+    expect(applyInputFallback(el, true, '', en({ formatOn: FormatOn.Change }))).toEqual({
       value: '1234',
       formattedValue: '1,234',
     });
@@ -122,7 +122,7 @@ describe('dom-events.ts applyInputFallback', () => {
   });
   it('L126: the caret is the larger of selectionStart and selectionEnd', () => {
     const el = mk('1234.5', 1, 3);
-    applyInputFallback(el, 'x', true, '', en({ formatOn: FormatOn.Change }));
+    applyInputFallback(el, true, '', en({ formatOn: FormatOn.Change }));
     expect([el.selectionStart, el.selectionEnd]).toEqual([4, 4]); // 1,23|4.5
   });
 });
@@ -134,10 +134,10 @@ describe('dom-events.ts applyBlur', () => {
     expect(applyBlur(el, en())).toBeUndefined();
     expect(spy).not.toHaveBeenCalled();
   });
-  it('early return: Change mode without decimalMinLength/allowNegative leaves the value alone', () => {
+  it('Change mode without decimalMinLength/allowNegative still settles the value (regroup only, nothing reported)', () => {
     const el = mk('1234');
     expect(applyBlur(el, en({ formatOn: FormatOn.Change }))).toBeUndefined();
-    expect(el.value).toBe('1234');
+    expect(el.value).toBe('1,234');
   });
 });
 

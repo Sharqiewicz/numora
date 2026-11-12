@@ -34,7 +34,7 @@ describe('NumoraInput value API', () => {
     expect(n.rawValue).toBe('12.34');
   });
 
-  it('setValue writes through setRangeText by default (undoable)', () => {
+  it('setValue writes through setRangeText', () => {
     const n = new NumoraInput(container, { formatOn: FormatOn.Change });
     const spy = vi.spyOn(n.element, 'setRangeText');
     n.setValue('1000');
@@ -42,20 +42,11 @@ describe('NumoraInput value API', () => {
     expect(n.element.value).toBe('1,000');
   });
 
-  it('setValue({ undoable: false }) assigns .value directly and skips setRangeText', () => {
-    const n = new NumoraInput(container, { formatOn: FormatOn.Change });
-    const spy = vi.spyOn(n.element, 'setRangeText');
-    n.setValue('1000', { undoable: false });
-    expect(spy).not.toHaveBeenCalled();
-    expect(n.element.value).toBe('1,000');
-    expect(n.rawValue).toBe('1000');
-  });
-
   it('setValue does not fire onValueChange (programmatic writes are not user edits)', () => {
     const onValueChange = vi.fn();
     const n = new NumoraInput(container, { formatOn: FormatOn.Change, onValueChange });
     n.setValue('5');
-    n.setValue('6', { undoable: false });
+    n.setValue('6');
     expect(onValueChange).not.toHaveBeenCalled();
   });
 });

@@ -93,7 +93,7 @@ A `readOnly` or `disabled` field ignores paste, as a native `<input>` does. Numo
 | `allowLeadingZeros` | `boolean` | `false` | Allow leading zeros |
 | `padLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |
 | `maxLength` | `number` | `undefined` | Max length of the whole raw value (digits + decimal mark + leading `-`; grouping and `decimalMinLength` padding not counted) |
-| `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject a keystroke/paste when it returns false (called with the post-sanitization raw value). A callback that throws is treated as "not allowed" (the keystroke is rejected) and the error is reported via `console.error` |
+| `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject an edit the user makes (typing, paste, drop, autofill) when it returns false (called with the post-sanitization raw value). A callback that throws is treated as "not allowed" (the keystroke is rejected) and the error is reported via `console.error` |
 | `locale` | `LocaleTag \| boolean` | `undefined` | Derive separators and grouping from `Intl.NumberFormat`; `true` uses the runtime default locale and `false` is the same as leaving it out. An explicit `thousandSeparator`, `decimalSeparator` or `groupingStyle` wins; `locale` fills the ones you did not set |
 | `onValueChange` | `(values: { value: string; formattedValue: string }) => void` | `undefined` | Called when value changes. `value` is the canonical raw value, `formattedValue` the display string |
 | `onFormattedValueChange` | `(formattedValue: string) => void` | `undefined` | Called with the display string every time Numora rewrites the field, including the blur regroup, the focus strip, `setValue()` and a format-only `update()`. Not called on creation |
@@ -109,8 +109,7 @@ the raw value. `input.formattedValue` is the display string, the same text as `i
 The `defaultValue` option and `setValue()` accept canonical raw values only. Numora never reads them as
 locale text and never format-detects them, so `setValue('1.234')` in de-DE is the number 1.234,
 shown as `1,234`. Both are typed `string`. Numora converts a `number` with `String()` and logs it
-in development, because it may already have lost precision. `setValue(value, { undoable: false })`
-writes without an undo step.
+in development, because it may already have lost precision.
 
 `setValue()` is your own write, so it does not call `onValueChange` and is not checked by
 `isAllowed`. Both exist for edits the user makes. The new text still reaches

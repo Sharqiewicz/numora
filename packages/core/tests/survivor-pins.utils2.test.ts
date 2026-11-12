@@ -103,7 +103,7 @@ describe('format-utils.ts sanitizeAndTrim', () => {
 describe('dom-events.ts', () => {
   it('L123: an already formatted value leaves the selection alone', () => {
     const el = mk('1,234', 1, 3);
-    expect(applyInputFallback(el, 'x', true, '', en({ formatOn: FormatOn.Change }))).toEqual({
+    expect(applyInputFallback(el, true, '', en({ formatOn: FormatOn.Change }))).toEqual({
       value: '1234',
       formattedValue: '1,234',
     });
@@ -115,7 +115,7 @@ describe('dom-events.ts', () => {
     Object.defineProperty(el, 'selectionStart', { value: 3, configurable: true });
     Object.defineProperty(el, 'selectionEnd', { value: 1, configurable: true });
     const set = vi.spyOn(el, 'setSelectionRange');
-    applyInputFallback(el, 'x', true, '', en({ formatOn: FormatOn.Change }));
+    applyInputFallback(el, true, '', en({ formatOn: FormatOn.Change }));
     expect(set).toHaveBeenCalledWith(4, 4); // 1,23|4.5, not 1|,234.5
   });
 

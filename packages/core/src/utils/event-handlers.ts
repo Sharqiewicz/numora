@@ -22,8 +22,8 @@ const DECIMAL_KEY_CANDIDATES = new Set<string>(['.', ',', ...NON_ASCII_DECIMAL_S
  * Outcome of `handleOnBeforeInputNumoraInput`. Pure: the helper does not mutate the
  * input or the event. The caller decides what to do based on the variant:
  *
- * - `handled`: caller should preventDefault, write `formatted` to the input via an
- *   undo-preserving write, set caret to `cursorPos`, and notify listeners.
+ * - `handled`: caller should preventDefault, write `formatted` to the input via
+ *   `writeValue`, set caret to `cursorPos`, and notify listeners.
  * - `reject`: caller should preventDefault. The input value is left untouched.
  * - `skip`: caller should NOT preventDefault. Includes paste (handled by the dedicated
  *   paste listener), native drop (no dedicated listener - it falls through to the
@@ -34,6 +34,22 @@ export type BeforeInputResult =
   | { type: 'handled'; formatted: string; raw: string; cursorPos: number }
   | { type: 'reject' }
   | { type: 'skip' };
+
+/**
+ * True when `allowScientificNotation` is `false` and user-typed/pasted/inserted text holds a
+ * number in scientific notation. Such input must be refused as a whole: the sanitizer would
+ * otherwise drop the `e` and turn `1.5e-7` into `1.57`. App-supplied values never go through
+ * this check (they always expand).
+ */
+export function isScientificNotationRejected(
+  text: string,
+  formattingOptions?: NumoraOptions
+): boolean {
+  return (
+    formattingOptions?.allowScientificNotation === false &&
+    containsScientificNotation(text, getSeparators(formattingOptions).decimalSeparator)
+  );
+}
 
 /**
  * Invokes a user-supplied `isAllowed` validator, treating a throw as "not allowed".
@@ -49,22 +65,7 @@ export type BeforeInputResult =
  * result, or risk crashing an unrelated caller (a test runner, a host app's own global
  * error handler) that isn't expecting an async throw from a keystroke.
  */
-/**
- * True when `allowScientificNotation` is `false` and user-typed/pasted/inserted text holds a
- * number in scientific notation. Such input must be refused as a whole: the sanitizer would
- * otherwise drop the `e` and turn `1.5e-7` into `1.57`. App-supplied values never go through
- * this check (they always expand).
- */
-export function isScientificNotationRejected(
-  text: string,
-  formattingOptions?: NumoraOptions
-): boolean {
-  return (
-    formattingOptions?.allowScientificNotation === false && containsScientificNotation(text)
-  );
-}
-
-function callIsAllowed(isAllowed: (rawValue: string) => boolean, rawValue: string): boolean {
+export function callIsAllowed(isAllowed: (rawValue: string) => boolean, rawValue: string): boolean {
   try {
     return isAllowed(rawValue);
   } catch (err) {
@@ -245,16 +246,17 @@ export function handleOnBeforeInputNumoraInput(
     formattingOptions
   );
 
-  if (formattingOptions?.isAllowed && !callIsAllowed(formattingOptions.isAllowed, rawValue)) {
-    return { type: 'reject' };
-  }
-
   // Nothing actually changed (e.g. a rejected letter, Backspace at position 0, Delete at
   // the end, Backspace on an empty field) - reject so the caller does not fire onChange
   // for a no-op keystroke. Accepted consequence: a selection whose replacement sanitizes
   // back to the exact same string (e.g. selecting the "," in "1,234" and typing a letter)
   // keeps its selection instead of collapsing, since `reject` leaves the DOM untouched.
   if (newValue === currentValue) {
+    return { type: 'reject' };
+  }
+
+  // Only a keystroke that would change the field reaches the app's validator.
+  if (formattingOptions?.isAllowed && !callIsAllowed(formattingOptions.isAllowed, rawValue)) {
     return { type: 'reject' };
   }
 
@@ -287,7 +289,7 @@ export function handleOnKeyDownNumoraInput(
  * Outcome of `handleOnPasteNumoraInput`. The caller always calls preventDefault on the
  * paste event; the variant says whether to apply a write or leave the input untouched.
  *
- * - `handled`: write `formatted` via an undo-preserving write, set caret to `cursorPos`.
+ * - `handled`: write `formatted` via `writeValue`, set caret to `cursorPos`.
  * - `reject`: do nothing further (input is unchanged).
  */
 export type PasteResult =

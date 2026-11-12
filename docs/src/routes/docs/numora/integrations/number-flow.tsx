@@ -10,7 +10,7 @@ const AUTHOR_URL = 'https://barvian.me/';
 
 const META_TITLE = 'NumberFlow integration | Numora';
 const META_DESCRIPTION =
-  'Use the vanilla NumberFlow web component by Maxwell Barvian with a vanilla Numora numeric input to animate each digit while the real input keeps handling the keyboard, undo, IME and string precision.';
+  'Use the vanilla NumberFlow web component by Maxwell Barvian with a vanilla Numora numeric input to animate each digit while the real input keeps handling the keyboard, IME and string precision.';
 
 const JSON_LD = [
   {
@@ -77,7 +77,7 @@ const JSON_LD = [
         name: 'How does the NumberFlow + Numora overlay work?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'A transparent-text NumoraInput sits on top of a `<number-flow>` element. The input owns the keyboard, undo, IME, and mobile inputmode. The onValueChange option receives the raw value, converts it to a Number, sets flow.format with a matching minimumFractionDigits, and calls flow.update() so NumberFlow animates the visible digits.',
+          text: 'A transparent-text NumoraInput sits on top of a `<number-flow>` element. The input owns the keyboard, IME, and mobile inputmode. The onValueChange option receives the raw value, converts it to a Number, sets flow.format with a matching minimumFractionDigits, and calls flow.update() so NumberFlow animates the visible digits.',
         },
       },
       {
@@ -156,7 +156,7 @@ function NumberFlowIntegration() {
         <p>
           Both layers render the same formatted number. The vanilla <code>NumoraInput</code> class
           calls its <code>onValueChange</code> option on every logical value change: typing, paste,
-          the focus-strip, undo/redo and blur reformatting. It receives{' '}
+          the focus-strip and blur reformatting. It receives{' '}
           <code>{'{ value, formattedValue }'}</code>. <code>value</code> is the raw string without
           separators, which <code>Number()</code> can parse. The callback sets{' '}
           <code>flow.format</code> and calls <code>flow.update()</code>, and NumberFlow tweens each
@@ -332,10 +332,9 @@ syncFlow(numora.rawValue)`}
           <strong>
             <code>onValueChange</code> callback
           </strong>{' '}
-          fires for typing, paste, the focus-strip, undo/redo and blur reformatting, so you need no
-          DOM <code>beforeinput</code> or <code>input</code> listeners. It does not fire for the
-          initial <code>value</code>, so the code calls <code>syncFlow(numora.rawValue)</code>{' '}
-          explicitly.
+          fires for typing, paste, the focus-strip and blur reformatting, so you need no DOM{' '}
+          <code>beforeinput</code> or <code>input</code> listeners. It does not fire for the initial{' '}
+          <code>value</code>, so the code calls <code>syncFlow(numora.rawValue)</code> explicitly.
         </li>
       </ul>
 

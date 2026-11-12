@@ -75,7 +75,7 @@ describe('controlled value sync (index.tsx:311)', () => {
   it('a parent value that formats to what is already shown does not rewrite the field', () => {
     const { rerender } = render(<NumoraInput data-testid="i" value="1" onChange={() => {}} />);
     const el = screen.getByTestId('i') as HTMLInputElement;
-    // writeValuePreservingUndo only skips an identical write when the caret already sits at
+    // writeValue only skips an identical write when the caret already sits at
     // the end, so a caret elsewhere shows whether the field was touched.
     el.setSelectionRange(0, 0);
     // "1." differs from "1" as a number string, but its display form is "1" (trailing

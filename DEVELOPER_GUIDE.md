@@ -295,14 +295,14 @@ keydown → handleOnKeyDownNumoraInput()
             ↓ (returns caret info)
 beforeinput → handleOnBeforeInputNumoraInput(event, decimalMaxLength, options)
             ↓ (sanitize → format → compute caret)
-            ↓ caller: preventDefault() + writeValuePreservingUndo()
+            ↓ caller: preventDefault() + writeValue()
 paste → handleOnPasteNumoraInput(event, decimalMaxLength, options)
 ```
 
 Formatting happens on **`beforeinput`**, not `input` - see the "Event
 architecture" notes below and `packages/core/INPUT_EVENTS.md`. Intercepting
-before the browser commits the mutation is what lets `setRangeText` preserve
-native undo history.
+before the browser commits the mutation means only the formatted text is ever
+shown, and `setRangeText` fires no `input` event.
 
 ---
 
@@ -855,8 +855,8 @@ handleOnKeyDownNumoraInput(e: KeyboardEvent) {
    → Calculate new cursor position using stored caret info
    → Return { type: 'handled', formatted, raw, cursorPos }
    ↓
-   Caller: preventDefault() + writeValuePreservingUndo(el, formatted, cursorPos)
-   (setRangeText, so native undo history survives)
+   Caller: preventDefault() + writeValue(el, formatted, cursorPos)
+   (setRangeText: no input event)
    ↓
 4. User sees formatted value with cursor in correct position
 ```

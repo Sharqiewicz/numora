@@ -97,7 +97,8 @@ function HowItWorks() {
           <Link to={ANATOMY} hash="event-pipeline">
             <code>input</code>
           </Link>
-          : fallback for undo/redo, autofill and other changes without <code>beforeinput</code>.
+          : fallback for autofill, drop, IME commits and other changes without{' '}
+          <code>beforeinput</code>.
         </li>
         <li>
           <Link to={ANATOMY} hash="paste">

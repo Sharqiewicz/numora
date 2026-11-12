@@ -68,8 +68,6 @@ export const InputType = {
   DeleteHardLineForward: 'deleteHardLineForward',
   DeleteWordBackward: 'deleteWordBackward',
   DeleteWordForward: 'deleteWordForward',
-  HistoryUndo: 'historyUndo',
-  HistoryRedo: 'historyRedo',
 } as const;
 export type InputType = (typeof InputType)[keyof typeof InputType];
 
@@ -145,7 +143,7 @@ export interface NumoraOptions {
   /**
    * Custom keystroke/paste validator. Called with the post-sanitization raw value the
    * input would have after the user's action. Return false to reject the edit (no value
-   * change, no change notification fires, undo history is untouched).
+   * change, no change notification fires).
    */
   isAllowed?: (rawValue: string) => boolean;
 }

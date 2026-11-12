@@ -1,5 +1,5 @@
 import fc from 'fast-check';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import * as root from '../src/index';
 import * as pipeline from '../src/pipeline';
 import { formatValue, parseValue, NumoraInput } from '../src/index';
@@ -132,9 +132,44 @@ describe('locale with explicit separator options', () => {
     expect(formatValue('1234567.5', { locale: 'en-US', groupingStyle: 'none' })).toBe('1234567.5');
   });
 
-  it('an override that collides with the separator the locale fills in throws', () => {
-    expect(() => formatValue('1', { locale: 'de-DE', decimalSeparator: '.' })).toThrow(
+  it('an override that collides with the separator the locale fills in wins', () => {
+    // de-DE fills in `.` grouping and `,` decimal; the one not passed gives way.
+    expect(formatValue('1234.5', { locale: 'de-DE', decimalSeparator: '.' })).toBe('1,234.5');
+    expect(formatValue('1234.5', { locale: 'de-DE', thousandSeparator: ',' })).toBe('1,234.5');
+    expect(formatValue('1234.5', { locale: 'en-US', thousandSeparator: '.' })).toBe('1.234,5');
+  });
+
+  it('a lone separator equal to the default other one pairs with the other mark', () => {
+    expect(formatValue('1234.5', { decimalSeparator: ',' })).toBe('1.234,5');
+    expect(formatValue('1234.5', { thousandSeparator: '.' })).toBe('1.234,5');
+    expect(parseValue('1.234,5', { thousandSeparator: '.' })).toBe('1234.5');
+  });
+
+  it('the same character passed for both separators still throws', () => {
+    expect(() => formatValue('1', { thousandSeparator: '.', decimalSeparator: '.' })).toThrow(
       /decimalSeparator cannot equal thousandSeparator/
     );
+    expect(() =>
+      formatValue('1', { locale: 'de-DE', thousandSeparator: ',', decimalSeparator: ',' })
+    ).toThrow(/decimalSeparator cannot equal thousandSeparator/);
+  });
+
+  it('takes a value that is not a string the way the input does', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      expect(formatValue(undefined as unknown as string)).toBe('');
+      expect(formatValue(null as unknown as string)).toBe('');
+      expect(parseValue(undefined as unknown as string)).toBe('');
+      expect(parseValue(null as unknown as string)).toBe('');
+      expect(warn).not.toHaveBeenCalled();
+      expect(formatValue(1234.5 as unknown as string)).toBe('1,234.5');
+      expect(parseValue(1234.5 as unknown as string)).toBe('1234.5');
+      expect(warn.mock.calls.map((c) => c[0])).toEqual([
+        expect.stringContaining('formatValue() received a number (1234.5)'),
+        expect.stringContaining('parseValue() received a number (1234.5)'),
+      ]);
+    } finally {
+      warn.mockRestore();
+    }
   });
 });

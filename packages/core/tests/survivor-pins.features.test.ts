@@ -4,7 +4,7 @@ import {
   computeStripSeparatorsResult,
   skipOverThousandSeparatorOnDelete,
 } from '@/features/formatting/caret-position-utils';
-import { writeValuePreservingUndo } from '@/features/formatting/dom-writes';
+import { writeValue } from '@/features/formatting/dom-writes';
 import { expandScientificNotation } from '@/features/scientific-notation';
 import { FormatOn } from '@/types';
 
@@ -84,7 +84,7 @@ describe('skipOverThousandSeparatorOnDelete pins', () => {
   });
 });
 
-describe('writeValuePreservingUndo pins', () => {
+describe('writeValue pins', () => {
   afterEach(() => {
     vi.useRealTimers();
   });
@@ -98,13 +98,13 @@ describe('writeValuePreservingUndo pins', () => {
 
   it('writes the selection when only the selection start differs', () => {
     const el = make('abc', 1, 3);
-    writeValuePreservingUndo(el, 'abc', 2, 3);
+    writeValue(el, 'abc', 2, 3);
     expect([el.selectionStart, el.selectionEnd]).toEqual([2, 3]);
   });
 
   it('writes the selection when only the selection end differs', () => {
     const el = make('abc', 1, 2);
-    writeValuePreservingUndo(el, 'abc', 1, 3);
+    writeValue(el, 'abc', 1, 3);
     expect([el.selectionStart, el.selectionEnd]).toEqual([1, 3]);
   });
 
@@ -112,7 +112,7 @@ describe('writeValuePreservingUndo pins', () => {
     const setup = () => {
       vi.useFakeTimers();
       const el = make('x', 0, 0);
-      writeValuePreservingUndo(el, 'abc', 1, 2);
+      writeValue(el, 'abc', 1, 2);
       const spy = vi.spyOn(el, 'setSelectionRange');
       return { el, spy };
     };

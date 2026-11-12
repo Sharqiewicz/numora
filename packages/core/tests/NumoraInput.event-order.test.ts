@@ -57,7 +57,7 @@ function paste(el: HTMLInputElement, text: string): Event {
   el.dispatchEvent(ev);
   return ev;
 }
-// Native `input` event without a preceding beforeinput (autofill, undo/redo, IME, ...).
+// Native `input` event without a preceding beforeinput (autofill, drop, IME, ...).
 function nativeInput(
   el: HTMLInputElement,
   value: string,
@@ -273,16 +273,7 @@ describe('paste', () => {
     const { el } = make({ defaultValue: '5' });
     el.focus();
     paste(el, 'abc');
-    expect(log).toMatchInlineSnapshot(`
-      [
-        {
-          "dom": "5",
-          "ev": "onValueChange",
-          "formattedValue": "5",
-          "value": "5",
-        },
-      ]
-    `);
+    expect(log).toEqual([]);
     expect(state(el)).toMatchInlineSnapshot(`
       {
         "caret": [
@@ -683,14 +674,16 @@ describe('blur cases', () => {
     expect(log).toEqual([]);
     expect(el.value).toBe('-5');
   });
-  it('Change mode without decimalMinLength/allowNegative: no blur handling, trailing "." stays', () => {
+  it('Change mode without decimalMinLength/allowNegative: blur strips the trailing "."', () => {
     const { el } = make({ formatOn: FormatOn.Change });
     el.focus();
     typeAll(el, '12.');
     log.length = 0;
     el.blur();
-    expect(log).toEqual([]);
-    expect(el.value).toBe('12.');
+    expect(log).toEqual([
+      { ev: 'onValueChange', value: '12', formattedValue: '12', dom: '12' },
+    ]);
+    expect(el.value).toBe('12');
   });
   it('no-op blur on an empty field writes nothing', () => {
     const { el } = make({ decimalMinLength: 2, allowNegative: true });
@@ -721,63 +714,6 @@ describe('blur cases', () => {
     el.blur();
     expect(el.value).toBe('1,234');
     expect(log).toEqual([]);
-  });
-});
-
-describe('undo / redo input events', () => {
-  for (const inputType of ['historyUndo', 'historyRedo']) {
-    for (const formatOn of [FormatOn.Blur, FormatOn.Change]) {
-      it(`${inputType} ${formatOn}: broadcasts the restored string, no rewrite`, () => {
-        const { el } = make({ formatOn, defaultValue: '5' });
-        el.focus();
-        const spy = vi.spyOn(HTMLInputElement.prototype, 'setRangeText');
-        nativeInput(el, '1234', 4, 4, inputType);
-        expect(spy).not.toHaveBeenCalled();
-        expect(log).toMatchInlineSnapshot(`
-          [
-            {
-              "dom": "1234",
-              "ev": "onValueChange",
-              "formattedValue": "1234",
-              "value": "1234",
-            },
-          ]
-        `);
-        expect(state(el)).toMatchInlineSnapshot(`
-          {
-            "caret": [
-              4,
-              4,
-            ],
-            "value": "1234",
-          }
-        `);
-      });
-    }
-  }
-  it('de-DE historyUndo: raw is canonical, formattedValue is the restored display text', () => {
-    const { el } = make({ locale: 'de-DE' });
-    el.focus();
-    nativeInput(el, '1.234,5', 7, 7, 'historyUndo');
-    expect(log).toMatchInlineSnapshot(`
-      [
-        {
-          "dom": "1.234,5",
-          "ev": "onValueChange",
-          "formattedValue": "1.234,5",
-          "value": "1234.5",
-        },
-      ]
-    `);
-    expect(state(el)).toMatchInlineSnapshot(`
-      {
-        "caret": [
-          7,
-          7,
-        ],
-        "value": "1.234,5",
-      }
-    `);
   });
 });
 

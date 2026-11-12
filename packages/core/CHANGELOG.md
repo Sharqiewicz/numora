@@ -5,6 +5,12 @@
 See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
 
 ### Breaking
+- **Numora no longer says its writes keep the browser's undo history, because they do not.**
+  Text written with `setRangeText` is not recorded for undo (checked in Chrome 156), so
+  Ctrl/Cmd+Z does nothing in a Numora field once Numora has written to it. The writes are
+  unchanged. `setValue()` loses its `{ undoable }` option, an `input` event from undo or redo
+  is formatted and checked by `isAllowed` like any other browser-made change, and
+  `writeValuePreservingUndo` is `writeValue` on `numora/internal`.
 - **`formatOn` defaults to `'change'`** (was `'blur'`), in both packages: digits are grouped as
   the user types. Pass `formatOn: 'blur'` to keep the v4 behavior.
 - **React: invalid options no longer crash a production render.** They still throw in
@@ -19,7 +25,8 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
 - **Vanilla `NumoraInput` exposes properties instead of getters:** `input.rawValue`,
   `input.formattedValue`, `input.element`, the same names as a React ref. They are read-only;
   `setValue()` writes. `getValue()`, `getFormattedValue()`,
-  `getElement()` and `valueAsNumber` are removed. `setValue(value, { undoable })` stays.
+  `getElement()` and `valueAsNumber` are removed. `setValue(value)` stays, without its
+  `{ undoable }` option.
 - **Vanilla `defaultValue` is the initial value**, the same name as the React prop. A `value`
   option is ignored and, in development, logged. `setValue()` writes later; it does not call
   `onValueChange`, is not checked by `isAllowed`, and on a focused `formatOn: 'blur'` field
@@ -45,7 +52,7 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   read-only.** `formattedValue` always reads the field's current text (the same as
   `ref.current.value`) instead of the last value Numora wrote, and assigning to it throws.
 - **React: a controlled field always shows its `value` prop.** An edit that `onChange` /
-  `onValueChange` does not store is put back (typing, paste, undo), with the caret at the end,
+  `onValueChange` does not store is put back (typing, paste), with the caret at the end,
   as a native controlled `<input>` does.
 - **React: your `onKeyDown` and `onPaste` run before Numora's handling**, and
   `e.preventDefault()` in either skips it. `onPaste` sees the field before the write.
@@ -70,7 +77,8 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
 - **Event handlers and DOM writers are no longer exported from `numora`:**
   `handleOnBeforeInputNumoraInput`, `handleOnPasteNumoraInput`, `writeStripPreservingUndo`,
   `computeStripSeparatorsResult` and `StripSeparatorsResult` are gone;
-  `handleOnKeyDownNumoraInput` and `writeValuePreservingUndo` moved to `numora/internal`,
+  `handleOnKeyDownNumoraInput` moved to `numora/internal` and `writeValuePreservingUndo` is
+  there as `writeValue`,
   next to the shared DOM wiring (`applyBeforeInput`, `applyPaste`, `applyInputFallback`,
   `applyBlur`, `attachFocusStrip`). `handleOnKeyDownNumoraInput` now returns nothing, and the
   `CaretPositionInfo` type it returned is removed from `numora` and `numora-react`.
@@ -90,6 +98,20 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   component logs a warning naming the replacement, and the old props no longer reach the DOM.
 
 ### Fixed
+- **A `formatOn: 'change'` field settles on blur** like a `'blur'` one: a trailing separator
+  is stripped (`1.` to `1`), reported as a raw change. Before, blur did nothing unless
+  `decimalMinLength` or `allowNegative` was set.
+- **A resting field is never a lone sign or separator.** `-`, `.` and `-.` rest as an empty
+  field, and `-0` rests as `0`, on blur, on creation and after `setValue()` on an unfocused
+  field. `formatValue('-0', { allowNegative: true })` is `'0'`.
+- **A paste that changes nothing reports nothing** (letters, an empty clipboard, the same
+  number, digits past `maxLength`), and neither does an `input` event that leaves the text
+  as it was.
+- **`isAllowed` also checks drop, autofill and IME text.** A refused value puts the previous
+  text back. `isAllowed` is no longer called for a keystroke
+  that changes nothing.
+- **`allowScientificNotation: false` refuses `1.e5`** (and `1,e5` in a comma-decimal locale).
+  It came through as `100000`.
 - **React: browser-inserted text while focused keeps typing rules** (autofill, drop, IME
   commit): `1.` is no longer padded to `1.00` or stripped to `1` until blur, same as vanilla.
 - **Compact notation keeps small decimals:** `0.0001k` gives `0.1` (was `0000.1`) and
@@ -111,9 +133,14 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
     of throwing;
   - underscore tags such as `de_DE` (Java, Python, Android) are read as `de-DE` instead of
     silently falling back to en-US separators.
-- **`decimalSeparator: ','` on its own no longer throws:** when no thousand separator or
-  locale is given, the thousand separator defaults to `.` (`1.234,5`). An explicit conflict
-  still throws.
+- **A separator passed on its own no longer throws:** when it is the character the defaults
+  or the `locale` would use for the other separator, the other one switches to `.` or `,`.
+  `decimalSeparator: ','` and `thousandSeparator: '.'` both give `1.234,5`, and
+  `{ locale: 'de-DE', decimalSeparator: '.' }` gives `1,234.5`. Passing the same character
+  for both still throws.
+- **`formatValue` and `parseValue` take a value that is not a string the way the input does:**
+  `null` and `undefined` give `''`, and a number is formatted with a development warning.
+  Both threw a `TypeError` before.
 - **The `input` fallback no longer misreads a focused Change-mode field's own grouping as a
   decimal:** an IME commit or drop that left `12,3456` gave `12.3456`; it now gives `123,456`.
   Such a field reads browser-inserted text in its own format; Blur-mode and unfocused fields
@@ -132,12 +159,12 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
 
 ### Added
 - **`onFormattedValueChange(formattedValue)` in both packages.** It is called with the display
-  string every time Numora rewrites the field and the text is new: typing, paste, undo/redo,
+  string every time Numora rewrites the field and the text is new: typing, paste,
   the blur regroup, the focus strip, `setValue()`, an option or locale change, and in React a
   new `value` prop. It is not called on creation or mount. `onValueChange` is unchanged and
   still reports raw changes only. The Torph integration docs and demos use it in place of
   `focus`, `blur` and `click` listeners.
-- **React: `ref.current.setValue(value, { undoable })`,** the same write as the vanilla
+- **React: `ref.current.setValue(value)`,** the same write as the vanilla
   `setValue()`: no callback, no `isAllowed`, ungrouped text on a focused `formatOn: 'blur'`
   field. A controlled field goes back to its `value` prop.
 - **Type declarations for both module formats.** `numora` ships one bundled `.d.mts` and

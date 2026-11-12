@@ -780,7 +780,7 @@ describe('beforeinput - selection and cut/drag deletion', () => {
 });
 
 // ---------------------------------------------------------------------------
-// beforeinput - pass-through events (undo/redo, paste delegation)
+// beforeinput - pass-through events (historyUndo/historyRedo, paste delegation)
 // ---------------------------------------------------------------------------
 
 describe('beforeinput - pass-through events', () => {
@@ -805,14 +805,14 @@ describe('beforeinput - pass-through events', () => {
     return ev;
   }
 
-  it('historyUndo is NOT prevented - browser handles undo natively', () => {
+  it('historyUndo is NOT prevented', () => {
     new NumoraInput(container, {});
     const el = getInputElement();
     const ev = dispatchBeforeInput(el, 'historyUndo');
     expect(ev.defaultPrevented).toBe(false);
   });
 
-  it('historyRedo is NOT prevented - browser handles redo natively', () => {
+  it('historyRedo is NOT prevented', () => {
     new NumoraInput(container, {});
     const el = getInputElement();
     const ev = dispatchBeforeInput(el, 'historyRedo');
@@ -1393,7 +1393,7 @@ describe('decimalMaxLength: 0 and trailing separator on blur', () => {
     const el = getInputElement();
 
     el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
-    numora.setValue('1234.', { undoable: false });
+    numora.setValue('1234.');
     // setValue already runs the display pipeline, which now also strips a trailing
     // separator - confirm blur (idempotent re-entry) doesn't reintroduce it.
     el.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
@@ -1414,7 +1414,7 @@ describe('decimalMaxLength: 0 and trailing separator on blur', () => {
     const el = getInputElement();
 
     el.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
-    numora.setValue('1234.', { undoable: false });
+    numora.setValue('1234.');
     el.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
 
     expect(el.value).toBe('1,234.00');
@@ -1531,6 +1531,8 @@ describe('Negative Number Support', () => {
       createInputWithNegatives();
       const inputElement = getInputElement();
 
+      // Focused: an edit-time value; a resting one is cleaned up (lone '-' empty, '-0' to '0').
+      inputElement.focus();
       inputElement.value = '-';
       inputElement.dispatchEvent(new Event('input'));
 
@@ -1541,6 +1543,8 @@ describe('Negative Number Support', () => {
       createInputWithNegatives();
       const inputElement = getInputElement();
 
+      // Focused: an edit-time value; a resting one is cleaned up (lone '-' empty, '-0' to '0').
+      inputElement.focus();
       inputElement.value = '-0';
       inputElement.dispatchEvent(new Event('input'));
 
@@ -1731,6 +1735,8 @@ describe('Negative Number Support', () => {
       createInputWithNegatives();
       const inputElement = getInputElement();
 
+      // Focused: an edit-time value; a resting one is cleaned up (lone '-' empty, '-0' to '0').
+      inputElement.focus();
       inputElement.value = '-';
       inputElement.dispatchEvent(new Event('input'));
 

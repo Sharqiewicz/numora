@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { writeValuePreservingUndo } from '../src/features/formatting/dom-writes';
+import { writeValue } from '../src/features/formatting/dom-writes';
 
 /**
  * Testing module: features/formatting/dom-writes.ts
@@ -9,7 +9,7 @@ import { writeValuePreservingUndo } from '../src/features/formatting/dom-writes'
  * against a second `onValueChange` from an `input` event, so these tests pin the fact.
  */
 
-describe('writeValuePreservingUndo', () => {
+describe('writeValue', () => {
   it('fires no input event on the element', () => {
     const el = document.createElement('input');
     document.body.appendChild(el);
@@ -20,7 +20,7 @@ describe('writeValuePreservingUndo', () => {
       inputEventCount += 1;
     });
 
-    writeValuePreservingUndo(el, '1,234', 5);
+    writeValue(el, '1,234', 5);
 
     expect(el.value).toBe('1,234');
     expect(inputEventCount).toBe(0);
@@ -39,7 +39,7 @@ describe('writeValuePreservingUndo', () => {
       inputEventCount += 1;
     });
 
-    writeValuePreservingUndo(el, '1,234', 5);
+    writeValue(el, '1,234', 5);
 
     expect(inputEventCount).toBe(0);
 
@@ -47,7 +47,7 @@ describe('writeValuePreservingUndo', () => {
   });
 });
 
-describe("writeValuePreservingUndo with selectMode 'preserve' (focus-strip)", () => {
+describe("writeValue with selectMode 'preserve' (focus-strip)", () => {
   it('fires no input event on the element', () => {
     const el = document.createElement('input');
     document.body.appendChild(el);
@@ -58,7 +58,7 @@ describe("writeValuePreservingUndo with selectMode 'preserve' (focus-strip)", ()
       inputEventCount += 1;
     });
 
-    writeValuePreservingUndo(el, '1234', 4, 4, 'preserve');
+    writeValue(el, '1234', 4, 4, 'preserve');
 
     expect(el.value).toBe('1234');
     expect(inputEventCount).toBe(0);

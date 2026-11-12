@@ -18,5 +18,5 @@ export {
   skipOverThousandSeparatorOnDelete,
 } from './caret-position-utils';
 
-// === DOM WRITES (undo-preserving) ===
-export { writeValuePreservingUndo } from './dom-writes';
+// === DOM WRITES ===
+export { writeValue } from './dom-writes';

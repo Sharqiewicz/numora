@@ -79,8 +79,9 @@ function Validation() {
     <div className="docs-prose max-w-[36rem]">
       <h1>Validation</h1>
       <p>
-        Use an <code>isAllowed</code> predicate to reject keystrokes and pastes <em>before</em> they
-        commit. It fits business rules and format rules that no built-in prop covers.
+        Use an <code>isAllowed</code> predicate to reject edits the user makes (typing, paste, drop,
+        autofill) <em>before</em> they commit. It fits business rules and format rules that no
+        built-in prop covers.
       </p>
 
       <CodeBlock language="typescript">
@@ -129,7 +130,7 @@ function Validation() {
           Runs <em>after</em> sanitization and formatting, but <em>before</em> the DOM is mutated
           and React state updates
         </li>
-        <li>Fires for typing, deletion and paste</li>
+        <li>Fires for typing, deletion, paste, drop and autofill</li>
         <li>
           Always allow the intermediate strings users need to type their way to a valid value (empty
           string, lone <code>-</code> or decimal separator)

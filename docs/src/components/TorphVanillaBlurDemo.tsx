@@ -32,7 +32,7 @@ export function TorphVanillaBlurDemo() {
       },
     });
 
-    // onFormattedValueChange fires on every rewrite of the field: typing, paste, undo/redo,
+    // onFormattedValueChange fires on every rewrite of the field: typing, paste,
     // the focus strip and the blur regroup.
     const numora = new NumoraInput(hostRef.current, {
       formatOn: 'blur',

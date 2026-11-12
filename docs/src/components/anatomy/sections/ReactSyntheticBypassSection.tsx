@@ -20,8 +20,8 @@ useEffect(() => {
         return
       case 'handled': {
         e.preventDefault()
-        // setRangeText under the hood, so the browser's undo history survives.
-        writeValuePreservingUndo(input, result.formatted, result.cursorPos)
+        // setRangeText under the hood: no input event, no React value tracker.
+        writeValue(input, result.formatted, result.cursorPos)
         // Call onChange directly - guaranteed delivery, no dependency on
         // React's value-tracker diff or synthetic event pipeline.
         stateRef.current.onChange?.(createSyntheticChangeEvent(input, result.raw))
@@ -64,7 +64,7 @@ export function ReactSyntheticBypassSection() {
         <code>onChange</code> itself. <code>setRangeText</code> dispatches no <code>input</code>{' '}
         event. The HTML spec says so, and Chrome and jsdom both follow it. Nothing reaches React's{' '}
         <code>handleChange</code> afterwards. <code>handleChange</code> only ever sees edits the
-        browser makes itself, such as undo, redo and autofill.
+        browser makes itself, such as autofill, drop and IME commits.
       </p>
     </section>
   );

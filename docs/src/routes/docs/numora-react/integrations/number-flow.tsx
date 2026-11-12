@@ -11,7 +11,7 @@ const AUTHOR_URL = 'https://barvian.me/';
 
 const META_TITLE = 'NumberFlow integration | Numora React';
 const META_DESCRIPTION =
-  'Use NumberFlow by Maxwell Barvian with Numora React to animate each digit while the real input keeps handling the keyboard, undo, IME and string precision.';
+  'Use NumberFlow by Maxwell Barvian with Numora React to animate each digit while the real input keeps handling the keyboard, IME and string precision.';
 
 const JSON_LD = [
   {

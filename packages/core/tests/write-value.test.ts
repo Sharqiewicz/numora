@@ -1,5 +1,5 @@
 /**
- * Invariant tests for `writeValuePreservingUndo`.
+ * Invariant tests for `writeValue`.
  *
  * The flag pattern in `NumoraInput` and the React component relies on these invariants:
  *
@@ -7,14 +7,14 @@
  *    write must see the new value immediately - the flag-set/flag-clear window depends on it.
  * 2. The selection is set synchronously to the requested cursor position.
  * 3. When the value and cursor are already what we want, the helper short-circuits without
- *    calling `setRangeText`. This avoids a spurious undo step on every controlled re-render.
- * 4. Writes go through `setRangeText`, not direct `el.value = ...`. The former preserves the
- *    browser's undo/redo history; the latter wipes it.
+ *    calling `setRangeText`, so a controlled re-render with nothing new does no DOM work.
+ * 4. Writes go through `setRangeText`, not direct `el.value = ...`: it fires no `input`
+ *    event and does not go through React's tracked `value` setter.
  */
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { writeValuePreservingUndo } from '@/features/formatting';
+import { writeValue } from '@/features/formatting';
 
-describe('writeValuePreservingUndo invariants', () => {
+describe('writeValue invariants', () => {
   let input: HTMLInputElement;
 
   beforeEach(() => {
@@ -31,7 +31,7 @@ describe('writeValuePreservingUndo invariants', () => {
     input.value = '12';
     input.setSelectionRange(2, 2);
 
-    writeValuePreservingUndo(input, '123', 3);
+    writeValue(input, '123', 3);
 
     // Synchronous - no microtask wait needed
     expect(input.value).toBe('123');
@@ -39,19 +39,19 @@ describe('writeValuePreservingUndo invariants', () => {
 
   it('sets selection synchronously to the requested cursor position', () => {
     input.value = '';
-    writeValuePreservingUndo(input, 'abc', 1);
+    writeValue(input, 'abc', 1);
 
     expect(input.selectionStart).toBe(1);
     expect(input.selectionEnd).toBe(1);
   });
 
-  it('uses setRangeText (preserves undo), not direct value assignment', () => {
+  it('uses setRangeText, not direct value assignment', () => {
     input.value = '12';
     input.setSelectionRange(2, 2);
 
     const setRangeSpy = vi.spyOn(input, 'setRangeText');
 
-    writeValuePreservingUndo(input, '123', 3);
+    writeValue(input, '123', 3);
 
     expect(setRangeSpy).toHaveBeenCalledTimes(1);
     expect(setRangeSpy).toHaveBeenCalledWith('123', 0, 2, 'end');
@@ -64,7 +64,7 @@ describe('writeValuePreservingUndo invariants', () => {
     const setRangeSpy = vi.spyOn(input, 'setRangeText');
     const setSelectionSpy = vi.spyOn(input, 'setSelectionRange');
 
-    writeValuePreservingUndo(input, '123', 3);
+    writeValue(input, '123', 3);
 
     expect(setRangeSpy).not.toHaveBeenCalled();
     expect(setSelectionSpy).not.toHaveBeenCalled();
@@ -76,7 +76,7 @@ describe('writeValuePreservingUndo invariants', () => {
 
     const setRangeSpy = vi.spyOn(input, 'setRangeText');
 
-    writeValuePreservingUndo(input, '123', 3);
+    writeValue(input, '123', 3);
 
     expect(setRangeSpy).toHaveBeenCalled();
     expect(input.selectionStart).toBe(3);
@@ -99,7 +99,7 @@ describe('writeValuePreservingUndo invariants', () => {
       observed.push(`setSelectionRange:${start}`);
     });
 
-    writeValuePreservingUndo(input, 'abc', 3);
+    writeValue(input, 'abc', 3);
 
     expect(observed).toEqual(['setRangeText:abc', 'setSelectionRange:3']);
   });
@@ -108,7 +108,7 @@ describe('writeValuePreservingUndo invariants', () => {
     input.value = 'abcdef';
     input.setSelectionRange(0, 0);
 
-    writeValuePreservingUndo(input, 'X', 1);
+    writeValue(input, 'X', 1);
 
     expect(input.value).toBe('X');
   });

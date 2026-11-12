@@ -85,6 +85,75 @@ function ValueTypes() {
         raw value for math and the formatted display value for the UI.
       </p>
 
+      <h2>The raw value format</h2>
+      <p>
+        The raw value is the one to store and do math on. It has one format, and the locale and the
+        separators do not change it:
+      </p>
+      <ul>
+        <li>
+          ASCII digits <code>0</code> to <code>9</code>, even if the user types Arabic-Indic or
+          fullwidth digits
+        </li>
+        <li>
+          <code>.</code> as the decimal mark, even if the field shows <code>,</code>
+        </li>
+        <li>
+          a leading <code>-</code> for a negative number, which needs <code>allowNegative</code>
+        </li>
+        <li>no thousand separators and no spaces</li>
+      </ul>
+      <div className="overflow-x-auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Options</th>
+              <th>The field shows</th>
+              <th>Raw value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>none</td>
+              <td>1,234,567.89</td>
+              <td>"1234567.89"</td>
+            </tr>
+            <tr>
+              <td>locale: 'de-DE'</td>
+              <td>1.234.567,89</td>
+              <td>"1234567.89"</td>
+            </tr>
+            <tr>
+              <td>locale: 'fr-FR'</td>
+              <td>{'1 234 567,89'}</td>
+              <td>"1234567.89"</td>
+            </tr>
+            <tr>
+              <td>locale: 'en-IN'</td>
+              <td>12,34,567.89</td>
+              <td>"1234567.89"</td>
+            </tr>
+            <tr>
+              <td>locale: 'ar-EG'</td>
+              <td>1٬234٫5</td>
+              <td>"1234.5"</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        The raw value is what the user has typed so far, so it is not always a complete number. It
+        can be <code>""</code> (empty field), <code>"-"</code>, <code>"."</code>, <code>"1."</code>{' '}
+        or <code>".5"</code>. Check for these before you parse it. Numora keeps trailing zeros, so{' '}
+        <code>0.50</code> stays <code>"0.50"</code>. With <code>decimalMinLength</code> it pads on
+        blur and the padding is part of the raw value, so <code>5</code> becomes <code>"5.00"</code>
+        .
+      </p>
+      <p>
+        <code>defaultValue</code> and <code>setValue</code> take this same format, so the value you
+        get from <code>onValueChange</code> can go straight back into <code>setValue</code>.
+      </p>
+
       <h2>Raw value and formatted value</h2>
       <p>
         <code>onValueChange</code> receives <code>{'{ value, formattedValue }'}</code>.{' '}
@@ -150,8 +219,7 @@ console.log(numoraInput.rawValue === '')        // true when the input is empty`
       <p>
         <code>rawValue</code> is read-only. To set the field from code, call <code>setValue</code>{' '}
         with a canonical raw value. Under <code>locale: 'de-DE'</code>,{' '}
-        <code>setValue('1234.5')</code> displays <code>1.234,5</code>. <code>Ctrl+Z</code> undoes
-        the write. Pass <code>{'{ undoable: false }'}</code> for a form reset.
+        <code>setValue('1234.5')</code> displays <code>1.234,5</code>.
       </p>
     </div>
   );

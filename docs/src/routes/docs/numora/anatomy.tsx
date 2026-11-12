@@ -19,7 +19,7 @@ import {
 
 const TITLE = 'Anatomy | Numora';
 const DESCRIPTION =
-  'How the HTML input element works and where it breaks for numbers: the keydown, beforeinput, input and paste events, IEEE 754 float errors, the ten-step sanitization pipeline, and how Numora handles formatting, undo and cursor position.';
+  'How the HTML input element works and where it breaks for numbers: the keydown, beforeinput, input and paste events, IEEE 754 float errors, the ten-step sanitization pipeline, and how Numora handles formatting and cursor position.';
 
 export const Route = createFileRoute('/docs/numora/anatomy')({
   head: () => ({

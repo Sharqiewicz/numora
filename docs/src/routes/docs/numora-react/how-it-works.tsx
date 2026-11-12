@@ -115,7 +115,8 @@ function HowItWorks() {
           <Link to={ANATOMY} hash="event-pipeline">
             <code>input</code>
           </Link>
-          : fallback for undo/redo, autofill and other changes without <code>beforeinput</code>.
+          : fallback for autofill, drop, IME commits and other changes without{' '}
+          <code>beforeinput</code>.
         </li>
         <li>
           <Link to={ANATOMY} hash="paste">
@@ -176,9 +177,8 @@ function HowItWorks() {
       <p>
         <code>value</code> / <code>defaultValue</code> take a string: the canonical raw value, with
         ASCII digits, <code>.</code> as the decimal mark and no grouping, in every locale. Under{' '}
-        <code>locale="de-DE"</code>, <code>{'value="1234.5"'}</code> displays{' '}
-        <code>"1.234,5"</code>. A JS <code>number</code> is a type error, because it may already
-        have lost precision.
+        <code>locale="de-DE"</code>, <code>{'value="1234.5"'}</code> displays <code>"1.234,5"</code>
+        . A JS <code>number</code> is a type error, because it may already have lost precision.
       </p>
     </div>
   );

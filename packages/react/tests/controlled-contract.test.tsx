@@ -96,7 +96,7 @@ describe('controlled field: the field shows the value prop after every change', 
     expect(el.value).toBe('5');
   });
 
-  it('an undo (input fallback) the parent does not accept is put back', () => {
+  it('a browser-made change (input fallback) the parent does not accept is put back', () => {
     render(<Capped />);
     const el = field();
     act(() => el.focus());
@@ -298,12 +298,6 @@ describe('ref.setValue() is the app\'s own write', () => {
     const { ref } = setup({ locale: 'de-DE' });
     act(() => ref.current?.setValue('1234.5'));
     expect(field().value).toBe('1.234,5');
-  });
-
-  it('undoable: false writes too', () => {
-    const { ref } = setup();
-    act(() => ref.current?.setValue('42', { undoable: false }));
-    expect(field().value).toBe('42');
   });
 
   it('a controlled field goes back to its value prop', () => {

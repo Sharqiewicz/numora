@@ -14,7 +14,7 @@ const LOCHIE_URL = 'https://lochie.me/';
 
 const META_TITLE = 'Torph integration | Numora';
 const META_DESCRIPTION =
-  'Use the Torph library by Lochie Axon with a vanilla Numora numeric input to animate each digit while the real input keeps handling the keyboard, undo, IME and string precision.';
+  'Use the Torph library by Lochie Axon with a vanilla Numora numeric input to animate each digit while the real input keeps handling the keyboard, IME and string precision.';
 
 const JSON_LD = [
   {
@@ -80,7 +80,7 @@ const JSON_LD = [
         name: 'How does Torph fit with Numora?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'A transparent-text NumoraInput sits on top of a Torph TextMorph. The input owns the keyboard, undo, IME and mobile inputmode. Its onFormattedValueChange option calls morph.update() every time Numora rewrites the field (typing, paste, undo/redo, the focus strip and the blur regroup), so Torph animates the formatted string. The value never passes through Number().',
+          text: 'A transparent-text NumoraInput sits on top of a Torph TextMorph. The input owns the keyboard, IME and mobile inputmode. Its onFormattedValueChange option calls morph.update() every time Numora rewrites the field (typing, paste, the focus strip and the blur regroup), so Torph animates the formatted string. The value never passes through Number().',
         },
       },
       {
@@ -262,8 +262,8 @@ input.addEventListener('focus', () => {
         <p>
           Both layers render the same formatted string. The vanilla <code>NumoraInput</code> class
           calls its <code>onFormattedValueChange</code> option every time it rewrites the field:
-          typing (from <code>beforeinput</code>), paste, undo/redo, the focus strip and the blur
-          regroup. The bridge is a single line:{' '}
+          typing (from <code>beforeinput</code>), paste, the focus strip and the blur regroup. The
+          bridge is a single line:{' '}
           <code>onFormattedValueChange: (text) =&gt; morph.update(text || '0')</code>. Torph diffs
           the old and new strings and animates each digit and separator into place. The input itself
           never animates, and because its text is transparent, you only see the Torph layer.

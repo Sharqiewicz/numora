@@ -3,7 +3,7 @@
  * the locale lookup, and the two headless functions (`formatValue`, `parseValue`).
  *
  * The individual sanitization steps live at `'numora/pipeline'`. The DOM-event and
- * undo-preserving-write plumbing shared with `numora-react` lives at `'numora/internal'`,
+ * DOM-write plumbing shared with `numora-react` lives at `'numora/internal'`,
  * which is not a stable contract.
  */
 export * from './NumoraInput';

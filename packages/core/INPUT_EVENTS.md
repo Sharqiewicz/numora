@@ -48,12 +48,11 @@ Nothing significant. `keydown` is intentionally minimal in Numora.
 ## 2. `beforeinput` ⭐ The correct hook for input formatting
 
 ### Why it was introduced
-`beforeinput` was added to the DOM spec in 2016 (Input Events Level 2) and landed in all major browsers by 2019–2020. It was introduced specifically because developers had been abusing `keydown` for input manipulation for 20 years - causing broken undo history, IME (Chinese/Japanese/Korean input) issues, and accessibility failures.
+`beforeinput` was added to the DOM spec in 2016 (Input Events Level 2) and landed in all major browsers by 2019–2020. It was introduced specifically because developers had been abusing `keydown` for input manipulation for 20 years - causing IME (Chinese/Japanese/Korean input) issues, and accessibility failures.
 
 The goals:
 1. **Give a cancelable hook that fires after the browser has resolved what the input WILL be**, but before it mutates the DOM
-2. **Preserve the browser's undo/redo stack** - if you use `setRangeText` inside `beforeinput`, the browser records a single atomic undo entry
-3. **Support non-keyboard input** - voice dictation, drag-and-drop, virtual keyboards, IME all fire `beforeinput` but may not fire `keydown` reliably
+2. **Support non-keyboard input** - voice dictation, drag-and-drop, virtual keyboards, IME all fire `beforeinput` but may not fire `keydown` reliably
 
 ### What it's for
 The intended use is: inspect what the user is about to do (via `inputType` and `data`), optionally cancel it, and apply your own transformed version using `setRangeText`. This is the standard pattern for all rich-text editors (Prosemirror, Slate, Lexical all use it).
@@ -78,8 +77,8 @@ The intended use is: inspect what the user is about to do (via `inputType` and `
 | `'deleteByDrag'` | Drag out of input | |
 | `'insertFromPaste'` | Ctrl+V | `e.dataTransfer` has clipboard data |
 | `'insertFromDrop'` | Drag into input | |
-| `'historyUndo'` | Ctrl+Z | Should NOT be cancelled - let browser handle |
-| `'historyRedo'` | Ctrl+Y | Should NOT be cancelled - let browser handle |
+| `'historyUndo'` | Ctrl+Z | Not intercepted; the browser makes the change and `input` handles it |
+| `'historyRedo'` | Ctrl+Y | Not intercepted; the browser makes the change and `input` handles it |
 | `'insertCompositionText'` | IME in progress | Mid-composition - see IME section below |
 | `'insertFromComposition'` | IME confirmed | Composition finished - see IME section below |
 
@@ -178,7 +177,7 @@ During composition, the browser owns the input - it shows intermediate phonetic 
 
 **This is intentional and fine for numeric inputs.** Nobody types `1`, `2`, `3` via IME - digits are standard ASCII and always fire `insertText`. The gap would only matter if Numora handled free-text inputs.
 
-**`historyUndo`/`historyRedo`:** Numora correctly returns `null` here, letting the browser handle undo/redo natively. The browser restores the previous value, then fires `input`, which `handleChange` picks up to emit `onChange`.
+**`historyUndo`/`historyRedo`:** Numora returns `null` here. If the browser makes such a change, it fires `input`, which `handleChange` treats like any other browser-made change.
 
 **`insertReplacementText`** (browser autocorrect/autocomplete): Falls into `default: return null`. The browser applies the replacement and then `input` fires; `handleChange` catches it.
 
@@ -200,13 +199,11 @@ During composition, the browser owns the input - it shows intermediate phonetic 
 
 ### How Numora uses it
 
-`handleChange` never sees Numora's own writes. The `beforeinput`, `paste`, `focus` and `blur` handlers write with `setRangeText`, which dispatches no `input` event (HTML spec; verified in Chrome and jsdom), and call `handleValueChange` themselves. So `onChange` fires once per edit without any guard. `handleChange` branches two ways, and only the second reformats:
+`handleChange` never sees Numora's own writes. The `beforeinput`, `paste`, `focus` and `blur` handlers write with `setRangeText`, which dispatches no `input` event (HTML spec; verified in Chrome and jsdom), and call `handleValueChange` themselves. So `onChange` fires once per edit without any guard. `handleChange` handles every `input` event the same way: it reformats the new value.
 
-- **After undo/redo:** `beforeinput` returns `{ type: 'skip' }` without `preventDefault`, so the browser applies the restore natively and fires `input` with `inputType` `historyUndo`/`historyRedo`. `handleChange` **deliberately does not reformat** — it just broadcasts the restored value. Re-formatting here would push another `setRangeText` step onto the undo stack and break the natural Ctrl+Z walk-back. This is the core of the undo-preservation design.
+- **Browser-made and programmatic changes:** a change the browser makes itself (autofill, drop, IME commit) or external code that sets `input.value` and dispatches `new Event('input')` (a form library resetting the field, or any other write that reaches `input` without going through `beforeinput`). When the field is focused, this branch runs `formatInputValue` under the field's real `formatOn` mode - the same typing-time formatting a keystroke would produce. When the field is **not** focused, there is no mid-edit state to respect, so the value is instead formatted for resting display (grouped, as if `FormatOn.Change`) - the same formatting a resting/programmatic value always gets, so e.g. a Blur-mode field left ungrouped by an autofill isn't stuck that way just because no blur followed it. Either way, when the value changes the write is routed through `writeValue` rather than assigning `target.value` directly — and so that `setRangeText` fires no `input` event.
 
-- **Programmatic changes:** external code sets `input.value` and dispatches `new Event('input')` (autofill, IME commit, a form library resetting the field, or any other write that reaches `input` without going through `beforeinput`). When the field is focused, this branch runs `formatInputValue` under the field's real `formatOn` mode - the same typing-time formatting a keystroke would produce. When the field is **not** focused, there is no mid-edit state to respect, so the value is instead formatted for resting display (grouped, as if `FormatOn.Change`) - the same formatting a resting/programmatic value always gets, so e.g. a Blur-mode field left ungrouped by an autofill isn't stuck that way just because no blur followed it. Either way, when the value changes the write is routed through `writeValuePreservingUndo` rather than assigning `target.value` directly — so even a programmatic write keeps undo history intact.
-
-`handleValueChange` (and therefore `onChange`) is reached from both branches.
+`handleValueChange` (and therefore `onChange`) is called after the reformat.
 
 ### Missing anything?
 The vanilla `handleChange` reformats on every `input` event. This is intentional - it's the correct fallback for any path that doesn't go through `beforeinput`.
@@ -219,8 +216,7 @@ Autofill, IME commit and programmatic dispatches reach `handleChange` without an
 and React share `computeCaretAfterRewrite`: while the field is focused the caret is mapped with
 the same rank logic (the text left of the browser's caret, sanitized, selected in the new value);
 while unfocused it goes to the end. If the value was re-read wholesale as a foreign format, the
-caret goes to the end. Undo/redo (`historyUndo`/`historyRedo`) is not touched: the browser's own
-caret restore stands.
+caret goes to the end.
 
 ## 4. `keyup`
 
@@ -337,23 +333,6 @@ beforeinput: inputType='insertText', data='.'
 
 ---
 
-### User presses Ctrl+Z (undo)
-
-```
-beforeinput: inputType='historyUndo', data=null
-  → falls into default: → return null
-  → e.preventDefault() is NOT called
-  → browser handles undo natively
-  → browser restores previous value via its internal undo stack
-  → 'input' fires with the restored value
-
-input:
-  → handleChange: formatInputValue(restoredValue) → formats if needed
-  → handleValueChange(formatted, raw)  ← emits onChange
-```
-
----
-
 ### User pastes `1,234.56abc`
 
 ```
@@ -445,7 +424,7 @@ The `numora-react` package wraps the core event handlers in a React component. T
 | Handler | Attachment | Type | What Numora does |
 |---|---|---|---|
 | `beforeinput` | native `addEventListener` on element | `InputEvent` (DOM) | Format + apply via `setRangeText`; store `formattedValue` on element |
-| `onChange` | React JSX prop | `ChangeEvent<HTMLInputElement>` | Skip internal writes; pass undo/redo through; reformat programmatic writes. Emits `onChange` / `onValueChange` |
+| `onChange` | React JSX prop | `ChangeEvent<HTMLInputElement>` | Skip internal writes; reformat programmatic writes. Emits `onChange` / `onValueChange` |
 | `onKeyDown` | React JSX prop | `KeyboardEvent<HTMLInputElement>` | `skipOverThousandSeparatorOnDelete`; forward to consumer |
 | `onPaste` | React JSX prop | `ClipboardEvent<HTMLInputElement>` | Sanitize clipboard; set value; synthesise change event |
 | `onFocus` | React JSX prop | `FocusEvent<HTMLInputElement>` | Blur mode: strip thousand separators for editing |
@@ -474,13 +453,13 @@ useEffect(() => {
 
     switch (result.type) {
       case 'skip':
-        return;                       // let the browser apply it natively (e.g. undo)
+        return;                       // let the browser apply it natively 
       case 'reject':
-        e.preventDefault();           // no write, no onChange, undo untouched
+        e.preventDefault();           // no write, no onChange
         return;
       case 'handled': {
         e.preventDefault();
-        writeValuePreservingUndo(input, result.formatted, result.cursorPos);
+        writeValue(input, result.formatted, result.cursorPos);
         (input as NumoraHTMLInputElement).formattedValue = result.formatted;
         stateRef.current.onChange?.(createSyntheticChangeEvent(input, result.raw));
         stateRef.current.onValueChange?.({
@@ -520,7 +499,7 @@ Inside the native `beforeinput` handler, the core calls `target.setRangeText(for
 
 The component renders `<input defaultValue={initialDisplayValue} />`, never `<input value={...} />`.
 
-React-controlled inputs (`value=`) have the reconciler overwrite `input.value` on every render - undoing what `setRangeText` just wrote and breaking both formatting and undo history. `defaultValue` means React writes the DOM value once at mount and never touches it again, leaving `setRangeText` as the sole mutation path during typing.
+React-controlled inputs (`value=`) have the reconciler overwrite `input.value` on every render - undoing what `setRangeText` just wrote and breaking formatting. `defaultValue` means React writes the DOM value once at mount and never touches it again, leaving `setRangeText` as the sole mutation path during typing.
 
 ### Controlled `value` prop - bypasses the event sequence, echoed value compared by raw
 
@@ -539,7 +518,7 @@ if (domRaw === controlledRaw) {
   return; // parent didn't actually change the number - leave the DOM untouched
 }
 // ...parent value genuinely differs -> format for editing (Blur mode, focused) or
-// resting display (everything else) and write it, via writeValuePreservingUndo.
+// resting display (everything else) and write it, via writeValue.
 ```
 
 This matters because `formatValueForDisplay`/`formatForDisplay` (used by earlier versions
@@ -558,37 +537,26 @@ In Blur mode, while the field is focused, a genuinely-different value is formatt
 *editing* (no thousand separators - the real `formatOn`) rather than resting display, so a
 programmatic update mid-typing doesn't inject commas and snap the caret to the end.
 
-### `handleChange` mirrors the vanilla two-way branch
+### `handleChange` mirrors the vanilla one
 
-The React `handleChange` has the same shape as the vanilla class's:
+The React `handleChange` does the same as the vanilla class's:
 
 ```typescript
 const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
   const numInput = e.target as NumoraHTMLInputElement;
-  const inputType = (e.nativeEvent as InputEvent).inputType;
 
-  if (inputType === InputType.HistoryUndo || inputType === InputType.HistoryRedo) {
-    // 1. Undo/redo: broadcast the restored string, never re-format. Re-formatting
-    //    would push another undo step and break the natural Ctrl+Z walk-back.
-    const raw = toRawValue(numInput.value, formattingOptions.thousandSeparator);
-    numInput.formattedValue = numInput.value;
-    onChange?.(createSyntheticChangeEvent(numInput, raw));
-    onValueChange?.({ value: raw, formattedValue: numInput.value });
-    return;
-  }
-
-  // 2. Programmatic write (IME commit, autofill, drag-drop, or a dispatched `input`):
+  // Browser-made or programmatic write (IME commit, autofill, drag-drop, or a dispatched `input`):
   //    while focused, format under the real formatOn (matches what typing would have
   //    produced); while NOT focused, there's no mid-edit state to preserve, so format for
   //    RESTING display instead (forced Change) - otherwise an autofill into a blurred
   //    Blur-mode field would sit ungrouped until the next focus+blur cycle. Either way,
-  //    route the write through writeValuePreservingUndo rather than assigning .value directly.
+  //    route the write through writeValue rather than assigning .value directly.
   const isFocused = typeof document !== 'undefined' && document.activeElement === numInput;
   const { formatted, raw } = isFocused
     ? formatValueForDisplay(numInput.value, decimalMaxLength, formattingOptions)
     : formatForDisplay(numInput.value);
   if (formatted !== numInput.value) {
-    writeValuePreservingUndo(numInput, formatted, formatted.length);
+    writeValue(numInput, formatted, formatted.length);
   }
   numInput.formattedValue = formatted;
   onChange?.(createSyntheticChangeEvent(numInput, raw));
@@ -637,7 +605,7 @@ beforeinput: inputType='insertText', data='4'  [native listener, fires AT the el
       intendedValue = "1,2344"
       → { type: 'handled', formatted: "12,344", raw: "12344", cursorPos: 6 }
       e.preventDefault()  ← browser mutation suppressed
-      writeValuePreservingUndo(input, "12,344", 6)
+      writeValue(input, "12,344", 6)
         ↳ setRangeText("12,344", 0, 5, 'end')   ← dispatches no 'input' event
         ↳ cursor positioned after '4'
       input.formattedValue = "12,344"

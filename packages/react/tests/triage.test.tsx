@@ -189,26 +189,6 @@ describe('beforeinput skip', () => {
   });
 });
 
-describe('undo / redo through the real input event', () => {
-  for (const inputType of ['historyUndo', 'historyRedo']) {
-    it(`${inputType}: broadcasts the restored string without reformatting`, () => {
-      const onChange = vi.fn();
-      const onValueChange = vi.fn();
-      render(<NumoraInput data-testid="i" formatOn={FormatOn.Change} defaultValue="5" onChange={onChange} onValueChange={onValueChange} />);
-      const input = screen.getByTestId('i') as NumoraInputChangeEvent['target'];
-      input.focus();
-      const setRangeText = vi.spyOn(HTMLInputElement.prototype, 'setRangeText');
-      nativeInput(input, '1234', 4, 4, inputType); // a re-format would give '1,234'
-      expect(input.value).toBe('1234');
-      expect(setRangeText).not.toHaveBeenCalled();
-      expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange.mock.calls[0][0].target.value).toBe('1234');
-      expect(onChange.mock.calls[0][0].target.formattedValue).toBe('1234');
-      expect(onValueChange).toHaveBeenCalledWith({ value: '1234', formattedValue: '1234' });
-    });
-  }
-});
-
 describe('input fallback', () => {
   it('rejects scientific notation when disabled: restores previous value, no onChange', () => {
     const onChange = vi.fn();
@@ -273,7 +253,7 @@ describe('paste / blur onValueChange', () => {
     expect(input.value).toBe('1,234');
     expect(onValueChange).not.toHaveBeenCalled();
   });
-  it('Change mode (no decimalMinLength/allowNegative): blur leaves a trailing separator alone', () => {
+  it('Change mode (no decimalMinLength/allowNegative): blur strips a trailing separator and reports it', () => {
     const onChange = vi.fn();
     render(<NumoraInput data-testid="i" formatOn={FormatOn.Change} onChange={onChange} />);
     const input = screen.getByTestId('i') as HTMLInputElement;
@@ -281,8 +261,8 @@ describe('paste / blur onValueChange', () => {
     typeChar(input, '1'); typeChar(input, '2'); typeChar(input, '.');
     onChange.mockClear();
     act(() => input.blur());
-    expect(input.value).toBe('12.');
-    expect(onChange).not.toHaveBeenCalled();
+    expect(input.value).toBe('12');
+    expect(onChange).toHaveBeenCalledTimes(1);
   });
   it('blur with an unchanged display does not rewrite the field', () => {
     render(<NumoraInput data-testid="i" formatOn={FormatOn.Change} allowNegative />);

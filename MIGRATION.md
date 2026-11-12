@@ -65,6 +65,7 @@ Number(input.rawValue);
 | `getFormattedValue()` | `input.formattedValue` |
 | `getElement()` | `input.element` |
 | `valueAsNumber` | removed: `Number(input.rawValue)`, or a decimal library |
+| `setValue(value, { undoable })` | `setValue(value)`. The option is gone: the write was never an undo step |
 | `defaultValue` option | unchanged: the initial value. A `value` option is ignored and logged in development; write later with `setValue()` |
 | `disable()`, `enable()`, `addEventListener()`, `removeEventListener()` | use `input.element` |
 | `onChange(value: string)` | `onValueChange({ value, formattedValue })`, the same name and payload as React |
@@ -115,7 +116,7 @@ and, in development, logged with its replacement.
   layout effect or a callback ref can read them.
 - `locale` accepts a boolean, so `locale={useBrowserLocale}` type-checks. `false` is the same
   as leaving it out.
-- New: `ref.current.setValue(value, { undoable })` writes an uncontrolled field, the same as
+- New: `ref.current.setValue(value)` writes an uncontrolled field, the same as
   the vanilla method. It calls no callback and skips `isAllowed`.
 - `react-dom` is no longer a peer dependency.
 - `getSeparatorsFromLocale` is re-exported from `numora-react`.
@@ -132,7 +133,7 @@ The root of `numora` now exports only `NumoraInput`, `FormatOn`, `GroupingStyle`
 | `formatValueForDisplay` | `formatValue(raw, options)` |
 | `sanitizeNumoraInput`, `displayToRawValue` | `parseValue(text, options)` for text in the configured format |
 | `normalizeFullWidthDigits` | `normalizeDigits` from `numora/pipeline` |
-| `handleOnBeforeInputNumoraInput`, `handleOnPasteNumoraInput`, `handleOnKeyDownNumoraInput`, `writeValuePreservingUndo`, `validateNumoraInputOptions`, `applyLocale`, `InputType` | not public. Some remain on `numora/internal`, which has no semver guarantee |
+| `handleOnBeforeInputNumoraInput`, `handleOnPasteNumoraInput`, `handleOnKeyDownNumoraInput`, `writeValuePreservingUndo` (now `writeValue`), `validateNumoraInputOptions`, `applyLocale`, `InputType` | not public. Some remain on `numora/internal`, which has no semver guarantee |
 
 ## New: `onFormattedValueChange`
 

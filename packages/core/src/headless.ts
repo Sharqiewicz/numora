@@ -1,15 +1,15 @@
 import type { NumoraOptions } from './types';
+import { appValue } from './utils/app-value';
 import { formatForDisplay } from './utils/dom-events';
 import { resolveOptions } from './utils/resolve-options';
 
-// A lone sign or separator is not a number.
-const numeric = (text: string): string => (/\d/.test(text) ? text : '');
 
 /**
  * Formats a canonical raw value (`'1234.5'`: ASCII digits, `.` decimal, optional `-`) the way
  * a field with these options shows it at rest: grouped, padded to `decimalMinLength`, cut
  * (never rounded) to `decimalMaxLength`, `maxLength` applied. No input element involved.
- * `isAllowed` is ignored. Anything that is not a number gives `''`.
+ * `isAllowed` is ignored. Anything that is not a number gives `''`, `null` and `undefined`
+ * included; a number is formatted with a development warning, like the input's own values.
  *
  * @example
  * formatValue('1234.5')                                             // '1,234.5'
@@ -18,7 +18,8 @@ const numeric = (text: string): string => (/\d/.test(text) ? text : '');
  * @throws when `options` are invalid, like the input does.
  */
 export function formatValue(value: string, options?: NumoraOptions): string {
-  return numeric(formatForDisplay(value, resolveOptions(options), 'canonical').formatted);
+  return formatForDisplay(appValue(value, 'formatValue()'), resolveOptions(options), 'canonical')
+    .formatted;
 }
 
 /**
@@ -34,5 +35,5 @@ export function formatValue(value: string, options?: NumoraOptions): string {
  * @throws when `options` are invalid, like the input does.
  */
 export function parseValue(text: string, options?: NumoraOptions): string {
-  return numeric(formatForDisplay(text, resolveOptions(options)).raw);
+  return formatForDisplay(appValue(text, 'parseValue()'), resolveOptions(options)).raw;
 }

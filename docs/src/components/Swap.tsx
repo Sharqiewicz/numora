@@ -109,7 +109,7 @@ export function Swap() {
     if (!input) return;
     input.focus();
     input.select();
-    // Real text insertion (not a value= assignment): it lands in the undo stack and runs
+    // Real text insertion (not a value= assignment): it runs
     // through Numora's sanitize/format pipeline, like an autofill or IME commit would.
     document.execCommand('insertText', false, text);
   }

@@ -15,7 +15,7 @@ const LOCHIE_URL = 'https://lochie.me/';
 
 const META_TITLE = 'Torph integration | Numora React';
 const META_DESCRIPTION =
-  'Use the Torph library by Lochie Axon with Numora React to animate each digit while the real input keeps handling the keyboard, undo, IME and string precision.';
+  'Use the Torph library by Lochie Axon with Numora React to animate each digit while the real input keeps handling the keyboard, IME and string precision.';
 
 const JSON_LD = [
   {

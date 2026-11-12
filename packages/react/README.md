@@ -63,7 +63,7 @@ string. `onChange` is the event form of the same notification, for form librarie
 | `allowLeadingZeros` | `boolean` | `false` | Allow leading zeros |
 | `padLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |
 | `maxLength` | `number` | `undefined` | Max length of the whole raw value (digits + decimal mark + leading `-`; grouping and `decimalMinLength` padding not counted) |
-| `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject a keystroke/paste when it returns false (called with the post-sanitization raw value). A callback that throws is treated as "not allowed" (the keystroke is rejected) and the error is reported via `console.error` |
+| `isAllowed` | `(rawValue: string) => boolean` | `undefined` | Reject an edit the user makes (typing, paste, drop, autofill) when it returns false (called with the post-sanitization raw value). A callback that throws is treated as "not allowed" (the keystroke is rejected) and the error is reported via `console.error` |
 | `locale` | `LocaleTag \| boolean` | `undefined` | Derive separators and grouping from `Intl.NumberFormat`; `true` uses the runtime default locale and `false` is the same as leaving it out. An explicit `thousandSeparator`, `decimalSeparator` or `groupingStyle` wins; `locale` fills the ones you did not set |
 | `onValueChange` | `(values: { value: string; formattedValue: string }) => void` | `undefined` | Called when the raw value changes |
 | `onFormattedValueChange` | `(formattedValue: string) => void` | `undefined` | Called with the display string every time Numora rewrites the field, including the blur regroup, the focus strip, `ref.setValue()`, a new `value` and a formatting-prop change. Not called on mount |
@@ -85,7 +85,7 @@ In `onChange`, `e.target.value` is the raw numeric string and `e.target.formatte
 
 The ref is the DOM input, so `ref.current.value` is the displayed text. `ref.current.rawValue` is the canonical raw value. Do not feed `ref.current.value` back into the `value` prop. Type the ref as `useRef<NumoraHTMLInputElement>(null)`. `rawValue` and `formattedValue` are read-only, read the field's current text, and exist as soon as the ref is set.
 
-`ref.current.setValue('1234.5')` writes a canonical raw value into an uncontrolled field, the same as the vanilla `setValue()`. It is your own write, so it calls neither `onChange` nor `onValueChange` and is not checked by `isAllowed`. The new text still reaches `onFormattedValueChange`. `setValue(value, { undoable: false })` writes without an undo step. A controlled field goes straight back to its `value` prop, so change the prop instead.
+`ref.current.setValue('1234.5')` writes a canonical raw value into an uncontrolled field, the same as the vanilla `setValue()`. It is your own write, so it calls neither `onChange` nor `onValueChange` and is not checked by `isAllowed`. The new text still reaches `onFormattedValueChange`. A controlled field goes straight back to its `value` prop, so change the prop instead.
 
 | Where | Raw value | Display string |
 |-------|-----------|----------------|

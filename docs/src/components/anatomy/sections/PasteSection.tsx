@@ -53,8 +53,8 @@ export function PasteSection() {
           parsed together.
         </li>
         <li>
-          Write the result with <code>setRangeText</code> (via <code>writeValuePreservingUndo</code>
-          ) so Ctrl/Cmd+Z still works, then place the cursor.
+          Write the result with <code>setRangeText</code> (via <code>writeValue</code>), then place
+          the cursor.
         </li>
         <li>
           Call <code>onChange</code> directly. In React, <code>e.target.value</code> is the raw

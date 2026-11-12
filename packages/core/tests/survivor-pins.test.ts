@@ -3,7 +3,7 @@ import { expandCompactNotation } from '@/features/compact-notation';
 import { removeExtraDecimalSeparators } from '@/features/decimals';
 import { canonicalToDisplayText, normalizeForeignFormat } from '@/features/foreign-format';
 import { skipOverThousandSeparatorOnDelete } from '@/features/formatting/caret-position-utils';
-import { writeValuePreservingUndo } from '@/features/formatting/dom-writes';
+import { writeValue } from '@/features/formatting/dom-writes';
 import { truncateToMaxLength } from '@/features/max-length';
 import { removeNonNumericCharacters } from '@/features/non-numeric-characters';
 import { sanitizeNumoraInput } from '@/features/sanitization';
@@ -130,12 +130,12 @@ describe('skipOverThousandSeparatorOnDelete', () => {
   });
 });
 
-describe('writeValuePreservingUndo', () => {
+describe('writeValue', () => {
   it('still sets the caret when the value already matches but the caret does not', () => {
     const el = document.createElement('input');
     el.value = '1234';
     el.setSelectionRange(0, 0);
-    writeValuePreservingUndo(el, '1234', 4);
+    writeValue(el, '1234', 4);
     expect(el.selectionStart).toBe(4);
   });
   it('re-applies the caret on the next tick if the browser drifted it', () => {
@@ -143,7 +143,7 @@ describe('writeValuePreservingUndo', () => {
     try {
       const el = document.createElement('input');
       el.value = '12';
-      writeValuePreservingUndo(el, '1234', 4);
+      writeValue(el, '1234', 4);
       el.setSelectionRange(1, 1);
       vi.runAllTimers();
       expect([el.selectionStart, el.selectionEnd]).toEqual([4, 4]);

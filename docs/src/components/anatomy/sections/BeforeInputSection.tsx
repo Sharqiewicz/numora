@@ -1,23 +1,27 @@
 import { CodeBlock } from '@/components/CodeBlock';
-import { NumoraInput } from 'numora-react';
-import { DiagramFrame, demoInputClass } from '../kit';
 
 export function BeforeInputSection() {
   return (
     <section id="before-input" className="space-y-4 scroll-mt-24">
       <h2>
-        <code>beforeinput</code> + undo/redo
+        Why <code>beforeinput</code>
       </h2>
       <p>
-        Formatting from <code>keydown</code> breaks undo history, IME input and accessibility tools.
-        Numora's primary path runs through <code>beforeinput</code> instead, for three reasons:
+        Formatting from <code>keydown</code> breaks IME input and accessibility tools. Numora's
+        primary path runs through <code>beforeinput</code> instead, for these reasons:
       </p>
       <ol>
-        <li>It is cancelable.</li>
         <li>
-          When you write the formatted value with <code>setRangeText</code> after cancelling, the
-          browser records a single atomic undo entry. Ctrl/Cmd+Z restores the previous value in one
-          step.
+          It fires before the browser edits the field and is cancelable, so only the formatted text
+          is ever shown. There is no flash of unformatted text.
+        </li>
+        <li>
+          It tells Numora what the edit is (<code>inputType</code> and <code>data</code>), so the
+          intended value and the caret can be computed.
+        </li>
+        <li>
+          Writing the result with <code>setRangeText</code> fires no <code>input</code> event, and
+          it does not go through React's tracked <code>value</code> setter.
         </li>
         <li>
           It fires for every input vector: keyboard, voice dictation, drag-and-drop, virtual
@@ -81,7 +85,10 @@ export function BeforeInputSection() {
                 <code>historyUndo</code> / <code>historyRedo</code>
               </td>
               <td>Ctrl/Cmd+Z / Ctrl+Y (Cmd+Shift+Z)</td>
-              <td>Pass through; let the browser restore</td>
+              <td>
+                Pass through. The browser makes the change, and the <code>input</code> fallback
+                reformats it
+              </td>
             </tr>
           </tbody>
         </table>
@@ -115,25 +122,10 @@ export function BeforeInputSection() {
         On <code>reject</code> the caller calls <code>preventDefault()</code> and leaves the value
         alone. On <code>handled</code> it calls <code>preventDefault()</code>, writes{' '}
         <code>formatted</code> with{' '}
-        <code>setRangeText(formatted, 0, currentValue.length, 'end')</code> (one atomic undo entry),
-        sets the cursor to <code>cursorPos</code>, and notifies <code>onChange</code> with{' '}
-        <code>raw</code> as the value and <code>formatted</code> as the display string.
+        <code>setRangeText(formatted, 0, currentValue.length, 'end')</code>, sets the cursor to{' '}
+        <code>cursorPos</code>, and notifies <code>onChange</code> with <code>raw</code> as the
+        value and <code>formatted</code> as the display string.
       </p>
-      <p>
-        Type <code>1234567</code> below, then press <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Z</kbd>. The
-        browser undoes the digit and the comma it added in a single step:
-      </p>
-      <DiagramFrame variant="demo">
-        <NumoraInput
-          formatOn="change"
-          thousandSeparator=","
-          groupingStyle="thousand"
-          decimalMaxLength={2}
-          aria-label="Undo test input"
-          placeholder="1234567"
-          className={demoInputClass}
-        />
-      </DiagramFrame>
     </section>
   );
 }

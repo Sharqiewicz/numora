@@ -189,22 +189,6 @@ const PINNED: Record<string, string[]> = {
     '["onChange value=0.00 formatted=0.00 dom=0.00","onValueChange value=0.00 formatted=0.00 dom=0.00","onBlur dom=0.00"]',
     '"0.00 caret=4,4"',
   ],
-  'undo / redo input events > historyUndo blur: broadcasts the restored string, no rewrite': [
-    '["onChange value=1234 formatted=1234 dom=1234","onValueChange value=1234 formatted=1234 dom=1234"]',
-    '"1234 caret=4,4"',
-  ],
-  'undo / redo input events > historyUndo change: broadcasts the restored string, no rewrite': [
-    '["onChange value=1234 formatted=1234 dom=1234","onValueChange value=1234 formatted=1234 dom=1234"]',
-    '"1234 caret=4,4"',
-  ],
-  'undo / redo input events > historyRedo blur: broadcasts the restored string, no rewrite': [
-    '["onChange value=1234 formatted=1234 dom=1234","onValueChange value=1234 formatted=1234 dom=1234"]',
-    '"1234 caret=4,4"',
-  ],
-  'undo / redo input events > historyRedo change: broadcasts the restored string, no rewrite': [
-    '["onChange value=1234 formatted=1234 dom=1234","onValueChange value=1234 formatted=1234 dom=1234"]',
-    '"1234 caret=4,4"',
-  ],
   'controlled value > parent echo while focused (Blur): no rewrite beyond the keystroke writes, no extra onChange':
     [
       '["onFocus dom=","onChange value=1 formatted=1 dom=1","onValueChange value=1 formatted=1 dom=1","onChange value=12 formatted=12 dom=12","onValueChange value=12 formatted=12 dom=12","onChange value=123 formatted=123 dom=123","onValueChange value=123 formatted=123 dom=123","onChange value=1234 formatted=1234 dom=1234","onValueChange value=1234 formatted=1234 dom=1234","onChange value=1234. formatted=1234. dom=1234.","onValueChange value=1234. formatted=1234. dom=1234.","onChange value=1234.5 formatted=1234.5 dom=1234.5","onValueChange value=1234.5 formatted=1234.5 dom=1234.5"]',
@@ -235,7 +219,7 @@ const PINNED: Record<string, string[]> = {
     '["onFocus dom=","onKeyDown 1 dom=","onChange value=1 formatted=1 dom=1","onValueChange value=1 formatted=1 dom=1","onKeyDown 2 dom=1","onChange value=12 formatted=12 dom=12","onValueChange value=12 formatted=12 dom=12","onPaste dom=12","onChange value=1234 formatted=1234 dom=1234","onValueChange value=1234 formatted=1234 dom=1234","onBlur dom=1,234"]',
     '"1,234 caret=5,5"',
   ],
-  'StrictMode > undo/redo and autofill fallbacks fire once': [
+  'StrictMode > input fallbacks fire once': [
     '["onFocus dom=","onChange value=1234 formatted=1234 dom=1234","onValueChange value=1234 formatted=1234 dom=1234","onChange value=5678 formatted=5678 dom=5678","onValueChange value=5678 formatted=5678 dom=5678"]',
   ],
 };
@@ -372,13 +356,7 @@ describe('paste', () => {
     focus();
     log.length = 0;
     paste('abc');
-    expect(log).toMatchInlineSnapshot(`
-      [
-        "onPaste dom=5",
-        "onChange value=5 formatted=5 dom=5",
-        "onValueChange value=5 formatted=5 dom=5",
-      ]
-    `);
+    expect(log).toEqual(['onPaste dom=5']);
     expect(state()).toMatchInlineSnapshot(`"5 caret=1,1"`);
   });
 });
@@ -626,14 +604,18 @@ describe('blur cases', () => {
     blur();
     expect(log).toEqual(['onBlur dom=-5']);
   });
-  it('Change mode without decimalMinLength/allowNegative: trailing "." stays', () => {
+  it('Change mode without decimalMinLength/allowNegative: blur strips the trailing "."', () => {
     mount({ formatOn: FormatOn.Change });
     focus();
     typeAll('12.');
     log.length = 0;
     blur();
-    expect(log).toEqual(['onBlur dom=12.']);
-    expect(el.value).toBe('12.');
+    expect(log).toEqual([
+      'onChange value=12 formatted=12 dom=12',
+      'onValueChange value=12 formatted=12 dom=12',
+      'onBlur dom=12',
+    ]);
+    expect(el.value).toBe('12');
   });
   it('no-op blur on an empty field writes nothing', () => {
     mount({ decimalMinLength: 2, allowNegative: true });
@@ -663,36 +645,6 @@ describe('blur cases', () => {
     typeChar('3');
     blur();
     expect(seen).toEqual(['123']);
-  });
-});
-
-describe('undo / redo input events', () => {
-  for (const inputType of ['historyUndo', 'historyRedo']) {
-    for (const formatOn of [FormatOn.Blur, FormatOn.Change]) {
-      it(`${inputType} ${formatOn}: broadcasts the restored string, no rewrite`, () => {
-        mount({ formatOn, defaultValue: '5' });
-        focus();
-        log.length = 0;
-        const spy = vi.spyOn(HTMLInputElement.prototype, 'setRangeText');
-        nativeInput('1234', 4, 4, inputType);
-        expect(spy).not.toHaveBeenCalled();
-        pin(log);
-        pin(state());
-      });
-    }
-  }
-  it('de-DE historyUndo: raw is canonical, formattedValue is the restored display text', () => {
-    mount({ locale: 'de-DE' });
-    focus();
-    log.length = 0;
-    nativeInput('1.234,5', 7, 7, 'historyUndo');
-    expect(log).toMatchInlineSnapshot(`
-      [
-        "onChange value=1234.5 formatted=1.234,5 dom=1.234,5",
-        "onValueChange value=1234.5 formatted=1.234,5 dom=1.234,5",
-      ]
-    `);
-    expect(state()).toMatchInlineSnapshot(`"1.234,5 caret=7,7"`);
   });
 });
 
@@ -954,7 +906,7 @@ describe('StrictMode', () => {
     expect(el.value).toBe('1234567');
     expect(log).toEqual(['onFocus dom=1,234,567']);
   });
-  it('undo/redo and autofill fallbacks fire once', () => {
+  it('input fallbacks fire once', () => {
     mount({ formatOn: 'blur' }, true);
     focus();
     nativeInput('1234', 4, 4, 'historyUndo');

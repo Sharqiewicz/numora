@@ -75,8 +75,9 @@ function Validation() {
     <div className="docs-prose max-w-[36rem]">
       <h1>Validation</h1>
       <p>
-        An <code>isAllowed</code> predicate rejects keystrokes and pastes <em>before</em> they
-        commit. Use it for business rules or format constraints that don't fit a built-in option.
+        An <code>isAllowed</code> predicate rejects edits the user makes (typing, paste, drop,
+        autofill) <em>before</em> they commit. Use it for business rules or format constraints that
+        don't fit a built-in option.
       </p>
 
       <CodeBlock language="typescript">
@@ -114,7 +115,7 @@ const input = new NumoraInput(container, {
         <li>
           Runs <em>after</em> sanitization and formatting, but <em>before</em> the DOM is mutated
         </li>
-        <li>Fires for both typing and paste paths</li>
+        <li>Fires for typing, paste, drop and autofill</li>
         <li>
           Always allow the intermediate strings users need to type their way to a valid value (empty
           string, lone <code>-</code> or decimal separator)
