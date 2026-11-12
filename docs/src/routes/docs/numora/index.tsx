@@ -67,20 +67,27 @@ function GetStarted() {
         which characters can be typed, pasted and shown.
       </p>
 
-      <h2>What you get</h2>
+      <h2>
+        Why <strong className="font-numora">numora</strong>?
+      </h2>
+      <p>
+        If you audit the codebases of the top 10 DeFi protocols - Uniswap, Aave, Curve, Balancer -
+        you'll notice a pattern. For the most critical UI component in finance, the numeric input,
+        every single one has built a custom implementation from scratch.
+      </p>
       <ul>
-        <li>
-          <strong>Zero dependencies, {CORE_SIZE_GZIP} gzipped.</strong>
-        </li>
-        <li>
-          <strong>String-only values.</strong> Numora never converts to <code>Number</code>, so
-          amounts like <code>0.1 + 0.2</code> don't pick up IEEE 754 rounding errors.
-        </li>
-        <li>
-          <strong>Three grouping styles.</strong> Thousand (1,234,567), Lakh (12,34,567) and Wan
-          (123,4567).
-        </li>
+        <li>Uniswap maintains ~200 lines of custom regex and locale logic.</li>
+        <li>Aave wraps a formatting library with heavy custom validation.</li>
+        <li>Curve relies on a complex chain of hooks to handle state.</li>
       </ul>
+      <p>
+        <strong>There is no standard.</strong> Every team wastes days reinventing the wheel:
+        comma/dot separator logic, parseFloat precision loss, mobile keyboard ghost characters.
+      </p>
+      <p>
+        <strong>numora is the new standard for numeric inputs</strong> - a precision-first library
+        you drop in once, configure with options, and forget about.
+      </p>
 
       <p>
         See <Link to="/docs/numora/installation">Installation</Link> for the vanilla JS API and
