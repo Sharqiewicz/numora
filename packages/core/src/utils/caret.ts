@@ -55,8 +55,6 @@ export function computeCaretFromEdit(
  * same result as detecting it. When they differ the text was re-interpreted wholesale and no
  * per-character mapping exists, so the caret goes to the end.
  *
- * Undo/redo never reaches this function: the browser restores its own caret there.
- *
  * @param focused - unfocused fields have no typing caret: it goes to the end
  */
 export function computeCaretAfterRewrite(

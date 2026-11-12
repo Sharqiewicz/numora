@@ -48,7 +48,7 @@ export function normalizeForeignFormat(value: string, options?: ForeignFormatOpt
   const decimalSeparator = options?.decimalSeparator ?? '.';
   const thousandSeparator = options?.thousandSeparator;
 
-  let v = normalizeDigits(value).replace(/[\s​]/g, '');
+  let v = normalizeDigits(value).replace(/[\s\u200B]/g, '');
   // Strip the field's own grouping mark first, so the glyph remap below never sees it.
   if (thousandSeparator && thousandSeparator !== '.' && thousandSeparator !== ',') {
     v = v.split(thousandSeparator).join('');

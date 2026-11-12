@@ -1,7 +1,3 @@
-/**
- * Static regex patterns for compact notation processing.
- * Defined at module level to avoid recompilation on each function call.
- */
 import {
   failedMantissaResumeIndex,
   isDigit,

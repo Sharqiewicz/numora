@@ -1,5 +1,5 @@
 import { handleOnKeyDownNumoraInput } from './utils/event-handlers';
-import { writeValuePreservingUndo } from './features/formatting';
+import { writeValue } from './features/formatting';
 import { displayToRawValue, formatValueForDisplay } from './utils/format-utils';
 import {
   applyBeforeInput,
@@ -10,7 +10,6 @@ import {
   attachFocusStrip,
   formatForDisplay,
 } from './utils/dom-events';
-import { appValue } from './utils/app-value';
 import { resolveOptions } from './utils/resolve-options';
 import { takeRemovedOptions, warnRemovedOptions } from './utils/removed-options';
 import type { ResolvedNumoraOptions } from './utils/dom-events';
@@ -92,16 +91,19 @@ export class NumoraInput {
 
     this.createInputElement(target);
     this.applyOptions(options);
-    // When adopting an existing <input>, any pre-set value (e.g. <input value="100"
-    // use:numora>) is kept unless the caller passes `defaultValue`.
-    if (options.defaultValue !== undefined) this.el.value = appValue(options.defaultValue, 'defaultValue');
     this.setupEventListeners();
-    // The initial value (option, or a pre-set value on an adopted <input>) is supplied by
-    // the app, so it is a canonical raw value (ADR 0004), not locale text. Also seeds `lastValue`.
+    // The initial value is `defaultValue`, or the pre-set value of an adopted <input> (e.g.
+    // <input value="100" use:numora>). Either way the app supplied it, so it is a canonical
+    // raw value (ADR 0004), not locale text. Also seeds `lastValue`.
     const left = leftovers.get(this.el);
-    this.setValue(left?.text === this.el.value ? left.raw : this.el.value, {
-      undoable: false,
-    });
+    applySetValue(
+      this.el,
+      options.defaultValue ?? (left?.text === this.el.value ? left.raw : this.el.value),
+      this.isFocused,
+      this.resolvedOptions,
+      'defaultValue'
+    );
+    this.emit(undefined);
     this.reported = this.el.value;
   }
 
@@ -112,15 +114,13 @@ export class NumoraInput {
     const isExistingInput = container instanceof HTMLInputElement;
     this.el = isExistingInput ? container : document.createElement('input');
 
-    // These attributes are REQUIRED for Numora to work correctly and must not be overridden:
-    // - type='text': Using 'number' would cause browser-native validation/formatting that conflicts with Numora
-    // - inputmode='decimal': Ensures mobile keyboards show numeric keypad
-    // - spellcheck='false': Prevents spellcheck from interfering with numeric input
-    // - autocomplete='off': Prevents browser autocomplete from interfering with formatting
+    // Fixed, because Numora needs them: `type="number"` would bring the browser's own
+    // validation and formatting, and `inputmode="decimal"` gives the numeric keypad.
     this.el.setAttribute('type', 'text');
     this.el.setAttribute('inputmode', 'decimal');
-    this.el.setAttribute('spellcheck', 'false');
-    this.el.setAttribute('autocomplete', 'off');
+    // Defaults only, as in React: an adopted <input> keeps its own (`autocomplete="cc-number"`).
+    if (!this.el.hasAttribute('spellcheck')) this.el.setAttribute('spellcheck', 'false');
+    if (!this.el.hasAttribute('autocomplete')) this.el.setAttribute('autocomplete', 'off');
 
     if (!isExistingInput) {
       container.appendChild(this.el);
@@ -148,13 +148,13 @@ export class NumoraInput {
       this.cleanups.push(() => el.removeEventListener(type, handler as EventListener));
     };
 
-    // `beforeinput` is cancelable and fires before the browser edits, so the formatted value
-    // goes in through `setRangeText` and the undo history survives.
+    // `beforeinput` is cancelable and fires before the browser edits, so only the formatted
+    // value is ever shown.
     add<InputEvent>('beforeinput', (e) => this.emit(applyBeforeInput(e, opts())));
-    // Fallback for edits with no `beforeinput`: undo/redo, autofill, programmatic dispatch.
+    // Fallback for edits with no `beforeinput`: autofill, drop, programmatic dispatch.
     // Mid-composition text is the IME's: the final non-composing `input` reconciles it.
     add<InputEvent>('input', (e) =>
-      e.isComposing || this.emit(applyInputFallback(el, e.inputType, this.isFocused, this.lastValue, opts()))
+      e.isComposing || this.emit(applyInputFallback(el, this.isFocused, this.lastValue, opts()))
     );
     add<KeyboardEvent>('keydown', (e) => handleOnKeyDownNumoraInput(e, opts()));
     add<ClipboardEvent>('paste', (e) => this.emit(applyPaste(e, opts())));
@@ -230,15 +230,13 @@ export class NumoraInput {
    *
    * @param value - A canonical raw value (ADR 0004): `.` is always the decimal mark and
    *   there is no grouping, whatever the field's locale (`'1234.5'` shows as `1.234,5` in
-   *   de-DE). It is never detected as locale text. It is re-formatted for display.
-   * @param options.undoable - Defaults to `true`: routes the write through `setRangeText`
-   *   so the browser's undo stack stays intact and `Ctrl+Z` can revert this call. Pass
-   *   `false` only when you intentionally want to wipe the undo history (e.g. form reset).
+   *   de-DE). It is never detected as locale text. It is re-formatted for display. A value
+   *   that is not a raw value is still read, with a development warning (ADR 0015).
    */
-  public setValue(value: string, options?: { undoable?: boolean }): void {
+  public setValue(value: string): void {
     // Same pipeline as typing/paste, so programmatic writes honor sanitization,
     // decimalMaxLength, maxLength, allowNegative and grouping.
-    applySetValue(this.el, value, this.isFocused, this.resolvedOptions, options?.undoable);
+    applySetValue(this.el, value, this.isFocused, this.resolvedOptions);
     this.emit(undefined);
   }
 
@@ -246,8 +244,8 @@ export class NumoraInput {
    * Changes options on a live field. `options` is merged over the current ones; a key set
    * to `undefined` goes back to its default (a native attribute left `undefined` is not
    * touched). The current raw value is kept and re-run through the new options: the display
-   * is rewritten (undoable, like {@link setValue}), and `onValueChange` fires only if the raw
-   * value itself changed, e.g. a smaller `decimalMaxLength` cut digits off (ADR 0008).
+   * is rewritten, and `onValueChange` fires only if the raw value itself changed, e.g. a
+   * smaller `decimalMaxLength` cut digits off (ADR 0008).
    *
    * @throws when the merged options are invalid. Nothing is changed in that case.
    */
@@ -265,7 +263,7 @@ export class NumoraInput {
     const { formatted, raw } = this.isFocused
       ? formatValueForDisplay(before, resolved.decimalMaxLength, resolved, 'canonical')
       : formatForDisplay(before, resolved, 'canonical');
-    if (formatted !== this.el.value) writeValuePreservingUndo(this.el, formatted, formatted.length);
+    if (formatted !== this.el.value) writeValue(this.el, formatted, formatted.length);
     this.emit(raw !== before ? { value: raw, formattedValue: formatted } : undefined);
   }
 }

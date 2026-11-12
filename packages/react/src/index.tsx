@@ -31,7 +31,7 @@ import {
   attachFocusStrip,
   formatForDisplay,
   handleOnKeyDownNumoraInput,
-  writeValuePreservingUndo,
+  writeValue,
   isProduction,
   resolveOptions,
   takeRemovedOptions,
@@ -58,11 +58,8 @@ export interface NumoraHTMLInputElement extends HTMLInputElement {
    * the app's own write: it calls neither `onChange` nor `onValueChange` and is not checked
    * by `isAllowed`. For uncontrolled fields. A controlled field goes straight back to its
    * `value` prop, so change that prop instead.
-   *
-   * @param options.undoable - Defaults to `true` (Ctrl+Z reverts the write). `false` wipes
-   *   the undo history, e.g. for a form reset.
    */
-  setValue(value: string, options?: { undoable?: boolean }): void;
+  setValue(value: string): void;
 }
 
 /**
@@ -296,11 +293,20 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
   };
 
   // Computed once on mount. Uncontrolled defaultValue lets React leave the DOM value alone
-  // on re-renders, which is what allows undo to work. Uses the resting format, so a Blur-mode
+  // on re-renders, so Numora's writes stay. Uses the resting format, so a Blur-mode
   // field paints with separators like vanilla and the first focus has separators to strip.
   // App-supplied values are canonical raw values ('1234.5', never locale text).
   const [initialDisplayValue] = useState(
-    () => formatForDisplay(appValue(controlledValue ?? defaultValue, 'value'), formattingOptions, 'canonical').formatted
+    () =>
+      formatForDisplay(
+        appValue(
+          controlledValue ?? defaultValue,
+          controlledValue === undefined ? 'defaultValue' : 'value',
+          formattingOptions.allowCompactNotation
+        ),
+        formattingOptions,
+        'canonical'
+      ).formatted
   );
 
   // Before the ref is handed out, so a callback ref and a parent's layout effect can already
@@ -317,8 +323,8 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
       },
       setValue: {
         configurable: true,
-        value: (value: string, options?: { undoable?: boolean }) => {
-          applySetValue(input, value, isFocused(input), stateRef.current.formattingOptions, options?.undoable);
+        value: (value: string) => {
+          applySetValue(input, value, isFocused(input), stateRef.current.formattingOptions);
           emit(input);
           // Controlled: render again so the layout effect puts the field back to `value`.
           if (stateRef.current.controlledValue !== undefined) resync((n) => n + 1);
@@ -333,9 +339,12 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
   // Layout effect 2: refresh stateRef every render so mount-only DOM listeners see the
   // latest props; re-sync the DOM value when controlled `value` changes. Runs on every
   // render. Equality guard short-circuits the common echo-back case. When the value
-  // differs, route through writeValuePreservingUndo so external updates don't wipe undo.
+  // differs, write it with writeValue.
   useIsomorphicLayoutEffect(() => {
     const prev = stateRef.current.formattingOptions;
+    // A new `value` gets the same development warnings as the first one.
+    if (controlledValue !== stateRef.current.controlledValue)
+      appValue(controlledValue, 'value', formattingOptions.allowCompactNotation);
     stateRef.current = {
       onChange,
       onValueChange,
@@ -351,7 +360,7 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
     // under the old options.
     const changed = prev !== formattingOptions;
     if (controlledValue === undefined && !changed) return;
-    const controlledValueString = String(controlledValue ?? formatForDisplay(input.value, prev).raw);
+    const controlledValueString = String(controlledValue ?? displayToRawValue(input.value, prev));
 
     // Is this just the parent echoing the raw value straight back (the single most
     // common controlled pattern: onChange -> setState(e.target.value) -> value={state})?
@@ -377,7 +386,7 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
           ? formatValueForDisplay(controlledValueString, options.decimalMaxLength, options, 'canonical')
           : formatForDisplay(controlledValueString, options, 'canonical');
       const { formatted, raw } = format(formattingOptions);
-      if (formatted !== input.value) writeValuePreservingUndo(input, formatted, formatted.length);
+      if (formatted !== input.value) writeValue(input, formatted, formatted.length);
       // New options that change the number itself (a smaller `decimalMaxLength` cutting
       // digits, `allowNegative` dropping the sign) are reported; a repaint alone is not.
       if (changed && raw !== format(prev).raw) {
@@ -403,22 +412,27 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
     input.addEventListener('beforeinput', onBeforeInput);
     // A strip only removes separators, so the raw value is unchanged: refresh `lastValue`,
     // report nothing.
-    const detach = attachFocusStrip(input, () => stateRef.current.formattingOptions, () => emit(input));
+    const detach = attachFocusStrip(
+      input,
+      () => stateRef.current.formattingOptions,
+      () => emit(input),
+      // `autoFocus` focused the field before this effect ran.
+      isFocused(input)
+    );
     return () => {
       input.removeEventListener('beforeinput', onBeforeInput);
       detach();
     };
   }, []);
 
-  // `input` fallback: undo/redo, autofill, drop, IME commit. `lastValue` still holds the
+  // `input` fallback: autofill, drop, IME commit. `lastValue` still holds the
   // last value Numora wrote, which a refused scientific-notation insert restores.
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const el = e.target as NumoraHTMLInputElement;
-    const inputType = (e.nativeEvent as InputEvent).inputType;
     // Mid-composition text is the IME's: the final non-composing `input` reconciles it.
     if ((e.nativeEvent as InputEvent).isComposing) return;
     const focused = isFocused(el);
-    emit(el, applyInputFallback(el, inputType, focused, lastValue.current, formattingOptions));
+    emit(el, applyInputFallback(el, focused, lastValue.current, formattingOptions));
   };
 
   // The app's handler runs first; `preventDefault()` in it turns Numora's handling off.

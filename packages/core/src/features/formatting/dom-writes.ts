@@ -1,16 +1,8 @@
 /**
- * DOM write helpers that preserve the browser's undo/redo stack.
- *
- * Direct `element.value = x` wipes the undo history. `setRangeText` registers an undo
- * step instead, so Ctrl+Z keeps working. Every value mutation in NumoraInput should
- * route through one of these helpers (the public `setValue({ undoable: false })`
- * escape hatch is the only intentional exception).
- */
-
-/**
- * Writes a new value to the input and sets the caret (or selection) in one operation,
- * preserving the undo stack. Skips the write if the value and selection are already what we
- * want - that avoids adding a noisy no-op undo step.
+ * Writes a new value to the input and sets the caret (or selection). Every write Numora makes
+ * goes through here. It uses `setRangeText`, which fires no `input` event and does not go
+ * through React's tracked `value` setter. The browser does not record it for undo. Skips the
+ * write if the value and selection are already what we want.
  *
  * `selectMode` defaults to `end`. The focus-strip passes `preserve` so setRangeText does not
  * snap the caret to the end of the string before setSelectionRange runs - that snap is what
@@ -22,7 +14,7 @@
  * @param start - The selection start to set after the write (the caret)
  * @param end - The selection end (defaults to `start`)
  */
-export function writeValuePreservingUndo(
+export function writeValue(
   el: HTMLInputElement,
   value: string,
   start: number,

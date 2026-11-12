@@ -1,7 +1,3 @@
-/**
- * Static regex patterns for scientific notation processing.
- * Defined at module level to avoid recompilation on each function call.
- */
 import {
   failedMantissaResumeIndex,
   isDigit,
@@ -20,6 +16,17 @@ const ALL_ZEROS_REGEX = /^0+$/;
 const MAX_EXPANSION_DIGITS = 1000;
 
 /**
+ * True when `value` holds a number in scientific notation that `expandScientificNotation`
+ * would expand: a mantissa (digits, optionally ending in the decimal separator: `1.e5`),
+ * `e`/`E`, an optional sign, then a digit (`1.5e-7`, `2E5`, `1,e5` with `,` as decimal
+ * separator). Expects ASCII digits; words like `EUR` or `2e` don't match.
+ */
+export function containsScientificNotation(value: string, decimalSeparator: string = '.'): boolean {
+  // `1.e5` is read as `1e5`: a separator between the digits and the `e` changes nothing.
+  return /\d[eE][+-]?\d/.test(value.replace(/[eE]/g, 'e').split(`${decimalSeparator}e`).join('e'));
+}
+
+/**
  * Expands scientific notation to decimal notation using string manipulation only.
  * Handles formats like: 1.5e-7, 2e+5, 1.23e-4, etc.
  * Finds and expands scientific notation anywhere in the string.
@@ -33,14 +40,6 @@ const MAX_EXPANSION_DIGITS = 1000;
  * @param value - The string value that may contain scientific notation
  * @returns The expanded decimal string, or original value if not scientific notation
  */
-/**
- * True when `value` holds a number in scientific notation: a digit, `e`/`E`, an optional
- * sign, then a digit (`1.5e-7`, `2E5`). Expects ASCII digits; words like `EUR` don't match.
- */
-export function containsScientificNotation(value: string): boolean {
-  return /\d[eE][+-]?\d/.test(value);
-}
-
 export function expandScientificNotation(value: string, decimalSeparator: string = '.'): string {
   // Fast early-exit for the dominant case (no scientific notation present)
   if (!value.includes('e') && !value.includes('E')) return value;

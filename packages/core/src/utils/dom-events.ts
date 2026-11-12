@@ -1,19 +1,19 @@
 import {
   FormatOn,
   GroupingStyle,
-  InputType,
   type NumoraOptions,
   type NumoraValues,
 } from '../types';
 import type { ValueSource } from '../features/sanitization';
 import {
   computeStripSeparatorsResult,
-  writeValuePreservingUndo,
+  writeValue,
 } from '../features/formatting';
 import {
   handleOnBeforeInputNumoraInput,
   handleOnPasteNumoraInput,
   isScientificNotationRejected,
+  callIsAllowed,
 } from './event-handlers';
 import { appValue } from './app-value';
 import { computeCaretAfterRewrite } from './caret';
@@ -26,7 +26,7 @@ import {
 
 /**
  * DOM event steps shared by the vanilla class and `numora-react`. Each one reads the input,
- * writes through `setRangeText` (undo-preserving, fires no `input` event) and returns the
+ * writes through `setRangeText` (fires no `input` event) and returns the
  * values to report, or `undefined` when there is nothing to report. Wrappers only decide how
  * to notify.
  */
@@ -53,12 +53,19 @@ export function formatForDisplay(
   opts: ResolvedNumoraOptions,
   source?: ValueSource
 ): { formatted: string; raw: string } {
-  return formatValueForDisplay(
+  const { formatted, raw } = formatValueForDisplay(
     value,
     opts.decimalMaxLength,
     { ...opts, formatOn: FormatOn.Change },
     source
   );
+  // A resting field has no lone sign or separator (`-`, `.`, `-.`): it is empty. Negative
+  // zero (`-0`, `-0.00`) drops its sign.
+  if (!/\d/.test(formatted)) return { formatted: '', raw: '' };
+  return {
+    formatted: normalizeNegativeZero(formatted, opts.decimalSeparator),
+    raw: normalizeNegativeZero(raw, '.'),
+  };
 }
 
 /**
@@ -71,14 +78,13 @@ export function applySetValue(
   value: string,
   focused: boolean,
   opts: ResolvedNumoraOptions,
-  undoable?: boolean
+  where = 'setValue()'
 ): string {
-  const raw = appValue(value, 'setValue()');
+  const raw = appValue(value, where, opts.allowCompactNotation);
   const { formatted } = focused
     ? formatValueForDisplay(raw, opts.decimalMaxLength, opts, 'canonical')
     : formatForDisplay(raw, opts, 'canonical');
-  if (undoable === false) el.value = formatted;
-  else writeValuePreservingUndo(el, formatted, formatted.length);
+  writeValue(el, formatted, formatted.length);
   return formatted;
 }
 
@@ -88,7 +94,7 @@ const write = (
   raw: string,
   caret: number
 ): NumoraValues => {
-  writeValuePreservingUndo(el, formatted, caret);
+  writeValue(el, formatted, caret);
   return { value: raw, formattedValue: formatted };
 };
 
@@ -114,15 +120,14 @@ export function applyPaste(
   const el = e.target as HTMLInputElement;
   if (el.readOnly || el.disabled) return;
   const result = handleOnPasteNumoraInput(e, opts.decimalMaxLength, opts);
-  if (result.type === 'handled') return write(el, result.formatted, result.raw, result.cursorPos);
+  if (result.type !== 'handled' || result.formatted === el.value) return;
+  return write(el, result.formatted, result.raw, result.cursorPos);
 }
 
 /**
- * The `input` fallback: undo/redo, autofill, drop, IME commit, programmatic dispatch. Typing
- * never gets here (`beforeinput` handles it).
+ * The `input` fallback: every change the browser makes itself (autofill, drop, IME commit,
+ * programmatic dispatch). Typing never gets here (`beforeinput` handles it).
  *
- * - Undo/redo: the browser restored an earlier string. Report it, don't rewrite it: another
- *   write would push an undo step and break the Ctrl+Z walk-back.
  * - Scientific notation while `allowScientificNotation` is false: put back `previous` (the
  *   last value Numora wrote) and report nothing, since the value didn't change.
  * - Otherwise reformat. While `focused` the text is mid-edit and keeps the field's typing
@@ -130,18 +135,16 @@ export function applyPaste(
  */
 export function applyInputFallback(
   el: HTMLInputElement,
-  inputType: string,
   focused: boolean,
   previous: string,
   opts: ResolvedNumoraOptions
 ): NumoraValues | undefined {
   const value = el.value;
-  if (inputType === InputType.HistoryUndo || inputType === InputType.HistoryRedo) {
-    return { value: displayToRawValue(value, opts), formattedValue: value };
-  }
+  // Nothing changed since Numora's last write: nothing to check, rewrite or report.
+  if (value === previous) return;
   if (isScientificNotationRejected(value, opts)) {
     // The caret pointed into the refused text, so it goes to the end.
-    writeValuePreservingUndo(el, previous, previous.length);
+    writeValue(el, previous, previous.length);
     return;
   }
   // A focused Change-mode field already shows its own grouping, which foreign detection would
@@ -150,6 +153,10 @@ export function applyInputFallback(
   const { formatted, raw } = focused
     ? formatInputValue(value, opts.decimalMaxLength, opts, undefined, own ? 'display' : 'foreign')
     : formatForDisplay(value, opts, 'foreign');
+  if (opts.isAllowed && !callIsAllowed(opts.isAllowed, raw)) {
+    writeValue(el, previous, previous.length);
+    return;
+  }
   if (formatted === value) return { value: raw, formattedValue: formatted };
   // Max of start/end works around a mobile-browser caret bug where selectionStart lags.
   const caret = Math.max(el.selectionStart ?? 0, el.selectionEnd ?? 0);
@@ -169,9 +176,9 @@ export function applyInputFallback(
 }
 
 /**
- * Blur: settle the value at rest (grouping, padding, trailing separator strip, `-0` to `0`).
- * Runs in Blur mode, or when `decimalMinLength` or `allowNegative` need a resting fix-up; a
- * Change-mode field is otherwise already at rest. Returns the values only when the raw value
+ * Blur: settle the value at rest (grouping, padding, trailing separator strip, `-0` to `0`,
+ * a lone sign or separator to empty). Runs in every mode; an already settled field is a no-op
+ * (the formatted text equals the current text). Returns the values only when the raw value
  * changed (trailing separator strip, `decimalMinLength` padding, `-0` to `0`): regrouping
  * alone is cosmetic, so it is written but not reported, in both packages.
  */
@@ -179,14 +186,10 @@ export function applyBlur(
   el: HTMLInputElement,
   opts: ResolvedNumoraOptions
 ): NumoraValues | undefined {
-  if (opts.formatOn !== FormatOn.Blur && !opts.decimalMinLength && !opts.allowNegative) return;
   const before = displayToRawValue(el.value, opts);
-  const { formatted, raw } = formatForDisplay(
-    normalizeNegativeZero(el.value, opts.decimalSeparator),
-    opts
-  );
+  const { formatted, raw } = formatForDisplay(el.value, opts);
   if (formatted === el.value) return;
-  writeValuePreservingUndo(el, formatted, formatted.length);
+  writeValue(el, formatted, formatted.length);
   if (raw !== before) return { value: raw, formattedValue: formatted };
 }
 
@@ -200,12 +203,15 @@ export function applyBlur(
  * there yet. Only the primary button is followed by a `click`; `blur` clears a pending strip
  * whose `click` never came (drag released outside).
  *
+ * `focused` strips straight away, for a field that got focus before the listeners existed.
+ *
  * Returns a function that removes the listeners.
  */
 export function attachFocusStrip(
   el: HTMLInputElement,
   getOpts: () => ResolvedNumoraOptions,
-  onStrip: () => void
+  onStrip: () => void,
+  focused?: boolean
 ): () => void {
   let pendingMouse = false;
   const strip = () => {
@@ -218,7 +224,7 @@ export function attachFocusStrip(
       thousandSeparator
     );
     if (!result) return;
-    writeValuePreservingUndo(el, result.raw, result.rawStart, result.rawEnd, 'preserve');
+    writeValue(el, result.raw, result.rawStart, result.rawEnd, 'preserve');
     onStrip();
   };
   const listeners: [string, (e: Event) => void][] = [
@@ -245,6 +251,9 @@ export function attachFocusStrip(
     ],
   ];
   for (const [type, fn] of listeners) el.addEventListener(type, fn);
+  // Already focused when attached (React `autoFocus` focuses before effects run): the
+  // `focus` event is gone, so strip now.
+  if (focused) strip();
   return () => {
     for (const [type, fn] of listeners) el.removeEventListener(type, fn);
   };

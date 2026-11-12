@@ -115,14 +115,6 @@ export function isProduction(): boolean {
   }
 }
 
-/** Development-only: an invalid tag otherwise falls back to en-US separators silently. */
-function warnInvalidLocale(locale: string | undefined): void {
-  if (isProduction()) return;
-  console.warn(
-    `[numora] Invalid locale "${locale}": Intl.NumberFormat rejected it, so the field uses "," grouping and "." decimal. Pass a BCP 47 tag such as "de-DE".`
-  );
-}
-
 export function getSeparatorsFromLocale(locale?: string): {
   thousandSeparator: string;
   decimalSeparator: string;
@@ -130,7 +122,8 @@ export function getSeparatorsFromLocale(locale?: string): {
 } {
   // Java, Python and Android write tags with `_` (`de_DE`), which Intl rejects with a
   // RangeError. Read them as the BCP 47 tag they name instead of falling back to en-US.
-  if (locale) locale = locale.replace(/_/g, '-');
+  // `String`: a non-string that got past the types fails as an invalid tag, not a TypeError.
+  if (locale) locale = String(locale).replace(/_/g, '-');
   try {
     let formatter = new Intl.NumberFormat(locale);
     // The locale's own zero digit anchors digit classification for the probe.
@@ -148,8 +141,12 @@ export function getSeparatorsFromLocale(locale?: string): {
       thousandSeparator: separators.length >= 2 ? separators[0] : ',',
       groupingStyle: deriveGroupingStyle(shape),
     };
-  } catch {
-    warnInvalidLocale(locale);
+  } catch (error) {
+    // A malformed tag is an invalid option and throws like one. Anything else is an engine
+    // without the `Intl` support needed, which gets the default separators.
+    if (error instanceof RangeError) {
+      throw new Error(`locale must be a BCP 47 tag such as "de-DE". Received: ${JSON.stringify(locale)}`);
+    }
     return {
       thousandSeparator: ',',
       decimalSeparator: '.',
@@ -158,6 +155,18 @@ export function getSeparatorsFromLocale(locale?: string): {
   }
 }
 
+// The conventional other mark for a separator the app did not pass: `.` unless that is taken.
+const otherMark = (taken: string): string =>
+  taken === DEFAULT_DECIMAL_SEPARATOR ? DEFAULT_THOUSAND_SEPARATOR : DEFAULT_DECIMAL_SEPARATOR;
+
+/**
+ * Fills the separators and grouping style the app left out from the locale. A separator the
+ * app passed always wins: when it equals the one the locale (or the defaults) would fill in
+ * for the other role, that other one gives way and becomes the conventional other mark
+ * (`{ thousandSeparator: '.' }` -> `,` decimal; de-DE + `decimalSeparator: '.'` -> `,`
+ * grouping). Two separators the app passed itself are never changed, so passing the same
+ * character for both still fails validation.
+ */
 export function applyLocale(
   locale: string | boolean | undefined,
   options: {
@@ -166,19 +175,24 @@ export function applyLocale(
     groupingStyle?: GroupingStyle;
   }
 ): { thousandSeparator?: string; decimalSeparator?: string; groupingStyle?: GroupingStyle } {
-  if (!locale) {
-    // A lone decimalSeparator equal to the default thousand one would always conflict;
-    // pair it with the conventional other mark instead. An explicit thousandSeparator wins.
-    return options.thousandSeparator === undefined &&
-      options.decimalSeparator === DEFAULT_THOUSAND_SEPARATOR
-      ? { ...options, thousandSeparator: DEFAULT_DECIMAL_SEPARATOR }
-      : options;
+  const base = locale ? getSeparatorsFromLocale(locale === true ? undefined : locale) : undefined;
+  const { thousandSeparator: thousand, decimalSeparator: decimal } = options;
+  const filledThousand = base?.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR;
+  const filledDecimal = base?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR;
+
+  let paired: { thousandSeparator?: string; decimalSeparator?: string } | undefined;
+  if (thousand === undefined && decimal === filledThousand) {
+    paired = { thousandSeparator: otherMark(decimal) };
+  } else if (decimal === undefined && thousand === filledDecimal) {
+    paired = { decimalSeparator: otherMark(thousand) };
   }
-  const tag = locale === true ? undefined : locale;
-  const seps = getSeparatorsFromLocale(tag);
+
+  // No locale: nothing to fill in, the caller's defaults apply to what is left out.
+  if (!base) return paired ? { ...options, ...paired } : options;
   return {
-    thousandSeparator: options.thousandSeparator ?? seps.thousandSeparator,
-    decimalSeparator: options.decimalSeparator ?? seps.decimalSeparator,
-    groupingStyle: options.groupingStyle ?? seps.groupingStyle,
+    thousandSeparator: thousand ?? base.thousandSeparator,
+    decimalSeparator: decimal ?? base.decimalSeparator,
+    groupingStyle: options.groupingStyle ?? base.groupingStyle,
+    ...paired,
   };
 }

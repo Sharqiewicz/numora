@@ -8,9 +8,7 @@ export const DEFAULT_DECIMAL_MAX_LENGTH = 18;
 export const DEFAULT_DECIMAL_MIN_LENGTH = 0;
 export const DEFAULT_FORMAT_ON = FormatOn.Change;
 export const DEFAULT_THOUSAND_SEPARATOR = ',';
-// A truthy thousandSeparator (the default is ',') implies grouping, so the grouping style
-// defaults to Thousand. This also aligns the core default with the React component (which
-// already defaulted to Thousand). Pass GroupingStyle.None to disable grouping.
+// Grouping is on by default. `GroupingStyle.None` is the only way to turn it off.
 export const DEFAULT_GROUPING_STYLE = GroupingStyle.Thousand;
 export const DEFAULT_DECIMAL_SEPARATOR = '.';
 export const DEFAULT_ALLOW_COMPACT_NOTATION = false;
