@@ -20,11 +20,13 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 // Budgets in KB (gzip, entry + the local chunks it imports).
 const BUDGETS = [
   { name: 'numora', file: 'packages/core/dist/index.mjs', budgetKb: 8.3 },
-  { name: 'numora-react', file: 'packages/react/dist/index.mjs', budgetKb: 1.72 },
+  { name: 'numora-react', file: 'packages/react/dist/index.mjs', budgetKb: 1.8 },
 ];
 
 // A React consumer ships core + core/internal + react. Budget the sum explicitly.
-const CONSUMER_TOTAL_BUDGET_KB = 10.15;
+// Raised from 10.15: `onFormattedValueChange` (about 20 bytes) and the production fallback
+// for invalid options in React (ADR 0014, about 80 bytes). numora-react moved 1.72 -> 1.8.
+const CONSUMER_TOTAL_BUDGET_KB = 10.3;
 
 // The files an entry loads: itself plus every sibling chunk it imports
 // (`from "./internal-XXXX.mjs"`), one level deep - Vite emits a flat chunk graph for

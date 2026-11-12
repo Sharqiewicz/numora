@@ -1935,7 +1935,7 @@ describe('react-hook-form integration', () => {
 
 describe('option validation', () => {
   // Vanilla NumoraInput.ts validates options unconditionally at construction.
-  // The React component must do the same so misconfig throws in both dev and prod.
+  // The React component throws too outside production; see invalid-options.test.tsx (ADR 0014).
   it('throws on multi-char thousand separator', () => {
     const originalError = console.error;
     console.error = () => {};

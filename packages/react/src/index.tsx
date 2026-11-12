@@ -32,6 +32,7 @@ import {
   formatForDisplay,
   handleOnKeyDownNumoraInput,
   writeValuePreservingUndo,
+  isProduction,
   resolveOptions,
   takeRemovedOptions,
   warnRemovedOptions,
@@ -199,30 +200,41 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
   // Props removed since v4: kept off the DOM here, warned about once on mount.
   const stale = takeRemovedOptions(rest);
 
+  const lastValidOptions = useRef<ResolvedNumoraOptions | undefined>(undefined);
   // biome-ignore lint/correctness/useExhaustiveDependencies: callbacks are read via stateRef; a new onChange/isAllowed identity must not re-resolve options.
   const formattingOptions: ResolvedNumoraOptions = useMemo(() => {
     warnServerLocale(locale);
     // Same resolver as the vanilla class: locale, defaults, then validation of the resolved
     // options against this render's real `isAllowed`/`onChange`, so a wrong type still throws.
-    const options = resolveOptions({
-      locale,
-      formatOn,
-      thousandSeparator,
-      groupingStyle,
-      decimalSeparator,
-      decimalMaxLength,
-      decimalMinLength,
-      allowCompactNotation,
-      allowScientificNotation,
-      allowNegative,
-      allowLeadingZeros,
-      padLeadingZero,
-      maxLength,
-      isAllowed,
-      onChange,
-      onValueChange,
-      onFormattedValueChange,
-    });
+    let options: ResolvedNumoraOptions;
+    try {
+      options = resolveOptions({
+        locale,
+        formatOn,
+        thousandSeparator,
+        groupingStyle,
+        decimalSeparator,
+        decimalMaxLength,
+        decimalMinLength,
+        allowCompactNotation,
+        allowScientificNotation,
+        allowNegative,
+        allowLeadingZeros,
+        padLeadingZero,
+        maxLength,
+        isAllowed,
+        onChange,
+        onValueChange,
+        onFormattedValueChange,
+      });
+    } catch (error) {
+      // Invalid options throw in development. In production a bad prop must not take the
+      // page down: log it and keep the last valid options (the defaults on a first render).
+      if (!isProduction()) throw error;
+      console.error(error);
+      options = lastValidOptions.current ?? resolveOptions({});
+    }
+    lastValidOptions.current = options;
     // Stable identity so `isAllowed` stays out of the memo's deps; delegates to the
     // current `isAllowed` via stateRef (read only from event handlers, after commit).
     options.isAllowed = (rawValue: string) => stateRef.current.isAllowed?.(rawValue) ?? true;
