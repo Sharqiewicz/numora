@@ -31,8 +31,12 @@ function resolve(options?: NumoraOptions) {
  * @throws when `options` are invalid, like the input does.
  */
 export function formatValue(value: string, options?: NumoraOptions): string {
-  return formatForDisplay(appValue(value, 'formatValue()'), resolve(options), 'canonical')
-    .formatted;
+  const resolved = resolve(options);
+  return formatForDisplay(
+    appValue(value, 'formatValue()', resolved.allowCompactNotation),
+    resolved,
+    'canonical'
+  ).formatted;
 }
 
 /**
@@ -48,5 +52,9 @@ export function formatValue(value: string, options?: NumoraOptions): string {
  * @throws when `options` are invalid, like the input does.
  */
 export function parseValue(text: string, options?: NumoraOptions): string {
-  return formatForDisplay(appValue(text, 'parseValue()'), resolve(options)).raw;
+  // Formatted text is what `parseValue` is for, so only a non-string goes through `appValue`.
+  return formatForDisplay(
+    typeof text === 'string' ? text : appValue(text, 'parseValue()'),
+    resolve(options)
+  ).raw;
 }

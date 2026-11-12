@@ -45,9 +45,20 @@ function makeBeforeInput(
   return e;
 }
 
-describe('A2-04 — thousand-separator key is rejected, not remapped to decimal', () => {
-  it('en-US (thousand ",", decimal "."): "," typed is rejected', () => {
+describe('decimal keys: "," and "." both type the decimal separator (ADR 0015)', () => {
+  it('en-US (thousand ",", decimal "."): "," typed inserts the decimal separator', () => {
     const input = makeInput('1', 1, 1);
+    const opts: NumoraOptions = { thousandSeparator: ',', decimalSeparator: '.' };
+    const result = handleOnBeforeInputNumoraInput(
+      makeBeforeInput(input, InputType.InsertText, ','),
+      18,
+      opts
+    );
+    expect(result).toMatchObject({ type: 'handled', formatted: '1.', raw: '1.' });
+  });
+
+  it('en-US: "," typed is ignored once the value has a decimal separator', () => {
+    const input = makeInput('1.5', 3, 3);
     const opts: NumoraOptions = { thousandSeparator: ',', decimalSeparator: '.' };
     const result = handleOnBeforeInputNumoraInput(
       makeBeforeInput(input, InputType.InsertText, ','),
@@ -71,7 +82,7 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
     }
   });
 
-  it('de-DE (thousand ".", decimal ","): "." typed is the decimal key (ADR 0005, supersedes A2-04)', () => {
+  it('de-DE (thousand ".", decimal ","): "." typed is the decimal key', () => {
     const input = makeInput('1', 1, 1);
     const opts: NumoraOptions = { thousandSeparator: '.', decimalSeparator: ',' };
     const result = handleOnBeforeInputNumoraInput(
@@ -133,7 +144,7 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
     }
   });
 
-  it('custom decimal "·" with thousand ",": "." maps to "·", "," is rejected', () => {
+  it('custom decimal "·" with thousand ",": "." and "," both map to "·"', () => {
     const opts: NumoraOptions = { thousandSeparator: ',', decimalSeparator: '·' };
 
     const dot = makeInput('1', 1, 1);
@@ -153,10 +164,10 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
       18,
       opts
     );
-    expect(commaResult).toEqual({ type: 'reject' });
+    expect(commaResult).toMatchObject({ type: 'handled', formatted: '1·', raw: '1.' });
   });
 
-  it('typing "1,000,000" digit-by-digit in en-US Change mode never inserts a decimal point', () => {
+  it('typing "1,000,000" in en-US: the first "," is the decimal key, the second is ignored', () => {
     const opts: NumoraOptions = { thousandSeparator: ',', decimalSeparator: '.' };
     const input = makeInput('', 0, 0);
     let raw = '';
@@ -171,9 +182,9 @@ describe('A2-04 — thousand-separator key is rejected, not remapped to decimal'
         input.value = result.formatted;
         input.setSelectionRange(result.cursorPos, result.cursorPos);
       }
-      // 'reject' keystrokes (the commas) leave `input`/`raw` untouched.
     }
-    expect(raw).toBe('1000000');
+    expect(raw).toBe('1.000000');
+    expect(input.value).toBe('1.000000');
   });
 });
 

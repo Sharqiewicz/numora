@@ -174,6 +174,33 @@ describe('locale with explicit separator options', () => {
   });
 });
 
+describe('a value that is not a raw value (ADR 0015)', () => {
+  it('formatValue reads "," as the decimal mark under every option set, and warns', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    expect(formatValue('1234,5')).toBe('1,234.5');
+    expect(formatValue('1234,5', { locale: 'de-DE' })).toBe('1.234,5');
+    expect(formatValue('1,234', { locale: 'de-DE' })).toBe('1,234');
+    expect(formatValue('1,234')).toBe('1.234');
+    expect(formatValue('1.234,5', { locale: 'de-DE' })).toBe('1,2345');
+    expect(warn).toHaveBeenCalledTimes(5);
+    expect(warn).toHaveBeenCalledWith(
+      '[numora] formatValue() received "1234,5"; pass a raw value such as "1234.5" (parseValue() turns formatted text into one).'
+    );
+    warn.mockRestore();
+  });
+
+  it('a raw value, and any text given to parseValue, gets no warning', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    formatValue('-1234.5');
+    formatValue('1.5e-7');
+    formatValue('1.5k', { allowCompactNotation: true });
+    expect(parseValue('1,234.50')).toBe('1234.50');
+    expect(parseValue('1.234,50', { locale: 'de-DE' })).toBe('1234.50');
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});
+
 describe('an invalid locale throws, like any other invalid option', () => {
   it.each([[5], [{}]])('a locale that is not a string or boolean: %j', (locale) => {
     expect(() => formatValue('1', { locale: locale as never })).toThrow(

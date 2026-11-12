@@ -8,14 +8,12 @@ import { computeCaretFromEdit } from './caret';
 import { type NumoraOptions, InputType } from '../types';
 import { formatInputValue } from './format-utils';
 
-// Keys that, when typed, are candidates for remapping to the configured decimal separator:
-// the plain ASCII '.' and ',' plus every non-ASCII glyph that functions as a decimal mark
-// on some keyboard/locale (see `../features/decimal-separators` for the glyph table and
-// the matching sanitization-side fix for paste/IME-commit). A candidate is remapped to
-// `decimalSeparator` UNLESS it is itself the configured `thousandSeparator` (and differs
-// from `decimalSeparator`), in which case the keystroke is rejected outright -
-// otherwise typing "1,000,000" under an en-US config (thousand ',', decimal '.') would
-// have each comma parsed as a decimal point.
+// Decimal keys: typed, each becomes the configured decimal separator. The ASCII '.' and ','
+// are decimal keys in every field, whatever its separators (ADR 0015): numpads and US
+// keyboards emit '.', most European layouts emit ','. The non-ASCII glyphs are the decimal
+// marks of other keyboards (see `../features/decimal-separators` for the table and the
+// matching sanitization step for paste/IME-commit); one of those is rejected when it is
+// itself the configured `thousandSeparator`.
 const DECIMAL_KEY_CANDIDATES = new Set<string>(['.', ',', ...NON_ASCII_DECIMAL_SEPARATOR_GLYPHS]);
 
 /**
@@ -102,14 +100,10 @@ export function handleOnBeforeInputNumoraInput(
     const decimalSep = separators.decimalSeparator;
     const thousandSep = formattingOptions?.thousandSeparator;
 
-    // The typed key is configured as the thousand separator (and isn't ALSO the decimal
-    // separator, which would make remapping a no-op anyway). ADR 0005: in a comma-decimal
-    // locale (thousand '.', e.g. de-DE) a typed '.' is the decimal key - numpads and US
-    // keyboards emit it - so it falls through to the decimal handling below (inserted only
-    // while the value has no decimal yet, ignored otherwise). Any other key that equals
-    // the thousand separator (',' in en-US) stays rejected: remapping it
-    // would turn a grouping habit into a stray decimal point.
-    if (inputData === thousandSep && inputData !== '.') {
+    // ADR 0015: '.' and ',' are never typed as grouping, so even the one that is the
+    // field's thousand separator falls through to the decimal handling below (inserted
+    // while the value has no decimal yet, ignored otherwise).
+    if (inputData === thousandSep && inputData !== '.' && inputData !== ',') {
       return { type: 'reject' };
     }
 

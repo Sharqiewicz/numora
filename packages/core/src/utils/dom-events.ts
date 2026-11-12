@@ -77,9 +77,10 @@ export function applySetValue(
   el: HTMLInputElement,
   value: string,
   focused: boolean,
-  opts: ResolvedNumoraOptions
+  opts: ResolvedNumoraOptions,
+  where = 'setValue()'
 ): string {
-  const raw = appValue(value, 'setValue()');
+  const raw = appValue(value, where, opts.allowCompactNotation);
   const { formatted } = focused
     ? formatValueForDisplay(raw, opts.decimalMaxLength, opts, 'canonical')
     : formatForDisplay(raw, opts, 'canonical');

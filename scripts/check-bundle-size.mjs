@@ -26,7 +26,9 @@ const BUDGETS = [
 // A React consumer ships core + core/internal + react. Budget the sum explicitly.
 // Raised from 10.15: `onFormattedValueChange` (about 20 bytes) and the production fallback
 // for invalid options in React (ADR 0014, about 80 bytes). numora-react moved 1.72 -> 1.8.
-const CONSUMER_TOTAL_BUDGET_KB = 10.3;
+// Raised from 10.3: the development warning for an app value that is not a Raw value
+// (ADR 0015, about 140 bytes).
+const CONSUMER_TOTAL_BUDGET_KB = 10.45;
 
 // The files an entry loads: itself plus every sibling chunk it imports
 // (`from "./internal-XXXX.mjs"`), one level deep - Vite emits a flat chunk graph for

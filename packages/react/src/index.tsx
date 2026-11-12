@@ -297,7 +297,16 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
   // field paints with separators like vanilla and the first focus has separators to strip.
   // App-supplied values are canonical raw values ('1234.5', never locale text).
   const [initialDisplayValue] = useState(
-    () => formatForDisplay(appValue(controlledValue ?? defaultValue, 'value'), formattingOptions, 'canonical').formatted
+    () =>
+      formatForDisplay(
+        appValue(
+          controlledValue ?? defaultValue,
+          controlledValue === undefined ? 'defaultValue' : 'value',
+          formattingOptions.allowCompactNotation
+        ),
+        formattingOptions,
+        'canonical'
+      ).formatted
   );
 
   // Before the ref is handed out, so a callback ref and a parent's layout effect can already
@@ -333,6 +342,9 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
   // differs, write it with writeValue.
   useIsomorphicLayoutEffect(() => {
     const prev = stateRef.current.formattingOptions;
+    // A new `value` gets the same development warnings as the first one.
+    if (controlledValue !== stateRef.current.controlledValue)
+      appValue(controlledValue, 'value', formattingOptions.allowCompactNotation);
     stateRef.current = {
       onChange,
       onValueChange,

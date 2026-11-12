@@ -10,7 +10,6 @@ import {
   attachFocusStrip,
   formatForDisplay,
 } from './utils/dom-events';
-import { appValue } from './utils/app-value';
 import { resolveOptions } from './utils/resolve-options';
 import { takeRemovedOptions, warnRemovedOptions } from './utils/removed-options';
 import type { ResolvedNumoraOptions } from './utils/dom-events';
@@ -92,14 +91,19 @@ export class NumoraInput {
 
     this.createInputElement(target);
     this.applyOptions(options);
-    // When adopting an existing <input>, any pre-set value (e.g. <input value="100"
-    // use:numora>) is kept unless the caller passes `defaultValue`.
-    if (options.defaultValue !== undefined) this.el.value = appValue(options.defaultValue, 'defaultValue');
     this.setupEventListeners();
-    // The initial value (option, or a pre-set value on an adopted <input>) is supplied by
-    // the app, so it is a canonical raw value (ADR 0004), not locale text. Also seeds `lastValue`.
+    // The initial value is `defaultValue`, or the pre-set value of an adopted <input> (e.g.
+    // <input value="100" use:numora>). Either way the app supplied it, so it is a canonical
+    // raw value (ADR 0004), not locale text. Also seeds `lastValue`.
     const left = leftovers.get(this.el);
-    this.setValue(left?.text === this.el.value ? left.raw : this.el.value);
+    applySetValue(
+      this.el,
+      options.defaultValue ?? (left?.text === this.el.value ? left.raw : this.el.value),
+      this.isFocused,
+      this.resolvedOptions,
+      'defaultValue'
+    );
+    this.emit(undefined);
     this.reported = this.el.value;
   }
 
@@ -226,7 +230,8 @@ export class NumoraInput {
    *
    * @param value - A canonical raw value (ADR 0004): `.` is always the decimal mark and
    *   there is no grouping, whatever the field's locale (`'1234.5'` shows as `1.234,5` in
-   *   de-DE). It is never detected as locale text. It is re-formatted for display.
+   *   de-DE). It is never detected as locale text. It is re-formatted for display. A value
+   *   that is not a raw value is still read, with a development warning (ADR 0015).
    */
   public setValue(value: string): void {
     // Same pipeline as typing/paste, so programmatic writes honor sanitization,

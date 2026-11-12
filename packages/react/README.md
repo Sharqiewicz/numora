@@ -79,7 +79,7 @@ Invalid options throw during render in development, for example a separator long
 
 A controlled field always shows its `value` prop. Store the raw value from `onValueChange` (or `e.target.value` in `onChange`) and pass it back, as in the example above, and it round-trips in every locale. If your handler does not store an edit, Numora puts the field back to `value` and the caret moves to the end, the same as a native controlled `<input>`.
 
-Numora does format-detect pasted text, so a pasted `"1.234,56"` is 1234.56 in any locale. It does not detect typed keys.
+Numora does format-detect pasted text, so a pasted `"1.234,56"` is 1234.56 in any locale. It does not detect typed keys: `,` and `.` both type the field's decimal separator.
 
 In `onChange`, `e.target.value` is the raw numeric string and `e.target.formattedValue` is the display string, such as `"1,234.56"`. The raw value is canonical in every locale, so a de-DE display of `1.234.567,89` is raw `1234567.89`. There is no toggle. Both are on every event.
 

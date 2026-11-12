@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { createRef, useState } from 'react';
 import { Controller, useController, useForm } from 'react-hook-form';
@@ -1933,12 +1933,52 @@ describe('canonical raw value', () => {
     expect(input.value).toBe('1,5');
   });
 
-  it('en-US rejects a typed ","', () => {
-    render(<NumoraInput data-testid="i" {...deProps} locale="en-US" onChange={() => {}} />);
+  it('en-US: a typed "," is the decimal key (ADR 0015)', () => {
+    render(<NumoraInput data-testid="i" {...deProps} locale="en-US" />);
     const input = screen.getByTestId('i') as HTMLInputElement;
     simulateTyping(input, '1');
     simulateTyping(input, ',');
-    expect(input.value).toBe('1');
+    expect(input.value).toBe('1.');
+    simulateTyping(input, '5');
+    simulateTyping(input, ',');
+    expect(input.value).toBe('1.5');
+  });
+
+  describe('a value that is not a raw value (ADR 0015)', () => {
+    let warn: ReturnType<typeof vi.spyOn>;
+    beforeEach(() => {
+      warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    });
+    afterEach(() => warn.mockRestore());
+
+    it.each(['en-US', 'de-DE'] as const)('value "1234,5" is 1234.5 under %s, with a warning', (locale) => {
+      render(<NumoraInput data-testid="i" locale={locale} value="1234,5" onChange={() => {}} />);
+      expect((screen.getByTestId('i') as NumoraHTMLInputElement).rawValue).toBe('1234.5');
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('[numora] value received "1234,5"; pass a raw value'));
+    });
+
+    it('defaultValue is named in its own warning', () => {
+      render(<NumoraInput data-testid="i" defaultValue="1,234" />);
+      expect((screen.getByTestId('i') as NumoraHTMLInputElement).rawValue).toBe('1.234');
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('defaultValue received "1,234"'));
+    });
+
+    it('warns again when the value changes to another bad one, not on a plain re-render', () => {
+      const { rerender } = render(<NumoraInput value="1,5" onChange={() => {}} />);
+      rerender(<NumoraInput value="1,5" onChange={() => {}} />);
+      expect(warn).toHaveBeenCalledTimes(1);
+      rerender(<NumoraInput value="2,5" onChange={() => {}} />);
+      expect(warn).toHaveBeenCalledTimes(2);
+      rerender(<NumoraInput value="2.5" onChange={() => {}} />);
+      expect(warn).toHaveBeenCalledTimes(2);
+    });
+
+    it('a raw value and a typed edit give no warning', () => {
+      render(<NumoraInput data-testid="i" defaultValue="1234.5" />);
+      simulateTyping(screen.getByTestId('i') as HTMLInputElement, '6');
+      expect(warn).not.toHaveBeenCalled();
+    });
   });
 
   it('de-DE paste 1.234,56 emits canonical raw 1234.56', () => {

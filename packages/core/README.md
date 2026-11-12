@@ -73,7 +73,7 @@ Numora detects the format of pasted text, and of text the browser inserts throug
 
 So `"1.234"` pasted into a de-DE field is `1234`, `"1.5"` is `1,5`, and `"1.234,56"` pasted into an en-US field is `1,234.56`.
 
-Numora never detects typed keys. In a comma-decimal locale the `.` key is a decimal key, and Numora ignores it when a decimal already exists. In en-US a typed `,` is rejected.
+Numora never detects typed keys. The `,` and `.` keys are both decimal keys in every field: either one types the field's decimal separator, and Numora ignores it when a decimal already exists.
 
 A `readOnly` or `disabled` field ignores paste, as a native `<input>` does. Numora writes nothing and calls no `onValueChange`.
 

@@ -25,7 +25,8 @@ const MAX_INPUT_LENGTH = 10_000;
  * - `foreign`: text of unknown format (paste, autofill, browser-inserted text). Read with
  *   foreign-format detection (ADR 0006), then continues as locale text.
  * - `canonical`: a value supplied by the app (`value`, `setValue`). `.` is
- *   ALWAYS the decimal (ADR 0004), never grouping and never detected.
+ *   ALWAYS the decimal (ADR 0004), never grouping and never detected. A `,` is read as a
+ *   decimal mark too (ADR 0015).
  *
  * The output is always locale text (field decimal separator, no grouping); the
  * canonical raw value is derived from it with `displayToRawValue`.
@@ -85,9 +86,13 @@ export const sanitizeNumoraInput = (
   let sanitized = filterMobileKeyboardArtifacts(value.slice(0, MAX_INPUT_LENGTH));
 
   // Source handling comes first so every later step sees plain locale text.
+  // In an app-supplied value a `,` is a decimal mark like `.`, in every field (ADR 0015),
+  // so the same string is the same number for every visitor and nothing in it is grouping.
   if (source !== 'display') {
     sanitized = canonicalToDisplayText(
-      source === 'foreign' ? normalizeForeignFormat(sanitized, formattingOptions) : sanitized,
+      source === 'foreign'
+        ? normalizeForeignFormat(sanitized, formattingOptions)
+        : sanitized.replace(/,/g, '.'),
       decimalSeparator
     );
   }

@@ -67,7 +67,7 @@ describe('canonical raw value', () => {
     });
   });
 
-  describe('typing (ADR 0005)', () => {
+  describe('typing (ADR 0015)', () => {
     it('de-DE: typing 1234567.89 with the "." key gives 1.234.567,89 and raw 1234567.89', () => {
       const { n, el, onValueChange } = make({ locale: 'de-DE', groupingStyle: GroupingStyle.Thousand });
       typeString(el, '1234567.89');
@@ -96,13 +96,26 @@ describe('canonical raw value', () => {
       expect(n.rawValue).toBe('1234.5');
     });
 
-    it('en-US: typing "," is rejected', () => {
+    it('en-US: typing "," inserts the decimal separator', () => {
+      const { el, n } = make({ locale: 'en-US', groupingStyle: GroupingStyle.Thousand });
+      typeString(el, '1234,5');
+      expect(el.value).toBe('1,234.5');
+      expect(n.rawValue).toBe('1234.5');
+    });
+
+    it('en-US: a "," is ignored once a decimal exists', () => {
       const { el, onValueChange } = make({ locale: 'en-US', groupingStyle: GroupingStyle.Thousand });
-      typeString(el, '12');
+      typeString(el, '1.5');
       onValueChange.mockClear();
       typeChar(el, ',');
-      expect(el.value).toBe('12');
+      expect(el.value).toBe('1.5');
       expect(onValueChange).not.toHaveBeenCalled();
+    });
+
+    it('fr-FR (thousand separator is a space): a typed space is still ignored', () => {
+      const { el, n } = make({ locale: 'fr-FR', groupingStyle: GroupingStyle.Thousand });
+      typeString(el, '1 234.5');
+      expect(n.rawValue).toBe('1234.5');
     });
 
     it('de-DE trailing decimal keeps raw "1."', () => {

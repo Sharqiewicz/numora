@@ -148,15 +148,12 @@ describe('NumoraInput Component', () => {
     expect(inputElement.value).toBe('1.');
   });
 
-  it('should reject comma (default thousand separator) and still block a second period', () => {
+  it('should take comma as the decimal key and block a second decimal key (ADR 0015)', () => {
     createInputWithPlaceholder({ decimalSeparator: '.', groupingStyle: GroupingStyle.Thousand });
     const inputElement = getInputElement();
 
     simulateTyping(inputElement, '1');
-    simulateTyping(inputElement, ','); // A2-04: comma == thousandSeparator -> rejected, not converted
-    expect(inputElement.value).toBe('1');
-
-    simulateTyping(inputElement, '.');
+    simulateTyping(inputElement, ','); // a decimal key, even though ',' is the thousand separator
     expect(inputElement.value).toBe('1.');
 
     simulateTyping(inputElement, '2');
@@ -169,7 +166,7 @@ describe('NumoraInput Component', () => {
     simulateTyping(inputElement, '3');
     expect(inputElement.value).toBe('1.23');
 
-    // Comma stays rejected
+    // So is ',' - decimal already present
     simulateTyping(inputElement, ',');
     expect(inputElement.value).toBe('1.23');
 
@@ -391,7 +388,7 @@ describe('beforeinput event path', () => {
       expect(el.value).toBe('1.5');
     });
 
-    it('should reject comma when it equals the default thousand separator (A2-04)', () => {
+    it('should map a typed comma to the decimal separator in a dot-decimal field (ADR 0015)', () => {
       new NumoraInput(container, {
         onValueChange: onChangeMock,
         decimalSeparator: '.',
@@ -402,7 +399,7 @@ describe('beforeinput event path', () => {
       simulateTyping(el, '1');
       simulateTyping(el, ',');
 
-      expect(el.value).toBe('1');
+      expect(el.value).toBe('1.');
     });
 
     it('should map a typed dot to the decimal separator in a comma-decimal locale (ADR 0005)', () => {
@@ -3014,6 +3011,65 @@ describe('a number passed where a string is expected', () => {
     input.setValue('8');
     expect(warn).not.toHaveBeenCalled();
     warn.mockRestore();
+  });
+});
+
+describe('a value that is not a raw value (ADR 0015)', () => {
+  let warn: ReturnType<typeof vi.spyOn>;
+  beforeEach(() => {
+    warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+  afterEach(() => warn.mockRestore());
+
+  const field = (options: ConstructorParameters<typeof NumoraInput>[1]) =>
+    new NumoraInput(document.createElement('div'), options);
+
+  it.each([
+    ['1234,5', '1234.5'],
+    ['1,234', '1.234'],
+    ['1,234.5', '1.2345'],
+    ['1.234,5', '1.2345'],
+  ])('defaultValue %s is the same number in every field: %s', (passed, raw) => {
+    for (const locale of ['en-US', 'de-DE', 'fr-FR', 'de-CH'] as const) {
+      expect(field({ locale, defaultValue: passed }).rawValue).toBe(raw);
+    }
+    expect(warn).toHaveBeenCalledWith(
+      `[numora] defaultValue received ${JSON.stringify(passed)}; pass a raw value such as "1234.5" (parseValue() turns formatted text into one).`
+    );
+  });
+
+  it('warns once per write, from defaultValue and from setValue()', () => {
+    const input = field({ defaultValue: '1,5' });
+    expect(warn).toHaveBeenCalledTimes(1);
+    input.setValue('2,5');
+    input.setValue('2,5');
+    expect(input.rawValue).toBe('2.5');
+    expect(warn).toHaveBeenCalledTimes(3);
+    expect(warn).toHaveBeenLastCalledWith(expect.stringContaining('setValue() received "2,5"'));
+  });
+
+  it.each(['', '-', '0', '-1234.5', '.5', '5.', '1.5e-7', '1E3', '1e+3'])(
+    'a raw value gets no warning: %j',
+    (value) => {
+      field({ defaultValue: value }).setValue(value);
+      expect(warn).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(['1 234', '$5', '1.2.3', '١٢', '1k'])('anything else warns: %j', (value) => {
+    field({ defaultValue: value });
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('a compact suffix is a raw value only when allowCompactNotation is on', () => {
+    expect(field({ allowCompactNotation: true, defaultValue: '1.5k' }).rawValue).toBe('1500');
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('defaultValue wins over the pre-set text of an adopted input', () => {
+    const el = document.createElement('input');
+    el.value = '999';
+    expect(new NumoraInput(el, { defaultValue: '5' }).rawValue).toBe('5');
   });
 });
 

@@ -42,6 +42,9 @@ every locale. A de-DE field showing `1.234.567,89` reports `1234567.89`. Values 
 (`value`, `defaultValue` in React, `setValue()`) use the same format and are never read as
 locale text.
 
+A raw value stored by v4 from a comma-decimal field (`1234,5`) still reads as 1234.5 in every
+field, and is logged in development so you can find it and store `1234.5` instead.
+
 ## Vanilla `NumoraInput`
 
 ```ts

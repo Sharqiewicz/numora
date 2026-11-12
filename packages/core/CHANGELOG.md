@@ -98,6 +98,11 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   component logs a warning naming the replacement, and the old props no longer reach the DOM.
 
 ### Fixed
+- **A `,` in a value you pass is the decimal mark in every field** (ADR 0015). `'1234,5'` as
+  `value`, `defaultValue`, `setValue()` or `formatValue()` is 1234.5 whatever the field's
+  separators, so one `defaultValue` is the same number for every visitor. Before, a default
+  field read it as 12345. Nothing in a passed value is grouping: `'1,234'` is 1.234. Pass
+  `.` as the decimal mark; the comma reading is a safety net for values stored by v4.
 - **A `formatOn: 'change'` field settles on blur** like a `'blur'` one: a trailing separator
   is stripped (`1.` to `1`), reported as a raw change. Before, blur did nothing unless
   `decimalMinLength` or `allowNegative` was set.
@@ -120,7 +125,8 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   `0.001` (was `0.01`) and `+1e3` gives `1000`.
 - **Comma-decimal locales accept a typed `.` as the decimal key** when the value has no
   decimal yet (numpads and phones emit `.`). Before, de-DE silently dropped it and typing
-  `1234567.89` gave 123 456 789. A typed `,` in dot-decimal locales is still rejected.
+  `1234567.89` gave 123 456 789. A typed `,` is a decimal key in every field too, as in
+  v4 (ADR 0015).
 - **Pasted and browser-inserted numbers are read with foreign-format detection**: when both
   `.` and `,` appear the last one is the decimal; a mark forming valid three-digit groups is
   grouping; anything else is the decimal. Pasting `1.5` into de-DE now gives 1.5 (was 15), and
@@ -166,6 +172,11 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   to fr-FR left `1.234.567,89` on screen; an uncontrolled field never repainted at all.
 
 ### Added
+- **A development warning for a passed value that is not a raw value.** `value`,
+  `defaultValue`, `setValue()` and `formatValue()` log each string that is not digits with
+  at most one `.`, an optional leading `-` and an optional exponent (plus a compact suffix
+  when `allowCompactNotation` is on), such as `'1234,5'` or `'1,234.50'`. The value is still
+  read. `parseValue()` takes formatted text and does not warn.
 - **`onFormattedValueChange(formattedValue)` in both packages.** It is called with the display
   string every time Numora rewrites the field and the text is new: typing, paste,
   the blur regroup, the focus strip, `setValue()`, an option or locale change, and in React a
