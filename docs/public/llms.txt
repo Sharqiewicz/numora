@@ -20,6 +20,7 @@ Numora is a framework-agnostic numeric input and number input library for JavaSc
 
 ## Features
 
+- Change vs blur (formatOn): https://numeric-input.com/docs/numora/features/format-on
 - Formatting: https://numeric-input.com/docs/numora/features/formatting
 - Value Types: https://numeric-input.com/docs/numora/features/value-types
 - Decimals: https://numeric-input.com/docs/numora/features/decimals

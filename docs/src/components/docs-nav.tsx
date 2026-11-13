@@ -10,6 +10,7 @@ import {
   Hash,
   Layers,
   Minimize2,
+  MousePointerClick,
   Rocket,
   Ruler,
   Shield,
@@ -67,6 +68,7 @@ export const docsNavigation: DocsNavGroup[] = [
   {
     title: 'Features',
     items: [
+      { title: 'Change vs blur', href: '/docs/features/format-on', icon: MousePointerClick },
       { title: 'Sanitization', href: '/docs/features/sanitization', icon: Shield },
       { title: 'Formatting', href: '/docs/features/formatting', icon: Type },
       { title: 'Value types', href: '/docs/features/value-types', icon: FileDigit },
