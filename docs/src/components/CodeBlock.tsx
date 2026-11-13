@@ -1,9 +1,13 @@
-import { PrismLight as SyntaxHighlighter } from 'react-syntax-highlighter';
+/// <reference types="react-syntax-highlighter" />
 import bash from 'react-syntax-highlighter/dist/esm/languages/prism/bash';
 import css from 'react-syntax-highlighter/dist/esm/languages/prism/css';
 import markup from 'react-syntax-highlighter/dist/esm/languages/prism/markup';
 import tsx from 'react-syntax-highlighter/dist/esm/languages/prism/tsx';
 import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typescript';
+// The light build is imported directly: the package root also evaluates the full Prism
+// build, which registers every grammar (js-extras included) on the shared refractor
+// instance in the browser but not on the server, so the two tokenize differently.
+import SyntaxHighlighter from 'react-syntax-highlighter/dist/esm/prism-light';
 import oneDark from 'react-syntax-highlighter/dist/esm/styles/prism/one-dark';
 import { cn } from '@/lib/utils';
 import { CopyButton } from './CopyButton';
