@@ -98,6 +98,9 @@ See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
   component logs a warning naming the replacement, and the old props no longer reach the DOM.
 
 ### Fixed
+- **`update()` leaves a focused field as typed** when the new options format the same way.
+  Before, every call re-ran the resting format, so a wrapper that calls `update()` on each
+  re-render turned a just-typed `1.` into `1` and padded to `decimalMinLength` mid-edit.
 - **React: an `autoFocus` field in `formatOn: 'blur'` mounts without grouping**, like any
   focused Blur-mode field. Before, it showed `1,234.5` while focused, because the field got
   focus before Numora's `focus` listener existed.

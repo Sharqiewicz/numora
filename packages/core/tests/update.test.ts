@@ -160,4 +160,88 @@ describe('NumoraInput.update', () => {
     vi.unstubAllEnvs();
     warn.mockRestore();
   });
+  describe('on a field being typed in', () => {
+    const type = (el: HTMLInputElement, text: string) => {
+      for (const data of text)
+        el.dispatchEvent(new InputEvent('beforeinput', { bubbles: true, cancelable: true, inputType: 'insertText', data }));
+    };
+
+    it('leaves the text and caret alone when the options format the same way', () => {
+      const onFormattedValueChange = vi.fn();
+      const input = make({ onFormattedValueChange });
+      const el = input.element;
+      el.focus();
+      type(el, '1234.');
+      el.setSelectionRange(1, 1);
+      onValueChange.mockClear();
+      onFormattedValueChange.mockClear();
+
+      input.update({});
+      input.update({ decimalMaxLength: 18, isAllowed: () => true });
+
+      expect(el.value).toBe('1,234.');
+      expect(el.selectionStart).toBe(1);
+      expect(onValueChange).not.toHaveBeenCalled();
+      expect(onFormattedValueChange).not.toHaveBeenCalled();
+    });
+
+    it('a wrapper that calls update() after every change can still type a decimal', () => {
+      const options: NumoraInputOptions = {
+        onValueChange: (values) => {
+          onValueChange(values.value);
+          input.update(options);
+        },
+      };
+      const input: NumoraInput = new NumoraInput(host, options);
+      input.element.focus();
+      type(input.element, '1.5');
+
+      expect(input.element.value).toBe('1.5');
+      expect(onValueChange.mock.calls.flat()).toEqual(['1', '1.', '1.5']);
+    });
+
+    it('does not pad to decimalMinLength mid-edit', () => {
+      const input = make({ decimalMinLength: 2 });
+      input.element.focus();
+      type(input.element, '1');
+      input.update({ decimalMinLength: 2 });
+      type(input.element, '2');
+
+      expect(input.element.value).toBe('12');
+    });
+
+    it('still applies the new options to the next keystroke and to attributes', () => {
+      const next = vi.fn();
+      const input = make();
+      input.element.focus();
+      type(input.element, '1.');
+      input.update({ onValueChange: next, placeholder: '0.00' });
+      type(input.element, '5');
+
+      expect(input.element.placeholder).toBe('0.00');
+      expect(next).toHaveBeenCalledWith({ value: '1.5', formattedValue: '1.5' });
+    });
+
+    it('still re-formats when the formatting really changed', () => {
+      const input = make();
+      input.element.focus();
+      type(input.element, '1234.567');
+      onValueChange.mockClear();
+      input.update({ decimalMaxLength: 2 });
+
+      expect(input.element.value).toBe('1,234.56');
+      expect(onValueChange).toHaveBeenCalledWith({ value: '1234.56', formattedValue: '1,234.56' });
+    });
+
+    it('still re-formats a field at rest when nothing changed', () => {
+      const input = make();
+      input.element.focus();
+      type(input.element, '1.');
+      input.element.blur();
+      input.element.value = '1234';
+      input.update({});
+
+      expect(input.element.value).toBe('1,234');
+    });
+  });
 });
