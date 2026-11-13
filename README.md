@@ -56,18 +56,18 @@ Coming from v4? See [MIGRATION.md](./MIGRATION.md).
 
 ## Features
 
-- [Sanitization](https://numora.xyz/docs/numora/features/sanitization) removes non-numeric characters and mobile keyboard artifacts
-- [Formatting](https://numora.xyz/docs/numora/features/formatting) adds thousand separators in Thousand, Lakh or Wan grouping, on blur or on every keystroke
-- [Decimals](https://numora.xyz/docs/numora/features/decimals) sets the minimum and maximum decimal places and the decimal separator
-- [Compact notation](https://numora.xyz/docs/numora/features/compact-notation) expands "1k" → "1000" and "1.5m" → "1500000" on paste and `setValue`. A suffix in the middle of a number, such as "1k5", does not scale the prefix
-- [Scientific notation](https://numora.xyz/docs/numora/features/scientific-notation) expands "1.5e-7" → "0.00000015"
-- [Leading zeros](https://numora.xyz/docs/numora/features/leading-zeros) are stripped by default, and `allowLeadingZeros` keeps them
+- [Sanitization](https://numeric-input.com/docs/numora/features/sanitization) removes non-numeric characters and mobile keyboard artifacts
+- [Formatting](https://numeric-input.com/docs/numora/features/formatting) adds thousand separators in Thousand, Lakh or Wan grouping, on blur or on every keystroke
+- [Decimals](https://numeric-input.com/docs/numora/features/decimals) sets the minimum and maximum decimal places and the decimal separator
+- [Compact notation](https://numeric-input.com/docs/numora/features/compact-notation) is opt-in (`allowCompactNotation`) and expands "1k" → "1000" and "1.5m" → "1500000" when typed, pasted or passed to `setValue`. A suffix in the middle of a number, such as "1k5", does not scale the prefix
+- [Scientific notation](https://numeric-input.com/docs/numora/features/scientific-notation) expands "1.5e-7" → "0.00000015"
+- [Leading zeros](https://numeric-input.com/docs/numora/features/leading-zeros) are stripped by default, and `allowLeadingZeros` keeps them
 
-Numora detects the format of pasted text. If `.` and `,` both appear, the last one is the decimal. A mark that forms groups of three digits is grouping. Any other single mark is the decimal. So `"1.234,56"` pasted into an en-US field is `1,234.56`. Numora never runs this detection on typed keys or on values the app passes in.
+Numora detects the format of pasted text. If `.` and `,` both appear, the last one is the decimal. A mark that repeats is grouping. A single mark is the decimal when it is the field's own decimal separator. Otherwise it is grouping when the digits around it form valid groups (`1,234`, but not `0,123` or `1234,567`), and the decimal when it does not. So `"1.234,56"` pasted into an en-US field is `1,234.56`. Numora never runs this detection on typed keys or on values the app passes in. Dropped and autofilled text is detected the same way, except in a focused field that formats on change (the default), which reads it as its own display text.
 
 ## Documentation
 
-The full documentation and a live demo are at [numora.xyz](https://numora.xyz/).
+The full documentation and a live demo are at [numeric-input.com](https://numeric-input.com/).
 
 ## License
 

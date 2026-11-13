@@ -56,19 +56,19 @@ format only and does not guess. Under the default options `,` is grouping, so
 
 ## Features
 
-- [Sanitization](https://numora.xyz/docs/numora/features/sanitization) removes non-numeric characters and mobile keyboard artifacts
-- [Formatting](https://numora.xyz/docs/numora/features/formatting) adds thousand separators in Thousand, Lakh or Wan grouping, on blur or on every keystroke
-- [Decimals](https://numora.xyz/docs/numora/features/decimals) sets the minimum and maximum decimal places and the decimal separator
-- [Compact notation](https://numora.xyz/docs/numora/features/compact-notation) is opt-in and expands "1k" → "1000" on paste and `setValue`. A suffix followed by a digit or a decimal separator is not expanded, so "1k5" does not scale the prefix
-- [Scientific notation](https://numora.xyz/docs/numora/features/scientific-notation) expands "1.5e-7" → "0.00000015" by default; `allowScientificNotation: false` rejects it
-- [Leading zeros](https://numora.xyz/docs/numora/features/leading-zeros) are stripped by default, and `allowLeadingZeros` keeps them
+- [Sanitization](https://numeric-input.com/docs/numora/features/sanitization) removes non-numeric characters and mobile keyboard artifacts
+- [Formatting](https://numeric-input.com/docs/numora/features/formatting) adds thousand separators in Thousand, Lakh or Wan grouping, on blur or on every keystroke
+- [Decimals](https://numeric-input.com/docs/numora/features/decimals) sets the minimum and maximum decimal places and the decimal separator
+- [Compact notation](https://numeric-input.com/docs/numora/features/compact-notation) is opt-in and expands "1k" → "1000" when typed, pasted or passed to `setValue`. A suffix followed by a digit or a decimal separator is not expanded, so "1k5" does not scale the prefix
+- [Scientific notation](https://numeric-input.com/docs/numora/features/scientific-notation) expands "1.5e-7" → "0.00000015" by default; `allowScientificNotation: false` rejects it
+- [Leading zeros](https://numeric-input.com/docs/numora/features/leading-zeros) are stripped by default, and `allowLeadingZeros` keeps them
 
-Numora detects the format of pasted text, and of text the browser inserts through a plain `input` event (ADR 0006). The rules, in order:
+Numora detects the format of pasted text, and of text the browser inserts through a plain `input` event (ADR 0006). The exception is a focused `formatOn: 'change'` field, which reads inserted text as its own display text. The rules, in order:
 
 1. If `.` and `,` both appear, the last one is the decimal.
 2. A mark repeated more than once is grouping.
 3. A single mark equal to the field's decimal separator is the decimal.
-4. A single mark followed by exactly three digits is grouping. Lakh and Wan group sizes count too.
+4. A single mark is grouping when one to three digits with no leading zero come before it and exactly three after it (`1,234`). A Wan field also accepts up to four digits before and exactly four after (`123,4567`). So `0,123` and `1234,567` read as decimals.
 5. Any other single mark is the decimal.
 
 So `"1.234"` pasted into a de-DE field is `1234`, `"1.5"` is `1,5`, and `"1.234,56"` pasted into an en-US field is `1,234.56`.
@@ -87,8 +87,8 @@ A `readOnly` or `disabled` field ignores paste, as a native `<input>` does. Numo
 | `thousandSeparator` | `string` | `','` | Thousand separator character (exactly one; use `groupingStyle: 'none'` to turn grouping off) |
 | `groupingStyle` | `'thousand' \| 'lakh' \| 'wan' \| 'none'` | `'thousand'` | Grouping style |
 | `formatOn` | `'change' \| 'blur'` | `'change'` | When grouping is applied: on every keystroke, or on blur |
-| `allowCompactNotation` | `boolean` | `false` | Expand compact notation ("1k" → "1000") on paste and in `setValue` |
-| `allowScientificNotation` | `boolean` | `true` | Expand scientific notation; when `false`, typed, pasted or inserted scientific notation is rejected (autofill restores the previous value). App values (`defaultValue`, `setValue`) always expand |
+| `allowCompactNotation` | `boolean` | `false` | Expand compact notation ("1k" → "1000") when typed, pasted or passed to `setValue` |
+| `allowScientificNotation` | `boolean` | `true` | Expand scientific notation; when `false`, typed, pasted or inserted scientific notation is rejected (autofill restores the previous value). App values (`defaultValue`, `setValue`) always expand. Typed text never expands: a typed `e` is not accepted, only pasted or inserted text is. |
 | `allowNegative` | `boolean` | `false` | Allow negative numbers |
 | `allowLeadingZeros` | `boolean` | `false` | Allow leading zeros |
 | `padLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |
@@ -170,7 +170,7 @@ submit) reads the display text, grouping included.
 
 ## Documentation
 
-Full docs and live demo at [numora.xyz/docs/numora](https://numora.xyz/docs/numora).
+Full docs and live demo at [numeric-input.com/docs/numora](https://numeric-input.com/docs/numora).
 
 ## Framework adapters
 

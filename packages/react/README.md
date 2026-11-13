@@ -36,13 +36,13 @@ string. `onChange` is the event form of the same notification, for form librarie
 
 ## Features
 
-- [Sanitization](https://numora.xyz/docs/numora-react/features/sanitization) removes non-numeric characters and mobile keyboard artifacts
-- [Formatting](https://numora.xyz/docs/numora-react/features/formatting) adds thousand separators in Thousand, Lakh or Wan grouping, on blur or on every keystroke
-- [Decimals](https://numora.xyz/docs/numora-react/features/decimals) sets the minimum and maximum decimal places and the decimal separator
-- [Compact notation](https://numora.xyz/docs/numora-react/features/compact-notation) is opt-in and expands "1k" → "1000" on paste. A suffix followed by a digit or a decimal separator is not expanded, so "1k5" does not scale the prefix
-- [Scientific notation](https://numora.xyz/docs/numora-react/features/scientific-notation) expands "1.5e-7" → "0.00000015" by default; `allowScientificNotation={false}` rejects it
-- [Leading zeros](https://numora.xyz/docs/numora-react/features/leading-zeros) are stripped by default, and `allowLeadingZeros` keeps them
-- [React Hook Form](https://numora.xyz/docs/numora-react/integrations/react-hook-form) works through the `Controller` pattern
+- [Sanitization](https://numeric-input.com/docs/numora-react/features/sanitization) removes non-numeric characters and mobile keyboard artifacts
+- [Formatting](https://numeric-input.com/docs/numora-react/features/formatting) adds thousand separators in Thousand, Lakh or Wan grouping, on blur or on every keystroke
+- [Decimals](https://numeric-input.com/docs/numora-react/features/decimals) sets the minimum and maximum decimal places and the decimal separator
+- [Compact notation](https://numeric-input.com/docs/numora-react/features/compact-notation) is opt-in and expands "1k" → "1000" when typed, pasted or passed in `value`. A suffix followed by a digit or a decimal separator is not expanded, so "1k5" does not scale the prefix
+- [Scientific notation](https://numeric-input.com/docs/numora-react/features/scientific-notation) expands "1.5e-7" → "0.00000015" by default; `allowScientificNotation={false}` rejects it
+- [Leading zeros](https://numeric-input.com/docs/numora-react/features/leading-zeros) are stripped by default, and `allowLeadingZeros` keeps them
+- [React Hook Form](https://numeric-input.com/docs/numora-react/integrations/react-hook-form) works through the `Controller` pattern
 - Ref forwarding, controlled and uncontrolled modes, all standard input props
 
 ## Props
@@ -57,8 +57,8 @@ string. `onChange` is the event form of the same notification, for form librarie
 | `formatOn` | `'change' \| 'blur'` | `'change'` | When grouping is applied: on every keystroke, or on blur |
 | `thousandSeparator` | `string` | `','` | Thousand separator character |
 | `groupingStyle` | `'thousand' \| 'lakh' \| 'wan' \| 'none'` | `'thousand'` | Grouping style; `'none'` turns grouping off |
-| `allowCompactNotation` | `boolean` | `false` | Expand compact notation ("1k" → "1000") on paste and in `value` |
-| `allowScientificNotation` | `boolean` | `true` | Expand scientific notation; when `false`, typed, pasted or inserted scientific notation is rejected (autofill restores the previous value). App values (`value`, `defaultValue`) always expand |
+| `allowCompactNotation` | `boolean` | `false` | Expand compact notation ("1k" → "1000") when typed, pasted or passed in `value` |
+| `allowScientificNotation` | `boolean` | `true` | Expand scientific notation; when `false`, typed, pasted or inserted scientific notation is rejected (autofill restores the previous value). App values (`value`, `defaultValue`) always expand. Typed text never expands: a typed `e` is not accepted, only pasted or inserted text is. |
 | `allowNegative` | `boolean` | `false` | Allow negative numbers |
 | `allowLeadingZeros` | `boolean` | `false` | Allow leading zeros |
 | `padLeadingZero` | `boolean` | `false` | Prepend `0` to a bare leading decimal (`.5` → `0.5`) |
@@ -69,7 +69,7 @@ string. `onChange` is the event form of the same notification, for form librarie
 | `onFormattedValueChange` | `(formattedValue: string) => void` | `undefined` | Called with the display string every time Numora rewrites the field, including the blur regroup, the focus strip, `ref.setValue()`, a new `value` and a formatting-prop change. Not called on mount |
 | `onChange` | `(e: NumoraInputChangeEvent) => void` | `undefined` | Event form, fired alongside `onValueChange`. `e.target.value` is raw; `e.target.formattedValue` is the display string |
 
-All standard `HTMLInputElement` props work except `type`, which is always `'text'`, and `inputMode`, which is always `'decimal'`. `autoComplete="off"` and `spellCheck={false}` are defaults, and a value you pass wins.
+All standard `HTMLInputElement` props work except `type`, which is always `'text'`, and `inputMode`, which is always `'decimal'`. `value`, `defaultValue` and `maxLength` are Numora's own props, described above. `autoComplete="off"` and `spellCheck={false}` are defaults, and a value you pass wins.
 
 Your own `onKeyDown` and `onPaste` run before Numora's handling. Call `e.preventDefault()` in one and Numora skips that key or paste.
 
@@ -79,7 +79,7 @@ Invalid options throw during render in development, for example a separator long
 
 A controlled field always shows its `value` prop. Store the raw value from `onValueChange` (or `e.target.value` in `onChange`) and pass it back, as in the example above, and it round-trips in every locale. If your handler does not store an edit, Numora puts the field back to `value` and the caret moves to the end, the same as a native controlled `<input>`.
 
-Numora does format-detect pasted text, so a pasted `"1.234,56"` is 1234.56 in any locale. It does not detect typed keys: `,` and `.` both type the field's decimal separator.
+Numora does format-detect pasted text, so a pasted `"1.234,56"` is 1234.56 in any locale. Dropped and autofilled text is detected the same way, except in a focused field with `formatOn="change"`, which reads it as its own display text. It does not detect typed keys: `,` and `.` both type the field's decimal separator.
 
 In `onChange`, `e.target.value` is the raw numeric string and `e.target.formattedValue` is the display string, such as `"1,234.56"`. The raw value is canonical in every locale, so a de-DE display of `1.234.567,89` is raw `1234567.89`. There is no toggle. Both are on every event.
 
@@ -137,7 +137,7 @@ A `readOnly` or `disabled` input ignores paste, as a native `<input>` does. Numo
 
 ## Documentation
 
-Full docs and live demo at [numora.xyz/docs/numora-react](https://numora.xyz/docs/numora-react).
+Full docs and live demo at [numeric-input.com/docs/numora-react](https://numeric-input.com/docs/numora-react).
 
 ## License
 
