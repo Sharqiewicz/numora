@@ -83,14 +83,16 @@ function Decimals() {
       <div className="space-y-4">
         <ExampleWithDemo
           title="Max decimal places"
-          description="Try typing more than 2 decimal places (the default). Extra digits are truncated"
+          description="Try typing more than 2 decimal places. Extra typed digits are refused, and pasted ones are cut off, not rounded (the default limit is 18)"
           language="tsx"
           code={`<NumoraInput decimalMaxLength={2} />`}
           config={{ decimalMaxLength: 2 }}
         />
         <ExampleWithDemo
           title="Min decimal places"
-          description={'Type "1" and the input shows "1.00"'}
+          description={
+            'Type "1" and click away. The input shows "1.00" on blur. A value your app passes is padded too. decimalMinLength above decimalMaxLength is an invalid option'
+          }
           language="tsx"
           code={`<NumoraInput decimalMinLength={2} decimalMaxLength={18} />`}
           config={{ decimalMinLength: 2, decimalMaxLength: 18 }}

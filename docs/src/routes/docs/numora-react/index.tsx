@@ -14,7 +14,7 @@ export const Route = createFileRoute('/docs/numora-react/')({
       {
         property: 'og:description',
         content:
-          'React numeric input component with controlled mode, React Hook Form integration, the raw value in onChange and formattedValue for display. No dependencies beyond its peers react and numora.',
+          'React numeric input component with controlled mode, React Hook Form integration, the raw value in onChange and formattedValue for display. No dependencies beyond react and the numora core.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react' },
       { name: 'twitter:title', content: 'React numeric input | Numora React' },
@@ -75,14 +75,14 @@ function GetStarted() {
       <h2>Raw and formatted values</h2>
       <p>
         On every change, <code>e.target.value</code> is the raw numeric string, with no thousand
-        separators or other formatting characters. With the default <code>.</code> decimal separator
-        you can pass it directly to BigNumber, ethers.js, viem or any precision math library. With a
-        custom <code>decimalSeparator</code> or a <code>locale</code>, the raw value keeps that
-        separator, so normalize it to <code>.</code> first.
+        separators or other formatting characters. Its decimal mark is always <code>.</code>, even
+        with a custom <code>decimalSeparator</code> or a <code>locale</code>, so you can pass it
+        directly to BigNumber, ethers.js, viem or any precision math library.
       </p>
       <p>
         <code>e.target.formattedValue</code> is the display string, with thousand separators and
-        decimal formatting, for showing to the user. One callback gives you both values.
+        decimal formatting, for showing to the user. <code>onValueChange</code> gives you both
+        values in one call.
       </p>
 
       <CodeBlock language="tsx">

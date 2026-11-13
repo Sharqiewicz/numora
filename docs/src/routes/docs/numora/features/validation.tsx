@@ -75,9 +75,9 @@ function Validation() {
     <div className="docs-prose max-w-[36rem]">
       <h1>Validation</h1>
       <p>
-        An <code>isAllowed</code> predicate rejects edits the user makes (typing, paste, drop,
-        autofill) <em>before</em> they commit. Use it for business rules or format constraints that
-        don't fit a built-in option.
+        An <code>isAllowed</code> predicate rejects edits the user makes (typing, deleting, paste,
+        drop, autofill, IME) <em>before</em> they commit. Use it for business rules or format
+        constraints that don't fit a built-in option.
       </p>
 
       <CodeBlock language="typescript">
@@ -96,7 +96,8 @@ function Validation() {
 
 const input = new NumoraInput(container, {
   isAllowed: (raw) => {
-    if (raw === '' || raw === '-' || raw === '.') return true
+    // Half-typed values. "-" and "-." only arrive with allowNegative: true
+    if (raw === '' || raw === '-' || raw === '.' || raw === '-.') return true
     const n = parseFloat(raw)
     return Number.isFinite(n) && n <= 100
   },
@@ -113,14 +114,27 @@ const input = new NumoraInput(container, {
       <h2>Notes</h2>
       <ul>
         <li>
-          Runs <em>after</em> sanitization and formatting, but <em>before</em> the DOM is mutated
+          Runs <em>after</em> sanitization and formatting. For typing and paste that is{' '}
+          <em>before</em> the DOM is mutated. For drop, autofill and IME text, which the browser has
+          already inserted, a rejection puts the previous value back
         </li>
-        <li>Fires for typing, paste, drop and autofill</li>
+        <li>
+          Fires for typing, deletion, paste, drop, autofill and IME text. A keystroke that changes
+          nothing, or one a built-in option already refused, never reaches it
+        </li>
+        <li>
+          Does not run for values your code writes: <code>defaultValue</code>,{' '}
+          <code>setValue()</code> and <code>update()</code> are never checked
+        </li>
+        <li>
+          A predicate that throws counts as a rejection, and the error is logged with{' '}
+          <code>console.error</code>
+        </li>
         <li>
           Always allow the intermediate strings users need to type their way to a valid value (empty
           string, lone <code>-</code> or decimal separator)
         </li>
-        <li>Keep the predicate cheap, because it runs on every keystroke</li>
+        <li>Keep the predicate cheap, because it runs on every edit</li>
         <li>
           For length and decimal-precision caps, use{' '}
           <Link to="/docs/numora/features/max-length">max length</Link> and{' '}

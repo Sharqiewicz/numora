@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
 
 export const Route = createFileRoute('/docs/numora-react/features/formatting')({
@@ -117,22 +117,11 @@ function Formatting() {
       </div>
 
       <h2>When to format</h2>
-      <div className="space-y-4">
-        <ExampleWithDemo
-          title="Blur (default)"
-          description="Type a number and click away to see the separators appear"
-          language="tsx"
-          code={`<NumoraInput formatOn="blur" />`}
-          config={{ formatOn: 'blur' }}
-        />
-        <ExampleWithDemo
-          title="Change"
-          description="Separators update on every keystroke"
-          language="tsx"
-          code={`<NumoraInput formatOn="change" />`}
-          config={{ formatOn: 'change' }}
-        />
-      </div>
+      <p>
+        The separators appear on every keystroke by default, or only on blur with{' '}
+        <code>formatOn="blur"</code>. See{' '}
+        <Link to="/docs/numora-react/features/format-on">Change vs blur</Link> for both modes.
+      </p>
 
       <h2>Separator skipping</h2>
       <ul>

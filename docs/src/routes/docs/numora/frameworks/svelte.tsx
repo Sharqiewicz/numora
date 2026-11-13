@@ -25,10 +25,10 @@ const FAQ = [
   {
     question: 'How do I add thousand separators to a Svelte number input?',
     answer:
-      'Pass `groupingStyle: "thousand"` and `formatOn: "change"` to the `use:numora` action. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can store in a Svelte store or pass to a form library.',
+      'Nothing to configure: grouping on every keystroke is the default. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can store in a Svelte store or pass to a form library.',
   },
   {
-    question: 'Does it support i18n (decimal commas, currency formatting) in Svelte?',
+    question: 'Does it support i18n (decimal commas, locale grouping) in Svelte?',
     answer:
       "Yes. Set `decimalSeparator: ','` and `thousandSeparator: '.'` (or use the `locale` option) for European locales. The raw `value` is a plain dot-decimal string in every locale.",
   },
@@ -167,9 +167,13 @@ function SvelteIntegration() {
         {`import { NumoraInput, type NumoraInputOptions } from 'numora';
 
 export function numora(node: HTMLInputElement, options: NumoraInputOptions) {
-  new NumoraInput(node, options);
-  // No destroy hook needed: the listeners are bound to the <input>,
-  // so they are released when Svelte removes it.
+  const instance = new NumoraInput(node, options);
+  return {
+    // Svelte calls this when the options passed to use:numora change.
+    update: (next: NumoraInputOptions) => instance.update(next),
+    // Removes Numora's listeners from the adopted <input>.
+    destroy: () => instance.destroy(),
+  };
 }`}
       </CodeBlock>
 
@@ -203,15 +207,14 @@ let value = $state('');`}
         Numora adopts the <code>&lt;input&gt;</code> and sets the attributes it needs.{' '}
         <code>onValueChange</code> receives <code>{`{ value, formattedValue }`}</code>, where{' '}
         <code>value</code> is the raw string (see{' '}
-        <Link to="/docs/numora/features/value-types">value types</Link>).{' '}
-        <code>'change'</code> formats on every keystroke (see{' '}
+        <Link to="/docs/numora/features/value-types">value types</Link>). <code>'change'</code>{' '}
+        formats on every keystroke (see{' '}
         <Link to="/docs/numora/features/formatting">formatting</Link>).
       </p>
 
       <p>
         Read the value from <code>onValueChange</code>, not from <code>bind:value</code>: the
-        element's own
-        <code>value</code> is the display string (<code>"1,234.56"</code>), while
+        element's own <code>value</code> is the display string (<code>"1,234.56"</code>), while{' '}
         <code>onValueChange</code> gives you the raw value (<code>"1234.56"</code>).
       </p>
 
@@ -223,8 +226,7 @@ let value = $state('');`}
       </p>
       <p>
         <code>src/lib/numora-torph.ts</code> is an action that mounts <code>NumoraInput</code> and{' '}
-        <code>TextMorph</code> in the same wrapper. It returns a <code>destroy</code> hook because
-        it also owns a <code>TextMorph</code>:
+        <code>TextMorph</code> in the same wrapper. Its <code>destroy</code> hook tears down both:
       </p>
       <CodeBlock language="ts">
         {`import { NumoraInput, type NumoraInputOptions } from 'numora';
@@ -234,31 +236,35 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
   const display = node.querySelector<HTMLElement>('.numora-overlay-display')!;
   const host = node.querySelector<HTMLElement>('.numora-overlay-host')!;
 
-  // SSR placeholder is a text node; Torph only animates element children.
+  // Optional: empty the SSR placeholder up front. Torph also removes it itself.
   display.textContent = '';
 
   const morph = new TextMorph({
     element: display,
     ease: { stiffness: 400, damping: 30 },
   });
-  morph.update('0');
 
-  // 'change': onValueChange fires on every edit. In Blur mode also sync on focus and blur.
   const numora = new NumoraInput(host, {
     formatOn: 'change',
     groupingStyle: 'thousand',
     ...options,
-    onValueChange: (values) => {
-      morph.update(values.formattedValue || '0');
-      options.onValueChange?.(values);
+    // onFormattedValueChange reports every rewrite of the field, in both formatOn modes.
+    // The caret is the second argument: Torph then matches digits around the edit.
+    onFormattedValueChange: (text) => {
+      morph.update(text || '0', numora.element.selectionStart ?? undefined);
+      options.onFormattedValueChange?.(text);
     },
   });
   const input = numora.element;
   input.setAttribute('aria-label', 'Amount');
 
+  // The callback does not fire on creation, so prime the display.
+  morph.update(numora.formattedValue || '0');
+
   return {
     destroy: () => {
       morph.destroy();
+      numora.destroy();
       input.remove();
     },
   };

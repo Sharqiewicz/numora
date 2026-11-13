@@ -92,7 +92,7 @@ const input1 = new NumoraInput(container, {
 })
 
 // Leading zeros kept
-// "007" → "007", "0001" → "0001"
+// "007" → "007", "0001" → raw "0001" (shown as "0,001" with the default grouping)
 const input2 = new NumoraInput(container, {
   allowLeadingZeros: true,
 })`}

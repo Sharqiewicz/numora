@@ -107,6 +107,18 @@ function Sanitization() {
         becomes <code>"5"</code>, because it has no explicit positive sign.
       </p>
 
+      <p>
+        While typing, <code>.</code> and <code>,</code> are both decimal keys, whatever the
+        configured separator. Pasted text is first checked for another locale's format, so{' '}
+        <code>1.234,56</code> pasted into an en-US field is read as <code>1234.56</code>. A single
+        mark is grouping when the digits around it form valid groups (<code>1,234</code>) and the
+        decimal mark when they do not (<code>1.5</code>); the field's own decimal separator is
+        always the decimal mark. Dropped and autofilled text is checked the same way, except in a
+        focused field that formats on change, which reads it as its own display text. Fullwidth and
+        other native digits and the Unicode minus (U+2212) are folded to ASCII before filtering, and
+        a native decimal mark becomes the field's decimal separator.
+      </p>
+
       <h2>removeThousandSeparators</h2>
       <p>
         The <code>numora</code> core package exports a standalone{' '}
@@ -119,7 +131,7 @@ function Sanitization() {
       </p>
 
       <CodeBlock language="tsx">
-        {`import { removeThousandSeparators } from 'numora'
+        {`import { removeThousandSeparators } from 'numora/pipeline'
 
 removeThousandSeparators('1,234,567.89', ',') // → '1234567.89'
 removeThousandSeparators('1.234.567,89', '.') // → '1234567,89'

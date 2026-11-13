@@ -81,9 +81,14 @@ function CompactNotation() {
     <div className="docs-prose max-w-[36rem]">
       <h1>Compact notation</h1>
       <p>
-        With <code>allowCompactNotation</code> set, typing or pasting shorthand like{' '}
-        <code>"1k"</code> or <code>"2.5m"</code> expands it to the full number. Expansion uses
-        string arithmetic, so there is no precision loss.
+        Compact notation is off by default. With <code>allowCompactNotation</code> set, typing or
+        pasting shorthand like <code>"1k"</code> or <code>"2.5m"</code> expands it to the full
+        number. A <code>value</code> or <code>defaultValue</code> you pass expands the same way.
+        Expansion uses string arithmetic, so there is no precision loss. A suffix followed by a
+        digit is not expanded: a pasted <code>1k5</code> becomes <code>15</code>. Typed text expands
+        as soon as the suffix is typed, so typing <code>1k</code> and then <code>5</code> gives{' '}
+        <code>10005</code>. Each suffixed number in a pasted text expands on its own, so{' '}
+        <code>1k 2m</code> becomes <code>12000000</code>.
       </p>
 
       <div className="overflow-x-auto">

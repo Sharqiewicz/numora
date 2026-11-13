@@ -134,7 +134,7 @@ function Form() {
         config={{
           decimalMaxLength: 2,
         }}
-        description="Basic form with the Controller pattern. setValue() updates the input."
+        description="Basic form with the Controller pattern. setValue() updates the input. The live field shows the input alone, without the form."
       />
 
       <h3>Validation errors</h3>

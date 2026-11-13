@@ -25,10 +25,10 @@ const FAQ = [
   {
     question: 'How do I add thousand separators to a Solid number input?',
     answer:
-      'Pass `groupingStyle: "thousand"` and `formatOn: "change"` inside the `use:numora` binding. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can write straight into a `createSignal` setter.',
+      'Nothing to configure: grouping on every keystroke is the default. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can write straight into a `createSignal` setter.',
   },
   {
-    question: 'Does it support i18n (decimal commas, currency formatting) in Solid?',
+    question: 'Does it support i18n (decimal commas, locale grouping) in Solid?',
     answer:
       "Yes. Set `decimalSeparator: ','` and `thousandSeparator: '.'` (or use the `locale` option) for European formats. The raw `value` is a plain dot-decimal string in every locale.",
   },
@@ -166,11 +166,14 @@ function SolidIntegration() {
         <code>src/directives/numora.ts</code>:
       </p>
       <CodeBlock language="ts">
-        {`import { NumoraInput, type NumoraInputOptions } from 'numora';
+        {`import { onCleanup } from 'solid-js';
+import { NumoraInput, type NumoraInputOptions } from 'numora';
 
 export function numora(el: HTMLInputElement, accessor: () => NumoraInputOptions) {
-  new NumoraInput(el, accessor() ?? {});
-  // No cleanup needed: listeners die with the <input> when Solid removes it.
+  // Options are read once, here. Later changes to the accessor are not applied.
+  const instance = new NumoraInput(el, accessor() ?? {});
+  // Removes Numora's listeners from the adopted <input>.
+  onCleanup(() => instance.destroy());
 }
 
 // Tells Solid's JSX compiler that use:numora is a valid directive.
@@ -187,8 +190,8 @@ declare module 'solid-js' {
       <CodeBlock language="tsx">
         {`import { createSignal } from 'solid-js';
 import { numora } from './directives/numora';
-// Solid's compiler must see the 'numora' import to keep it. The directive
-// looks unused otherwise and tree-shaking would drop it.
+// 'numora' is only used as use:numora in the JSX, so TypeScript and bundlers see an
+// unused import and may remove it. This reference keeps it.
 void numora;
 
 export function AmountInput() {
@@ -217,15 +220,14 @@ export function AmountInput() {
         The directive gets the <code>&lt;input&gt;</code> and an accessor for its options. Numora
         adopts the input and sets the attributes it needs. <code>onValueChange</code> receives{' '}
         <code>{`{ value, formattedValue }`}</code>, where <code>value</code> is the raw string (see{' '}
-        <Link to="/docs/numora/features/value-types">value types</Link>).{' '}
-        <code>'change'</code> formats on every keystroke (see{' '}
+        <Link to="/docs/numora/features/value-types">value types</Link>). <code>'change'</code>{' '}
+        formats on every keystroke (see{' '}
         <Link to="/docs/numora/features/formatting">formatting</Link>).
       </p>
 
       <p>
         Read the value from <code>onValueChange</code>, not from the element's <code>value</code>:
-        the element's own
-        <code>value</code> is the display string (<code>"1,234.56"</code>), while
+        the element's own <code>value</code> is the display string (<code>"1,234.56"</code>), while{' '}
         <code>onValueChange</code> gives you the raw value (<code>"1234.56"</code>).
       </p>
 
@@ -246,27 +248,32 @@ export function AnimatedAmountInput() {
   let host!: HTMLDivElement;
 
   onMount(() => {
-    // SSR placeholder is a text node; Torph only animates element children.
+    // Optional: empty the SSR placeholder up front. Torph also removes it itself.
     display.textContent = '';
 
     const morph = new TextMorph({
       element: display,
       ease: { stiffness: 400, damping: 30 },
     });
-    morph.update('0');
 
-    // 'change': onValueChange fires on every edit. In Blur mode also sync on focus and blur.
     const numora = new NumoraInput(host, {
       formatOn: 'change',
       groupingStyle: 'thousand',
       decimalMaxLength: 2,
-      onValueChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
+      // onFormattedValueChange reports every rewrite of the field, in both formatOn modes.
+      // The caret is the second argument: Torph then matches digits around the edit.
+      onFormattedValueChange: (text) =>
+        morph.update(text || '0', numora.element.selectionStart ?? undefined),
     });
     const input = numora.element;
     input.setAttribute('aria-label', 'Amount');
 
+    // The callback does not fire on creation, so prime the display.
+    morph.update(numora.formattedValue || '0');
+
     onCleanup(() => {
       morph.destroy();
+      numora.destroy();
       input.remove();
     });
   });

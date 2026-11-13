@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
 
@@ -86,7 +86,7 @@ function MaxLength() {
 
       <div className="space-y-4">
         <ExampleWithDemo
-          title="7 raw digits, formatted with thousands"
+          title="7 raw digits, grouped by default"
           description={'Try typing more than 7 digits. The 8th keystroke is blocked'}
           language="tsx"
           code={`<NumoraInput
@@ -123,15 +123,27 @@ function MaxLength() {
         Numora React truncates a paste after sanitizing it. Pasting <code>"99999999"</code> into an
         input with <code>maxLength={'{4}'}</code> commits <code>"9999"</code>.
       </p>
+      <p>
+        Typing is different: a keystroke that would take the raw value past the limit is rejected,
+        and nothing is cut. Values your code passes in are truncated like a paste.
+      </p>
+      <p>
+        Truncation happens after compact and scientific notation expand, so it can change the
+        magnitude. With <code>allowCompactNotation</code> and <code>maxLength={'{5}'}</code>, a
+        pasted <code>1.5m</code> expands to <code>1500000</code> and is cut to <code>15000</code>.
+        To refuse an over-long paste, drop <code>maxLength</code> and check the length in{' '}
+        <Link to="/docs/numora-react/features/validation">isAllowed</Link>. With both set,{' '}
+        <code>isAllowed</code> only sees the value after it was cut.
+      </p>
 
       <h2>Standalone utility</h2>
       <p>
-        To truncate outside the input pipeline, the <code>numora</code> core package exports{' '}
-        <code>truncateToMaxLength</code>:
+        To truncate outside the input pipeline, import <code>truncateToMaxLength</code> from the{' '}
+        <code>numora/pipeline</code> entry point of the core package:
       </p>
 
       <CodeBlock language="tsx">
-        {`import { truncateToMaxLength } from 'numora'
+        {`import { truncateToMaxLength } from 'numora/pipeline'
 
 truncateToMaxLength('1234567', 5) // → '12345'`}
       </CodeBlock>

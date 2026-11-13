@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora/features/formatting')({
@@ -113,21 +113,11 @@ const input4 = new NumoraInput(container, {
       </CodeBlock>
 
       <h2>When to format</h2>
-      <CodeBlock language="typescript">
-        {`import { NumoraInput } from 'numora'
-
-// Blur (default): format when the input loses focus
-const input1 = new NumoraInput(container, {
-  formatOn: 'blur',
-  groupingStyle: 'thousand',
-})
-
-// Change: format on every keystroke
-const input2 = new NumoraInput(container, {
-  formatOn: 'change',
-  groupingStyle: 'thousand',
-})`}
-      </CodeBlock>
+      <p>
+        The separators appear on every keystroke by default, or only on blur with{' '}
+        <code>formatOn: 'blur'</code>. See{' '}
+        <Link to="/docs/numora/features/format-on">Change vs blur</Link> for both modes.
+      </p>
 
       <h2>Separator skipping</h2>
       <ul>

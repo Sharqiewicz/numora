@@ -113,7 +113,7 @@ function Locale() {
         <code>- + e E k K m M b B t T</code>, which Numora reads as a sign, an exponent or a
         compact-notation suffix. The two separators must be different. Numora throws on an invalid
         separator in development. In a production build it logs the error and keeps the last valid
-        options.
+        options, or the defaults if the first render was invalid.
       </p>
       <p>
         A separator you pass never clashes with one you did not. If it is the character the defaults
@@ -222,8 +222,16 @@ getSeparatorsFromLocale('en-IN')
         ar-EG it shows <code>1٬234٫5</code>, not the Arabic-Indic <code>١٬٢٣٤٫٥</code> that{' '}
         <code>Intl.NumberFormat</code> prints, and in sv-SE it shows <code>-</code>, not{' '}
         <code>−</code> (U+2212). Typed and pasted native digits and minus signs are still accepted
-        and folded to ASCII. Four-digit numbers are always grouped (<code>1.234</code> in es-ES),
-        even where <code>Intl</code> leaves them ungrouped.
+        and folded to ASCII. With thousand grouping, four-digit numbers are grouped too (
+        <code>1.234</code> in es-ES), even where <code>Intl</code> leaves them ungrouped.
+      </p>
+
+      <h2>Changing the locale later</h2>
+      <p>
+        Change the <code>locale</code> prop on a mounted field. The raw value is kept and the
+        display is rewritten with the new separators. An invalid tag throws in development and is
+        logged in production. <code>locale={'{false}'}</code> turns locale handling off and uses the{' '}
+        <code>thousandSeparator</code> and <code>decimalSeparator</code> props.
       </p>
 
       <h2>Value format under a locale</h2>

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { InstallTabs } from '@/components/InstallTabs';
 import { CodeBlock } from '@/components/CodeBlock';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
+import { InstallTabs } from '@/components/InstallTabs';
 
 export const Route = createFileRoute('/docs/numora-react/installation')({
   head: () => ({
@@ -10,7 +10,7 @@ export const Route = createFileRoute('/docs/numora-react/installation')({
       {
         name: 'description',
         content:
-          'Add a React numeric input component to your project. Install Numora React, render NumoraInput, and format numbers as the user types, with no dependencies beyond its peers react and numora.',
+          'Add a React numeric input component to your project. Install Numora React, render NumoraInput, and format numbers as the user types, with no dependencies beyond react and the numora core.',
       },
       {
         property: 'og:title',
@@ -19,7 +19,7 @@ export const Route = createFileRoute('/docs/numora-react/installation')({
       {
         property: 'og:description',
         content:
-          'Install Numora React and render NumoraInput for string-based number formatting in any React project. No dependencies beyond its peers react and numora. Written for TypeScript.',
+          'Install Numora React and render NumoraInput for string-based number formatting in any React project. No dependencies beyond react and the numora core. Written for TypeScript.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora-react/installation' },
       {
@@ -84,10 +84,10 @@ function Installation() {
 
       <h2>Install</h2>
       <p>
-        Numora React has peer dependencies on <code>react</code> (17 or later), <code>numora</code>{' '}
-        (3.5.0 or later, the core engine), and optionally <code>react-dom</code> (17 or later). The
-        command below installs <code>numora</code> and <code>numora-react</code> together. Pick your
-        package manager:
+        Numora React has one peer dependency, <code>react</code> (17 or later). The core engine,{' '}
+        <code>numora</code>, is a regular dependency and installs with it. The command below also
+        adds <code>numora</code> to your own dependencies so you can import its helpers directly.
+        Pick your package manager:
       </p>
 
       <InstallTabs packages="numora numora-react" />

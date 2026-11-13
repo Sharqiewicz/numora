@@ -14,25 +14,40 @@ Numora is a framework-agnostic numeric input and number input library for JavaSc
 - Numora JS - Get Started: https://numeric-input.com/docs/numora
 - Numora JS - Installation: https://numeric-input.com/docs/numora/installation
 - Numora JS - How It Works: https://numeric-input.com/docs/numora/how-it-works
+- Numora JS - Anatomy (each pipeline step, with demos): https://numeric-input.com/docs/numora/anatomy
 - Numora React - Get Started: https://numeric-input.com/docs/numora-react
 - Numora React - Installation: https://numeric-input.com/docs/numora-react/installation
 - Numora React - How It Works: https://numeric-input.com/docs/numora-react/how-it-works
+- Numora React - Anatomy: https://numeric-input.com/docs/numora-react/anatomy
 
 ## Features
 
-- Change vs blur (formatOn): https://numeric-input.com/docs/numora/features/format-on
-- Formatting: https://numeric-input.com/docs/numora/features/formatting
-- Value Types: https://numeric-input.com/docs/numora/features/value-types
-- Decimals: https://numeric-input.com/docs/numora/features/decimals
-- Sanitization: https://numeric-input.com/docs/numora/features/sanitization
-- Compact Notation: https://numeric-input.com/docs/numora/features/compact-notation
-- Scientific Notation: https://numeric-input.com/docs/numora/features/scientific-notation
-- Leading Zeros: https://numeric-input.com/docs/numora/features/leading-zeros
-- Locale: https://numeric-input.com/docs/numora/features/locale
+Each feature has a vanilla page and a React page.
+
+- Formatting: https://numeric-input.com/docs/numora/features/formatting and https://numeric-input.com/docs/numora-react/features/formatting
+- Change vs blur (formatOn): https://numeric-input.com/docs/numora/features/format-on and https://numeric-input.com/docs/numora-react/features/format-on
+- Value Types: https://numeric-input.com/docs/numora/features/value-types and https://numeric-input.com/docs/numora-react/features/value-types
+- Decimals: https://numeric-input.com/docs/numora/features/decimals and https://numeric-input.com/docs/numora-react/features/decimals
+- Sanitization: https://numeric-input.com/docs/numora/features/sanitization and https://numeric-input.com/docs/numora-react/features/sanitization
+- Compact Notation: https://numeric-input.com/docs/numora/features/compact-notation and https://numeric-input.com/docs/numora-react/features/compact-notation
+- Scientific Notation: https://numeric-input.com/docs/numora/features/scientific-notation and https://numeric-input.com/docs/numora-react/features/scientific-notation
+- Leading Zeros: https://numeric-input.com/docs/numora/features/leading-zeros and https://numeric-input.com/docs/numora-react/features/leading-zeros
+- Locale: https://numeric-input.com/docs/numora/features/locale and https://numeric-input.com/docs/numora-react/features/locale
+- Max Length: https://numeric-input.com/docs/numora/features/max-length and https://numeric-input.com/docs/numora-react/features/max-length
+- Validation: https://numeric-input.com/docs/numora/features/validation and https://numeric-input.com/docs/numora-react/features/validation
+
+## Framework guides
+
+- Svelte: https://numeric-input.com/docs/numora/frameworks/svelte
+- Vue: https://numeric-input.com/docs/numora/frameworks/vue
+- Angular: https://numeric-input.com/docs/numora/frameworks/angular
+- Solid: https://numeric-input.com/docs/numora/frameworks/solid
 
 ## Integrations
 
 - React Hook Form: https://numeric-input.com/docs/numora-react/integrations/react-hook-form
+- NumberFlow: https://numeric-input.com/docs/numora/integrations/number-flow and https://numeric-input.com/docs/numora-react/integrations/number-flow
+- Torph: https://numeric-input.com/docs/numora/integrations/torph and https://numeric-input.com/docs/numora-react/integrations/torph
 
 ## API Reference - numora (vanilla JS)
 
@@ -43,33 +58,57 @@ every locale: ASCII digits, `.` decimal, no grouping (a de-DE field showing `1.2
 ```ts
 import { NumoraInput, FormatOn, GroupingStyle } from 'numora'
 
-const numoraInput = new NumoraInput(containerElement, {
+// The first argument is an existing <input> (Numora adopts it) or a container element
+// (Numora creates the <input> inside it).
+const numoraInput = new NumoraInput(inputOrContainerElement, {
   decimalMaxLength?: number,          // max decimal places (default 18)
   decimalMinLength?: number,          // min decimal places, pads zeros on blur (default 0)
   thousandSeparator?: string,         // default ','
   groupingStyle?: GroupingStyle,      // 'thousand' (default) | 'lakh' | 'wan' | 'none'
   decimalSeparator?: string,          // default '.'
-  formatOn?: FormatOn,                // FormatOn.Blur (default) | FormatOn.Change
-  locale?: string | true,             // e.g. 'de-DE', or true for the browser locale
-  enableCompactNotation?: boolean,    // '1k' -> '1000'
-  enableScientificNotation?: boolean, // default true: pasted '1.5e-7' -> '0.00000015'; false: rejected
-  enableNegative?: boolean,
-  enableLeadingZeros?: boolean,
-  autoAddLeadingZero?: boolean,       // '.5' -> '0.5'
+  formatOn?: FormatOn,                // FormatOn.Change (default) | FormatOn.Blur
+  locale?: string | boolean,          // e.g. 'de-DE', or true for the browser locale
+  allowCompactNotation?: boolean,     // '1k' -> '1000'
+  allowScientificNotation?: boolean,  // default true: pasted '1.5e-7' -> '0.00000015'; false: rejected
+  allowNegative?: boolean,
+  allowLeadingZeros?: boolean,
+  padLeadingZero?: boolean,           // '.5' -> '0.5'
   maxLength?: number,                 // raw length; separators not counted
-  isAllowed?: (rawValue: string) => boolean, // reject an edit by returning false
-  onChange?: ({ value, formattedValue }) => void, // value is raw, formattedValue is displayed
-  value?: string,                     // canonical raw value
-  defaultValue?: string,
+  isAllowed?: (rawValue: string) => boolean, // reject a user edit by returning false
+  onValueChange?: ({ value, formattedValue }) => void, // fires when the raw value changes
+  onFormattedValueChange?: (formattedValue: string) => void, // fires on every rewrite of the text
+  defaultValue?: string,              // canonical raw value
+  // native attributes: id, name, className, placeholder, disabled, readOnly, required,
+  // tabIndex, title, autofocus, ariaLabel
 })
 
-numoraInput.getValue()          // raw, e.g. '1234.5'
-numoraInput.getFormattedValue() // displayed, e.g. '1,234.5'
-numoraInput.setValue('1234.5')
+numoraInput.rawValue            // raw, e.g. '1234.5'
+numoraInput.formattedValue      // displayed, e.g. '1,234.5'
+numoraInput.element             // the <input>
+numoraInput.setValue('1234.5')  // does not call onValueChange or isAllowed
+numoraInput.update({ decimalMaxLength: 2 }) // merges over the current options; a key you leave out keeps its value
+numoraInput.destroy()           // remove Numora's listeners
 ```
 
-Values the app passes in (`value`, `defaultValue`, `setValue`) always expand scientific notation,
-even with `enableScientificNotation: false`, since `String(1e21)` is `'1e+21'`.
+Values the app passes in (`defaultValue`, `setValue`) always expand scientific notation,
+even with `allowScientificNotation: false`, since `String(1e21)` is `'1e+21'`.
+
+Format or parse without an input (both packages export these):
+
+```ts
+import { formatValue, parseValue, getSeparatorsFromLocale } from 'numora'
+
+formatValue('1234.5', { locale: 'de-DE', decimalMinLength: 2 }) // '1.234,50'
+parseValue('1.234,50', { locale: 'de-DE' })                      // '1234.50'
+getSeparatorsFromLocale('de-DE') // the locale's thousand and decimal separators and grouping style
+```
+
+The v4 names (`enableNegative`, `enableLeadingZeros`, `enableCompactNotation`,
+`autoAddLeadingZero`, `maxDecimals`, `thousandStyle`, `rawValueMode`,
+`enableScientificNotation`, `emitRawValue`, vanilla `value` and `onChange`) are removed in v5: they are ignored with a development warning.
+
+`numora/pipeline` exports the single sanitization steps, with no semver
+guarantee. `numora/internal` is for `numora-react` only; do not import it.
 
 ## API Reference - numora-react
 
@@ -81,14 +120,19 @@ import { NumoraInput, FormatOn, GroupingStyle } from 'numora-react'
   groupingStyle={GroupingStyle.Thousand}
   formatOn={FormatOn.Change}
   locale="de-DE"
-  enableNegative
+  allowNegative
   value={amount}               // canonical raw value, e.g. "1234.56"
   onChange={(e) => {
     e.target.value             // raw value, e.g. "1234.56"
     e.target.formattedValue    // displayed string, e.g. "1.234,56"
   }}
+  onValueChange={({ value, formattedValue }) => {}}  // same payload as vanilla
+  onFormattedValueChange={(formattedValue) => {}}    // every rewrite of the text
 />
 ```
+
+Use `defaultValue` instead of `value` for an uncontrolled field. A ref typed as
+`NumoraHTMLInputElement` has `rawValue`, `formattedValue` and `setValue(value)`.
 
 ## Common Use Cases
 

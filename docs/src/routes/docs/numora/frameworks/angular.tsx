@@ -16,7 +16,7 @@ const FAQ = [
   {
     question: 'How do I add thousand separators to an Angular number input?',
     answer:
-      "Pass `groupingStyle: 'thousand'` and `formatOn: 'change'` through the directive's `@Input`. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators. You can write it straight into a signal or a `FormControl<string>`.",
+      'Nothing to configure: grouping on every keystroke is the default. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators. You can write it straight into a signal or a `FormControl<string>`.',
   },
   {
     question: 'Is there a numora-angular package?',
@@ -200,6 +200,7 @@ export class NumoraDirective implements ControlValueAccessor, OnInit, OnDestroy 
   private onChangeCb: (value: string) => void = () => {};
   private onTouchedCb: () => void = () => {};
 
+  // Read once in ngOnInit. Later changes to the binding are not applied.
   @Input('numora') options: NumoraInputOptions = {};
 
   ngOnInit(): void {
@@ -248,7 +249,8 @@ export class NumoraDirective implements ControlValueAccessor, OnInit, OnDestroy 
   }
 
   setDisabledState(isDisabled: boolean): void {
-    if (this.instance) this.instance.element.disabled = isDisabled;
+    // Set on the element itself: Angular can call this before ngOnInit creates the instance.
+    this.el.nativeElement.disabled = isDisabled;
   }
 }`}
       </CodeBlock>
@@ -316,6 +318,41 @@ export class AmountFormComponent {
       </CodeBlock>
 
       <p>
+        A value the form sets goes through <code>setValue()</code>, which sanitizes it without
+        calling <code>onValueChange</code>. With <code>decimalMaxLength: 2</code>, a control set to{' '}
+        <code>'1234.567'</code> shows <code>1,234.56</code> but still holds <code>'1234.567'</code>{' '}
+        until the user edits the field. Give the control values that already fit the options.
+      </p>
+
+      <p>
+        Template-driven forms work the same way with <code>[(ngModel)]</code>. The bare{' '}
+        <code>numora</code> attribute uses the default options. If strict templates reject it, write{' '}
+        <code>[numora]="{'{}'}"</code>:
+      </p>
+
+      <CodeBlock language="ts">
+        {`import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { NumoraDirective } from './numora.directive';
+
+@Component({
+  selector: 'app-amount-model',
+  standalone: true,
+  imports: [NumoraDirective, FormsModule],
+  template: \`
+    <label>
+      Amount
+      <input numora [(ngModel)]="amount" />
+    </label>
+    <p>Raw value: {{ amount }}</p>
+  \`,
+})
+export class AmountModelComponent {
+  protected amount = '0';
+}`}
+      </CodeBlock>
+
+      <p>
         Numora adopts the <code>&lt;input&gt;</code> and sets the attributes it needs. The{' '}
         <code>ControlValueAccessor</code> bridge: <code>writeValue</code> calls{' '}
         <code>setValue</code>, <code>registerOnChange</code> passes the raw <code>value</code> to
@@ -362,37 +399,42 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
   @ViewChild('host', { static: true }) host!: ElementRef<HTMLDivElement>;
 
   private morph?: TextMorph;
-  private input?: HTMLInputElement;
+  private numora?: NumoraInput;
   private readonly platformId = inject(PLATFORM_ID);
 
   ngOnInit(): void {
     // NumoraInput and TextMorph touch the DOM, so skip them during server rendering.
     if (!isPlatformBrowser(this.platformId)) return;
 
-    // SSR placeholder is a text node; Torph only animates element children.
+    // Optional: empty the SSR placeholder up front. Torph also removes it itself.
     this.display.nativeElement.textContent = '';
 
     const morph = new TextMorph({
       element: this.display.nativeElement,
       ease: { stiffness: 400, damping: 30 },
     });
-    morph.update('0');
     this.morph = morph;
 
-    // 'change': onValueChange fires on every edit. In Blur mode also sync on focus and blur.
     const numora = new NumoraInput(this.host.nativeElement, {
       formatOn: 'change',
       groupingStyle: 'thousand',
       decimalMaxLength: 2,
-      onValueChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
+      // onFormattedValueChange reports every rewrite of the field, in both formatOn modes.
+      // The caret is the second argument: Torph then matches digits around the edit.
+      onFormattedValueChange: (text) =>
+        morph.update(text || '0', numora.element.selectionStart ?? undefined),
     });
-    this.input = numora.element;
-    this.input.setAttribute('aria-label', 'Amount');
+    this.numora = numora;
+    numora.element.setAttribute('aria-label', 'Amount');
+
+    // The callback does not fire on creation, so prime the display.
+    morph.update(numora.formattedValue || '0');
   }
 
   ngOnDestroy(): void {
     this.morph?.destroy();
-    this.input?.remove();
+    this.numora?.destroy();
+    this.numora?.element.remove();
   }
 }`}
       </CodeBlock>

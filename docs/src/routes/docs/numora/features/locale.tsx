@@ -191,6 +191,9 @@ getSeparatorsFromLocale('fr-FR')
 getSeparatorsFromLocale('en-IN')
 // → { thousandSeparator: ',', decimalSeparator: '.', groupingStyle: 'lakh' }
 
+// No argument: the runtime's own locale. An invalid tag throws.
+getSeparatorsFromLocale()
+
 const input = new NumoraInput(container, { thousandSeparator, decimalSeparator })`}
       </CodeBlock>
 
@@ -205,8 +208,19 @@ const input = new NumoraInput(container, { thousandSeparator, decimalSeparator }
         ar-EG it shows <code>1٬234٫5</code>, not the Arabic-Indic <code>١٬٢٣٤٫٥</code> that{' '}
         <code>Intl.NumberFormat</code> prints, and in sv-SE it shows <code>-</code>, not{' '}
         <code>−</code> (U+2212). Typed and pasted native digits and minus signs are still accepted
-        and folded to ASCII. Four-digit numbers are always grouped (<code>1.234</code> in es-ES),
-        even where <code>Intl</code> leaves them ungrouped.
+        and folded to ASCII. With thousand grouping, four-digit numbers are grouped too (
+        <code>1.234</code> in es-ES), even where <code>Intl</code> leaves them ungrouped.
+      </p>
+
+      <h2>Changing the locale later</h2>
+      <p>
+        Call{' '}
+        <code>
+          instance.update({'{'} locale: 'fr-FR' {'}'})
+        </code>{' '}
+        on a live field. The raw value is kept and the display is rewritten with the new separators.
+        An invalid tag throws and changes nothing. <code>locale: false</code> turns locale handling
+        off and uses the <code>thousandSeparator</code> and <code>decimalSeparator</code> options.
       </p>
 
       <h2>Value format under a locale</h2>

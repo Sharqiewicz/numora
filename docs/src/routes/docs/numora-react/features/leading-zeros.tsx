@@ -95,7 +95,9 @@ function LeadingZeros() {
         />
         <ExampleWithDemo
           title="Preserved"
-          description={'Type "007" and it stays "007"'}
+          description={
+            'Type "007" and it stays "007". Grouping still applies, so "0001" shows as "0,001"'
+          }
           language="tsx"
           code={`<NumoraInput allowLeadingZeros />`}
           config={{ allowLeadingZeros: true }}
@@ -112,7 +114,8 @@ function LeadingZeros() {
           Numora React always keeps a bare <code>"0"</code>
         </li>
         <li>
-          Negative numbers keep their sign (<code>"-007"</code> → <code>"-7"</code>)
+          Negative numbers keep their sign (<code>"-007"</code> → <code>"-7"</code>, with{' '}
+          <code>allowNegative</code>)
         </li>
       </ul>
 

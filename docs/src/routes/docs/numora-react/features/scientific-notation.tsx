@@ -82,19 +82,20 @@ function ScientificNotation() {
       <h1>Scientific notation</h1>
       <p>
         Numora expands scientific notation to decimal notation. Expansion uses string arithmetic, so
-        there is no floating-point precision loss. Typing <code>e</code> is rejected, so scientific
-        notation enters the field through paste or through values your app passes in.
+        there is no floating-point precision loss. It usually enters the field through paste or
+        through values your app passes in. A lone <code>e</code> typed at the end of the field is
+        ignored, but an <code>e</code> typed between digits completes a token and expands too (
+        <code>1e5</code> becomes <code>100000</code>).
       </p>
       <p>
-        To refuse pasted scientific notation instead, pass{' '}
-        <code>allowScientificNotation={'{false}'}</code>. Such a paste then leaves the field
-        unchanged. Values passed through <code>value</code> or <code>defaultValue</code> are
-        expanded either way, because <code>String(1e21)</code> is <code>"1e+21"</code> in
-        JavaScript.
+        To refuse scientific notation instead, pass <code>allowScientificNotation={'{false}'}</code>
+        . Such a paste or keystroke then leaves the field unchanged. Values passed through{' '}
+        <code>value</code> or <code>defaultValue</code> are expanded either way, because{' '}
+        <code>String(1e21)</code> is <code>"1e+21"</code> in JavaScript.
       </p>
 
       <ExampleWithDemo
-        description={'Paste "1.5e-7", "2e+5" or "1.5e-18" to see each expanded'}
+        description={'Paste "1.5e-7", "2e+5" or "1.5e-17" to see each expanded'}
         language="tsx"
         code={`<NumoraInput decimalMaxLength={18} />`}
         config={{ decimalMaxLength: 18 }}

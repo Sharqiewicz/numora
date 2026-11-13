@@ -147,8 +147,8 @@ function ValueTypes() {
             </tr>
             <tr>
               <td>locale="ar-EG"</td>
-              <td>1٬234٫5</td>
-              <td>"1234.5"</td>
+              <td>1٬234٬567٫89</td>
+              <td>"1234567.89"</td>
             </tr>
           </tbody>
         </table>
@@ -158,8 +158,10 @@ function ValueTypes() {
         can be <code>""</code> (empty field), <code>"-"</code>, <code>"."</code>, <code>"1."</code>{' '}
         or <code>".5"</code>. Check for these before you parse it. Numora keeps trailing zeros, so{' '}
         <code>0.50</code> stays <code>"0.50"</code>. With <code>decimalMinLength</code> it pads on
-        blur and the padding is part of the raw value, so <code>5</code> becomes <code>"5.00"</code>
-        .
+        blur and when your app sets the value, and the padding is part of the raw value, so{' '}
+        <code>5</code> becomes <code>"5.00"</code>. A blur that pads the value or strips a trailing
+        separator changes the raw value, so it calls <code>onChange</code> and{' '}
+        <code>onValueChange</code>.
       </p>
       <p>
         The <code>value</code> and <code>defaultValue</code> props take this same format, so the
@@ -204,11 +206,14 @@ function ValueTypes() {
 
       <h2>Reading values via ref</h2>
       <p>
-        The ref is the <code>&lt;input&gt;</code> element with two extra read-only properties.{' '}
-        <code>rawValue</code> is the raw value and <code>formattedValue</code> is the display
-        string. <code>ref.current.value</code> is the DOM value, so it is the display string too.
-        Only <code>e.target.value</code> inside <code>onChange</code> is raw. Type the ref as{' '}
-        <code>NumoraHTMLInputElement</code> and no cast is needed.
+        The ref is the <code>&lt;input&gt;</code> element with two extra read-only properties and
+        one method. <code>rawValue</code> is the raw value and <code>formattedValue</code> is the
+        display string. <code>setValue(value)</code> writes a value from code. It fires{' '}
+        <code>onFormattedValueChange</code> only, and skips <code>onChange</code>,{' '}
+        <code>onValueChange</code> and <code>isAllowed</code>. <code>ref.current.value</code> is the
+        DOM value, so it is the display string too. Only <code>e.target.value</code> inside{' '}
+        <code>onChange</code> is raw. Type the ref as <code>NumoraHTMLInputElement</code> and no
+        cast is needed.
       </p>
       <CodeBlock language="tsx">
         {`import { useRef } from 'react'
@@ -272,13 +277,13 @@ import { NumoraInput } from 'numora-react'
         precision with no error.
       </p>
 
-      <h2>Numeric value and defaultValue props</h2>
+      <h2>The value and defaultValue props</h2>
       <p>
-        <code>value</code> and <code>defaultValue</code> accept a <code>string</code> or a{' '}
-        <code>number</code>. Both are the canonical raw value: ASCII digits, <code>.</code> as the
-        decimal mark, no grouping, in every locale. <code>value={'{1234.5}'}</code> and{' '}
-        <code>{'value="1234.5"'}</code> under <code>locale="de-DE"</code> both display{' '}
-        <code>1.234,5</code>. Prefer strings when the value comes from a decimal library.
+        <code>value</code> and <code>defaultValue</code> take a <code>string</code>. Pass the
+        canonical raw value: ASCII digits, <code>.</code> as the decimal mark, no grouping, in every
+        locale. <code>{'value="1234.5"'}</code> under <code>locale="de-DE"</code> displays{' '}
+        <code>1.234,5</code>. A <code>number</code> is a type error, so convert it yourself with{' '}
+        <code>String(n)</code> or pass the string your decimal library gives you.
       </p>
     </div>
   );

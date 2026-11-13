@@ -87,7 +87,7 @@ function Installation() {
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
-const container = document.querySelector('#my-input-container')
+const container = document.querySelector<HTMLElement>('#my-input-container')!
 
 const numoraInput = new NumoraInput(container, {
   decimalMaxLength: 2,
@@ -162,7 +162,11 @@ const numoraInput = new NumoraInput(container, {
               <td>
                 <code>','</code>
               </td>
-              <td>The character between digit groups. Exactly one character.</td>
+              <td>
+                The character between digit groups. Exactly one character. It cannot be a digit, one
+                of <code>- + e E k K m M b B t T</code>, or the same as{' '}
+                <code>decimalSeparator</code>. An invalid value throws.
+              </td>
             </tr>
             <tr>
               <td>
@@ -171,7 +175,10 @@ const numoraInput = new NumoraInput(container, {
               <td>
                 <code>'.'</code>
               </td>
-              <td>The character between the integer and decimal parts. Exactly one character.</td>
+              <td>
+                The character between the integer and decimal parts. Exactly one character, with the
+                same rules as <code>thousandSeparator</code>.
+              </td>
             </tr>
             <tr>
               <td>
@@ -267,8 +274,8 @@ const numoraInput = new NumoraInput(container, {
                 <code>true</code>
               </td>
               <td>
-                Expands a pasted <code>1.5e-7</code> to <code>0.00000015</code>. <code>false</code>{' '}
-                rejects such a paste. See{' '}
+                Expands a pasted or app-set <code>1.5e-7</code> to <code>0.00000015</code>. A typed{' '}
+                <code>e</code> is never accepted. <code>false</code> rejects such a paste. See{' '}
                 <Link to="/docs/numora/features/scientific-notation">Scientific notation</Link>.
               </td>
             </tr>
@@ -355,6 +362,27 @@ const numoraInput = new NumoraInput(container, {
         Don't set the native <code>maxLength</code> on the element. It counts grouping separators,
         and the Numora option doesn't.
       </p>
+
+      <h2>The instance</h2>
+      <p>
+        Pass a container and Numora creates an <code>{'<input>'}</code> inside it. Pass an existing{' '}
+        <code>{'<input>'}</code> and Numora adopts it. The instance has three read-only properties
+        and three methods:
+      </p>
+      <CodeBlock language="typescript">
+        {`numoraInput.rawValue        // '1234.5', the value to store or send
+numoraInput.formattedValue  // '1,234.5', the text in the field
+numoraInput.element         // the <input> itself
+
+// Write a raw value. It is sanitized and formatted; onValueChange is not called.
+numoraInput.setValue('2500')
+
+// Change options. They merge over the current ones, so decimalMaxLength stays 2.
+numoraInput.update({ locale: 'de-DE' })
+
+// Remove Numora's listeners. The <input> stays in the page.
+numoraInput.destroy()`}
+      </CodeBlock>
 
       <h2>TypeScript</h2>
       <p>Numora ships its own declarations. Import types directly:</p>

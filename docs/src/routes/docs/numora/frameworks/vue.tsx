@@ -25,7 +25,7 @@ const FAQ = [
   {
     question: 'How do I add thousand separators to a Vue number input?',
     answer:
-      'Pass `groupingStyle: "thousand"` and `formatOn: "change"` inside the `v-numora` binding. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can store in a `ref`, Pinia, VeeValidate or FormKit.',
+      'Nothing to configure: grouping on every keystroke is the default. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can store in a `ref`, Pinia, VeeValidate or FormKit.',
   },
   {
     question: 'Does it work with VeeValidate, FormKit or Pinia in Vue?',
@@ -33,7 +33,7 @@ const FAQ = [
       'Yes. `onValueChange` receives `{ value, formattedValue }`, and `value` is the raw string. Pass it to VeeValidate, FormKit, Pinia or any other state library as you would a `v-model` value.',
   },
   {
-    question: 'Does it support i18n (decimal commas, currency formatting) in Vue?',
+    question: 'Does it support i18n (decimal commas, locale grouping) in Vue?',
     answer:
       "Yes. Set `decimalSeparator: ','` and `thousandSeparator: '.'` (or use the `locale` option) for European formats. The raw `value` is a plain dot-decimal string in every locale.",
   },
@@ -168,10 +168,16 @@ function VueIntegration() {
         {`import type { Directive } from 'vue';
 import { NumoraInput, type NumoraInputOptions } from 'numora';
 
+const instances = new WeakMap<HTMLInputElement, NumoraInput>();
+
 export const vNumora: Directive<HTMLInputElement, NumoraInputOptions> = {
+  // Options are read once, here. Later changes to the binding are not applied.
   mounted(el, binding) {
-    new NumoraInput(el, binding.value ?? {});
-    // No unmounted hook needed: listeners die with the <input> when Vue removes it.
+    instances.set(el, new NumoraInput(el, binding.value ?? {}));
+  },
+  unmounted(el) {
+    // Removes Numora's listeners from the adopted <input>.
+    instances.get(el)?.destroy();
   },
 };`}
       </CodeBlock>
@@ -220,15 +226,14 @@ const value = ref('');`}
         <code>type</code>, <code>inputmode</code>, <code>autocomplete</code> and others).{' '}
         <code>onValueChange</code> receives <code>{`{ value, formattedValue }`}</code>, where{' '}
         <code>value</code> is the raw string (see{' '}
-        <Link to="/docs/numora/features/value-types">value types</Link>).{' '}
-        <code>'change'</code> formats on every keystroke (see{' '}
+        <Link to="/docs/numora/features/value-types">value types</Link>). <code>'change'</code>{' '}
+        formats on every keystroke (see{' '}
         <Link to="/docs/numora/features/formatting">formatting</Link>).
       </p>
 
       <p>
         Read the value from <code>onValueChange</code>, not from <code>v-model</code>: the element's
-        own
-        <code>value</code> is the display string (<code>"1,234.56"</code>), while
+        own <code>value</code> is the display string (<code>"1,234.56"</code>), while{' '}
         <code>onValueChange</code> gives you the raw value (<code>"1234.56"</code>).
       </p>
 
@@ -255,28 +260,32 @@ let cleanup: (() => void) | null = null;
 onMounted(() => {
   if (!display.value || !host.value) return;
 
-  // SSR placeholder is a text node; Torph only animates element children.
+  // Optional: empty the SSR placeholder up front. Torph also removes it itself.
   display.value.textContent = '';
 
   const morph = new TextMorph({
     element: display.value,
     ease: { stiffness: 400, damping: 30 },
   });
-  morph.update('0');
 
-  // 'change': onValueChange fires on every edit (in Blur mode also sync on focus/blur). Torph shows
-  // the formatted string, so read formattedValue.
   const numora = new NumoraInput(host.value, {
     formatOn: 'change',
     groupingStyle: 'thousand',
     decimalMaxLength: 2,
-    onValueChange: ({ formattedValue }) => morph.update(formattedValue || '0'),
+    // onFormattedValueChange reports every rewrite of the field, in both formatOn modes.
+    // The caret is the second argument: Torph then matches digits around the edit.
+    onFormattedValueChange: (text) =>
+      morph.update(text || '0', numora.element.selectionStart ?? undefined),
   });
   const input = numora.element;
   input.setAttribute('aria-label', 'Amount');
 
+  // The callback does not fire on creation, so prime the display.
+  morph.update(numora.formattedValue || '0');
+
   cleanup = () => {
     morph.destroy();
+    numora.destroy();
     input.remove();
   };
 });

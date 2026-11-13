@@ -79,9 +79,9 @@ function Validation() {
     <div className="docs-prose max-w-[36rem]">
       <h1>Validation</h1>
       <p>
-        Use an <code>isAllowed</code> predicate to reject edits the user makes (typing, paste, drop,
-        autofill) <em>before</em> they commit. It fits business rules and format rules that no
-        built-in prop covers.
+        Use an <code>isAllowed</code> predicate to reject edits the user makes (typing, deleting,
+        paste, drop, autofill, IME) <em>before</em> they commit. It fits business rules and format
+        rules that no built-in prop covers.
       </p>
 
       <CodeBlock language="typescript">
@@ -102,14 +102,15 @@ function Validation() {
         language="tsx"
         code={`<NumoraInput
   isAllowed={(raw) => {
-    if (raw === '' || raw === '-' || raw === '.') return true
+    // Half-typed values. "-" and "-." only arrive with allowNegative
+    if (raw === '' || raw === '-' || raw === '.' || raw === '-.') return true
     const n = parseFloat(raw) // comparison only
     return Number.isFinite(n) && n <= 100
   }}
 />`}
         config={{
           isAllowed: (raw: string) => {
-            if (raw === '' || raw === '-' || raw === '.') return true;
+            if (raw === '' || raw === '-' || raw === '.' || raw === '-.') return true;
             const n = parseFloat(raw);
             return Number.isFinite(n) && n <= 100;
           },
@@ -127,15 +128,27 @@ function Validation() {
       <h2>Notes</h2>
       <ul>
         <li>
-          Runs <em>after</em> sanitization and formatting, but <em>before</em> the DOM is mutated
-          and React state updates
+          Runs <em>after</em> sanitization and formatting. For typing and paste that is{' '}
+          <em>before</em> the DOM is mutated and React state updates. For drop, autofill and IME
+          text, which the browser has already inserted, a rejection puts the previous value back
         </li>
-        <li>Fires for typing, deletion, paste, drop and autofill</li>
+        <li>
+          Fires for typing, deletion, paste, drop, autofill and IME text. A keystroke that changes
+          nothing, or one a built-in option already refused, never reaches it
+        </li>
+        <li>
+          Does not run for values your code writes: the <code>value</code> and{' '}
+          <code>defaultValue</code> props and option changes are never checked
+        </li>
+        <li>
+          A predicate that throws counts as a rejection, and the error is logged with{' '}
+          <code>console.error</code>
+        </li>
         <li>
           Always allow the intermediate strings users need to type their way to a valid value (empty
           string, lone <code>-</code> or decimal separator)
         </li>
-        <li>Keep the predicate cheap, because it runs on every keystroke</li>
+        <li>Keep the predicate cheap, because it runs on every edit</li>
         <li>
           For length and decimal-precision caps, use{' '}
           <Link to="/docs/numora-react/features/max-length">max length</Link> and{' '}

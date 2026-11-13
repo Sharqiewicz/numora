@@ -81,12 +81,14 @@ function Decimals() {
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
-// Cap at 2 decimal places. Extra digits are truncated on input
+// Cap at 2 decimal places. A typed third digit is refused. Pasted or app-set extra
+// digits are cut off, not rounded: "1.239" becomes "1.23"
 const input1 = new NumoraInput(container, {
   decimalMaxLength: 2,
 })
 
-// Pad to at least 2 decimal places as you type
+// Pad to at least 2 decimal places on blur and when your app sets the value (never
+// while typing). The constructor throws if decimalMinLength is above decimalMaxLength
 const input2 = new NumoraInput(container, {
   decimalMinLength: 2,
   decimalMaxLength: 18,

@@ -135,8 +135,8 @@ function ValueTypes() {
             </tr>
             <tr>
               <td>locale: 'ar-EG'</td>
-              <td>1٬234٫5</td>
-              <td>"1234.5"</td>
+              <td>1٬234٬567٫89</td>
+              <td>"1234567.89"</td>
             </tr>
           </tbody>
         </table>
@@ -146,8 +146,8 @@ function ValueTypes() {
         can be <code>""</code> (empty field), <code>"-"</code>, <code>"."</code>, <code>"1."</code>{' '}
         or <code>".5"</code>. Check for these before you parse it. Numora keeps trailing zeros, so{' '}
         <code>0.50</code> stays <code>"0.50"</code>. With <code>decimalMinLength</code> it pads on
-        blur and the padding is part of the raw value, so <code>5</code> becomes <code>"5.00"</code>
-        .
+        blur and when your app sets the value, and the padding is part of the raw value, so{' '}
+        <code>5</code> becomes <code>"5.00"</code>.
       </p>
       <p>
         <code>defaultValue</code> and <code>setValue</code> take this same format, so the value you
@@ -191,7 +191,10 @@ const numoraInput = new NumoraInput(container, {
   onValueChange: ({ value }) => {
     hidden.value = value // "1234.56"
   },
-})`}
+})
+// onValueChange does not fire for the initial value or for setValue(),
+// so copy the raw value yourself after those.
+hidden.value = numoraInput.rawValue`}
       </CodeBlock>
 
       <h2>When you need a number</h2>
@@ -220,6 +223,14 @@ console.log(numoraInput.rawValue === '')        // true when the input is empty`
         <code>rawValue</code> is read-only. To set the field from code, call <code>setValue</code>{' '}
         with a canonical raw value. Under <code>locale: 'de-DE'</code>,{' '}
         <code>setValue('1234.5')</code> displays <code>1.234,5</code>.
+      </p>
+      <p>
+        <code>setValue</code> is your own write, so it does not call <code>onValueChange</code> and
+        is not checked by <code>isAllowed</code>. The new text still goes to{' '}
+        <code>onFormattedValueChange</code>. In a value you pass in, <code>,</code> is read as a
+        decimal mark like <code>.</code> and never as grouping, so <code>setValue('1234,5')</code>{' '}
+        is the same number, with a development warning. Turn formatted text into a raw value with{' '}
+        <code>parseValue()</code> first.
       </p>
     </div>
   );

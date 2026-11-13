@@ -101,14 +101,14 @@ function GetStarted() {
           <Link to="/docs/numora/frameworks/svelte">
             <strong>Svelte numeric input</strong>
           </Link>
-          . A 10-line <code>use:numora</code> action for Svelte 5 and SvelteKit (SSR-safe).
+          . A short <code>use:numora</code> action for Svelte 5 and SvelteKit (SSR-safe).
         </li>
         <li>
           <Link to="/docs/numora/frameworks/vue">
             <strong>Vue numeric input</strong>
           </Link>
-          . A Vue 3 composable bound to a template <code>ref</code>, or a <code>v-numora</code>{' '}
-          directive. Works with Nuxt 3, VeeValidate, FormKit and Pinia.
+          . A <code>v-numora</code> directive for Vue 3. Works with Nuxt 3, VeeValidate, FormKit and
+          Pinia.
         </li>
         <li>
           <Link to="/docs/numora/frameworks/angular">
@@ -121,7 +121,7 @@ function GetStarted() {
           <Link to="/docs/numora/frameworks/solid">
             <strong>SolidJS numeric input</strong>
           </Link>
-          . An <code>onMount</code> wrapper that writes the raw value into a{' '}
+          . A <code>use:numora</code> directive that writes the raw value into a{' '}
           <code>createSignal</code>. Works with SolidStart.
         </li>
         <li>
