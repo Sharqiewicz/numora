@@ -1,11 +1,9 @@
-import { Outlet, createRootRouteWithContext, HeadContent, Scripts } from '@tanstack/react-router';
-
 import type { QueryClient } from '@tanstack/react-query';
-import type { TRPCRouter } from '@/integrations/trpc/router';
+import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query';
-
-import stylesCss from '../styles.css?url';
+import type { TRPCRouter } from '@/integrations/trpc/router';
 import { CORE_SIZE_GZIP } from '@/lib/constants/package';
+import stylesCss from '../styles.css?url';
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -42,14 +40,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       { property: 'og:image:height', content: '630' },
       {
         property: 'og:image:alt',
-        content:
-          `Numora, a numeric input library. Zero dependencies, ${CORE_SIZE_GZIP} gzipped, works with any framework.`,
+        content: `Numora, a numeric input library. Zero dependencies, ${CORE_SIZE_GZIP} gzipped, works with any framework.`,
       },
       { name: 'twitter:image', content: 'https://numeric-input.com/og-image.png' },
       {
         name: 'twitter:image:alt',
-        content:
-          `Numora, a numeric input library. Zero dependencies, ${CORE_SIZE_GZIP} gzipped, works with any framework.`,
+        content: `Numora, a numeric input library. Zero dependencies, ${CORE_SIZE_GZIP} gzipped, works with any framework.`,
       },
     ],
     links: [

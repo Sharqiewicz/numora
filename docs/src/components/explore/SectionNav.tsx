@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
 import {
   Clipboard,
-  MousePointer2,
-  FlaskConical,
-  Smartphone,
-  Percent,
-  Hash,
   Code,
+  FlaskConical,
+  Hash,
+  MousePointer2,
+  Percent,
+  Smartphone,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface Section {
   id: string;

@@ -1,5 +1,5 @@
-import { useScrollReveal } from '@/hooks/use-scroll-reveal';
 import { Badge } from '@/components/ui/badge';
+import { useScrollReveal } from '@/hooks/use-scroll-reveal';
 
 interface ProblemSectionProps {
   id: string;

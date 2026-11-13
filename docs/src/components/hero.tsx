@@ -66,6 +66,7 @@ export function ScrollIndicator({ target = '#tamper-proof-section' }: { target?:
       >
         <span className="text-xs tracking-widest uppercase">Scroll</span>
         <svg
+          aria-hidden="true"
           className="
             w-5 h-5
             animate-[bounce_1.5s_ease-in-out_infinite] motion-reduce:animate-none

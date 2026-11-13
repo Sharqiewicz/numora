@@ -38,7 +38,7 @@ function Presentation() {
         >
           {WORDS.map((word, i) => (
             <motion.span
-              key={word + i}
+              key={word}
               className="inline-block mr-[0.25em] last:mr-0"
               initial={shouldReduceMotion ? false : { opacity: 0, y: 32, filter: 'blur(8px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}

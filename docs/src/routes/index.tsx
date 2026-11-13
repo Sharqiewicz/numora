@@ -15,8 +15,7 @@ export const Route = createFileRoute('/')({
       { title: 'Numeric input library for JavaScript and React | Numora' },
       {
         name: 'description',
-        content:
-          `Numora is a framework-agnostic numeric input library for financial apps. Format numbers as you type, with thousand separators, decimal limits and cursor management. Zero dependencies, ${CORE_SIZE_GZIP} gzipped.`,
+        content: `Numora is a framework-agnostic numeric input library for financial apps. Format numbers as you type, with thousand separators, decimal limits and cursor management. Zero dependencies, ${CORE_SIZE_GZIP} gzipped.`,
       },
       {
         property: 'og:title',
@@ -48,8 +47,7 @@ export const Route = createFileRoute('/')({
             offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
             url: 'https://numeric-input.com',
             downloadUrl: 'https://www.npmjs.com/package/numora',
-            description:
-              `Precision-first numeric input library for financial and DeFi apps. Zero dependencies, ${CORE_SIZE_GZIP} gzipped. Works with Vanilla JS, React, Vue, Svelte, Angular, and Solid. Torph animations work in every one of them.`,
+            description: `Precision-first numeric input library for financial and DeFi apps. Zero dependencies, ${CORE_SIZE_GZIP} gzipped. Works with Vanilla JS, React, Vue, Svelte, Angular, and Solid. Torph animations work in every one of them.`,
             author: {
               '@type': 'Person',
               name: 'Kacper Szarkiewicz',

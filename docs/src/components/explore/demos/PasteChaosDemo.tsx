@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { NumoraInput } from 'numora-react';
 import { sanitizeNumoraInput } from 'numora/internal';
-import { ProblemSection } from '../ProblemSection';
+import { NumoraInput } from 'numora-react';
+import { useState } from 'react';
+import { BrokenInput } from '../BrokenInput';
 import { InputComparison } from '../InputComparison';
 import { PasteButtonGroup } from '../PasteButton';
-import { BrokenInput } from '../BrokenInput';
+import { ProblemSection } from '../ProblemSection';
 
 const PASTE_VALUES = [
   { label: '$1,234.56', value: '$1,234.56' },
-  { label: '1.234,56 (EU, needs decimalSeparator: \',\')', value: '1.234,56' },
+  { label: "1.234,56 (EU, needs decimalSeparator: ',')", value: '1.234,56' },
   { label: '1.5e-18', value: '1.5e-18' },
   { label: '１２３４ (full-width)', value: '１２３４' },
 ];
@@ -45,6 +45,7 @@ export function PasteChaosDemo() {
   };
 
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <ProblemSection
       id="paste-chaos"
       problemNumber={1}
@@ -113,8 +114,8 @@ function ResultDisplay({ label, original, result, isBroken, intended }: ResultDi
   if (!original) return null;
 
   const isEmpty = !result || result === '';
-  const isNaN = result === 'NaN' || Number.isNaN(Number(result));
-  const hasError = isEmpty || isNaN;
+  const isNotNumber = result === 'NaN' || Number.isNaN(Number(result));
+  const hasError = isEmpty || isNotNumber;
 
   return (
     <div className="p-3 rounded-lg bg-muted/30 border border-border">

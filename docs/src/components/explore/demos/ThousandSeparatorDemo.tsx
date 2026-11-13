@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { NumoraInput } from 'numora-react';
 import type { GroupingStyle } from 'numora';
-import { ProblemSection } from '../ProblemSection';
-import { InputComparison } from '../InputComparison';
-import { BrokenInput } from '../BrokenInput';
+import { NumoraInput } from 'numora-react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { BrokenInput } from '../BrokenInput';
+import { InputComparison } from '../InputComparison';
+import { ProblemSection } from '../ProblemSection';
 
 type GroupingKey = 'thousand' | 'lakh' | 'wan';
 
@@ -37,6 +37,7 @@ export function ThousandSeparatorDemo() {
   const currentStyle = GROUPING_STYLES[groupingKey];
 
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <ProblemSection
       id="thousand-separators"
       problemNumber={6}
@@ -44,8 +45,9 @@ export function ThousandSeparatorDemo() {
       subtitle="Format on blur is jarring. Format on change is hard"
       description={
         <p>
-          Adding thousand separators while someone types is hard. Most implementations format on blur, which
-          jars, or on change, which moves the cursor. Regions also group digits differently.
+          Adding thousand separators while someone types is hard. Most implementations format on
+          blur, which jars, or on change, which moves the cursor. Regions also group digits
+          differently.
         </p>
       }
     >
@@ -62,6 +64,7 @@ export function ThousandSeparatorDemo() {
           ).map(([key, { label }]) => (
             <button
               key={key}
+              type="button"
               onClick={() => setGroupingKey(key)}
               className={cn(
                 'px-4 py-2 rounded-lg border font-medium text-sm active:scale-[0.96] transition-[background-color,border-color,color,scale] duration-150 ease-out-expo',
@@ -104,7 +107,8 @@ export function ThousandSeparatorDemo() {
         rightInput={
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Type <code className="px-1 py-0.5 rounded bg-muted font-mono">1234567</code> the same way:
+              Type <code className="px-1 py-0.5 rounded bg-muted font-mono">1234567</code> the same
+              way:
             </p>
             <NumoraInput
               value={numoraValue}

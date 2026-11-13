@@ -100,33 +100,37 @@ export const CopyButton = ({
 
   return (
     <>
-    <button
-      aria-label={accessibleLabel}
-      className={buttonClasses}
-      onClick={handleClick}
-      type="button"
-    >
-      {iconPosition === 'left' && (
-        <AnimatedCopyIcon
-          className={iconClasses}
-          onAnimationComplete={handleAnimationComplete}
-          trigger={triggerAnimation}
-        />
-      )}
-      {label}
-      {iconPosition === 'right' && (
-        <AnimatedCopyIcon
-          className={iconClasses}
-          onAnimationComplete={handleAnimationComplete}
-          trigger={triggerAnimation}
-        />
-      )}
-    </button>
-    {/* Outside the button: a button's children are presentational, so a live
+      <button
+        aria-label={accessibleLabel}
+        className={buttonClasses}
+        onClick={handleClick}
+        type="button"
+      >
+        {iconPosition === 'left' && (
+          <AnimatedCopyIcon
+            className={iconClasses}
+            onAnimationComplete={handleAnimationComplete}
+            trigger={triggerAnimation}
+          />
+        )}
+        {label}
+        {iconPosition === 'right' && (
+          <AnimatedCopyIcon
+            className={iconClasses}
+            onAnimationComplete={handleAnimationComplete}
+            trigger={triggerAnimation}
+          />
+        )}
+      </button>
+      {/* Outside the button: a button's children are presentational, so a live
         region inside it may never be announced. */}
-    <span aria-live="polite" className="sr-only">
-      {copyFailed ? 'Copy failed. Select the code and copy it manually' : triggerAnimation ? 'Copied' : ''}
-    </span>
+      <span aria-live="polite" className="sr-only">
+        {copyFailed
+          ? 'Copy failed. Select the code and copy it manually'
+          : triggerAnimation
+            ? 'Copied'
+            : ''}
+      </span>
     </>
   );
 };

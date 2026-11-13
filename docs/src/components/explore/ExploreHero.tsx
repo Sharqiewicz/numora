@@ -1,6 +1,6 @@
+import { Link } from '@tanstack/react-router';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Link } from '@tanstack/react-router';
 
 export function ExploreHero() {
   return (
@@ -106,6 +106,7 @@ export function ExploreHero() {
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"

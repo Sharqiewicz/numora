@@ -1,6 +1,6 @@
 import oneDark from 'react-syntax-highlighter/dist/esm/styles/prism/one-dark';
-import { refractor } from 'refractor/core';
 import bash from 'refractor/bash';
+import { refractor } from 'refractor/core';
 import tsx from 'refractor/tsx';
 import typescript from 'refractor/typescript';
 

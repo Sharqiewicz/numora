@@ -1,4 +1,4 @@
-import type { PackageTab, PackageRoutePrefix } from '@/contexts/PackageContext';
+import type { PackageRoutePrefix, PackageTab } from '@/contexts/PackageContext';
 
 export function getPackageRoutePrefix(packageTab: PackageTab): PackageRoutePrefix {
   return packageTab === 'react' ? 'numora-react' : 'numora';

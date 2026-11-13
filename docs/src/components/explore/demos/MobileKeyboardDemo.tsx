@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { Smartphone } from 'lucide-react';
 import { NumoraInput } from 'numora-react';
-import { ProblemSection } from '../ProblemSection';
+import { useState } from 'react';
+import { BrokenInput } from '../BrokenInput';
 import { InputComparison } from '../InputComparison';
 import { PasteButton } from '../PasteButton';
-import { BrokenInput } from '../BrokenInput';
-import { Smartphone } from 'lucide-react';
+import { ProblemSection } from '../ProblemSection';
 
 const MOBILE_PASTE_VALUE = '1\u00A0234';
 
@@ -27,6 +27,7 @@ export function MobileKeyboardDemo() {
   };
 
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <ProblemSection
       id="mobile-keyboard"
       problemNumber={4}
@@ -53,7 +54,9 @@ export function MobileKeyboardDemo() {
             <code className="block p-2 rounded bg-background font-mono">1 234</code>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground mb-1">What's actually there (UTF-8 bytes, hex):</p>
+            <p className="text-xs text-muted-foreground mb-1">
+              What's actually there (UTF-8 bytes, hex):
+            </p>
             <code className="block p-2 rounded bg-background font-mono text-signal-amber">
               31 C2 A0 32 33 34
             </code>

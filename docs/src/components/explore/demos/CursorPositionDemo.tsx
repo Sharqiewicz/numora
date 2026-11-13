@@ -1,9 +1,9 @@
-import { useState, useRef, useCallback } from 'react';
 import { NumoraInput, type NumoraInputChangeEvent } from 'numora-react';
-import { ProblemSection } from '../ProblemSection';
-import { InputComparison } from '../InputComparison';
+import { useCallback, useRef, useState } from 'react';
 import { BrokenInput } from '../BrokenInput';
 import { CursorVisualizer } from '../CursorVisualizer';
+import { InputComparison } from '../InputComparison';
+import { ProblemSection } from '../ProblemSection';
 
 export function CursorPositionDemo() {
   const [naiveValue, setNaiveValue] = useState('');
@@ -32,6 +32,7 @@ export function CursorPositionDemo() {
   };
 
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <ProblemSection
       id="cursor-position"
       problemNumber={2}
@@ -88,9 +89,7 @@ export function CursorPositionDemo() {
             />
             <CursorVisualizer value={numoraDisplay} cursorPosition={numoraCursor} />
             <div className="p-3 rounded-lg bg-signal-green/10 border border-signal-green/30 text-sm">
-              <p className="text-signal-green">
-                The cursor stays put, even as Numora adds commas.
-              </p>
+              <p className="text-signal-green">The cursor stays put, even as Numora adds commas.</p>
             </div>
           </div>
         }

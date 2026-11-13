@@ -108,7 +108,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
     if (!isPlaying) return;
     if (slide.video && videoDuration === null) return; // wait for video metadata
 
-    const duration = slide.video ? videoDuration! : SLIDE_DURATION;
+    const duration = slide.video && videoDuration !== null ? videoDuration : SLIDE_DURATION;
 
     timerRef.current = setTimeout(() => {
       setVideoDuration(null);
@@ -118,7 +118,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [activeSlide, isPlaying, videoDuration]);
+  }, [slide, isPlaying, videoDuration]);
 
   // Typing animation
   useEffect(() => {
@@ -370,7 +370,8 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
           <div className="flex items-center gap-1.5">
             {SLIDES.map((_, index) => (
               <button
-                key={index}
+                key={SLIDES[index].id}
+                type="button"
                 onClick={() => handleSlideClick(index)}
                 aria-label={`Show ${SLIDES[index].label}`}
                 aria-current={index === activeSlide ? 'true' : undefined}
@@ -384,6 +385,7 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
           </div>
 
           <button
+            type="button"
             onClick={() => setIsPlaying((prev) => !prev)}
             aria-label={isPlaying ? 'Pause' : 'Play'}
             className="relative w-8 h-8 rounded-full border border-[oklch(0.232_0.008_255)] bg-surface-2 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground/90 hover:border-surface-6 hover:bg-surface-3 transition-[color,background-color,border-color,scale] duration-150 ease-out active:scale-[0.96] cursor-pointer after:absolute after:top-1/2 after:left-1/2 after:size-10 after:-translate-x-1/2 after:-translate-y-1/2"
@@ -404,13 +406,25 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                 className="leading-none select-none flex items-center justify-center"
               >
                 {isPlaying ? (
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 10 10"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
                     <rect x="1" y="1" width="3" height="8" rx="0.5" />
                     <rect x="6" y="1" width="3" height="8" rx="0.5" />
                   </svg>
                 ) : (
                   <div className="ml-0.5">
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+                    <svg
+                      width="10"
+                      height="10"
+                      viewBox="0 0 10 10"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
                       <path d="M2 1.5 L9 5 L2 8.5 Z" />
                     </svg>
                   </div>

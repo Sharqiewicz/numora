@@ -29,6 +29,7 @@ export function CursorVisualizer({ value, cursorPosition, className }: CursorVis
           </div>
         ) : (
           chars.map((char, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: static character list that never reorders; the index is the cursor position
             <div key={index} className="relative">
               {index === validCursorPos && (
                 <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-secondary animate-pulse" />

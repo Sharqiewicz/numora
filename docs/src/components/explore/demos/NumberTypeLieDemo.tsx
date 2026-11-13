@@ -1,18 +1,18 @@
-import { useState, useRef, useEffect } from 'react';
+import {
+  Accessibility,
+  AlertTriangle,
+  Code,
+  Eye,
+  Hash,
+  MousePointer2,
+  Smartphone,
+  Type,
+} from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { NumoraInput } from 'numora-react';
-import { ProblemSection } from '../ProblemSection';
+import { useEffect, useRef, useState } from 'react';
 import { InputComparison } from '../InputComparison';
-import {
-  AlertTriangle,
-  MousePointer2,
-  Type,
-  Hash,
-  Eye,
-  Accessibility,
-  Smartphone,
-  Code,
-} from 'lucide-react';
+import { ProblemSection } from '../ProblemSection';
 
 const PROBLEMS = [
   {
@@ -74,6 +74,7 @@ export function NumberTypeLieDemo() {
   }, []);
 
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <ProblemSection
       id="number-type-lie"
       problemNumber={7}
@@ -115,8 +116,18 @@ export function NumberTypeLieDemo() {
                   <motion.div
                     className="absolute -top-10 left-0 right-0 flex justify-center"
                     initial={{ opacity: 0, y: -4, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: 0.18, ease: [0.16, 1, 0.3, 1] } }}
-                    exit={{ opacity: 0, y: -2, scale: 0.97, transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] } }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      transition: { duration: 0.18, ease: [0.16, 1, 0.3, 1] },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -2,
+                      scale: 0.97,
+                      transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] },
+                    }}
                   >
                     <div className="px-3 py-1 rounded bg-signal-red text-white text-xs font-medium motion-safe:animate-bounce">
                       Value changed by scroll!
@@ -138,7 +149,9 @@ export function NumberTypeLieDemo() {
             </div>
             <div className="p-3 rounded-lg bg-muted/30 border border-border">
               <p className="text-xs text-muted-foreground">Implementation:</p>
-              <code className="font-mono text-xs text-signal-amber">{'<input type="number" />'}</code>
+              <code className="font-mono text-xs text-signal-amber">
+                {'<input type="number" />'}
+              </code>
             </div>
           </div>
         }

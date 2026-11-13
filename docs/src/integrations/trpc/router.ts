@@ -1,10 +1,8 @@
-import { z } from 'zod';
-
-import { createTRPCRouter, publicProcedure } from './init';
-
 import { TRPCError, type TRPCRouterRecord } from '@trpc/server';
-import { fetchAllTokenPrices, type PriceData } from '@/lib/services/priceService';
+import { z } from 'zod';
 import type { NetworkName } from '@/lib/constants/priceFeeds';
+import { fetchAllTokenPrices, type PriceData } from '@/lib/services/priceService';
+import { createTRPCRouter, publicProcedure } from './init';
 
 const todos = [
   { id: 1, name: 'Get groceries' },

@@ -1,6 +1,6 @@
-import { createPublicClient, fallback, http, formatUnits, getAddress } from 'viem';
-import { mainnet, base } from 'viem/chains';
-import { PRICE_FEEDS, PRICE_FEED_ABI, type NetworkName } from '../constants/priceFeeds';
+import { createPublicClient, fallback, formatUnits, getAddress, http } from 'viem';
+import { base, mainnet } from 'viem/chains';
+import { type NetworkName, PRICE_FEED_ABI, PRICE_FEEDS } from '../constants/priceFeeds';
 import type { TokenSymbol } from '../constants/tokens';
 
 export interface PriceData {

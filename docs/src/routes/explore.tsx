@@ -1,17 +1,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import {
+  CursorPositionDemo,
+  DecimalDilemmaDemo,
+  ExploreHero,
+  MobileKeyboardDemo,
+  NumberTypeLieDemo,
+  PasteChaosDemo,
+  ScientificNotationDemo,
+  SectionNav,
+  ThousandSeparatorDemo,
+} from '@/components/explore';
 import LightRays from '@/components/LightRaysDeferred';
 import { Socials } from '@/components/socials';
-import {
-  ExploreHero,
-  SectionNav,
-  PasteChaosDemo,
-  CursorPositionDemo,
-  ScientificNotationDemo,
-  MobileKeyboardDemo,
-  DecimalDilemmaDemo,
-  ThousandSeparatorDemo,
-  NumberTypeLieDemo,
-} from '@/components/explore';
 
 export const Route = createFileRoute('/explore')({
   head: () => ({
@@ -100,12 +100,11 @@ function ExplorePage() {
 
         <section className="container mx-auto flex flex-col items-center justify-center px-4 sm:px-8 py-24">
           <div className="text-center max-w-2xl">
-            <h2 className="text-3xl sm:text-4xl font-semibold mb-4">
-              Fix these in your app
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-semibold mb-4">Fix these in your app</h2>
             <p className="text-muted-foreground mb-8">
               <strong className="font-numora text-secondary">Numora</strong> handles every case on
-              this page. Values stay strings, so nothing loses precision, and the cursor stays where you left it.
+              this page. Values stay strings, so nothing loses precision, and the cursor stays where
+              you left it.
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
               <Link
