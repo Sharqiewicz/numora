@@ -1,11 +1,20 @@
+import { formatValue } from 'numora';
 import { NumoraInput } from 'numora-react';
-import { useEffect, useId, useRef } from 'react';
-import { TextMorph } from 'torph';
+import { useId, useRef, useState } from 'react';
+import { TextMorph } from 'torph/react';
 import { useTypingLoop } from '@/hooks/use-typing-loop';
 import { DemoFrame, demoOverlayBox, demoOverlayInput } from './DemoFrame';
 
+const OPTIONS = {
+  formatOn: 'blur',
+  decimalMaxLength: 2,
+  thousandSeparator: ',',
+  groupingStyle: 'thousand',
+} as const;
+const EASE = { stiffness: 400, damping: 30 };
+
 /**
- * The core integration: NumoraInput → onFormattedValueChange → TextMorph.update.
+ * The core integration: NumoraInput → onFormattedValueChange → <TextMorph>.
  *
  * The visible cursor drifts during the focus-strip morph
  * (1,234,567 → 1234567) because the native cursor lands at its final position
@@ -14,43 +23,31 @@ import { DemoFrame, demoOverlayBox, demoOverlayInput } from './DemoFrame';
  */
 export function TorphBlurMinimal() {
   const inputId = useId();
-  const displayRef = useRef<HTMLSpanElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const morphRef = useRef<TextMorph | null>(null);
+  // The first text: onFormattedValueChange does not fire on mount.
+  const [text, setText] = useState(() => formatValue('1234567', OPTIONS));
+  const [caret, setCaret] = useState<number>();
 
   useTypingLoop(inputRef, { mode: 'blur' });
-
-  useEffect(() => {
-    if (!displayRef.current) return;
-    displayRef.current.textContent = '';
-    const morph = new TextMorph({
-      element: displayRef.current,
-      ease: { stiffness: 400, damping: 30 },
-    });
-    morph.update('1,234,567');
-    morphRef.current = morph;
-    return () => {
-      morph.destroy();
-      morphRef.current = null;
-    };
-  }, []);
 
   return (
     <DemoFrame inputId={inputId} hint="Blur the field to format.">
       <div className={demoOverlayBox}>
-        <span ref={displayRef} aria-hidden="true" className="pointer-events-none whitespace-pre">
-          0
+        <span aria-hidden="true" className="pointer-events-none whitespace-pre">
+          <TextMorph cursorIndex={caret} ease={EASE}>
+            {text || '0'}
+          </TextMorph>
         </span>
         <NumoraInput
           id={inputId}
           ref={inputRef}
           defaultValue="1234567"
           // Every rewrite of the field: typing, the focus strip and the blur regroup.
-          onFormattedValueChange={(text) => morphRef.current?.update(text || '0')}
-          formatOn="blur"
-          decimalMaxLength={2}
-          thousandSeparator=","
-          groupingStyle="thousand"
+          onFormattedValueChange={(next) => {
+            setCaret(inputRef.current?.selectionStart ?? undefined);
+            setText(next);
+          }}
+          {...OPTIONS}
           aria-label="Amount"
           className={`${demoOverlayInput} caret-foreground`}
         />

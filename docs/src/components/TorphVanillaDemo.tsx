@@ -28,7 +28,9 @@ export function TorphVanillaDemo() {
       thousandSeparator: ',',
       defaultValue: '1234567',
       groupingStyle: 'thousand',
-      onFormattedValueChange: (text) => morph.update(text || '0'),
+      // The caret is the second argument: Torph then matches digits around the edit.
+      onFormattedValueChange: (text) =>
+        morph.update(text || '0', numora.element.selectionStart ?? undefined),
     });
     const input = numora.element;
     input.id = inputId;

@@ -263,10 +263,11 @@ input.addEventListener('focus', () => {
           Both layers render the same formatted string. The vanilla <code>NumoraInput</code> class
           calls its <code>onFormattedValueChange</code> option every time it rewrites the field:
           typing (from <code>beforeinput</code>), paste, the focus strip and the blur regroup. The
-          bridge is a single line:{' '}
-          <code>onFormattedValueChange: (text) =&gt; morph.update(text || '0')</code>. Torph diffs
-          the old and new strings and animates each digit and separator into place. The input itself
-          never animates, and because its text is transparent, you only see the Torph layer.
+          bridge is a single call:{' '}
+          <code>morph.update(text || '0', numora.element.selectionStart ?? undefined)</code>. The
+          second argument is the caret, which tells Torph where the edit was. Torph diffs the old
+          and new strings and animates each digit and separator into place. The input itself never
+          animates, and because its text is transparent, you only see the Torph layer.
         </p>
       </OverlayExplainer>
 
@@ -341,7 +342,9 @@ const numora = new NumoraInput(host, {
   formatOn: 'change',
   decimalMaxLength: 2,
   groupingStyle: 'thousand',
-  onFormattedValueChange: (text) => morph.update(text || '0'),
+  // The caret is the second argument: Torph then matches digits around the edit.
+  onFormattedValueChange: (text) =>
+    morph.update(text || '0', numora.element.selectionStart ?? undefined),
 })
 const input = numora.element
 input.setAttribute('aria-label', 'Amount')

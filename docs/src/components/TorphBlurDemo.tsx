@@ -1,15 +1,25 @@
+import { formatValue } from 'numora';
 import { NumoraInput } from 'numora-react';
 import { useEffect, useId, useRef, useState } from 'react';
-import { TextMorph } from 'torph';
+import { TextMorph } from 'torph/react';
 import { useTypingLoop } from '@/hooks/use-typing-loop';
 import { DemoFrame, demoOverlayBox, demoOverlayInput } from './DemoFrame';
 
+const OPTIONS = {
+  formatOn: 'blur',
+  decimalMaxLength: 2,
+  thousandSeparator: ',',
+  groupingStyle: 'thousand',
+} as const;
+const EASE = { stiffness: 400, damping: 30 };
+
 export function TorphBlurDemo() {
   const inputId = useId();
-  const [caretHidden, setCaretHidden] = useState(false);
-  const displayRef = useRef<HTMLSpanElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const morphRef = useRef<TextMorph | null>(null);
+  // The first text: onFormattedValueChange does not fire on mount.
+  const [text, setText] = useState(() => formatValue('1234567', OPTIONS));
+  const [caret, setCaret] = useState<number>();
+  const [caretHidden, setCaretHidden] = useState(false);
   // True from focus → first morph-complete, so the focus-strip morph hides the cursor
   // but later per-keystroke morphs do not (you need to see your cursor while typing).
   const postFocusMorphPendingRef = useRef(false);
@@ -17,43 +27,34 @@ export function TorphBlurDemo() {
 
   useTypingLoop(inputRef, { mode: 'blur' });
 
-  useEffect(() => {
-    if (!displayRef.current) return;
-
-    displayRef.current.textContent = '';
-
-    const morph = new TextMorph({
-      element: displayRef.current,
-      ease: { stiffness: 400, damping: 30 },
-      onAnimationComplete: () => {
-        if (postFocusMorphPendingRef.current) {
-          postFocusMorphPendingRef.current = false;
-          setCaretHidden(false);
-        }
-      },
-    });
-    morph.update('1,234,567');
-    morphRef.current = morph;
-
-    return () => {
-      window.clearTimeout(caretTimeoutRef.current);
-      morph.destroy();
-      morphRef.current = null;
-    };
-  }, []);
+  useEffect(() => () => window.clearTimeout(caretTimeoutRef.current), []);
 
   return (
     <DemoFrame inputId={inputId} hint="Blur the field to format.">
       <div className={demoOverlayBox}>
-        <span ref={displayRef} aria-hidden="true" className="pointer-events-none whitespace-pre">
-          0
+        <span aria-hidden="true" className="pointer-events-none whitespace-pre">
+          <TextMorph
+            cursorIndex={caret}
+            ease={EASE}
+            onAnimationComplete={() => {
+              if (postFocusMorphPendingRef.current) {
+                postFocusMorphPendingRef.current = false;
+                setCaretHidden(false);
+              }
+            }}
+          >
+            {text || '0'}
+          </TextMorph>
         </span>
         <NumoraInput
           id={inputId}
           ref={inputRef}
           defaultValue="1234567"
           // Every rewrite of the field: typing, the focus strip and the blur regroup.
-          onFormattedValueChange={(text) => morphRef.current?.update(text || '0')}
+          onFormattedValueChange={(next) => {
+            setCaret(inputRef.current?.selectionStart ?? undefined);
+            setText(next);
+          }}
           onFocus={() => {
             postFocusMorphPendingRef.current = true;
             setCaretHidden(true);
@@ -67,10 +68,7 @@ export function TorphBlurDemo() {
               }
             }, 600);
           }}
-          formatOn="blur"
-          decimalMaxLength={2}
-          thousandSeparator=","
-          groupingStyle="thousand"
+          {...OPTIONS}
           aria-label="Amount"
           className={`${demoOverlayInput} ${caretHidden ? 'caret-transparent' : 'caret-foreground'}`}
         />
