@@ -2,7 +2,7 @@
   "name": "numora",
   "version": "5.0.0",
   "description": "Framework-agnostic numeric input library for DeFi and financial apps",
-  "homepage": "https://numora.xyz/",
+  "homepage": "https://numeric-input.com/",
   "main": "dist/index.js",
   "types": "dist/index.d.cts",
   "files": [

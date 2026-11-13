@@ -1,6 +1,6 @@
 # Changelog for `numora`
 
-## Unreleased
+## 5.0.0 - 2026-11-13
 
 See [MIGRATION.md](../../MIGRATION.md) for a v4 to v5 walkthrough.
 
