@@ -280,7 +280,7 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
     const { onChange: cb, onValueChange: vcb, onFormattedValueChange: fcb } = stateRef.current;
     if (values) {
       cb?.(createSyntheticChangeEvent(el, values.value));
-      vcb?.({ value: values.value, formattedValue: values.formattedValue });
+      vcb?.(values);
     }
     if (text !== reported.current) {
       reported.current = text;

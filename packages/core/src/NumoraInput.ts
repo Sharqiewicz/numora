@@ -197,7 +197,7 @@ export class NumoraInput {
   private emit(values: NumoraValues | undefined): void {
     const text = this.el.value;
     this.lastValue = text;
-    if (values) this.options.onValueChange?.({ value: values.value, formattedValue: values.formattedValue });
+    if (values) this.options.onValueChange?.(values);
     if (this.reported !== undefined && text !== this.reported) {
       this.reported = text;
       this.options.onFormattedValueChange?.(text);
@@ -246,6 +246,7 @@ export class NumoraInput {
    * touched). The current raw value is kept and re-run through the new options: the display
    * is rewritten, and `onValueChange` fires only if the raw value itself changed, e.g. a
    * smaller `decimalMaxLength` cut digits off (ADR 0008).
+   * A focused field is left as typed when the new options format the same way.
    *
    * @throws when the merged options are invalid. Nothing is changed in that case.
    */
@@ -255,9 +256,15 @@ export class NumoraInput {
     warnRemovedOptions(takeRemovedOptions({ ...options }));
 
     const before = this.rawValue;
+    // Functions (`isAllowed`) drop out of the JSON, so a new callback is not a format change.
+    const same = JSON.stringify(this.resolvedOptions) === JSON.stringify(resolved);
     this.options = merged;
     this.resolvedOptions = resolved;
     this.applyOptions(options);
+
+    // Same formatting on a field being typed in: leave the text and caret alone. A wrapper
+    // that calls update() on every re-render would otherwise strip a just-typed `1.` to `1`.
+    if (same && this.isFocused) return;
 
     // A focused Blur-mode field shows no grouping, so it keeps its edit-time format.
     const { formatted, raw } = this.isFocused
