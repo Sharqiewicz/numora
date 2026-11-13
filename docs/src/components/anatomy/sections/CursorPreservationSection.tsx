@@ -1,8 +1,8 @@
-import { CaretJumpDemo } from '../CaretJumpDemo';
-import { CursorAnchorDiagram } from '../diagrams';
+import { CursorLanes } from '../CursorLanes';
 
 export function CursorPreservationSection() {
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="cursor-preservation" className="space-y-4 scroll-mt-24">
       <h2>Cursor preservation</h2>
       <p>
@@ -10,7 +10,6 @@ export function CursorPreservationSection() {
         and types a digit. The formatter rebuilds the string with the commas in new places, and the
         cursor ends up several characters from where it should be.
       </p>
-      <CursorAnchorDiagram />
       <p>
         Numora computes the caret from the edit itself. It runs the text left of the edit, plus the
         inserted text, through the same sanitizer as the whole value: separators removed, leading
@@ -27,11 +26,7 @@ export function CursorPreservationSection() {
         need no per-style code. A separator is always one character, so every comparison is a
         single-character comparison.
       </p>
-      <p>
-        Here is that keystroke again, an <code>8</code> typed after the <code>3</code>, one step at
-        a time for both formatters:
-      </p>
-      <CaretJumpDemo />
+      <CursorLanes />
     </section>
   );
 }

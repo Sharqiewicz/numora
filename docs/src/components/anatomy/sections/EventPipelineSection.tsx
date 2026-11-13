@@ -1,9 +1,9 @@
 import { CodeBlock } from '@/components/CodeBlock';
-import { EventPipelineDemo } from '../EventPipelineDemo';
-import { EventPipelineDiagram } from '../diagrams';
+import { EventPipelineLoop } from '../EventPipelineLoop';
 
 export function EventPipelineSection() {
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="event-pipeline" className="space-y-4 scroll-mt-24">
       <h2>The event pipeline</h2>
       <p>
@@ -11,7 +11,6 @@ export function EventPipelineSection() {
         order:
       </p>
       <CodeBlock language="text">{`keydown  →  beforeinput  →  [DOM mutation]  →  input  →  keyup`}</CodeBlock>
-      <EventPipelineDiagram />
       <ul>
         <li>
           <strong>
@@ -23,10 +22,11 @@ export function EventPipelineSection() {
           <strong>
             <code>beforeinput</code> (2016)
           </strong>{' '}
-          fires after the browser has decided what the input <em>will</em> be, but before it
-          touches the DOM. It is cancelable, which lets Numora replace the edit. It carries an <code>inputType</code> that names the
-          action ("insertText", "deleteContentBackward", …) and a <code>data</code> field with the
-          resolved character. <strong>This is the hook to format from.</strong>
+          fires after the browser has decided what the input <em>will</em> be, but before it touches
+          the DOM. It is cancelable, which lets Numora replace the edit. It carries an{' '}
+          <code>inputType</code> that names the action ("insertText", "deleteContentBackward", …)
+          and a <code>data</code> field with the resolved character.{' '}
+          <strong>This is the hook to format from.</strong>
         </li>
         <li>
           <strong>
@@ -43,11 +43,7 @@ export function EventPipelineSection() {
           fires when the key is released, after the value has already changed. Numora ignores it.
         </li>
       </ul>
-      <p>
-        Type below to see all four fire in order. <code>beforeinput</code> shows its{' '}
-        <code>inputType</code> and <code>data</code>:
-      </p>
-      <EventPipelineDemo />
+      <EventPipelineLoop />
     </section>
   );
 }

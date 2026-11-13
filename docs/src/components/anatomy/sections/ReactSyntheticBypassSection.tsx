@@ -6,27 +6,13 @@ useEffect(() => {
   if (!input) return
 
   const onBeforeInput = (e: InputEvent) => {
-    const result = handleOnBeforeInputNumoraInput(
-      e,
-      stateRef.current.decimalMaxLength,
-      stateRef.current.formattingOptions
-    )
-
-    switch (result.type) {
-      case 'skip':
-        return
-      case 'reject':
-        e.preventDefault()
-        return
-      case 'handled': {
-        e.preventDefault()
-        // setRangeText under the hood: no input event, no React value tracker.
-        writeValue(input, result.formatted, result.cursorPos)
-        // Call onChange directly - guaranteed delivery, no dependency on
-        // React's value-tracker diff or synthetic event pipeline.
-        stateRef.current.onChange?.(createSyntheticChangeEvent(input, result.raw))
-      }
-    }
+    // Decides skip / reject / handled. When it handles the edit it calls
+    // preventDefault() and writes the field with setRangeText: no input event,
+    // no React value tracker. It returns the new values, or nothing.
+    const values = applyBeforeInput(e, stateRef.current.formattingOptions)
+    // Call onChange directly - guaranteed delivery, no dependency on
+    // React's value-tracker diff or synthetic event pipeline.
+    if (values) emit(input, values)
   }
 
   input.addEventListener('beforeinput', onBeforeInput)
@@ -35,6 +21,7 @@ useEffect(() => {
 
 export function ReactSyntheticBypassSection() {
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="react-synthetic-bypass" className="space-y-4 scroll-mt-24">
       <h2>
         Why <code>beforeinput</code> bypasses React's synthetic event system
@@ -64,7 +51,7 @@ export function ReactSyntheticBypassSection() {
         <code>onChange</code> itself. <code>setRangeText</code> dispatches no <code>input</code>{' '}
         event. The HTML spec says so, and Chrome and jsdom both follow it. Nothing reaches React's{' '}
         <code>handleChange</code> afterwards. <code>handleChange</code> only ever sees edits the
-        browser makes itself, such as autofill, drop and IME commits.
+        browser makes itself, such as autofill, drop, IME commits, undo and redo.
       </p>
     </section>
   );

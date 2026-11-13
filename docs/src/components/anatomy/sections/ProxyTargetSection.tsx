@@ -16,18 +16,20 @@ ref.current?.value           // → "1,234.56"  (DOM value: formatted unless Blu
 
 export function ProxyTargetSection() {
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="proxy-target" className="space-y-4 scroll-mt-24">
       <h2>
         The Proxy on <code>e.target</code>
       </h2>
       <p>
         The React component exposes both the raw and the formatted string on the change event's{' '}
-        <code>target</code> through a Proxy. The synthetic <code>ChangeEvent</code>'s <code>target</code>{' '}
-        wraps the real <code>HTMLInputElement</code>. Reads of <code>target.value</code> are
-        intercepted and return the raw string. <code>target.formattedValue</code> reads a custom
-        property that Numora React writes after each format pass. Everything else (
-        <code>selectionStart</code>, <code>focus()</code>, <code>name</code>, …) passes through to
-        the underlying element.
+        <code>target</code> through a Proxy. The synthetic <code>ChangeEvent</code>'s{' '}
+        <code>target</code> wraps the real <code>HTMLInputElement</code>. Reads of{' '}
+        <code>target.value</code> are intercepted and return the raw string.{' '}
+        <code>target.formattedValue</code> is a getter that Numora React defines once on the input
+        when it mounts, next to <code>rawValue</code> and <code>setValue</code>. The Proxy passes it
+        through, like everything else (<code>selectionStart</code>, <code>focus()</code>,{' '}
+        <code>name</code>, …) on the underlying element.
       </p>
       <CodeBlock language="tsx">{code}</CodeBlock>
       <p>

@@ -107,10 +107,11 @@ function HowItWorks() {
           : splices clipboard text into the selection and runs the full pipeline.
         </li>
         <li>
-          <Link to={ANATOMY} hash="format-mode">
+          <Link to="/docs/numora/features/format-on">
             <code>focus</code> / <code>blur</code>
           </Link>
-          : strip and re-apply separators in <code>'blur'</code> mode.
+          : strip and re-apply separators in <code>'blur'</code> mode. Blur also settles the value
+          in both modes: it drops a trailing separator and pads decimals.
         </li>
       </ul>
 

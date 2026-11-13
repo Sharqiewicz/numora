@@ -3,10 +3,8 @@ import {
   BeforeInputSection,
   CursorPreservationSection,
   DefaultVsValueSection,
-  DropInUsageSection,
   EventPipelineSection,
   FloatVsStringSection,
-  FormatModeSection,
   GroupingStylesSection,
   Hero,
   KeydownSection,
@@ -87,7 +85,7 @@ function Anatomy() {
   const pkg = 'numora-react' as const;
   return (
     <div className="docs-prose max-w-[36rem]">
-      <Hero pkg={pkg} />
+      <Hero />
       <div className="space-y-16">
         <NativeInputSection pkg={pkg} />
         <EventPipelineSection />
@@ -99,13 +97,11 @@ function Anatomy() {
         <BeforeInputSection />
         <ReactSyntheticBypassSection />
         <DefaultVsValueSection />
-        <FormatModeSection />
         <GroupingStylesSection />
         <CursorPreservationSection />
         <PasteSection />
         <ProxyTargetSection />
         <RawVsFormattedSection pkg={pkg} />
-        <DropInUsageSection pkg={pkg} />
       </div>
     </div>
   );

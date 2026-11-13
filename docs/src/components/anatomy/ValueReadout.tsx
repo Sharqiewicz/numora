@@ -1,9 +1,6 @@
 import { motion, useReducedMotion } from 'motion/react';
-import {
-  NumoraInput,
-  type NumoraInputChangeEvent,
-} from 'numora-react';
-import { type ReactNode, useId, useState } from 'react';
+import { formatValue, NumoraInput, type NumoraInputChangeEvent } from 'numora-react';
+import { type ReactNode, useState } from 'react';
 import { DiagramFrame, DUR, demoInputClass, demoInsetClass, EASE } from './kit';
 
 /**
@@ -57,43 +54,39 @@ export function ReadoutRow({
   );
 }
 
+const OPTIONS = {
+  formatOn: 'change',
+  thousandSeparator: ',',
+  groupingStyle: 'thousand',
+  decimalMaxLength: 2,
+  allowCompactNotation: true,
+} as const;
+const START = '1234567.89';
+
 export function ValueReadout() {
-  const inputId = useId();
-  const [rawValue, setRawValue] = useState('');
-  const [formattedValue, setFormattedValue] = useState('');
-  const [selectionStart, setSelectionStart] = useState<number | null>(0);
+  const [rawValue, setRawValue] = useState(START);
+  const [formattedValue, setFormattedValue] = useState(() => formatValue(START, OPTIONS));
 
   const handleChange = (e: NumoraInputChangeEvent) => {
     setRawValue(e.target.value);
     setFormattedValue(e.target.formattedValue);
-    setSelectionStart(e.target.selectionStart);
   };
 
   return (
     <DiagramFrame variant="demo">
-      <label htmlFor={inputId} className="mb-2 block text-caption font-medium text-muted-foreground">
-        Type a number
-      </label>
       <NumoraInput
-        id={inputId}
-        formatOn="change"
-        thousandSeparator=","
-        groupingStyle="thousand"
-        decimalMaxLength={2}
-        allowCompactNotation
+        {...OPTIONS}
+        aria-label="Type a number"
+        defaultValue={START}
         onChange={handleChange}
-        placeholder="1234567.89"
         className={demoInputClass}
       />
       <div className={`${demoInsetClass} mt-4 space-y-3`}>
-        <ReadoutRow name="e.target.value" note="raw, no separators">
-          <FlashValue value={rawValue}>"{rawValue}"</FlashValue>
-        </ReadoutRow>
-        <ReadoutRow name="e.target.formattedValue" note="display string">
+        <ReadoutRow name="e.target.formattedValue">
           <FlashValue value={formattedValue}>"{formattedValue}"</FlashValue>
         </ReadoutRow>
-        <ReadoutRow name="e.target.selectionStart">
-          <FlashValue value={selectionStart ?? ''}>{selectionStart}</FlashValue>
+        <ReadoutRow name="e.target.value">
+          <FlashValue value={rawValue}>"{rawValue}"</FlashValue>
         </ReadoutRow>
       </div>
     </DiagramFrame>

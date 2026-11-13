@@ -1,7 +1,8 @@
-import { FloatVsString } from '../FloatVsString';
+import { NumberRoundTrip } from '../NumberRoundTrip';
 
 export function FloatVsStringSection() {
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="float-vs-string" className="space-y-4 scroll-mt-24">
       <h2>
         Why <code>Number</code> is the wrong type
@@ -11,11 +12,12 @@ export function FloatVsStringSection() {
         financial UI, such as prices, ratios and percentages, have no exact binary representation.
         Add two of them and you get the result every developer eventually meets:
       </p>
-      <FloatVsString />
+      <NumberRoundTrip />
       <p>
         On a price field, <code>0.30000000000000004</code> is not the number the user meant. Numora
         has one rule here. Every value in the input is <strong>a string</strong>. Numora never
-        converts it to a <code>Number</code>. What the user typed is what your code reads back.
+        converts it to a <code>Number</code>. The digits the user typed are the digits your code
+        reads back.
       </p>
     </section>
   );

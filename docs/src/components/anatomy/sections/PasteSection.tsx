@@ -1,13 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
 import { NumoraInput } from 'numora-react';
+import { useEffect, useRef, useState } from 'react';
 import { DiagramFrame, demoInputClass } from '../kit';
 
-const samples = [
-  { label: 'US price with $', value: '$1,234.56 USD' },
-  { label: 'Excel cell', value: '1,234.560000' },
-  { label: 'Spaced digits', value: '1 234.56' },
-  { label: 'Email body fragment', value: 'price: 2,500,000.00 USD' },
-];
+const samples = ['$1,234.56 USD', '1,234.560000', '1.234,56'];
 
 type CopyState = { value: string; status: 'copied' | 'failed' } | null;
 
@@ -29,18 +24,20 @@ export function PasteSection() {
   };
 
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="paste" className="space-y-4 scroll-mt-24">
       <h2>Paste messy text</h2>
       <p>
-        When the user pastes, <code>beforeinput</code> fires first with{' '}
-        <code>inputType: 'insertFromPaste'</code>. Numora returns immediately. The dedicated{' '}
-        <code>paste</code> handler takes over because it has the full <code>ClipboardData</code>{' '}
-        object.
+        When the user pastes, the <code>paste</code> event fires first, and it carries the full{' '}
+        <code>ClipboardData</code> object. Numora handles the paste there and cancels the event, so
+        the browser never sends a <code>beforeinput</code> with{' '}
+        <code>inputType: 'insertFromPaste'</code> for it.
       </p>
       <p>The paste handler:</p>
       <ol>
         <li>
-          Call <code>e.preventDefault()</code> to block the native paste.
+          Call <code>e.preventDefault()</code> to block the native paste. A read-only or disabled
+          field stops here and takes nothing.
         </li>
         <li>
           Read the text with <code>e.clipboardData.getData('text/plain')</code>.
@@ -53,53 +50,51 @@ export function PasteSection() {
           parsed together.
         </li>
         <li>
-          Write the result with <code>setRangeText</code> (via <code>writeValue</code>), then place
-          the cursor.
+          Stop if <code>isAllowed</code> refuses the result, or if the text holds scientific
+          notation and <code>allowScientificNotation</code> is off. Otherwise write the result with{' '}
+          <code>setRangeText</code> (via <code>writeValue</code>), then place the cursor.
         </li>
         <li>
-          Call <code>onChange</code> directly. In React, <code>e.target.value</code> is the raw
-          value and <code>e.target.formattedValue</code> the display string. In vanilla, the
-          callback receives <code>{'{ value, formattedValue }'}</code>. No synthetic{' '}
-          <code>input</code> event is dispatched.
+          Call the change callback directly. In React that is <code>onChange</code>, where{' '}
+          <code>e.target.value</code> is the raw value and <code>e.target.formattedValue</code> the
+          display string. In vanilla it is <code>onValueChange</code>, which receives{' '}
+          <code>{'{ value, formattedValue }'}</code>. No synthetic <code>input</code> event is
+          dispatched.
         </li>
       </ol>
       <p>
-        Numora does not convert separators between locales. It only knows the separators you
-        configured. With <code>thousandSeparator=","</code>, a German <code>1.234,56</code> loses
-        its comma and is read as <code>1.23456</code>, then trimmed to the decimal limit.
+        Pasted text may come from another locale, so Numora does not assume the field's own
+        separators. Dropped and autofilled text is read the same way, except in a focused field that
+        formats on change, which reads it as its own display text. When both <code>.</code> and{' '}
+        <code>,</code> appear, the last one is the decimal mark and the rest is grouping, so a
+        German <code>1.234,56</code> pasted into a field with <code>thousandSeparator=","</code> is
+        read as <code>1234.56</code>. A mark that repeats is grouping. A single mark is the decimal
+        mark when it is the field's own decimal separator. Otherwise it is grouping when the digits
+        around it form valid groups (<code>1,234</code>), and the decimal mark when they do not.
       </p>
-      <p>Copy any of these strings, then paste it into the Numora input below:</p>
+      <p>
+        Copy a string, then paste it into the Numora input. Clear the input before each one, because
+        a paste is inserted into the text already there:
+      </p>
       <DiagramFrame variant="demo">
-        <ul className="m-0 mb-4 list-none space-y-1 p-0">
-          {samples.map((s) => {
-            const state = copyState?.value === s.value ? copyState.status : null;
-            return (
-              <li key={s.label} className="m-0 p-0">
-                <button
-                  type="button"
-                  onClick={() => copySample(s.value)}
-                  className="inline-flex min-h-6 items-center py-1 text-left text-caption transition-[color,scale] duration-150 ease-out-expo hover:text-foreground active:scale-[0.97] motion-reduce:transition-none [@media(pointer:coarse)]:min-h-11"
-                  aria-label={`${s.label}: ${s.value}. Copy`}
-                >
-                  <span className="text-muted-foreground">{s.label}: </span>
-                  <span className="font-mono text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground">
-                    {s.value}
-                  </span>
-                  {state === 'copied' && (
-                    <span aria-hidden className="ml-2 text-signal-green-fg">
-                      Copied
-                    </span>
-                  )}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-        <output className="mb-2 block min-h-4 text-caption text-muted-foreground">
+        <div className="mb-2 flex flex-wrap gap-2">
+          {samples.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => copySample(s)}
+              aria-label={`Copy ${s}`}
+              className="inline-flex min-h-9 items-center rounded-md border border-border bg-surface-1 px-2.5 font-mono text-caption text-foreground transition-[background-color,scale] duration-150 ease-out-expo hover:bg-surface-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] motion-reduce:transition-none [@media(pointer:coarse)]:min-h-11"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+        <output className="mb-2 block min-h-5 text-caption text-muted-foreground">
           {copyState?.status === 'failed'
-            ? 'Copy failed. Select the text and copy it manually'
+            ? 'Copy failed. Select the text instead.'
             : copyState?.status === 'copied'
-              ? `Copied ${samples.find((x) => x.value === copyState.value)?.label ?? ''}`
+              ? `Copied ${copyState.value}`
               : ''}
         </output>
         <NumoraInput
@@ -109,7 +104,7 @@ export function PasteSection() {
           decimalMaxLength={2}
           allowCompactNotation
           aria-label="Paste test input"
-          placeholder="$1,234.56 USD"
+          placeholder="Paste here"
           className={demoInputClass}
         />
       </DiagramFrame>

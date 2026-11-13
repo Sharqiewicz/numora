@@ -2,10 +2,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import {
   BeforeInputSection,
   CursorPreservationSection,
-  DropInUsageSection,
   EventPipelineSection,
   FloatVsStringSection,
-  FormatModeSection,
   GroupingStylesSection,
   Hero,
   KeydownSection,
@@ -84,7 +82,7 @@ function Anatomy() {
   const pkg = 'numora' as const;
   return (
     <div className="docs-prose max-w-[36rem]">
-      <Hero pkg={pkg} />
+      <Hero />
       <div className="space-y-16">
         {/* Act 1: why this exists */}
         <NativeInputSection pkg={pkg} />
@@ -100,13 +98,11 @@ function Anatomy() {
 
         {/* Act 3: what Numora does with the value */}
         <SanitizationSection />
-        <FormatModeSection />
         <GroupingStylesSection />
         <CursorPreservationSection />
         <RawVsFormattedSection pkg={pkg} />
 
         {/* Act 4: using it */}
-        <DropInUsageSection pkg={pkg} />
       </div>
     </div>
   );

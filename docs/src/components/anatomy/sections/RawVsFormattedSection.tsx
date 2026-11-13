@@ -25,6 +25,7 @@ new NumoraInput(container, {
 
 export function RawVsFormattedSection({ pkg }: SectionProps) {
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="raw-vs-formatted" className="space-y-4 scroll-mt-24">
       <h2>Raw value vs formatted value</h2>
       <p>

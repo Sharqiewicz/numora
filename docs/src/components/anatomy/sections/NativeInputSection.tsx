@@ -1,8 +1,8 @@
-import { AnnotatedInput } from '../AnnotatedInput';
 import type { SectionProps } from './types';
 
 export function NativeInputSection(_props: SectionProps) {
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="native-input" className="space-y-4 scroll-mt-24">
       <h2>
         What is an <code>&lt;input&gt;</code>, really?
@@ -31,13 +31,11 @@ export function NativeInputSection(_props: SectionProps) {
       <p>
         It uses the input's <code>value</code>, <code>selectionStart</code> /{' '}
         <code>selectionEnd</code>, <code>setRangeText</code> and <code>inputMode</code>. See{' '}
-        <a href="#before-input">beforeinput</a> and <a href="#cursor-preservation">cursor
-        preservation</a> for how.
-        {' '}
-        Numora sets no <code>pattern</code> attribute, so native constraint validation never
-        rejects a value the field itself produced. Add your own if you need one.
+        <a href="#before-input">beforeinput</a> and{' '}
+        <a href="#cursor-preservation">cursor preservation</a> for how. Numora sets no{' '}
+        <code>pattern</code> attribute, so native constraint validation never rejects a value the
+        field itself produced. Add your own if you need one.
       </p>
-      <AnnotatedInput />
     </section>
   );
 }

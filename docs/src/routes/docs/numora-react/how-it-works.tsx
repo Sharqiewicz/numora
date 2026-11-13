@@ -88,9 +88,9 @@ function HowItWorks() {
       <h2>React integration</h2>
       <p>
         <code>NumoraInput</code> is a <code>forwardRef</code> component that calls the core event
-        handlers directly and never instantiates the vanilla class. After every pipeline cycle,{' '}
-        <code>onChange</code> fires with a synthetic event whose <code>target</code> exposes both
-        the raw and formatted values.
+        handlers directly and never instantiates the vanilla class. When an edit changes the raw
+        value, <code>onChange</code> fires with a synthetic event whose <code>target</code> exposes
+        both the raw and formatted values.
       </p>
 
       <h2>Events</h2>
@@ -125,10 +125,11 @@ function HowItWorks() {
           : splices clipboard text into the selection and runs the full pipeline.
         </li>
         <li>
-          <Link to={ANATOMY} hash="format-mode">
+          <Link to="/docs/numora-react/features/format-on">
             <code>focus</code> / <code>blur</code>
           </Link>
-          : strip and re-apply separators in <code>'blur'</code> mode.
+          : strip and re-apply separators in <code>'blur'</code> mode. Blur also settles the value
+          in both modes: it drops a trailing separator and pads decimals.
         </li>
       </ul>
 
@@ -178,7 +179,8 @@ function HowItWorks() {
         <code>value</code> / <code>defaultValue</code> take a string: the canonical raw value, with
         ASCII digits, <code>.</code> as the decimal mark and no grouping, in every locale. Under{' '}
         <code>locale="de-DE"</code>, <code>{'value="1234.5"'}</code> displays <code>"1.234,5"</code>
-        . A JS <code>number</code> is a type error, because it may already have lost precision.
+        . A JS <code>number</code> is a TypeScript error, because it may already have lost
+        precision.
       </p>
     </div>
   );

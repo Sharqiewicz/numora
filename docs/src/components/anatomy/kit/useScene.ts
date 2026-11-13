@@ -35,9 +35,11 @@ export interface Scene<T extends Element = HTMLDivElement> {
  *     initial={scene.phase === 'final' ? false : 'hidden'}
  *     animate={scene.phase === 'hidden' ? 'hidden' : 'shown'} variants={...} />
  */
-export function useScene<T extends Element = HTMLDivElement>(
-  { amount = 'some' }: { amount?: 'some' | 'all' | number } = {},
-): Scene<T> {
+export function useScene<T extends Element = HTMLDivElement>({
+  amount = 'some',
+}: {
+  amount?: 'some' | 'all' | number;
+} = {}): Scene<T> {
   const ref = useRef<T>(null);
   const reduced = useReducedMotion() ?? false;
   // Same -15% bottom margin as DiagramFrame's reveal, so the scene starts as the frame lands.

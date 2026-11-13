@@ -60,7 +60,8 @@ export function DiagramFrame({
   const inView = useInView(figureRef, { once: true, margin: '0px 0px -15% 0px' });
   const [armed, setArmed] = useState(false);
   useEffect(() => {
-    if (!reveal || reduced || !figureRef.current || typeof IntersectionObserver === 'undefined') return;
+    if (!reveal || reduced || !figureRef.current || typeof IntersectionObserver === 'undefined')
+      return;
     const rect = figureRef.current.getBoundingClientRect();
     // Arm only when fully off screen, so SSR-visible content is never hidden after hydration.
     if (rect.top > window.innerHeight || rect.bottom < 0) setArmed(true);
@@ -81,53 +82,51 @@ export function DiagramFrame({
 
   return (
     <MotionConfig reducedMotion="user">
-    <motion.figure
-      ref={figureRef}
-      initial={false}
-      animate={{ opacity: hidden ? 0 : 1 }}
-      transition={hidden ? { duration: 0 } : { duration: DUR.base, ease: EASE.outExpo }}
-      className={cn(
-        'not-prose relative my-8 rounded-xl border p-4 sm:p-6',
-        variant === 'demo' ? 'border-border bg-transparent' : 'border-border bg-surface-2',
-        className,
-      )}
-    >
-      {title && (
-        <div className="mb-4 flex min-h-8 items-center pr-10 text-caption font-medium text-muted-foreground">
-          {title}
-        </div>
-      )}
-      {onReplay && canReplay && (
-        // Absolutely placed so a title-less frame doesn't get an empty header row.
-        <button
-          type="button"
-          onClick={onReplay}
-          aria-label={label ? `Replay: ${label}` : 'Replay animation'}
-          title="Replay"
-          className="absolute top-3 right-3 inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-[color,background-color,transform] duration-150 ease-out-expo hover:bg-surface-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.96] motion-reduce:transition-none sm:top-5 sm:right-5"
-        >
-          <RotateCcw className="size-4" aria-hidden />
-        </button>
-      )}
-      <div
-        ref={sceneRef}
-        className={
-          minWidth
-            ? '-mx-4 overflow-x-auto px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:mx-0 sm:px-0'
-            : undefined
-        }
-        {...(minWidth
-          ? { tabIndex: 0, role: 'group', 'aria-label': label ?? 'Diagram' }
-          : {})}
+      <motion.figure
+        ref={figureRef}
+        initial={false}
+        animate={{ opacity: hidden ? 0 : 1 }}
+        transition={hidden ? { duration: 0 } : { duration: DUR.base, ease: EASE.outExpo }}
+        className={cn(
+          'not-prose relative my-8 rounded-xl border p-4 sm:p-6',
+          variant === 'demo' ? 'border-border bg-transparent' : 'border-border bg-surface-2',
+          className
+        )}
       >
-        <div style={minWidth ? { minWidth } : undefined}>{children}</div>
-      </div>
-      {caption && (
-        <figcaption className="mt-4 text-caption leading-relaxed text-muted-foreground">
-          {caption}
-        </figcaption>
-      )}
-    </motion.figure>
+        {title && (
+          <div className="mb-4 flex min-h-8 items-center pr-10 text-caption font-medium text-muted-foreground">
+            {title}
+          </div>
+        )}
+        {onReplay && canReplay && (
+          // Absolutely placed so a title-less frame doesn't get an empty header row.
+          <button
+            type="button"
+            onClick={onReplay}
+            aria-label={label ? `Replay: ${label}` : 'Replay animation'}
+            title="Replay"
+            className="absolute top-3 right-3 inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-[color,background-color,transform] duration-150 ease-out-expo hover:bg-surface-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.96] motion-reduce:transition-none sm:top-5 sm:right-5"
+          >
+            <RotateCcw className="size-4" aria-hidden />
+          </button>
+        )}
+        <div
+          ref={sceneRef}
+          className={
+            minWidth
+              ? '-mx-4 overflow-x-auto px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:mx-0 sm:px-0'
+              : undefined
+          }
+          {...(minWidth ? { tabIndex: 0, role: 'group', 'aria-label': label ?? 'Diagram' } : {})}
+        >
+          <div style={minWidth ? { minWidth } : undefined}>{children}</div>
+        </div>
+        {caption && (
+          <figcaption className="mt-4 text-caption leading-relaxed text-muted-foreground">
+            {caption}
+          </figcaption>
+        )}
+      </motion.figure>
     </MotionConfig>
   );
 }
