@@ -1,31 +1,30 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
-import { FormatOn } from 'numora';
 
 export const Route = createFileRoute('/docs/numora-react/features/decimals')({
   head: () => ({
     meta: [
-      { title: 'Decimal Input Validation & Limits | numora-react' },
+      { title: 'Decimals | Numora React' },
       {
         name: 'description',
         content:
-          'Validate decimal inputs and enforce limits using the NumoraInput React component. Set max/min decimal places with full TypeScript support.',
+          'Limit decimal places in the NumoraInput React component. Set the max and min decimal places and the decimal separator, with TypeScript types.',
       },
-      { property: 'og:title', content: 'Decimal Input Validation & Limits | numora-react' },
+      { property: 'og:title', content: 'Decimals | Numora React' },
       {
         property: 'og:description',
         content:
-          'Validate decimal inputs and enforce limits using the NumoraInput React component. Set max/min decimal places with TypeScript support.',
+          'Limit decimal places in the NumoraInput React component. Set the max and min decimal places and the decimal separator, with TypeScript types.',
       },
       {
         property: 'og:url',
         content: 'https://numeric-input.com/docs/numora-react/features/decimals',
       },
-      { name: 'twitter:title', content: 'Decimal Input Validation & Limits | numora-react' },
+      { name: 'twitter:title', content: 'Decimals | Numora React' },
       {
         name: 'twitter:description',
         content:
-          'Validate decimal inputs and enforce limits using the NumoraInput React component.',
+          'Limit decimal places in the NumoraInput React component. Set the max and min decimal places and the decimal separator, with TypeScript types.',
       },
     ],
     links: [
@@ -38,9 +37,9 @@ export const Route = createFileRoute('/docs/numora-react/features/decimals')({
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Decimal Handling in numora-react - React Numeric Input Decimal Precision',
+            headline: 'Decimals | Numora React',
             description:
-              'Configure decimal precision in the numora-react React numeric input component. Control decimal separator, max decimals, and minimum decimal padding.',
+              'Configure decimal precision in the React numeric input component: the decimal separator, decimalMaxLength and decimalMinLength padding.',
             url: 'https://numeric-input.com/docs/numora-react/features/decimals',
             author: {
               '@type': 'Person',
@@ -76,61 +75,57 @@ export const Route = createFileRoute('/docs/numora-react/features/decimals')({
 
 function Decimals() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Decimals</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Control decimal precision, separators, and locale-aware formatting.
-      </p>
+    <div className="docs-prose max-w-[36rem]">
+      <h1>Decimals</h1>
+      <p>Set how many decimal places are allowed and which separators the input uses.</p>
 
-      <h2 className="text-foreground text-2xl">Precision limits</h2>
+      <h2>Precision limits</h2>
       <div className="space-y-4">
         <ExampleWithDemo
           title="Max decimal places"
-          description="Try typing more than 2 decimal places - extra digits are truncated"
+          description="Try typing more than 2 decimal places. Extra typed digits are refused, and pasted ones are cut off, not rounded (the default limit is 18)"
           language="tsx"
-          code={`<NumoraInput maxDecimals={2} />`}
-          config={{ maxDecimals: 2 }}
+          code={`<NumoraInput decimalMaxLength={2} />`}
+          config={{ decimalMaxLength: 2 }}
         />
         <ExampleWithDemo
           title="Min decimal places"
-          description={'Type "1" and blur - it becomes "1.00"'}
+          description={
+            'Type "1" and click away. The input shows "1.00" on blur. A value your app passes is padded too. decimalMinLength above decimalMaxLength is an invalid option'
+          }
           language="tsx"
-          code={`<NumoraInput decimalMinLength={2} maxDecimals={18} />`}
-          config={{ decimalMinLength: 2, maxDecimals: 18 }}
+          code={`<NumoraInput decimalMinLength={2} decimalMaxLength={18} />`}
+          config={{ decimalMinLength: 2, decimalMaxLength: 18 }}
         />
       </div>
 
-      <h2 className="text-foreground text-2xl">Separators</h2>
+      <h2>Separators</h2>
       <div className="space-y-4">
         <ExampleWithDemo
           title="European format"
-          description='Type a number - displayed as "1.234,56"'
+          description='Type a number and it displays as "1.234,56"'
           language="tsx"
-          code={`<NumoraInput decimalSeparator="," thousandSeparator="." formatOn={FormatOn.Change} />`}
-          config={{ decimalSeparator: ',', thousandSeparator: '.', formatOn: FormatOn.Change }}
+          code={`<NumoraInput decimalSeparator="," thousandSeparator="." formatOn="change" />`}
+          config={{ decimalSeparator: ',', thousandSeparator: '.', formatOn: 'change' }}
         />
       </div>
 
-      <p className="text-muted-foreground text-base leading-6">
+      <p>
         For locale-aware separator detection, see{' '}
-        <Link to="/docs/numora-react/features/locale" className="underline link-underline hover:text-foreground transition-colors">
-          Locale
-        </Link>
-        .
+        <Link to="/docs/numora-react/features/locale">Locale</Link>.
       </p>
 
-      <h2 className="text-foreground text-2xl">Automatic behaviors</h2>
+      <h2>Built-in behavior</h2>
       <ul>
         <li>
-          <strong>Comma/dot conversion</strong> - when no thousand separator is set, both{' '}
-          <code>,</code> and <code>.</code> keystrokes map to the configured decimal separator
+          Typing <code>,</code> or <code>.</code> inserts the configured decimal separator. It is
+          blocked if the value already has one.
         </li>
         <li>
-          <strong>Duplicate prevention</strong> - typing a second decimal separator is blocked
-        </li>
-        <li>
-          <strong>Paste cleanup</strong> - if multiple separators appear (e.g.{' '}
-          <code>"12.34.56"</code>), all but the first are removed (<code>"12.3456"</code>)
+          Numora reads pasted text by its own format. When both <code>.</code> and <code>,</code>{' '}
+          appear, the last one is the decimal, so <code>"1,234.56"</code> becomes{' '}
+          <code>1234.56</code>. A mark that repeats is grouping, so <code>"12.34.56"</code> becomes{' '}
+          <code>123456</code>.
         </li>
       </ul>
     </div>

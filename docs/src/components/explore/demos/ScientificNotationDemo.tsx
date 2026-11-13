@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { Beaker, Calculator, Wallet } from 'lucide-react';
 import { NumoraInput } from 'numora-react';
-import { ProblemSection } from '../ProblemSection';
+import { useState } from 'react';
+import { BrokenInput } from '../BrokenInput';
 import { InputComparison } from '../InputComparison';
 import { PasteButtonGroup } from '../PasteButton';
-import { BrokenInput } from '../BrokenInput';
-import { Wallet, Beaker, Calculator } from 'lucide-react';
+import { ProblemSection } from '../ProblemSection';
 
 const SCIENTIFIC_VALUES = [
   { label: '1e-18 (1 wei)', value: '1e-18' },
@@ -25,16 +25,17 @@ export function ScientificNotationDemo() {
   };
 
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <ProblemSection
       id="scientific-notation"
       problemNumber={3}
-      title="Scientific Notation Expansion"
+      title="Scientific notation expansion"
       subtitle="1e-18 should expand to 0.000000000000000001"
       description={
         <p>
-          In crypto and DeFi, users frequently deal with very small or very large numbers. Pasting{' '}
-          <code className="px-1 py-0.5 rounded bg-muted font-mono">1e-18</code> (1 wei) should
-          display the full decimal representation, not the scientific notation.
+          DeFi amounts are often very small or very large. Pasting{' '}
+          <code className="px-1 py-0.5 rounded bg-muted font-mono">1e-18</code> (1 wei) should show
+          the full decimal, not scientific notation.
         </p>
       }
     >
@@ -60,8 +61,8 @@ export function ScientificNotationDemo() {
       </div>
 
       <InputComparison
-        leftLabel="Native type='number'"
-        rightLabel="Numora Input"
+        leftLabel={'Native <input type="number">'}
+        rightLabel="Numora"
         leftInput={
           <div className="space-y-4">
             <PasteButtonGroup
@@ -73,13 +74,13 @@ export function ScientificNotationDemo() {
               mode="native-number"
               value={nativeValue}
               onChange={setNativeValue}
-              placeholder="Paste scientific notation..."
+              placeholder="1e-18"
             />
             <div className="p-3 rounded-lg bg-muted/30 border border-border">
-              <p className="text-xs text-muted-foreground mb-1">Native displays:</p>
+              <p className="text-xs text-muted-foreground mb-1">Native value:</p>
               <code className="font-mono text-signal-red">{nativeValue || '(empty)'}</code>
               <p className="text-xs text-signal-red mt-2">
-                Shows scientific notation or loses precision entirely
+                Shows scientific notation or loses precision
               </p>
             </div>
           </div>
@@ -94,16 +95,18 @@ export function ScientificNotationDemo() {
             <NumoraInput
               value={numoraValue}
               onChange={(e) => setNumoraValue(e.target.value)}
-              enableCompactNotation
-              maxDecimals={18}
-              placeholder="Paste scientific notation..."
+              allowCompactNotation
+              decimalMaxLength={18}
+              placeholder="1e-18"
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
             <div className="p-3 rounded-lg bg-muted/30 border border-border">
               <p className="text-xs text-muted-foreground mb-1">Numora expands:</p>
-              <code className="font-mono text-signal-green break-all">{numoraValue || '(empty)'}</code>
+              <code className="font-mono text-signal-green break-all">
+                {numoraValue || '(empty)'}
+              </code>
               <p className="text-xs text-signal-green mt-2">
-                Full decimal expansion with precise representation
+                Full decimal expansion, no precision lost
               </p>
             </div>
           </div>

@@ -1,55 +1,54 @@
-import { useState, useRef, useEffect } from 'react';
+import {
+  Accessibility,
+  AlertTriangle,
+  Code,
+  Eye,
+  Hash,
+  MousePointer2,
+  Smartphone,
+  Type,
+} from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { NumoraInput } from 'numora-react';
-import { FormatOn, ThousandStyle } from 'numora';
-import { ProblemSection } from '../ProblemSection';
+import { useEffect, useRef, useState } from 'react';
 import { InputComparison } from '../InputComparison';
-import {
-  AlertTriangle,
-  MousePointer2,
-  Type,
-  Hash,
-  Eye,
-  Accessibility,
-  Smartphone,
-  Code,
-} from 'lucide-react';
+import { ProblemSection } from '../ProblemSection';
 
 const PROBLEMS = [
   {
     icon: MousePointer2,
     title: 'Scroll wheel changes value',
-    description: 'Hover and scroll to accidentally change the number',
+    description: 'Scrolling over the input changes the number',
   },
   {
     icon: Type,
     title: "Can't format with commas",
-    description: 'Thousand separators are rejected',
+    description: 'It rejects thousand separators',
   },
   {
     icon: Hash,
     title: 'Shows spinners on desktop',
-    description: 'Ugly increment/decrement buttons appear',
+    description: 'Increment and decrement buttons show up',
   },
   {
     icon: Eye,
     title: 'Inconsistent validation',
-    description: 'Allows "e" but not "," - counterintuitive',
+    description: 'Allows "e" but not ","',
   },
   {
     icon: Accessibility,
     title: 'Poor accessibility',
-    description: 'Screen readers struggle with the format',
+    description: 'Screen readers handle it inconsistently',
   },
   {
     icon: Smartphone,
     title: 'Mobile keyboard issues',
-    description: 'Some mobile browsers show wrong keyboard',
+    description: 'Some mobile browsers show the wrong keyboard',
   },
   {
     icon: Code,
     title: 'Value vs display mismatch',
-    description: '.value might differ from displayed text',
+    description: '.value can differ from the text on screen',
   },
 ];
 
@@ -63,7 +62,7 @@ export function NumberTypeLieDemo() {
     const input = nativeInputRef.current;
     if (!input) return;
 
-    const handleWheel = (e: WheelEvent) => {
+    const handleWheel = () => {
       if (document.activeElement === input || input.matches(':hover')) {
         setScrollWarning(true);
         setTimeout(() => setScrollWarning(false), 2000);
@@ -75,16 +74,17 @@ export function NumberTypeLieDemo() {
   }, []);
 
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <ProblemSection
       id="number-type-lie"
       problemNumber={7}
-      title='The type="number" Lie'
-      subtitle="It seems right, but it's deeply broken"
+      title='The type="number" lie'
+      subtitle="It looks right, but it isn't"
       description={
         <p>
           <code className="px-1 py-0.5 rounded bg-muted font-mono">{'<input type="number">'}</code>{' '}
-          seems like the obvious choice for numeric inputs, but it has fundamental problems that
-          make it unsuitable for most real-world applications.
+          looks like the obvious choice for a numeric input. It has problems that make it a poor fit
+          for money.
         </p>
       }
     >
@@ -108,7 +108,7 @@ export function NumberTypeLieDemo() {
                 type="number"
                 value={nativeValue}
                 onChange={(e) => setNativeValue(e.target.value)}
-                placeholder="Type a number..."
+                placeholder="1234.56"
                 className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
               />
               <AnimatePresence>
@@ -116,8 +116,18 @@ export function NumberTypeLieDemo() {
                   <motion.div
                     className="absolute -top-10 left-0 right-0 flex justify-center"
                     initial={{ opacity: 0, y: -4, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: 0.18, ease: [0.16, 1, 0.3, 1] } }}
-                    exit={{ opacity: 0, y: -2, scale: 0.97, transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] } }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      scale: 1,
+                      transition: { duration: 0.18, ease: [0.16, 1, 0.3, 1] },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -2,
+                      scale: 0.97,
+                      transition: { duration: 0.12, ease: [0.16, 1, 0.3, 1] },
+                    }}
                   >
                     <div className="px-3 py-1 rounded bg-signal-red text-white text-xs font-medium motion-safe:animate-bounce">
                       Value changed by scroll!
@@ -132,36 +142,38 @@ export function NumberTypeLieDemo() {
                 <span className="text-signal-red font-medium">Try this:</span>
               </div>
               <ul className="text-signal-red list-disc list-inside space-y-1 text-xs">
-                <li>Hover and scroll to change value accidentally</li>
+                <li>Hover and scroll to change the value by accident</li>
                 <li>Try typing 1,000 (comma rejected)</li>
-                <li>Notice the ugly spinner buttons</li>
+                <li>Look at the spinner buttons</li>
               </ul>
             </div>
             <div className="p-3 rounded-lg bg-muted/30 border border-border">
               <p className="text-xs text-muted-foreground">Implementation:</p>
-              <code className="font-mono text-xs text-signal-amber">{'<input type="number" />'}</code>
+              <code className="font-mono text-xs text-signal-amber">
+                {'<input type="number" />'}
+              </code>
             </div>
           </div>
         }
         rightInput={
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Same test - hover and scroll:</p>
+            <p className="text-sm text-muted-foreground">Same test. Hover and scroll:</p>
             <NumoraInput
               value={numoraValue}
               onChange={(e) => setNumoraValue(e.target.value)}
-              formatOn={FormatOn.Change}
+              formatOn="change"
               thousandSeparator=","
-              thousandStyle={ThousandStyle.Thousand}
-              placeholder="Type a number..."
+              groupingStyle="thousand"
+              placeholder="1234.56"
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
             <div className="p-3 rounded-lg bg-signal-green/10 border border-signal-green/30 text-sm">
               <p className="text-signal-green font-medium mb-2">Numora uses:</p>
               <ul className="text-signal-green list-disc list-inside space-y-1 text-xs">
-                <li>type="text" - no scroll hijacking</li>
-                <li>inputmode="decimal" - mobile numeric keyboard</li>
-                <li>Full formatting support with commas</li>
-                <li>Consistent, predictable behavior</li>
+                <li>type="text", so scrolling does nothing</li>
+                <li>inputmode="decimal" for the numeric keyboard on mobile</li>
+                <li>Commas and other separators</li>
+                <li>Numora sanitizes pasted values before they reach your state</li>
               </ul>
             </div>
             <div className="p-3 rounded-lg bg-muted/30 border border-border">

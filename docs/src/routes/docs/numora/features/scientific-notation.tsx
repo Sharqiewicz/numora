@@ -4,26 +4,27 @@ import { CodeBlock } from '@/components/CodeBlock';
 export const Route = createFileRoute('/docs/numora/features/scientific-notation')({
   head: () => ({
     meta: [
-      { title: 'Scientific Notation Input (1e-18) | Numora' },
+      { title: 'Scientific notation | Numora' },
       {
         name: 'description',
         content:
-          "Handle scientific notation in numeric inputs with Numora. Prevent JavaScript's automatic 1e-6 conversion and preserve full expanded strings for DeFi token amounts.",
+          "Handle scientific notation in numeric inputs with Numora. Avoid JavaScript's automatic 1e-7 conversion and keep the full expanded string for DeFi token amounts.",
       },
-      { property: 'og:title', content: 'Scientific Notation Input (1e-18) | Numora' },
+      { property: 'og:title', content: 'Scientific notation | Numora' },
       {
         property: 'og:description',
         content:
-          'Handle scientific notation in numeric inputs with Numora. Prevent 1e-18 issues and preserve full expanded decimal strings.',
+          "Handle scientific notation in numeric inputs with Numora. Avoid JavaScript's automatic 1e-7 conversion and keep the full expanded string for DeFi token amounts.",
       },
       {
         property: 'og:url',
         content: 'https://numeric-input.com/docs/numora/features/scientific-notation',
       },
-      { name: 'twitter:title', content: 'Scientific Notation Input (1e-18) | Numora' },
+      { name: 'twitter:title', content: 'Scientific notation | Numora' },
       {
         name: 'twitter:description',
-        content: 'Handle scientific notation (1e-18) in numeric inputs with Numora.',
+        content:
+          "Handle scientific notation in numeric inputs with Numora. Avoid JavaScript's automatic 1e-7 conversion and keep the full expanded string for DeFi token amounts.",
       },
     ],
     links: [
@@ -39,9 +40,9 @@ export const Route = createFileRoute('/docs/numora/features/scientific-notation'
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Scientific Notation Handling in Numora - Safe Paste for Numeric Input',
+            headline: 'Scientific notation in Numora: safe paste for numeric input',
             description:
-              'Handle scientific notation safely in JavaScript numeric inputs. Numora expands 1.5e-7 to 0.00000015 automatically when pasting from block explorers or APIs.',
+              'Handle scientific notation in JavaScript numeric inputs. Numora expands 1.5e-7 to 0.00000015 when you paste from block explorers or APIs.',
             url: 'https://numeric-input.com/docs/numora/features/scientific-notation',
             author: {
               '@type': 'Person',
@@ -57,13 +58,13 @@ export const Route = createFileRoute('/docs/numora/features/scientific-notation'
               {
                 '@type': 'ListItem',
                 position: 2,
-                name: 'Numora JS',
+                name: 'Numora',
                 item: 'https://numeric-input.com/docs/numora',
               },
               {
                 '@type': 'ListItem',
                 position: 3,
-                name: 'Scientific Notation',
+                name: 'Scientific notation',
                 item: 'https://numeric-input.com/docs/numora/features/scientific-notation',
               },
             ],
@@ -77,32 +78,42 @@ export const Route = createFileRoute('/docs/numora/features/scientific-notation'
 
 function ScientificNotation() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Scientific Notation</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Numora always expands scientific notation to decimal notation. This is automatic and cannot
-        be disabled. Expansion uses string arithmetic, so there is no floating-point precision loss.
+    <div className="docs-prose max-w-[36rem]">
+      <h1>Scientific notation</h1>
+      <p>
+        Numora expands values like <code>1.5e-7</code> to decimal notation. It usually enters the
+        field through paste or through values your app passes in. A lone <code>e</code> typed at the
+        end of the field is ignored, but an <code>e</code> typed between digits completes a token
+        and expands too (<code>1e5</code> becomes <code>100000</code>). Expansion uses string
+        arithmetic, so no floating-point precision is lost.
+      </p>
+      <p>
+        To refuse scientific notation instead, set <code>allowScientificNotation: false</code>{' '}
+        (default <code>true</code>). Such a paste or keystroke then leaves the field unchanged.
+        Values your app passes in (<code>defaultValue</code>, <code>setValue()</code>) are expanded
+        either way, because <code>String(1e21)</code> is <code>"1e+21"</code> in JavaScript.
       </p>
 
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
 const input = new NumoraInput(container, {
-  maxDecimals: 18,
+  decimalMaxLength: 18,
 })
 
-// Paste or type any of these - all are expanded automatically:
+// Paste any of these and Numora expands it. The raw value becomes:
 // "1.5e-7"   → "0.00000015"
-// "2e+5"     → "200000"
+// "2e+5"     → "200000"  (shown as "200,000" with the default grouping)
 // "1.23e-4"  → "0.000123"
-// "5e3"      → "5000"
-// "-1.5e-7"  → "-0.00000015"  (with enableNegative: true)
-// "1.5e-18"  → "0.0000000000000000015"  (no precision loss)`}
+// "5e3"      → "5000"    (shown as "5,000")
+// "-1.5e-7"  → "-0.00000015"  (with allowNegative: true)
+// "1.5e-17"  → "0.000000000000000015"  (18 decimals, no precision lost)
+// Digits past decimalMaxLength are cut off after expansion:
+// "1.5e-19" → "0.000000000000000000"`}
       </CodeBlock>
 
-      <p className="text-muted-foreground text-base leading-6">
-        Both <code>e</code> and <code>E</code> are supported. The expanded value is then processed
-        through the rest of the sanitization pipeline and formatted according to your configuration.
+      <p>
+        Both <code>e</code> and <code>E</code> work.
       </p>
     </div>
   );

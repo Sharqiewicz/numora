@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { Smartphone } from 'lucide-react';
 import { NumoraInput } from 'numora-react';
-import { ProblemSection } from '../ProblemSection';
+import { useState } from 'react';
+import { BrokenInput } from '../BrokenInput';
 import { InputComparison } from '../InputComparison';
 import { PasteButton } from '../PasteButton';
-import { BrokenInput } from '../BrokenInput';
-import { Smartphone } from 'lucide-react';
+import { ProblemSection } from '../ProblemSection';
 
 const MOBILE_PASTE_VALUE = '1\u00A0234';
 
@@ -21,29 +21,29 @@ export function MobileKeyboardDemo() {
   };
 
   const showHexView = (str: string) => {
-    return str
-      .split('')
-      .map((char) => char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0'))
+    return Array.from(new TextEncoder().encode(str))
+      .map((byte) => byte.toString(16).toUpperCase().padStart(2, '0'))
       .join(' ');
   };
 
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <ProblemSection
       id="mobile-keyboard"
       problemNumber={4}
-      title="Mobile Keyboard Gremlins"
-      subtitle="Hidden characters that break your validation"
+      title="Mobile keyboard gremlins"
+      subtitle="Invisible characters that break validation"
       description={
         <p>
-          Mobile keyboards often insert non-breaking spaces (U+00A0), zero-width characters, or
-          other invisible Unicode. These break validation and calculations silently.
+          Mobile keyboards can insert non-breaking spaces (U+00A0), zero-width characters and other
+          invisible Unicode. Validation and math then fail with no visible cause.
         </p>
       }
     >
       <div className="mb-8 p-4 rounded-lg bg-muted/30 border border-border">
         <div className="flex items-center gap-2 mb-3 text-secondary">
           <Smartphone className="w-5 h-5" />
-          <span className="font-medium">The Hidden Character Problem</span>
+          <span className="font-medium">The hidden character problem</span>
         </div>
         <p className="text-sm text-muted-foreground mb-3">
           When copying "1 234" from a mobile app, you might get:
@@ -54,7 +54,9 @@ export function MobileKeyboardDemo() {
             <code className="block p-2 rounded bg-background font-mono">1 234</code>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground mb-1">What's actually there (hex):</p>
+            <p className="text-xs text-muted-foreground mb-1">
+              What's actually there (UTF-8 bytes, hex):
+            </p>
             <code className="block p-2 rounded bg-background font-mono text-signal-amber">
               31 C2 A0 32 33 34
             </code>
@@ -64,8 +66,8 @@ export function MobileKeyboardDemo() {
       </div>
 
       <InputComparison
-        leftLabel="Native Input"
-        rightLabel="Numora Input"
+        leftLabel="Native input"
+        rightLabel="Numora"
         leftInput={
           <div className="space-y-4">
             <PasteButton
@@ -78,21 +80,21 @@ export function MobileKeyboardDemo() {
               mode="native-text"
               value={nativeValue}
               onChange={setNativeValue}
-              placeholder="Paste mobile number..."
+              placeholder="1 234"
             />
             {nativeValue && (
               <div className="space-y-2">
                 <div className="p-3 rounded-lg bg-muted/30 border border-border">
-                  <p className="text-xs text-muted-foreground mb-1">Hex view:</p>
+                  <p className="text-xs text-muted-foreground mb-1">UTF-8 bytes (hex):</p>
                   <code className="font-mono text-signal-amber text-xs break-all">
                     {showHexView(nativeValue)}
                   </code>
                 </div>
                 <div className="p-3 rounded-lg bg-signal-red/10 border border-signal-red/30">
                   <p className="text-xs text-signal-red">
-                    parseFloat("{nativeValue}") = {parseFloat(nativeValue) || 'NaN'}
+                    parseFloat("{nativeValue}") = {String(parseFloat(nativeValue))}
                     <br />
-                    The hidden character breaks parsing!
+                    Parsing stops at the hidden character.
                   </p>
                 </div>
               </div>
@@ -110,22 +112,22 @@ export function MobileKeyboardDemo() {
             <NumoraInput
               value={numoraValue}
               onChange={(e) => setNumoraValue(e.target.value)}
-              placeholder="Paste mobile number..."
+              placeholder="1 234"
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
             {numoraValue && (
               <div className="space-y-2">
                 <div className="p-3 rounded-lg bg-muted/30 border border-border">
-                  <p className="text-xs text-muted-foreground mb-1">Hex view:</p>
+                  <p className="text-xs text-muted-foreground mb-1">UTF-8 bytes (hex):</p>
                   <code className="font-mono text-signal-green text-xs break-all">
                     {showHexView(numoraValue)}
                   </code>
                 </div>
                 <div className="p-3 rounded-lg bg-signal-green/10 border border-signal-green/30">
                   <p className="text-xs text-signal-green">
-                    Automatically cleaned to: {numoraValue}
+                    Numora cleaned it to: {numoraValue}
                     <br />
-                    All hidden characters removed!
+                    It removed every hidden character.
                   </p>
                 </div>
               </div>

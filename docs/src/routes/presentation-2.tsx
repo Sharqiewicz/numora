@@ -1,8 +1,12 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, notFound } from '@tanstack/react-router';
 import { motion, useReducedMotion } from 'motion/react';
 import LightRays from '@/components/LightRays';
 
 export const Route = createFileRoute('/presentation-2')({
+  // Talk slides: available in local dev, not part of the production site.
+  beforeLoad: () => {
+    if (import.meta.env.PROD) throw notFound();
+  },
   head: () => ({
     meta: [{ name: 'robots', content: 'noindex, nofollow' }],
   }),

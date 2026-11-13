@@ -1,1061 +1,249 @@
 # Numora Developer Guide
 
-**A Comprehensive Guide to Understanding and Contributing to Numora**
+A guide for people who work on Numora itself. For using the library, see the package READMEs and the docs site.
 
-Version: 1.0
-Last Updated: 2025-01-27
+## Contents
 
----
+1. [What Numora is](#what-numora-is)
+2. [Core principles](#core-principles)
+3. [Repository layout](#repository-layout)
+4. [Entry points](#entry-points)
+5. [How a keystroke flows](#how-a-keystroke-flows)
+6. [Sanitization and value sources](#sanitization-and-value-sources)
+7. [Development setup](#development-setup)
+8. [Testing](#testing)
+9. [Adding a feature](#adding-a-feature)
+10. [Troubleshooting](#troubleshooting)
+11. [Further reading](#further-reading)
 
-## 📖 Table of Contents
+## What Numora is
 
-1. [What is Numora?](#what-is-numora)
-2. [Core Principles](#core-principles)
-3. [Architecture Overview](#architecture-overview)
-4. [Module Breakdown](#module-breakdown)
-5. [Data Flow](#data-flow)
-6. [Development Setup](#development-setup)
-7. [Testing](#testing)
-8. [Adding New Features](#adding-new-features)
-9. [Key Concepts](#key-concepts)
-10. [Common Patterns](#common-patterns)
-11. [Troubleshooting](#troubleshooting)
-
----
-
-## 🎯 What is Numora?
-
-Numora is a **precision-first numeric input library** designed specifically for DeFi and financial applications where accuracy is critical.
-
-### The Problem
-
-Standard HTML number inputs and JavaScript's `Number` type have serious limitations:
+Numora is a numeric input for financial apps, where a wrong digit is a real error. It keeps every value as a string, so there are no floating-point errors:
 
 ```javascript
-// ❌ JavaScript floating-point precision issues
-0.1 + 0.2 === 0.3  // false! (0.30000000000000004)
-1.005 * 100        // 100.49999999999999
-
-// ❌ HTML number input limitations
-<input type="number">  // Can't handle custom formatting
-                       // Poor mobile keyboard support
-                       // Loses leading zeros
+0.1 + 0.2 === 0.3  // false (0.30000000000000004)
 ```
 
-### The Solution
+Numora does no arithmetic. It cleans, trims and formats text.
 
-Numora provides:
+What it does:
 
-✅ **String-only arithmetic** - No floating-point errors
-✅ **Precision control** - Configurable decimal places
-✅ **Smart formatting** - Thousands separators with cursor preservation
-✅ **Scientific notation** - Automatic expansion (1.5e-7 → 0.00000015)
-✅ **Mobile-friendly** - Decimal keyboard on mobile devices
-✅ **Zero dependencies** - Lightweight and secure
-✅ **Framework adapters** - React, Vue (planned), Vanilla JS
+- Strips anything that is not part of a number.
+- Limits decimals (`decimalMaxLength`, `decimalMinLength`) and total raw length (`maxLength`).
+- Groups digits (`groupingStyle`: `thousand`, `lakh`, `wan`, `none`) and keeps the caret where the user expects it.
+- Expands scientific notation (`1.5e-7` to `0.00000015`) and, when enabled, compact notation (`1k` to `1000`).
+- Reads separators from a `locale`.
+- Has no runtime dependencies.
 
-### Use Cases
+## Core principles
 
-- 💰 Cryptocurrency wallets (precise token amounts)
-- 📊 Trading platforms (accurate price inputs)
-- 💳 Payment forms (exact currency amounts)
-- 🏦 Financial calculators (decimal precision critical)
+1. **Strings only.** A value is never converted to `Number` while it is being processed.
+2. **Two kinds of value.** The raw value is canonical: ASCII digits, `.` as the decimal mark, an optional leading `-`, no grouping, the same in every locale. The display value is what the field shows, in the field's locale. See ADR 0004.
+3. **The core has no framework code.** `numora-react` is a thin adapter over the same DOM-event functions.
+4. **Behavior changes are recorded.** Decisions that are not obvious from the code live in `docs/adr/`.
 
----
+## Repository layout
 
-## 🧭 Core Principles
-
-### 1. String-Only State
-
-**All numeric values are stored and manipulated as strings.**
-
-```typescript
-// ✅ Good - String manipulation
-const value = "1.234567890123456789";
-const trimmed = value.slice(0, value.indexOf('.') + 3); // "1.23"
-
-// ❌ Bad - Number conversion loses precision
-const value = 1.234567890123456789;
-const rounded = Number(value.toFixed(2)); // Precision lost!
-```
-
-### 2. Zero Dependencies
-
-The core library has **zero runtime dependencies** to ensure:
-- Small bundle size
-- Security (no supply chain attacks)
-- Predictable behavior
-- Easy auditing
-
-### 3. Framework Agnostic
-
-The core is pure TypeScript. Framework adapters are thin wrappers:
+This is a pnpm workspace (`pnpm-workspace.yaml`).
 
 ```
-packages/core/       ← Pure TS logic (no framework deps)
-packages/react/      ← React wrapper
-packages/vue/        ← Vue wrapper (planned)
+packages/core/      numora: the vanilla input (NumoraInput), headless functions, pipeline
+packages/react/     numora-react: the React component
+docs/               the documentation site
+docs/adr/           architecture decision records
+scripts/            check-bundle-size.mjs, check-docs-drift.mjs, diff-fuzz.mjs
 ```
 
-### 4. Progressive Enhancement
-
-Features are layered:
+Core source (`packages/core/src/`):
 
 ```
-Base:        Input sanitization + decimal control
-Layer 1:     Scientific notation expansion
-Layer 2:     Thousands separator formatting
-Layer 3:     Advanced cursor positioning
+index.ts                  public API
+pipeline.ts               entry point: the individual sanitization steps
+internal.ts               entry point: wiring shared with numora-react (not stable)
+NumoraInput.ts            the vanilla class
+headless.ts               formatValue, parseValue
+config.ts, types.ts, validation.ts
+features/
+  sanitization.ts         sanitizeNumoraInput, ValueSource
+  foreign-format.ts       reads pasted text of unknown format
+  decimal-separators.ts, decimals.ts, fullwidth-digits.ts, unicode-minus.ts
+  scientific-notation.ts, compact-notation.ts
+  non-numeric-characters.ts, leading-zeros.ts, prepend-leading-zero.ts
+  max-length.ts, mobile-keyboard-filtering.ts
+  formatting/             thousand-grouping.ts, rank-select.ts, caret-position-utils.ts,
+                          dom-writes.ts, index.ts
+utils/
+  event-handlers.ts       pure beforeinput / keydown / paste handlers
+  dom-events.ts           apply* functions that run a handler and write the DOM
+  caret.ts                caret placement
+  format-utils.ts, locale.ts, resolve-options.ts, app-value.ts,
+  removed-options.ts, mantissa-scan.ts
 ```
 
----
+React source is `packages/react/src/index.tsx` and `use-isomorphic-layout-effect.ts`.
 
-## 🏗️ Architecture Overview
+Other files worth knowing: `knip.json` (unused code check), `biome.json` (lint and format), `packages/core/bench/` (benchmarks), `.github/workflows/ci.yml`.
 
-### High-Level Architecture
+## Entry points
 
-```
-┌─────────────────────────────────────────────────┐
-│                  User Interface                 │
-│              (Types, Pastes, Deletes)           │
-└────────────────────┬────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────┐
-│              NumoraInput Class                   │
-│         (Presentation & Coordination)           │
-│  - Creates <input> element                      │
-│  - Manages event listeners                      │
-│  - Coordinates between handlers                 │
-└─────┬──────────────┬────────────────────────────┘
-      │              │
-      ▼              ▼
-┌──────────┐  ┌─────────────────────────────────┐
-│ Event    │  │    Utility Modules              │
-│ Handlers │◄─┤  (Pure Functions)               │
-└────┬─────┘  └─────────────────────────────────┘
-     │                     │
-     │                     ├─► Sanitization
-     │                     ├─► Decimals
-     │                     ├─► Formatting
-     │                     └─► Scientific Notation
-     │
-     ▼
-┌─────────────────────────────────────────────────┐
-│           DOM Update & Cursor Positioning       │
-└─────────────────────────────────────────────────┘
-```
+`numora` has three entry points (see `packages/core/package.json`).
 
-### Data Flow
+| Import | What is in it | Stable? |
+| --- | --- | --- |
+| `numora` | `NumoraInput`, option types, `GroupingStyle`, `FormatOn`, `getSeparatorsFromLocale`, `formatValue`, `parseValue` | Yes |
+| `numora/pipeline` | The individual sanitization steps as pure string functions, for building a custom pipeline | No. No semver guarantee: a step can change or go in a minor version. |
+| `numora/internal` | DOM-event and DOM-write primitives that `numora-react` reuses | No. May change in a minor version. Do not use it in app code. |
 
-```
-User Input ("1.5e-7")
-    ↓
-┌─────────────────────────────────┐
-│  Step 1: Event Capture          │
-│  keydown → track caret position │
-│  input → trigger processing     │
-└─────────────┬───────────────────┘
-              ↓
-┌─────────────────────────────────┐
-│  Step 2: Sanitization           │
-│  - Expand scientific notation   │
-│    "1.5e-7" → "0.00000015"     │
-│  - Remove non-numeric chars     │
-│  - Remove extra dots            │
-└─────────────┬───────────────────┘
-              ↓
-┌─────────────────────────────────┐
-│  Step 3: Decimal Control        │
-│  - Trim to maxDecimals          │
-│  - Replace commas with dots     │
-└─────────────┬───────────────────┘
-              ↓
-┌─────────────────────────────────┐
-│  Step 4: Formatting (Optional)  │
-│  - Add thousands separators     │
-│    "1000000" → "1,000,000"     │
-└─────────────┬───────────────────┘
-              ↓
-┌─────────────────────────────────┐
-│  Step 5: Cursor Positioning     │
-│  - Calculate new cursor position│
-│  - Preserve relative position   │
-└─────────────┬───────────────────┘
-              ↓
-Update DOM (input.value & cursor)
-```
+`numora-react` exports the `NumoraInput` component and re-exports `FormatOn`, `GroupingStyle`, `formatValue`, `parseValue` and `getSeparatorsFromLocale`. It depends on `numora` at an exact version (ADR 0007).
 
----
+Public option names (shared by the vanilla class and React): `locale`, `formatOn` (default `'change'`), `thousandSeparator`, `decimalSeparator`, `groupingStyle`, `decimalMaxLength`, `decimalMinLength`, `maxLength`, `allowNegative`, `allowLeadingZeros`, `padLeadingZero`, `allowCompactNotation`, `allowScientificNotation`, `isAllowed`. The source of truth is `NumoraOptions` in `packages/core/src/types.ts`.
 
-## 📦 Module Breakdown
+Vanilla specifics: `defaultValue` for the first value, `setValue()` for later writes, `update(options)` to change options, `rawValue`, `formattedValue`, `element`, `destroy()`. Callbacks are `onValueChange({ value, formattedValue })` and `onFormattedValueChange(formattedValue)`.
 
-### File Structure
+`onValueChange` fires only when the raw value changes (ADR 0008). `onFormattedValueChange` fires whenever the display text is rewritten, including a blur regroup and `setValue()` (ADR 0013).
 
-```
-packages/core/src/
-├── NumoraInput.ts                # Main presentation class
-├── index.ts                      # Public API exports
-├── features/
-│   ├── sanitization.ts           # Input cleaning pipeline
-│   ├── decimals.ts               # Decimal handling utilities
-│   ├── scientific-notation.ts    # Scientific notation expansion
-│   ├── non-numeric-characters.ts # Character filtering
-│   └── formatting/               # 🆕 MODULAR (recently refactored)
-│       ├── constants.ts          # Types & grouping configuration
-│       ├── thousand-grouping.ts  # Number formatting logic
-│       ├── cursor-position.ts    # Cursor calculation (complex!)
-│       ├── change-detection.ts   # Change tracking utilities
-│       ├── digit-counting.ts     # Digit manipulation utilities
-│       ├── index.ts              # Public API
-│       └── README.md             # Detailed module docs
-└── utils/
-    └── event-handlers.ts         # User interaction handlers
-```
+## How a keystroke flows
 
----
+Numora formats on `beforeinput`, not `input`. The event is still cancelable, so only formatted text is ever shown. `packages/core/INPUT_EVENTS.md` explains each browser event and why.
 
-### Module Details
+The handlers in `utils/event-handlers.ts` are pure. They compute a result and change neither the input nor the event:
 
-#### 1. **NumoraInput.ts** - Main Class
+- `handleOnBeforeInputNumoraInput` returns `handled` (with `formatted`, `raw`, `cursorPos`), `reject` or `skip`.
+- `handleOnPasteNumoraInput` returns `handled` or `reject`.
+- `handleOnKeyDownNumoraInput` only skips the caret over a thousand separator on Delete and Backspace.
 
-**Purpose:** Presentation layer that manages the DOM input element and coordinates events.
+The `apply*` functions in `utils/dom-events.ts` (`applyBeforeInput`, `applyPaste`, `applyInputFallback`, `applyBlur`, `applySetValue`, `attachFocusStrip`) call a handler, then do `preventDefault()` (`applyBeforeInput` and `applyPaste` only) and the DOM write (`writeValue`, which uses `setRangeText`, so no `input` event fires), and return what the caller needs: the values to report, the written string for `applySetValue`, or a detach function for `attachFocusStrip`. `NumoraInput` and the React component both call these and fire the callbacks from their own `emit()`, which keeps the two packages behaving the same.
 
-**Key Responsibilities:**
-- Create and configure `<input>` element
-- Attach event listeners
-- Maintain state (caret position tracking)
-- Call appropriate handlers
-- Provide public API
+Edits the browser applies itself (autofill, drop, undo) reach the `input` event. `applyInputFallback` handles them.
 
-**Example:**
-```typescript
-const input = new NumoraInput(container, {
-  decimalMaxLength: 6,
-  placeholder: "Enter amount",
-  onChange: (value) => console.log(value)
-});
+The caret keeps no state between events. It is computed from the edit itself (`computeCaretFromEdit` in `utils/caret.ts`): take the text before the caret as it would look after sanitization, count its digits, and select that rank in the formatted string (`features/formatting/rank-select.ts`). When the browser inserts text, `computeCaretAfterRewrite` is used.
 
-input.getValue();  // "123.456"
-input.setValue("789.012");
-```
+Typed `,` and `.` are both decimal keys in every field (ADR 0015).
 
-**State Management:**
-```typescript
-private caretPositionBeforeChange?: {
-  selectionStart: number;
-  selectionEnd: number;
-  endOffset?: number;  // Used to distinguish Delete vs Backspace
-}
-```
+## Sanitization and value sources
 
----
+`sanitizeNumoraInput(value, options, source)` in `features/sanitization.ts` runs the whole pipeline. The order matters. In short:
 
-#### 2. **event-handlers.ts** - Event Processing
+1. Cap the input length and filter mobile-keyboard artifacts (non-breaking spaces).
+2. Read the text according to its source (below).
+3. Remove thousand separators.
+4. Normalize fullwidth digits, Unicode minus signs and decimal-separator glyphs.
+5. Expand compact notation (only with `allowCompactNotation`).
+6. Expand scientific notation.
+7. Remove non-numeric characters, then extra decimal separators.
+8. Remove leading zeros (unless `allowLeadingZeros`).
+9. Prepend a zero before a bare decimal mark (`padLeadingZero`).
+10. Truncate to `maxLength`.
 
-**Purpose:** Handle user interactions and coordinate sanitization/formatting.
+Decimal trimming and grouping happen after this, in `utils/format-utils.ts`. Read the source for the exact order.
 
-**Three Main Handlers:**
+### ValueSource
 
-```typescript
-// 1. onChange - Main input processing
-handleOnChangeNumoraInput(
-  e: Event,
-  decimalMaxLength: number,
-  caretPositionBeforeChange?: CaretPositionInfo
-): void
+The third argument says where the string came from, because that decides how `.` and `,` are read.
 
-// 2. onKeyDown - Track caret & prevent invalid input
-handleOnKeyDownNumoraInput(
-  e: KeyboardEvent
-): CaretPositionInfo | undefined
+| Source | Meaning | How `.` and `,` are read |
+| --- | --- | --- |
+| `display` (default) | The field's own text: typing, blur, the DOM value | The field's `thousandSeparator` groups and its `decimalSeparator` is the decimal |
+| `foreign` | Text of unknown format: paste, and text the browser inserted (drop, autofill) unless the field is focused and formats on change, where it is read as `display` | Foreign-format detection (ADR 0006) |
+| `canonical` | A value the app passes: `value`, `defaultValue`, `setValue()` | `.` is always the decimal, and `,` is read as a decimal mark too (ADR 0004, ADR 0015). Never grouping, never detected. |
 
-// 3. onPaste - Handle clipboard data
-handleOnPasteNumoraInput(
-  e: ClipboardEvent,
-  decimalMaxLength: number
-): string
-```
+Foreign-format rules (ADR 0006): if both `.` and `,` appear, the last one is the decimal mark. If only one kind appears and it repeats, it is grouping. A single mark is the decimal mark when it is the field's own `decimalSeparator`. Otherwise it is grouping when it forms valid groups (three digits, or four for Wan), and the decimal mark when it does not.
 
-**Flow:**
-```
-keydown → handleOnKeyDownNumoraInput()
-            ↓ (returns caret info)
-input → handleOnChangeNumoraInput(event, decimalMaxLength, caretInfo)
-            ↓ (sanitize → format → position cursor)
-paste → handleOnPasteNumoraInput(event, decimalMaxLength)
-```
+The output of `sanitizeNumoraInput` is always display text. The raw value is derived from it with `displayToRawValue`.
 
----
+### Adding a step to the pipeline
 
-#### 3. **sanitization.ts** - Input Cleaning
+Each step is a pure string function in its own file under `features/`. To add one:
 
-**Purpose:** Remove invalid characters and normalize input.
+1. Write the function and its tests.
+2. Call it from `sanitizeNumoraInput` at the right place in the order.
+3. If it should be usable on its own, export it from `pipeline.ts`.
+4. If it needs an option, see the next section.
 
-**Pipeline:**
-```typescript
-export const sanitizeNumoraInput = (
-  value: string,
-  options?: SanitizationOptions
-): string => {
-  // Filter mobile keyboard artifacts
-  let sanitized = filterMobileKeyboardArtifacts(value);
-  // Remove thousand separators
-  if (options?.thousandSeparator) {
-    sanitized = removeThousandSeparators(sanitized, options.thousandSeparator);
-  }
-  // Expand compact notation (if enabled)
-  if (options?.enableCompactNotation) {
-    sanitized = expandCompactNotation(sanitized);
-  }
-  // Expand scientific notation
-  sanitized = expandScientificNotation(sanitized);
-  // Remove non-numeric characters
-  sanitized = removeNonNumericCharacters(sanitized, options?.enableNegative, options?.decimalSeparator);
-  // Remove extra decimal separators
-  sanitized = removeExtraDecimalSeparators(sanitized, options?.decimalSeparator || DEFAULT_DECIMAL_SEPARATOR);
-  // Remove leading zeros (if not allowed)
-  if (!options?.enableLeadingZeros) {
-    sanitized = removeLeadingZeros(sanitized);
-  }
-  return sanitized;
-};
-```
+## Development setup
 
-**Example:**
-```typescript
-sanitizeNumoraInput("$1,234.56abc", { thousandSeparator: ',' });  // "1234.56"
-sanitizeNumoraInput("1.5e-7");        // "0.00000015"
-sanitizeNumoraInput("1..2.3");        // "1.23"
-```
-
----
-
-#### 4. **decimals.ts** - Decimal Utilities
-
-**Purpose:** Control decimal precision and separator handling.
-
-**Key Functions:**
-
-```typescript
-// Replace commas with dots (locale normalization)
-replaceCommasWithDots("1,234.56")  // "1.234.56"
-
-// Prevent duplicate decimal points
-alreadyHasDecimal(keyboardEvent)  // true/false
-
-// Trim to max decimal places
-trimToMaxDecimals("1.23456", 2)  // "1.23"
-
-// Remove extra dots
-removeExtraDots("1..2.3")  // "1.23"
-```
-
-**Current Limitations (TODOs):**
-```typescript
-// @TODO: support a choice between comma and dot as decimal separator
-// @TODO: add support for specialChars
-```
-
----
-
-#### 5. **scientific-notation.ts** - Scientific Notation
-
-**Purpose:** Expand scientific notation to decimal format using only strings.
-
-**Examples:**
-```typescript
-expandScientificNotation("1.5e-7")   // "0.00000015"
-expandScientificNotation("2e+5")     // "200000"
-expandScientificNotation("1.23e-4")  // "0.000123"
-expandScientificNotation("5e0")      // "5"
-```
-
-**Algorithm:**
-1. Parse regex: `/([+-]?\d+\.?\d*)[eE]([+-]?\d+)/g`
-2. Extract base and exponent
-3. Move decimal point using string manipulation
-4. Handle positive/negative exponents differently
-5. Trim trailing zeros
-
----
-
-#### 6. **formatting/** - Number Formatting Module 🆕
-
-**Recently refactored into focused sub-modules!**
-
-See [`packages/core/src/features/formatting/README.md`](packages/core/src/features/formatting/README.md) for complete documentation.
-
-**Sub-modules:**
-
-**a) constants.ts** - Types and configuration
-```typescript
-export type ThousandsGroupStyle = 'thousand' | 'lakh' | 'wan';
-
-export const GROUPING_CONFIG = {
-  thousand: { size: 3 },        // 1,234,567
-  lakh: { firstGroup: 3, restGroup: 2 },  // 12,34,567
-  wan: { size: 4 },             // 123,4567
-};
-```
-
-**b) thousands-grouping.ts** - Number formatting
-```typescript
-formatWithSeparators("1234567", ",", "thousand")  // "1,234,567"
-formatWithSeparators("1234567", ",", "lakh")      // "12,34,567"
-formatWithSeparators("1234567", ",", "wan")       // "123,4567"
-```
-
-**c) cursor-position.ts** - Cursor preservation (⚠️ Most complex!)
-```typescript
-// When "1000" becomes "1,000" after typing last zero:
-calculateCursorPositionAfterFormatting(
-  "100",   // old value
-  "1,000", // new value
-  3,       // old cursor (after last 0)
-  ",",     // separator
-  "thousand"
-)
-// Returns: 5 (cursor after last 0 in formatted value)
-```
-
-**d) change-detection.ts** - Track what changed
-```typescript
-findChangedRangeFromCaretPositions(
-  { selectionStart: 2, selectionEnd: 2, endOffset: 1 },
-  "1,234",
-  "1,34"
-)
-// Returns: { start: 2, end: 3, deletedLength: 1, isDelete: true }
-```
-
-**e) digit-counting.ts** - Digit utilities
-```typescript
-// Count actual digits (excluding separators)
-countMeaningfulDigitsBeforePosition("1,234", 3, ",")  // 2 (digits "1" and "2")
-```
-
----
-
-## 🔄 Data Flow (Detailed)
-
-### Example: User Types "4" in "1000" → becomes "1,0004"
-
-```typescript
-Step 1: keydown event
-    ↓
-handleOnKeyDownNumoraInput(e)
-  - Captures: selectionStart=4, selectionEnd=4
-  - Returns: { selectionStart: 4, selectionEnd: 4 }
-  ────────────────────────────────────────────────
-Step 2: input event triggered (value now "10004")
-    ↓
-handleOnChangeNumoraInput(e, decimalMaxLength=2, caretInfo)
-  Input: "10004"
-    ↓
-  sanitizeNumoraInput("10004", options)    → "10004"
-  trimToDecimalMaxLength("10004", 2)     → "10004"
-    ↓
-  formatWithSeparators("10004", ",", "thousand")
-    → "10,004"
-    ↓
-  calculateCursorPositionAfterFormatting(
-    "1000",   // old formatted
-    "10,004", // new formatted
-    4,        // old cursor
-    ","
-  )
-    → Returns: 6 (cursor after last "4")
-    ↓
-  target.value = "10,004"
-  target.setSelectionRange(6, 6)
-  ────────────────────────────────────────────────
-Step 3: DOM updated
-  Display: "10,004" with cursor after last "4"
-```
-
----
-
-## 💻 Development Setup
-
-### Prerequisites
+Use pnpm. The version is pinned in the root `package.json` (`packageManager`).
 
 ```bash
-node >= 18.0.0
-npm >= 9.0.0
-```
-
-### Installation
-
-```bash
-# Clone repository
-git clone https://github.com/your-username/numora.git
+git clone <repo-url> numora
 cd numora
-
-# Install dependencies
-npm install
-
-# Navigate to core package
-cd packages/core
+pnpm install
+pnpm build
 ```
 
-### Project Structure
+Root scripts (run from the repo root):
 
-```
-numora/
-├── packages/
-│   ├── core/          # Main library
-│   ├── react/         # React adapter
-│   └── vue/           # Vue adapter (planned)
-├── docs/              # Documentation site
-├── GAP_ANALYSIS.md    # Feature status tracking
-└── DEVELOPER_GUIDE.md # This file
-```
+| Script | What it does |
+| --- | --- |
+| `pnpm build` | Builds `packages/*`. Build `numora` first when you work on React: `pnpm --filter numora build` |
+| `pnpm dev` | Watch builds for the packages |
+| `pnpm dev:all` | Builds core, then runs the package watchers and the docs site |
+| `pnpm test` | Runs the Vitest suites of both packages |
+| `pnpm bench` | Runs the core benchmarks |
+| `pnpm typecheck` | `tsc --noEmit` in each package |
+| `pnpm lint` | Biome lint of each package's `src`, warnings are errors |
+| `pnpm check` | `biome check` for the whole repo |
+| `pnpm format` / `pnpm format:check` | Biome format |
+| `pnpm size` | Gzip bundle-size budget check. Run it after `pnpm build`. |
+| `pnpm docs:drift` | Fails if a gated document names an identifier that was removed or renamed |
+| `pnpm knip` | Finds unused files and exports |
+| `pnpm docs:dev` / `pnpm docs:build` | Run or build the docs site |
+| `pnpm clean` | Removes build output |
 
-### Available Scripts
+CI (`.github/workflows/ci.yml`) runs build, typecheck, test, lint, size, docs:drift and knip. Run the same before opening a PR.
+
+`scripts/diff-fuzz.mjs` compares two builds of core on random inputs. Use it to show a refactor changed no behavior. Its header comment has the usage.
+
+## Testing
+
+Tests use Vitest.
+
+- `packages/core/tests/` tests the core. Roughly: the `NumoraInput` class and event order, each feature in `features/`, the caret (`caret.*.test.ts`, including property tests with fast-check), formatting, locales, security, and regression pins for past bugs.
+- `packages/react/tests/` tests the component: the controlled-value contract, event order, locales, SSR, invalid options, and parity with the vanilla class. `pnpm --filter numora-react test` builds core first (`pretest`).
+- `packages/core/tests/perf.gate.test.ts` is a performance gate. `packages/core/bench/` holds benchmarks.
+
+Run one package or one file:
 
 ```bash
-# In packages/core/
-
-# Run tests
-npm test              # Run all tests
-npm run test:watch    # Watch mode
-npm run test:coverage # Generate coverage report
-
-# Build
-npm run build         # Build for production
-
-# Development
-npm run dev           # Development mode
+pnpm --filter numora test
+pnpm --filter numora exec vitest run tests/decimals.test.ts
 ```
 
----
+Test names change often, so look in the directory instead of trusting a list here. When you fix a bug, add a test that fails without the fix.
 
-## 🧪 Testing
+## Adding a feature
 
-### Test Structure
+A new option touches several places. Use an existing option such as `padLeadingZero` as a model and follow it with a search.
 
-```
-packages/core/tests/
-├── NumoraInput.test.ts            # Main class tests
-├── formatting.test.ts             # Formatting logic
-├── formatting.cursor.test.ts      # Cursor positioning (complex!)
-└── scientific-notation.test.ts    # Scientific notation expansion
-```
+1. **Type.** Add the option to `NumoraOptions` in `types.ts`, with a doc comment. Both the vanilla class and React take this shape.
+2. **Defaults and validation.** Check `config.ts`, `utils/resolve-options.ts` and `validation.ts`.
+3. **Logic.** Put the pure string function in `features/`, and call it from the pipeline (above) or from the formatting code in `utils/format-utils.ts`.
+4. **Caret.** If the feature changes the text, check the caret tests. The caret is computed from the sanitized text before it, so a new step must be part of the same pipeline.
+5. **React.** The component passes options to the same core functions. Check `packages/react/src/index.tsx` and add a parity test.
+6. **Option changes.** An option change reformats the live value (ADR 0008).
+7. **Tests.** Core unit tests, plus a React test if the option has a prop.
+8. **Docs.** Update the package READMEs, the docs site and `MIGRATION.md` if it is a breaking change. Add an ADR for any decision a future reader would question.
+9. **Checks.** Run `pnpm build`, `pnpm test`, `pnpm lint`, `pnpm typecheck`, `pnpm size`, `pnpm docs:drift` and `pnpm knip`. If the bundle grows past its budget, raise the budget in `scripts/check-bundle-size.mjs` and say why in the comment there.
 
-### Running Tests
+## Troubleshooting
 
-```bash
-cd packages/core
-npm test
-```
+**The caret jumps.** Look at `utils/caret.ts` and `features/formatting/rank-select.ts`. The caret tests in `packages/core/tests/caret.*.test.ts` show the expected behavior. Reproduce with a test before changing anything.
 
-### Test Status
+**Decimals are not limited.** Check that `decimalMaxLength` reaches the pipeline. The default is 18. `maxLength` is applied before decimal trimming and can leave fewer decimals than `decimalMaxLength`.
 
-```
-✅ NumoraInput.test.ts:           52 tests passing
-✅ formatting.test.ts:            42 tests passing
-⚠️  formatting.cursor.test.ts:    30/36 passing (6 pre-existing failures)
-✅ scientific-notation.test.ts:   30 tests passing
-──────────────────────────────────────────────────
-Total: 154/160 passing (96% pass rate)
-```
+**Scientific notation is not expanded.** Typed and pasted values are expanded only when `allowScientificNotation` is not `false`. With `false`, such a paste is rejected. Values the app passes are always expanded.
 
-### Writing Tests
+**A pasted number is read wrongly.** Pasted text goes through foreign-format detection (ADR 0006). A lone `.` or `,` in valid groups of three is grouping, not a decimal mark, unless it is the field's own `decimalSeparator`: a default field reads `1,234` as `1234` and `1.234` as `1.234`.
 
-**Pattern:**
-```typescript
-import { describe, it, expect } from 'vitest';
-import { yourFunction } from '../src/utils/yourModule';
+**A value from the app looks wrong.** The app value is read as a canonical raw value (ADR 0004, ADR 0015). In development a warning is logged when a string is not one.
 
-describe('yourFunction', () => {
-  it('should handle basic case', () => {
-    expect(yourFunction("input")).toBe("expected");
-  });
+**React tests fail on import.** React tests use the built `numora`. Run `pnpm --filter numora build`.
 
-  it('should handle edge case', () => {
-    expect(yourFunction("")).toBe("");
-  });
-});
-```
+**`pnpm docs:drift` fails.** A gated document (this guide, the READMEs, `INPUT_EVENTS.md`) uses an identifier that was renamed or removed. The script prints the reason. Fix the document.
 
----
+## Further reading
 
-## ✨ Adding New Features
-
-### Example: Adding Shorthand Parsing (k, m, b)
-
-**Feature:** Convert "1k" → "1000", "1.5m" → "1500000", "2b" → "2000000000"
-
-**Step 1: Create Utility Function**
-
-File: `packages/core/src/utils/shorthand.ts`
-
-```typescript
-/**
- * Expands shorthand notation (k, m, b) to full numbers.
- * @param value - Input that may contain shorthand
- * @returns Expanded numeric string
- */
-export function expandShorthand(value: string): string {
-  // Match patterns like: 1k, 1.5m, 2B (case-insensitive)
-  const shorthandRegex = /(\d+\.?\d*)\s*([kmb])/gi;
-
-  return value.replace(shorthandRegex, (match, number, suffix) => {
-    const multiplier = {
-      'k': '1000',
-      'm': '1000000',
-      'b': '1000000000'
-    }[suffix.toLowerCase()];
-
-    // Use string arithmetic to maintain precision
-    const base = parseFloat(number);
-    const mult = parseFloat(multiplier);
-    return (base * mult).toString();
-  });
-}
-```
-
-**Step 2: Add to Sanitization Pipeline**
-
-File: `packages/core/src/features/sanitization.ts`
-
-```typescript
-import { expandCompactNotation } from './compact-notation';
-
-export const sanitizeNumoraInput = (
-  value: string,
-  options?: SanitizationOptions
-): string => {
-  let sanitized = filterMobileKeyboardArtifacts(value);
-  if (options?.thousandSeparator) {
-    sanitized = removeThousandSeparators(sanitized, options.thousandSeparator);
-  }
-  if (options?.enableCompactNotation) {
-    sanitized = expandCompactNotation(sanitized);  // 🆕 Add this
-  }
-  sanitized = expandScientificNotation(sanitized);
-  sanitized = removeNonNumericCharacters(sanitized, options?.enableNegative, options?.decimalSeparator);
-  sanitized = removeExtraDecimalSeparators(sanitized, options?.decimalSeparator || DEFAULT_DECIMAL_SEPARATOR);
-  if (!options?.enableLeadingZeros) {
-    sanitized = removeLeadingZeros(sanitized);
-  }
-  return sanitized;
-};
-```
-
-**Step 3: Write Tests**
-
-File: `packages/core/tests/shorthand.test.ts`
-
-```typescript
-import { describe, it, expect } from 'vitest';
-import { expandShorthand } from '../src/utils/shorthand';
-
-describe('expandShorthand', () => {
-  describe('thousands (k)', () => {
-    it('should expand 1k to 1000', () => {
-      expect(expandShorthand('1k')).toBe('1000');
-    });
-
-    it('should expand 1.5k to 1500', () => {
-      expect(expandShorthand('1.5k')).toBe('1500');
-    });
-
-    it('should be case-insensitive', () => {
-      expect(expandShorthand('1K')).toBe('1000');
-    });
-  });
-
-  describe('millions (m)', () => {
-    it('should expand 1m to 1000000', () => {
-      expect(expandShorthand('1m')).toBe('1000000');
-    });
-
-    it('should expand 2.5m to 2500000', () => {
-      expect(expandShorthand('2.5m')).toBe('2500000');
-    });
-  });
-
-  describe('billions (b)', () => {
-    it('should expand 1b to 1000000000', () => {
-      expect(expandShorthand('1b')).toBe('1000000000');
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle no shorthand', () => {
-      expect(expandShorthand('1234')).toBe('1234');
-    });
-
-    it('should handle multiple shorthands', () => {
-      expect(expandShorthand('1k and 2m')).toContain('1000');
-    });
-  });
-});
-```
-
-**Step 4: Update Documentation**
-
-1. Update `GAP_ANALYSIS.md`:
-```markdown
-- [x] Shorthand parsing (k, m, b)  ← Change from ❌ to ✅
-```
-
-2. Add to exports in `packages/core/src/index.ts`:
-```typescript
-export * from './utils/shorthand';
-```
-
-**Step 5: Run Tests**
-
-```bash
-npm test
-```
-
----
-
-## 🧠 Key Concepts
-
-### 1. String-Only Arithmetic
-
-**Why?**
-
-JavaScript's `Number` type uses IEEE 754 floating-point, which has precision issues:
-
-```javascript
-// ❌ Problem
-0.1 + 0.2 = 0.30000000000000004
-1.005 * 100 = 100.49999999999999999
-
-// ✅ Solution (Numora approach)
-"0.1" + "0.2" → sanitize → "0.3"  (as strings)
-```
-
-**How Numora Does It:**
-
-```typescript
-// Never convert to Number during processing
-const value = "1.234567890123456789";
-const [integer, decimal] = value.split('.');
-const trimmed = `${integer}.${decimal.slice(0, 2)}`; // "1.23"
-```
-
----
-
-### 2. Cursor Position Preservation
-
-**The Challenge:**
-
-When you add formatting (commas), the cursor position changes:
-
-```
-User types in "1000" (cursor at position 4)
-         ↓
-Format to "1,000"
-         ↓
-Where should cursor be? Position 4 lands on comma!
-Should be position 5 (after last zero)
-```
-
-**The Solution:**
-
-1. **Track "meaningful digits"** (non-separator characters)
-2. **Count digits before cursor** in old value
-3. **Find same digit count** in new value
-4. **Place cursor after that digit**
-
-**Algorithm:**
-
-```typescript
-// Example: "100|0" → "1,000|"
-// (| shows cursor position)
-
-Step 1: Count meaningful digits before cursor in old value
-  "1000" with cursor at 4
-  → 4 digits before cursor
-
-Step 2: Format the value
-  "1000" → "1,000"
-
-Step 3: Find position for 4 digits in new value
-  "1,000" → count digits, skip separators
-  1 (pos 0), 0 (pos 2), 0 (pos 3), 0 (pos 4)
-  → position after 4th digit = 5
-
-Result: Cursor at position 5 in "1,000"
-```
-
-**See:** `features/formatting/cursor-position.ts` for full implementation.
-
----
-
-### 3. Delete vs Backspace Handling
-
-**The Difference:**
-
-```
-Backspace: Deletes character BEFORE cursor, cursor moves LEFT
-Delete:    Deletes character AFTER cursor, cursor STAYS
-
-Example with "1,234"
-
-Backspace at position 3: "1,|34" → "1|34" (position 1)
-Delete at position 2:    "1,|234" → "1,|34" (position 2)
-```
-
-**Detection:**
-
-```typescript
-handleOnKeyDownNumoraInput(e: KeyboardEvent) {
-  if (e.key === 'Delete') {
-    return {
-      selectionStart,
-      selectionEnd,
-      endOffset: 1  // ← Signals Delete key
-    };
-  }
-
-  if (e.key === 'Backspace') {
-    return {
-      selectionStart,
-      selectionEnd,
-      endOffset: 0  // ← Signals Backspace
-    };
-  }
-}
-```
-
----
-
-### 4. Event Flow
-
-**Complete Event Sequence:**
-
-```
-1. User presses key
-   ↓
-2. keydown event fires
-   → handleOnKeyDownNumoraInput()
-   → Capture caret position
-   → Store selectionStart, selectionEnd, endOffset
-   ↓
-3. input event fires (value already changed by browser)
-   → handleOnChangeNumoraInput()
-   → Sanitize value
-   → Format value
-   → Calculate new cursor position using stored caret info
-   → Update input.value
-   → Update cursor position
-   ↓
-4. User sees formatted value with cursor in correct position
-```
-
----
-
-## 🎨 Common Patterns
-
-### Pattern 1: Adding a Sanitization Step
-
-```typescript
-// 1. Create function in utils/
-export function yourSanitizer(value: string): string {
-  // Your logic here
-  return sanitized;
-}
-
-// 2. Add to pipeline in sanitization.ts
-export const sanitizeNumericInput = (value: string): string => {
-  const step1 = expandScientificNotation(value);
-  const step2 = yourSanitizer(step1);  // ← Add here
-  const step3 = removeNonNumericCharacters(step2);
-  return removeExtraDots(step3);
-};
-
-// 3. Write tests
-// 4. Export from index.ts
-```
-
-### Pattern 2: Adding Configuration Options
-
-```typescript
-// 1. Extend interface in NumoraInput.ts
-interface NumoraInputOptions extends Partial<HTMLInputElement> {
-  decimalMaxLength?: number;
-  yourNewOption?: YourType;  // ← Add here
-}
-
-// 2. Use in constructor
-constructor(container: HTMLElement, options: NumoraInputOptions) {
-  this.options = { ...options };
-  // Access via this.options.yourNewOption
-}
-
-// 3. Pass to utilities as needed
-```
-
-### Pattern 3: Formatting Algorithm
-
-```typescript
-// Always follow this structure for number formatting:
-
-1. Split into integer and decimal parts
-   const [integer, decimal] = value.split('.');
-
-2. Process integer part
-   const formatted = processInteger(integer);
-
-3. Reassemble
-   return decimal ? `${formatted}.${decimal}` : formatted;
-
-4. Preserve trailing decimal point
-   if (value.endsWith('.')) return formatted + '.';
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Issue: Cursor Jumps to Wrong Position
-
-**Symptoms:** After typing, cursor moves to unexpected location.
-
-**Probable Causes:**
-1. Formatting added/removed separators
-2. Change detection failed
-3. Digit counting error
-
-**Debug Steps:**
-```typescript
-// Add logging in event-handlers.ts
-console.log('Old value:', oldValue);
-console.log('New value:', newValue);
-console.log('Old cursor:', oldCursorPosition);
-console.log('Calculated cursor:', newCursorPosition);
-console.log('Change range:', changeRange);
-```
-
-**Fix:** Check `features/formatting/cursor-position.ts` logic.
-
----
-
-### Issue: Decimal Places Not Enforced
-
-**Symptoms:** Input allows more decimals than `maxDecimals`.
-
-**Check:**
-1. Is `trimToDecimalMaxLength()` being called?
-2. Is `decimalMaxLength` passed correctly?
-3. Is there a race condition?
-
-**Debug:**
-```typescript
-console.log('decimalMaxLength:', decimalMaxLength);
-console.log('Value before trim:', value);
-console.log('Value after trim:', trimToDecimalMaxLength(value, decimalMaxLength, decimalSeparator));
-```
-
----
-
-### Issue: Scientific Notation Not Expanding
-
-**Symptoms:** "1e-7" stays as "1e-7" instead of "0.0000001".
-
-**Check:**
-1. Is `expandScientificNotation()` in the pipeline?
-2. Is the regex matching your format?
-
-**Debug:**
-```typescript
-import { expandScientificNotation } from './utils/scientific-notation';
-console.log(expandScientificNotation("1e-7"));  // Should be "0.0000001"
-```
-
----
-
-### Issue: Tests Failing
-
-**Common causes:**
-
-1. **Import paths changed:**
-   ```typescript
-   // ❌ Old path
-   import { formatWithSeparators } from '../src/utils/formatting';
-
-   // ✅ New path (after refactoring)
-   import { formatWithSeparators } from '../src/features/formatting/thousand-grouping';
-   // OR use re-export
-   import { formatWithSeparators } from '../src/features/formatting';
-   ```
-
-2. **Expected behavior changed:**
-   - Review test expectations
-   - Check if refactoring intentionally changed behavior
-
-3. **Missing test data:**
-   - Verify test fixtures
-   - Check mock data
-
-**Fix:**
-```bash
-# Run specific test file
-npm test -- formatting.test.ts
-
-# Run with verbose output
-npm test -- --reporter=verbose
-
-# Update snapshots (if using)
-npm test -- -u
-```
-
----
-
-##📚 Additional Resources
-
-- **GAP_ANALYSIS.md** - Feature status and roadmap
-- **formatting/README.md** - Detailed formatting module docs
-- **packages/core/README.md** - Core package docs
-- **Tests** - Best examples of usage
-
----
-
-## 🤝 Contributing
-
-Ready to contribute? Great!
-
-1. **Pick a feature** from GAP_ANALYSIS.md
-2. **Create a branch**: `git checkout -b feature/your-feature`
-3. **Follow this guide** to implement
-4. **Write tests** (aim for >90% coverage)
-5. **Update docs** (GAP_ANALYSIS.md, JSDoc comments)
-6. **Submit PR** with clear description
-
-**Questions?** Open an issue or check existing documentation.
-
----
-
-## 🎓 Learning Path
-
-### Beginner (Week 1)
-- [ ] Read this guide
-- [ ] Explore file structure
-- [ ] Run tests locally
-- [ ] Make simple change (add comment, fix typo)
-
-### Intermediate (Week 2-3)
-- [ ] Understand data flow
-- [ ] Read `sanitization.ts` fully
-- [ ] Implement simple feature (e.g., trim leading zeros)
-- [ ] Write tests
-
-### Advanced (Week 4+)
-- [ ] Master cursor positioning logic
-- [ ] Understand formatting module
-- [ ] Implement complex feature (e.g., locale support)
-- [ ] Refactor for performance
-
----
-
-**Happy Coding! 🚀**
-
-*Last updated: 2025-01-27*
+- `packages/core/README.md`, `packages/react/README.md`: usage.
+- `packages/core/INPUT_EVENTS.md`: browser input events and how Numora uses them.
+- `MIGRATION.md`: changes from v4 to v5.
+- `docs/adr/`: decisions. Start with 0004 (canonical raw value), 0006 (foreign-format detection), 0008 (option changes), 0011 (`setValue`), 0012 (React controlled contract), 0013 (`onFormattedValueChange`), 0015 (`,` and `.` as decimal keys and marks).

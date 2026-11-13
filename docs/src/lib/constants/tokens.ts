@@ -1,8 +1,8 @@
-import ETH from '@/assets/tokens/ETH.svg';
-import USDC from '@/assets/tokens/USDC.png';
 import cbBTC from '@/assets/tokens/CBBTC.svg';
-import wstETH from '@/assets/tokens/WSTETH.svg';
+import ETH from '@/assets/tokens/ETH.svg';
 import EURC from '@/assets/tokens/EURC.svg';
+import USDC from '@/assets/tokens/USDC.png';
+import wstETH from '@/assets/tokens/WSTETH.svg';
 
 export interface TokenInfo {
   symbol: string;

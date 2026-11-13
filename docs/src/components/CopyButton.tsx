@@ -5,11 +5,13 @@ import { AnimatedCopyIcon } from './AnimatedCopyIcon';
 export function useClipboard() {
   return useMemo(
     () => ({
-      async copyToClipboard(value: string) {
+      async copyToClipboard(value: string): Promise<boolean> {
         try {
           await navigator.clipboard.writeText(value);
+          return true;
         } catch (error) {
           console.error('Failed to copy: ', error);
+          return false;
         }
       },
     }),
@@ -58,6 +60,7 @@ export const CopyButton = ({
   const clipboard = useClipboard();
   const prefersReducedMotion = useReducedMotion();
   const [triggerAnimation, setTriggerAnimation] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
   const resetFallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
@@ -66,8 +69,16 @@ export const CopyButton = ({
     };
   }, []);
 
-  const handleClick = () => {
-    clipboard.copyToClipboard(text);
+  const handleClick = async () => {
+    // Only confirm the copy once the clipboard write has actually succeeded.
+    const copied = await clipboard.copyToClipboard(text);
+    if (!copied) {
+      setCopyFailed(true);
+      if (resetFallbackTimeoutRef.current) clearTimeout(resetFallbackTimeoutRef.current);
+      resetFallbackTimeoutRef.current = setTimeout(() => setCopyFailed(false), 3000);
+      return;
+    }
+    setCopyFailed(false);
     setTriggerAnimation(true);
     onClick?.();
 
@@ -85,33 +96,41 @@ export const CopyButton = ({
 
   const buttonClasses = getButtonClasses(noBorder, className);
   const iconClasses = getIconClasses(iconPosition, Boolean(label));
-  const accessibleLabel = triggerAnimation ? 'Copied to clipboard' : 'Copy to clipboard';
+  const accessibleLabel = label ?? 'Copy code';
 
   return (
-    <button
-      aria-label={accessibleLabel}
-      className={buttonClasses}
-      onClick={handleClick}
-      type="button"
-    >
-      {iconPosition === 'left' && (
-        <AnimatedCopyIcon
-          className={iconClasses}
-          onAnimationComplete={handleAnimationComplete}
-          trigger={triggerAnimation}
-        />
-      )}
-      {label}
-      {iconPosition === 'right' && (
-        <AnimatedCopyIcon
-          className={iconClasses}
-          onAnimationComplete={handleAnimationComplete}
-          trigger={triggerAnimation}
-        />
-      )}
+    <>
+      <button
+        aria-label={accessibleLabel}
+        className={buttonClasses}
+        onClick={handleClick}
+        type="button"
+      >
+        {iconPosition === 'left' && (
+          <AnimatedCopyIcon
+            className={iconClasses}
+            onAnimationComplete={handleAnimationComplete}
+            trigger={triggerAnimation}
+          />
+        )}
+        {label}
+        {iconPosition === 'right' && (
+          <AnimatedCopyIcon
+            className={iconClasses}
+            onAnimationComplete={handleAnimationComplete}
+            trigger={triggerAnimation}
+          />
+        )}
+      </button>
+      {/* Outside the button: a button's children are presentational, so a live
+        region inside it may never be announced. */}
       <span aria-live="polite" className="sr-only">
-        {triggerAnimation ? 'Copied to clipboard' : ''}
+        {copyFailed
+          ? 'Copy failed. Select the code and copy it manually'
+          : triggerAnimation
+            ? 'Copied'
+            : ''}
       </span>
-    </button>
+    </>
   );
 };

@@ -1,38 +1,37 @@
-/**
- * Static regex patterns for compact notation processing.
- * Defined at module level to avoid recompilation on each function call.
- */
+import {
+  failedMantissaResumeIndex,
+  isDigit,
+  matchMantissaAt,
+} from '../utils/mantissa-scan';
 
-// Match compact notation patterns: number followed by scale suffix (case-insensitive)
-const COMPACT_NOTATION_REGEX = /(\d+\.?\d*)\s*([kmbt])/gi;
+// Cheap presence check so the scan below never runs on the dominant case (no k/m/b/t
+// anywhere in the value).
+const SUFFIX_PRESENT_REGEX = /[kmbtKMBT]/;
 
-// Remove leading zeros from integer part
-const LEADING_ZEROS_REGEX = /^0+/;
-
-// Remove leading zeros after sign, preserving at least one non-zero digit
-const LEADING_ZERO_REPLACE_REGEX = /^(-?)0+([1-9])/;
-
-// Match strings that are all zeros (with optional sign)
-const ALL_ZEROS_REGEX = /^-?0+$/;
-
-// Trim trailing zeros from decimal part (including optional decimal point)
-const TRAILING_ZEROS_REGEX = /\.?0+$/;
+// `\s` in a single-character test - matches the same set the old `\s*` regex quantifier did.
+const WHITESPACE_REGEX = /\s/;
 
 /**
  * Scale suffix to zero count mapping.
  * Uses lowercase keys - suffixes are normalized before lookup.
  */
 const ZERO_COUNTS: Record<string, number> = {
-  k: 3,   // Thousand
-  m: 6,   // Million
-  b: 9,   // Billion
-  t: 12,  // Trillion
+  k: 3, // Thousand
+  m: 6, // Million
+  b: 9, // Billion
+  t: 12, // Trillion
 };
 
 /**
  * Expands compact notation (k, m, b, t) to full numbers using string manipulation.
  * Handles formats like: 1k, 1.5m, 2B, 1M, 2.5T (case-insensitive)
  * Uses string arithmetic to avoid precision loss with large numbers.
+ *
+ * Scans left to right in linear time instead of using a regex (see `utils/mantissa-scan.ts`
+ * for why): a digit run not followed by a suffix letter is skipped in one jump.
+ *
+ * See `utils/mantissa-scan.ts` for the re-anchoring rule applied when a mantissa is
+ * followed by neither a valid token nor a plain boundary.
  *
  * @param value - The string value that may contain compact notation
  * @returns The expanded numeric string
@@ -44,51 +43,70 @@ const ZERO_COUNTS: Record<string, number> = {
  * expandCompactNotation("1M")     // "1000000"
  * expandCompactNotation("2.5T")   // "2500000000000"
  * expandCompactNotation("0.5k")   // "500"
+ * expandCompactNotation(".5k")    // "500"
+ * expandCompactNotation("1k234")  // "1k234" (suffix followed by a digit - not a token, left alone)
  */
-export function expandCompactNotation(value: string): string {
-  return value.replace(COMPACT_NOTATION_REGEX, (match, number, suffix) => {
-    // Normalize suffix to lowercase for lookup
-    const suffixLower = suffix.toLowerCase();
-    const zerosToAdd = ZERO_COUNTS[suffixLower];
+export function expandCompactNotation(value: string, decimalSeparator: string = '.'): string {
+  // Fast early-exit for the dominant case (no compact-notation suffix present anywhere).
+  if (!SUFFIX_PRESENT_REGEX.test(value)) return value;
 
-    if (!zerosToAdd) {
-      return match;
+  const len = value.length;
+  let out = '';
+  let i = 0;
+
+  while (i < len) {
+    const match = matchMantissaAt(value, i, decimalSeparator);
+
+    if (match === null) {
+      out += value[i];
+      i++;
+      continue;
     }
 
-    const [integerPart, decimalPart = ''] = number.split('.');
+    const mantissaEnd = match.end;
 
-    // Remove leading zeros from integer part (but keep at least one digit if it's all zeros)
-    const cleanedInteger = integerPart.replace(LEADING_ZEROS_REGEX, '') || '0';
+    let s = mantissaEnd;
+    while (WHITESPACE_REGEX.test(value.charAt(s))) s++;
 
-    // Multiply by adding zeros: move decimal point right by zeroCount positions
-    let result: string;
-    if (decimalPart.length === 0) {
-      // No decimal part: just append zeros
-      result = cleanedInteger + '0'.repeat(zerosToAdd);
-    } else if (decimalPart.length <= zerosToAdd) {
-      // Decimal part fits within zeros to add: move all decimals to integer part
-      const zerosNeeded = zerosToAdd - decimalPart.length;
-      result = cleanedInteger + decimalPart + '0'.repeat(zerosNeeded);
-    } else {
-      // Decimal part is longer: split it
-      const decimalToMove = decimalPart.slice(0, zerosToAdd);
-      const remainingDecimal = decimalPart.slice(zerosToAdd);
-      result = cleanedInteger + decimalToMove + '.' + remainingDecimal;
+    const zerosToAdd = ZERO_COUNTS[value.charAt(s).toLowerCase()];
+
+    // A suffix immediately followed by a digit or another decimal separator is not a
+    // standalone compact-notation token - it's a mid-number keystroke (e.g. typing "k" in
+    // the middle of "1|234" produces "1k234", which must round-trip unchanged so the
+    // beforeinput caller can reject the keystroke) rather than glue onto a longer
+    // numeral. End of string, whitespace, or any other non-numeric character right after
+    // the suffix is a valid boundary and still expands (e.g. "1k 2m", "1k USD", "1kk").
+    const charAfterSuffix = value[s + 1];
+    const suffixFollowedByDigitOrSeparator =
+      isDigit(charAfterSuffix) || value.startsWith(decimalSeparator, s + 1);
+
+    if (zerosToAdd && !suffixFollowedByDigitOrSeparator) {
+      const number = value.slice(i, mantissaEnd);
+      out += expandToken(number, zerosToAdd, decimalSeparator);
+      i = s + 1;
+      continue;
     }
 
-    // Remove leading zeros from the final result (but keep at least one digit)
-    result = result.replace(LEADING_ZERO_REPLACE_REGEX, '$1$2');
+    // Mantissa found but nothing valid follows it. See `failedMantissaResumeIndex` for why
+    // this cannot always jump straight to `mantissaEnd`.
+    const resume = failedMantissaResumeIndex(value, match, decimalSeparator);
+    out += value.slice(i, resume);
+    i = resume;
+  }
 
-    // If result is all zeros, keep one zero
-    if (ALL_ZEROS_REGEX.test(result)) {
-      result = '0';
-    }
+  return out;
+}
 
-    // Trim trailing zeros from decimal part only (if decimal point exists)
-    if (result.includes('.')) {
-      result = result.replace(TRAILING_ZEROS_REGEX, '');
-    }
+function expandToken(number: string, zerosToAdd: number, decimalSeparator: string): string {
+  const [integerPart, decimalPart = ''] = number.split(decimalSeparator);
 
-    return result;
-  });
+  // Shift the decimal point right by `zerosToAdd` places, padding with zeros.
+  const shifted = (integerPart + decimalPart.slice(0, zerosToAdd).padEnd(zerosToAdd, '0')).replace(
+    /^0+/,
+    ''
+  );
+  // Whatever is left of the fraction, without trailing zeros.
+  const remainder = decimalPart.slice(zerosToAdd).replace(/0+$/, '');
+
+  return (shifted || '0') + (remainder ? decimalSeparator + remainder : '');
 }

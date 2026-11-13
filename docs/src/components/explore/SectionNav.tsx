@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
 import {
   Clipboard,
-  MousePointer2,
-  FlaskConical,
-  Smartphone,
-  Percent,
-  Hash,
   Code,
+  FlaskConical,
+  Hash,
+  MousePointer2,
+  Percent,
+  Smartphone,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface Section {
   id: string;
@@ -75,6 +75,7 @@ export function SectionNav() {
 
   return (
     <nav
+      aria-label="Problems"
       className={cn(
         'fixed top-0 left-0 right-0 z-50',
         'bg-background/80 backdrop-blur-lg border-b border-border',
@@ -97,6 +98,7 @@ export function SectionNav() {
                 <a
                   key={id}
                   href={`#${id}`}
+                  aria-label={label}
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-1.5 min-h-10 rounded-full text-xs font-medium',
                     'transition-colors duration-200 whitespace-nowrap',

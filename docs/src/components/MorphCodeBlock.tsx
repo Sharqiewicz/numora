@@ -27,13 +27,13 @@ interface MorphCodeBlockProps {
  */
 export function MorphCodeBlock({ code, language = 'typescript' }: MorphCodeBlockProps) {
   return (
-    <div className="relative w-full">
+    <div className="group relative w-full">
       <CopyButton
         className="absolute top-2 right-2 z-10 p-1.5! opacity-60 group-hover:opacity-100 focus-visible:opacity-100"
         noBorder
         text={code}
       />
-      <pre className="relative block w-full m-0 px-4 py-3 text-white bg-surface-1 rounded-xl [corner-shape:superellipse(1.25)] font-mono text-[0.8125rem] font-light leading-[1.4] max-h-[11.75rem] overflow-y-auto">
+      <pre className="relative block w-full m-0 px-4 py-3 text-white bg-surface-1 rounded-xl [corner-shape:superellipse(1.25)] font-mono text-caption font-light leading-[1.4] max-h-[11.75rem] overflow-y-auto">
         <MorphCode code={code} language={language} />
       </pre>
     </div>

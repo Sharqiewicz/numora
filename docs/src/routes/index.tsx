@@ -7,24 +7,24 @@ import LightRays from '@/components/LightRaysDeferred';
 import { NumoraDemo } from '@/components/NumoraDemo';
 import { Socials } from '@/components/socials';
 import { Button } from '@/components/ui/button';
+import { CORE_SIZE_GZIP } from '@/lib/constants/package';
 
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'Numora - Numeric Input & Number Input Library for JavaScript and React' },
+      { title: 'Numeric input library for JavaScript and React | Numora' },
       {
         name: 'description',
-        content:
-          'Numora is the standard numeric input and number input library for JavaScript and React. Format numbers as you type, thousand separators, decimal limits, cursor management. Zero dependencies, 6.4kb gzipped.',
+        content: `Numora is a framework-agnostic numeric input library for financial apps. Format numbers as you type, with thousand separators, decimal limits and cursor management. Zero dependencies, ${CORE_SIZE_GZIP} gzipped.`,
       },
       {
         property: 'og:title',
-        content: 'Numora - Numeric Input & Number Input Library for JavaScript and React',
+        content: 'Numeric input library for JavaScript and React | Numora',
       },
       {
         property: 'og:description',
         content:
-          'The only framework-agnostic numeric input and number input library. Format numbers as you type, thousand separators, decimal limits, cursor management.',
+          'A framework-agnostic numeric input library for financial apps. Format numbers as you type, with thousand separators, decimal limits and cursor management.',
       },
       { property: 'og:url', content: 'https://numeric-input.com' },
     ],
@@ -47,8 +47,7 @@ export const Route = createFileRoute('/')({
             offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
             url: 'https://numeric-input.com',
             downloadUrl: 'https://www.npmjs.com/package/numora',
-            description:
-              'Precision-first numeric input library for financial and DeFi apps. Zero dependencies, 6.4kb gzipped. Works with React, Vue, Svelte, Angular, SolidJS, and Vanilla JS - and animates with Torph in every framework.',
+            description: `Precision-first numeric input library for financial and DeFi apps. Zero dependencies, ${CORE_SIZE_GZIP} gzipped. Works with Vanilla JS, React, Vue, Svelte, Angular, and Solid. Torph animations work in every one of them.`,
             author: {
               '@type': 'Person',
               name: 'Kacper Szarkiewicz',
@@ -68,7 +67,7 @@ export const Route = createFileRoute('/')({
             url: 'https://numeric-input.com/docs/numora-react',
             downloadUrl: 'https://www.npmjs.com/package/numora-react',
             description:
-              'React component wrapper for numora. Drop-in NumoraInput component with full TypeScript support and React Hook Form integration.',
+              'React component wrapper for numora. A drop-in NumoraInput component, written in TypeScript, that works with React Hook Form.',
             author: {
               '@type': 'Person',
               name: 'Kacper Szarkiewicz',
@@ -144,7 +143,7 @@ function App() {
                 transition-shadow duration-300
               "
               >
-                <span className="relative z-10">Get Started</span>
+                <span className="relative z-10">Get started</span>
                 <span
                   className="
                   absolute inset-0 -translate-x-full
@@ -164,7 +163,7 @@ function App() {
                 transition-shadow duration-300
               "
               >
-                Try it
+                Try the swap demo
               </Button>
             </Link>
           </div>

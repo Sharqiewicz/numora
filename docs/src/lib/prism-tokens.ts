@@ -1,5 +1,13 @@
 import oneDark from 'react-syntax-highlighter/dist/esm/styles/prism/one-dark';
-import { refractor } from 'refractor/all';
+import bash from 'refractor/bash';
+import { refractor } from 'refractor/core';
+import tsx from 'refractor/tsx';
+import typescript from 'refractor/typescript';
+
+// Only the grammars the morphing code blocks use (InstallTabs: bash, FrameworkUsage: typescript/tsx).
+refractor.register(bash);
+refractor.register(typescript);
+refractor.register(tsx);
 
 /**
  * Maps Prism tokens to the One Dark colours used by `CodeBlock`, so a

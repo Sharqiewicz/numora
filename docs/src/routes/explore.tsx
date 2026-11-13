@@ -1,45 +1,45 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
+import {
+  CursorPositionDemo,
+  DecimalDilemmaDemo,
+  ExploreHero,
+  MobileKeyboardDemo,
+  NumberTypeLieDemo,
+  PasteChaosDemo,
+  ScientificNotationDemo,
+  SectionNav,
+  ThousandSeparatorDemo,
+} from '@/components/explore';
 import LightRays from '@/components/LightRaysDeferred';
 import { Socials } from '@/components/socials';
-import {
-  ExploreHero,
-  SectionNav,
-  PasteChaosDemo,
-  CursorPositionDemo,
-  ScientificNotationDemo,
-  MobileKeyboardDemo,
-  DecimalDilemmaDemo,
-  ThousandSeparatorDemo,
-  NumberTypeLieDemo,
-} from '@/components/explore';
 
 export const Route = createFileRoute('/explore')({
   head: () => ({
     meta: [
-      { title: 'Why Numeric Input & Number Input Break - Interactive Demos | Numora' },
+      { title: 'Why numeric inputs break | Numora' },
       {
         name: 'description',
         content:
-          'See 7 ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal dilemmas, mobile keyboard chaos, and more. Interactive live demos.',
+          'Seven ways <input type="number"> fails in production, with live demos: cursor jumping, scientific notation paste, decimal separators and mobile keyboards.',
       },
       {
         property: 'og:title',
-        content: 'Why Numeric Input & Number Input Break - Interactive Demos | Numora',
+        content: 'Why numeric inputs break | Numora',
       },
       {
         property: 'og:description',
         content:
-          'See 7 ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal dilemmas, mobile keyboard chaos, and more.',
+          'Seven ways <input type="number"> fails in production, with live demos: cursor jumping, scientific notation paste, decimal separators and mobile keyboards.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/explore' },
       {
         name: 'twitter:title',
-        content: 'Why Numeric Input & Number Input Break - Interactive Demos | Numora',
+        content: 'Why numeric inputs break | Numora',
       },
       {
         name: 'twitter:description',
         content:
-          'See 7 ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal dilemmas, and more.',
+          'Seven ways <input type="number"> fails in production: cursor jumping, scientific notation paste, decimal separators and more.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://numeric-input.com/explore' }],
@@ -50,9 +50,9 @@ export const Route = createFileRoute('/explore')({
           {
             '@context': 'https://schema.org',
             '@type': 'WebPage',
-            name: 'Why Numeric Input Breaks - Interactive Demos',
+            name: 'Why numeric inputs break | Numora',
             description:
-              'See how input type=number fails in production: cursor jumping, scientific notation paste, decimal dilemmas, mobile keyboard chaos, and more.',
+              'Seven ways input type=number fails in production: cursor jumping, scientific notation paste, decimal separators and mobile keyboards.',
             url: 'https://numeric-input.com/explore',
             isPartOf: { '@type': 'WebSite', name: 'Numora', url: 'https://numeric-input.com' },
           },
@@ -100,20 +100,19 @@ function ExplorePage() {
 
         <section className="container mx-auto flex flex-col items-center justify-center px-4 sm:px-8 py-24">
           <div className="text-center max-w-2xl">
-            <h2 className="text-3xl sm:text-4xl font-semibold mb-4">
-              Ready to solve these problems?
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-semibold mb-4">Fix these in your app</h2>
             <p className="text-muted-foreground mb-8">
-              <strong className="font-numora text-secondary">numora</strong> handles all of this out
-              of the box. No more regex nightmares, no more cursor jumping, no more precision loss.
+              <strong className="font-numora text-secondary">Numora</strong> handles every case on
+              this page. Values stay strings, so nothing loses precision, and the cursor stays where
+              you left it.
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
-              <a
-                href="/docs/numora"
+              <Link
+                to="/docs/numora"
                 className="px-6 py-3 rounded-lg bg-secondary text-secondary-foreground font-medium hover:opacity-90 active:scale-[0.96] transition-[opacity,scale] duration-150 ease-out-expo"
               >
-                Get Started
-              </a>
+                Get started
+              </Link>
               <a
                 href="https://github.com/sharqiewicz/numora"
                 target="_blank"

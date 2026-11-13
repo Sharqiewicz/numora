@@ -3,45 +3,26 @@
  * Only removes leading zeros from the integer part, not from decimal values like "0.5".
  *
  * @param value - The numeric string to process
+ * @param decimalSeparator - The decimal separator character (default: '.')
  * @returns The string with leading zeros removed
  *
  * @example
- * removeLeadingZeros("007")     // "7"
- * removeLeadingZeros("0001")    // "1"
- * removeLeadingZeros("0")       // "0"
- * removeLeadingZeros("0.5")     // "0.5"
- * removeLeadingZeros("-007")    // "-7"
- * removeLeadingZeros("123")     // "123"
- * removeLeadingZeros("00.5")    // "0.5"
- * removeLeadingZeros("-00.5")   // "-0.5"
+ * removeLeadingZeros("007")        // "7"
+ * removeLeadingZeros("0001")       // "1"
+ * removeLeadingZeros("0")          // "0"
+ * removeLeadingZeros("0.5")        // "0.5"
+ * removeLeadingZeros("-007")       // "-7"
+ * removeLeadingZeros("123")        // "123"
+ * removeLeadingZeros("00.5")       // "0.5"
+ * removeLeadingZeros("-00.5")      // "-0.5"
+ * removeLeadingZeros("00,5", ",")  // "0,5"
  */
-export function removeLeadingZeros(value: string): string {
-  if (!value || value === '0' || value === '-0' || value === '-' || value === '.') {
-    return value;
-  }
-
-  const isNegative = value.startsWith('-');
-  const absoluteValue = isNegative ? value.slice(1) : value;
-
-  if (absoluteValue === '.') {
-    return value;
-  }
-
-  const hasDecimal = absoluteValue.includes('.');
-  if (hasDecimal) {
-    const [integerPart, decimalPart] = absoluteValue.split('.');
-    if (integerPart) {
-      const cleanedInteger = integerPart.replace(/^0+/, '') || '0';
-      const result = cleanedInteger + '.' + decimalPart;
-      return isNegative ? '-' + result : result;
-    }
-    return value;
-  }
-
-  if (absoluteValue.startsWith('0')) {
-    const withoutLeadingZeros = absoluteValue.replace(/^0+/, '') || '0';
-    return isNegative ? '-' + withoutLeadingZeros : withoutLeadingZeros;
-  }
-
-  return value;
+export function removeLeadingZeros(value: string, decimalSeparator: string = '.'): string {
+  const sign = value.startsWith('-') ? '-' : '';
+  const absoluteValue = value.slice(sign.length);
+  const decimalIdx = absoluteValue.indexOf(decimalSeparator);
+  const integerPart = decimalIdx === -1 ? absoluteValue : absoluteValue.slice(0, decimalIdx);
+  // No integer digits ('', '-', '.5', '-.5'): nothing to strip.
+  if (!integerPart) return value;
+  return sign + (integerPart.replace(/^0+/, '') || '0') + absoluteValue.slice(integerPart.length);
 }

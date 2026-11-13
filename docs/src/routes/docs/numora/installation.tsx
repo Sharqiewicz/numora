@@ -1,30 +1,28 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { InstallTabs } from '@/components/InstallTabs';
 import { CodeBlock } from '@/components/CodeBlock';
-import CHEVRON_RIGHT from '@/assets/chevron-right.svg';
-import { Button } from '@/components/ui/button';
+import { InstallTabs } from '@/components/InstallTabs';
 
 export const Route = createFileRoute('/docs/numora/installation')({
   head: () => ({
     meta: [
-      { title: 'Install Numora - Numeric Input Library Setup Guide' },
+      { title: 'Installation | Numora' },
       {
         name: 'description',
         content:
-          'Install the Numora JavaScript numeric input library with npm, pnpm, yarn, or bun. Zero dependencies, TypeScript-ready, works with any framework. Live number formatting in minutes.',
+          'Install the Numora TypeScript numeric input library with npm, pnpm, yarn, or bun. Zero dependencies, no framework required.',
       },
-      { property: 'og:title', content: 'Install Numora - Numeric Input Library Setup Guide' },
+      { property: 'og:title', content: 'Installation | Numora' },
       {
         property: 'og:description',
         content:
-          'Install the Numora JavaScript numeric input library. Zero dependencies, TypeScript-ready, works with any framework.',
+          'Install the Numora TypeScript numeric input library with npm, pnpm, yarn, or bun. Zero dependencies, no framework required.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/installation' },
-      { name: 'twitter:title', content: 'Install Numora - Numeric Input Library Setup Guide' },
+      { name: 'twitter:title', content: 'Installation | Numora' },
       {
         name: 'twitter:description',
         content:
-          'Install the Numora JavaScript numeric input library. Zero dependencies, works with any framework.',
+          'Install the Numora TypeScript numeric input library with npm, pnpm, yarn, or bun. Zero dependencies, no framework required.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora/installation' }],
@@ -35,9 +33,9 @@ export const Route = createFileRoute('/docs/numora/installation')({
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Install Numora - Numeric Input Library Setup',
+            headline: 'Install Numora',
             description:
-              'Step-by-step installation guide for the numora JavaScript numeric input library. Works with npm, pnpm, yarn, and bun.',
+              'How to install the Numora TypeScript numeric input library with npm, pnpm, yarn, or bun.',
             url: 'https://numeric-input.com/docs/numora/installation',
             author: {
               '@type': 'Person',
@@ -53,7 +51,7 @@ export const Route = createFileRoute('/docs/numora/installation')({
               {
                 '@type': 'ListItem',
                 position: 2,
-                name: 'Numora JS',
+                name: 'Numora',
                 item: 'https://numeric-input.com/docs/numora',
               },
               {
@@ -73,111 +71,332 @@ export const Route = createFileRoute('/docs/numora/installation')({
 
 function Installation() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Install numora</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Add the numora JavaScript numeric input library to any project - no framework required.
-      </p>
+    <div className="docs-prose max-w-[36rem]">
+      <h1>Install Numora</h1>
+      <p>Add the Numora TypeScript numeric input library to any project. No framework required.</p>
 
-      <h2 className="text-foreground text-2xl">Install</h2>
-      <p className="text-muted-foreground text-base leading-6">numora has zero runtime dependencies. Pick your package manager:</p>
+      <h2>Install</h2>
+      <p>Numora has zero runtime dependencies. Pick your package manager:</p>
 
       <InstallTabs packages="numora" />
 
-      <h2 className="text-foreground text-2xl">Basic Usage</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Import the <code>NumoraInput</code> class and attach it to any container element:
+      <h2>Basic usage</h2>
+      <p>
+        Import the <code>NumoraInput</code> class and pass it a container element:
       </p>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
-const container = document.querySelector('#my-input-container')
+const container = document.querySelector<HTMLElement>('#my-input-container')!
 
 const numoraInput = new NumoraInput(container, {
-  maxDecimals: 2,
+  decimalMaxLength: 2,
+  groupingStyle: 'thousand',
   thousandSeparator: ',',
   decimalSeparator: '.',
+  formatOn: 'change',
+  // typing 1234.56 displays "1,234.56"
 })`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">Options</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        numora accepts a <code>FormattingOptions</code> object as the second argument. Common
-        options:
-      </p>
-      <ul className="list-disc list-inside">
-        <li>
-          <code>decimalSeparator</code> - character separating integer from decimal part (default{' '}
-          <code>'.'</code>)
-        </li>
-        <li>
-          <code>thousandSeparator</code> - character inserted between digit groups (default{' '}
-          <code>','</code>)
-        </li>
-        <li>
-          <code>thousandStyle</code> - <code>None</code>, <code>Thousand</code>, <code>Lakh</code>,
-          or <code>Wan</code>
-        </li>
-        <li>
-          <code>formatOn</code> - when separators are applied: <code>FormatOn.Blur</code> (default)
-          or <code>FormatOn.Change</code>
-        </li>
-        <li>
-          <code>decimalMinLength</code> - pad decimals to a minimum number of digits on blur
-        </li>
-        <li>
-          <code>enableNegative</code> - allow negative values (default <code>false</code>)
-        </li>
-        <li>
-          <code>enableCompactNotation</code> - expand <code>1k → 1000</code> on input
-        </li>
-        <li>
-          <code>rawValueMode</code> - emit raw values without separators in <code>onChange</code>
-        </li>
-      </ul>
-      <p className="text-muted-foreground text-base leading-6">
-        See the <Link to="/docs/numora/features/formatting" className="underline link-underline hover:text-foreground transition-colors">Formatting</Link> and{' '}
-        <Link to="/docs/numora/features/sanitization" className="underline link-underline hover:text-foreground transition-colors">Sanitization</Link> docs for the full options
-        reference.
+      <h2>Options</h2>
+      <p>
+        The second argument is an optional options object (<code>NumoraInputOptions</code>). It
+        extends <code>NumoraOptions</code> with the callbacks, <code>defaultValue</code> and a few
+        native attributes. You can leave any of them out.
       </p>
 
-      <h2 className="text-foreground text-2xl">TypeScript</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        numora ships with full TypeScript declarations - no <code>@types</code> package needed.
-        Import types directly:
+      <h3>Formatting</h3>
+      <div className="overflow-x-auto">
+        <table className="[&_td:first-child]:whitespace-nowrap [&_td:nth-child(2)]:whitespace-nowrap">
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Default</th>
+              <th>What it does</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>locale</code>
+              </td>
+              <td>unset</td>
+              <td>
+                A BCP 47 tag (<code>'de-DE'</code>) or <code>true</code> for the runtime's locale.
+                Sets <code>thousandSeparator</code>, <code>decimalSeparator</code> and{' '}
+                <code>groupingStyle</code>. If you also pass one of those, yours wins. See{' '}
+                <Link to="/docs/numora/features/locale">Locale</Link>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>formatOn</code>
+              </td>
+              <td>
+                <code>'change'</code>
+              </td>
+              <td>
+                Adds separators on every keystroke (<code>'change'</code>) or when the field loses
+                focus (<code>'blur'</code>). See{' '}
+                <Link to="/docs/numora/features/formatting">Formatting</Link>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>groupingStyle</code>
+              </td>
+              <td>
+                <code>'thousand'</code>
+              </td>
+              <td>
+                <code>'thousand'</code> (1,234,567), <code>'lakh'</code> (12,34,567),{' '}
+                <code>'wan'</code> (123,4567) or <code>'none'</code>. <code>'none'</code> is the
+                only way to turn grouping off.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>thousandSeparator</code>
+              </td>
+              <td>
+                <code>','</code>
+              </td>
+              <td>
+                The character between digit groups. Exactly one character. It cannot be a digit, one
+                of <code>- + e E k K m M b B t T</code>, or the same as{' '}
+                <code>decimalSeparator</code>. An invalid value throws.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>decimalSeparator</code>
+              </td>
+              <td>
+                <code>'.'</code>
+              </td>
+              <td>
+                The character between the integer and decimal parts. Exactly one character, with the
+                same rules as <code>thousandSeparator</code>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>decimalMaxLength</code>
+              </td>
+              <td>
+                <code>18</code>
+              </td>
+              <td>
+                Maximum number of decimal digits. Numora cuts extra digits off and never rounds. See{' '}
+                <Link to="/docs/numora/features/decimals">Decimals</Link>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>decimalMinLength</code>
+              </td>
+              <td>
+                <code>0</code>
+              </td>
+              <td>
+                Pads decimals with zeros up to this many digits. Numora pads on blur and when your
+                app sets the value, never while the user types.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>What the user can enter</h3>
+      <div className="overflow-x-auto">
+        <table className="[&_td:first-child]:whitespace-nowrap [&_td:nth-child(2)]:whitespace-nowrap">
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Default</th>
+              <th>What it does</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>allowNegative</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>
+                Allows a leading <code>-</code>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>allowLeadingZeros</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>
+                Keeps leading zeros (<code>007</code>) instead of removing them. See{' '}
+                <Link to="/docs/numora/features/leading-zeros">Leading zeros</Link>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>padLeadingZero</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>
+                Puts a <code>0</code> in front of a bare decimal separator (<code>.5</code> becomes{' '}
+                <code>0.5</code>).
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>allowCompactNotation</code>
+              </td>
+              <td>
+                <code>false</code>
+              </td>
+              <td>
+                Expands <code>1k</code> to <code>1000</code>. See{' '}
+                <Link to="/docs/numora/features/compact-notation">Compact notation</Link>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>allowScientificNotation</code>
+              </td>
+              <td>
+                <code>true</code>
+              </td>
+              <td>
+                Expands a pasted or app-set <code>1.5e-7</code> to <code>0.00000015</code>. A typed{' '}
+                <code>e</code> is never accepted. <code>false</code> rejects such a paste. See{' '}
+                <Link to="/docs/numora/features/scientific-notation">Scientific notation</Link>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>maxLength</code>
+              </td>
+              <td>unset</td>
+              <td>
+                The most characters the raw value can have. Digits, the decimal separator and a
+                leading <code>-</code> count. Grouping separators and <code>decimalMinLength</code>{' '}
+                padding don't. See <Link to="/docs/numora/features/max-length">Max length</Link>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>isAllowed</code>
+              </td>
+              <td>unset</td>
+              <td>
+                <code>(rawValue) =&gt; boolean</code>. Return <code>false</code> to reject a
+                keystroke or paste. See{' '}
+                <Link to="/docs/numora/features/validation">Validation</Link>.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Value and callbacks</h3>
+      <div className="overflow-x-auto">
+        <table className="[&_td:first-child]:whitespace-nowrap">
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>What it does</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>defaultValue</code>
+              </td>
+              <td>
+                The initial value, as a raw value (<code>'1234.5'</code> in every locale). Later
+                writes go through <code>setValue()</code>. Numora ignores a <code>value</code>{' '}
+                option. See <Link to="/docs/numora/features/value-types">Value types</Link>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>onValueChange</code>
+              </td>
+              <td>
+                Called with <code>{'{ value, formattedValue }'}</code> when the raw value changes.{' '}
+                <code>value</code> is the raw value: ASCII digits, a <code>.</code> decimal, no
+                grouping.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <code>onFormattedValueChange</code>
+              </td>
+              <td>
+                Called with the field's text every time Numora rewrites it and the text is new. That
+                includes the rewrites <code>onValueChange</code> says nothing about: grouping on
+                blur, removing separators on focus, and <code>setValue()</code>. Not called on
+                creation.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Native attributes</h3>
+      <p>
+        Numora copies these onto the <code>{'<input>'}</code>: <code>id</code>, <code>name</code>,{' '}
+        <code>className</code>, <code>placeholder</code>, <code>disabled</code>,{' '}
+        <code>readOnly</code>, <code>required</code>, <code>tabIndex</code>, <code>title</code>,{' '}
+        <code>autofocus</code> and <code>ariaLabel</code>, which sets <code>aria-label</code>. Set
+        anything else on <code>numoraInput.element</code>.
+      </p>
+      <p>
+        Don't set the native <code>maxLength</code> on the element. It counts grouping separators,
+        and the Numora option doesn't.
+      </p>
+
+      <h2>The instance</h2>
+      <p>
+        Pass a container and Numora creates an <code>{'<input>'}</code> inside it. Pass an existing{' '}
+        <code>{'<input>'}</code> and Numora adopts it. The instance has three read-only properties
+        and three methods:
       </p>
       <CodeBlock language="typescript">
-        {`import { NumoraInput, FormatOn, ThousandStyle } from 'numora'
-import type { FormattingOptions } from 'numora'
+        {`numoraInput.rawValue        // '1234.5', the value to store or send
+numoraInput.formattedValue  // '1,234.5', the text in the field
+numoraInput.element         // the <input> itself
 
-const options: FormattingOptions = {
-  maxDecimals: 6,
-  formatOn: FormatOn.Change,
-  thousandStyle: ThousandStyle.Thousand,
+// Write a raw value. It is sanitized and formatted; onValueChange is not called.
+numoraInput.setValue('2500')
+
+// Change options. They merge over the current ones, so decimalMaxLength stays 2.
+numoraInput.update({ locale: 'de-DE' })
+
+// Remove Numora's listeners. The <input> stays in the page.
+numoraInput.destroy()`}
+      </CodeBlock>
+
+      <h2>TypeScript</h2>
+      <p>Numora ships its own declarations. Import types directly:</p>
+      <CodeBlock language="typescript">
+        {`import { NumoraInput } from 'numora'
+import type { NumoraOptions } from 'numora'
+
+const options: NumoraOptions = {
+  decimalMaxLength: 6,
+  formatOn: 'change',
+  groupingStyle: 'thousand',
   thousandSeparator: ',',
 }`}
       </CodeBlock>
-
-      <hr />
-
-      <h2 className="text-foreground text-2xl">Next Steps</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Learn how the <code>beforeinput</code>-based event architecture works in the{' '}
-        <Link to="/docs/numora/anatomy" className="underline link-underline hover:text-foreground transition-colors">Anatomy</Link> guide, or jump to the{' '}
-        <Link to="/docs/numora/features/formatting" className="underline link-underline hover:text-foreground transition-colors">Formatting</Link> feature docs.
-      </p>
-      <div className="flex items-center gap-2 my-8">
-        <Link to="/docs/numora/anatomy">
-          <Button variant="default">
-            Anatomy <img src={CHEVRON_RIGHT} alt="Chevron Right" className="w-4 h-4" />
-          </Button>
-        </Link>
-        <Link to="/docs/numora/features/formatting">
-          <Button variant="outline">
-            Formatting Features <img src={CHEVRON_RIGHT} alt="Chevron Right" className="w-4 h-4" />
-          </Button>
-        </Link>
-      </div>
     </div>
   );
 }

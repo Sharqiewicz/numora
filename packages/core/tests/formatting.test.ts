@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { formatWithSeparators } from '../src/features/formatting';
-
+import { formatValueForDisplay } from '../src/utils/format-utils';
+import { FormatOn, GroupingStyle } from '../src/types';
+import { DEFAULT_GROUPING_STYLE } from '../src/config';
 
 describe('✅ formatWithSeparators', () => {
   describe('✅ thousand style (standard Western)', () => {
@@ -193,11 +195,9 @@ describe('✅ formatWithSeparators', () => {
     it('should format -12345678.90 to -12,345,678.90', () => {
       expect(formatWithSeparators('-12345678.90', ',')).toBe('-12,345,678.90');
     });
-
   });
 
   describe('✅ edge cases', () => {
-
     it('should handle leading zeros', () => {
       expect(formatWithSeparators('001234567', ',', 'thousand')).toBe('001,234,567');
     });
@@ -222,11 +222,11 @@ describe('✅ formatWithSeparators', () => {
       });
 
       it('should format -1000.40 to -1,000.40', () => {
-        expect(formatWithSeparators('-1000.40', ',', 'thousand', false, '.')).toBe('-1,000.40');
+        expect(formatWithSeparators('-1000.40', ',', 'thousand', '.')).toBe('-1,000.40');
       });
 
       it('should format -100.40 to -100.40 (no separator needed)', () => {
-        expect(formatWithSeparators('-100.40', ',', 'thousand', false, '.')).toBe('-100.40');
+        expect(formatWithSeparators('-100.40', ',', 'thousand', '.')).toBe('-100.40');
       });
     });
 
@@ -236,15 +236,15 @@ describe('✅ formatWithSeparators', () => {
       });
 
       it('should format 100400.5 to 1,00,400.5', () => {
-        expect(formatWithSeparators('100400.5', ',', 'lakh', false, '.')).toBe('1,00,400.5');
+        expect(formatWithSeparators('100400.5', ',', 'lakh', '.')).toBe('1,00,400.5');
       });
 
       it('should format -100400.5 to -1,00,400.5', () => {
-        expect(formatWithSeparators('-100400.5', ',', 'lakh', false, '.')).toBe('-1,00,400.5');
+        expect(formatWithSeparators('-100400.5', ',', 'lakh', '.')).toBe('-1,00,400.5');
       });
 
       it('should format -100.40 to -100.40 (no separator needed)', () => {
-        expect(formatWithSeparators('-100.40', ',', 'lakh', false, '.')).toBe('-100.40');
+        expect(formatWithSeparators('-100.40', ',', 'lakh', '.')).toBe('-100.40');
       });
     });
 
@@ -254,8 +254,52 @@ describe('✅ formatWithSeparators', () => {
       });
 
       it('should format -12345.67 to -1,2345.67', () => {
-        expect(formatWithSeparators('-12345.67', ',', 'wan', false, '.')).toBe('-1,2345.67');
+        expect(formatWithSeparators('-12345.67', ',', 'wan', '.')).toBe('-1,2345.67');
       });
     });
+  });
+});
+
+describe('✅ formatValueForDisplay - grouping style default', () => {
+  // Regression for known-bugs/03: the public export hardcoded `?? GroupingStyle.None`,
+  // so a caller relying on the documented Thousand default silently got no grouping.
+  it('should group by thousands when groupingStyle is omitted', () => {
+    expect(
+      formatValueForDisplay('1234567', 18, {
+        formatOn: FormatOn.Change,
+        thousandSeparator: ',',
+      }).formatted
+    ).toBe('1,234,567');
+  });
+
+  it('should match DEFAULT_GROUPING_STYLE exactly when omitted', () => {
+    const omitted = formatValueForDisplay('1234567', 18, {
+      formatOn: FormatOn.Change,
+      thousandSeparator: ',',
+    }).formatted;
+    const explicit = formatValueForDisplay('1234567', 18, {
+      formatOn: FormatOn.Change,
+      thousandSeparator: ',',
+      groupingStyle: DEFAULT_GROUPING_STYLE,
+    }).formatted;
+    expect(omitted).toBe(explicit);
+  });
+
+  it('should still honour an explicit groupingStyle', () => {
+    expect(
+      formatValueForDisplay('1234567', 18, {
+        formatOn: FormatOn.Change,
+        thousandSeparator: ',',
+        groupingStyle: GroupingStyle.None,
+      }).formatted
+    ).toBe('1234567');
+
+    expect(
+      formatValueForDisplay('1234567', 18, {
+        formatOn: FormatOn.Change,
+        thousandSeparator: ',',
+        groupingStyle: GroupingStyle.Lakh,
+      }).formatted
+    ).toBe('12,34,567');
   });
 });

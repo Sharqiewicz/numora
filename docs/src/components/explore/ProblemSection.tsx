@@ -1,5 +1,5 @@
-import { useScrollReveal } from '@/hooks/use-scroll-reveal';
 import { Badge } from '@/components/ui/badge';
+import { useScrollReveal } from '@/hooks/use-scroll-reveal';
 
 interface ProblemSectionProps {
   id: string;
@@ -30,7 +30,7 @@ export function ProblemSection({
       >
         <div className="text-center mb-10">
           <Badge variant="orange" className="mb-4">
-            Problem #{problemNumber}
+            Problem {problemNumber}
           </Badge>
           <h2 className="text-3xl sm:text-4xl font-semibold mb-2">{title}</h2>
           <p className="text-lg text-secondary font-medium mb-4">{subtitle}</p>

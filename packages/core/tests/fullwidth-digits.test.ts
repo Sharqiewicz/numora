@@ -1,26 +1,26 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeFullWidthDigits } from '../src/features/fullwidth-digits';
+import { normalizeDigits } from '../src/features/fullwidth-digits';
 import { sanitizeNumoraInput } from '../src/features/sanitization';
 
-describe('normalizeFullWidthDigits', () => {
+describe('normalizeDigits', () => {
   it('should convert fullwidth digits to ASCII', () => {
-    expect(normalizeFullWidthDigits('１２３')).toBe('123');
+    expect(normalizeDigits('１２３')).toBe('123');
   });
 
   it('should convert all ten fullwidth digits', () => {
-    expect(normalizeFullWidthDigits('０１２３４５６７８９')).toBe('0123456789');
+    expect(normalizeDigits('０１２３４５６７８９')).toBe('0123456789');
   });
 
   it('should leave ASCII digits unchanged', () => {
-    expect(normalizeFullWidthDigits('123')).toBe('123');
+    expect(normalizeDigits('123')).toBe('123');
   });
 
   it('should handle mixed fullwidth and ASCII digits', () => {
-    expect(normalizeFullWidthDigits('１2３')).toBe('123');
+    expect(normalizeDigits('１2３')).toBe('123');
   });
 
   it('should leave non-digit characters unchanged', () => {
-    expect(normalizeFullWidthDigits('１．abc')).toBe('1．abc');
+    expect(normalizeDigits('１．abc')).toBe('1．abc');
   });
 });
 
@@ -40,8 +40,6 @@ describe('sanitizeNumoraInput with fullwidth digits', () => {
   });
 
   it('should expand compact notation with fullwidth digits', () => {
-    expect(
-      sanitizeNumoraInput('１.５k', { ...options, enableCompactNotation: true })
-    ).toBe('1500');
+    expect(sanitizeNumoraInput('１.５k', { ...options, allowCompactNotation: true })).toBe('1500');
   });
 });

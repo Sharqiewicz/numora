@@ -13,6 +13,16 @@ const FOCUS_SETTLE_MS = 600;
 /** Pause on the finished raw value before the simulated blur re-groups it. */
 const PRE_BLUR_MS = 700;
 
+/**
+ * Blur mode announces each simulated focus and blur this long before it happens, as a
+ * bubbling {@link DEMO_CUE_EVENT} on the input. DemoFrame's pointer uses the lead as its
+ * travel time, so it arrives exactly when the focus or blur fires. The lead is taken out
+ * of the pause before it, so the cycle length is unchanged.
+ */
+export const DEMO_CUE_LEAD_MS = 450;
+export const DEMO_CUE_EVENT = 'numora-demo-cue';
+export type DemoCue = 'focus-soon' | 'blur-soon';
+
 const DEFAULT_SEQUENCES: Record<TypingLoopMode, string[]> = {
   change: ['1234567.89', '0'],
   // Both values group, so every cycle shows a focus-strip AND a blur-regroup.
@@ -30,7 +40,7 @@ export interface TypingLoopOptions {
   sequence?: string[];
 }
 
-type Phase = 'focus' | 'type' | 'blur' | 'hold';
+type Phase = 'cue-focus' | 'focus' | 'type' | 'cue-blur' | 'blur' | 'hold';
 
 /**
  * "Types" a scripted sequence into a real input through synthetic events, so the
@@ -60,7 +70,7 @@ export function startTypingLoop(
     'value'
   )?.set;
 
-  const firstPhase: Phase = mode === 'blur' ? 'focus' : 'type';
+  const firstPhase: Phase = mode === 'blur' ? 'cue-focus' : 'type';
 
   let timer: ReturnType<typeof setTimeout> | undefined;
   let valueIndex = 0;
@@ -77,6 +87,10 @@ export function startTypingLoop(
   const dispatchBlur = () => {
     input.dispatchEvent(new FocusEvent('blur'));
     input.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+  };
+
+  const dispatchCue = (cue: DemoCue) => {
+    input.dispatchEvent(new CustomEvent<DemoCue>(DEMO_CUE_EVENT, { bubbles: true, detail: cue }));
   };
 
   const typeChar = (char: string, replaceAll: boolean) => {
@@ -124,6 +138,13 @@ export function startTypingLoop(
 
     const target = sequence[valueIndex];
 
+    if (phase === 'cue-focus') {
+      dispatchCue('focus-soon');
+      phase = 'focus';
+      timer = setTimeout(tick, DEMO_CUE_LEAD_MS);
+      return;
+    }
+
     if (phase === 'focus') {
       dispatchFocus();
       phase = 'type';
@@ -137,16 +158,23 @@ export function startTypingLoop(
       if (charIndex < target.length) {
         timer = setTimeout(tick, TYPE_MS);
       } else {
-        phase = mode === 'blur' ? 'blur' : 'hold';
-        timer = setTimeout(tick, mode === 'blur' ? PRE_BLUR_MS : HOLD_MS);
+        phase = mode === 'blur' ? 'cue-blur' : 'hold';
+        timer = setTimeout(tick, mode === 'blur' ? PRE_BLUR_MS - DEMO_CUE_LEAD_MS : HOLD_MS);
       }
+      return;
+    }
+
+    if (phase === 'cue-blur') {
+      dispatchCue('blur-soon');
+      phase = 'blur';
+      timer = setTimeout(tick, DEMO_CUE_LEAD_MS);
       return;
     }
 
     if (phase === 'blur') {
       dispatchBlur();
       phase = 'hold';
-      timer = setTimeout(tick, HOLD_MS);
+      timer = setTimeout(tick, HOLD_MS - DEMO_CUE_LEAD_MS);
       return;
     }
 
@@ -156,7 +184,7 @@ export function startTypingLoop(
     timer = setTimeout(tick, 0);
   };
 
-  timer = setTimeout(tick, HOLD_MS);
+  timer = setTimeout(tick, mode === 'blur' ? HOLD_MS - DEMO_CUE_LEAD_MS : HOLD_MS);
 
   return () => {
     disposed = true;

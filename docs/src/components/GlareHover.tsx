@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import type React from 'react';
+import { useRef } from 'react';
 
 interface GlareHoverProps {
   width?: string;
@@ -43,8 +44,7 @@ const GlareHover: React.FC<GlareHoverProps> = ({
 
   const overlayRef = useRef<HTMLDivElement | null>(null);
 
-  const prefersReducedMotion = () =>
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const animateIn = () => {
     const el = overlayRef.current;
@@ -89,6 +89,7 @@ const GlareHover: React.FC<GlareHoverProps> = ({
   };
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: purely visual hover glare; the wrapper has no action and children keep their own semantics
     <div
       className={`relative grid place-items-center overflow-hidden cursor-pointer z-30 ${className}`}
       onMouseEnter={animateIn}

@@ -1,18 +1,45 @@
 {
   "name": "numora",
-  "version": "3.5.0",
+  "version": "5.0.0",
   "description": "Framework-agnostic numeric input library for DeFi and financial apps",
-  "homepage": "https://numora.xyz/",
+  "homepage": "https://numeric-input.com/",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/index.d.cts",
   "files": [
-    "dist"
+    "dist",
+    "internal",
+    "pipeline"
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./internal": {
+      "import": {
+        "types": "./dist/internal.d.mts",
+        "default": "./dist/internal.mjs"
+      },
+      "require": {
+        "types": "./dist/internal.d.cts",
+        "default": "./dist/internal.js"
+      }
+    },
+    "./pipeline": {
+      "import": {
+        "types": "./dist/pipeline.d.mts",
+        "default": "./dist/pipeline.mjs"
+      },
+      "require": {
+        "types": "./dist/pipeline.d.cts",
+        "default": "./dist/pipeline.js"
+      }
     }
   },
   "repository": {
@@ -20,32 +47,29 @@
     "url": "https://github.com/Sharqiewicz/numora"
   },
   "scripts": {
-    "build": "vite build && tsc --emitDeclarationOnly",
+    "build": "vite build && tsc --emitDeclarationOnly && rollup -c",
     "test": "vitest run",
-    "dev": "vite build --watch & tsc --watch --emitDeclarationOnly --preserveWatchOutput"
+    "bench": "vitest bench --run",
+    "dev": "vite build --watch & tsc --watch --emitDeclarationOnly --preserveWatchOutput & rollup -c --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "lint": "biome lint --error-on-warnings ./src"
   },
   "keywords": [
     "numeric input",
+    "number input",
     "currency input",
-    "input",
-    "form",
-    "form input",
-    "form currency input",
-    "form numeric input",
-    "input library",
-    "input component",
-    "input field",
-    "input form",
-    "input form field",
-    "input form field currency",
-    "input form field numeric",
+    "money input",
+    "decimal input",
     "financial input",
-    "financial input component",
-    "financial input field",
-    "financial input form",
-    "financial input form field",
-    "financial input form field currency",
-    "financial input form field numeric"
+    "defi",
+    "input formatting",
+    "thousand separator",
+    "locale",
+    "bigint",
+    "precision",
+    "vanilla",
+    "typescript"
   ],
   "authors": [
     {
@@ -59,6 +83,8 @@
     "@types/node": "^22.13.11",
     "fast-check": "^3.15.0",
     "jsdom": "^26.0.0",
+    "rollup": "^4.53.5",
+    "rollup-plugin-dts": "^6.5.1",
     "typescript": "^5.8.2",
     "vite": "^6.2.2",
     "vitest": "^3.0.9"

@@ -1,61 +1,58 @@
-import { FormatOn, NumoraInput, ThousandStyle } from 'numora';
+import { NumoraInput } from 'numora';
 import 'number-flow';
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
+import { DemoFrame, demoOverlayBox } from './DemoFrame';
 
 export function NumberFlowVanillaOverlayDemo() {
+  const inputId = useId();
   const displayRef = useRef<HTMLSpanElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!displayRef.current || !hostRef.current) return;
 
-    // The "1,234,567" rendered for SSR is a plain text node. <number-flow> needs to be
-    // a sibling element, not a child of the span, so clear the span and append.
+    // The "1,234,567" rendered for SSR is a plain text node. Clear it, then append
+    // <number-flow> inside the span.
     displayRef.current.textContent = '';
 
     const flow = document.createElement('number-flow');
     displayRef.current.appendChild(flow);
 
-    const numora = new NumoraInput(hostRef.current, {
-      formatOn: FormatOn.Change,
-      decimalMaxLength: 2,
-      thousandSeparator: ',',
-      value: '1234567',
-      thousandStyle: ThousandStyle.Thousand,
-    });
-    const input = numora.getElement();
-    input.setAttribute('aria-label', 'Amount');
-
-    const syncFlow = () => {
-      const raw = numora.value;
+    const syncFlow = (raw: string) => {
       const decimals = raw.includes('.') ? raw.split('.')[1].length : 0;
-      // Mirror typed decimals so trailing zeros line up under the caret.
+      // Mirror typed decimals so trailing zeros line up under the cursor.
+      flow.locales = 'en-US';
       flow.format = {
         useGrouping: true,
         minimumFractionDigits: decimals,
         maximumFractionDigits: decimals,
       };
-      flow.update(raw === '' ? 0 : Number(raw));
+      flow.update(Number(raw) || 0);
     };
 
-    syncFlow();
+    const numora = new NumoraInput(hostRef.current, {
+      formatOn: 'change',
+      decimalMaxLength: 2,
+      thousandSeparator: ',',
+      defaultValue: '1234567',
+      groupingStyle: 'thousand',
+      // NumberFlow formats the canonical raw `value` itself, so syncing on raw
+      // changes is enough - separator-only rewrites don't change what it shows.
+      onValueChange: ({ value }) => syncFlow(value),
+    });
+    const input = numora.element;
+    input.id = inputId;
+    input.setAttribute('aria-label', 'Amount');
 
-    // Numora applies formatted values in beforeinput via setRangeText. The input event
-    // is not guaranteed to follow on every path, so sync via a beforeinput microtask too.
-    const scheduleFlowSync = () => {
-      queueMicrotask(syncFlow);
-    };
-
-    input.addEventListener('beforeinput', scheduleFlowSync);
-    input.addEventListener('input', syncFlow);
+    // The initial value does not fire onValueChange, so prime the display.
+    syncFlow(numora.rawValue);
 
     return () => {
-      input.removeEventListener('beforeinput', scheduleFlowSync);
-      input.removeEventListener('input', syncFlow);
       flow.remove();
+      numora.destroy();
       input.remove();
     };
-  }, []);
+  }, [inputId]);
 
   return (
     <>
@@ -68,25 +65,21 @@ export function NumberFlowVanillaOverlayDemo() {
           border: 0;
           background: transparent;
           color: transparent;
-          caret-color: white;
+          caret-color: var(--color-foreground);
           outline: none;
           font: inherit;
         }
-        .nf-vanilla-input-host input::selection { background: rgba(255, 255, 255, 0.25); }
+        .nf-vanilla-input-host input::selection { background: color-mix(in oklab, var(--color-foreground) 25%, transparent); }
         .nf-vanilla-input-host input::placeholder { color: transparent; }
       `}</style>
-      <div className="my-16 py-12 flex justify-center items-center">
-        <label className="relative inline-flex items-center min-h-[44px] min-w-[6ch] text-4xl font-mono leading-none text-white">
-          <span
-            ref={displayRef}
-            className="pointer-events-none whitespace-pre tabular-nums"
-            aria-hidden="true"
-          >
+      <DemoFrame inputId={inputId}>
+        <div className={demoOverlayBox}>
+          <span ref={displayRef} className="pointer-events-none whitespace-pre" aria-hidden="true">
             1,234,567
           </span>
           <div ref={hostRef} className="nf-vanilla-input-host absolute inset-0" />
-        </label>
-      </div>
+        </div>
+      </DemoFrame>
     </>
   );
 }

@@ -1,6 +1,6 @@
-import { createPublicClient, http, formatUnits, getAddress } from 'viem';
-import { mainnet, base } from 'viem/chains';
-import { PRICE_FEEDS, PRICE_FEED_ABI, type NetworkName } from '../constants/priceFeeds';
+import { createPublicClient, fallback, formatUnits, getAddress, http } from 'viem';
+import { base, mainnet } from 'viem/chains';
+import { type NetworkName, PRICE_FEED_ABI, PRICE_FEEDS } from '../constants/priceFeeds';
 import type { TokenSymbol } from '../constants/tokens';
 
 export interface PriceData {
@@ -11,14 +11,26 @@ export interface PriceData {
   EURC: number;
 }
 
+// viem's default mainnet RPC (eth.merkle.io) rate-limits shared IPs with 429s,
+// and viem's retry backoff then stalls the whole request. Try an explicit
+// endpoint first (overridable via env) and fail fast so the fallback kicks in.
+const RPC_OPTIONS = { timeout: 5_000, retryCount: 1 } as const;
+
+function transportFor(primaryUrls: (string | undefined)[]) {
+  return fallback([
+    ...primaryUrls.filter((url): url is string => !!url).map((url) => http(url, RPC_OPTIONS)),
+    http(undefined, RPC_OPTIONS), // chain default
+  ]);
+}
+
 const clients = {
   mainnet: createPublicClient({
     chain: mainnet,
-    transport: http(),
+    transport: transportFor([process.env.MAINNET_RPC_URL, 'https://ethereum-rpc.publicnode.com']),
   }),
   base: createPublicClient({
     chain: base,
-    transport: http(),
+    transport: transportFor([process.env.BASE_RPC_URL]),
   }),
 };
 

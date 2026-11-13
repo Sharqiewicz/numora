@@ -29,6 +29,7 @@ export function CursorVisualizer({ value, cursorPosition, className }: CursorVis
           </div>
         ) : (
           chars.map((char, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: static character list that never reorders; the index is the cursor position
             <div key={index} className="relative">
               {index === validCursorPos && (
                 <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-secondary animate-pulse" />
@@ -56,7 +57,9 @@ export function CursorVisualizer({ value, cursorPosition, className }: CursorVis
       <p className="text-xs text-muted-foreground mt-1">
         Cursor at position: <span className="font-mono text-secondary">{validCursorPos}</span>
         {chars.length > 0 && (
-          <span className="ml-2">(after "{chars[validCursorPos - 1] || 'start'}")</span>
+          <span className="ml-2">
+            {validCursorPos === 0 ? '(at the start)' : `(after "${chars[validCursorPos - 1]}")`}
+          </span>
         )}
       </p>
     </div>

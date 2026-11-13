@@ -92,7 +92,7 @@ export const AnimatedCopyIcon: FC<AnimatedCopyIconProps> = ({
   };
 
   return (
-    <span className={className}>
+    <span className={className} aria-hidden="true">
       <AnimatePresence initial={false} mode="wait" onExitComplete={handleExitComplete}>
         {!showSuccess ? (
           <motion.div

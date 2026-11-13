@@ -29,12 +29,12 @@ const FRAMEWORKS: Framework[] = [
     language: 'tsx',
     logo: <ReactLogo />,
     href: '/docs/numora-react',
-    example: `import { NumoraInput, FormatOn } from 'numora-react'
+    example: `import { NumoraInput } from 'numora-react'
 
 <NumoraInput
-  formatOn={FormatOn.Change}
-  maxDecimals={2}
-  onChange={(e) => console.log(e.target.value)}
+  formatOn="change"
+  decimalMaxLength={2}
+  onValueChange={({ value }) => console.log(value)}
 />`,
   },
   {
@@ -45,7 +45,7 @@ const FRAMEWORKS: Framework[] = [
     example: `import { NumoraInput } from 'numora'
 
 new NumoraInput(document.querySelector('#amount'), {
-  maxDecimals: 2,
+  decimalMaxLength: 2,
   thousandSeparator: ',',
 })`,
   },
@@ -61,7 +61,7 @@ export const vNumora = {
   mounted: (el, { value }) => new NumoraInput(el, value ?? {}),
 }
 
-<input v-numora="{ maxDecimals: 2 }" />`,
+<input v-numora="{ decimalMaxLength: 2 }" />`,
   },
   {
     name: 'Svelte',
@@ -75,7 +75,7 @@ export function numora(node, options) {
   new NumoraInput(node, options)
 }
 
-<input use:numora={{ maxDecimals: 2 }} />`,
+<input use:numora={{ decimalMaxLength: 2 }} />`,
   },
   {
     name: 'Angular',
@@ -87,7 +87,7 @@ export function numora(node, options) {
 @Directive({ selector: 'input[numora]', standalone: true })
 export class NumoraDirective implements OnInit {
   private el = inject(ElementRef<HTMLInputElement>)
-  ngOnInit() { new NumoraInput(this.el.nativeElement, { maxDecimals: 2 }) }
+  ngOnInit() { new NumoraInput(this.el.nativeElement, { decimalMaxLength: 2 }) }
 }
 
 <input numora />`,
@@ -104,7 +104,7 @@ export function numora(el, options) {
   new NumoraInput(el, options() ?? {})
 }
 
-<input use:numora={{ maxDecimals: 2 }} />`,
+<input use:numora={{ decimalMaxLength: 2 }} />`,
   },
 ];
 

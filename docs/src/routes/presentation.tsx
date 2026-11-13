@@ -1,8 +1,12 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, notFound } from '@tanstack/react-router';
 import { motion, useReducedMotion } from 'motion/react';
 import LightRays from '@/components/LightRays';
 
 export const Route = createFileRoute('/presentation')({
+  // Talk slides: available in local dev, not part of the production site.
+  beforeLoad: () => {
+    if (import.meta.env.PROD) throw notFound();
+  },
   head: () => ({
     meta: [{ name: 'robots', content: 'noindex, nofollow' }],
   }),
@@ -34,7 +38,7 @@ function Presentation() {
         >
           {WORDS.map((word, i) => (
             <motion.span
-              key={word + i}
+              key={word}
               className="inline-block mr-[0.25em] last:mr-0"
               initial={shouldReduceMotion ? false : { opacity: 0, y: 32, filter: 'blur(8px)' }}
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
@@ -77,7 +81,7 @@ function Presentation() {
             delay: shouldReduceMotion ? 0 : 1.0,
           }}
         >
-          <span className="font-numora text-foreground">numora</span> fixes them.
+          <span className="font-numora text-foreground">Numora</span> fixes them.
         </motion.p>
       </main>
     </div>

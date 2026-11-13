@@ -1,23 +1,23 @@
-import { FloatVsString } from '../FloatVsString';
+import { NumberRoundTrip } from '../NumberRoundTrip';
 
 export function FloatVsStringSection() {
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="float-vs-string" className="space-y-4 scroll-mt-24">
       <h2>
-        Why <code>Number</code> is the enemy
+        Why <code>Number</code> is the wrong type
       </h2>
       <p>
-        JavaScript stores all numbers as 64-bit IEEE 754 floats. The decimals you reach for in a
-        financial UI - money, ratios, percentages - don't fit cleanly into binary fractions. Add two
-        innocent values and you get the famous result every developer eventually meets:
+        JavaScript stores every number as a 64-bit IEEE 754 float. Most decimals you use in a
+        financial UI, such as prices, ratios and percentages, have no exact binary representation.
+        Add two of them and you get the result every developer eventually meets:
       </p>
-      <FloatVsString />
+      <NumberRoundTrip />
       <p>
-        On a price field, that <code>0.30000000000000004</code> isn't a rounding bug - it is a
-        corruption of user intent. Numora's central design rule is that every value flowing through
-        the input is <strong>a string</strong>. We never call <code>parseFloat</code>, never coerce
-        with <code>+</code>, never store a <code>Number</code> anywhere in the pipeline. The string
-        the user typed is the string the consumer reads back.
+        On a price field, <code>0.30000000000000004</code> is not the number the user meant. Numora
+        has one rule here. Every value in the input is <strong>a string</strong>. Numora never
+        converts it to a <code>Number</code>. The digits the user typed are the digits your code
+        reads back.
       </p>
     </section>
   );

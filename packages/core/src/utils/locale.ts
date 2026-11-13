@@ -1,28 +1,198 @@
-export function getSeparatorsFromLocale(locale?: string): {
-  thousandSeparator: string;
-  decimalSeparator: string;
-} {
+import { DEFAULT_DECIMAL_SEPARATOR, DEFAULT_GROUPING_STYLE, DEFAULT_THOUSAND_SEPARATOR } from '../config';
+import { GroupingStyle } from '../types';
+
+// Probe value: wide enough that every locale groups it, and it carries a fraction, so a
+// single formatted string exposes the group separator, the decimal separator, and the
+// grouping pattern at once.
+const GROUPING_PROBE = 1234567.89;
+
+// Indic (lakh/crore) grouping is 3-2-2: the group immediately left of the last one is two
+// digits wide. Western 3-3-3 grouping puts 3 there. That single width is the whole test.
+const LAKH_PENULTIMATE_GROUP_WIDTH = 2;
+
+interface ProbeShape {
+  /** Width of each run of digits, left to right, fraction run included. */
+  digitRuns: number[];
+  /** Each run of non-digit characters between the digit runs, left to right. */
+  separators: string[];
+}
+
+/**
+ * Splits a formatted probe into digit runs and the separators between them.
+ *
+ * Deliberately does NOT use `Intl.NumberFormat.prototype.formatToParts`, which would make
+ * this trivial. `formatToParts` is not implemented in Hermes on iOS (hermes#1188, and it
+ * is listed unsupported in Hermes' own IntlAPIs.md), and Android has reported the `group`
+ * part missing in cases (hermes#788). The old implementation called it inside the
+ * try/catch below, so on iOS the `TypeError` was swallowed and every locale silently
+ * resolved to US separators - no throw, no warning, wrong output. `format()` IS
+ * implemented there, so deriving from the formatted string instead makes this function
+ * correct on iOS, Android, old browsers and any other constrained engine at once.
+ *
+ * `zeroCode` is the code point of the locale's own zero digit, so this classifies digits
+ * for non-ASCII numbering systems too (`ar-EG` -> `١٬٢٣٤٬٥٦٧٫٨٩`, `bn-IN` -> `১২,৩৪,৫৬৭.৮৯`).
+ * Every Unicode decimal-digit set is contiguous from its zero by definition, so a simple
+ * range test is enough - no `\p{Nd}` escape, which Hermes also may not support.
+ */
+function parseProbe(formatted: string, zeroCode: number): ProbeShape {
+  const digitRuns: number[] = [];
+  const separators: string[] = [];
+  let digitRun = 0;
+  let separatorRun = '';
+
+  // Array.from iterates by code point, so astral-plane digit sets survive intact.
+  for (const char of Array.from(formatted)) {
+    const code = char.codePointAt(0) ?? 0;
+    if (code >= zeroCode && code <= zeroCode + 9) {
+      if (separatorRun) {
+        separators.push(separatorRun);
+        separatorRun = '';
+      }
+      digitRun++;
+    } else {
+      if (digitRun) {
+        digitRuns.push(digitRun);
+        digitRun = 0;
+      }
+      separatorRun += char;
+    }
+  }
+  // The probe ends in its fraction digits, so no separator run is pending here.
+  digitRuns.push(digitRun);
+
+  return { digitRuns, separators };
+}
+
+/**
+ * Infers the grouping style from the widths of the integer digit runs.
+ *
+ * Only `Thousand` and `Lakh` are inferrable. `GroupingStyle.Wan` is NOT derivable from
+ * `Intl`: `zh-CN` and `ja-JP` both report Western 3-3-3 grouping, not 4-4-4 (verified),
+ * so Wan stays opt-in via an explicit `groupingStyle`. Do not special-case CJK tags here.
+ *
+ * Reads run *lengths*, not digit values, so non-ASCII numbering systems are unaffected.
+ */
+function deriveGroupingStyle({ digitRuns }: ProbeShape): GroupingStyle {
+  // The final run is the fraction ("89"), which says nothing about integer grouping.
+  const integerWidths = digitRuns.slice(0, -1);
+  return integerWidths[integerWidths.length - 2] === LAKH_PENULTIMATE_GROUP_WIDTH
+    ? GroupingStyle.Lakh
+    : GroupingStyle.Thousand;
+}
+
+// Bidi control marks that RTL locales embed in formatted numbers. They are not separators.
+const BIDI_MARKS = /[\u200E\u200F\u061C\u202A-\u202E\u2066-\u2069]/g;
+
+/**
+ * Returns the code point of the locale's zero if its digits 0..9 are contiguous, otherwise
+ * undefined (e.g. `hanidec`: 〇一二三四五六七八九).
+ */
+function contiguousZero(formatter: Intl.NumberFormat): number | undefined {
+  let zero: number | undefined;
+  for (let i = 0; i <= 9; i++) {
+    const code = formatter.format(i).replace(BIDI_MARKS, '').codePointAt(0) ?? 0;
+    if (zero === undefined) zero = code;
+    else if (code !== zero + i) return undefined;
+  }
+  return zero;
+}
+
+/** Re-targets a tag to Latin digits. Separators do not depend on the digit set. */
+function withLatinDigits(locale: string | undefined): string {
+  const tag = locale ?? new Intl.NumberFormat().resolvedOptions().locale;
+  // Replace an existing nu keyword, otherwise add the extension.
+  return /-nu-/i.test(tag) ? tag.replace(/-nu-[a-z0-9]+/i, '-nu-latn') : `${tag}-u-nu-latn`;
+}
+
+/** True in a production bundle. Guards every development-only warning. */
+export function isProduction(): boolean {
   try {
-    const formatter = new Intl.NumberFormat(locale);
-    const parts = formatter.formatToParts(1234567.89);
-    return {
-      decimalSeparator: parts.find(p => p.type === 'decimal')?.value ?? '.',
-      thousandSeparator: parts.find(p => p.type === 'group')?.value ?? ',',
-    };
+    // Bundlers replace this; unbundled ESM has no `process`, so guard the lookup.
+    return typeof process !== 'undefined' && process.env.NODE_ENV === 'production';
   } catch {
-    return { thousandSeparator: ',', decimalSeparator: '.' };
+    // Some environments expose a `process` without `env`.
+    return false;
   }
 }
 
+export function getSeparatorsFromLocale(locale?: string): {
+  thousandSeparator: string;
+  decimalSeparator: string;
+  groupingStyle: GroupingStyle;
+} {
+  // Java, Python and Android write tags with `_` (`de_DE`), which Intl rejects with a
+  // RangeError. Read them as the BCP 47 tag they name instead of falling back to en-US.
+  // `String`: a non-string that got past the types fails as an invalid tag, not a TypeError.
+  if (locale) locale = String(locale).replace(/_/g, '-');
+  try {
+    let formatter = new Intl.NumberFormat(locale);
+    // The locale's own zero digit anchors digit classification for the probe.
+    let zeroCode = contiguousZero(formatter);
+    if (zeroCode === undefined) {
+      formatter = new Intl.NumberFormat(withLatinDigits(locale));
+      zeroCode = 0x30;
+    }
+    const shape = parseProbe(formatter.format(GROUPING_PROBE).replace(BIDI_MARKS, ''), zeroCode);
+    const { separators } = shape;
+    return {
+      // Last separator is the decimal one (the probe's fraction is right of it); anything
+      // before it is a group separator, all identical.
+      decimalSeparator: separators[separators.length - 1] ?? '.',
+      thousandSeparator: separators.length >= 2 ? separators[0] : ',',
+      groupingStyle: deriveGroupingStyle(shape),
+    };
+  } catch (error) {
+    // A malformed tag is an invalid option and throws like one. Anything else is an engine
+    // without the `Intl` support needed, which gets the default separators.
+    if (error instanceof RangeError) {
+      throw new Error(`locale must be a BCP 47 tag such as "de-DE". Received: ${JSON.stringify(locale)}`);
+    }
+    return {
+      thousandSeparator: ',',
+      decimalSeparator: '.',
+      groupingStyle: DEFAULT_GROUPING_STYLE,
+    };
+  }
+}
+
+// The conventional other mark for a separator the app did not pass: `.` unless that is taken.
+const otherMark = (taken: string): string =>
+  taken === DEFAULT_DECIMAL_SEPARATOR ? DEFAULT_THOUSAND_SEPARATOR : DEFAULT_DECIMAL_SEPARATOR;
+
+/**
+ * Fills the separators and grouping style the app left out from the locale. A separator the
+ * app passed always wins: when it equals the one the locale (or the defaults) would fill in
+ * for the other role, that other one gives way and becomes the conventional other mark
+ * (`{ thousandSeparator: '.' }` -> `,` decimal; de-DE + `decimalSeparator: '.'` -> `,`
+ * grouping). Two separators the app passed itself are never changed, so passing the same
+ * character for both still fails validation.
+ */
 export function applyLocale(
-  locale: string | true | undefined,
-  options: { thousandSeparator?: string; decimalSeparator?: string }
-): { thousandSeparator?: string; decimalSeparator?: string } {
-  if (!locale) return options;
-  const tag = locale === true ? undefined : locale;
-  const seps = getSeparatorsFromLocale(tag);
+  locale: string | boolean | undefined,
+  options: {
+    thousandSeparator?: string;
+    decimalSeparator?: string;
+    groupingStyle?: GroupingStyle;
+  }
+): { thousandSeparator?: string; decimalSeparator?: string; groupingStyle?: GroupingStyle } {
+  const base = locale ? getSeparatorsFromLocale(locale === true ? undefined : locale) : undefined;
+  const { thousandSeparator: thousand, decimalSeparator: decimal } = options;
+  const filledThousand = base?.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR;
+  const filledDecimal = base?.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR;
+
+  let paired: { thousandSeparator?: string; decimalSeparator?: string } | undefined;
+  if (thousand === undefined && decimal === filledThousand) {
+    paired = { thousandSeparator: otherMark(decimal) };
+  } else if (decimal === undefined && thousand === filledDecimal) {
+    paired = { decimalSeparator: otherMark(thousand) };
+  }
+
+  // No locale: nothing to fill in, the caller's defaults apply to what is left out.
+  if (!base) return paired ? { ...options, ...paired } : options;
   return {
-    thousandSeparator: options.thousandSeparator ?? seps.thousandSeparator,
-    decimalSeparator: options.decimalSeparator ?? seps.decimalSeparator,
+    thousandSeparator: thousand ?? base.thousandSeparator,
+    decimalSeparator: decimal ?? base.decimalSeparator,
+    groupingStyle: options.groupingStyle ?? base.groupingStyle,
+    ...paired,
   };
 }

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   ensureMinDecimals,
   trimToDecimalMaxLength,
-  removeExtraDecimalSeparators
+  removeExtraDecimalSeparators,
 } from '../src/features/decimals';
 
 describe('ensureMinDecimals', () => {
@@ -34,12 +34,14 @@ describe('ensureMinDecimals', () => {
       expect(ensureMinDecimals('0', 0, '.')).toBe('0');
     });
 
-    it('should handle empty string', () => {
-      expect(ensureMinDecimals('', 2, '.')).toBe('.00');
+    it('should leave a value with no digit unchanged (nothing to pad)', () => {
+      // '', '-', '.', '-.' carry no digit; padding them would fabricate a number
+      // (e.g. '' -> '.00') out of a field that is actually empty or mid-entry.
+      expect(ensureMinDecimals('', 2, '.')).toBe('');
     });
 
     it('should handle just decimal separator', () => {
-      expect(ensureMinDecimals('.', 2, '.')).toBe('.00');
+      expect(ensureMinDecimals('.', 2, '.')).toBe('.');
     });
 
     it('should handle negative numbers', () => {
@@ -48,15 +50,19 @@ describe('ensureMinDecimals', () => {
     });
 
     it('should handle negative with just separator', () => {
-      expect(ensureMinDecimals('-.', 2, '.')).toBe('-.00');
+      expect(ensureMinDecimals('-.', 2, '.')).toBe('-.');
     });
 
     it('should handle solo hyphen', () => {
-      expect(ensureMinDecimals('-', 2, '.')).toBe('-.00');
+      expect(ensureMinDecimals('-', 2, '.')).toBe('-');
     });
 
     it('should handle negative zero', () => {
       expect(ensureMinDecimals('-0', 2, '.')).toBe('-0.00');
+    });
+
+    it('should pad a value with a trailing separator', () => {
+      expect(ensureMinDecimals('0.', 2, '.')).toBe('0.00');
     });
   });
 
@@ -112,8 +118,12 @@ describe('✅ trimToDecimalMaxLength', () => {
       expect(trimToDecimalMaxLength('.', 2, '.')).toBe('.');
     });
 
-    it('should handle zero max length', () => {
-      expect(trimToDecimalMaxLength('1.123', 0, '.')).toBe('1.');
+    it('should handle zero max length by dropping the separator entirely', () => {
+      // decimalMaxLength: 0 means no decimals at all - the separator itself is dropped,
+      // not just trimmed down to an empty fraction (which used to leave a trailing '.').
+      expect(trimToDecimalMaxLength('1.123', 0, '.')).toBe('1');
+      expect(trimToDecimalMaxLength('1.', 0, '.')).toBe('1');
+      expect(trimToDecimalMaxLength('1.5', 0, '.')).toBe('1');
     });
 
     it('should handle very large max length', () => {
@@ -191,7 +201,7 @@ describe('✅ removeExtraDecimalSeparators', () => {
 
     it('should handle multiple separators at end', () => {
       expect(removeExtraDecimalSeparators('1.23.', '.')).toBe('1.23');
-    }); 
+    });
 
     it('should handle empty string', () => {
       expect(removeExtraDecimalSeparators('', '.')).toBe('');
@@ -238,7 +248,9 @@ describe('✅ removeExtraDecimalSeparators', () => {
     it('should handle input validation cleanup', () => {
       expect(removeExtraDecimalSeparators('123.45.67.89', '.')).toBe('123.456789');
       expect(removeExtraDecimalSeparators('-1.2.3', '.')).toBe('-1.23');
-      expect(removeExtraDecimalSeparators('....,,,,.,.,.,.,....123.45.67.89', '.')).toBe('.123456789');
+      expect(removeExtraDecimalSeparators('....,,,,.,.,.,.,....123.45.67.89', '.')).toBe(
+        '.123456789'
+      );
     });
 
     it('should purge mixed dot and comma separators from the tail', () => {

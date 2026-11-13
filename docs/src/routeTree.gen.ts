@@ -40,6 +40,7 @@ import { Route as DocsNumoraFeaturesMaxLengthRouteImport } from './routes/docs/n
 import { Route as DocsNumoraFeaturesLocaleRouteImport } from './routes/docs/numora/features/locale'
 import { Route as DocsNumoraFeaturesLeadingZerosRouteImport } from './routes/docs/numora/features/leading-zeros'
 import { Route as DocsNumoraFeaturesFormattingRouteImport } from './routes/docs/numora/features/formatting'
+import { Route as DocsNumoraFeaturesFormatOnRouteImport } from './routes/docs/numora/features/format-on'
 import { Route as DocsNumoraFeaturesDecimalsRouteImport } from './routes/docs/numora/features/decimals'
 import { Route as DocsNumoraFeaturesCompactNotationRouteImport } from './routes/docs/numora/features/compact-notation'
 import { Route as DocsNumoraReactIntegrationsTorphRouteImport } from './routes/docs/numora-react/integrations/torph'
@@ -53,6 +54,7 @@ import { Route as DocsNumoraReactFeaturesMaxLengthRouteImport } from './routes/d
 import { Route as DocsNumoraReactFeaturesLocaleRouteImport } from './routes/docs/numora-react/features/locale'
 import { Route as DocsNumoraReactFeaturesLeadingZerosRouteImport } from './routes/docs/numora-react/features/leading-zeros'
 import { Route as DocsNumoraReactFeaturesFormattingRouteImport } from './routes/docs/numora-react/features/formatting'
+import { Route as DocsNumoraReactFeaturesFormatOnRouteImport } from './routes/docs/numora-react/features/format-on'
 import { Route as DocsNumoraReactFeaturesDecimalsRouteImport } from './routes/docs/numora-react/features/decimals'
 import { Route as DocsNumoraReactFeaturesCompactNotationRouteImport } from './routes/docs/numora-react/features/compact-notation'
 
@@ -226,6 +228,12 @@ const DocsNumoraFeaturesFormattingRoute =
     path: '/numora/features/formatting',
     getParentRoute: () => DocsRoute,
   } as any)
+const DocsNumoraFeaturesFormatOnRoute =
+  DocsNumoraFeaturesFormatOnRouteImport.update({
+    id: '/numora/features/format-on',
+    path: '/numora/features/format-on',
+    getParentRoute: () => DocsRoute,
+  } as any)
 const DocsNumoraFeaturesDecimalsRoute =
   DocsNumoraFeaturesDecimalsRouteImport.update({
     id: '/numora/features/decimals',
@@ -304,6 +312,12 @@ const DocsNumoraReactFeaturesFormattingRoute =
     path: '/numora-react/features/formatting',
     getParentRoute: () => DocsRoute,
   } as any)
+const DocsNumoraReactFeaturesFormatOnRoute =
+  DocsNumoraReactFeaturesFormatOnRouteImport.update({
+    id: '/numora-react/features/format-on',
+    path: '/numora-react/features/format-on',
+    getParentRoute: () => DocsRoute,
+  } as any)
 const DocsNumoraReactFeaturesDecimalsRoute =
   DocsNumoraReactFeaturesDecimalsRouteImport.update({
     id: '/numora-react/features/decimals',
@@ -337,6 +351,7 @@ export interface FileRoutesByFullPath {
   '/docs/numora/': typeof DocsNumoraIndexRoute
   '/docs/numora-react/features/compact-notation': typeof DocsNumoraReactFeaturesCompactNotationRoute
   '/docs/numora-react/features/decimals': typeof DocsNumoraReactFeaturesDecimalsRoute
+  '/docs/numora-react/features/format-on': typeof DocsNumoraReactFeaturesFormatOnRoute
   '/docs/numora-react/features/formatting': typeof DocsNumoraReactFeaturesFormattingRoute
   '/docs/numora-react/features/leading-zeros': typeof DocsNumoraReactFeaturesLeadingZerosRoute
   '/docs/numora-react/features/locale': typeof DocsNumoraReactFeaturesLocaleRoute
@@ -350,6 +365,7 @@ export interface FileRoutesByFullPath {
   '/docs/numora-react/integrations/torph': typeof DocsNumoraReactIntegrationsTorphRoute
   '/docs/numora/features/compact-notation': typeof DocsNumoraFeaturesCompactNotationRoute
   '/docs/numora/features/decimals': typeof DocsNumoraFeaturesDecimalsRoute
+  '/docs/numora/features/format-on': typeof DocsNumoraFeaturesFormatOnRoute
   '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
   '/docs/numora/features/leading-zeros': typeof DocsNumoraFeaturesLeadingZerosRoute
   '/docs/numora/features/locale': typeof DocsNumoraFeaturesLocaleRoute
@@ -385,6 +401,7 @@ export interface FileRoutesByTo {
   '/docs/numora': typeof DocsNumoraIndexRoute
   '/docs/numora-react/features/compact-notation': typeof DocsNumoraReactFeaturesCompactNotationRoute
   '/docs/numora-react/features/decimals': typeof DocsNumoraReactFeaturesDecimalsRoute
+  '/docs/numora-react/features/format-on': typeof DocsNumoraReactFeaturesFormatOnRoute
   '/docs/numora-react/features/formatting': typeof DocsNumoraReactFeaturesFormattingRoute
   '/docs/numora-react/features/leading-zeros': typeof DocsNumoraReactFeaturesLeadingZerosRoute
   '/docs/numora-react/features/locale': typeof DocsNumoraReactFeaturesLocaleRoute
@@ -398,6 +415,7 @@ export interface FileRoutesByTo {
   '/docs/numora-react/integrations/torph': typeof DocsNumoraReactIntegrationsTorphRoute
   '/docs/numora/features/compact-notation': typeof DocsNumoraFeaturesCompactNotationRoute
   '/docs/numora/features/decimals': typeof DocsNumoraFeaturesDecimalsRoute
+  '/docs/numora/features/format-on': typeof DocsNumoraFeaturesFormatOnRoute
   '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
   '/docs/numora/features/leading-zeros': typeof DocsNumoraFeaturesLeadingZerosRoute
   '/docs/numora/features/locale': typeof DocsNumoraFeaturesLocaleRoute
@@ -434,6 +452,7 @@ export interface FileRoutesById {
   '/docs/numora/': typeof DocsNumoraIndexRoute
   '/docs/numora-react/features/compact-notation': typeof DocsNumoraReactFeaturesCompactNotationRoute
   '/docs/numora-react/features/decimals': typeof DocsNumoraReactFeaturesDecimalsRoute
+  '/docs/numora-react/features/format-on': typeof DocsNumoraReactFeaturesFormatOnRoute
   '/docs/numora-react/features/formatting': typeof DocsNumoraReactFeaturesFormattingRoute
   '/docs/numora-react/features/leading-zeros': typeof DocsNumoraReactFeaturesLeadingZerosRoute
   '/docs/numora-react/features/locale': typeof DocsNumoraReactFeaturesLocaleRoute
@@ -447,6 +466,7 @@ export interface FileRoutesById {
   '/docs/numora-react/integrations/torph': typeof DocsNumoraReactIntegrationsTorphRoute
   '/docs/numora/features/compact-notation': typeof DocsNumoraFeaturesCompactNotationRoute
   '/docs/numora/features/decimals': typeof DocsNumoraFeaturesDecimalsRoute
+  '/docs/numora/features/format-on': typeof DocsNumoraFeaturesFormatOnRoute
   '/docs/numora/features/formatting': typeof DocsNumoraFeaturesFormattingRoute
   '/docs/numora/features/leading-zeros': typeof DocsNumoraFeaturesLeadingZerosRoute
   '/docs/numora/features/locale': typeof DocsNumoraFeaturesLocaleRoute
@@ -484,6 +504,7 @@ export interface FileRouteTypes {
     | '/docs/numora/'
     | '/docs/numora-react/features/compact-notation'
     | '/docs/numora-react/features/decimals'
+    | '/docs/numora-react/features/format-on'
     | '/docs/numora-react/features/formatting'
     | '/docs/numora-react/features/leading-zeros'
     | '/docs/numora-react/features/locale'
@@ -497,6 +518,7 @@ export interface FileRouteTypes {
     | '/docs/numora-react/integrations/torph'
     | '/docs/numora/features/compact-notation'
     | '/docs/numora/features/decimals'
+    | '/docs/numora/features/format-on'
     | '/docs/numora/features/formatting'
     | '/docs/numora/features/leading-zeros'
     | '/docs/numora/features/locale'
@@ -532,6 +554,7 @@ export interface FileRouteTypes {
     | '/docs/numora'
     | '/docs/numora-react/features/compact-notation'
     | '/docs/numora-react/features/decimals'
+    | '/docs/numora-react/features/format-on'
     | '/docs/numora-react/features/formatting'
     | '/docs/numora-react/features/leading-zeros'
     | '/docs/numora-react/features/locale'
@@ -545,6 +568,7 @@ export interface FileRouteTypes {
     | '/docs/numora-react/integrations/torph'
     | '/docs/numora/features/compact-notation'
     | '/docs/numora/features/decimals'
+    | '/docs/numora/features/format-on'
     | '/docs/numora/features/formatting'
     | '/docs/numora/features/leading-zeros'
     | '/docs/numora/features/locale'
@@ -580,6 +604,7 @@ export interface FileRouteTypes {
     | '/docs/numora/'
     | '/docs/numora-react/features/compact-notation'
     | '/docs/numora-react/features/decimals'
+    | '/docs/numora-react/features/format-on'
     | '/docs/numora-react/features/formatting'
     | '/docs/numora-react/features/leading-zeros'
     | '/docs/numora-react/features/locale'
@@ -593,6 +618,7 @@ export interface FileRouteTypes {
     | '/docs/numora-react/integrations/torph'
     | '/docs/numora/features/compact-notation'
     | '/docs/numora/features/decimals'
+    | '/docs/numora/features/format-on'
     | '/docs/numora/features/formatting'
     | '/docs/numora/features/leading-zeros'
     | '/docs/numora/features/locale'
@@ -840,6 +866,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsNumoraFeaturesFormattingRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/docs/numora/features/format-on': {
+      id: '/docs/numora/features/format-on'
+      path: '/numora/features/format-on'
+      fullPath: '/docs/numora/features/format-on'
+      preLoaderRoute: typeof DocsNumoraFeaturesFormatOnRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/docs/numora/features/decimals': {
       id: '/docs/numora/features/decimals'
       path: '/numora/features/decimals'
@@ -931,6 +964,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsNumoraReactFeaturesFormattingRouteImport
       parentRoute: typeof DocsRoute
     }
+    '/docs/numora-react/features/format-on': {
+      id: '/docs/numora-react/features/format-on'
+      path: '/numora-react/features/format-on'
+      fullPath: '/docs/numora-react/features/format-on'
+      preLoaderRoute: typeof DocsNumoraReactFeaturesFormatOnRouteImport
+      parentRoute: typeof DocsRoute
+    }
     '/docs/numora-react/features/decimals': {
       id: '/docs/numora-react/features/decimals'
       path: '/numora-react/features/decimals'
@@ -959,6 +999,7 @@ interface DocsRouteChildren {
   DocsNumoraIndexRoute: typeof DocsNumoraIndexRoute
   DocsNumoraReactFeaturesCompactNotationRoute: typeof DocsNumoraReactFeaturesCompactNotationRoute
   DocsNumoraReactFeaturesDecimalsRoute: typeof DocsNumoraReactFeaturesDecimalsRoute
+  DocsNumoraReactFeaturesFormatOnRoute: typeof DocsNumoraReactFeaturesFormatOnRoute
   DocsNumoraReactFeaturesFormattingRoute: typeof DocsNumoraReactFeaturesFormattingRoute
   DocsNumoraReactFeaturesLeadingZerosRoute: typeof DocsNumoraReactFeaturesLeadingZerosRoute
   DocsNumoraReactFeaturesLocaleRoute: typeof DocsNumoraReactFeaturesLocaleRoute
@@ -972,6 +1013,7 @@ interface DocsRouteChildren {
   DocsNumoraReactIntegrationsTorphRoute: typeof DocsNumoraReactIntegrationsTorphRoute
   DocsNumoraFeaturesCompactNotationRoute: typeof DocsNumoraFeaturesCompactNotationRoute
   DocsNumoraFeaturesDecimalsRoute: typeof DocsNumoraFeaturesDecimalsRoute
+  DocsNumoraFeaturesFormatOnRoute: typeof DocsNumoraFeaturesFormatOnRoute
   DocsNumoraFeaturesFormattingRoute: typeof DocsNumoraFeaturesFormattingRoute
   DocsNumoraFeaturesLeadingZerosRoute: typeof DocsNumoraFeaturesLeadingZerosRoute
   DocsNumoraFeaturesLocaleRoute: typeof DocsNumoraFeaturesLocaleRoute
@@ -1000,6 +1042,7 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsNumoraReactFeaturesCompactNotationRoute:
     DocsNumoraReactFeaturesCompactNotationRoute,
   DocsNumoraReactFeaturesDecimalsRoute: DocsNumoraReactFeaturesDecimalsRoute,
+  DocsNumoraReactFeaturesFormatOnRoute: DocsNumoraReactFeaturesFormatOnRoute,
   DocsNumoraReactFeaturesFormattingRoute:
     DocsNumoraReactFeaturesFormattingRoute,
   DocsNumoraReactFeaturesLeadingZerosRoute:
@@ -1022,6 +1065,7 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsNumoraFeaturesCompactNotationRoute:
     DocsNumoraFeaturesCompactNotationRoute,
   DocsNumoraFeaturesDecimalsRoute: DocsNumoraFeaturesDecimalsRoute,
+  DocsNumoraFeaturesFormatOnRoute: DocsNumoraFeaturesFormatOnRoute,
   DocsNumoraFeaturesFormattingRoute: DocsNumoraFeaturesFormattingRoute,
   DocsNumoraFeaturesLeadingZerosRoute: DocsNumoraFeaturesLeadingZerosRoute,
   DocsNumoraFeaturesLocaleRoute: DocsNumoraFeaturesLocaleRoute,

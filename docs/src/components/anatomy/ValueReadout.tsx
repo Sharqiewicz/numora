@@ -1,57 +1,94 @@
-import { useState } from 'react';
-import { FormatOn, ThousandStyle } from 'numora';
-import {
-  type NumoraHTMLInputElement,
-  NumoraInput,
-  type NumoraInputChangeEvent,
-} from 'numora-react';
+import { motion, useReducedMotion } from 'motion/react';
+import { formatValue, NumoraInput, type NumoraInputChangeEvent } from 'numora-react';
+import { type ReactNode, useState } from 'react';
+import { DiagramFrame, DUR, demoInputClass, demoInsetClass, EASE } from './kit';
+
+/**
+ * A value that flashes a neutral surface (opacity only, DUR.flash) when `value` changes.
+ * Diff-based: unchanged values never flash. No flash on mount.
+ */
+export function FlashValue({ value, children }: { value: string | number; children: ReactNode }) {
+  const reduced = useReducedMotion() ?? false;
+  // Derive the flash key during render (no extra render / frame of lag).
+  const [prev, setPrev] = useState(value);
+  const [n, setN] = useState(0);
+  if (prev !== value) {
+    setPrev(value);
+    setN((c) => c + 1);
+  }
+  return (
+    <span className="relative -mx-1 inline-block rounded px-1 break-all">
+      {n > 0 && !reduced && (
+        <motion.span
+          key={n}
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded bg-surface-4"
+          initial={{ opacity: 0.6 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: DUR.flash, ease: EASE.outExpo }}
+        />
+      )}
+      <span className="relative">{children}</span>
+    </span>
+  );
+}
+
+/** One readout row: fixed key column, tabular-nums value. Keys muted, values foreground. */
+export function ReadoutRow({
+  name,
+  note,
+  children,
+}: {
+  name: string;
+  note?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="grid gap-x-4 gap-y-0.5 sm:grid-cols-[13rem_1fr]">
+      <div className="text-muted-foreground">{name}</div>
+      <div className="min-w-0 tabular-nums text-foreground">
+        {children}
+        {note && <span className="ml-2 text-muted-foreground">{note}</span>}
+      </div>
+    </div>
+  );
+}
+
+const OPTIONS = {
+  formatOn: 'change',
+  thousandSeparator: ',',
+  groupingStyle: 'thousand',
+  decimalMaxLength: 2,
+  allowCompactNotation: true,
+} as const;
+const START = '1234567.89';
 
 export function ValueReadout() {
-  const [rawValue, setRawValue] = useState('');
-  const [formattedValue, setFormattedValue] = useState('');
-  const [selectionStart, setSelectionStart] = useState<number | null>(0);
+  const [rawValue, setRawValue] = useState(START);
+  const [formattedValue, setFormattedValue] = useState(() => formatValue(START, OPTIONS));
 
   const handleChange = (e: NumoraInputChangeEvent) => {
-    const target = e.target as NumoraHTMLInputElement;
-    setRawValue(target.value);
-    setFormattedValue(target.formattedValue ?? '');
-    setSelectionStart(target.selectionStart);
+    setRawValue(e.target.value);
+    setFormattedValue(e.target.formattedValue);
   };
 
   return (
-    <div className="my-6 grid gap-4 rounded-lg border bg-muted/30 p-4 md:grid-cols-2">
-      <div>
-        <label className="mb-2 block text-sm font-medium">Type a number with separators:</label>
-        <NumoraInput
-          formatOn={FormatOn.Change}
-          thousandSeparator=","
-          thousandStyle={ThousandStyle.Thousand}
-          maxDecimals={2}
-          enableCompactNotation
-          onChange={handleChange}
-          placeholder="Try 1234567.89 or 2.5k…"
-          className="w-full rounded border bg-background px-3 py-2 font-mono outline-none focus:ring-2 focus:ring-ring"
-        />
+    <DiagramFrame variant="demo">
+      <NumoraInput
+        {...OPTIONS}
+        aria-label="Type a number"
+        defaultValue={START}
+        onChange={handleChange}
+        className={demoInputClass}
+      />
+      <div className={`${demoInsetClass} mt-4 space-y-3`}>
+        <ReadoutRow name="e.target.formattedValue">
+          <FlashValue value={formattedValue}>"{formattedValue}"</FlashValue>
+        </ReadoutRow>
+        <ReadoutRow name="e.target.value">
+          <FlashValue value={rawValue}>"{rawValue}"</FlashValue>
+        </ReadoutRow>
       </div>
-      <div className="space-y-1.5 self-center font-mono text-xs text-muted-foreground">
-        <div>
-          <span className="text-foreground">e.target.value</span>{' '}
-          <span className="text-muted-foreground/60">// raw, no separators</span>
-          <br />
-          <span className="text-signal-green">"{rawValue}"</span>
-        </div>
-        <div>
-          <span className="text-foreground">e.target.formattedValue</span>{' '}
-          <span className="text-muted-foreground/60">// display string</span>
-          <br />
-          <span className="text-signal-green">"{formattedValue}"</span>
-        </div>
-        <div>
-          <span className="text-foreground">e.target.selectionStart</span>
-          <br />
-          <span className="text-signal-green">{selectionStart}</span>
-        </div>
-      </div>
-    </div>
+    </DiagramFrame>
   );
 }

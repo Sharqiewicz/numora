@@ -1,6 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Righteous&display=swap');
-@import url('https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700&display=swap');
-
 @import 'tailwindcss';
 
 @import 'tw-animate-css';
@@ -17,6 +14,9 @@ code {
 
   --font-satoshi: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-righteous: 'Righteous', sans-serif;
+  /* Site-wide UI + reading face. Loaded once in routes/__root.tsx. */
+  --font-reading: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-code: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Neutral ramp. Every neutral carries the brand hue (277) so whites, greys
      and blacks are tinted to the same temperature as the brand. L and C are
@@ -41,7 +41,7 @@ code {
      surface sits behind them instead of declaring a competing colour. */
   --border: oklch(1 0 0 / 0.08);
   --input: oklch(0.274 0.006 277);
-  --ring: oklch(0.442 0.017 277);
+  --ring: oklch(0.712 0.013 277);
   --sidebar: oklch(0.147 0.004 277);
   --sidebar-foreground: oklch(0.985 0.002 277);
   --sidebar-primary: oklch(0.460 0.277 278);
@@ -49,7 +49,7 @@ code {
   --sidebar-accent: oklch(0.274 0.006 277);
   --sidebar-accent-foreground: oklch(0.985 0.002 277);
   --sidebar-border: oklch(1 0 0 / 0.08);
-  --sidebar-ring: oklch(0.442 0.017 277);
+  --sidebar-ring: oklch(0.712 0.013 277);
 
   /* Surface tokens - component-level dark surfaces */
   --surface-1: oklch(0.145 0.005 277);
@@ -118,13 +118,26 @@ code {
   --radius: 0.5rem;
 }
 
+/* Smooth scrolling is opt-in for people who haven't asked for less motion */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 html {
-  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+button, a, input, select, textarea, [role="button"] {
+  touch-action: manipulation;
 }
 
 body {
   @apply m-0;
-  font-family: var(--font-satoshi);
+  font-family: var(--font-reading);
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
@@ -135,9 +148,6 @@ body {
     radial-gradient(circle at 50% 50%, var(--gradient-3-color) 0%, var(--gradient-3-fade) 50%);
   background-size: 200% 200%;
   background-attachment: fixed;
-
-  animation: gradient-shift 25s ease infinite;
-
 }
 
 @keyframes gradient-shift {
@@ -154,25 +164,6 @@ body {
    ========================================================================== */
 
 /* Use transform3d for hardware acceleration across all animations */
-@keyframes fade-in-out {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 10px, 0);
-  }
-  33.33% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-  66.66% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(0, -10px, 0);
-  }
-}
-
 @keyframes fade-in {
   0% {
     opacity: 0;
@@ -207,28 +198,6 @@ body {
   }
 }
 
-/* Subtle floating animation - much more refined than bounce */
-@keyframes float-gentle {
-  0%, 100% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(0, -6px, 0);
-  }
-}
-
-/* Scroll-triggered reveal animation */
-@keyframes reveal-up {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 30px, 0);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
 /* Logo stagger animation for social proof */
 @keyframes logo-reveal {
   0% {
@@ -238,28 +207,6 @@ body {
   100% {
     opacity: 0.6;
     transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
-/* Docs page content transition */
-@keyframes content-enter {
-  0% {
-    opacity: 0;
-    transform: translate3d(0, 8px, 0);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-/* Button pulse glow effect */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--secondary) 0%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 20px 4px color-mix(in oklab, var(--secondary) 30%, transparent);
   }
 }
 
@@ -323,6 +270,8 @@ body {
 }
 
 @theme inline {
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.25rem;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -397,26 +346,22 @@ body {
   /* Motion easing tokens (generate `ease-out-expo` / `ease-drawer` utilities) */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-move: cubic-bezier(0.645, 0.045, 0.355, 1);
   /* Shadow-as-border token (dark-mode single ring; site is dark-only) */
   --shadow-border: 0 0 0 1px oklch(1 0 0 / 0.08);
-  --animate-fade-in-out: fade-in-out 1.5s ease forwards;
   --animate-fade-in: fade-in 1.5s ease forwards;
   --animate-fade-in-fast: fade-in 0.6s ease forwards;
   --animate-expand-line: expand-line 0.6s ease-out forwards;
   --animate-slide-in-left: slide-in-left 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-slide-in-right: slide-in-right 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-float-gentle: float-gentle 4s ease-in-out infinite;
-  --animate-reveal-up: reveal-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-logo-reveal: logo-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-content-enter: content-enter 0.4s ease-out forwards;
-  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
   --animate-draw-line: draw-line 0.4s ease-out forwards;
   --animate-draw-line-right: draw-line-right 0.4s ease-out forwards;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
   body {
     @apply text-foreground;
@@ -445,17 +390,6 @@ body {
     font-family: var(--font-satoshi);
   }
 
-  /* GPU-accelerated animation utilities */
-  .gpu-accelerated {
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
-  }
-
-  .will-animate {
-    will-change: transform, opacity;
-  }
-
   /* Staggered entrance animations */
   .animate-slide-in-left {
     animation: var(--animate-slide-in-left);
@@ -467,26 +401,9 @@ body {
     opacity: 0;
   }
 
-  .animate-float-gentle {
-    animation: var(--animate-float-gentle);
-  }
-
-  .animate-reveal-up {
-    animation: var(--animate-reveal-up);
-    opacity: 0;
-  }
-
   .animate-logo-reveal {
     animation: var(--animate-logo-reveal);
     opacity: 0;
-  }
-
-  .animate-content-enter {
-    animation: var(--animate-content-enter);
-  }
-
-  .animate-pulse-glow {
-    animation: var(--animate-pulse-glow);
   }
 
   .animate-draw-line {
@@ -519,27 +436,30 @@ body {
   /* Reduced motion preference */
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-in,
-    .animate-fade-in-out,
     .animate-slide-in-left,
     .animate-slide-in-right,
-    .animate-float-gentle,
-    .animate-reveal-up,
     .animate-logo-reveal,
-    .animate-content-enter,
-    .animate-pulse-glow,
     .animate-expand-line,
+    .animate-draw-line,
+    .animate-draw-line-right,
     .scroll-reveal {
       animation: none !important;
       transition: none !important;
       opacity: 1 !important;
       transform: none !important;
     }
+
+    /* The background gradient holds still; it's ambient, not feedback. */
+    body,
+    .animated-gradient-bg {
+      animation: none;
+    }
   }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
   body {
     @apply bg-background text-foreground;
@@ -555,105 +475,345 @@ body {
   }
 }
 
-@layer utilities {
-  .prose {
-    @apply text-foreground;
+/* ------------------------------------------------------------------------------------------
+   .docs-prose: calm long-form reading typography for every docs page.
+   Small quiet headings, 15px body at 1.65, muted body with bright emphasis, compact code chips.
+   Every selector is wrapped in :where() (zero specificity) inside the components layer, so any
+   utility class on an element still wins. `.not-prose` subtrees (diagrams, demos) are skipped.
+   ------------------------------------------------------------------------------------------ */
+@layer components {
+  .docs-prose {
+    font-family: var(--font-reading);
+    font-size: 15px;
+    line-height: 1.65;
+    letter-spacing: -0.006em;
+    font-optical-sizing: auto;
+    color: var(--muted-foreground);
   }
 
-  /* Quiet rule under body links; brightens with the text on hover. */
-  .link-underline {
+  :where(.docs-prose) :where(h1) {
+    color: var(--foreground);
+  }
+
+  :where(.docs-prose) :where(h2, h3, h4):not(:where(.not-prose, .not-prose *)) {
+    color: var(--foreground);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+  }
+  :where(.docs-prose) :where(h2):not(:where(.not-prose, .not-prose *)) {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+  :where(.docs-prose) :where(h3):not(:where(.not-prose, .not-prose *)) {
+    font-size: 16px;
+    line-height: 1.4;
+    text-wrap: balance;
+  }
+  :where(.docs-prose) :where(h4):not(:where(.not-prose, .not-prose *)) {
+    font-size: 15px;
+  }
+
+  :where(.docs-prose) :where(p, ul, ol, table):not(:where(.not-prose, .not-prose *)) {
+    margin: 0 0 1rem;
+  }
+  :where(.docs-prose) :where(ul):not(:where(.not-prose, .not-prose *)) {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+  :where(.docs-prose) :where(ol):not(:where(.not-prose, .not-prose *)) {
+    list-style: decimal;
+    padding-left: 1.25rem;
+  }
+  :where(.docs-prose) :where(li):not(:where(.not-prose, .not-prose *)) {
+    margin-bottom: 0.375rem;
+    padding-left: 0.125rem;
+  }
+  :where(.docs-prose) :where(li)::marker {
+    color: var(--surface-7);
+  }
+
+  :where(.docs-prose) :where(strong, b):not(:where(.not-prose, .not-prose *)) {
+    color: var(--foreground);
+    font-weight: 500;
+  }
+
+  :where(.docs-prose) :where(a):not(:where(.not-prose, .not-prose *, [data-slot])) {
+    color: var(--foreground);
+    text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 3px;
     text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
-    transition: text-decoration-color 150ms ease;
+    transition: text-decoration-color 150ms var(--ease-out-expo);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    :where(.docs-prose) :where(a):not(:where(.not-prose, .not-prose *, [data-slot])):hover {
+      text-decoration-color: currentColor;
+    }
   }
 
-  .link-underline:hover {
-    text-decoration-color: currentColor;
+  /* Inline code chips: small, bright text on a barely-lifted surface. Code blocks are untouched. */
+  :where(.docs-prose) :where(p, li, h2, h3, h4, td, th) :where(code, kbd):not(:where(.not-prose, .not-prose *)) {
+    font-size: 0.84em;
+    letter-spacing: 0;
+    color: var(--foreground);
+    background: var(--surface-4);
+    padding: 0.1em 0.3em;
+    border-radius: 4px;
+    overflow-wrap: anywhere;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  :where(.docs-prose) :where(kbd):not(:where(.not-prose, .not-prose *)) {
+    box-shadow: inset 0 -1px 0 var(--surface-7);
   }
 
-  :where(.prose) h1 {
-    @apply text-4xl font-bold mb-4 mt-8 first:mt-0;
+  :where(.docs-prose) :where(table):not(:where(.not-prose, .not-prose *)) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  :where(.docs-prose) :where(th):not(:where(.not-prose, .not-prose *)) {
+    text-align: left;
+    font-weight: 500;
+    color: var(--foreground);
+    padding: 0.5rem 0.75rem 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  :where(.docs-prose) :where(td):not(:where(.not-prose, .not-prose *)) {
+    padding: 0.5rem 0.75rem 0.5rem 0;
+    border-bottom: 1px solid var(--border);
   }
 
-  :where(.prose) h2 {
-    @apply text-3xl font-semibold mb-3 mt-8;
+  /* Page rhythm. Direct children of the article only, so nested sections (Anatomy) keep their own
+     spacing utilities. Quiet, small headings; air above them, a short gap below (they belong to
+     the text that follows). */
+  :where(.docs-prose) > :where(h1) {
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.75rem;
+  }
+  :where(.docs-prose) > :where(h1 + p) {
+    font-size: 16px;
+    margin-bottom: 2.5rem;
+    /* Lead fills the column; `pretty` would shorten the first line of a short lead. */
+    text-wrap: wrap;
+  }
+  :where(.docs-prose) > :where(h2) {
+    margin: 3rem 0 0.625rem;
+  }
+  :where(.docs-prose) > :where(h3) {
+    margin: 2rem 0 0.375rem;
+  }
+  :where(.docs-prose) > :where(h2, h3, h4) {
+    scroll-margin-top: 2rem;
+  }
+  /* The `#` link DocsLayout injects into each h2/h3. Quiet until the heading is
+     hovered or the link itself has keyboard focus. */
+  :where(.docs-prose) .heading-anchor {
+    position: relative;
+    margin-left: 0.5rem;
+    color: var(--muted-foreground);
+    text-decoration: none;
+    opacity: 0;
+    border-radius: 0.25rem;
+    transition: opacity 150ms var(--ease-out-expo), color 150ms var(--ease-out-expo);
+  }
+  :where(.docs-prose) .heading-anchor::after {
+    content: '';
+    position: absolute;
+    inset: -0.75rem -0.5rem;
+  }
+  :where(.docs-prose) .heading-anchor:focus-visible {
+    opacity: 1;
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  @media (hover: hover) {
+    :where(.docs-prose) :where(h2, h3):hover > .heading-anchor {
+      opacity: 1;
+    }
+    :where(.docs-prose) .heading-anchor:hover {
+      color: var(--foreground);
+    }
+  }
+  /* Scoped to the docs sidebar's scroll container only; the page scrollbar is untouched. */
+  .docs-sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-5) transparent;
+  }
+  /* Fade the nav out above the socials footer instead of clipping it; padding keeps the
+     last item fully readable at the end of the scroll. */
+  @media (min-width: 768px) {
+    .docs-sidebar-scroll {
+      padding-bottom: 1rem;
+      -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 16px), transparent);
+      mask-image: linear-gradient(to bottom, black calc(100% - 16px), transparent);
+    }
+  }
+  :where(.docs-prose) > :where(:first-child) {
+    margin-top: 0;
+  }
+  :where(.docs-prose) > :where(hr) {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 3rem 0;
+  }
+  :where(.docs-prose) > :where(hr + h2, hr + h3) {
+    margin-top: 0;
+  }
+  :where(.docs-prose) :where(ul, ol) :where(ul, ol):not(:where(.not-prose, .not-prose *)) {
+    margin: 0.375rem 0 0;
   }
 
-  :where(.prose) h3 {
-    @apply text-2xl font-semibold mb-2 mt-6;
+  /* DemoFrame `focusPointer`: an animated focus ring and the pointer that causes it.
+     The ring animates outline-offset (paint only): scaling a wide, short box would move
+     its sides further than its top. */
+  .demo-focus-ring {
+    outline: 2px solid transparent;
+    outline-offset: 6px;
+    /* Leaving: the colour fades, then the offset resets unseen. */
+    transition:
+      background-color 150ms ease,
+      outline-color 150ms ease,
+      outline-offset 0s linear 150ms;
+  }
+  .demo-focus-ring[data-focused] {
+    outline-color: var(--brand);
+    outline-offset: 0px;
+    /* Entering: starts wide and transparent, settles tight onto the field. */
+    transition:
+      background-color 150ms ease,
+      outline-color 250ms var(--ease-out-expo),
+      outline-offset 250ms var(--ease-out-expo);
   }
 
-  :where(.prose) h4 {
-    @apply text-xl font-semibold mb-2 mt-4;
+  /* The arrow tip (the hotspot) sits at the element's top-left + (3px, 2px).
+     The travel time must equal DEMO_CUE_LEAD_MS in use-typing-loop.ts. */
+  .demo-pointer {
+    position: absolute;
+    left: 68%;
+    top: 44px;
+    pointer-events: none;
+    user-select: none;
+    transform: translate(72px, 62px);
+    transition:
+      transform 450ms var(--ease-move),
+      opacity 150ms ease;
+    will-change: transform;
   }
-
-  :where(.prose) p {
-    @apply mb-4 leading-7;
+  .demo-pointer[data-state="approach"],
+  .demo-pointer[data-state="focused"] {
+    transform: none;
   }
-
-  .prose ul,
-  .prose ol {
-    @apply mb-4 ml-6;
+  .demo-pointer[data-state="user"] {
+    opacity: 0;
   }
-
-  .prose ul {
-    @apply list-disc;
+  .demo-pointer-press {
+    display: block;
+    transform-origin: 3px 2px;
+    animation: demo-pointer-press 220ms ease-out;
   }
-
-  .prose ol {
-    @apply list-decimal;
+  .demo-pointer-ripple {
+    position: absolute;
+    left: 3px;
+    top: 2px;
+    width: 36px;
+    height: 36px;
+    margin: -18px 0 0 -18px;
+    border-radius: 999px;
+    border: 1.5px solid var(--foreground);
+    opacity: 0;
+    animation: demo-pointer-ripple 500ms var(--ease-out-expo);
   }
-
-  .prose li {
-    @apply mb-2;
+  .demo-pointer-tag {
+    position: absolute;
+    left: 13px;
+    top: 15px;
+    padding: 4px 6px;
+    border-radius: 2px 7px 7px 7px;
+    background: var(--brand);
+    color: #fff;
+    white-space: nowrap;
+    font: 500 11px/1 var(--font-code);
+    transform-origin: top left;
+    animation: demo-pointer-tag-in 180ms var(--ease-out-expo) both;
   }
-
-  .prose code {
-    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+  .demo-pointer-tag[data-event="blur"] {
+    animation: demo-pointer-tag-blur 1100ms ease-out both;
   }
-
-  .prose pre {
-    @apply mb-4;
+  @keyframes demo-pointer-press {
+    40% {
+      transform: scale(0.84);
+    }
   }
-
-  :where(.prose) a {
-    @apply text-inherit underline-offset-4;
+  @keyframes demo-pointer-ripple {
+    from {
+      opacity: 0.7;
+      transform: scale(0.25);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1);
+    }
   }
-
-  .prose table {
-    @apply w-full border-collapse mb-4;
+  @keyframes demo-pointer-tag-in {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
   }
-
-  .prose th {
-    @apply border border-border px-4 py-2 text-left font-semibold bg-muted/50;
+  @keyframes demo-pointer-tag-blur {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    14%,
+    72% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1);
+    }
   }
-
-  .prose td {
-    @apply border border-border px-4 py-2;
+  /*
+   * Overlay demos in Blur mode: the focus strip moves the native caret at once while the
+   * display layer morphs, so the caret stays hidden until the digits arrive.
+   * No `to` keyframe: it fades into the caret colour the field already has.
+   * Reduced motion gets no hold, because the display layer swaps instantly there.
+   */
+  @keyframes caret-hold {
+    0%,
+    70% {
+      caret-color: transparent;
+    }
   }
-
-  .prose blockquote {
-    @apply border-l-4 border-border pl-4 italic my-4;
+  @media (prefers-reduced-motion: no-preference) {
+    .caret-hold:focus {
+      animation: caret-hold 400ms;
+    }
   }
-
-  .prose hr {
-    @apply border-border my-8;
-  }
-
-  .prose strong {
-    @apply font-semibold;
-  }
-
-  .prose em {
-    @apply italic;
-  }
-
-  .prose pre[class*="language-"] {
-    @apply m-0 mb-0 bg-transparent p-0;
-  }
-
-  .prose code[class*="language-"] {
-    @apply bg-transparent p-0 rounded-none text-sm font-mono shadow-none;
+  /* The typing loop does not run under reduced motion, so there is nothing to point at. */
+  @media (prefers-reduced-motion: reduce) {
+    .demo-focus-ring,
+    .demo-focus-ring[data-focused] {
+      transition: none;
+    }
+    .demo-pointer {
+      display: none;
+    }
   }
 }
+
+/* Unlayered on purpose: the global `code { font-family }` rule above is unlayered too. */
+.docs-prose code,
+.docs-prose kbd {
+  font-family: var(--font-code);
+}
+

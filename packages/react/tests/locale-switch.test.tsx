@@ -1,0 +1,171 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { NumoraInput } from '../src/index';
+
+/**
+ * Changing `locale` (or a separator prop) on a mounted field must repaint it in the new
+ * format. The text in the DOM is in the OLD format, so it cannot be compared or re-read
+ * under the new options: `1.234.567,89` (de-DE) read as fr-FR looked "equal" and stayed.
+ */
+
+const RAW = '1234567.89';
+const SHOWN: [string, string][] = [
+  ['en-US', '1,234,567.89'],
+  ['de-DE', '1.234.567,89'],
+  ['fr-FR', '1 234 567,89'],
+  ['pl-PL', '1 234 567,89'],
+  ['de-CH', "1'234'567.89"],
+  ['en-IN', '12,34,567.89'],
+  ['ar-EG', '1٬234٬567٫89'],
+  ['fa-IR', '1٬234٬567٫89'],
+  ['en-US', '1,234,567.89'],
+];
+
+const field = () => screen.getByTestId('amount') as HTMLInputElement;
+
+describe('switching locale on a mounted field', () => {
+  it('controlled: repaints in each new locale', () => {
+    const { rerender } = render(<NumoraInput data-testid="amount" value={RAW} locale="en-US" />);
+    for (const [locale, shown] of SHOWN) {
+      rerender(<NumoraInput data-testid="amount" value={RAW} locale={locale} />);
+      expect(field().value, locale).toBe(shown);
+      expect(field().formattedValue, locale).toBe(shown);
+    }
+  });
+
+  it('uncontrolled: carries the number over into each new locale', () => {
+    const { rerender } = render(<NumoraInput data-testid="amount" defaultValue={RAW} locale="en-US" />);
+    for (const [locale, shown] of SHOWN) {
+      rerender(<NumoraInput data-testid="amount" defaultValue={RAW} locale={locale} />);
+      expect(field().value, locale).toBe(shown);
+    }
+  });
+
+  it('separator props: dot-comma to space-comma', () => {
+    const { rerender } = render(
+      <NumoraInput data-testid="amount" value={RAW} thousandSeparator="." decimalSeparator="," />
+    );
+    expect(field().value).toBe('1.234.567,89');
+    rerender(<NumoraInput data-testid="amount" value={RAW} thousandSeparator=" " decimalSeparator="," />);
+    expect(field().value).toBe('1 234 567,89');
+  });
+
+  it('an unrelated re-render leaves a half-typed value alone', () => {
+    const { rerender } = render(<NumoraInput data-testid="amount" value="12." locale="en-US" />);
+    field().value = '12.';
+    rerender(<NumoraInput data-testid="amount" value="12." locale="en-US" className="x" />);
+    expect(field().value).toBe('12.');
+  });
+});
+
+// A formatting-prop change keeps the raw value and re-runs it through the new options;
+// callbacks fire only when the raw value itself changed (ADR 0008).
+describe('formatting props changing on a mounted field: notifications', () => {
+  it('a repaint alone (locale) fires nothing', () => {
+    const onChange = vi.fn();
+    const onValueChange = vi.fn();
+    const ui = (locale: string) => (
+      <NumoraInput data-testid="amount" defaultValue={RAW} locale={locale} onChange={onChange} onValueChange={onValueChange} />
+    );
+    const { rerender } = render(ui('en-US'));
+    rerender(ui('de-DE'));
+    expect(field().value).toBe('1.234.567,89');
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  it('uncontrolled: a smaller decimalMaxLength cuts digits and reports the new raw value', () => {
+    const onChange = vi.fn();
+    const onValueChange = vi.fn();
+    const ui = (decimalMaxLength: number) => (
+      <NumoraInput
+        data-testid="amount"
+        defaultValue="1234.56789"
+        decimalMaxLength={decimalMaxLength}
+        onChange={onChange}
+        onValueChange={onValueChange}
+      />
+    );
+    const { rerender } = render(ui(8));
+    rerender(ui(2));
+    expect(field().value).toBe('1,234.56');
+    expect(onValueChange).toHaveBeenCalledTimes(1);
+    expect(onValueChange).toHaveBeenCalledWith({ value: '1234.56', formattedValue: '1,234.56' });
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange.mock.calls[0][0].target.value).toBe('1234.56');
+    expect((field() as HTMLInputElement & { formattedValue?: string }).formattedValue).toBe('1,234.56');
+  });
+
+  it('controlled: the parent is told its value was cut, once', () => {
+    const onValueChange = vi.fn();
+    const ui = (value: string, decimalMaxLength: number) => (
+      <NumoraInput data-testid="amount" value={value} decimalMaxLength={decimalMaxLength} onValueChange={onValueChange} />
+    );
+    const { rerender } = render(ui('0.123456', 6));
+    rerender(ui('0.123456', 2));
+    expect(field().value).toBe('0.12');
+    expect(onValueChange).toHaveBeenCalledTimes(1);
+    expect(onValueChange).toHaveBeenCalledWith({ value: '0.12', formattedValue: '0.12' });
+    // The parent echoes the new raw value back: nothing more to report.
+    rerender(ui('0.12', 2));
+    expect(onValueChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('dropping allowNegative removes the sign and reports it', () => {
+    const onValueChange = vi.fn();
+    const ui = (allowNegative: boolean) => (
+      <NumoraInput data-testid="amount" defaultValue="-5" allowNegative={allowNegative} onValueChange={onValueChange} />
+    );
+    const { rerender } = render(ui(true));
+    rerender(ui(false));
+    expect(field().value).toBe('5');
+    expect(onValueChange).toHaveBeenCalledWith({ value: '5', formattedValue: '5' });
+  });
+
+  it('a value change with unchanged options is the parent\'s own: not echoed back', () => {
+    const onValueChange = vi.fn();
+    const ui = (value: string) => <NumoraInput data-testid="amount" value={value} decimalMaxLength={2} onValueChange={onValueChange} />;
+    const { rerender } = render(ui('1'));
+    rerender(ui('2.999'));
+    expect(field().value).toBe('2.99');
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+});
+
+// `ref.current.value` is the display string; `rawValue` is the canonical raw value.
+describe('ref.rawValue', () => {
+  it('reads the canonical raw value in every state, under the current options', () => {
+    const ref = { current: null as (HTMLInputElement & { rawValue?: string; formattedValue?: string }) | null };
+    const ui = (locale: string) => <NumoraInput formatOn="blur" ref={ref} data-testid="amount" defaultValue={RAW} locale={locale} />;
+    const { rerender } = render(ui('de-DE'));
+    expect(ref.current?.value).toBe('1.234.567,89');
+    expect(ref.current?.formattedValue).toBe('1.234.567,89');
+    expect(ref.current?.rawValue).toBe(RAW);
+
+    // Focus strips the grouping: same raw value.
+    fireEvent.focus(field());
+    expect(field().value).toBe('1234567,89');
+    expect(ref.current?.rawValue).toBe(RAW);
+
+    rerender(ui('en-IN'));
+    expect(ref.current?.rawValue).toBe(RAW);
+  });
+
+  it('is empty for an empty field and cannot be assigned', () => {
+    const ref = { current: null as (HTMLInputElement & { rawValue?: string }) | null };
+    render(<NumoraInput ref={ref} data-testid="amount" />);
+    expect(ref.current?.rawValue).toBe('');
+    expect(() => {
+      'use strict';
+      (ref.current as { rawValue: string }).rawValue = '5';
+    }).toThrow(TypeError);
+  });
+});
+
+describe('headless functions', () => {
+  it('numora-react re-exports formatValue and parseValue', async () => {
+    const { formatValue, parseValue } = await import('../src/index');
+    expect(formatValue('1234.5', { locale: 'de-DE', decimalMinLength: 2 })).toBe('1.234,50');
+    expect(parseValue('1.234,50', { locale: 'de-DE' })).toBe('1234.50');
+  });
+});

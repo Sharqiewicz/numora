@@ -1,31 +1,31 @@
-import { useState } from 'react';
+import type { GroupingStyle } from 'numora';
 import { NumoraInput } from 'numora-react';
-import { FormatOn, ThousandStyle } from 'numora';
-import { ProblemSection } from '../ProblemSection';
-import { InputComparison } from '../InputComparison';
-import { BrokenInput } from '../BrokenInput';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { BrokenInput } from '../BrokenInput';
+import { InputComparison } from '../InputComparison';
+import { ProblemSection } from '../ProblemSection';
 
 type GroupingKey = 'thousand' | 'lakh' | 'wan';
 
 const GROUPING_STYLES: Record<
   GroupingKey,
-  { label: string; example: string; style: ThousandStyle }
+  { label: string; example: string; style: GroupingStyle }
 > = {
   thousand: {
     label: 'Thousand (1,234,567)',
     example: '1,234,567',
-    style: ThousandStyle.Thousand,
+    style: 'thousand',
   },
   lakh: {
     label: 'Lakh (12,34,567)',
     example: '12,34,567',
-    style: ThousandStyle.Lakh,
+    style: 'lakh',
   },
   wan: {
     label: 'Wan (123,4567)',
     example: '123,4567',
-    style: ThousandStyle.Wan,
+    style: 'wan',
   },
 };
 
@@ -37,16 +37,17 @@ export function ThousandSeparatorDemo() {
   const currentStyle = GROUPING_STYLES[groupingKey];
 
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <ProblemSection
       id="thousand-separators"
       problemNumber={6}
-      title="Thousand Separator Traps"
-      subtitle="Format on blur is jarring, format on change is hard"
+      title="Thousand separator traps"
+      subtitle="Format on blur is jarring. Format on change is hard"
       description={
         <p>
-          Formatting numbers with thousand separators as users type is surprisingly difficult. Most
-          implementations either format on blur (jarring) or format on change (cursor jumps).
-          Different regions also use different grouping styles.
+          Adding thousand separators while someone types is hard. Most implementations format on
+          blur, which jars, or on change, which moves the cursor. Regions also group digits
+          differently.
         </p>
       }
     >
@@ -63,6 +64,7 @@ export function ThousandSeparatorDemo() {
           ).map(([key, { label }]) => (
             <button
               key={key}
+              type="button"
               onClick={() => setGroupingKey(key)}
               className={cn(
                 'px-4 py-2 rounded-lg border font-medium text-sm active:scale-[0.96] transition-[background-color,border-color,color,scale] duration-150 ease-out-expo',
@@ -78,8 +80,8 @@ export function ThousandSeparatorDemo() {
       </div>
 
       <InputComparison
-        leftLabel="Naive Format-on-Change"
-        rightLabel="Numora Input"
+        leftLabel="Naive format-on-change"
+        rightLabel="Numora"
         leftInput={
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
@@ -90,7 +92,7 @@ export function ThousandSeparatorDemo() {
               mode="naive-format"
               value={naiveValue}
               onChange={setNaiveValue}
-              placeholder="Type 1234567..."
+              placeholder="1234567.89"
             />
             <div className="p-3 rounded-lg bg-signal-red/10 border border-signal-red/30 text-sm space-y-2">
               <p className="text-signal-red font-medium">Problems:</p>
@@ -105,22 +107,23 @@ export function ThousandSeparatorDemo() {
         rightInput={
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Type <code className="px-1 py-0.5 rounded bg-muted font-mono">1234567</code> smoothly:
+              Type <code className="px-1 py-0.5 rounded bg-muted font-mono">1234567</code> the same
+              way:
             </p>
             <NumoraInput
               value={numoraValue}
               onChange={(e) => setNumoraValue(e.target.value)}
-              formatOn={FormatOn.Change}
+              formatOn="change"
               thousandSeparator=","
-              thousandStyle={currentStyle.style}
-              placeholder="Type 1234567..."
+              groupingStyle={currentStyle.style}
+              placeholder="1234567.89"
               className="w-full px-4 py-3 rounded-lg bg-background border border-border text-lg font-mono focus:outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-muted-foreground/50"
             />
             <div className="p-3 rounded-lg bg-signal-green/10 border border-signal-green/30 text-sm space-y-2">
               <p className="text-signal-green font-medium">Features:</p>
               <ul className="text-signal-green list-disc list-inside space-y-1 text-xs">
-                <li>Cursor stays in logical position</li>
-                <li>Edit anywhere without issues</li>
+                <li>The cursor stays in place</li>
+                <li>You can edit anywhere in the number</li>
                 <li>
                   Supports {currentStyle.label.split(' ')[0]} grouping: {currentStyle.example}
                 </li>

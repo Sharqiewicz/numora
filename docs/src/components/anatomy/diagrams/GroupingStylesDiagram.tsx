@@ -1,136 +1,97 @@
-type Group = { from: number; to: number; color: string };
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { formatValue, type GroupingStyle } from 'numora';
+import { cn } from '@/lib/utils';
+import { DiagramFrame, DUR, EASE, SPRING, useLoop } from '../kit';
 
-interface Style {
-  label: string;
-  formatted: string;
-  groups: Group[];
-  description?: string;
+const VALUE = '10000000';
+
+/** One loop frame per style. The key beat (a style change) holds long enough to read. */
+const STYLES: { id: GroupingStyle; label: string; rule: string }[] = [
+  { id: 'none', label: 'None', rule: 'No separators.' },
+  { id: 'thousand', label: 'Thousand', rule: 'Groups of 3 from the right.' },
+  { id: 'lakh', label: 'Lakh', rule: '3 on the right, then groups of 2.' },
+  { id: 'wan', label: 'Wan', rule: 'Groups of 4 from the right.' },
+];
+
+const frameMs = (f: number) => (f === 0 ? 900 : 1400);
+
+/** The real formatter's output, split into digits (stable keys) and the separators it put between them. */
+function layout(style: GroupingStyle) {
+  const text = formatValue(VALUE, { groupingStyle: style, thousandSeparator: ',' });
+  const items: { key: string; ch: string }[] = [];
+  let digit = 0;
+  for (const ch of text) {
+    if (ch === ',') items.push({ key: `sep-${digit}`, ch });
+    else items.push({ key: `d-${digit++}`, ch });
+  }
+  return { text, items };
 }
 
 export function GroupingStylesDiagram() {
-  const styles: Style[] = [
-    {
-      label: 'raw',
-      formatted: '10000000',
-      groups: [],
-    },
-    {
-      label: 'Thousand',
-      formatted: '10,000,000',
-      groups: [
-        { from: 0, to: 1, color: 'emerald' },
-        { from: 3, to: 5, color: 'sky' },
-        { from: 7, to: 9, color: 'amber' },
-      ],
-      description: 'Group by 3 from the right (Western)',
-    },
-    {
-      label: 'Lakh',
-      formatted: '1,00,00,000',
-      groups: [
-        { from: 0, to: 0, color: 'emerald' },
-        { from: 2, to: 3, color: 'sky' },
-        { from: 5, to: 6, color: 'amber' },
-        { from: 8, to: 10, color: 'violet' },
-      ],
-      description: 'Three then twos from the right (Indian)',
-    },
-    {
-      label: 'Wan',
-      formatted: '1000,0000',
-      groups: [
-        { from: 0, to: 3, color: 'sky' },
-        { from: 5, to: 8, color: 'amber' },
-      ],
-      description: 'Four-digit groups, the myriad (CJK)',
-    },
-  ];
-
-  const cellW = 26;
-  const colorMap: Record<string, string> = {
-    emerald: 'fill-signal-green/15 stroke-signal-green/70',
-    sky: 'fill-signal-sky/15 stroke-signal-sky/70',
-    amber: 'fill-signal-amber/15 stroke-signal-amber/70',
-    violet: 'fill-signal-violet/15 stroke-signal-violet/70',
-  };
+  const reduced = useReducedMotion() ?? false;
+  const loop = useLoop({ frames: STYLES.length, frameMs, holdMs: 1500 });
+  const active = STYLES[loop.frame];
+  const { text, items } = layout(active.id);
+  const move = reduced ? { duration: 0 } : SPRING;
 
   return (
-    <div className="my-10">
-      <svg
-        viewBox="0 0 720 360"
-        role="img"
-        aria-label="The same underlying value rendered with three grouping rhythms: Thousand, Lakh, and Wan, with the raw value at top for comparison"
-        className="block w-full"
-      >
-        {styles.map((s, idx) => {
-          const isRaw = s.groups.length === 0;
-          const rowY = 30 + idx * 78;
-          const chars = [...s.formatted];
-          const totalW = chars.length * cellW;
-          const startX = (720 - totalW) / 2;
+    <DiagramFrame sceneRef={loop.ref}>
+      <fieldset className="m-0 flex min-w-0 flex-wrap gap-x-5 gap-y-1 border-0 p-0">
+        <legend className="sr-only">Grouping style</legend>
+        {STYLES.map((s, i) => (
+          <button
+            key={s.id}
+            type="button"
+            aria-pressed={loop.frame === i}
+            onClick={() => loop.goTo(i)}
+            className={cn(
+              'min-h-11 border-b-2 px-0.5 text-[14px] font-medium transition-colors duration-150 ease-out-expo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none',
+              loop.frame === i
+                ? 'border-foreground text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {s.label}
+          </button>
+        ))}
+      </fieldset>
 
-          return (
-            <g key={s.label}>
-              <text
-                x="20"
-                y={rowY + 22}
-                className={isRaw ? 'fill-muted-foreground' : 'fill-foreground'}
-                fontSize={isRaw ? 13 : 14}
-                fontWeight={isRaw ? 400 : 600}
-                fontStyle={isRaw ? 'italic' : 'normal'}
-              >
-                {s.label}
-              </text>
-              {s.description && (
-                <text x="20" y={rowY + 40} className="fill-muted-foreground" fontSize="11">
-                  {s.description}
-                </text>
-              )}
+      <div className="mt-5 flex min-h-12 items-center font-mono text-[28px] leading-none tabular-nums text-foreground sm:text-[32px]">
+        <div aria-hidden className="flex items-baseline">
+          <AnimatePresence mode="popLayout" initial={false}>
+            {items.map((it) =>
+              it.ch === ',' ? (
+                <motion.span
+                  key={it.key}
+                  layout="position"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    layout: move,
+                    opacity: { duration: reduced ? 0 : DUR.base, ease: EASE.outExpo },
+                  }}
+                  className="inline-block w-[0.4em] text-center font-bold text-signal-sky-fg"
+                >
+                  ,
+                </motion.span>
+              ) : (
+                <motion.span
+                  key={it.key}
+                  layout="position"
+                  transition={{ layout: move }}
+                  className="inline-block w-[0.62em] text-center"
+                >
+                  {it.ch}
+                </motion.span>
+              )
+            )}
+          </AnimatePresence>
+        </div>
+        <output className="sr-only">{`${active.label} grouping: ${text}`}</output>
+      </div>
 
-              {s.groups.map((g, gi) => {
-                const x = startX + g.from * cellW;
-                const w = (g.to - g.from + 1) * cellW;
-                return (
-                  <rect
-                    key={gi}
-                    x={x - 2}
-                    y={rowY + 4}
-                    width={w}
-                    height={44}
-                    rx={6}
-                    className={colorMap[g.color]}
-                    strokeWidth="1.5"
-                  />
-                );
-              })}
-
-              {chars.map((ch, i) => {
-                const isSep = ch === ',';
-                return (
-                  <text
-                    key={i}
-                    x={startX + i * cellW + cellW / 2}
-                    y={rowY + 32}
-                    textAnchor="middle"
-                    className={
-                      isSep
-                        ? 'fill-muted-foreground'
-                        : isRaw
-                          ? 'fill-muted-foreground'
-                          : 'fill-foreground'
-                    }
-                    fontSize="18"
-                    fontFamily="ui-monospace, monospace"
-                    fontWeight={isSep || isRaw ? 400 : 600}
-                  >
-                    {ch}
-                  </text>
-                );
-              })}
-            </g>
-          );
-        })}
-      </svg>
-    </div>
+      <p className="mt-3 text-caption text-muted-foreground">{active.rule}</p>
+    </DiagramFrame>
   );
 }

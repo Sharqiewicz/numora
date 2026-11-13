@@ -1,77 +1,50 @@
-import { FormatOn, NumoraInput, ThousandStyle } from 'numora';
-import { useEffect, useRef } from 'react';
+import { NumoraInput } from 'numora';
+import { useEffect, useId, useRef } from 'react';
 import { TextMorph } from 'torph';
 import { startTypingLoop } from '@/hooks/use-typing-loop';
+import { DemoFrame, demoOverlayBox } from './DemoFrame';
 
 export function TorphVanillaBlurDemo() {
+  const inputId = useId();
   const displayRef = useRef<HTMLSpanElement>(null);
   const hostRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!displayRef.current || !hostRef.current) return;
-
     displayRef.current.textContent = '';
-
-    // True from focus → first morph-complete, so the focus-strip morph hides the caret
-    // but later per-keystroke morphs do not (you need to see your caret while typing).
-    let postFocusMorphPending = false;
-    const updateCaret = (hidden: boolean) => {
-      hostRef.current?.classList.toggle('caret-suppressed', hidden);
-    };
 
     const morph = new TextMorph({
       element: displayRef.current,
       ease: { stiffness: 400, damping: 30 },
-      onAnimationComplete: () => {
-        if (postFocusMorphPending) {
-          postFocusMorphPending = false;
-          updateCaret(false);
-        }
-      },
     });
 
-    // Drive the morph via NumoraInput's onChange option. setRangeText fires a synchronous
-    // `input` event during writes, but withInternalWrite suppresses NumoraInput's own
-    // handler - DOM `input` listeners would be racy in that window. onChange fires once
-    // per logical value change (typing, paste, focus-strip, blur-reformat).
     const numora = new NumoraInput(hostRef.current, {
-      formatOn: FormatOn.Blur,
+      formatOn: 'blur',
       decimalMaxLength: 2,
       thousandSeparator: ',',
-      thousandStyle: ThousandStyle.Thousand,
-      value: '1234567',
-      onChange: (value) => morph.update(value || '0'),
+      groupingStyle: 'thousand',
+      defaultValue: '1234567',
+      // The caret is the second argument: Torph then matches digits around the edit.
+      onFormattedValueChange: (text) =>
+        morph.update(text || '0', numora.element.selectionStart ?? undefined),
     });
-    const input = numora.getElement();
-    input.setAttribute('aria-label', 'Amount (blur to format)');
+    const input = numora.element;
+    input.id = inputId;
+    input.setAttribute('aria-label', 'Amount');
+    // The caret appears once the focus-strip morph has settled.
+    input.classList.add('caret-hold');
 
-    // The constructor's setDefaultValue runs before onChange is wired (and never fires
-    // onChange anyway), so prime the morph with the formatted initial value here.
-    morph.update(numora.value || '0');
-
-    const handleFocus = () => {
-      postFocusMorphPending = true;
-      updateCaret(true);
-      // Fallback if no morph fires (e.g. value already has no separators).
-      window.setTimeout(() => {
-        if (postFocusMorphPending) {
-          postFocusMorphPending = false;
-          updateCaret(false);
-        }
-      }, 600);
-    };
-
-    input.addEventListener('focus', handleFocus);
+    // Creation fires no callback, so show the first text here.
+    morph.update(numora.formattedValue || '0');
 
     const stopTypingLoop = startTypingLoop(input, { mode: 'blur' });
 
     return () => {
       stopTypingLoop();
-      input.removeEventListener('focus', handleFocus);
       morph.destroy();
       input.remove();
     };
-  }, []);
+  }, [inputId]);
 
   return (
     <>
@@ -80,28 +53,27 @@ export function TorphVanillaBlurDemo() {
           width: 100%;
           height: 100%;
           margin: 0;
-          padding: 0.75rem 1rem;
+          padding: 0;
           box-sizing: border-box;
           border: 0;
-          text-align: right;
+          text-align: left;
           background: transparent;
           color: transparent;
-          caret-color: var(--secondary);
+          caret-color: var(--color-foreground);
           outline: none;
           font: inherit;
         }
-        .torph-vanilla-input-host.caret-suppressed input { caret-color: transparent; }
-        .torph-vanilla-input-host input::selection { background: color-mix(in oklch, var(--secondary) 40%, transparent); }
+        .torph-vanilla-input-host input::selection { background: color-mix(in oklch, var(--color-foreground) 25%, transparent); }
         .torph-vanilla-input-host input::placeholder { color: transparent; }
       `}</style>
-      <div className="my-12 w-full max-w-lg mx-auto">
-        <label className="relative flex items-center justify-end w-full rounded-2xl border border-surface-3 bg-surface-1 overflow-hidden px-4 py-3 text-xl font-mono tracking-wide text-white cursor-text">
+      <DemoFrame inputId={inputId} hint="Blur the field to format." focusPointer>
+        <div className={demoOverlayBox}>
           <span ref={displayRef} className="pointer-events-none whitespace-pre" aria-hidden="true">
             0
           </span>
           <div ref={hostRef} className="torph-vanilla-input-host absolute inset-0" />
-        </label>
-      </div>
+        </div>
+      </DemoFrame>
     </>
   );
 }

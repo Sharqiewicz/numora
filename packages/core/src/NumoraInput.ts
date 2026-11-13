@@ -1,554 +1,276 @@
+import { handleOnKeyDownNumoraInput } from './utils/event-handlers';
+import { writeValue } from './features/formatting';
+import { displayToRawValue, formatValueForDisplay } from './utils/format-utils';
 import {
-  handleOnBeforeInputNumoraInput,
-  handleOnKeyDownNumoraInput,
-  handleOnPasteNumoraInput,
-} from '@/utils/event-handlers';
-import {
-  computeCursorPosition,
-  computeStripSeparatorsResult,
-  formatWithSeparators,
-  writeStripPreservingUndo,
-  writeValuePreservingUndo,
-} from '@/features/formatting';
-import { getSeparators } from '@/features/decimals';
-import { formatInputValue } from '@/utils/format-utils';
-import { removeThousandSeparators } from '@/features/sanitization';
-import { escapeRegExp } from '@/utils/escape-reg-exp';
-import { applyLocale } from '@/utils/locale';
-import {
-  DEFAULT_AUTO_ADD_LEADING_ZERO,
-  DEFAULT_DECIMAL_MAX_LENGTH,
-  DEFAULT_DECIMAL_MIN_LENGTH,
-  DEFAULT_DECIMAL_SEPARATOR,
-  DEFAULT_ENABLE_COMPACT_NOTATION,
-  DEFAULT_ENABLE_LEADING_ZEROS,
-  DEFAULT_ENABLE_NEGATIVE,
-  DEFAULT_FORMAT_ON,
-  DEFAULT_RAW_VALUE_MODE,
-  DEFAULT_THOUSAND_SEPARATOR,
-  DEFAULT_THOUSAND_STYLE,
-} from './config';
-import { FormatOn, InputType, ThousandStyle, FormattingOptions, CaretPositionInfo } from './types';
-import { validateNumoraInputOptions } from './validation';
+  applyBeforeInput,
+  applyBlur,
+  applyInputFallback,
+  applyPaste,
+  applySetValue,
+  attachFocusStrip,
+  formatForDisplay,
+} from './utils/dom-events';
+import { resolveOptions } from './utils/resolve-options';
+import { takeRemovedOptions, warnRemovedOptions } from './utils/removed-options';
+import type { ResolvedNumoraOptions } from './utils/dom-events';
+import type { NumoraOptions, NumoraValues } from './types';
 
+// Native attributes the constructor forwards to the element. Deliberately a short list:
+// anything else is set on `input.element` directly.
+const NATIVE_ATTRIBUTES = [
+  'id',
+  'name',
+  'className',
+  'placeholder',
+  'disabled',
+  'readOnly',
+  'required',
+  'tabIndex',
+  'title',
+  'autofocus',
+] as const;
 
-// maxLength and isAllowed are opt-in only - no sensible default - so they stay optional
-// in the resolved options. Everything else has a default in `config.ts`.
-type ResolvedNumoraOptions = Required<Omit<FormattingOptions, 'maxLength' | 'isAllowed'>>
-  & Pick<FormattingOptions, 'maxLength' | 'isAllowed'>
-  & {
-    onChange?: (value: string) => void;
-  };
-
-// Every option that belongs to Numora rather than the native <input>. createInputElement
-// strips these before Object.assign-ing the rest onto the DOM element; otherwise they
-// would land as nonsense attributes (`thousandseparator=","` etc.). Add new options here
-// whenever a new field is introduced in NumoraInputOptions.
-const NUMORA_OPTION_KEYS = new Set<string>([
-  'decimalMaxLength', 'decimalMinLength', 'formatOn', 'thousandSeparator',
-  'thousandStyle', 'decimalSeparator', 'locale',
-  'enableCompactNotation', 'enableNegative', 'enableLeadingZeros',
-  'autoAddLeadingZero', 'rawValueMode',
-  'maxLength', 'isAllowed', 'onChange',
-  'value', 'defaultValue',
-  // Protected native attrs set explicitly in createInputElement.
-  'type', 'inputMode', 'spellcheck', 'autocomplete',
-]);
-
-export interface NumoraInputOptions extends Partial<Omit<HTMLInputElement, 'value' | 'defaultValue' | 'onChange' | 'maxLength'>> {
-  // Formatting options
-  formatOn?: FormatOn;
-
-  // Thousand options
-  thousandSeparator?: string;
-  thousandStyle?: ThousandStyle;
-
-  // Decimal options
-  decimalSeparator?: string;
-  decimalMaxLength?: number;
-  decimalMinLength?: number;
-
-  // Locale
-  locale?: string | true;
-
-  // Parsing options
-  enableCompactNotation?: boolean;
-  enableNegative?: boolean;
-  enableLeadingZeros?: boolean;
-  autoAddLeadingZero?: boolean;
-  rawValueMode?: boolean;
-
-  // Validation
-  /** Max raw length (digits + decimal sep + leading `-`). Separators not counted. */
-  maxLength?: number;
-  /** Reject keystroke/paste if this returns false. Called with post-sanitization raw value. */
-  isAllowed?: (rawValue: string) => boolean;
-
-  // Event handlers
-  onChange?: (value: string) => void;
-
-  // Value initialization
-  value?: string;
+export interface NumoraInputOptions
+  extends NumoraOptions,
+    Partial<Pick<HTMLInputElement, (typeof NATIVE_ATTRIBUTES)[number]>> {
+  /** Sets the `aria-label` attribute. */
+  ariaLabel?: string;
+  /** Fired on every change with `{ value, formattedValue }`: canonical raw + display string. */
+  onValueChange?: (values: NumoraValues) => void;
+  /**
+   * Fired with the display string every time Numora rewrites the field, including the
+   * rewrites `onValueChange` is silent about: the blur regroup, the focus strip, `setValue()`
+   * and an `update()` that only changes the format. Not fired on creation
+   * (`formatValue(defaultValue, options)` gives the first text) and never twice in a row for
+   * the same text. Use it to mirror the field, e.g. in an animated overlay.
+   */
+  onFormattedValueChange?: (formattedValue: string) => void;
+  /**
+   * Initial value, as a canonical raw value (`'1234.5'` in every locale). When adopting an
+   * existing `<input>`, its own value is kept unless this is passed. Later writes go through
+   * {@link NumoraInput.setValue}. Same name and meaning as the React `defaultValue` prop.
+   */
   defaultValue?: string;
 }
 
-export class NumoraInput {
-  private element!: HTMLInputElement;
+// Display text destroy() leaves in a field, with its raw value, so a re-init can tell Numora's
+// own leftover text from an app-supplied canonical value (ADR 0004). Weak: no element leak.
+const leftovers = new WeakMap<HTMLInputElement, { text: string; raw: string }>();
 
+export class NumoraInput {
+  private el!: HTMLInputElement;
+
+  // Options as the caller gave them (merged by update()), and their resolved form.
+  private options: NumoraInputOptions;
   private resolvedOptions: ResolvedNumoraOptions;
 
-  private rawValue: string = '';
+  // Mirrors this instance's focus/blur listeners rather than `document.activeElement`: tests
+  // and some embedders dispatch synthetic focus/blur without moving real focus.
+  private isFocused = false;
+  /** Field text after the last write this class made; restored when the `input` fallback must refuse a value. */
+  private lastValue!: string;
+  /** Last text given to `onFormattedValueChange`; unset until the constructor is done. */
+  private reported?: string;
+  // Removes exactly the listeners Numora added, so destroy() leaves the caller's alone.
+  private cleanups: Array<() => void> = [];
 
-  // True while we're applying our own setRangeText. The synchronous `input` event that
-  // setRangeText fires must NOT re-enter handleChange's broadcast path, or onChange
-  // double-fires and the cursor is recomputed against the post-write value.
-  // try/finally in withInternalWrite guarantees this clears even if the write throws.
-  private suppressNextInputEvent: boolean = false;
+  /**
+   * @param target - Either an existing `<input>` to **adopt in place** (its listeners are
+   *   attached directly - ideal for a Svelte action / Vue directive / Solid ref), or any
+   *   other element to **mount a new `<input>` into** as a child. Selected at runtime by an
+   *   `instanceof HTMLInputElement` check.
+   * @param options - Numora options plus a few native `<input>` attributes. Optional.
+   */
+  constructor(target: HTMLInputElement | HTMLElement, options: NumoraInputOptions = {}) {
+    this.resolvedOptions = resolveOptions(options);
+    this.options = options;
 
-  // Mouse-driven focus: the browser commits the click→selection mapping AFTER focus
-  // fires, using the input's current value. If we strip separators in the focus handler,
-  // the click X-coord then maps to a position N digits too far right (where N = separators
-  // before the click point). Set on mousedown, cleared on click after we strip + map -
-  // click fires after the browser has finalised the caret, so selectionStart reflects
-  // the user's intended position when we read it.
-  private pendingMouseStrip: boolean = false;
+    // Options removed since v4 are ignored and warned about. Checked on a copy: the caller's
+    // object is left alone.
+    warnRemovedOptions(takeRemovedOptions({ ...options }));
 
-  private caretPositionBeforeChange?: CaretPositionInfo;
-
-  constructor(container: HTMLElement, options: NumoraInputOptions) {
-    validateNumoraInputOptions(options);
-
-    const {
-      decimalMaxLength = DEFAULT_DECIMAL_MAX_LENGTH,
-      decimalMinLength = DEFAULT_DECIMAL_MIN_LENGTH,
-      formatOn = DEFAULT_FORMAT_ON,
-      thousandSeparator,
-      thousandStyle = DEFAULT_THOUSAND_STYLE,
-      decimalSeparator,
-      locale,
-      enableCompactNotation = DEFAULT_ENABLE_COMPACT_NOTATION,
-      enableNegative = DEFAULT_ENABLE_NEGATIVE,
-      enableLeadingZeros = DEFAULT_ENABLE_LEADING_ZEROS,
-      autoAddLeadingZero = DEFAULT_AUTO_ADD_LEADING_ZERO,
-      rawValueMode = DEFAULT_RAW_VALUE_MODE,
-      maxLength,
-      isAllowed,
-      onChange,
-    } = options;
-
-    const separators = applyLocale(locale, { thousandSeparator, decimalSeparator });
-
-    this.resolvedOptions = {
-      decimalMaxLength,
-      decimalMinLength,
-      formatOn,
-      thousandSeparator: separators.thousandSeparator ?? DEFAULT_THOUSAND_SEPARATOR,
-      thousandStyle,
-      decimalSeparator: separators.decimalSeparator ?? DEFAULT_DECIMAL_SEPARATOR,
-      enableCompactNotation,
-      enableNegative,
-      enableLeadingZeros,
-      autoAddLeadingZero,
-      rawValueMode,
-      maxLength,
-      isAllowed,
-      onChange,
-    };
-
-    this.createInputElement(container, options);
+    this.createInputElement(target);
+    this.applyOptions(options);
     this.setupEventListeners();
-    this.setDefaultValue();
+    // The initial value is `defaultValue`, or the pre-set value of an adopted <input> (e.g.
+    // <input value="100" use:numora>). Either way the app supplied it, so it is a canonical
+    // raw value (ADR 0004), not locale text. Also seeds `lastValue`.
+    const left = leftovers.get(this.el);
+    applySetValue(
+      this.el,
+      options.defaultValue ?? (left?.text === this.el.value ? left.raw : this.el.value),
+      this.isFocused,
+      this.resolvedOptions,
+      'defaultValue'
+    );
+    this.emit(undefined);
+    this.reported = this.el.value;
   }
 
-  private toRaw(value: string): string {
-    const sep = this.resolvedOptions.thousandSeparator;
-    return sep ? removeThousandSeparators(value, sep) : value;
-  }
-
-  private setDefaultValue(): void {
-    if (!this.element.value) return;
-
-    const raw = this.toRaw(this.element.value);
-
-    if (this.resolvedOptions.rawValueMode) {
-      this.rawValue = raw;
-    }
-
-    this.element.value = this.applyDisplaySeparators(raw);
-  }
-
-  private createInputElement(container: HTMLElement, options: NumoraInputOptions): void {
+  private createInputElement(container: HTMLElement): void {
     // If an <input> is passed directly (Svelte action, Vue directive, Angular directive,
     // Solid ref), adopt it instead of creating a new one so frameworks can use the
     // idiomatic <input use:numora> shape rather than a wrapping container <div>.
     const isExistingInput = container instanceof HTMLInputElement;
-    this.element = isExistingInput ? container : document.createElement('input');
+    this.el = isExistingInput ? container : document.createElement('input');
 
-    // These attributes are REQUIRED for Numora to work correctly and must not be overridden:
-    // - type='text': Using 'number' would cause browser-native validation/formatting that conflicts with Numora
-    // - inputmode='decimal': Ensures mobile keyboards show numeric keypad
-    // - spellcheck='false': Prevents spellcheck from interfering with numeric input
-    // - autocomplete='off': Prevents browser autocomplete from interfering with formatting
-    this.element.setAttribute('type', 'text');
-    this.element.setAttribute('inputmode', 'decimal');
-    this.element.setAttribute('spellcheck', 'false');
-    this.element.setAttribute('autocomplete', 'off');
-
-    // Pattern helps with native validation but is optional
-    // HTML pattern attr: optional leading `-` (if negatives enabled) + digits + optional decimal separator + digits.
-    const escapedDecimal = escapeRegExp(this.resolvedOptions.decimalSeparator);
-    const negativePrefix = this.resolvedOptions.enableNegative ? '-?' : '';
-    this.element.setAttribute('pattern', `^${negativePrefix}[0-9]*[${escapedDecimal}]?[0-9]*$`);
-
-    // Filter Numora-specific options + protected native attrs from what we assign.
-    // maxLength is in NUMORA_OPTION_KEYS so it never reaches the native attribute - the
-    // native one counts formatted chars (separators included), which would double-count
-    // vs Numora's raw-length semantics.
-    const nativeProps = Object.fromEntries(
-      Object.entries(options).filter(([key]) => !NUMORA_OPTION_KEYS.has(key))
-    );
-
-    Object.assign(this.element, nativeProps);
-
-    // Handle value initialization. When adopting an existing <input>, any pre-set value
-    // (e.g. <input value="100" use:numora>) is preserved unless the caller passes value
-    // or defaultValue explicitly via options.
-    if (options.value !== undefined) {
-      this.element.value = options.value;
-    } else if (options.defaultValue !== undefined) {
-      this.element.defaultValue = options.defaultValue;
-      this.element.value = options.defaultValue;
-    }
+    // Fixed, because Numora needs them: `type="number"` would bring the browser's own
+    // validation and formatting, and `inputmode="decimal"` gives the numeric keypad.
+    this.el.setAttribute('type', 'text');
+    this.el.setAttribute('inputmode', 'decimal');
+    // Defaults only, as in React: an adopted <input> keeps its own (`autocomplete="cc-number"`).
+    if (!this.el.hasAttribute('spellcheck')) this.el.setAttribute('spellcheck', 'false');
+    if (!this.el.hasAttribute('autocomplete')) this.el.setAttribute('autocomplete', 'off');
 
     if (!isExistingInput) {
-      container.appendChild(this.element);
+      container.appendChild(this.el);
     }
+  }
+
+  /**
+   * Writes the native attributes given onto the element. No `pattern` is set: the field can
+   * only hold what Numora wrote, and a `pattern` of your own on the element is left alone.
+   */
+  private applyOptions(options: NumoraInputOptions): void {
+    for (const name of NATIVE_ATTRIBUTES) {
+      const attribute = options[name];
+      if (attribute !== undefined) (this.el as unknown as Record<string, unknown>)[name] = attribute;
+    }
+    if (options.ariaLabel !== undefined) this.el.setAttribute('aria-label', options.ariaLabel);
   }
 
   private setupEventListeners(): void {
-    // beforeinput fires before the browser applies the user's action and is cancelable,
-    // which lets us apply the formatted value via setRangeText and preserve undo history.
-    this.element.addEventListener('beforeinput', this.handleBeforeInput.bind(this));
-    // The input listener stays as a fallback for programmatic value changes in tests or
-    // environments that dispatch 'input' without a preceding 'beforeinput'.
-    this.element.addEventListener('input', this.handleChange.bind(this));
-    this.element.addEventListener('keydown', this.handleKeyDown.bind(this));
-    this.element.addEventListener('paste', this.handlePaste.bind(this));
-
-    // Only add focus/blur handlers for 'blur' mode formatting
-    if (this.resolvedOptions.formatOn === FormatOn.Blur && this.resolvedOptions.thousandSeparator) {
-      this.element.addEventListener('focus', this.handleFocus.bind(this));
-      this.element.addEventListener('blur', this.handleBlur.bind(this));
-      // Mouse path: capture the intent on mousedown, defer strip until click so the
-      // browser's click→selection mapping runs against the still-formatted value and
-      // is committed to selectionStart before we read it. Caret is hidden until then.
-      this.element.addEventListener('mousedown', this.handleMouseDown.bind(this));
-      this.element.addEventListener('click', this.handleClick.bind(this));
-    }
-  }
-
-  /**
-   * Runs `fn` with `suppressNextInputEvent` set so the synchronous `input` event fired
-   * by `setRangeText` is short-circuited in `handleChange`. Exactly one set/clear pair
-   * per write; try/finally guarantees the flag clears even if `fn` throws.
-   */
-  private withInternalWrite(fn: () => void): void {
-    this.suppressNextInputEvent = true;
-    try {
-      fn();
-    } finally {
-      this.suppressNextInputEvent = false;
-    }
-  }
-
-  private handleValueChange(formattedValue: string, rawValue?: string): void {
-    if (this.resolvedOptions.rawValueMode && rawValue !== undefined) {
-      this.rawValue = rawValue;
-    }
-
-    if (this.resolvedOptions.onChange) {
-      const valueToEmit = this.resolvedOptions.rawValueMode ? this.rawValue : formattedValue;
-      this.resolvedOptions.onChange(valueToEmit);
-    }
-  }
-
-  private applyDisplaySeparators(value: string): string {
-    if (!value) {
-      return value;
-    }
-
-    const { thousandSeparator, thousandStyle, enableLeadingZeros, decimalSeparator } = this.resolvedOptions;
-
-    if (thousandSeparator && thousandStyle !== ThousandStyle.None) {
-      return formatWithSeparators(
-        value,
-        thousandSeparator,
-        thousandStyle,
-        enableLeadingZeros,
-        decimalSeparator
-      );
-    }
-
-    return value;
-  }
-
-  private handleBeforeInput(e: InputEvent): void {
-    const result = handleOnBeforeInputNumoraInput(
-      e,
-      this.resolvedOptions.decimalMaxLength,
-      this.resolvedOptions
-    );
-
-    switch (result.type) {
-      case 'handled': {
-        e.preventDefault();
-        this.withInternalWrite(() =>
-          writeValuePreservingUndo(this.element, result.formatted, result.cursorPos)
-        );
-        this.handleValueChange(result.formatted, result.raw);
-        break;
-      }
-      case 'reject':
-        e.preventDefault();
-        break;
-      case 'skip':
-        break;
-    }
-  }
-
-  private handleChange(e: Event): void {
-    // Our own setRangeText fired this synchronously; the originating handler
-    // (beforeinput/paste/focus/blur) already broadcast. Skip to avoid double-firing.
-    if (this.suppressNextInputEvent) return;
-
-    const target = e.target as HTMLInputElement;
-
-    // Undo/redo: the browser has restored a prior value. Re-formatting here would push
-    // another setRangeText step onto the stack and break the natural Ctrl+Z walk-back.
-    // Just broadcast the restored value.
-    if (
-      e instanceof InputEvent &&
-      (e.inputType === InputType.HistoryUndo || e.inputType === InputType.HistoryRedo)
-    ) {
-      const raw = this.toRaw(target.value);
-      this.caretPositionBeforeChange = undefined;
-      this.handleValueChange(target.value, raw);
-      return;
-    }
-
-    // Programmatic input event (synthetic dispatch from external code or tests). Format
-    // the current value and route the write through writeValuePreservingUndo so undo stays
-    // intact instead of being wiped by `target.value = x`.
-    const oldValue = target.value;
-    // Max of start/end works around a mobile-browser caret bug where selectionStart lags.
-    const oldCursorPosition = Math.max(target.selectionStart ?? 0, target.selectionEnd ?? 0);
-    const separators = getSeparators(this.resolvedOptions);
-    const shouldRemoveThousandSeparators = this.resolvedOptions.formatOn === FormatOn.Change;
-
-    const { formatted: newValue, raw: rawValue } = formatInputValue(
-      oldValue,
-      this.resolvedOptions.decimalMaxLength,
-      this.resolvedOptions,
-      shouldRemoveThousandSeparators
-    );
-
-    if (oldValue !== newValue) {
-      const computed = computeCursorPosition(
-        oldValue,
-        newValue,
-        oldCursorPosition,
-        this.caretPositionBeforeChange,
-        separators,
-        this.resolvedOptions
-      );
-      this.withInternalWrite(() =>
-        writeValuePreservingUndo(target, newValue, computed ?? newValue.length)
-      );
-    }
-
-    this.caretPositionBeforeChange = undefined;
-    this.handleValueChange(newValue, rawValue);
-  }
-
-  private handleKeyDown(e: KeyboardEvent): void {
-    const inputElement = e.target as HTMLInputElement;
-    this.caretPositionBeforeChange = handleOnKeyDownNumoraInput(e, this.resolvedOptions) ?? {
-      selectionStart: inputElement.selectionStart ?? 0,
-      selectionEnd: inputElement.selectionEnd ?? 0,
+    const el = this.el;
+    // Read per event: update() swaps the options.
+    const opts = () => this.resolvedOptions;
+    const add = <E extends Event>(type: string, handler: (e: E) => void) => {
+      el.addEventListener(type, handler as EventListener);
+      this.cleanups.push(() => el.removeEventListener(type, handler as EventListener));
     };
-  }
 
-  private handlePaste(e: ClipboardEvent): void {
-    e.preventDefault();
-    const result = handleOnPasteNumoraInput(e, this.resolvedOptions.decimalMaxLength, this.resolvedOptions);
-
-    if (result.type === 'reject') return;
-
-    this.withInternalWrite(() =>
-      writeValuePreservingUndo(this.element, result.formatted, result.cursorPos)
+    // `beforeinput` is cancelable and fires before the browser edits, so only the formatted
+    // value is ever shown.
+    add<InputEvent>('beforeinput', (e) => this.emit(applyBeforeInput(e, opts())));
+    // Fallback for edits with no `beforeinput`: autofill, drop, programmatic dispatch.
+    // Mid-composition text is the IME's: the final non-composing `input` reconciles it.
+    add<InputEvent>('input', (e) =>
+      e.isComposing || this.emit(applyInputFallback(el, this.isFocused, this.lastValue, opts()))
     );
-    this.handleValueChange(result.formatted, result.raw);
-  }
-
-  private stripSeparatorsAndMapCaret(target: HTMLInputElement): void {
-    const sep = this.resolvedOptions.thousandSeparator;
-    if (!sep || this.resolvedOptions.thousandStyle === ThousandStyle.None) return;
-    const displayStart = target.selectionStart ?? 0;
-    const displayEnd = target.selectionEnd ?? target.value.length;
-    const result = computeStripSeparatorsResult(target.value, displayStart, displayEnd, sep);
-    if (!result) return;
-
-    this.withInternalWrite(() =>
-      writeStripPreservingUndo(target, result.raw, result.rawStart, result.rawEnd)
+    add<KeyboardEvent>('keydown', (e) => handleOnKeyDownNumoraInput(e, opts()));
+    add<ClipboardEvent>('paste', (e) => this.emit(applyPaste(e, opts())));
+    add('focus', () => {
+      this.isFocused = true;
+    });
+    add('blur', () => {
+      this.isFocused = false;
+      this.emit(applyBlur(el, opts()));
+    });
+    this.cleanups.push(
+      // A strip leaves the raw value alone: only the display is reported.
+      attachFocusStrip(el, opts, () => this.emit(undefined))
     );
-    this.handleValueChange(result.raw, result.raw);
-  }
-
-  private handleFocus(e: FocusEvent): void {
-    // Mouse-driven focus: skip - the strip happens on click, after the browser
-    // has placed the cursor based on where the user clicked in the formatted value.
-    if (this.pendingMouseStrip) return;
-    this.stripSeparatorsAndMapCaret(e.target as HTMLInputElement);
-  }
-
-  private handleMouseDown(): void {
-    this.pendingMouseStrip = true;
-  }
-
-  private handleClick(e: MouseEvent): void {
-    if (!this.pendingMouseStrip) return;
-    this.pendingMouseStrip = false;
-    this.stripSeparatorsAndMapCaret(e.target as HTMLInputElement);
-  }
-
-  private handleBlur(e: FocusEvent): void {
-    this.pendingMouseStrip = false;
-
-    const target = e.target as HTMLInputElement;
-    const { thousandSeparator, thousandStyle } = this.resolvedOptions;
-    if (!thousandSeparator || thousandStyle === ThousandStyle.None || !target.value) return;
-
-    const formatted = this.applyDisplaySeparators(target.value);
-    if (formatted !== target.value) {
-      this.withInternalWrite(() =>
-        writeValuePreservingUndo(target, formatted, formatted.length)
-      );
-    }
-
-    const raw = this.resolvedOptions.rawValueMode
-      ? this.toRaw(formatted)
-      : undefined;
-    this.handleValueChange(formatted, raw);
-  }
-
-  public getValue(): string {
-    if (this.resolvedOptions.rawValueMode) {
-      return this.rawValue;
-    }
-    return this.element.value;
   }
 
   /**
-   * Sets the input's value programmatically.
+   * Removes all Numora-internal event listeners from the underlying input. Call this when
+   * tearing down an adopted `<input>` (Svelte action `destroy`, Vue `unmounted`, Angular
+   * `ngOnDestroy`, Solid `onCleanup`) or before re-initialising Numora on the same
+   * element - otherwise each re-init stacks a fresh set of listeners that double-fire
+   * onValueChange and duplicate every DOM write per keystroke.
    *
-   * @param value - The new value. In `rawValueMode`, this is treated as raw and re-formatted for display.
-   * @param options.undoable - Defaults to `true`: routes the write through `setRangeText`
-   *   so the browser's undo stack stays intact and `Ctrl+Z` can revert this call. Pass
-   *   `false` only when you intentionally want to wipe the undo history (e.g. form reset).
+   * Only removes listeners Numora added; anything else attached to the element is left
+   * untouched. Does not remove the element from the DOM.
+   * Idempotent - calling it more than once is a no-op.
    */
-  public setValue(value: string, options?: { undoable?: boolean }): void {
-    let displayValue: string;
-    if (this.resolvedOptions.rawValueMode) {
-      const raw = this.toRaw(value);
-      this.rawValue = raw;
-      displayValue = this.applyDisplaySeparators(raw);
-    } else {
-      displayValue = value;
+  public destroy(): void {
+    // splice empties the list, so a second destroy() is a no-op.
+    if (this.cleanups.length) {
+      leftovers.set(this.el, { text: this.el.value, raw: this.rawValue });
     }
+    for (const cleanup of this.cleanups.splice(0)) cleanup();
+  }
 
-    if (options?.undoable === false) {
-      this.element.value = displayValue;
-      return;
+  /**
+   * Records a write to the field and reports it: `onValueChange` when the caller passes the
+   * values of a raw change, then `onFormattedValueChange` when the text is new.
+   */
+  private emit(values: NumoraValues | undefined): void {
+    const text = this.el.value;
+    this.lastValue = text;
+    if (values) this.options.onValueChange?.(values);
+    if (this.reported !== undefined && text !== this.reported) {
+      this.reported = text;
+      this.options.onFormattedValueChange?.(text);
     }
-    this.withInternalWrite(() =>
-      writeValuePreservingUndo(this.element, displayValue, displayValue.length)
-    );
-  }
-
-  public disable(): void {
-    this.element.disabled = true;
-  }
-
-  public enable(): void {
-    this.element.disabled = false;
-  }
-
-  public addEventListener(event: string, callback: EventListenerOrEventListenerObject): void {
-    this.element.addEventListener(event, callback);
-  }
-
-  public removeEventListener(event: string, callback: EventListenerOrEventListenerObject): void {
-    this.element.removeEventListener(event, callback);
   }
 
   /**
-   * Returns the underlying HTMLInputElement for direct access.
-   * This allows users to interact with the input as a normal HTMLInputElement.
+   * The canonical raw value: ASCII digits, `.` decimal, `-` sign, no grouping, identical for
+   * every locale (de-DE display `1.234.567,89` -> `1234567.89`). Safe to pass to a decimal
+   * library. Read-only: write with {@link setValue}. (`element.value` is the display string.)
    */
-  public getElement(): HTMLInputElement {
-    return this.element;
+  public get rawValue(): string {
+    return displayToRawValue(this.el.value, this.resolvedOptions);
+  }
+
+  /** The display string shown in the field (locale separators and grouping included). */
+  public get formattedValue(): string {
+    return this.el.value;
+  }
+
+  /** The underlying `<input>`: set any native attribute or add listeners on it directly. */
+  public get element(): HTMLInputElement {
+    return this.el;
   }
 
   /**
-   * Gets the current value of the input.
-   * In rawValueMode, returns the raw numeric value without formatting.
-   * Otherwise, returns the formatted display value.
-   */
-  public get value(): string {
-    return this.getValue();
-  }
-
-  /**
-   * Sets the value of the input.
-   * In rawValueMode, the value will be formatted for display.
-   * Otherwise, sets the value directly.
-   */
-  public set value(val: string) {
-    this.setValue(val);
-  }
-
-  /**
-   * Gets the value as a number, similar to HTMLInputElement.valueAsNumber.
-   * Returns NaN if the value cannot be converted to a number.
+   * Sets the input's value programmatically. Like assigning `element.value`, it is the app's
+   * own write: it does not call `onValueChange` and is not checked by `isAllowed`. The new
+   * text still goes to `onFormattedValueChange`.
    *
-   * **Precision warning**: this getter returns a JavaScript `number` (IEEE 754 double).
-   * Values beyond ~15 significant digits will lose precision. Numora is designed around
-   * string values for this reason - prefer {@link getValue} when exact precision matters.
-   * Treat `valueAsNumber` strictly as an escape hatch for arithmetic that you already know
-   * is safe at float precision.
+   * @param value - A canonical raw value (ADR 0004): `.` is always the decimal mark and
+   *   there is no grouping, whatever the field's locale (`'1234.5'` shows as `1.234,5` in
+   *   de-DE). It is never detected as locale text. It is re-formatted for display. A value
+   *   that is not a raw value is still read, with a development warning (ADR 0015).
    */
-  public get valueAsNumber(): number {
-    const value = this.getValue();
-    if (!value) {
-      return NaN;
-    }
-    // Remove thousand separators and convert decimal separator to dot for parsing
-    const cleanValue = this.toRaw(value);
-    const normalizedValue = this.resolvedOptions.decimalSeparator && this.resolvedOptions.decimalSeparator !== '.'
-      ? cleanValue.replace(new RegExp(escapeRegExp(this.resolvedOptions.decimalSeparator), 'g'), '.')
-      : cleanValue;
-    return parseFloat(normalizedValue);
+  public setValue(value: string): void {
+    // Same pipeline as typing/paste, so programmatic writes honor sanitization,
+    // decimalMaxLength, maxLength, allowNegative and grouping.
+    applySetValue(this.el, value, this.isFocused, this.resolvedOptions);
+    this.emit(undefined);
   }
 
   /**
-   * Sets the value from a number, similar to HTMLInputElement.valueAsNumber.
+   * Changes options on a live field. `options` is merged over the current ones; a key set
+   * to `undefined` goes back to its default (a native attribute left `undefined` is not
+   * touched). The current raw value is kept and re-run through the new options: the display
+   * is rewritten, and `onValueChange` fires only if the raw value itself changed, e.g. a
+   * smaller `decimalMaxLength` cut digits off (ADR 0008).
+   * A focused field is left as typed when the new options format the same way.
+   *
+   * @throws when the merged options are invalid. Nothing is changed in that case.
    */
-  public set valueAsNumber(num: number) {
-    if (isNaN(num)) {
-      this.setValue('');
-      return;
-    }
-    const stringValue = num.toString();
-    this.setValue(stringValue);
+  public update(options: Omit<NumoraInputOptions, 'defaultValue'>): void {
+    const merged = { ...this.options, ...options };
+    const resolved = resolveOptions(merged);
+    warnRemovedOptions(takeRemovedOptions({ ...options }));
+
+    const before = this.rawValue;
+    // Functions (`isAllowed`) drop out of the JSON, so a new callback is not a format change.
+    const same = JSON.stringify(this.resolvedOptions) === JSON.stringify(resolved);
+    this.options = merged;
+    this.resolvedOptions = resolved;
+    this.applyOptions(options);
+
+    // Same formatting on a field being typed in: leave the text and caret alone. A wrapper
+    // that calls update() on every re-render would otherwise strip a just-typed `1.` to `1`.
+    if (same && this.isFocused) return;
+
+    // A focused Blur-mode field shows no grouping, so it keeps its edit-time format.
+    const { formatted, raw } = this.isFocused
+      ? formatValueForDisplay(before, resolved.decimalMaxLength, resolved, 'canonical')
+      : formatForDisplay(before, resolved, 'canonical');
+    if (formatted !== this.el.value) writeValue(this.el, formatted, formatted.length);
+    this.emit(raw !== before ? { value: raw, formattedValue: formatted } : undefined);
   }
 }

@@ -4,23 +4,24 @@ import { CodeBlock } from '@/components/CodeBlock';
 export const Route = createFileRoute('/docs/numora/features/decimals')({
   head: () => ({
     meta: [
-      { title: 'Decimal Input Validation & Limits | Numora' },
+      { title: 'Decimals | Numora' },
       {
         name: 'description',
         content:
-          'Enforce decimal place limits and validate decimal inputs with Numora. Set max/min decimal places, choose separators, and prevent invalid decimal entries.',
+          'Enforce decimal place limits and validate decimal inputs with Numora. Set max and min decimal places, choose separators, and block invalid decimal entries.',
       },
-      { property: 'og:title', content: 'Decimal Input Validation & Limits | Numora' },
+      { property: 'og:title', content: 'Decimals | Numora' },
       {
         property: 'og:description',
         content:
-          'Enforce decimal place limits and validate decimal inputs with Numora. Set max/min decimal places and prevent invalid entries.',
+          'Enforce decimal place limits and validate decimal inputs with Numora. Set max and min decimal places, choose separators, and block invalid decimal entries.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/decimals' },
-      { name: 'twitter:title', content: 'Decimal Input Validation & Limits | Numora' },
+      { name: 'twitter:title', content: 'Decimals | Numora' },
       {
         name: 'twitter:description',
-        content: 'Enforce decimal place limits and validate decimal inputs with Numora.',
+        content:
+          'Enforce decimal place limits and validate decimal inputs with Numora. Set max and min decimal places, choose separators, and block invalid decimal entries.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora/features/decimals' }],
@@ -31,9 +32,9 @@ export const Route = createFileRoute('/docs/numora/features/decimals')({
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Decimal Handling in Numora - Numeric Input Decimal Precision',
+            headline: 'Decimal handling in Numora: numeric input decimal precision',
             description:
-              'Configure decimal precision in the numora JavaScript numeric input library. Control decimal separator, max decimals, minimum decimal padding, and trailing zero behaviour.',
+              'Configure decimal precision in the Numora numeric input library. Set the decimal separator, max decimals, and decimal padding.',
             url: 'https://numeric-input.com/docs/numora/features/decimals',
             author: {
               '@type': 'Person',
@@ -49,7 +50,7 @@ export const Route = createFileRoute('/docs/numora/features/decimals')({
               {
                 '@type': 'ListItem',
                 position: 2,
-                name: 'Numora JS',
+                name: 'Numora',
                 item: 'https://numeric-input.com/docs/numora',
               },
               {
@@ -69,30 +70,33 @@ export const Route = createFileRoute('/docs/numora/features/decimals')({
 
 function Decimals() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Decimals</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        Control decimal precision, separators, and locale-aware formatting.
+    <div className="docs-prose max-w-[36rem]">
+      <h1>Decimals</h1>
+      <p>
+        Decimal options limit how many decimal digits a value can have and set the separator between
+        the integer and decimal parts.
       </p>
 
-      <h2 className="text-foreground text-2xl">Precision limits</h2>
+      <h2>Precision limits</h2>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
-// Cap at 2 decimal places - extra digits are truncated on input
-const input = new NumoraInput(container, {
-  maxDecimals: 2,
+// Cap at 2 decimal places. A typed third digit is refused. Pasted or app-set extra
+// digits are cut off, not rounded: "1.239" becomes "1.23"
+const input1 = new NumoraInput(container, {
+  decimalMaxLength: 2,
 })
 
-// Pad to at least 2 decimal places - applied on blur
-const input = new NumoraInput(container, {
+// Pad to at least 2 decimal places on blur and when your app sets the value (never
+// while typing). The constructor throws if decimalMinLength is above decimalMaxLength
+const input2 = new NumoraInput(container, {
   decimalMinLength: 2,
-  maxDecimals: 18,
+  decimalMaxLength: 18,
   // "1" on blur → "1.00"
 })`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">Separators</h2>
+      <h2>Separators</h2>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
@@ -100,30 +104,28 @@ const input = new NumoraInput(container, {
 const input = new NumoraInput(container, {
   decimalSeparator: ',',
   thousandSeparator: '.',
-  // "1234.56" → "1.234,56"
+  groupingStyle: 'thousand',
+  formatOn: 'change',
+  // typing "1234,56" displays "1.234,56"
 })`}
       </CodeBlock>
 
-      <p className="text-muted-foreground text-base leading-6">
-        For locale-aware separator detection, see{' '}
-        <Link to="/docs/numora/features/locale" className="underline link-underline hover:text-foreground transition-colors">
-          Locale
-        </Link>
-        .
+      <p>
+        To detect separators from a locale, see{' '}
+        <Link to="/docs/numora/features/locale">Locale</Link>.
       </p>
 
-      <h2 className="text-foreground text-2xl">Automatic behaviors</h2>
+      <h2>Automatic behaviors</h2>
       <ul>
         <li>
-          <strong>Comma/dot conversion</strong> - when no thousand separator is set, both{' '}
-          <code>,</code> and <code>.</code> keystrokes map to the configured decimal separator
+          <strong>Separator input.</strong> Typing <code>,</code> or <code>.</code> inserts the
+          configured decimal separator. Numora blocks it if the value already has one.
         </li>
         <li>
-          <strong>Duplicate prevention</strong> - typing a second decimal separator is blocked
-        </li>
-        <li>
-          <strong>Paste cleanup</strong> - if multiple separators appear (e.g.{' '}
-          <code>"12.34.56"</code>), all but the first are removed (<code>"12.3456"</code>)
+          <strong>Paste cleanup.</strong> Numora reads pasted text by its own format. When both{' '}
+          <code>.</code> and <code>,</code> appear, the last one is the decimal, so{' '}
+          <code>"1,234.56"</code> becomes <code>1234.56</code>. A mark that repeats is grouping, so{' '}
+          <code>"12.34.56"</code> becomes <code>123456</code>.
         </li>
       </ul>
     </div>

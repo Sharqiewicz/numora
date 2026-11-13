@@ -1,76 +1,57 @@
 import { CodeBlock } from '@/components/CodeBlock';
 
-const code = `useEffect(() => {
+const code = `// (trimmed)
+useEffect(() => {
   const input = internalInputRef.current
   if (!input) return
 
-  const handler = (e: InputEvent) => {
-    if (e.inputType === 'insertFromPaste' || e.inputType === 'insertFromDrop') return
-
-    const result = handleNumoraOnBeforeInput(e, {
-      maxDecimals: maxDecimalsRef.current,
-      formattingOptions: formattingOptionsRef.current,
-    })
-    if (result !== null) {
-      const numInput = input as NumoraHTMLInputElement
-      numInput.formattedValue = result.value
-
-      // Call onChange directly - guaranteed delivery, no dependency on
-      // React's value-tracker diff or synthetic event pipeline.
-      onChangeRef.current?.(createSyntheticChangeEvent(numInput, result.rawValue ?? ''))
-
-      // Dispatch a native 'input' to keep React's value tracker in sync.
-      isHandledByBeforeInputRef.current = true
-      input.dispatchEvent(new Event('input', { bubbles: true }))
-      isHandledByBeforeInputRef.current = false
-    }
+  const onBeforeInput = (e: InputEvent) => {
+    // Decides skip / reject / handled. When it handles the edit it calls
+    // preventDefault() and writes the field with setRangeText: no input event,
+    // no React value tracker. It returns the new values, or nothing.
+    const values = applyBeforeInput(e, stateRef.current.formattingOptions)
+    // Call onChange directly - guaranteed delivery, no dependency on
+    // React's value-tracker diff or synthetic event pipeline.
+    if (values) emit(input, values)
   }
 
-  input.addEventListener('beforeinput', handler)
-  return () => input.removeEventListener('beforeinput', handler)
+  input.addEventListener('beforeinput', onBeforeInput)
+  return () => input.removeEventListener('beforeinput', onBeforeInput)
 }, [])`;
 
 export function ReactSyntheticBypassSection() {
   return (
+    // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="react-synthetic-bypass" className="space-y-4 scroll-mt-24">
       <h2>
         Why <code>beforeinput</code> bypasses React's synthetic event system
       </h2>
       <p>
-        React's event system uses <strong>delegation</strong>: a single listener at the root
-        container fires handlers during the bubbling phase. For most events this is fine. For{' '}
-        <code>beforeinput</code> it is fatal - by the time bubbling reaches the root, the browser
-        has already committed the character to the DOM. Calling{' '}
-        <code>e.nativeEvent.preventDefault()</code> at that point is a no-op.
+        React's event system uses <strong>delegation</strong>. A single listener at the root
+        container fires handlers during the bubbling phase. That works for most events, but not for{' '}
+        <code>beforeinput</code>. React's <code>onBeforeInput</code> is not the native event. React
+        synthesizes it from <code>textInput</code>, <code>keypress</code> and composition events, so
+        it cannot reliably cancel the edit before the browser applies it.
       </p>
       <p>
-        This was verified empirically: switching to React's <code>onBeforeInput</code> prop caused
-        all validation and sanitisation to silently fail - any character could be typed.
-        ProseMirror, Slate, and Lexical hit the same constraint and all use native{' '}
-        <code>addEventListener</code> for <code>beforeinput</code>.
+        Switching to React's <code>onBeforeInput</code> prop broke validation and sanitization, and
+        any character could be typed. So Numora React registers the native listener itself.
       </p>
       <p>
         The listener is registered once at mount on the actual element. Mutable options are read
-        through refs updated via <code>useLayoutEffect</code> so prop changes never need a listener
+        through a ref updated via <code>useLayoutEffect</code> so prop changes never need a listener
         re-registration:
       </p>
       <CodeBlock language="tsx">{code}</CodeBlock>
       <h3 className="text-base">
-        <code>isHandledByBeforeInputRef</code> - preventing double-fire
+        Why <code>onChange</code> fires only once
       </h3>
       <p>
-        The native handler calls <code>onChange</code> directly with a synthetic{' '}
-        <code>ChangeEvent</code>, then dispatches a real <code>input</code> event so React's value
-        tracker stays in sync. That dispatched event flows through React's normal pipeline and would
-        trigger the React-side <code>handleChange</code> → <code>onChange</code> a <em>second</em>{' '}
-        time, firing every callback twice per keystroke.
-      </p>
-      <p>
-        <code>isHandledByBeforeInputRef</code> is the gate: it is set to <code>true</code>{' '}
-        synchronously around <code>dispatchEvent</code>, and because <code>dispatchEvent</code> is
-        synchronous, the React-side handler runs to completion while the flag is up. It reads the
-        flag, sees that <code>onChange</code> has already been called, and exits without
-        re-emitting.
+        The handler writes the formatted value with <code>setRangeText</code> and calls{' '}
+        <code>onChange</code> itself. <code>setRangeText</code> dispatches no <code>input</code>{' '}
+        event. The HTML spec says so, and Chrome and jsdom both follow it. Nothing reaches React's{' '}
+        <code>handleChange</code> afterwards. <code>handleChange</code> only ever sees edits the
+        browser makes itself, such as autofill, drop, IME commits, undo and redo.
       </p>
     </section>
   );

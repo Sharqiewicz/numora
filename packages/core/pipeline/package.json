@@ -1,0 +1,5 @@
+{
+  "main": "../dist/pipeline.js",
+  "module": "../dist/pipeline.mjs",
+  "types": "../dist/pipeline.d.cts"
+}

@@ -4,26 +4,27 @@ import { CodeBlock } from '@/components/CodeBlock';
 export const Route = createFileRoute('/docs/numora/features/leading-zeros')({
   head: () => ({
     meta: [
-      { title: 'Leading Zero Handling | Numora' },
+      { title: 'Leading zeros | Numora' },
       {
         name: 'description',
         content:
-          'Control leading zero behavior in numeric inputs with Numora. Strip or preserve integer leading zeros, and auto-prepend "0" before bare decimal points like ".5" → "0.5".',
+          'Control leading zero behavior in numeric inputs with Numora. Strip or keep integer leading zeros, and prepend "0" before bare decimal points like ".5" → "0.5".',
       },
-      { property: 'og:title', content: 'Leading Zero Handling | Numora' },
+      { property: 'og:title', content: 'Leading zeros | Numora' },
       {
         property: 'og:description',
         content:
-          'Control leading zero behavior in numeric inputs with Numora. Enable or disable for financial inputs.',
+          'Control leading zero behavior in numeric inputs with Numora. Strip or keep integer leading zeros, and prepend "0" before bare decimal points like ".5" → "0.5".',
       },
       {
         property: 'og:url',
         content: 'https://numeric-input.com/docs/numora/features/leading-zeros',
       },
-      { name: 'twitter:title', content: 'Leading Zero Handling | Numora' },
+      { name: 'twitter:title', content: 'Leading zeros | Numora' },
       {
         name: 'twitter:description',
-        content: 'Control leading zero behavior in numeric inputs with Numora.',
+        content:
+          'Control leading zero behavior in numeric inputs with Numora. Strip or keep integer leading zeros, and prepend "0" before bare decimal points like ".5" → "0.5".',
       },
     ],
     links: [
@@ -36,9 +37,9 @@ export const Route = createFileRoute('/docs/numora/features/leading-zeros')({
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Leading Zero Control in Numora - Numeric Input Leading Zero Handling',
+            headline: 'Leading zero control in Numora numeric inputs',
             description:
-              'Control leading zero behaviour in JavaScript numeric inputs with Numora. Strip leading zeros automatically or preserve them based on your use case.',
+              'Control leading zero behavior in JavaScript numeric inputs with Numora. Strip leading zeros, or keep them for IDs and product codes.',
             url: 'https://numeric-input.com/docs/numora/features/leading-zeros',
             author: {
               '@type': 'Person',
@@ -54,13 +55,13 @@ export const Route = createFileRoute('/docs/numora/features/leading-zeros')({
               {
                 '@type': 'ListItem',
                 position: 2,
-                name: 'Numora JS',
+                name: 'Numora',
                 item: 'https://numeric-input.com/docs/numora',
               },
               {
                 '@type': 'ListItem',
                 position: 3,
-                name: 'Leading Zeros',
+                name: 'Leading zeros',
                 item: 'https://numeric-input.com/docs/numora/features/leading-zeros',
               },
             ],
@@ -74,84 +75,77 @@ export const Route = createFileRoute('/docs/numora/features/leading-zeros')({
 
 function LeadingZeros() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Leading Zeros</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        By default, Numora strips leading zeros from the integer part of a number. Set{' '}
-        <code>enableLeadingZeros: true</code> to preserve them.
+    <div className="docs-prose max-w-[36rem]">
+      <h1>Leading zeros</h1>
+      <p>
+        By default, Numora removes leading zeros from the integer part of a number. Set{' '}
+        <code>allowLeadingZeros: true</code> to keep them.
       </p>
 
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
-// Default - leading zeros removed
+// Default: leading zeros removed
 // "007" → "7", "0001" → "1"
-const input = new NumoraInput(container, {
-  enableLeadingZeros: false,
+const input1 = new NumoraInput(container, {
+  allowLeadingZeros: false,
 })
 
-// Leading zeros preserved
-// "007" → "007", "0001" → "0001"
-const input = new NumoraInput(container, {
-  enableLeadingZeros: true,
+// Leading zeros kept
+// "007" → "007", "0001" → raw "0001" (shown as "0,001" with the default grouping)
+const input2 = new NumoraInput(container, {
+  allowLeadingZeros: true,
 })`}
       </CodeBlock>
 
-      <h2 className="text-foreground text-2xl">Rules</h2>
+      <h2>Rules</h2>
       <ul>
         <li>
-          Only the integer part is affected - decimal zeros are never touched (<code>"0.05"</code>{' '}
-          stays <code>"0.05"</code>)
+          Only the integer part is affected. Decimal zeros are never touched (<code>"0.05"</code>{' '}
+          stays <code>"0.05"</code>).
         </li>
         <li>
-          A bare <code>"0"</code> is always preserved
+          Numora always keeps a bare <code>"0"</code>
         </li>
         <li>
-          The sign is preserved for negative numbers (<code>"-007"</code> → <code>"-7"</code>)
+          Negative numbers keep their sign (<code>"-007"</code> → <code>"-7"</code>, with{' '}
+          <code>allowNegative: true</code>)
         </li>
       </ul>
 
-      <h2 className="text-foreground text-2xl">When to use each</h2>
-      <ul>
-        <li>
-          <strong>Removed (default)</strong> - currency and general numeric inputs where leading
-          zeros are meaningless
-        </li>
-        <li>
-          <strong>Preserved</strong> - product codes, IDs, or any format where zero-padding is
-          significant
-        </li>
-      </ul>
+      <p>
+        Keep the default for currency and numeric inputs. Enable leading zeros for product codes,
+        IDs and other formats where zero-padding matters.
+      </p>
 
-      <h2 className="text-foreground text-2xl">Auto-prepend leading zero</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Set <code>autoAddLeadingZero: true</code> to automatically prepend <code>0</code>
-        before a bare decimal separator. Useful when you want <code>.5</code> stored as
-        <code>0.5</code> so the value is unambiguously parseable downstream.
+      <h2>Auto-prepend leading zero</h2>
+      <p>
+        Set <code>padLeadingZero: true</code> to prepend <code>0</code> before a bare decimal
+        separator. Use it when you want <code>.5</code> stored as <code>0.5</code>, so the value
+        parses the same way everywhere downstream.
       </p>
 
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
 const input = new NumoraInput(container, {
-  autoAddLeadingZero: true,
+  padLeadingZero: true,
 })
 
 // Typing ".5"        → "0.5"
-// Typing "-.5"       → "-0.5"  (requires enableNegative: true)
+// Typing "-.5"       → "-0.5"  (requires allowNegative: true)
 // Typing "."         → "0."
 // Typing "1.5"       → "1.5"   (unchanged)`}
       </CodeBlock>
 
       <ul>
         <li>
-          Runs as the last sanitization step, after <code>enableLeadingZeros</code> trimming - safe
-          to combine
+          Runs after <code>allowLeadingZeros</code> trimming, so you can combine the two. Only the
+          optional <code>maxLength</code> truncation runs later.
         </li>
         <li>
-          Respects <code>decimalSeparator</code> (e.g. <code>","</code> for European format)
+          Uses your <code>decimalSeparator</code> (e.g. <code>","</code> for European format)
         </li>
-        <li>Off by default</li>
       </ul>
     </div>
   );

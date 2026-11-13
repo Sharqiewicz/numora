@@ -4,26 +4,27 @@ import { ExampleWithDemo } from '@/components/ExampleWithDemo';
 export const Route = createFileRoute('/docs/numora-react/features/leading-zeros')({
   head: () => ({
     meta: [
-      { title: 'Leading Zero Handling | numora-react' },
+      { title: 'Leading zeros | Numora React' },
       {
         name: 'description',
         content:
           'Control leading zeros using the NumoraInput React component. Strip or preserve integer leading zeros, and auto-prepend "0" before bare decimal points like ".5" → "0.5".',
       },
-      { property: 'og:title', content: 'Leading Zero Handling | numora-react' },
+      { property: 'og:title', content: 'Leading zeros | Numora React' },
       {
         property: 'og:description',
         content:
-          'Control leading zeros using the NumoraInput React component. Enable or disable for financial forms.',
+          'Control leading zeros using the NumoraInput React component. Strip or preserve integer leading zeros, and auto-prepend "0" before bare decimal points like ".5" → "0.5".',
       },
       {
         property: 'og:url',
         content: 'https://numeric-input.com/docs/numora-react/features/leading-zeros',
       },
-      { name: 'twitter:title', content: 'Leading Zero Handling | numora-react' },
+      { name: 'twitter:title', content: 'Leading zeros | Numora React' },
       {
         name: 'twitter:description',
-        content: 'Control leading zeros using the NumoraInput React component.',
+        content:
+          'Control leading zeros using the NumoraInput React component. Strip or preserve integer leading zeros, and auto-prepend "0" before bare decimal points like ".5" → "0.5".',
       },
     ],
     links: [
@@ -39,9 +40,9 @@ export const Route = createFileRoute('/docs/numora-react/features/leading-zeros'
           {
             '@context': 'https://schema.org',
             '@type': 'TechArticle',
-            headline: 'Leading Zero Control in numora-react - React Numeric Input Leading Zeros',
+            headline: 'Leading zeros | Numora React',
             description:
-              'Control leading zero behaviour in React numeric inputs with numora-react. Strip leading zeros automatically or preserve them based on your use case.',
+              'Control leading zeros in React numeric inputs with Numora React. It strips leading zeros by default, and allowLeadingZeros keeps them.',
             url: 'https://numeric-input.com/docs/numora-react/features/leading-zeros',
             author: {
               '@type': 'Person',
@@ -63,7 +64,7 @@ export const Route = createFileRoute('/docs/numora-react/features/leading-zeros'
               {
                 '@type': 'ListItem',
                 position: 3,
-                name: 'Leading Zeros',
+                name: 'Leading zeros',
                 item: 'https://numeric-input.com/docs/numora-react/features/leading-zeros',
               },
             ],
@@ -77,87 +78,76 @@ export const Route = createFileRoute('/docs/numora-react/features/leading-zeros'
 
 function LeadingZeros() {
   return (
-    <div className="prose prose-invert max-w-xl">
-      <h1 className="text-foreground">Leading Zeros</h1>
-      <p className="text-muted-foreground text-base leading-6">
-        By default, Numora strips leading zeros from the integer part of a number. Set{' '}
-        <code>enableLeadingZeros</code> to preserve them.
+    <div className="docs-prose max-w-[36rem]">
+      <h1>Leading zeros</h1>
+      <p>
+        By default, Numora React strips leading zeros from the integer part of a number. Set{' '}
+        <code>allowLeadingZeros</code> to preserve them.
       </p>
 
       <div className="space-y-4">
         <ExampleWithDemo
           title="Removed (default)"
-          description={'Try typing "007" - it becomes "7"'}
+          description={'Type "007" and it becomes "7"'}
           language="tsx"
           code={`<NumoraInput />`}
+          config={{}}
         />
         <ExampleWithDemo
           title="Preserved"
-          description={'Try typing "007" - it stays "007"'}
+          description={
+            'Type "007" and it stays "007". Grouping still applies, so "0001" shows as "0,001"'
+          }
           language="tsx"
-          code={`<NumoraInput enableLeadingZeros />`}
-          config={{ enableLeadingZeros: true }}
+          code={`<NumoraInput allowLeadingZeros />`}
+          config={{ allowLeadingZeros: true }}
         />
       </div>
 
-      <h2 className="text-foreground text-2xl">Rules</h2>
+      <h2>Rules</h2>
       <ul>
         <li>
-          Only the integer part is affected - decimal zeros are never touched (<code>"0.05"</code>{' '}
+          Only the integer part is affected. Decimal zeros are never touched (<code>"0.05"</code>{' '}
           stays <code>"0.05"</code>)
         </li>
         <li>
-          A bare <code>"0"</code> is always preserved
+          Numora React always keeps a bare <code>"0"</code>
         </li>
         <li>
-          The sign is preserved for negative numbers (<code>"-007"</code> → <code>"-7"</code>)
+          Negative numbers keep their sign (<code>"-007"</code> → <code>"-7"</code>, with{' '}
+          <code>allowNegative</code>)
         </li>
       </ul>
 
-      <h2 className="text-foreground text-2xl">When to use each</h2>
-      <ul>
-        <li>
-          <strong>Removed (default)</strong> - currency and general numeric inputs where leading
-          zeros are meaningless
-        </li>
-        <li>
-          <strong>Preserved</strong> - product codes, IDs, or any format where zero-padding is
-          significant
-        </li>
-      </ul>
+      <p>
+        Keep the default for currency and numeric inputs. Preserve zeros for product codes, IDs and
+        other formats where zero-padding matters.
+      </p>
 
-      <h2 className="text-foreground text-2xl">Auto-prepend leading zero</h2>
-      <p className="text-muted-foreground text-base leading-6">
-        Set <code>autoAddLeadingZero</code> to automatically prepend <code>0</code> before a bare
-        decimal separator. Useful when you want <code>.5</code> stored as <code>0.5</code>
-        so the value is unambiguously parseable downstream.
+      <h2>Auto-prepend leading zero</h2>
+      <p>
+        Set <code>padLeadingZero</code> to prepend <code>0</code> before a bare decimal separator.
+        Use it when you want <code>.5</code> stored as <code>0.5</code>, so the value parses the
+        same way everywhere downstream.
       </p>
 
       <div className="space-y-4">
         <ExampleWithDemo
-          title="Off (default)"
-          description={'Type ".5" - it stays ".5"'}
+          description={'Type ".5" and it becomes "0.5"'}
           language="tsx"
-          code={`<NumoraInput />`}
-        />
-        <ExampleWithDemo
-          title="On"
-          description={'Type ".5" - it becomes "0.5"'}
-          language="tsx"
-          code={`<NumoraInput autoAddLeadingZero />`}
-          config={{ autoAddLeadingZero: true }}
+          code={`<NumoraInput padLeadingZero />`}
+          config={{ padLeadingZero: true }}
         />
       </div>
 
       <ul>
         <li>
-          Runs as the last sanitization step, after <code>enableLeadingZeros</code> trimming - safe
-          to combine
+          Runs after <code>allowLeadingZeros</code> trimming, so you can combine the two. Only the
+          optional <code>maxLength</code> truncation runs later
         </li>
         <li>
           Respects <code>decimalSeparator</code> (e.g. <code>","</code> for European format)
         </li>
-        <li>Off by default</li>
       </ul>
     </div>
   );

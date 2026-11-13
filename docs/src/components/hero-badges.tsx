@@ -9,7 +9,7 @@ import { useScrollReveal } from '@/hooks/use-scroll-reveal';
 const COUNTDOWN_FROM = 100;
 
 /**
- * The value is stepped through intermediate numbers on an eased timeline -
+ * The value is stepped through intermediate numbers on an eased timeline.
  * NumberFlow alone would animate 100 → 0 per digit, and the ones digit is 0
  * on both sides, so nothing would visibly count. Cubic ease-out: big jumps at
  * first, then single steps (3, 2, 1, 0) that the eye can follow as it settles.
@@ -182,8 +182,8 @@ export function HeroBadges({ skipIntro = false }: HeroBadgesProps) {
       <button
         type="button"
         onClick={handleClick}
-        aria-label={ouch ? 'ouch!' : `${count} dependencies`}
-        className="cursor-pointer rounded-full transition-transform duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        aria-label="Replay the zero dependencies animation"
+        className="cursor-pointer rounded-full transition-transform duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
       >
         <Badge variant={ouch ? 'red' : 'green'}>
           {/* The badge never changes size: an invisible copy of the widest

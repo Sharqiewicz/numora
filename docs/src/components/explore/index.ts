@@ -1,15 +1,14 @@
-export { ExploreHero } from './ExploreHero';
-export { SectionNav } from './SectionNav';
-export { ProblemSection } from './ProblemSection';
-export { InputComparison } from './InputComparison';
 export { BrokenInput } from './BrokenInput';
-export { PasteButton, PasteButtonGroup } from './PasteButton';
 export { CursorVisualizer } from './CursorVisualizer';
-
-export { PasteChaosDemo } from './demos/PasteChaosDemo';
 export { CursorPositionDemo } from './demos/CursorPositionDemo';
-export { ScientificNotationDemo } from './demos/ScientificNotationDemo';
-export { MobileKeyboardDemo } from './demos/MobileKeyboardDemo';
 export { DecimalDilemmaDemo } from './demos/DecimalDilemmaDemo';
-export { ThousandSeparatorDemo } from './demos/ThousandSeparatorDemo';
+export { MobileKeyboardDemo } from './demos/MobileKeyboardDemo';
 export { NumberTypeLieDemo } from './demos/NumberTypeLieDemo';
+export { PasteChaosDemo } from './demos/PasteChaosDemo';
+export { ScientificNotationDemo } from './demos/ScientificNotationDemo';
+export { ThousandSeparatorDemo } from './demos/ThousandSeparatorDemo';
+export { ExploreHero } from './ExploreHero';
+export { InputComparison } from './InputComparison';
+export { PasteButton, PasteButtonGroup } from './PasteButton';
+export { ProblemSection } from './ProblemSection';
+export { SectionNav } from './SectionNav';

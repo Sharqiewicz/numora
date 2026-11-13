@@ -92,5 +92,26 @@ describe('removeLeadingZeros', () => {
       expect(removeLeadingZeros('.5')).toBe('.5');
     });
   });
-});
 
+  describe('Custom decimal separator', () => {
+    it('should treat comma as decimal separator when configured', () => {
+      expect(removeLeadingZeros('00,5', ',')).toBe('0,5');
+    });
+
+    it('should preserve 0,5 with comma separator', () => {
+      expect(removeLeadingZeros('0,5', ',')).toBe('0,5');
+    });
+
+    it('should handle -00,5 with comma separator', () => {
+      expect(removeLeadingZeros('-00,5', ',')).toBe('-0,5');
+    });
+
+    it('should preserve bare comma separator', () => {
+      expect(removeLeadingZeros(',', ',')).toBe(',');
+    });
+
+    it('should preserve leading-comma values (,5 stays ,5)', () => {
+      expect(removeLeadingZeros(',5', ',')).toBe(',5');
+    });
+  });
+});
