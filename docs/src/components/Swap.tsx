@@ -1,5 +1,6 @@
-import { type NumoraHTMLInputElement, NumoraInput } from 'numora-react';
-import { useEffect, useId, useRef, useState } from 'react';
+import type { NumoraHTMLInputElement, NumoraInputProps } from 'numora-react';
+import { type Ref, useEffect, useId, useRef, useState } from 'react';
+import { TextMorph } from 'torph/react';
 import { useTRPC } from '@/integrations/trpc/react';
 import { TOKENS, type TokenInfo, type TokenSymbol } from '@/lib/constants/tokens';
 import {
@@ -8,6 +9,7 @@ import {
   calculateSwapAmount,
 } from '@/lib/utils/swapCalculator';
 import { TokenSelector } from './TokenSelector';
+import { TorphField } from './TorphField';
 
 const TRY_INPUTS = ['1.5k', '1e-7', '1,234.56', '12abc.3'];
 
@@ -18,37 +20,69 @@ const isWithinLimit = (raw: string) => raw.split('.')[0].length <= MAX_INTEGER_D
 const amountDecimals = (token: TokenInfo) => Math.min(token.decimals, MAX_DECIMALS);
 
 const fieldClass =
-  'group flex flex-col gap-1 p-3 border bg-surface-3 border-surface-5 hover:bg-surface-5 transition-colors [&:has(input:focus-visible)]:ring-2 [&:has(input:focus-visible)]:ring-brand';
+  'group flex flex-col gap-1 p-3 border cursor-text bg-surface-3 border-surface-5 hover:bg-surface-5 transition-colors [&:has(input:focus-visible)]:ring-2 [&:has(input:focus-visible)]:ring-brand';
 
 // Step the font down as the formatted value grows, so separators and decimals stay
 // visible. Fixed h-8 keeps the field height constant across steps (no layout shift).
+// The longest value the limits allow is 20 characters, which fits at text-lg, so the
+// input never drops below 16px (iOS zooms on focus under that).
 const AMOUNT_SIZE_STEPS: [maxChars: number, className: string][] = [
   [13, 'text-2xl'],
   [17, 'text-xl'],
-  [21, 'text-lg'],
-  [23, 'text-base'],
 ];
 
 function amountSizeClass(raw: string) {
   const intLen = raw.split('.')[0].replace('-', '').length;
   const displayLen = raw.length + Math.max(0, Math.floor((intLen - 1) / 3));
-  return AMOUNT_SIZE_STEPS.find(([max]) => displayLen <= max)?.[1] ?? 'text-sm';
+  return AMOUNT_SIZE_STEPS.find(([max]) => displayLen <= max)?.[1] ?? 'text-lg';
 }
 
-function amountInputClass(isComputed: boolean, raw: string) {
-  return `flex min-w-0 w-full h-8 bg-transparent border-none ${amountSizeClass(raw)} focus:outline-none placeholder-muted-icon tabular-nums transition-colors ${
-    isComputed ? 'text-muted-foreground' : 'text-white'
-  }`;
+const AMOUNT_FORMAT = { formatOn: 'change', groupingStyle: 'thousand' } as const;
+const MORPH_EASE = { stiffness: 400, damping: 30 };
+
+type AmountInputProps = Omit<
+  NumoraInputProps,
+  'value' | 'className' | 'formatOn' | 'groupingStyle'
+> & {
+  ref?: Ref<HTMLInputElement>;
+  value: string;
+  /** The side the quote fills in, not the one the user typed. Drawn muted. */
+  isComputed: boolean;
+};
+
+/** A Torph-drawn amount: digits slide as separators appear, the quoted side rolls to its new value. */
+function AmountInput({ value, isComputed, ...props }: AmountInputProps) {
+  const color = !value ? 'text-muted-icon' : isComputed ? 'text-muted-foreground' : 'text-white';
+
+  return (
+    <div
+      className={`relative flex items-center min-w-0 w-full h-8 overflow-hidden ${amountSizeClass(value)} tabular-nums transition-colors ${color}`}
+    >
+      <TorphField
+        {...props}
+        {...AMOUNT_FORMAT}
+        value={value}
+        // The quoted side is rewritten while the other field has focus: it has no caret.
+        focusedCaretOnly
+        className="caret-white selection:bg-white/25"
+      />
+    </div>
+  );
 }
+
 export function Swap() {
   const [fromToken, setFromToken] = useState<TokenInfo>(TOKENS[0]);
   const [toToken, setToToken] = useState<TokenInfo>(TOKENS[2]);
   const [fromAmount, setFromAmount] = useState('1');
   const [toAmount, setToAmount] = useState('');
-  const [lastEdited, setLastEdited] = useState<'from' | 'to' | null>(null);
+  const [lastEdited, setLastEdited] = useState<'from' | 'to'>('from');
+  const [swapped, setSwapped] = useState(false);
+  const [flips, setFlips] = useState(0);
   const [openSelector, setOpenSelector] = useState<'from' | 'to' | null>(null);
 
   const fromInputRef = useRef<HTMLInputElement>(null);
+  const toInputRef = useRef<HTMLInputElement>(null);
+  const swappedTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const fromInputId = useId();
   const toInputId = useId();
 
@@ -76,22 +110,27 @@ export function Swap() {
   useEffect(() => {
     if (!prices) return;
 
-    if (lastEdited !== 'to' && fromAmount && +fromAmount > 0) {
-      setToAmount(quoteTo(fromAmount));
-    } else if (lastEdited === 'to' && toAmount && +toAmount > 0) {
-      setFromAmount(quoteFrom(toAmount));
+    // The edited side drives the other one. An empty or zero amount clears it.
+    if (lastEdited === 'from') {
+      setToAmount(+fromAmount > 0 ? quoteTo(fromAmount) : '');
+    } else {
+      setFromAmount(+toAmount > 0 ? quoteFrom(toAmount) : '');
     }
   }, [fromAmount, toAmount, lastEdited, prices, fromToken, toToken]);
 
-  const hasAmount = !!fromAmount && +fromAmount > 0;
+  useEffect(() => () => clearTimeout(swappedTimer.current), []);
+
+  const hasAmount = +fromAmount > 0 || +toAmount > 0;
+  const canSwap = +fromAmount > 0 && +toAmount > 0;
 
   function flipTokens() {
+    setFlips((n) => n + 1);
     setFromToken(toToken);
     setToToken(fromToken);
     setFromAmount(toAmount);
     setToAmount(fromAmount);
-    if (lastEdited === 'from') setLastEdited('to');
-    else if (lastEdited === 'to') setLastEdited('from');
+    // The amount the user typed stays the source of truth on its new side.
+    setLastEdited(lastEdited === 'from' ? 'to' : 'from');
   }
 
   function handleFromInputChange(e: React.ChangeEvent<NumoraHTMLInputElement>) {
@@ -115,7 +154,14 @@ export function Swap() {
   }
 
   function handleSwap() {
-    console.log('Swapping', fromAmount, fromToken.symbol, 'to', toToken.symbol);
+    setSwapped(true);
+    clearTimeout(swappedTimer.current);
+    swappedTimer.current = setTimeout(() => setSwapped(false), 1500);
+  }
+
+  // The field's padding looks clickable (hover state), so a click there focuses the input.
+  function focusOnFieldClick(e: React.MouseEvent, input: HTMLInputElement | null) {
+    if (!(e.target as HTMLElement).closest('button, input, label, [role="menu"]')) input?.focus();
   }
 
   function toggleSelector(selector: 'from' | 'to', next: boolean) {
@@ -123,7 +169,7 @@ export function Swap() {
     else if (openSelector === selector) setOpenSelector(null);
   }
 
-  const ctaDisabled = isLoading || !prices || !hasAmount;
+  const ctaDisabled = isLoading || !prices || !canSwap;
 
   let rateLine: React.ReactNode;
   if (isLoading) {
@@ -167,16 +213,21 @@ export function Swap() {
   return (
     <div className="flex items-center flex-col justify-center w-full px-4 sm:p-0">
       <div className="relative p-4 rounded-xl sm:border bg-surface-1 border-surface-3 w-full">
-        <div className={`${fieldClass} rounded-t-md`}>
+        {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer convenience only; the input and its label are the accessible controls */}
+        {/* biome-ignore lint/a11y/useKeyWithClickEvents: same as above */}
+        <div
+          className={`${fieldClass} rounded-t-lg`}
+          onClick={(e) => focusOnFieldClick(e, fromInputRef.current)}
+        >
           <label htmlFor={fromInputId} className="text-sm text-muted-foreground">
             You pay
           </label>
           <div className="flex items-center gap-2">
-            <NumoraInput
+            <AmountInput
               ref={fromInputRef}
               id={fromInputId}
               name="fromAmount"
-              className={amountInputClass(lastEdited === 'to', fromAmount)}
+              isComputed={lastEdited === 'to'}
               placeholder="0"
               value={fromAmount}
               onChange={(e) =>
@@ -184,8 +235,6 @@ export function Swap() {
               }
               decimalMaxLength={amountDecimals(fromToken)}
               isAllowed={isFromAllowed}
-              formatOn="change"
-              groupingStyle="thousand"
               allowCompactNotation
             />
             <div className="w-36 shrink-0">
@@ -204,7 +253,7 @@ export function Swap() {
         <div className="relative h-0.5">
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 rounded-full border border-surface-5">
             <button
-              className="p-2 rounded-full border cursor-pointer transition-[background-color,border-color,rotate,scale] duration-200 active:scale-[0.96] bg-surface-1 border-surface-3 text-muted-icon hover:bg-surface-4 hover:border-surface-7 motion-safe:hover:rotate-180 focus-visible:ring-2 focus-visible:ring-brand focus-visible:outline-none"
+              className="relative after:absolute after:-inset-1 after:content-[''] p-2 rounded-full border cursor-pointer transition-[background-color,border-color,scale] duration-200 active:scale-[0.96] bg-surface-1 border-surface-3 text-muted-icon hover:bg-surface-4 hover:border-surface-7 focus-visible:ring-2 focus-visible:ring-brand focus-visible:outline-none"
               onClick={flipTokens}
               type="button"
               aria-label="Flip tokens"
@@ -216,6 +265,9 @@ export function Swap() {
                 viewBox="0 0 24 25"
                 fill="none"
                 aria-hidden="true"
+                // Half a turn per flip: the click is what moves the arrow, not the hover.
+                className="motion-safe:rotate-(--flip) transition-[rotate] duration-200 ease-move"
+                style={{ '--flip': `${flips * 180}deg` } as React.CSSProperties}
               >
                 <path
                   d="M18 14.5L12 20.5L6 14.5M12 19.5V4.5"
@@ -229,22 +281,26 @@ export function Swap() {
           </div>
         </div>
 
-        <div className={`${fieldClass} rounded-b-md`}>
+        {/* biome-ignore lint/a11y/noStaticElementInteractions: pointer convenience only; the input and its label are the accessible controls */}
+        {/* biome-ignore lint/a11y/useKeyWithClickEvents: same as above */}
+        <div
+          className={`${fieldClass} rounded-b-lg`}
+          onClick={(e) => focusOnFieldClick(e, toInputRef.current)}
+        >
           <label htmlFor={toInputId} className="text-sm text-muted-foreground">
             You receive
           </label>
           <div className="flex items-center gap-2">
-            <NumoraInput
+            <AmountInput
+              ref={toInputRef}
               id={toInputId}
               name="toAmount"
-              className={amountInputClass(lastEdited !== 'to', toAmount)}
+              isComputed={lastEdited === 'from'}
               placeholder="0"
               value={toAmount}
               onChange={(e) => handleToInputChange(e as React.ChangeEvent<NumoraHTMLInputElement>)}
               decimalMaxLength={amountDecimals(toToken)}
               isAllowed={isToAllowed}
-              formatOn="change"
-              groupingStyle="thousand"
               allowCompactNotation
             />
             <div className="w-36 shrink-0">
@@ -269,25 +325,29 @@ export function Swap() {
         </div>
         <button
           type="button"
-          className="active:scale-[0.96] w-full py-3 font-bold rounded-xl text-base text-white border-none cursor-pointer transition-[background-color,color,scale] duration-200 bg-brand hover:bg-brand-hover disabled:bg-surface-4 disabled:text-muted-foreground disabled:cursor-not-allowed disabled:active:scale-100 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-1 focus-visible:outline-none"
+          className="active:scale-[0.98] w-full py-3 font-bold rounded-lg text-base text-white border-none cursor-pointer transition-[background-color,color,scale] duration-200 bg-brand hover:bg-brand-hover disabled:bg-surface-4 disabled:text-muted-foreground disabled:cursor-not-allowed disabled:active:scale-100 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-surface-1 focus-visible:outline-none"
           onClick={handleSwap}
           disabled={ctaDisabled}
         >
-          {hasAmount ? 'Swap' : 'Enter an amount'}
+          <span aria-live="polite">
+            <TextMorph ease={MORPH_EASE}>
+              {swapped ? 'Swapped (demo)' : hasAmount ? 'Swap' : 'Enter an amount'}
+            </TextMorph>
+          </span>
         </button>
         <p className="mt-2 text-xs text-center text-muted-foreground">
           Demo only. No transaction is sent.
         </p>
       </div>
 
-      <div className="w-full mt-4 flex flex-wrap items-center justify-center gap-1.5 text-sm">
+      <div className="w-full mt-4 flex flex-wrap items-center justify-center gap-2.5 text-sm">
         <span className="text-muted-foreground mr-1">Try typing</span>
         {TRY_INPUTS.map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => tryInput(t)}
-            className="rounded-md border border-surface-5 bg-surface-2 px-2 py-0.5 font-mono text-xs text-foreground cursor-pointer transition-colors hover:bg-surface-4 hover:border-surface-7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            className="relative after:absolute after:-inset-y-3 after:-inset-x-1 after:content-[''] rounded-md border border-surface-5 bg-surface-2 px-2 py-0.5 font-mono text-xs text-foreground cursor-pointer transition-[background-color,border-color,scale] duration-150 ease-out-expo active:scale-[0.97] hover:bg-surface-4 hover:border-surface-7 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
             {t}
           </button>

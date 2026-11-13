@@ -1,7 +1,7 @@
-import type { CSSProperties } from 'react';
-import { useState } from 'react';
-import { Swap } from './Swap';
 import { Link } from '@tanstack/react-router';
+import type { CSSProperties } from 'react';
+import { useEffect, useState } from 'react';
+import { Swap } from './Swap';
 
 interface SwapPlaygroundProps {
   heading?: string;
@@ -76,11 +76,23 @@ function Annotation({ side, title, description, delay, topOffset, skip }: Annota
 }
 
 export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {}) {
-  const [skipIntro] = useState(() => {
-    const seen = sessionStorage.getItem('numora_intro_v1');
-    if (!seen) sessionStorage.setItem('numora_intro_v1', 'true');
-    return !!seen;
-  });
+  // The server has no sessionStorage, so it always renders the intro styles. Reading
+  // storage during render would make a repeat visit's first client render differ from
+  // the server HTML (hydration mismatch). Decide after mount instead.
+  const [skipIntro, setSkipIntro] = useState(false);
+
+  useEffect(() => {
+    // Storage can be blocked (private mode, site-data settings). Skip the intro then.
+    try {
+      if (sessionStorage.getItem('numora_intro_v1')) {
+        setSkipIntro(true);
+      } else {
+        sessionStorage.setItem('numora_intro_v1', 'true');
+      }
+    } catch {
+      setSkipIntro(true);
+    }
+  }, []);
 
   const underlineStyle: CSSProperties = skipIntro
     ? { transform: 'scaleX(1)', transformOrigin: 'center' }
@@ -89,11 +101,7 @@ export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {
   const d = (ms: number): CSSProperties =>
     skipIntro ? { animation: 'none', opacity: 1 } : { animationDelay: `${ms}ms` };
 
-  const defaultHeading = (
-    <>
-      DeFi swap interface
-    </>
-  );
+  const defaultHeading = <>DeFi swap interface</>;
 
   const defaultDescription =
     'A swap form is a good test for a numeric input. It has to sanitize keystrokes, expand scientific notation and keep the cursor in place.';
@@ -140,7 +148,9 @@ export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {
             defaultHeading
           )}
         </h2>
-        <p className="text-muted-foreground">{description ?? defaultDescription}</p>
+        <p className="text-muted-foreground max-w-xl mx-auto">
+          {description ?? defaultDescription}
+        </p>
       </div>
 
       <div className="relative max-w-md mx-auto">
@@ -180,7 +190,10 @@ export function SwapPlayground({ heading, description }: SwapPlaygroundProps = {
           skip={skipIntro}
         />
 
-        <div className="animate-fade-in opacity-0" style={d(250)}>
+        <div
+          className="animate-fade-in [animation-duration:500ms] [animation-timing-function:var(--ease-out-expo)] opacity-0"
+          style={d(250)}
+        >
           <Swap />
         </div>
       </div>

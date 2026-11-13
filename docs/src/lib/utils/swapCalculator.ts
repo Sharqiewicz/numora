@@ -1,5 +1,5 @@
-import type { PriceData } from '../services/priceService';
 import type { TokenSymbol } from '../constants/tokens';
+import type { PriceData } from '../services/priceService';
 
 /** "0.02940500" -> "0.029405", "1.000" -> "1". */
 function trimTrailingZeros(value: string): string {
@@ -66,6 +66,7 @@ export function calculateExchangeRate(
     return '-';
   }
 
+  // Significant digits, not fixed decimals: small rates (USDC -> cbBTC) keep their precision.
   const rate = fromPrice / toPrice;
-  return rate.toFixed(6);
+  return rate.toLocaleString('en-US', { maximumSignificantDigits: 6 });
 }
