@@ -11,29 +11,13 @@ export function TorphVanillaBlurDemo() {
 
   useEffect(() => {
     if (!displayRef.current || !hostRef.current) return;
-
     displayRef.current.textContent = '';
-
-    // True from focus → first morph-complete, so the focus-strip morph hides the cursor
-    // but later per-keystroke morphs do not (you need to see your cursor while typing).
-    let postFocusMorphPending = false;
-    const updateCaret = (hidden: boolean) => {
-      hostRef.current?.classList.toggle('caret-suppressed', hidden);
-    };
 
     const morph = new TextMorph({
       element: displayRef.current,
       ease: { stiffness: 400, damping: 30 },
-      onAnimationComplete: () => {
-        if (postFocusMorphPending) {
-          postFocusMorphPending = false;
-          updateCaret(false);
-        }
-      },
     });
 
-    // onFormattedValueChange fires on every rewrite of the field: typing, paste,
-    // the focus strip and the blur regroup.
     const numora = new NumoraInput(hostRef.current, {
       formatOn: 'blur',
       decimalMaxLength: 2,
@@ -47,33 +31,16 @@ export function TorphVanillaBlurDemo() {
     const input = numora.element;
     input.id = inputId;
     input.setAttribute('aria-label', 'Amount');
+    // The caret appears once the focus-strip morph has settled.
+    input.classList.add('caret-hold');
 
     // Creation fires no callback, so show the first text here.
     morph.update(numora.formattedValue || '0');
-
-    let caretTimeout: number | undefined;
-    const handleFocus = () => {
-      postFocusMorphPending = true;
-      updateCaret(true);
-      // Fallback if no morph fires (e.g. value already has no separators), so the caret
-      // is never left hidden. Slightly longer than the morph duration to avoid revealing mid-flight.
-      window.clearTimeout(caretTimeout);
-      caretTimeout = window.setTimeout(() => {
-        if (postFocusMorphPending) {
-          postFocusMorphPending = false;
-          updateCaret(false);
-        }
-      }, 600);
-    };
-
-    input.addEventListener('focus', handleFocus);
 
     const stopTypingLoop = startTypingLoop(input, { mode: 'blur' });
 
     return () => {
       stopTypingLoop();
-      window.clearTimeout(caretTimeout);
-      input.removeEventListener('focus', handleFocus);
       morph.destroy();
       input.remove();
     };
@@ -96,11 +63,10 @@ export function TorphVanillaBlurDemo() {
           outline: none;
           font: inherit;
         }
-        .torph-vanilla-input-host.caret-suppressed input { caret-color: transparent; }
         .torph-vanilla-input-host input::selection { background: color-mix(in oklch, var(--color-foreground) 25%, transparent); }
         .torph-vanilla-input-host input::placeholder { color: transparent; }
       `}</style>
-      <DemoFrame inputId={inputId} hint="Blur the field to format.">
+      <DemoFrame inputId={inputId} hint="Blur the field to format." focusPointer>
         <div className={demoOverlayBox}>
           <span ref={displayRef} className="pointer-events-none whitespace-pre" aria-hidden="true">
             0

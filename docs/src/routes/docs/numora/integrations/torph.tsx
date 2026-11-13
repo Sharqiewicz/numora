@@ -1,11 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { CodeBlock } from '@/components/CodeBlock';
 import { OverlayExplainer } from '@/components/docs/OverlayExplainer';
 import { InstallTabs } from '@/components/InstallTabs';
-import { TorphBlurSection } from '@/components/TorphBlurSection';
 import { TorphVanillaBlurDemo } from '@/components/TorphVanillaBlurDemo';
-import { TorphVanillaBlurMinimal } from '@/components/TorphVanillaBlurMinimal';
 import { TorphVanillaDemo } from '@/components/TorphVanillaDemo';
 
 const TORPH_PAGE_URL = 'https://numeric-input.com/docs/numora/integrations/torph';
@@ -118,8 +115,6 @@ export const Route = createFileRoute('/docs/numora/integrations/torph')({
 });
 
 function TorphIntegration() {
-  const prefersReducedMotion = useReducedMotion();
-
   return (
     <div className="docs-prose max-w-[36rem]">
       <h1>Torph integration</h1>
@@ -130,9 +125,7 @@ function TorphIntegration() {
         is an animated text-morphing library. This guide layers a Torph <code>TextMorph</code> on
         top of a transparent-text vanilla <code>NumoraInput</code> so the editable surface itself
         appears animated. The real <code>&lt;input&gt;</code> still handles every keystroke, and
-        Torph renders what the user sees. With <code>'blur'</code>, focusing the input removes the
-        separators so the user can edit the plain digits. This guide calls that step the
-        &quot;focus-strip&quot;.
+        Torph renders what the user sees.
       </p>
       <p>
         Using React? See the{' '}
@@ -146,106 +139,11 @@ function TorphIntegration() {
 
       <hr />
 
-      <TorphBlurSection>
-        {(variant) => (
-          <>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={variant}
-                initial={{ opacity: 0 }}
-                animate={{
-                  opacity: 1,
-                  transition: prefersReducedMotion
-                    ? { duration: 0.1 }
-                    : { duration: 0.15, ease: [0.16, 1, 0.3, 1] },
-                }}
-                exit={{
-                  opacity: 0,
-                  transition: { duration: 0.1 },
-                }}
-              >
-                {variant === 'minimal' ? <TorphVanillaBlurMinimal /> : <TorphVanillaBlurDemo />}
-                <p className="mx-auto -mt-6 mb-12 max-w-lg text-sm text-muted-foreground">
-                  <code>'blur'</code>:{' '}
-                  {variant === 'minimal'
-                    ? 'minimal integration. The cursor drifts during the focus-strip morph.'
-                    : 'polished variant. It hides the cursor during the focus-strip morph.'}
-                </p>
-              </motion.div>
-            </AnimatePresence>
-
-            <AnimatePresence initial={false}>
-              {variant === 'polished' && (
-                <motion.section
-                  key="polished-deep-dive"
-                  initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 4 }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                    transition: prefersReducedMotion
-                      ? { duration: 0.1 }
-                      : { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
-                  }}
-                  exit={{
-                    opacity: 0,
-                    transition: { duration: 0.12 },
-                  }}
-                >
-                  <p>
-                    <strong>Hiding the cursor during the focus-strip morph.</strong> With{' '}
-                    <code>'blur'</code>, focusing the input swaps <code>1,234,567</code> to{' '}
-                    <code>1234567</code> in one DOM call. The cursor jumps to its final index
-                    instantly, but Torph takes ~400ms to morph the visible digits there, so the
-                    cursor looks like it drifts past stationary text. Hide the native cursor on
-                    focus and show it again on the next <code>onAnimationComplete</code>. A timeout
-                    fallback covers the case where focus fires but no morph follows (the value
-                    already has no separators):
-                  </p>
-
-                  <CodeBlock language="ts">
-                    {`let postFocusMorphPending = false
-const setCursorHidden = (hidden: boolean) => {
-  host.classList.toggle('cursor-suppressed', hidden)
-}
-
-const morph = new TextMorph({
-  element: display,
-  ease: { stiffness: 400, damping: 30 },
-  onAnimationComplete: () => {
-    if (postFocusMorphPending) {
-      postFocusMorphPending = false
-      setCursorHidden(false)
-    }
-  },
-})
-
-input.addEventListener('focus', () => {
-  postFocusMorphPending = true
-  setCursorHidden(true)
-  window.setTimeout(() => {
-    if (postFocusMorphPending) {
-      postFocusMorphPending = false
-      setCursorHidden(false)
-    }
-  }, 600)
-})`}
-                  </CodeBlock>
-
-                  <CodeBlock language="css">
-                    {`.numora-overlay-host input { caret-color: white; }
-.numora-overlay-host.cursor-suppressed input { caret-color: transparent; }`}
-                  </CodeBlock>
-
-                  <p>
-                    The flag gates the toggle, so per-keystroke morphs after the strip don't keep
-                    flipping the cursor. Only the first morph after focus matters.
-                  </p>
-                </motion.section>
-              )}
-            </AnimatePresence>
-          </>
-        )}
-      </TorphBlurSection>
+      <TorphVanillaBlurDemo />
+      <p className="mx-auto -mt-6 mb-12 max-w-lg text-sm text-muted-foreground">
+        With <code>'blur'</code>, the separators animate out on focus and back in on blur. The caret
+        appears once the digits have settled. See “The caret during the focus strip” below.
+      </p>
 
       <OverlayExplainer
         visibleLayer={
@@ -274,12 +172,13 @@ input.addEventListener('focus', () => {
       <h2>Installation</h2>
       <InstallTabs packages="numora torph" />
 
+      {/* biome-ignore lint/correctness/useUniqueElementIds: explicit heading id keeps a stable, shareable URL anchor (ArticleHeadings would otherwise slugify the text) */}
       <h2 id="overlay">Building the overlay</h2>
 
       <CodeBlock language="html">
         {`<label class="numora-overlay">
   <span class="numora-overlay-display" aria-hidden="true">0</span>
-  <div class="numora-overlay-host"></div>
+  <span class="numora-overlay-host"></span>
 </label>`}
       </CodeBlock>
 
@@ -329,7 +228,7 @@ const wrap = document.querySelector<HTMLElement>('.numora-overlay')!
 const display = wrap.querySelector<HTMLElement>('.numora-overlay-display')!
 const host = wrap.querySelector<HTMLElement>('.numora-overlay-host')!
 
-// SSR placeholder is a text node; Torph only replaces element children.
+// Optional: empty the SSR placeholder up front. Torph also removes it itself.
 display.textContent = ''
 
 const morph = new TextMorph({
@@ -358,9 +257,8 @@ morph.update('0')`}
           <strong>
             <code>display.textContent = ''</code>
           </strong>{' '}
-          is needed because a placeholder text node (e.g. SSR <code>0</code>) is not an element
-          child. Torph's <code>createTextGroup</code> only replaces element children, so it would
-          append animated spans beside a stuck <code>0</code> instead of owning the span.
+          empties a placeholder (e.g. SSR <code>0</code>) before Torph takes over the span. The line
+          is optional, because Torph removes leftover text nodes itself when it renders.
         </li>
         <li>
           <strong>
@@ -378,13 +276,51 @@ morph.update('0')`}
           (used here) keeps the input's display as the formatted string at all times. With{' '}
           <code>'blur'</code>, the focus strip and the blur regroup only add or remove separators.{' '}
           <code>onValueChange</code> does not report them, because the raw value is unchanged, but{' '}
-          <code>onFormattedValueChange</code> does, so the same line covers both modes.
+          <code>onFormattedValueChange</code> does, so the same line covers both modes. Blur mode
+          also needs a few lines of CSS for the caret, shown in the next section.
         </li>
         <li>
           <strong>Match typography.</strong> Set <code>font: inherit</code> plus{' '}
-          <code>margin: 0; padding: 0; border: 0</code> on the input. The browser computes the
-          cursor position from the input's invisible text layout, so any difference in font metrics
-          or text origin shows up as cursor drift.
+          <code>margin: 0; padding: 0; border: 0</code> on the input. The browser computes the caret
+          position from the input's invisible text layout, so any difference in font metrics or text
+          origin shows up as caret drift.
+        </li>
+      </ul>
+
+      <h2>The caret during the focus strip</h2>
+      <p>
+        With <code>'blur'</code>, focusing the field rewrites <code>1,234,567</code> to{' '}
+        <code>1234567</code> in one step. Numora calls this rewrite the focus strip. The native
+        caret is at its final position at once, but Torph needs about 400ms to move the digits
+        there, so the caret looks misplaced until they arrive. Keep the caret transparent while the
+        digits move. It takes CSS only:
+      </p>
+      <CodeBlock language="css">
+        {`@keyframes caret-hold {
+  0%, 70% { caret-color: transparent; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .numora-overlay-host input:focus { animation: caret-hold 400ms; }
+}`}
+      </CodeBlock>
+      <p>
+        The selector targets the input that <code>NumoraInput</code> creates inside the host. The
+        caret stays transparent for the first 280ms and fades in over the last 120ms. The keyframes
+        have no <code>to</code> step, so it fades into the colour the field already has.
+      </p>
+      <ul>
+        <li>
+          The 400ms matches the spring used on this page (<code>stiffness: 400, damping: 30</code>
+          ). If you change <code>ease</code> or <code>duration</code>, change the 400ms to match.
+        </li>
+        <li>
+          The hold runs on every focus, also when the value has no separators to remove. The caret
+          is then 280ms late for no visible reason.
+        </li>
+        <li>
+          Under <code>prefers-reduced-motion</code> Torph swaps the text instantly, so the hold is
+          off.
         </li>
       </ul>
 
@@ -396,14 +332,14 @@ morph.update('0')`}
 
       <h2>Cleanup</h2>
       <p>
-        On teardown call <code>morph.destroy()</code> to detach Torph's observers, then remove the
-        input element. The vanilla <code>NumoraInput</code> doesn't expose an explicit destroy
-        method. Its internal listeners are bound to the input it created, so removing that element
-        from the DOM is enough for Numora itself.
+        On teardown call <code>morph.destroy()</code> to detach Torph's observers and{' '}
+        <code>numora.destroy()</code> to detach Numora's listeners, then remove the input element.
+        Calling <code>destroy()</code> twice is safe.
       </p>
 
       <CodeBlock language="ts">
         {`morph.destroy()
+numora.destroy()
 input.remove()`}
       </CodeBlock>
 

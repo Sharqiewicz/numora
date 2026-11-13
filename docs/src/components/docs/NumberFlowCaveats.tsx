@@ -30,10 +30,11 @@ export function NumberFlowCaveats() {
           <strong>Locales.</strong> NumberFlow formats the number itself with <code>Intl</code>, so
           give it the same locale as the input. In Spanish and Polish <code>Intl</code> leaves a
           four-digit number ungrouped (<code>1234,5</code>) while Numora groups it (
-          <code>1.234,5</code>). Pass <code>useGrouping: 'always'</code> in <code>format</code> and
-          the two match. One difference remains. For Arabic and Persian locales NumberFlow prints
-          native digits (<code>١٬٢٣٤</code>) while Numora shows ASCII digits (<code>1٬234</code>),
-          so the overlay's characters do not line up with the input's.
+          <code>1.234,5</code> in Spanish, <code>1 234,5</code> in Polish). Pass{' '}
+          <code>useGrouping: 'always'</code> in <code>format</code> and the two match. One
+          difference remains. For Arabic and Persian locales NumberFlow prints native digits (
+          <code>١٬٢٣٤</code>) while Numora shows ASCII digits (<code>1٬234</code>), so the overlay's
+          characters do not line up with the input's.
         </p>
       </div>
 
@@ -41,8 +42,8 @@ export function NumberFlowCaveats() {
         <p className="m-0">
           <strong>Cursor drift during animation.</strong> The cursor's pixel position is computed
           from the input's invisible text layout, which jumps to the new value instantly. NumberFlow
-          animates digits into that final position over ~150ms. During the animation, the cursor
-          sits next to characters that haven't arrived yet.
+          animates digits into that final position over most of a second by default. During the
+          animation, the cursor sits next to characters that haven't arrived yet.
         </p>
       </div>
 

@@ -155,8 +155,8 @@ function NumberFlowIntegration() {
       >
         <p>
           Both layers render the same formatted number. The vanilla <code>NumoraInput</code> class
-          calls its <code>onValueChange</code> option on every logical value change: typing, paste,
-          the focus-strip and blur reformatting. It receives{' '}
+          calls its <code>onValueChange</code> option every time the raw value changes: typing,
+          paste, and a blur that settles the number. It receives{' '}
           <code>{'{ value, formattedValue }'}</code>. <code>value</code> is the raw string without
           separators, which <code>Number()</code> can parse. The callback sets{' '}
           <code>flow.format</code> and calls <code>flow.update()</code>, and NumberFlow tweens each
@@ -181,13 +181,14 @@ function NumberFlowIntegration() {
 npm install numora number-flow`}
       </CodeBlock>
 
+      {/* biome-ignore lint/correctness/useUniqueElementIds: explicit heading id keeps a stable, shareable URL anchor (ArticleHeadings would otherwise slugify the text) */}
       <h2 id="overlay">Building the overlay</h2>
 
       <CodeBlock language="html">
         {`<!-- aria-hidden: screen readers announce the <input> (it has an aria-label), not the decoration -->
 <label class="numora-overlay">
   <span class="numora-overlay-display" aria-hidden="true"></span>
-  <div class="numora-overlay-host"></div>
+  <span class="numora-overlay-host"></span>
 </label>`}
       </CodeBlock>
 
@@ -245,13 +246,14 @@ npm install numora number-flow`}
 import 'number-flow' // registers the <number-flow> custom element
 
 const display = document.querySelector<HTMLSpanElement>('.numora-overlay-display')!
-const host = document.querySelector<HTMLDivElement>('.numora-overlay-host')!
+const host = document.querySelector<HTMLElement>('.numora-overlay-host')!
 
 const flow = document.createElement('number-flow')
 display.appendChild(flow)
 
 function syncFlow(raw: string) {
   const decimals = raw.includes('.') ? raw.split('.')[1].length : 0
+  flow.locales = 'en-US' // match Numora's "," and "." (the default is the browser locale)
   flow.format = {
     useGrouping: true,
     minimumFractionDigits: decimals,
@@ -304,10 +306,10 @@ syncFlow(numora.rawValue)`}
           <strong>
             <code>Number(value)</code> suits fiat-sized amounts only.
           </strong>{' '}
-          NumberFlow takes a JavaScript number, so the overlay is exact up to about 15 significant
-          digits. Past that, for example an 18-decimal token amount, the animated digits can differ
-          from what the input holds. Keep the string from <code>onValueChange</code> as the value
-          you store and send. For long amounts use the{' '}
+          The samples hand NumberFlow <code>Number(value)</code>, and a JavaScript number is exact
+          up to about 15 significant digits. Past that, for example an 18-decimal token amount, the
+          animated digits can differ from what the input holds. Keep the string from{' '}
+          <code>onValueChange</code> as the value you store and send. For long amounts use the{' '}
           <a href="/docs/numora/integrations/torph">Torph</a> overlay, which animates the display
           string and never converts it.
         </li>
@@ -324,17 +326,19 @@ syncFlow(numora.rawValue)`}
           <strong>
             <code>useGrouping: true</code>
           </strong>{' '}
-          is needed because NumberFlow's grouping must match the input's thousand separator. The
-          default en-US locale uses <code>","</code>, which matches the default{' '}
-          <code>thousandSeparator</code> and <code>'thousand'</code>.
+          is needed because NumberFlow's grouping must match the input's thousand separator. Without{' '}
+          <code>locales</code>, NumberFlow formats in the visitor's browser locale, so the code sets{' '}
+          <code>flow.locales = 'en-US'</code> to get <code>","</code> and <code>"."</code>, which
+          match the default <code>thousandSeparator</code> and <code>'thousand'</code>.
         </li>
         <li>
           <strong>
             <code>onValueChange</code> callback
           </strong>{' '}
-          fires for typing, paste, the focus-strip and blur reformatting, so you need no DOM{' '}
-          <code>beforeinput</code> or <code>input</code> listeners. It does not fire for the initial{' '}
-          <code>value</code>, so the code calls <code>syncFlow(numora.rawValue)</code> explicitly.
+          fires whenever the raw value changes, so you need no DOM <code>beforeinput</code> or{' '}
+          <code>input</code> listeners. It does not fire for the <code>defaultValue</code> or for{' '}
+          <code>setValue()</code>, so the code calls <code>syncFlow(numora.rawValue)</code>{' '}
+          explicitly, and you should do the same after every <code>setValue()</code>.
         </li>
       </ul>
 
@@ -358,13 +362,13 @@ syncFlow(numora.rawValue)`}
 
       <h2>Cleanup</h2>
       <p>
-        The vanilla <code>NumoraInput</code> class has no destroy method; its listeners are bound to
-        the input it created. On teardown remove the <code>&lt;number-flow&gt;</code> element, then
-        the input element.
+        On teardown call <code>numora.destroy()</code> to detach Numora's listeners, then remove the{' '}
+        <code>&lt;number-flow&gt;</code> element and the input element.
       </p>
 
       <CodeBlock language="ts">
-        {`flow.remove()
+        {`numora.destroy()
+flow.remove()
 input.remove()`}
       </CodeBlock>
 

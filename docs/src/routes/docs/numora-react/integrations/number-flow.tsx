@@ -178,6 +178,7 @@ function NumberFlowIntegration() {
 # or
 npm install numora-react @number-flow/react`}
       </CodeBlock>
+      {/* biome-ignore lint/correctness/useUniqueElementIds: explicit heading id keeps a stable, shareable URL anchor (ArticleHeadings would otherwise slugify the text) */}
       <h2 id="overlay">Building the overlay</h2>
 
       <CodeBlock language="tsx">
@@ -189,19 +190,20 @@ function AnimatedInput() {
   const [value, setValue] = useState('')
   const [mounted, setMounted] = useState(false)
 
-  // NumberFlow is client-only (uses ResizeObserver). Defer until hydration.
+  // Show a plain string until hydration, so server and first client render match.
   useEffect(() => { setMounted(true) }, [])
 
   const decimals = value.includes('.') ? value.split('.')[1].length : 0
   const numericValue = Number(value) || 0
 
   return (
-    <label className="relative inline-flex items-center text-4xl font-mono leading-none text-white">
+    <label className="relative inline-flex items-center text-4xl font-mono leading-none tabular-nums text-white">
       {/* Visible layer: NumberFlow animates the digits. aria-hidden: screen readers announce the input. */}
-      <span aria-hidden="true" className="pointer-events-none whitespace-pre tabular-nums">
+      <span aria-hidden="true" className="pointer-events-none whitespace-pre">
         {mounted ? (
           <NumberFlow
             value={numericValue}
+            locales="en-US"
             format={{
               useGrouping: true,
               minimumFractionDigits: decimals,
@@ -222,11 +224,10 @@ function AnimatedInput() {
         // text-transparent + caret-white: hide the text, keep the cursor
         // placeholder-transparent: hide the input's own placeholder
         // selection:bg-white/25: an opaque selection would cover NumberFlow
-        // text-4xl font-mono leading-none: must match the overlay, or the cursor drifts
+        // [font:inherit]: the label's typography, so the cursor cannot drift
         className="absolute inset-0 w-full h-full m-0 p-0 border-0 bg-transparent
                    text-transparent placeholder-transparent caret-white
-                   outline-none focus:outline-none selection:bg-white/25
-                   text-4xl font-mono leading-none"
+                   outline-none focus:outline-none selection:bg-white/25 [font:inherit]"
       />
     </label>
   )
@@ -248,10 +249,10 @@ function AnimatedInput() {
           <strong>
             <code>Number(value)</code> suits fiat-sized amounts only.
           </strong>{' '}
-          NumberFlow takes a JavaScript number, so the overlay is exact up to about 15 significant
-          digits. Past that, for example an 18-decimal token amount, the animated digits can differ
-          from what the input holds. Keep the string from <code>onValueChange</code> as the value
-          you store and send. For long amounts use the{' '}
+          The samples hand NumberFlow <code>Number(value)</code>, and a JavaScript number is exact
+          up to about 15 significant digits. Past that, for example an 18-decimal token amount, the
+          animated digits can differ from what the input holds. Keep the string from{' '}
+          <code>onValueChange</code> as the value you store and send. For long amounts use the{' '}
           <a href="/docs/numora-react/integrations/torph">Torph</a> overlay, which animates the
           display string and never converts it.
         </li>
@@ -268,30 +269,35 @@ function AnimatedInput() {
           <strong>
             <code>useGrouping: true</code>
           </strong>{' '}
-          makes NumberFlow's grouping match the input's thousand separator. The default en-US locale
-          uses <code>","</code>, the same as Numora React's default.
+          makes NumberFlow's grouping match the input's thousand separator. Without{' '}
+          <code>locales</code>, NumberFlow formats in the visitor's browser locale, so the code
+          passes <code>locales="en-US"</code> to get <code>","</code>, the same as Numora React's
+          default.
         </li>
         <li>
           <strong>
             <code>mounted</code> gate
           </strong>{' '}
-          is needed because <code>@number-flow/react</code> is a client component (it uses DOM APIs
-          and <code>ResizeObserver</code>). Render a plain string at SSR; mount NumberFlow after
-          hydration. In Next.js App Router, mark the page with <code>'use client'</code> instead.
+          renders a plain string on the server and mounts NumberFlow after hydration, so the server
+          and the first client render show the same text. It is optional:{' '}
+          <code>@number-flow/react</code> is already marked <code>'use client'</code> and can render
+          on the server.
         </li>
         <li>
           <strong>
-            Matching typography on both layers (<code>text-4xl font-mono leading-none</code>)
+            <code>[font:inherit]</code>
           </strong>{' '}
-          matters because the browser computes the cursor position from the input's text layout. If
-          the fonts differ, the cursor drifts.
+          gives the input the label's font, size and line height. It matters because the browser
+          computes the cursor position from the input's text layout. If the fonts differ, the cursor
+          drifts.
         </li>
         <li>
           <strong>
-            <code>tabular-nums</code> on the overlay
+            <code>tabular-nums</code> on the label
           </strong>{' '}
           keeps digit widths stable while NumberFlow animates, which reduces layout shift during
-          transitions.
+          transitions. On the label it reaches both layers, so the input's digits are the same
+          width as the overlay's.
         </li>
       </ul>
 
@@ -306,6 +312,7 @@ function AnimatedInput() {
       </p>
       <NumberFlowLocalePlayground />
 
+      {/* biome-ignore lint/correctness/useUniqueElementIds: explicit heading id keeps a stable, shareable URL anchor (ArticleHeadings would otherwise slugify the text) */}
       <h2 id="readout">Display animation alongside the input</h2>
       <p>
         This is the conservative pattern. The user types into a plain <code>NumoraInput</code>, and
@@ -323,7 +330,8 @@ import { useState } from 'react'
 function SwapForm() {
   const [amount, setAmount] = useState('')
 
-  const displayValue = amount === '' ? 0 : Number(amount)
+  // A lone "." (or "-" with allowNegative) is a valid raw value but not a number, so fall back to 0.
+  const displayValue = Number(amount) || 0
   const exchangeRate = 1850.42
   const converted = displayValue * exchangeRate
 

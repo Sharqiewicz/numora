@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
-import { TorphVanillaBlurMinimal } from '@/components/TorphVanillaBlurMinimal';
+import { TorphVanillaBlurDemo } from '@/components/TorphVanillaBlurDemo';
 import { TorphVanillaDemo } from '@/components/TorphVanillaDemo';
 
 const PAGE_URL = 'https://numeric-input.com/docs/numora/features/format-on';
@@ -68,7 +68,7 @@ function FormatOn() {
       </p>
 
       <h2>Change</h2>
-      <p>The separators update on every keystroke, and the cursor stays where the user left it.</p>
+      <p>The separators update on every keystroke, and the caret stays where the user left it.</p>
       <TorphVanillaDemo />
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
@@ -83,7 +83,7 @@ const input = new NumoraInput(container, {
         The input shows plain digits while it has focus. Numora removes the separators when the
         input takes focus and puts them back when it loses focus.
       </p>
-      <TorphVanillaBlurMinimal />
+      <TorphVanillaBlurDemo />
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
@@ -97,12 +97,16 @@ const input = new NumoraInput(container, {
         <code>onFormattedValueChange</code> reports the new text. Numora groups a value you set from
         code while the input is unfocused.
       </p>
+      <p>
+        <code>onValueChange</code> fires on blur only when blur also changes the raw value:{' '}
+        <code>1.</code> becomes <code>1</code>, or <code>decimalMinLength</code> pads it.
+      </p>
 
       <h2>Which one to use</h2>
       <p>
         Keep the default for amounts the user reads while typing, such as a price or a token amount.
         Use <code>'blur'</code> when users edit digits in the middle of a long number. No separator
-        moves under the cursor while they type.
+        moves under the caret while they type.
       </p>
       <p>
         The demos on this page animate the digits with Torph. See the{' '}

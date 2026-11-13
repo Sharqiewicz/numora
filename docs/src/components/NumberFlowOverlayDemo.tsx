@@ -24,6 +24,7 @@ export function NumberFlowOverlayDemo() {
           {mounted ? (
             <NumberFlow
               value={numericValue}
+              locales="en-US"
               format={{
                 useGrouping: true,
                 minimumFractionDigits: decimals,

@@ -11,8 +11,8 @@ export function NumberFlowVanillaOverlayDemo() {
   useEffect(() => {
     if (!displayRef.current || !hostRef.current) return;
 
-    // The "1,234,567" rendered for SSR is a plain text node. <number-flow> needs to be
-    // a sibling element, not a child of the span, so clear the span and append.
+    // The "1,234,567" rendered for SSR is a plain text node. Clear it, then append
+    // <number-flow> inside the span.
     displayRef.current.textContent = '';
 
     const flow = document.createElement('number-flow');
@@ -21,6 +21,7 @@ export function NumberFlowVanillaOverlayDemo() {
     const syncFlow = (raw: string) => {
       const decimals = raw.includes('.') ? raw.split('.')[1].length : 0;
       // Mirror typed decimals so trailing zeros line up under the cursor.
+      flow.locales = 'en-US';
       flow.format = {
         useGrouping: true,
         minimumFractionDigits: decimals,
@@ -48,6 +49,7 @@ export function NumberFlowVanillaOverlayDemo() {
 
     return () => {
       flow.remove();
+      numora.destroy();
       input.remove();
     };
   }, [inputId]);

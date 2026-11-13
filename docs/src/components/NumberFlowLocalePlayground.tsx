@@ -36,8 +36,8 @@ export function NumberFlowLocalePlayground() {
         options={LOCALE_OPTIONS}
       />
       <DemoFrame inputId={`${id}-amount`} className="my-0">
-        <div className="relative flex min-h-[44px] min-w-[6ch] items-center font-mono text-4xl text-white leading-none">
-          <span aria-hidden="true" className="pointer-events-none whitespace-pre tabular-nums">
+        <div className="relative flex min-h-[44px] min-w-[6ch] items-center font-mono text-4xl text-white tabular-nums leading-none">
+          <span aria-hidden="true" className="pointer-events-none whitespace-pre">
             {mounted ? (
               <NumberFlow value={number} locales={locale} format={format} />
             ) : (
@@ -52,7 +52,7 @@ export function NumberFlowLocalePlayground() {
             value={value}
             onValueChange={({ value: raw }) => setValue(raw)}
             aria-label="Amount"
-            className="absolute inset-0 m-0 h-full w-full border-0 bg-transparent p-0 font-mono text-4xl text-transparent leading-none placeholder-transparent caret-white outline-none selection:bg-white/25 focus:outline-none"
+            className="absolute inset-0 m-0 h-full w-full border-0 bg-transparent p-0 text-transparent tracking-[inherit] placeholder-transparent [font:inherit] caret-white outline-none selection:bg-white/25 focus:outline-none"
           />
         </div>
       </DemoFrame>

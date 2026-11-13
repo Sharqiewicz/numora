@@ -12,9 +12,8 @@ export function TorphVanillaDemo() {
   useEffect(() => {
     if (!displayRef.current || !hostRef.current) return;
 
-    // The "0" rendered for SSR is a text node, not an element. Torph's createTextGroup
-    // only inspects element children, so it would add new spans next to that text node
-    // instead of replacing it. Clear textContent so torph owns the span.
+    // Empty the "0" rendered for SSR up front. Optional: Torph removes leftover text
+    // nodes itself when it renders.
     displayRef.current.textContent = '';
 
     const morph = new TextMorph({

@@ -440,6 +440,8 @@ body {
     .animate-slide-in-right,
     .animate-logo-reveal,
     .animate-expand-line,
+    .animate-draw-line,
+    .animate-draw-line-right,
     .scroll-reveal {
       animation: none !important;
       transition: none !important;
@@ -666,6 +668,146 @@ body {
   }
   :where(.docs-prose) :where(ul, ol) :where(ul, ol):not(:where(.not-prose, .not-prose *)) {
     margin: 0.375rem 0 0;
+  }
+
+  /* DemoFrame `focusPointer`: an animated focus ring and the pointer that causes it.
+     The ring animates outline-offset (paint only): scaling a wide, short box would move
+     its sides further than its top. */
+  .demo-focus-ring {
+    outline: 2px solid transparent;
+    outline-offset: 6px;
+    /* Leaving: the colour fades, then the offset resets unseen. */
+    transition:
+      background-color 150ms ease,
+      outline-color 150ms ease,
+      outline-offset 0s linear 150ms;
+  }
+  .demo-focus-ring[data-focused] {
+    outline-color: var(--brand);
+    outline-offset: 0px;
+    /* Entering: starts wide and transparent, settles tight onto the field. */
+    transition:
+      background-color 150ms ease,
+      outline-color 250ms var(--ease-out-expo),
+      outline-offset 250ms var(--ease-out-expo);
+  }
+
+  /* The arrow tip (the hotspot) sits at the element's top-left + (3px, 2px).
+     The travel time must equal DEMO_CUE_LEAD_MS in use-typing-loop.ts. */
+  .demo-pointer {
+    position: absolute;
+    left: 68%;
+    top: 44px;
+    pointer-events: none;
+    user-select: none;
+    transform: translate(72px, 62px);
+    transition:
+      transform 450ms var(--ease-move),
+      opacity 150ms ease;
+    will-change: transform;
+  }
+  .demo-pointer[data-state="approach"],
+  .demo-pointer[data-state="focused"] {
+    transform: none;
+  }
+  .demo-pointer[data-state="user"] {
+    opacity: 0;
+  }
+  .demo-pointer-press {
+    display: block;
+    transform-origin: 3px 2px;
+    animation: demo-pointer-press 220ms ease-out;
+  }
+  .demo-pointer-ripple {
+    position: absolute;
+    left: 3px;
+    top: 2px;
+    width: 36px;
+    height: 36px;
+    margin: -18px 0 0 -18px;
+    border-radius: 999px;
+    border: 1.5px solid var(--foreground);
+    opacity: 0;
+    animation: demo-pointer-ripple 500ms var(--ease-out-expo);
+  }
+  .demo-pointer-tag {
+    position: absolute;
+    left: 13px;
+    top: 15px;
+    padding: 4px 6px;
+    border-radius: 2px 7px 7px 7px;
+    background: var(--brand);
+    color: #fff;
+    white-space: nowrap;
+    font: 500 11px/1 var(--font-code);
+    transform-origin: top left;
+    animation: demo-pointer-tag-in 180ms var(--ease-out-expo) both;
+  }
+  .demo-pointer-tag[data-event="blur"] {
+    animation: demo-pointer-tag-blur 1100ms ease-out both;
+  }
+  @keyframes demo-pointer-press {
+    40% {
+      transform: scale(0.84);
+    }
+  }
+  @keyframes demo-pointer-ripple {
+    from {
+      opacity: 0.7;
+      transform: scale(0.25);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1);
+    }
+  }
+  @keyframes demo-pointer-tag-in {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+  }
+  @keyframes demo-pointer-tag-blur {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    14%,
+    72% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1);
+    }
+  }
+  /*
+   * Overlay demos in Blur mode: the focus strip moves the native caret at once while the
+   * display layer morphs, so the caret stays hidden until the digits arrive.
+   * No `to` keyframe: it fades into the caret colour the field already has.
+   * Reduced motion gets no hold, because the display layer swaps instantly there.
+   */
+  @keyframes caret-hold {
+    0%,
+    70% {
+      caret-color: transparent;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .caret-hold:focus {
+      animation: caret-hold 400ms;
+    }
+  }
+  /* The typing loop does not run under reduced motion, so there is nothing to point at. */
+  @media (prefers-reduced-motion: reduce) {
+    .demo-focus-ring,
+    .demo-focus-ring[data-focused] {
+      transition: none;
+    }
+    .demo-pointer {
+      display: none;
+    }
   }
 }
 
