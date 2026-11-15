@@ -27,7 +27,6 @@ import { Route as DocsNumoraReactHowItWorksRouteImport } from './routes/docs/num
 import { Route as DocsNumoraReactAnatomyRouteImport } from './routes/docs/numora-react/anatomy'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 import { Route as DocsNumoraIntegrationsTorphRouteImport } from './routes/docs/numora/integrations/torph'
-import { Route as DocsNumoraIntegrationsNumberFlowRouteImport } from './routes/docs/numora/integrations/number-flow'
 import { Route as DocsNumoraFrameworksVueRouteImport } from './routes/docs/numora/frameworks/vue'
 import { Route as DocsNumoraFrameworksSvelteRouteImport } from './routes/docs/numora/frameworks/svelte'
 import { Route as DocsNumoraFrameworksSolidRouteImport } from './routes/docs/numora/frameworks/solid'
@@ -149,12 +148,6 @@ const DocsNumoraIntegrationsTorphRoute =
   DocsNumoraIntegrationsTorphRouteImport.update({
     id: '/numora/integrations/torph',
     path: '/numora/integrations/torph',
-    getParentRoute: () => DocsRoute,
-  } as any)
-const DocsNumoraIntegrationsNumberFlowRoute =
-  DocsNumoraIntegrationsNumberFlowRouteImport.update({
-    id: '/numora/integrations/number-flow',
-    path: '/numora/integrations/number-flow',
     getParentRoute: () => DocsRoute,
   } as any)
 const DocsNumoraFrameworksVueRoute = DocsNumoraFrameworksVueRouteImport.update({
@@ -378,7 +371,6 @@ export interface FileRoutesByFullPath {
   '/docs/numora/frameworks/solid': typeof DocsNumoraFrameworksSolidRoute
   '/docs/numora/frameworks/svelte': typeof DocsNumoraFrameworksSvelteRoute
   '/docs/numora/frameworks/vue': typeof DocsNumoraFrameworksVueRoute
-  '/docs/numora/integrations/number-flow': typeof DocsNumoraIntegrationsNumberFlowRoute
   '/docs/numora/integrations/torph': typeof DocsNumoraIntegrationsTorphRoute
 }
 export interface FileRoutesByTo {
@@ -428,7 +420,6 @@ export interface FileRoutesByTo {
   '/docs/numora/frameworks/solid': typeof DocsNumoraFrameworksSolidRoute
   '/docs/numora/frameworks/svelte': typeof DocsNumoraFrameworksSvelteRoute
   '/docs/numora/frameworks/vue': typeof DocsNumoraFrameworksVueRoute
-  '/docs/numora/integrations/number-flow': typeof DocsNumoraIntegrationsNumberFlowRoute
   '/docs/numora/integrations/torph': typeof DocsNumoraIntegrationsTorphRoute
 }
 export interface FileRoutesById {
@@ -479,7 +470,6 @@ export interface FileRoutesById {
   '/docs/numora/frameworks/solid': typeof DocsNumoraFrameworksSolidRoute
   '/docs/numora/frameworks/svelte': typeof DocsNumoraFrameworksSvelteRoute
   '/docs/numora/frameworks/vue': typeof DocsNumoraFrameworksVueRoute
-  '/docs/numora/integrations/number-flow': typeof DocsNumoraIntegrationsNumberFlowRoute
   '/docs/numora/integrations/torph': typeof DocsNumoraIntegrationsTorphRoute
 }
 export interface FileRouteTypes {
@@ -531,7 +521,6 @@ export interface FileRouteTypes {
     | '/docs/numora/frameworks/solid'
     | '/docs/numora/frameworks/svelte'
     | '/docs/numora/frameworks/vue'
-    | '/docs/numora/integrations/number-flow'
     | '/docs/numora/integrations/torph'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -581,7 +570,6 @@ export interface FileRouteTypes {
     | '/docs/numora/frameworks/solid'
     | '/docs/numora/frameworks/svelte'
     | '/docs/numora/frameworks/vue'
-    | '/docs/numora/integrations/number-flow'
     | '/docs/numora/integrations/torph'
   id:
     | '__root__'
@@ -631,7 +619,6 @@ export interface FileRouteTypes {
     | '/docs/numora/frameworks/solid'
     | '/docs/numora/frameworks/svelte'
     | '/docs/numora/frameworks/vue'
-    | '/docs/numora/integrations/number-flow'
     | '/docs/numora/integrations/torph'
   fileRoutesById: FileRoutesById
 }
@@ -773,13 +760,6 @@ declare module '@tanstack/react-router' {
       path: '/numora/integrations/torph'
       fullPath: '/docs/numora/integrations/torph'
       preLoaderRoute: typeof DocsNumoraIntegrationsTorphRouteImport
-      parentRoute: typeof DocsRoute
-    }
-    '/docs/numora/integrations/number-flow': {
-      id: '/docs/numora/integrations/number-flow'
-      path: '/numora/integrations/number-flow'
-      fullPath: '/docs/numora/integrations/number-flow'
-      preLoaderRoute: typeof DocsNumoraIntegrationsNumberFlowRouteImport
       parentRoute: typeof DocsRoute
     }
     '/docs/numora/frameworks/vue': {
@@ -1026,7 +1006,6 @@ interface DocsRouteChildren {
   DocsNumoraFrameworksSolidRoute: typeof DocsNumoraFrameworksSolidRoute
   DocsNumoraFrameworksSvelteRoute: typeof DocsNumoraFrameworksSvelteRoute
   DocsNumoraFrameworksVueRoute: typeof DocsNumoraFrameworksVueRoute
-  DocsNumoraIntegrationsNumberFlowRoute: typeof DocsNumoraIntegrationsNumberFlowRoute
   DocsNumoraIntegrationsTorphRoute: typeof DocsNumoraIntegrationsTorphRoute
 }
 
@@ -1079,7 +1058,6 @@ const DocsRouteChildren: DocsRouteChildren = {
   DocsNumoraFrameworksSolidRoute: DocsNumoraFrameworksSolidRoute,
   DocsNumoraFrameworksSvelteRoute: DocsNumoraFrameworksSvelteRoute,
   DocsNumoraFrameworksVueRoute: DocsNumoraFrameworksVueRoute,
-  DocsNumoraIntegrationsNumberFlowRoute: DocsNumoraIntegrationsNumberFlowRoute,
   DocsNumoraIntegrationsTorphRoute: DocsNumoraIntegrationsTorphRoute,
 }
 

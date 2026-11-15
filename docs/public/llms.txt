@@ -46,7 +46,7 @@ Each feature has a vanilla page and a React page.
 ## Integrations
 
 - React Hook Form: https://numeric-input.com/docs/numora-react/integrations/react-hook-form
-- NumberFlow: https://numeric-input.com/docs/numora/integrations/number-flow and https://numeric-input.com/docs/numora-react/integrations/number-flow
+- NumberFlow: https://numeric-input.com/docs/numora-react/integrations/number-flow
 - Torph: https://numeric-input.com/docs/numora/integrations/torph and https://numeric-input.com/docs/numora-react/integrations/torph
 
 ## API Reference - numora (vanilla JS)

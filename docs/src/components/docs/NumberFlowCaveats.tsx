@@ -7,34 +7,33 @@ export function NumberFlowCaveats() {
 
       <div className={BOX}>
         <p className="m-0">
-          <strong>Partial-input states.</strong> NumberFlow takes a <code>number</code>. While the
-          user is typing <code>"1."</code> (a digit then a dot, no decimals yet),{' '}
-          <code>Number("1.")</code> is <code>1</code> and NumberFlow renders <code>"1"</code> with
-          no dot. The cursor sits just past the invisible input's dot, one character beyond the
-          visible <code>"1"</code>. It lasts until the user types a fractional digit.
+          <strong>Text NumberFlow cannot show.</strong> NumberFlow always draws a number, so an
+          empty field shows <code>0</code> in the overlay. With <code>allowNegative</code>, a lone{' '}
+          <code>"-"</code> shows <code>0</code>, and <code>Number()</code> drops the sign of a
+          negative zero, so <code>"-0."</code> shows as <code>0.</code> until a non-zero digit
+          follows. With <code>allowLeadingZeros</code>, <code>"007"</code> shows as <code>7</code>{' '}
+          and the cursor sits two characters past it.
         </p>
       </div>
 
       <div className={BOX}>
         <p className="m-0">
-          <strong>Precision ceiling.</strong> Numora handles strings of any length.{' '}
-          <code>Number()</code> is safe up to 15 significant digits. For DeFi token amounts at
-          18-decimal precision the overlay loses tail digits at the display layer, but the editable
-          string you pass to your math or contracts is untouched. The overlay only changes what is
-          displayed.
+          <strong>Precision.</strong> <code>Number()</code> is exact up to about 15 significant
+          digits. Longer amounts lose their tail digits in the overlay unless you pass NumberFlow
+          the raw string, as described above. The string you get from <code>onValueChange</code> is
+          untouched either way. The overlay only changes what is displayed.
         </p>
       </div>
 
       <div className={BOX}>
         <p className="m-0">
           <strong>Locales.</strong> NumberFlow formats the number itself with <code>Intl</code>, so
-          give it the same locale as the input. In Spanish and Polish <code>Intl</code> leaves a
-          four-digit number ungrouped (<code>1234,5</code>) while Numora groups it (
-          <code>1.234,5</code> in Spanish, <code>1 234,5</code> in Polish). Pass{' '}
-          <code>useGrouping: 'always'</code> in <code>format</code> and the two match. One
-          difference remains. For Arabic and Persian locales NumberFlow prints native digits (
-          <code>١٬٢٣٤</code>) while Numora shows ASCII digits (<code>1٬234</code>), so the overlay's
-          characters do not line up with the input's.
+          give it the same locale as the input and keep <code>useGrouping: true</code>. Left to its
+          default, <code>Intl</code> does not group a four-digit number in Spanish and Polish (
+          <code>1234,5</code>) while Numora does (<code>1.234,5</code> in Spanish,{' '}
+          <code>1 234,5</code> in Polish). One difference remains. For Arabic and Persian locales
+          NumberFlow prints native digits (<code>١٬٢٣٤</code>) while Numora shows ASCII digits (
+          <code>1٬234</code>), so the overlay's characters do not line up with the input's.
         </p>
       </div>
 
