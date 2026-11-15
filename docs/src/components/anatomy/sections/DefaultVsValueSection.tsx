@@ -30,6 +30,13 @@ export function DefaultVsValueSection() {
         <code>writeValue</code>. That write does not call <code>onChange</code>, unless the new
         options change the raw value, as a smaller <code>decimalMaxLength</code> can.
       </p>
+      <p>
+        This is also how a controlled field holds its <code>value</code>. An edit goes into the DOM
+        first, and Numora calls <code>onChange</code> and <code>onValueChange</code>. It then
+        renders the component again, even if the parent kept its state. The layout effect runs, sees
+        that the DOM differs from <code>value</code>, and writes the field back before the browser
+        paints. If the parent accepted the edit, the prop already matches and nothing is written.
+      </p>
     </section>
   );
 }

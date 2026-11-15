@@ -17,9 +17,9 @@ export function FocusBlurSection() {
       </p>
       <p>
         Leaving the field settles the value in both modes. Numora puts the separators back, drops a
-        trailing decimal separator, pads the decimals up to <code>decimalMinLength</code> and
-        empties a field that holds only a sign or a separator. Your change callback is called only
-        if the raw value changed.
+        trailing decimal separator, pads the decimals up to <code>decimalMinLength</code>, turns a
+        negative zero such as <code>-0</code> into <code>0</code> and empties a field that holds
+        only a sign or a separator. Your change callback is called only if the raw value changed.
       </p>
     </section>
   );

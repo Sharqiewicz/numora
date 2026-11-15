@@ -8,8 +8,8 @@ export function PlainVsNumoraSection() {
         Plain <code>&lt;input&gt;</code> vs Numora
       </h2>
       <p>
-        Pasted into a plain input, a messy text such as <code>$1,234.56abc</code> stays as it is,
-        and your code gets that string. Numora cleans and groups the value, so your code gets a
+        Paste messy text such as <code>$1,234.56abc</code> into a plain input and it stays as it
+        is. Your code gets that string. Numora cleans and groups the value, so your code gets a
         string that parses as a number:
       </p>
       <PlainVsNumoraFigure />

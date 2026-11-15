@@ -74,7 +74,7 @@ export function ValueReadout({ pkg = 'numora-react' }: { pkg?: 'numora' | 'numor
   };
 
   return (
-    <DiagramFrame variant="demo">
+    <DiagramFrame>
       <NumoraInput
         {...OPTIONS}
         aria-label="Type a number"

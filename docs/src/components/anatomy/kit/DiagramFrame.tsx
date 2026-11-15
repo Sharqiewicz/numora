@@ -1,7 +1,8 @@
-import { Pause, Play } from 'lucide-react';
 import { MotionConfig, motion, useInView, useReducedMotion } from 'motion/react';
 import { type ReactNode, type Ref, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { FigureLabel, figureFooterClass, figureShellClass } from './LoopFigure';
+import { LoopToggle, StepCount } from './LoopToggle';
 import { DUR, EASE } from './tokens';
 import type { Loop } from './useLoop';
 
@@ -36,10 +37,10 @@ interface DiagramFrameProps {
   /** Ref for the scene root (from useLoop), when the frame's own scene wrapper should carry it. */
   sceneRef?: Ref<HTMLDivElement>;
   /**
-   * `diagram` (default): filled surface-2 slab for illustrations / scenes.
-   * `demo`: outline only, no fill, for live interactive demos, so the two kinds read differently.
+   * With `controls`: what goes where the "2 / 5" count sits, when the scene's steps are not one
+   * per frame. `steps` fills it in on its own.
    */
-  variant?: 'diagram' | 'demo';
+  count?: { current: number; total: number };
   /**
    * Opt-in one-time opacity reveal as the frame scrolls in. Off by default: frames that hold
    * a live input or run their own loop must not also fade (one effect per trigger).
@@ -50,8 +51,28 @@ interface DiagramFrameProps {
 }
 
 /**
- * The one frame every Anatomy diagram and demo sits in, so they read as one family.
- * Replaces the old `rounded-lg border bg-muted/30 p-4` card. Never nest frames.
+ * One segment of a step rail. The current step is the tallest and brightest, done steps are
+ * mid-grey, steps still to come are dim. A segment the reader cannot click (`clickable` false)
+ * is thinner and never lights on hover.
+ */
+export function stepBarClass(index: number, current: number, clickable: boolean) {
+  return cn(
+    'w-full rounded-full transition-[background-color,height] duration-150 ease-out-expo motion-reduce:transition-none',
+    index === current
+      ? 'h-1.5 bg-foreground'
+      : cn(
+          clickable ? 'h-1' : 'h-0.5',
+          index < current ? 'bg-muted-foreground' : clickable ? 'bg-surface-7' : 'bg-surface-5'
+        ),
+    clickable &&
+      'group-focus-visible:ring-2 group-focus-visible:ring-ring [@media(hover:hover)]:group-hover:bg-foreground'
+  );
+}
+
+/**
+ * The one frame every diagram and live demo sits in. Same card as `LoopFigure`: scene on top,
+ * and for a looping scene a bottom row with the steps on the left and the pause button on the
+ * right. Never nest frames.
  */
 export function DiagramFrame({
   title,
@@ -62,7 +83,7 @@ export function DiagramFrame({
   label: labelProp,
   minWidth,
   sceneRef,
-  variant = 'diagram',
+  count,
   reveal = false,
   className,
   children,
@@ -102,30 +123,29 @@ export function DiagramFrame({
         initial={false}
         animate={{ opacity: hidden ? 0 : 1 }}
         transition={hidden ? { duration: 0 } : { duration: DUR.base, ease: EASE.outExpo }}
-        className={cn(
-          'not-prose relative my-8 rounded-xl border p-4 sm:p-6',
-          variant === 'demo' ? 'border-border bg-transparent' : 'border-border bg-surface-2',
-          className
-        )}
+        className={cn('not-prose relative my-8', figureShellClass, className)}
       >
-        {title && (
-          <div className="mb-4 flex min-h-8 items-center text-caption font-medium text-muted-foreground">
-            {title}
+        <div className="p-4 sm:p-6">
+          {title && <FigureLabel className="mb-4">{title}</FigureLabel>}
+          <div
+            ref={sceneRef}
+            className={
+              minWidth
+                ? '-mx-4 overflow-x-auto px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:mx-0 sm:px-0'
+                : undefined
+            }
+            {...(minWidth ? { tabIndex: 0, role: 'group', 'aria-label': label ?? 'Diagram' } : {})}
+          >
+            <div style={minWidth ? { minWidth } : undefined}>{children}</div>
           </div>
-        )}
-        <div
-          ref={sceneRef}
-          className={
-            minWidth
-              ? '-mx-4 overflow-x-auto px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:mx-0 sm:px-0'
-              : undefined
-          }
-          {...(minWidth ? { tabIndex: 0, role: 'group', 'aria-label': label ?? 'Diagram' } : {})}
-        >
-          <div style={minWidth ? { minWidth } : undefined}>{children}</div>
+          {caption && (
+            <figcaption className="mt-4 text-caption leading-relaxed text-muted-foreground">
+              {caption}
+            </figcaption>
+          )}
         </div>
         {loop && (steps || controls || !loop.reduced) && (
-          <div className="mt-3 flex items-center gap-3">
+          <div className={figureFooterClass}>
             {steps ? (
               <ol className="m-0 flex min-w-0 flex-1 list-none gap-1 p-0" aria-label="Steps">
                 {Array.from({ length: loop.frames }, (_, i) => (
@@ -136,19 +156,10 @@ export function DiagramFrame({
                       aria-label={`Step ${i + 1} of ${loop.frames}`}
                       aria-current={loop.frame === i ? 'step' : undefined}
                       onClick={() => loop.goTo(i)}
-                      // 44px tall hit area around a 4px bar; the row itself stays 32px.
+                      // 44px tall hit area around the bar; the row itself stays 32px.
                       className="group -my-1.5 flex h-11 w-full cursor-pointer items-center focus-visible:outline-none"
                     >
-                      <span
-                        className={cn(
-                          'h-1 w-full rounded-full transition-[background-color] duration-150 ease-out-expo group-hover:bg-foreground group-focus-visible:ring-2 group-focus-visible:ring-ring motion-reduce:transition-none',
-                          i === loop.frame
-                            ? 'bg-foreground'
-                            : i < loop.frame
-                              ? 'bg-muted-foreground'
-                              : 'bg-surface-7'
-                        )}
-                      />
+                      <span className={stepBarClass(i, loop.frame, true)} />
                     </button>
                   </li>
                 ))}
@@ -156,28 +167,13 @@ export function DiagramFrame({
             ) : (
               (controls ?? <span className="flex-1" />)
             )}
-            {!loop.reduced && (
-              <button
-                type="button"
-                data-loop-control
-                onClick={loop.toggle}
-                aria-label={loop.held ? 'Play animation' : 'Pause animation'}
-                // 32px button, 44px hit area.
-                className="relative inline-flex size-8 flex-none cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-[color,background-color,scale] duration-150 ease-out-expo before:absolute before:-inset-1.5 hover:bg-surface-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.96] motion-reduce:transition-none"
-              >
-                {loop.held ? (
-                  <Play className="size-4" aria-hidden />
-                ) : (
-                  <Pause className="size-4" aria-hidden />
-                )}
-              </button>
+            {steps ? (
+              <StepCount current={loop.frame + 1} total={loop.frames} />
+            ) : (
+              count && <StepCount {...count} />
             )}
+            <LoopToggle loop={loop} />
           </div>
-        )}
-        {caption && (
-          <figcaption className="mt-4 text-caption leading-relaxed text-muted-foreground">
-            {caption}
-          </figcaption>
         )}
       </motion.figure>
     </MotionConfig>

@@ -29,6 +29,17 @@ export function NativeInputSection(_props: SectionProps) {
         <code>selectionStart</code> / <code>selectionEnd</code>, <code>setRangeText</code> and{' '}
         <code>inputMode</code>.
       </p>
+      <p>Numora sets four attributes on the input:</p>
+      <ul>
+        <li>
+          <code>type="text"</code> and <code>inputmode="decimal"</code>, always. An input you hand
+          to Numora with <code>type="number"</code> becomes <code>type="text"</code>.
+        </li>
+        <li>
+          <code>spellcheck="false"</code> and <code>autocomplete="off"</code>, only when you did not
+          set them. An input with <code>autocomplete="cc-number"</code> keeps it.
+        </li>
+      </ul>
       <p>
         Numora sets no <code>pattern</code> attribute, so native constraint validation never rejects
         a value the field itself produced. Add your own if you need one.

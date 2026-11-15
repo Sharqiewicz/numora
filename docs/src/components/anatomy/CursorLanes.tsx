@@ -220,7 +220,7 @@ export function CursorLanes() {
   const last = f === NOTES.length - 1;
 
   return (
-    <DiagramFrame variant="diagram" loop={loop} steps>
+    <DiagramFrame loop={loop} steps>
       <div ref={loop.ref} className="space-y-4">
         <Lane
           name="Naive formatter"

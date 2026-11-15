@@ -15,16 +15,21 @@ export function CursorPreservationSection() {
       </p>
       <CursorLanes />
       <p>
-        It does this by counting. Numora sanitizes the text left of the edit, plus the inserted
-        text, the same way it sanitizes the whole value. The length of the result is the number of
-        digits, decimal separators and leading minus signs that belong before the cursor. Numora
-        then walks the formatted string, skipping the thousand separators it added, until it has
-        passed that many characters. It puts the cursor there.
+        Numora takes the text left of the edit, plus the inserted text, and runs it through the same
+        pipeline as the whole value: separators removed, leading zeros dropped, notation expanded,
+        decimals trimmed. The result is the text that belongs before the cursor. Numora then walks
+        the final display string and matches that text character by character, skipping the thousand
+        separators it added. It puts the cursor where the match ends.
+      </p>
+      <p>
+        Sometimes nothing matches, because the edit made Numora read the whole value again. Pasting{' '}
+        <code>e-</code> into <code>1|5</code> gives <code>0.00001</code>, and no character left of
+        the cursor survives. The cursor then goes to the end of the text.
       </p>
       <p>
         A paste whose tail was trimmed leaves the cursor after the last pasted character that
-        survived. The grouping style only changes where the separators sit, so Thousand, Lakh and
-        Wan need no per-style code.
+        survived. The grouping style only changes where the separators sit, so{' '}
+        <code>'thousand'</code>, <code>'lakh'</code> and <code>'wan'</code> need no per-style code.
       </p>
     </section>
   );

@@ -1,7 +1,6 @@
-import { Pause, Play } from 'lucide-react';
 import { formatValue } from 'numora';
 import type { ReactNode } from 'react';
-import { useLoop } from '@/components/anatomy/kit';
+import { LoopFigure, useLoop } from '@/components/anatomy/kit';
 import { cn } from '@/lib/utils';
 
 // One worst-case edit in a Numora field: type "8" in the middle of an already grouped number.
@@ -80,89 +79,69 @@ export function EventPipelineLoop() {
   const written = f >= 1;
 
   return (
-    <figure className="not-prose my-8">
-      <div ref={loop.ref} className="overflow-hidden rounded-xl bg-surface-1 shadow-border">
-        <div className="flex items-center gap-2 py-4 pr-3 pl-4 sm:pl-6">
-          <div className="min-w-0 flex-1">
-            {/* The buttons carry their own padding for a tall hit area; the list pulls it back. */}
-            <ol
-              aria-label="Event order"
-              className="-my-2.5 -ml-1.5 flex list-none flex-wrap items-center p-0 font-mono text-caption text-muted-foreground"
-            >
-              {STEPS.map((step, i) => (
-                <li key={step.name} className="flex items-center">
-                  {i > 0 && <span aria-hidden>›</span>}
-                  <button
-                    type="button"
-                    aria-current={f === i ? 'step' : undefined}
-                    aria-label={step.skipped ? `${step.name}, skipped` : undefined}
-                    onClick={() => loop.goTo(i)}
-                    className={cn(
-                      'cursor-pointer touch-manipulation rounded-sm bg-transparent px-1.5 py-2.5 font-mono text-caption transition-colors duration-150 ease-out-expo focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none motion-reduce:transition-none [@media(hover:hover)]:hover:text-foreground',
-                      // Struck through from the moment the edit is cancelled.
-                      step.skipped && written && 'line-through',
-                      f === i
-                        ? step.name === 'beforeinput'
-                          ? 'font-bold text-signal-amber-fg'
-                          : 'font-bold text-foreground'
-                        : 'text-muted-foreground'
-                    )}
-                  >
-                    {step.name}
-                  </button>
-                </li>
-              ))}
-            </ol>
-            <div
-              role="img"
-              aria-label={
-                written
-                  ? `Numora wrote ${AFTER}. The browser's own edit, ${SPLICED}, never happened`
-                  : `The field holds ${BEFORE} with the caret after ${BEFORE.slice(0, CARET)}`
-              }
-              className="relative mt-2 flex h-10 items-center font-mono text-[1.75rem] leading-none font-medium text-foreground select-none sm:text-[2rem]"
-            >
-              {written ? (
-                <>
-                  <Chars text={AFTER.slice(0, KEY_END - 1)} />
-                  <span className="text-signal-amber-fg">{KEY}</span>
-                </>
-              ) : (
-                <Chars text={BEFORE.slice(0, CARET)} />
-              )}
-              <span
-                aria-hidden
-                className={cn(
-                  'ml-px inline-block h-[1.15em] w-[1.5px] flex-none bg-foreground motion-reduce:hidden',
-                  // Solid on the beat where the value was just written.
-                  f !== 1 && 'animate-[demo-caret-blink_1.1s_steps(1)_infinite]'
-                )}
-              />
-              <Chars text={written ? AFTER.slice(KEY_END) : BEFORE.slice(CARET)} />
-            </div>
-          </div>
-          {/* Nothing autoplays under reduced motion, so there is nothing to pause. */}
-          {!loop.reduced && (
+    <LoopFigure loop={loop} note={STEPS[f].note} step={{ current: f + 1, total: STEPS.length }}>
+      {/* The buttons carry their own padding for a tall hit area; the list pulls it back. */}
+      <ol
+        aria-label="Event order"
+        className="-my-2.5 -ml-1.5 flex list-none flex-wrap items-center p-0 font-mono text-caption leading-5 text-muted-foreground"
+      >
+        {STEPS.map((step, i) => (
+          <li key={step.name} className="flex items-center">
+            {i > 0 && <span aria-hidden>›</span>}
             <button
               type="button"
-              data-loop-control
-              onClick={loop.toggle}
-              aria-label={loop.held ? 'Play animation' : 'Pause animation'}
-              className="relative inline-flex size-8 flex-none cursor-pointer touch-manipulation items-center justify-center rounded-md text-muted-foreground transition-[color,background-color,scale] duration-150 ease-out-expo before:absolute before:-inset-1.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.96] motion-reduce:transition-none [@media(hover:hover)]:hover:bg-surface-4 [@media(hover:hover)]:hover:text-foreground"
+              aria-current={f === i ? 'step' : undefined}
+              aria-label={step.skipped ? `${step.name}, skipped` : undefined}
+              onClick={() => loop.goTo(i)}
+              className="group cursor-pointer touch-manipulation bg-transparent px-0.5 py-2.5 font-mono text-caption focus-visible:outline-none"
             >
-              {loop.held ? (
-                <Play className="size-4" aria-hidden />
-              ) : (
-                <Pause className="size-4" aria-hidden />
-              )}
+              {/* The pill is the state; the button around it is the 44px hit area. */}
+              <span
+                className={cn(
+                  'block rounded-sm px-1 py-0.5 transition-colors duration-150 ease-out-expo group-focus-visible:ring-2 group-focus-visible:ring-ring motion-reduce:transition-none',
+                  f === i
+                    ? 'bg-foreground text-background'
+                    : step.skipped && written
+                      ? // Struck through from the moment the edit is cancelled.
+                        'text-muted-foreground line-through [@media(hover:hover)]:group-hover:text-foreground'
+                      : i < f
+                        ? 'text-foreground'
+                        : 'text-muted-foreground [@media(hover:hover)]:group-hover:text-foreground'
+                )}
+              >
+                {step.name}
+              </span>
             </button>
+          </li>
+        ))}
+      </ol>
+      <div
+        role="img"
+        aria-label={
+          written
+            ? `Numora wrote ${AFTER}. The browser's own edit, ${SPLICED}, never happened`
+            : `The field holds ${BEFORE} with the caret after ${BEFORE.slice(0, CARET)}`
+        }
+        className="relative mt-2 flex h-10 items-center font-mono text-[1.75rem] leading-none font-medium text-foreground select-none sm:text-[2rem]"
+      >
+        {written ? (
+          <>
+            <Chars text={AFTER.slice(0, KEY_END - 1)} />
+            <span className="text-signal-amber-fg">{KEY}</span>
+          </>
+        ) : (
+          <Chars text={BEFORE.slice(0, CARET)} />
+        )}
+        <span
+          aria-hidden
+          className={cn(
+            'ml-px inline-block h-[1.15em] w-[1.5px] flex-none bg-foreground motion-reduce:hidden',
+            // Solid on the beat where the value was just written.
+            f !== 1 && 'animate-[demo-caret-blink_1.1s_steps(1)_infinite]'
           )}
-        </div>
-        <p className="m-0 flex h-9 items-center border-t border-surface-3 px-4 text-sm text-muted-foreground sm:px-6">
-          {/* One flex child, so the spaces between the note's parts survive. */}
-          <span>{STEPS[f].note}</span>
-        </p>
+        />
+        <Chars text={written ? AFTER.slice(KEY_END) : BEFORE.slice(CARET)} />
       </div>
-    </figure>
+    </LoopFigure>
   );
 }

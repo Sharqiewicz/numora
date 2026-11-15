@@ -5,7 +5,6 @@ import type { SectionProps } from './types';
 const reactCode = `import { NumoraInput, type NumoraInputChangeEvent } from 'numora-react'
 
 <NumoraInput
-  thousandSeparator=","
   decimalMaxLength={2}
   onChange={(e: NumoraInputChangeEvent) => {
     e.target.value           // → "1234.56"   (raw, no separators)
@@ -17,7 +16,6 @@ const reactCode = `import { NumoraInput, type NumoraInputChangeEvent } from 'num
 const vanillaCode = `import { NumoraInput } from 'numora'
 
 new NumoraInput(container, {
-  thousandSeparator: ',',
   decimalMaxLength: 2,
   // onValueChange always receives both: the raw value and the formatted value.
   onValueChange: ({ value, formattedValue }) => console.log(value, formattedValue),

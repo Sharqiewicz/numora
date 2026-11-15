@@ -12,9 +12,22 @@ import {
   truncateToMaxLength,
 } from 'numora/pipeline';
 import { cn } from '@/lib/utils';
-import { DiagramFrame, DUR, EASE, ROLE, readMs, SPRING, Typewriter, useLoop } from './kit';
+import {
+  DiagramFrame,
+  DUR,
+  EASE,
+  ROLE,
+  readMs,
+  SPRING,
+  stepBarClass,
+  Typewriter,
+  useLoop,
+} from './kit';
 
-/** Every conditional step switched on. */
+/**
+ * Every conditional step switched on. A default field skips steps 4, 9 and 10: they run only
+ * with `allowCompactNotation`, `padLeadingZero` and `maxLength`.
+ */
 const config = {
   thousandSeparator: ',',
   decimalSeparator: '.',
@@ -48,7 +61,7 @@ const STEPS: Step[] = [
   },
   {
     name: 'expandCompactNotation',
-    does: 'Expands k, m, b and t into zeros.',
+    does: 'Expands k, m, b and t into zeros. Only with allowCompactNotation.',
     run: expandCompactNotation,
   },
   {
@@ -69,12 +82,12 @@ const STEPS: Step[] = [
   { name: 'removeLeadingZeros', does: 'Removes leading zeros.', run: removeLeadingZeros },
   {
     name: 'prependLeadingZero',
-    does: 'Adds a 0 in front of a bare decimal separator.',
+    does: 'Adds a 0 before a bare decimal separator. Only with padLeadingZero.',
     run: (s) => prependLeadingZero(s, config.decimalSeparator),
   },
   {
     name: 'truncateToMaxLength',
-    does: 'Cuts the value at maxLength.',
+    does: 'Cuts the value at maxLength. Only when maxLength is set.',
     run: (s) => truncateToMaxLength(s, config.maxLength, config.decimalSeparator),
   },
 ];
@@ -232,25 +245,13 @@ export function SanitizationJourney() {
     <DiagramFrame
       sceneRef={loop.ref}
       loop={loop}
+      count={step ? { current: f.step, total: STEPS.length } : undefined}
       controls={
         <ol className="m-0 flex min-w-0 flex-1 list-none gap-1 p-0" aria-label="Pipeline steps">
           {STEPS.map((s, i) => {
             const n = i + 1;
             const target = sample.markFrame[n];
-            const bar = (
-              <span
-                className={cn(
-                  'h-1 w-full rounded-full transition-[background-color] duration-150 ease-out-expo motion-reduce:transition-none',
-                  n === f.step
-                    ? 'bg-foreground'
-                    : n < f.step
-                      ? 'bg-muted-foreground'
-                      : 'bg-surface-7',
-                  target !== undefined &&
-                    'group-hover:bg-foreground group-focus-visible:ring-2 group-focus-visible:ring-ring'
-                )}
-              />
-            );
+            const bar = <span className={stepBarClass(n, f.step, target !== undefined)} />;
             return (
               <li key={s.name} className="m-0 flex min-w-0 flex-1 items-center p-0">
                 {target === undefined ? (

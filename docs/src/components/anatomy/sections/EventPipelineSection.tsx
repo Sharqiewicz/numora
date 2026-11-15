@@ -1,4 +1,3 @@
-import { CodeBlock } from '@/components/CodeBlock';
 import { EventPipelineLoop } from '../EventPipelineLoop';
 
 export function EventPipelineSection() {
@@ -8,9 +7,8 @@ export function EventPipelineSection() {
       <h2>The event pipeline</h2>
       <p>
         One keystroke fires four events on a focused <code>&lt;input&gt;</code>, always in the same
-        order:
+        order. The browser edits the DOM between the second and the third:
       </p>
-      <CodeBlock language="text">{`keydown  →  beforeinput  →  [DOM edit]  →  input  →  keyup`}</CodeBlock>
       <ul>
         <li>
           <code>keydown</code> fires first. It reports the physical key, not the resulting

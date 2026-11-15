@@ -98,11 +98,12 @@ function Anatomy() {
         <EventPipelineSection />
         <KeydownSection />
         <BeforeInputSection />
-        <PasteSection />
         <FocusBlurSection />
 
         {/* Act 3: what Numora does with the value */}
         <SanitizationSection />
+        {/* After the pipeline: a paste is the pipeline's hardest input. */}
+        <PasteSection />
         <GroupingStylesSection />
         <CursorPreservationSection />
         <RawVsFormattedSection pkg={pkg} />

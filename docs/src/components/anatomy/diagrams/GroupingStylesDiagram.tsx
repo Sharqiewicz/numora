@@ -1,4 +1,3 @@
-import { Pause, Play } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { formatValue, type GroupingStyle } from 'numora';
 import { cn } from '@/lib/utils';
@@ -38,14 +37,12 @@ export function GroupingStylesDiagram() {
   const move = reduced ? { duration: 0 } : SPRING;
 
   return (
-    <DiagramFrame sceneRef={loop.ref}>
-      {/*
-        The tabs are 44px tall around a 20px line of text, and the pause button is 32px around a
-        16px icon. The negative margins pull both back so the text and the icon, not their hit
-        areas, sit on the frame's padding.
-      */}
-      <div className="-mx-2 -mt-3 flex items-start gap-2">
-        <fieldset className="m-0 flex min-w-0 flex-1 flex-wrap gap-1 border-0 p-0">
+    <DiagramFrame
+      sceneRef={loop.ref}
+      loop={loop}
+      // The tabs are the step control: 44px tall around a 20px line of text.
+      controls={
+        <fieldset className="m-0 -ml-2 flex min-w-0 flex-1 flex-wrap gap-1 border-0 p-0">
           <legend className="sr-only">Grouping style</legend>
           {STYLES.map((s, i) => (
             <button
@@ -70,26 +67,9 @@ export function GroupingStylesDiagram() {
             </button>
           ))}
         </fieldset>
-        {/* Nothing autoplays under reduced motion, so there is nothing to pause. */}
-        {!loop.reduced && (
-          <button
-            type="button"
-            data-loop-control
-            onClick={loop.toggle}
-            aria-label={loop.held ? 'Play animation' : 'Pause animation'}
-            // 32px button, 44px hit area. The top margin centres it on the first row of tabs.
-            className="relative mt-1.5 inline-flex size-8 flex-none cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-[color,background-color,scale] duration-150 ease-out-expo before:absolute before:-inset-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.96] motion-reduce:transition-none [@media(hover:hover)]:hover:bg-surface-4 [@media(hover:hover)]:hover:text-foreground"
-          >
-            {loop.held ? (
-              <Play className="size-4" aria-hidden />
-            ) : (
-              <Pause className="size-4" aria-hidden />
-            )}
-          </button>
-        )}
-      </div>
-
-      <div className="mt-4 flex min-h-12 items-center font-mono text-[28px] leading-none tabular-nums text-foreground sm:text-[32px]">
+      }
+    >
+      <div className="flex min-h-12 items-center font-mono text-[28px] leading-none tabular-nums text-foreground sm:text-[32px]">
         <div aria-hidden className="flex items-baseline">
           <AnimatePresence mode="popLayout" initial={false}>
             {items.map((it) =>

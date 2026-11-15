@@ -69,8 +69,9 @@ function compute() {
 
 // 0 idle | 1 key down | 2 naive settles | 3 switch | 4 key down | 5 Numora settles
 const FRAMES = 6;
-// Each frame brings one short sentence. The two verdict frames (2 and 5) get the longest read.
-const TIMES = [2000, 2200, 2800, 2400, 2200, 2400];
+// Only the two verdict frames (2 and 5) carry a sentence, so only they are timed for reading.
+// The rest show one visible change each (key, comma, badge, caret) and move at watching speed.
+const TIMES = [1000, 900, 2800, 1000, 900, 2400];
 /** How long the key stays pushed down at the start of a key-down frame. */
 const PRESS_MS = 220;
 const frameMs = (f: number) => TIMES[f];
@@ -125,7 +126,7 @@ function Field({ edit, tone, still }: { edit: Edit; tone: 'plain' | 'numora'; st
   );
 }
 
-/** Stuck, then fixed: the same Backspace in a naive field, then with Numora's keydown skip. */
+/** Stuck, then fixed: the same Backspace in a naive field, then with Numora's separator skip. */
 export function BackspaceSkipFigure() {
   const loop = useLoop({ frames: FRAMES, frameMs, holdMs: 800 });
   const s = useMemo(compute, []);
@@ -149,10 +150,14 @@ export function BackspaceSkipFigure() {
   let verdict: 'bad' | 'good' | null = null;
   if (f === 1) [edit, note] = [s.naiveRaw, 'Backspace deletes the comma.'];
   if (f === 2)
-    [edit, note, verdict] = [s.naiveAfter, 'It comes straight back. Nothing changed.', 'bad'];
-  if (f === 3) note = 'Same field, now with the keydown skip.';
-  if (f === 4) [edit, note] = [s.skipped, 'The caret hops over the comma.'];
-  if (f === 5) [edit, note, verdict] = [s.numoraAfter, 'The 1 is deleted.', 'good'];
+    [edit, note, verdict] = [
+      s.naiveAfter,
+      'The comma comes straight back. Nothing deleted.',
+      'bad',
+    ];
+  if (f === 3) note = 'Same field, now with Numora.';
+  if (f === 4) [edit, note] = [s.skipped, 'keydown moves the caret over the comma.'];
+  if (f === 5) [edit, note, verdict] = [s.numoraAfter, 'beforeinput then deletes the 1.', 'good'];
 
   return (
     <DiagramFrame title="Backspace after a comma" loop={loop} steps>
@@ -178,7 +183,7 @@ export function BackspaceSkipFigure() {
                 : 'border-border bg-surface-4 text-foreground'
             )}
           >
-            <LoopFade loop={loop}>{fixed ? 'With keydown skip' : 'Naive field'}</LoopFade>
+            <LoopFade loop={loop}>{fixed ? 'With Numora' : 'Naive field'}</LoopFade>
           </span>
         </div>
         <div className="rounded-lg border border-border bg-surface-1 p-3">
@@ -192,7 +197,10 @@ export function BackspaceSkipFigure() {
               {verdict === 'good' && (
                 <Check className="size-3.5 shrink-0 text-signal-green-fg" aria-hidden />
               )}
-              <Typewriter text={note} className="truncate" />
+              {/* The field shows the steps. Words appear only for the two results. The
+                  Typewriter stays mounted so each result is typed, not shown whole. */}
+              <Typewriter text={verdict ? note : ''} className="truncate" />
+              {!verdict && <span className="sr-only">{note}</span>}
             </p>
           </LoopFade>
         </div>
