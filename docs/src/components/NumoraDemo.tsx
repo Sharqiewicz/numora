@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { NumoraInput } from 'numora-react';
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 
 const SLIDE_DURATION = 4000;
 const TYPING_DELAY = 80;
@@ -17,7 +17,12 @@ interface Slide {
   isPaste?: boolean;
   typingSequence?: string[];
   video?: string;
+  /** Accessible name of the recording. */
   videoLabel?: string;
+  /** Says whose input the recording shows, so the clip reads as a before or an after. */
+  videoCaption?: string;
+  /** Shown in the media box on slides without a recording. */
+  samples?: { value: string; note: string }[];
 }
 
 const SLIDES: Slide[] = [
@@ -28,7 +33,8 @@ const SLIDES: Slide[] = [
     demoValue: '10000000000000000000000000000000000',
     description: 'Keeps large numbers in decimal, so 1e+21 never shows up.',
     video: '/videos/scientific-notation.mp4',
-    videoLabel: 'scientific notation bug',
+    videoLabel: 'Screen recording of an input without Numora showing scientific notation',
+    videoCaption: 'Without Numora',
   },
   {
     id: 'cursor',
@@ -37,7 +43,8 @@ const SLIDES: Slide[] = [
     demoValue: '1234567.89',
     description: 'The cursor stays where you put it.',
     video: '/videos/cursor-jump.mp4',
-    videoLabel: 'cursor jump',
+    videoLabel: 'Screen recording of an input without Numora where the cursor jumps',
+    videoCaption: 'Without Numora',
   },
   {
     id: 'paste',
@@ -47,7 +54,8 @@ const SLIDES: Slide[] = [
     isPaste: true,
     description: 'Numora strips symbols and text from pasted values.',
     video: '/videos/paste.mp4',
-    videoLabel: 'unhandled paste',
+    videoLabel: 'Screen recording of an input without Numora accepting an unsanitized paste',
+    videoCaption: 'Without Numora',
   },
   {
     id: 'thousands',
@@ -56,7 +64,8 @@ const SLIDES: Slide[] = [
     demoValue: '12345',
     description: 'Format on every keystroke or on blur.',
     video: '/videos/format.mp4',
-    videoLabel: 'format on change or on blur',
+    videoLabel: 'Screen recording of a Numora input formatting on change and on blur',
+    videoCaption: 'With Numora',
   },
   {
     id: 'compact',
@@ -66,7 +75,8 @@ const SLIDES: Slide[] = [
     typingSequence: ['1', '.', '5', 'm'],
     description: 'Type 1k, 1.5m or 2b and Numora expands it.',
     video: '/videos/compact.mp4',
-    videoLabel: 'compact notation',
+    videoLabel: 'Screen recording of a Numora input expanding compact notation',
+    videoCaption: 'With Numora',
   },
   {
     id: 'regional',
@@ -74,6 +84,11 @@ const SLIDES: Slide[] = [
     label: 'Regional grouping',
     demoValue: '12345678',
     description: 'Lakh (Indian, 12,34,567) and Wan (East Asian, 1,2345,6789) groupings.',
+    samples: [
+      { value: '12,345,678', note: 'thousand' },
+      { value: '1,23,45,678', note: 'lakh' },
+      { value: '1234,5678', note: 'wan' },
+    ],
   },
   {
     id: 'locale',
@@ -81,6 +96,20 @@ const SLIDES: Slide[] = [
     label: 'Locale auto-detection',
     demoValue: '1234567.89',
     description: 'Numora reads the separators from Intl.NumberFormat.',
+    video: '/videos/locale.mp4',
+    videoLabel:
+      'Screen recording of a Numora input switching between en-US, de-DE and de-CH separators',
+    videoCaption: 'With Numora',
+  },
+  {
+    id: 'torph',
+    category: 'features',
+    label: 'Animated digits',
+    demoValue: '1234567.89',
+    description: 'Pair Numora with Torph to animate each digit as you type.',
+    video: '/videos/torph.mp4',
+    videoLabel: 'Screen recording of a Numora input with Torph animating each digit as it is typed',
+    videoCaption: 'With Numora and Torph',
   },
 ];
 
@@ -92,39 +121,96 @@ const CATEGORY_LABELS: Record<Category, string> = {
 const inputClass =
   'w-full bg-transparent text-xl font-mono text-white placeholder-surface-6 focus:outline-none text-right py-3 tracking-wide';
 
+const ICON_HIDDEN = { opacity: 0, scale: 0.25, filter: 'blur(4px)' };
+const ICON_SHOWN = { opacity: 1, scale: 1, filter: 'blur(0px)' };
+
 export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
   const [activeSlide, setActiveSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [videoDuration, setVideoDuration] = useState<number | null>(null);
+  const [failedVideoId, setFailedVideoId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const typingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+  // Time spent on a slide that has no recording to act as its clock.
+  const elapsedRef = useRef(0);
+  const cancelTypingRef = useRef<(() => void) | null>(null);
+  // Once the reader has played, paused or typed, their choice outranks the motion preference.
+  const userChoseRef = useRef(false);
   const shouldReduceMotion = useReducedMotion();
+  const reduceMotionRef = useRef(shouldReduceMotion);
+  reduceMotionRef.current = shouldReduceMotion;
 
   const slide = SLIDES[activeSlide];
+  // The recording is the clock on its slide: progress reads its currentTime and the
+  // slide advances when it ends. Slides without one (or whose file failed) run a timer.
+  const usesVideoClock = !!slide.video && failedVideoId !== slide.id;
 
-  // Auto-advance timer
+  const advance = useCallback(() => {
+    setActiveSlide((prev) => (prev + 1) % SLIDES.length);
+  }, []);
+
+  // Reduced motion: start paused, on the first slide's poster.
+  useEffect(() => {
+    if (shouldReduceMotion && !userChoseRef.current) setIsPlaying(false);
+  }, [shouldReduceMotion]);
+
+  // New slide: progress starts from zero.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: resets on every slide change
+  useEffect(() => {
+    elapsedRef.current = 0;
+    if (barRef.current) barRef.current.style.transform = 'scaleX(0)';
+  }, [activeSlide]);
+
+  // Play and pause reach the recording itself.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a new slide mounts a new <video>
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const autoplayBlocked = shouldReduceMotion && !userChoseRef.current;
+    if (isPlaying && !autoplayBlocked) {
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [isPlaying, activeSlide, usesVideoClock, shouldReduceMotion]);
+
+  // Progress bar and auto-advance. Pausing stops the loop and leaves the bar where it is.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: restarts for each slide
   useEffect(() => {
     if (!isPlaying) return;
-    if (slide.video && videoDuration === null) return; // wait for video metadata
 
-    const duration = slide.video && videoDuration !== null ? videoDuration : SLIDE_DURATION;
+    let raf = 0;
+    let last = performance.now();
 
-    timerRef.current = setTimeout(() => {
-      setVideoDuration(null);
-      setActiveSlide((prev) => (prev + 1) % SLIDES.length);
-    }, duration);
+    const tick = (now: number) => {
+      // A backgrounded tab stops rAF; don't count the time away as time on the slide.
+      const dt = Math.min(now - last, 100);
+      last = now;
 
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      let progress = 0;
+      if (usesVideoClock) {
+        const video = videoRef.current;
+        if (video && video.duration > 0) progress = video.currentTime / video.duration;
+      } else {
+        elapsedRef.current += dt;
+        progress = elapsedRef.current / SLIDE_DURATION;
+        if (progress >= 1) {
+          advance();
+          return;
+        }
+      }
+
+      if (barRef.current) barRef.current.style.transform = `scaleX(${Math.min(progress, 1)})`;
+      raf = requestAnimationFrame(tick);
     };
-  }, [slide, isPlaying, videoDuration]);
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [isPlaying, activeSlide, usesVideoClock, advance]);
 
   // Typing animation
   useEffect(() => {
     if (!inputRef.current) return;
-
-    if (typingRef.current) clearInterval(typingRef.current);
 
     const input = inputRef.current;
     const currentSlide = SLIDES[activeSlide];
@@ -149,33 +235,16 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
         // Ensure cursor is at the end before each simulated keypress.
         input.setSelectionRange(input.value.length, input.value.length);
 
-        if (char === '\b') {
-          const beforeInput = new InputEvent('beforeinput', {
-            bubbles: true,
-            cancelable: true,
-            inputType: 'deleteContentBackward',
-          });
-          input.dispatchEvent(beforeInput);
-          if (!beforeInput.defaultPrevented) {
-            nativeSetter?.call(input, input.value.slice(0, -1));
-            input.dispatchEvent(
-              new InputEvent('input', { bubbles: true, inputType: 'deleteContentBackward' })
-            );
-          }
-        } else {
-          const beforeInput = new InputEvent('beforeinput', {
-            bubbles: true,
-            cancelable: true,
-            inputType: 'insertText',
-            data: char,
-          });
-          input.dispatchEvent(beforeInput);
-          if (!beforeInput.defaultPrevented) {
-            nativeSetter?.call(input, input.value + char);
-            input.dispatchEvent(
-              new InputEvent('input', { bubbles: true, inputType: 'insertText' })
-            );
-          }
+        const beforeInput = new InputEvent('beforeinput', {
+          bubbles: true,
+          cancelable: true,
+          inputType: 'insertText',
+          data: char,
+        });
+        input.dispatchEvent(beforeInput);
+        if (!beforeInput.defaultPrevented) {
+          nativeSetter?.call(input, input.value + char);
+          input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
         }
       });
     };
@@ -186,11 +255,10 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
       input.dispatchEvent(new Event('input', { bubbles: true }));
     };
 
-    let clearTimer: ReturnType<typeof setTimeout>;
-    let pasteTimer: ReturnType<typeof setTimeout>;
+    let pasteTimer: ReturnType<typeof setTimeout> | undefined;
+    let typingTimer: ReturnType<typeof setInterval> | undefined;
 
-    clearTimer = setTimeout(() => {
-      if (!input) return;
+    const clearTimer = setTimeout(() => {
       clearInput();
 
       if (currentSlide.isPaste) {
@@ -199,39 +267,56 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
           nativeSetter?.call(input, currentSlide.demoValue);
           input.dispatchEvent(new Event('input', { bubbles: true }));
         }, 200);
-      } else {
-        const sequence = currentSlide.typingSequence ?? currentSlide.demoValue.split('');
-        let i = 0;
-        typingRef.current = setInterval(() => {
-          simulateChar(sequence[i]);
-          i++;
-          if (i >= sequence.length) {
-            if (typingRef.current) clearInterval(typingRef.current);
-          }
-        }, TYPING_DELAY);
+        return;
       }
+
+      const sequence = currentSlide.typingSequence ?? currentSlide.demoValue.split('');
+
+      // Reduced motion: show the result without the keystroke-by-keystroke animation.
+      if (reduceMotionRef.current) {
+        for (const char of sequence) simulateChar(char);
+        return;
+      }
+
+      let i = 0;
+      typingTimer = setInterval(() => {
+        simulateChar(sequence[i]);
+        i++;
+        if (i >= sequence.length) clearInterval(typingTimer);
+      }, TYPING_DELAY);
     }, CLEAR_DELAY);
 
-    return () => {
+    const cancel = () => {
       clearTimeout(clearTimer);
       clearTimeout(pasteTimer);
-      if (typingRef.current) clearInterval(typingRef.current);
+      clearInterval(typingTimer);
     };
+    cancelTypingRef.current = cancel;
+
+    return cancel;
   }, [activeSlide]);
 
+  // Picking a slide shows it. It doesn't restart autoplay for a reader who paused.
   const handleSlideClick = (index: number) => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setVideoDuration(null);
     setActiveSlide(index);
-    setIsPlaying(true);
   };
 
-  const hasVideo = !!slide.video;
+  const handleTogglePlay = () => {
+    userChoseRef.current = true;
+    setIsPlaying((prev) => !prev);
+  };
+
+  // The reader is using the input: stop typing over them and stop changing slides.
+  const handleReaderInput = () => {
+    userChoseRef.current = true;
+    cancelTypingRef.current?.();
+    setIsPlaying(false);
+  };
 
   return (
     <div className="pt-4 pb-8 w-full max-w-lg mx-auto animate-fade-in opacity-0" style={style}>
       <div className="space-y-3">
-        <div className="rounded-2xl border border-surface-3 bg-surface-1 overflow-hidden px-4 py-0">
+        <div className="rounded-2xl border border-surface-3 bg-surface-1 overflow-hidden px-4 py-0 transition-[border-color] duration-150 ease-out has-[input:focus-visible]:border-secondary">
           <NumoraInput
             ref={inputRef}
             locale={slide.id === 'locale' ? true : undefined}
@@ -241,52 +326,105 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
             decimalMaxLength={2}
             allowCompactNotation
             placeholder="0.00"
+            aria-label="Numora demo input"
+            onPointerDown={handleReaderInput}
+            onKeyDown={handleReaderInput}
             className={inputClass}
           />
         </div>
 
-        {(() => {
-          const progressDuration = slide.video ? videoDuration : SLIDE_DURATION;
-          return (
-            <div className="relative h-px bg-surface-3 overflow-hidden rounded-full">
-              <div
-                key={`${activeSlide}-${isPlaying}-${progressDuration}`}
-                className={`h-px bg-secondary/60 ${isPlaying && progressDuration !== null ? '' : 'hidden'}`}
-                style={{
-                  width: '0',
-                  animation:
-                    isPlaying && progressDuration !== null
-                      ? `expand ${progressDuration}ms linear forwards`
-                      : 'none',
-                }}
-              />
-            </div>
-          );
-        })()}
+        <div className="flex items-center gap-3">
+          <div className="relative h-0.5 flex-1 overflow-hidden rounded-full bg-surface-3">
+            <div
+              ref={barRef}
+              className="h-full origin-left bg-secondary/60"
+              style={{ transform: 'scaleX(0)' }}
+            />
+          </div>
 
-        <div
-          className={`transition-[opacity,max-height] duration-300 ease-out-expo overflow-hidden ${
-            hasVideo ? 'opacity-100 h-52 sm:h-72 rounded-lg' : 'opacity-0 max-h-0'
-          }`}
-        >
-          {slide.video ? (
+          <button
+            type="button"
+            onClick={handleTogglePlay}
+            aria-label={isPlaying ? 'Pause demo' : 'Play demo'}
+            className="relative size-8 shrink-0 rounded-full border border-surface-4 bg-surface-2 flex items-center justify-center text-muted-foreground/70 hover:text-muted-foreground hover:border-surface-6 hover:bg-surface-3 transition-[color,background-color,border-color,scale] duration-150 ease-out active:scale-[0.96] cursor-pointer after:absolute after:top-1/2 after:left-1/2 after:size-11 after:-translate-x-1/2 after:-translate-y-1/2"
+          >
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.span
+                key={isPlaying ? 'pause' : 'play'}
+                initial={shouldReduceMotion ? { opacity: 0 } : ICON_HIDDEN}
+                animate={ICON_SHOWN}
+                exit={shouldReduceMotion ? { opacity: 0 } : ICON_HIDDEN}
+                transition={{ type: 'spring', duration: 0.2, bounce: 0 }}
+                className="leading-none select-none flex items-center justify-center"
+              >
+                {isPlaying ? (
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 10 10"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <rect x="1" y="1" width="3" height="8" rx="0.5" />
+                    <rect x="6" y="1" width="3" height="8" rx="0.5" />
+                  </svg>
+                ) : (
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 10 10"
+                    fill="currentColor"
+                    aria-hidden="true"
+                    className="ml-0.5"
+                  >
+                    <path d="M2 1.5 L9 5 L2 8.5 Z" />
+                  </svg>
+                )}
+              </motion.span>
+            </AnimatePresence>
+          </button>
+        </div>
+
+        {/* The media box keeps one size on every slide, so nothing below it moves. */}
+        <div className="relative aspect-video overflow-hidden rounded-2xl border border-surface-3 bg-surface-1">
+          {usesVideoClock && slide.video ? (
             <video
               key={slide.id}
-              autoPlay
-              loop
+              ref={videoRef}
               muted
               playsInline
-              onLoadedMetadata={(e) =>
-                setVideoDuration(Math.round(e.currentTarget.duration * 1000))
-              }
-              className="w-full sm:w-auto mx-auto sm:h-full"
+              preload="auto"
+              poster={slide.video.replace(/\.mp4$/, '.jpg')}
+              aria-label={slide.videoLabel}
+              onEnded={advance}
+              onError={() => setFailedVideoId(slide.id)}
+              className="size-full object-cover"
             >
               <source src={slide.video} type="video/mp4" />
             </video>
           ) : (
-            <div className="rounded-2xl border border-dashed border-surface-3 bg-surface-1 px-4 py-6 text-center">
-              <span className="text-xs text-muted-foreground/40">{slide.videoLabel}</span>
-            </div>
+            slide.samples && (
+              <dl className="flex size-full flex-col items-center justify-center gap-2 sm:gap-3">
+                {slide.samples.map((sample) => (
+                  <div key={sample.note} className="flex w-56 items-baseline justify-between gap-4">
+                    <dt className="text-xs text-muted-foreground">{sample.note}</dt>
+                    <dd className="font-mono text-base tabular-nums text-white sm:text-lg">
+                      {sample.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            )
+          )}
+
+          {usesVideoClock && slide.videoCaption && (
+            <span
+              className={`absolute left-2 top-2 rounded-full bg-surface-1/90 px-2 py-0.5 text-xs ${
+                slide.category === 'prevents' ? 'text-signal-amber' : 'text-secondary'
+              }`}
+            >
+              {slide.videoCaption}
+            </span>
           )}
         </div>
 
@@ -296,10 +434,12 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
             return (
               <motion.button
                 key={s.id}
+                type="button"
                 layout
                 whileTap={{ scale: 0.96 }}
                 transition={{ layout: { type: 'spring', duration: 0.3, bounce: 0 } }}
                 onClick={() => handleSlideClick(index)}
+                aria-current={isActive ? 'true' : undefined}
                 className={`relative w-full text-left rounded-lg px-3 py-2.5 cursor-pointer ${
                   !isActive ? 'hover:bg-surface-2' : ''
                 }`}
@@ -314,21 +454,15 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
                 )}
 
                 <div className="relative flex items-center gap-2 z-[5]">
-                  <span className="relative w-3 h-3.5 shrink-0 flex items-center justify-center">
-                    <AnimatePresence mode="wait" initial={false}>
-                      <motion.span
-                        key={isActive ? 'active' : 'inactive'}
-                        initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.7 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.7 }}
-                        transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
-                        className={`absolute text-xs leading-none ${
-                          isActive ? 'text-secondary' : 'text-muted-foreground/30'
-                        }`}
-                      >
-                        {isActive ? '▶' : '○'}
-                      </motion.span>
-                    </AnimatePresence>
+                  <span
+                    aria-hidden="true"
+                    className="w-3 h-3.5 shrink-0 flex items-center justify-center"
+                  >
+                    <span
+                      className={`size-1.5 rounded-full transition-[background-color] duration-150 ease-out ${
+                        isActive ? 'bg-secondary' : 'bg-muted-foreground/30'
+                      }`}
+                    />
                   </span>
 
                   <p
@@ -364,74 +498,6 @@ export function NumoraDemo({ style }: { style?: CSSProperties } = {}) {
               </motion.button>
             );
           })}
-        </div>
-
-        <div className="flex items-center justify-center gap-3 pt-1">
-          <div className="flex items-center gap-1.5">
-            {SLIDES.map((_, index) => (
-              <button
-                key={SLIDES[index].id}
-                type="button"
-                onClick={() => handleSlideClick(index)}
-                aria-label={`Show ${SLIDES[index].label}`}
-                aria-current={index === activeSlide ? 'true' : undefined}
-                className={`rounded-full transition-[background-color,width,height] duration-200 cursor-pointer ${
-                  index === activeSlide
-                    ? 'w-2 h-2 bg-secondary/80'
-                    : 'w-1.5 h-1.5 bg-surface-3 hover:bg-surface-6'
-                }`}
-              />
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsPlaying((prev) => !prev)}
-            aria-label={isPlaying ? 'Pause' : 'Play'}
-            className="relative w-8 h-8 rounded-full border border-[oklch(0.232_0.008_255)] bg-surface-2 flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground/90 hover:border-surface-6 hover:bg-surface-3 transition-[color,background-color,border-color,scale] duration-150 ease-out active:scale-[0.96] cursor-pointer after:absolute after:top-1/2 after:left-1/2 after:size-10 after:-translate-x-1/2 after:-translate-y-1/2"
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={isPlaying ? 'pause' : 'play'}
-                initial={
-                  shouldReduceMotion ? false : { opacity: 0, scale: 0.25, filter: 'blur(4px)' }
-                }
-                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                exit={
-                  shouldReduceMotion
-                    ? { opacity: 0 }
-                    : { opacity: 0, scale: 0.25, filter: 'blur(4px)' }
-                }
-                transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
-                className="leading-none select-none flex items-center justify-center"
-              >
-                {isPlaying ? (
-                  <svg
-                    width="10"
-                    height="10"
-                    viewBox="0 0 10 10"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <rect x="1" y="1" width="3" height="8" rx="0.5" />
-                    <rect x="6" y="1" width="3" height="8" rx="0.5" />
-                  </svg>
-                ) : (
-                  <div className="ml-0.5">
-                    <svg
-                      width="10"
-                      height="10"
-                      viewBox="0 0 10 10"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="M2 1.5 L9 5 L2 8.5 Z" />
-                    </svg>
-                  </div>
-                )}
-              </motion.span>
-            </AnimatePresence>
-          </button>
         </div>
       </div>
     </div>

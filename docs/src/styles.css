@@ -233,16 +233,6 @@ body {
   }
 }
 
-/* Expand animation for progress bar (width-based, intentional for time visualization) */
-@keyframes expand {
-  0% {
-    width: 0;
-  }
-  100% {
-    width: 100%;
-  }
-}
-
 /* GPU-accelerated line expansion for hero underline */
 @keyframes expand-line {
   from { transform: scaleX(0); }
@@ -586,6 +576,15 @@ body {
     padding: 0.5rem 0.75rem 0.5rem 0;
     border-bottom: 1px solid var(--border);
   }
+  :where(.docs-prose) :where(th, td):not(:where(.not-prose, .not-prose *)) {
+    vertical-align: top;
+  }
+  /* An identifier in a table's first column never breaks in the middle: the cell grows to fit it, and a
+     table too wide for the column scrolls inside its `overflow-x-auto` wrapper. */
+  :where(.docs-prose) :where(td:first-child) :where(code):not(:where(.not-prose, .not-prose *)) {
+    overflow-wrap: normal;
+    white-space: nowrap;
+  }
 
   /* Page rhythm. Direct children of the article only, so nested sections (Anatomy) keep their own
      spacing utilities. Quiet, small headings; air above them, a short gap below (they belong to
@@ -705,6 +704,8 @@ body {
     position: absolute;
     left: 68%;
     top: 44px;
+    /* Above whatever follows the figure: the pointer rests outside the card. */
+    z-index: 1;
     pointer-events: none;
     user-select: none;
     transform: translate(72px, 62px);

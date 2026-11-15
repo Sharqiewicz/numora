@@ -30,7 +30,7 @@ export const Route = createFileRoute('/')({
     ],
     links: [
       { rel: 'canonical', href: 'https://numeric-input.com' },
-      { rel: 'preload', href: '/videos/scientific-notation.mp4', as: 'video', type: 'video/mp4' },
+      { rel: 'preload', href: '/videos/scientific-notation.jpg', as: 'image', type: 'image/jpeg' },
       { rel: 'prefetch', href: '/videos/cursor-jump.mp4', as: 'video', type: 'video/mp4' },
       { rel: 'prefetch', href: '/videos/paste.mp4', as: 'video', type: 'video/mp4' },
     ],
