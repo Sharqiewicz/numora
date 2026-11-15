@@ -31,6 +31,8 @@ If your React app also lists `numora`, keep it at the same version as `numora-re
 | `thousandStyle` / `ThousandStyle` | `groupingStyle` / `GroupingStyle` (default is now `'thousand'`, with `,` as the separator. Vanilla v4 defaulted to none. React v4 defaulted to `'thousand'` but grouped only when you passed `thousandSeparator` or `locale`, so a field that passed neither now shows grouping. `locale` now also sets the grouping style: an `en-IN` field shows `12,34,567` where v4 showed `1,234,567`. Pass `groupingStyle: 'thousand'` to keep the old grouping) |
 | `thousandSeparator: ''` | `groupingStyle: 'none'` (an empty separator is invalid: vanilla throws, as in v4; React throws outside production, as in v4, and in production logs the error and keeps the last valid options, or the defaults on a first render, so grouping usually stays on. A v4 production build did not validate and showed no grouping) |
 | `rawValueMode` | removed: the raw value is always reported |
+| `emitRawValue` (never in a published release; only in builds between 4.0.0 and 5.0.0) | removed: read the raw value from the `onValueChange` `value` |
+| `enableScientificNotation` (never in a published release; only in builds between 4.0.0 and 5.0.0) | `allowScientificNotation` |
 | type `FormattingOptions` | `NumoraOptions` |
 | `formatOn` left out (was `'blur'`) | the default is now `'change'`; pass `formatOn: 'blur'` to keep grouping on blur only. This matters in React and in a vanilla field that set `thousandStyle`; other vanilla v4 fields had no grouping |
 
