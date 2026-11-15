@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { useSyncExternalStore } from 'react';
 import { CodeBlock } from '@/components/CodeBlock';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
+import { LocaleSeparatorsDemo } from '@/components/LocaleSeparatorsDemo';
 
 export const Route = createFileRoute('/docs/numora-react/features/locale')({
   head: () => ({
@@ -92,6 +93,8 @@ function Locale() {
         style, via <code>Intl.NumberFormat</code>. An explicit <code>groupingStyle</code> overrides
         the detected one.
       </p>
+
+      <LocaleSeparatorsDemo />
 
       <h2>Where the separators come from</h2>
       <p>

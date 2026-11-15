@@ -102,12 +102,6 @@ const input = new NumoraInput(container, {
         <code>1.</code> becomes <code>1</code>, or <code>decimalMinLength</code> pads it.
       </p>
 
-      <h2>Which one to use</h2>
-      <p>
-        Keep the default for amounts the user reads while typing, such as a price or a token amount.
-        Use <code>'blur'</code> when users edit digits in the middle of a long number. No separator
-        moves under the caret while they type.
-      </p>
       <p>
         The demos on this page animate the digits with Torph. See the{' '}
         <Link to="/docs/numora/integrations/torph">Torph integration</Link> to build them, and{' '}

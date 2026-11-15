@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
+import { ValidationDemo } from '@/components/ValidationDemo';
 
 export const Route = createFileRoute('/docs/numora-react/features/validation')({
   head: () => ({
@@ -83,6 +84,8 @@ function Validation() {
         paste, drop, autofill, IME) <em>before</em> they commit. It fits business rules and format
         rules that no built-in prop covers.
       </p>
+
+      <ValidationDemo api="react" />
 
       <CodeBlock language="typescript">
         {`type IsAllowed = (rawValue: string) => boolean`}

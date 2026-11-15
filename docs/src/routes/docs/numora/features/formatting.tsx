@@ -1,4 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { BackspaceSkipFigure } from '@/components/anatomy/BackspaceSkipFigure';
+import { CursorLanes } from '@/components/anatomy/CursorLanes';
+import { GroupingStylesDiagram } from '@/components/anatomy/diagrams';
 import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora/features/formatting')({
@@ -88,6 +91,7 @@ function Formatting() {
       </p>
 
       <h2>Grouping styles</h2>
+      <GroupingStylesDiagram />
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
@@ -118,6 +122,8 @@ const input4 = new NumoraInput(container, {
         <code>formatOn: 'blur'</code>. See{' '}
         <Link to="/docs/numora/features/format-on">Change vs blur</Link> for both modes.
       </p>
+      <p>When the separators move, the caret stays between the same two digits:</p>
+      <CursorLanes />
 
       <h2>Separator skipping</h2>
       <ul>
@@ -125,6 +131,7 @@ const input4 = new NumoraInput(container, {
           Backspace and Delete jump over thousand separators, so you never delete one by hand.
         </li>
       </ul>
+      <BackspaceSkipFigure />
     </div>
   );
 }

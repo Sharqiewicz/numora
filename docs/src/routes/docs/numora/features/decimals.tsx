@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
+import { DecimalsDemo } from '@/components/DecimalsDemo';
 
 export const Route = createFileRoute('/docs/numora/features/decimals')({
   head: () => ({
@@ -77,18 +78,20 @@ function Decimals() {
         the integer and decimal parts.
       </p>
 
+      <DecimalsDemo />
+
       <h2>Precision limits</h2>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
-// Cap at 2 decimal places. A typed third digit is refused. Pasted or app-set extra
-// digits are cut off, not rounded: "1.239" becomes "1.23"
+// Cap at 2 decimal places. Numora refuses a third typed digit. It cuts extra digits
+// off a pasted or app-set value without rounding, so "1.239" becomes "1.23"
 const input1 = new NumoraInput(container, {
   decimalMaxLength: 2,
 })
 
-// Pad to at least 2 decimal places on blur and when your app sets the value (never
-// while typing). The constructor throws if decimalMinLength is above decimalMaxLength
+// Pad to at least 2 decimal places on blur and when your app sets the value, never
+// while typing. The constructor throws if decimalMinLength is above decimalMaxLength
 const input2 = new NumoraInput(container, {
   decimalMinLength: 2,
   decimalMaxLength: 18,
@@ -100,7 +103,7 @@ const input2 = new NumoraInput(container, {
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
-// European format
+// Comma decimal, dot thousands
 const input = new NumoraInput(container, {
   decimalSeparator: ',',
   thousandSeparator: '.',
@@ -115,17 +118,17 @@ const input = new NumoraInput(container, {
         <Link to="/docs/numora/features/locale">Locale</Link>.
       </p>
 
-      <h2>Automatic behaviors</h2>
+      <h2>Typing and pasting a separator</h2>
       <ul>
         <li>
           <strong>Separator input.</strong> Typing <code>,</code> or <code>.</code> inserts the
           configured decimal separator. Numora blocks it if the value already has one.
         </li>
         <li>
-          <strong>Paste cleanup.</strong> Numora reads pasted text by its own format. When both{' '}
-          <code>.</code> and <code>,</code> appear, the last one is the decimal, so{' '}
-          <code>"1,234.56"</code> becomes <code>1234.56</code>. A mark that repeats is grouping, so{' '}
-          <code>"12.34.56"</code> becomes <code>123456</code>.
+          <strong>Paste cleanup.</strong> Numora works out the format of pasted text from the text,
+          not from the field's separators. When both <code>.</code> and <code>,</code> appear, the
+          last one is the decimal, so <code>"1,234.56"</code> becomes <code>1234.56</code>. A mark
+          that repeats is grouping, so <code>"12.34.56"</code> becomes <code>123456</code>.
         </li>
       </ul>
     </div>

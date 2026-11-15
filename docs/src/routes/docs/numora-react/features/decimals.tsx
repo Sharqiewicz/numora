@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { DecimalsDemo } from '@/components/DecimalsDemo';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
 
 export const Route = createFileRoute('/docs/numora-react/features/decimals')({
@@ -78,6 +79,8 @@ function Decimals() {
     <div className="docs-prose max-w-[36rem]">
       <h1>Decimals</h1>
       <p>Set how many decimal places are allowed and which separators the input uses.</p>
+
+      <DecimalsDemo />
 
       <h2>Precision limits</h2>
       <div className="space-y-4">

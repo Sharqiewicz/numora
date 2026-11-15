@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
+import { MaxLengthDemo } from '@/components/MaxLengthDemo';
 
 export const Route = createFileRoute('/docs/numora-react/features/max-length')({
   head: () => ({
@@ -83,6 +84,8 @@ function MaxLength() {
         <code>maxLength</code> attribute counts formatted characters: <code>1,234,567</code> is 9
         characters but only 7 digits, and <code>maxLength</code> here counts 7.
       </p>
+
+      <MaxLengthDemo />
 
       <div className="space-y-4">
         <ExampleWithDemo

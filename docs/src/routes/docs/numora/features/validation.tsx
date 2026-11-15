@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
+import { ValidationDemo } from '@/components/ValidationDemo';
 
 export const Route = createFileRoute('/docs/numora/features/validation')({
   head: () => ({
@@ -79,6 +80,8 @@ function Validation() {
         drop, autofill, IME) <em>before</em> they commit. Use it for business rules or format
         constraints that don't fit a built-in option.
       </p>
+
+      <ValidationDemo />
 
       <CodeBlock language="typescript">
         {`type IsAllowed = (rawValue: string) => boolean`}

@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { ValueReadout } from '@/components/anatomy/ValueReadout';
 import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora-react/features/value-types')({
@@ -203,6 +204,8 @@ function ValueTypes() {
   }}
 />`}
       </CodeBlock>
+      <p>Type below. Both readouts update on every keystroke:</p>
+      <ValueReadout pkg="numora-react" />
 
       <h2>Reading values via ref</h2>
       <p>

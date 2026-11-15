@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
+import { CompactNotationDemo } from '@/components/CompactNotationDemo';
 
 export const Route = createFileRoute('/docs/numora/features/compact-notation')({
   head: () => ({
@@ -88,6 +89,8 @@ function CompactNotation() {
         <code>12000000</code>.
       </p>
 
+      <CompactNotationDemo />
+
       <div className="overflow-x-auto">
         <table>
           <thead>
@@ -126,16 +129,12 @@ function CompactNotation() {
         {`import { NumoraInput } from 'numora'
 
 const input = new NumoraInput(container, {
-  allowCompactNotation: true,
-  decimalMaxLength: 18,
-  // "0.5k"  → "500"
-  // "2.75m" → "2750000"
+  allowCompactNotation: true
 })`}
       </CodeBlock>
 
       <p>
-        Typing <code>1</code> then <code>k</code> gives the raw value <code>"1000"</code>, shown as{' '}
-        <code>1,000</code> with the default grouping.
+        Typing <code>1</code> then <code>k</code> gives the raw value <code>"1000"</code>.
       </p>
     </div>
   );

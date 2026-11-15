@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { ValueReadout } from '@/components/anatomy/ValueReadout';
 import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora/features/value-types')({
@@ -157,12 +158,10 @@ function ValueTypes() {
       <h2>Raw value and formatted value</h2>
       <p>
         <code>onValueChange</code> receives <code>{'{ value, formattedValue }'}</code>.{' '}
-        <code>value</code> is the canonical raw string for every locale: ASCII digits,{' '}
-        <code>.</code> as the decimal, a leading <code>-</code>, no grouping (a de-DE display of{' '}
-        <code>1.234.567,89</code> is raw <code>1234567.89</code>). <code>instance.rawValue</code>{' '}
-        returns the same raw string and <code>instance.formattedValue</code> the display string. The
-        names follow one rule. The instance says <code>rawValue</code>. Callbacks and options say{' '}
-        <code>value</code>.
+        <code>value</code> is the raw value described above and <code>formattedValue</code> is the
+        text the field shows. <code>instance.rawValue</code> and{' '}
+        <code>instance.formattedValue</code> return the same two strings. The naming rule is that
+        the instance says <code>rawValue</code>, and callbacks and options say <code>value</code>.
       </p>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
@@ -177,13 +176,15 @@ const numoraInput = new NumoraInput(container, {
 numoraInput.rawValue       // "1234.56"
 numoraInput.formattedValue // "1,234.56"`}
       </CodeBlock>
+      <p>Type below. Both readouts update on every keystroke:</p>
+      <ValueReadout pkg="numora" />
 
       <h2>Native form submission</h2>
       <p>
         A plain <code>&lt;form&gt;</code> submit or <code>new FormData(form)</code> reads the
-        input's DOM value, which is the display string (<code>"1,234.56"</code>, or{' '}
-        <code>"1.234,56"</code> in de-DE). To submit the raw value, leave the visible input without
-        a <code>name</code> and mirror the raw value into a hidden input:
+        input's DOM value, which is the display string. That is <code>"1,234.56"</code>, or{' '}
+        <code>"1.234,56"</code> in de-DE. To submit the raw value, leave the visible input without a{' '}
+        <code>name</code> and copy the raw value into a hidden input:
       </p>
       <CodeBlock language="typescript">
         {`const hidden = form.querySelector<HTMLInputElement>('input[name="amount"]')!
@@ -200,8 +201,8 @@ hidden.value = numoraInput.rawValue`}
       <h2>When you need a number</h2>
       <p>
         Numora has no numeric getter. If you need a JavaScript <code>number</code>, convert the raw
-        value yourself, and only for values where a rounding error is acceptable (a chart, a slider,
-        a rough comparison):
+        value yourself. Only do it where a rounding error is acceptable, such as a chart or a
+        slider:
       </p>
       <CodeBlock language="typescript">
         {`const numoraInput = new NumoraInput(container, { defaultValue: '1234.56' })
@@ -211,7 +212,7 @@ console.log(num)                                // 1234.56
 console.log(numoraInput.rawValue === '')        // true when the input is empty`}
       </CodeBlock>
       <p>
-        <code>Number</code> is subject to IEEE 754 limits. Integers above{' '}
+        <code>Number</code> is an IEEE 754 double. Integers above{' '}
         <code>Number.MAX_SAFE_INTEGER</code> and long decimals lose precision, and JavaScript raises
         no error when they do. For financial arithmetic, keep working with the string from{' '}
         <code>onValueChange</code> and use a decimal library such as <code>decimal.js</code>, or{' '}
@@ -225,12 +226,12 @@ console.log(numoraInput.rawValue === '')        // true when the input is empty`
         <code>setValue('1234.5')</code> displays <code>1.234,5</code>.
       </p>
       <p>
-        <code>setValue</code> is your own write, so it does not call <code>onValueChange</code> and
-        is not checked by <code>isAllowed</code>. The new text still goes to{' '}
-        <code>onFormattedValueChange</code>. In a value you pass in, <code>,</code> is read as a
-        decimal mark like <code>.</code> and never as grouping, so <code>setValue('1234,5')</code>{' '}
-        is the same number, with a development warning. Turn formatted text into a raw value with{' '}
-        <code>parseValue()</code> first.
+        <code>setValue</code> is your own write, so it does not call <code>onValueChange</code> and{' '}
+        <code>isAllowed</code> does not check it. The new text still goes to{' '}
+        <code>onFormattedValueChange</code>. Numora reads a <code>,</code> in a value you pass in as
+        a decimal mark, like <code>.</code>, and never as grouping. So{' '}
+        <code>setValue('1234,5')</code> sets the same number and logs a warning in development. Turn
+        formatted text into a raw value with <code>parseValue()</code> first.
       </p>
     </div>
   );

@@ -1,4 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { BackspaceSkipFigure } from '@/components/anatomy/BackspaceSkipFigure';
+import { CursorLanes } from '@/components/anatomy/CursorLanes';
+import { GroupingStylesDiagram } from '@/components/anatomy/diagrams';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
 
 export const Route = createFileRoute('/docs/numora-react/features/formatting')({
@@ -93,6 +96,7 @@ function Formatting() {
         <code>groupingStyle="none"</code> to turn grouping off. Thousand (1,234,567) is the default,
         so the demos below show the other two styles.
       </p>
+      <GroupingStylesDiagram />
 
       <h2>Other grouping styles</h2>
       <div className="space-y-4">
@@ -122,6 +126,8 @@ function Formatting() {
         <code>formatOn="blur"</code>. See{' '}
         <Link to="/docs/numora-react/features/format-on">Change vs blur</Link> for both modes.
       </p>
+      <p>When the separators move, the caret stays between the same two digits:</p>
+      <CursorLanes />
 
       <h2>Separator skipping</h2>
       <ul>
@@ -129,6 +135,7 @@ function Formatting() {
           Backspace and delete skip over thousand separators, so you never delete them by hand.
         </li>
       </ul>
+      <BackspaceSkipFigure />
     </div>
   );
 }

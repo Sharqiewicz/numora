@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { CompactNotationDemo } from '@/components/CompactNotationDemo';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
 
 export const Route = createFileRoute('/docs/numora-react/features/compact-notation')({
@@ -90,6 +91,8 @@ function CompactNotation() {
         <code>10005</code>. Each suffixed number in a pasted text expands on its own, so{' '}
         <code>1k 2m</code> becomes <code>12000000</code>.
       </p>
+
+      <CompactNotationDemo />
 
       <div className="overflow-x-auto">
         <table>

@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { SanitizationJourney } from '@/components/anatomy/SanitizationJourney';
 import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora/features/sanitization')({
@@ -78,12 +79,16 @@ function Sanitization() {
     <div className="docs-prose max-w-[36rem]">
       <h1>Sanitization</h1>
       <p>
-        Numora runs every value through a sequential sanitization pipeline before it formats. For
-        the full architecture and pipeline diagram, see{' '}
+        Numora runs every value through a sequential sanitization pipeline before it formats. Watch
+        three messy values go through it. Each step marks what it is about to change. Steps with
+        nothing to do are skipped:
+      </p>
+      <SanitizationJourney />
+      <p>
         <Link to="/docs/numora/anatomy" hash="sanitization">
           Anatomy: sanitization
-        </Link>
-        . This page covers character filtering and the standalone{' '}
+        </Link>{' '}
+        covers the pipeline in full. This page covers character filtering and the standalone{' '}
         <code>removeThousandSeparators</code> utility.
       </p>
 

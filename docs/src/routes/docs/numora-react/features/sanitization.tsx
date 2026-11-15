@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { SanitizationJourney } from '@/components/anatomy/SanitizationJourney';
 import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora-react/features/sanitization')({
@@ -82,11 +83,16 @@ function Sanitization() {
       <h1>Sanitization</h1>
       <p>
         Numora React runs every value through a sequential sanitization pipeline before formatting.
-        For the full architecture and pipeline diagram, see the{' '}
+        Watch three messy values go through it. Each step marks what it is about to change. Steps
+        with nothing to do are skipped:
+      </p>
+      <SanitizationJourney />
+      <p>
+        The{' '}
         <Link to="/docs/numora-react/anatomy" hash="sanitization">
           Sanitization section of Anatomy
-        </Link>
-        . The sections below cover the configurable features.
+        </Link>{' '}
+        covers the pipeline in full. The sections below cover the configurable features.
       </p>
 
       <h2>Non-numeric character filtering</h2>

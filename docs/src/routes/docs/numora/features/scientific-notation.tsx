@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
+import { ScientificNotationDemo } from '@/components/ScientificNotationDemo';
 
 export const Route = createFileRoute('/docs/numora/features/scientific-notation')({
   head: () => ({
@@ -87,6 +88,8 @@ function ScientificNotation() {
         and expands too (<code>1e5</code> becomes <code>100000</code>). Expansion uses string
         arithmetic, so no floating-point precision is lost.
       </p>
+
+      <ScientificNotationDemo />
       <p>
         To refuse scientific notation instead, set <code>allowScientificNotation: false</code>{' '}
         (default <code>true</code>). Such a paste or keystroke then leaves the field unchanged.

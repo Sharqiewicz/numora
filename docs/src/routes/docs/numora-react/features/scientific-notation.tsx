@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
+import { ScientificNotationDemo } from '@/components/ScientificNotationDemo';
 
 export const Route = createFileRoute('/docs/numora-react/features/scientific-notation')({
   head: () => ({
@@ -87,6 +88,8 @@ function ScientificNotation() {
         ignored, but an <code>e</code> typed between digits completes a token and expands too (
         <code>1e5</code> becomes <code>100000</code>).
       </p>
+
+      <ScientificNotationDemo />
       <p>
         To refuse scientific notation instead, pass <code>allowScientificNotation={'{false}'}</code>
         . Such a paste or keystroke then leaves the field unchanged. Values passed through{' '}
