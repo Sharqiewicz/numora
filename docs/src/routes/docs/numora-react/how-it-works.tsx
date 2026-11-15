@@ -99,7 +99,11 @@ function HowItWorks() {
           <Link to={ANATOMY} hash="keydown">
             <code>keydown</code>
           </Link>
-          : skips the cursor over separators on <kbd>Delete</kbd> / <kbd>Backspace</kbd>.
+          : moves the cursor over a thousand separator on <kbd>Delete</kbd> / <kbd>Backspace</kbd>.
+          It deletes nothing. It acts only with <code>formatOn: 'change'</code>, a thousand
+          separator set and no text selected. <code>beforeinput</code> then deletes the digit.
+          Mobile keyboards that send no usable <code>keydown</code> get the same result, because{' '}
+          <code>beforeinput</code> deletes the digit past the separator itself.
         </li>
         <li>
           <Link to={ANATOMY} hash="before-input">
@@ -129,7 +133,8 @@ function HowItWorks() {
             <code>focus</code> / <code>blur</code>
           </Link>
           : strip and re-apply separators in <code>'blur'</code> mode. Blur also settles the value
-          in both modes: it drops a trailing separator and pads decimals.
+          in both modes: it drops a trailing decimal separator, pads decimals, turns <code>-0</code>{' '}
+          into <code>0</code> and empties a field with no digit.
         </li>
       </ul>
 
@@ -151,7 +156,9 @@ function HowItWorks() {
           <Link to={ANATOMY} hash="grouping-styles">
             Formatting
           </Link>
-          : decimal trimming and padding, then thousand grouping. Options:{' '}
+          : trims the decimals to <code>decimalMaxLength</code>, then groups the digits. On blur and
+          for values from your code it then drops a trailing decimal separator and pads the decimals
+          to <code>decimalMinLength</code>. Options:{' '}
           <Link to="/docs/numora-react/features/formatting">Formatting</Link>,{' '}
           <Link to="/docs/numora-react/features/decimals">Decimals</Link>.
         </li>
@@ -159,7 +166,9 @@ function HowItWorks() {
           <Link to={ANATOMY} hash="cursor-preservation">
             Cursor restoration
           </Link>
-          : puts the cursor back after the formatted value replaces <code>input.value</code>.
+          : puts the cursor back after Numora writes the formatted value. Every write goes through{' '}
+          <code>setRangeText</code>, which fires no <code>input</code> event. Numora never assigns{' '}
+          <code>input.value</code>.
         </li>
         <li>
           <Link to={ANATOMY} hash="raw-vs-formatted">

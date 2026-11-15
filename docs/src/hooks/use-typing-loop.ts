@@ -12,6 +12,11 @@ const HOLD_MS = 1800;
 const FOCUS_SETTLE_MS = 600;
 /** Pause on the finished raw value before the simulated blur re-groups it. */
 const PRE_BLUR_MS = 700;
+/**
+ * A metered loop types every value over this span, whatever its length, so each cycle
+ * lasts the same and the loop keeps a steady beat. Ten characters land at TYPE_MS apart.
+ */
+const TYPE_SPAN_MS = TYPE_MS * 9;
 
 /**
  * Blur mode announces each simulated focus and blur this long before it happens, as a
@@ -33,12 +38,31 @@ const DEFAULT_SEQUENCES: Record<TypingLoopMode, string[]> = {
 export interface TypingLoopOptions {
   /**
    * `change` types straight into the field - separators appear per keystroke.
-   * `blur` plays the full Blur-mode cycle: simulated focus (strip), type, simulated
-   * blur (regroup), hold.
+   * `blur` plays the full staged cycle: simulated focus (strip), type, simulated
+   * blur (regroup), hold. A `formatOn: 'change'` field can run it too; it then shows
+   * the click in and out around the same per-keystroke formatting.
    */
   mode?: TypingLoopMode;
   sequence?: string[];
+  /** Type every value over the same span, so all cycles are the same length. */
+  metered?: boolean;
+  /**
+   * Fields that share a group share one clock: each receives the same simulated focus,
+   * keystroke and blur at the same instant. The first field to join sets the options.
+   */
+  group?: string;
 }
+
+/**
+ * The Change and Blur demos shown as a pair: one clock, the same numbers, the same
+ * keystrokes. All three values group, and the last is the longest amount the field carries.
+ */
+export const PAIRED_LOOP: TypingLoopOptions = {
+  mode: 'blur',
+  group: 'format-on-pair',
+  metered: true,
+  sequence: ['1234567.89', '2500', '987654321012.5'],
+};
 
 type Phase = 'cue-focus' | 'focus' | 'type' | 'cue-blur' | 'blur' | 'hold';
 
@@ -60,11 +84,46 @@ type Phase = 'cue-focus' | 'focus' | 'type' | 'cue-blur' | 'blur' | 'hold';
  */
 export function startTypingLoop(
   input: HTMLInputElement,
-  { mode = 'change', sequence = DEFAULT_SEQUENCES[mode] }: TypingLoopOptions = {}
+  options: TypingLoopOptions = {}
 ): () => void {
   if (typeof window === 'undefined') return () => {};
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
 
+  const { group } = options;
+  if (!group) return runTypingLoop(new Set([input]), options).stop;
+
+  let shared = groups.get(group);
+  if (shared) {
+    shared.inputs.add(input);
+    // A field that joins late starts with the others at the top of a cycle.
+    shared.loop.restart();
+  } else {
+    const inputs = new Set([input]);
+    shared = { inputs, loop: runTypingLoop(inputs, options) };
+    groups.set(group, shared);
+  }
+  const joined = shared;
+
+  return () => {
+    joined.inputs.delete(input);
+    if (joined.inputs.size > 0) return;
+    joined.loop.stop();
+    if (groups.get(group) === joined) groups.delete(group);
+  };
+}
+
+interface TypingLoop {
+  stop: () => void;
+  restart: () => void;
+}
+
+const groups = new Map<string, { inputs: Set<HTMLInputElement>; loop: TypingLoop }>();
+
+/** One clock for every field in `inputs`; the set may grow and shrink while it runs. */
+function runTypingLoop(
+  inputs: Set<HTMLInputElement>,
+  { mode = 'change', sequence = DEFAULT_SEQUENCES[mode], metered = false }: TypingLoopOptions
+): TypingLoop {
   const nativeSetter = Object.getOwnPropertyDescriptor(
     window.HTMLInputElement.prototype,
     'value'
@@ -80,20 +139,26 @@ export function startTypingLoop(
   let disposed = false;
 
   const dispatchFocus = () => {
-    input.dispatchEvent(new FocusEvent('focus'));
-    input.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    for (const input of inputs) {
+      input.dispatchEvent(new FocusEvent('focus'));
+      input.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    }
   };
 
   const dispatchBlur = () => {
-    input.dispatchEvent(new FocusEvent('blur'));
-    input.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    for (const input of inputs) {
+      input.dispatchEvent(new FocusEvent('blur'));
+      input.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+    }
   };
 
   const dispatchCue = (cue: DemoCue) => {
-    input.dispatchEvent(new CustomEvent<DemoCue>(DEMO_CUE_EVENT, { bubbles: true, detail: cue }));
+    for (const input of inputs) {
+      input.dispatchEvent(new CustomEvent<DemoCue>(DEMO_CUE_EVENT, { bubbles: true, detail: cue }));
+    }
   };
 
-  const typeChar = (char: string, replaceAll: boolean) => {
+  const typeChar = (input: HTMLInputElement, char: string, replaceAll: boolean) => {
     // Numora repositions the caret via setRangeText; on a non-focused input that can
     // nudge the page's scroll position. Restore it after the write.
     const { scrollX, scrollY } = window;
@@ -123,8 +188,8 @@ export function startTypingLoop(
   const tick = () => {
     if (disposed) return;
 
-    if (document.activeElement === input) {
-      // The reader is editing. Leave their value alone and replay this cycle from the
+    if (inputs.has(document.activeElement as HTMLInputElement)) {
+      // The reader is editing. Leave every field alone and replay this cycle from the
       // top once they're done.
       restartCycle = true;
       timer = setTimeout(tick, HOLD_MS);
@@ -153,10 +218,10 @@ export function startTypingLoop(
     }
 
     if (phase === 'type') {
-      typeChar(target[charIndex], charIndex === 0);
+      for (const input of inputs) typeChar(input, target[charIndex], charIndex === 0);
       charIndex += 1;
       if (charIndex < target.length) {
-        timer = setTimeout(tick, TYPE_MS);
+        timer = setTimeout(tick, metered ? TYPE_SPAN_MS / Math.max(1, target.length - 1) : TYPE_MS);
       } else {
         phase = mode === 'blur' ? 'cue-blur' : 'hold';
         timer = setTimeout(tick, mode === 'blur' ? PRE_BLUR_MS - DEMO_CUE_LEAD_MS : HOLD_MS);
@@ -186,9 +251,14 @@ export function startTypingLoop(
 
   timer = setTimeout(tick, mode === 'blur' ? HOLD_MS - DEMO_CUE_LEAD_MS : HOLD_MS);
 
-  return () => {
-    disposed = true;
-    if (timer) clearTimeout(timer);
+  return {
+    stop() {
+      disposed = true;
+      if (timer) clearTimeout(timer);
+    },
+    restart() {
+      restartCycle = true;
+    },
   };
 }
 
@@ -197,10 +267,10 @@ export function useTypingLoop(
   inputRef: RefObject<HTMLInputElement | null>,
   options: TypingLoopOptions = {}
 ) {
-  const { mode, sequence } = options;
+  const { mode, sequence, metered, group } = options;
   useEffect(() => {
     const input = inputRef.current;
     if (!input) return;
-    return startTypingLoop(input, { mode, sequence });
-  }, [inputRef, mode, sequence]);
+    return startTypingLoop(input, { mode, sequence, metered, group });
+  }, [inputRef, mode, sequence, metered, group]);
 }

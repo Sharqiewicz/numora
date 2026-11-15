@@ -1,4 +1,3 @@
-import { CodeBlock } from '@/components/CodeBlock';
 import { EventPipelineLoop } from '../EventPipelineLoop';
 
 export function EventPipelineSection() {
@@ -8,41 +7,32 @@ export function EventPipelineSection() {
       <h2>The event pipeline</h2>
       <p>
         One keystroke fires four events on a focused <code>&lt;input&gt;</code>, always in the same
-        order:
+        order. The browser edits the DOM between the second and the third:
       </p>
-      <CodeBlock language="text">{`keydown  →  beforeinput  →  [DOM mutation]  →  input  →  keyup`}</CodeBlock>
       <ul>
         <li>
-          <strong>
-            <code>keydown</code> (1996)
-          </strong>{' '}
-          fires first. It reports the <em>physical key</em>, not the resulting character.
+          <code>keydown</code> fires first. It reports the physical key, not the resulting
+          character.
         </li>
         <li>
-          <strong>
-            <code>beforeinput</code> (2016)
-          </strong>{' '}
-          fires after the browser has decided what the input <em>will</em> be, but before it touches
-          the DOM. It is cancelable, which lets Numora replace the edit. It carries an{' '}
-          <code>inputType</code> that names the action ("insertText", "deleteContentBackward", …)
-          and a <code>data</code> field with the resolved character.{' '}
-          <strong>This is the hook to format from.</strong>
+          <code>beforeinput</code> fires once the browser has decided what the edit will be, but
+          before it edits the DOM. It is cancelable. Numora formats here.
         </li>
         <li>
-          <strong>
-            <code>input</code> (2009)
-          </strong>{' '}
-          fires after the value has changed. It is not cancelable. It fires for keyboard, paste,
-          drag-and-drop, voice input and autocorrect. Setting <code>input.value</code> from code
-          does not fire it.
+          <code>input</code> fires after the value has changed and cannot be canceled. Numora uses
+          it as a fallback. It reformats what the browser changed on its own, such as autofill,
+          drop, IME commits, undo and redo. If the new value is not allowed, it puts the previous
+          one back.
         </li>
         <li>
-          <strong>
-            <code>keyup</code> (1996)
-          </strong>{' '}
-          fires when the key is released, after the value has already changed. Numora ignores it.
+          <code>keyup</code> fires when the key is released. Numora ignores it.
         </li>
       </ul>
+      <p>
+        In a Numora field, typing stops at <code>beforeinput</code>. Numora cancels the edit and
+        writes the formatted value itself, so the browser never edits the DOM and <code>input</code>{' '}
+        never fires:
+      </p>
       <EventPipelineLoop />
     </section>
   );

@@ -1,18 +1,11 @@
 import { CodeBlock } from '@/components/CodeBlock';
 
-const code = `import { type NumoraHTMLInputElement, type NumoraInputChangeEvent } from 'numora-react'
+const code = `import { type NumoraHTMLInputElement } from 'numora-react'
 
-// From any onChange handler:
-onChange={(e: NumoraInputChangeEvent) => {
-  e.target.value           // → "1234.56"   (raw, via Proxy)
-  e.target.formattedValue  // → "1,234.56"  (display string)
-  e.target.selectionStart  // → cursor position (real HTMLInputElement)
-}}
-
-// Or off a forwarded ref:
 const ref = useRef<NumoraHTMLInputElement>(null)
 ref.current?.formattedValue  // → "1,234.56"
-ref.current?.value           // → "1,234.56"  (DOM value: formatted unless Blur mode and focused; no Proxy here)`;
+// The DOM value, with no Proxy: formatted, except in a focused blur-mode field
+ref.current?.value           // → "1,234.56"`;
 
 export function ProxyTargetSection() {
   return (
@@ -22,20 +15,36 @@ export function ProxyTargetSection() {
         The Proxy on <code>e.target</code>
       </h2>
       <p>
-        The React component exposes both the raw and the formatted string on the change event's{' '}
-        <code>target</code> through a Proxy. The synthetic <code>ChangeEvent</code>'s{' '}
-        <code>target</code> wraps the real <code>HTMLInputElement</code>. Reads of{' '}
-        <code>target.value</code> are intercepted and return the raw string.{' '}
-        <code>target.formattedValue</code> is a getter that Numora React defines once on the input
-        when it mounts, next to <code>rawValue</code> and <code>setValue</code>. The Proxy passes it
-        through, like everything else (<code>selectionStart</code>, <code>focus()</code>,{' '}
-        <code>name</code>, …) on the underlying element.
+        The <code>target</code> of a change event is a Proxy around the real{' '}
+        <code>HTMLInputElement</code>. It does three things:
       </p>
-      <CodeBlock language="tsx">{code}</CodeBlock>
+      <ul>
+        <li>
+          A read of <code>target.value</code> returns the raw string. Every other read goes to the
+          element, including <code>selectionStart</code> and <code>name</code>. So does{' '}
+          <code>formattedValue</code>, a getter that Numora React defines on the input when it
+          mounts, next to <code>rawValue</code> and <code>setValue</code>.
+        </li>
+        <li>
+          A function it returns, such as <code>focus()</code>, is bound to the real input. A native
+          method called on a Proxy would throw.
+        </li>
+        <li>
+          A write is forwarded to the real input. Assigning <code>target.value</code> changes the
+          field, and a later read of <code>target.value</code> still returns the raw string.
+        </li>
+      </ul>
+      <p>
+        The event object is built by hand. It is not a React synthetic event. Its{' '}
+        <code>nativeEvent</code> is a new <code>Event('change')</code> that was never dispatched,
+        its <code>isTrusted</code> is <code>false</code>, and <code>preventDefault()</code> and{' '}
+        <code>stopPropagation()</code> do nothing.
+      </p>
       <p>
         The Proxy only wraps <code>e.target</code> on change events. A forwarded ref points at the
-        real DOM element, so read <code>ref.current.formattedValue</code> there.
+        real DOM element, so read <code>ref.current.formattedValue</code> there:
       </p>
+      <CodeBlock language="tsx">{code}</CodeBlock>
     </section>
   );
 }

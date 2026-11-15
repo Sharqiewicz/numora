@@ -66,7 +66,8 @@ export interface NumoraHTMLInputElement extends HTMLInputElement {
  * Synthetic change event fired by NumoraInput on every value change.
  *
  * - `target.value` - the **canonical raw value**: ASCII digits, `.` decimal, no grouping.
- *   Pass it to react-hook-form's `Controller` (`field.onChange(e.target.value)`) or any
+ *   react-hook-form's `Controller` reads it, so `<NumoraInput {...field} />` stores the raw
+ *   value. A hand-written handler is `field.onChange(e.target.value)`. The same goes for any
  *   other form library that takes a value.
  *
  * - `target.formattedValue` - the formatted display string (e.g. `"1,234.56"`),
@@ -268,6 +269,9 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
   // Field text after the last write Numora made; restored when the `input` fallback must
   // refuse a value. Private: the public `formattedValue` reads the element.
   const lastValue = useRef('');
+  // Field text as Numora last saw it: its own writes plus the IME's mid-composition text. A
+  // field that reads differently was assigned from outside (`input.value = ...`).
+  const seenText = useRef('');
   // Last text given to `onFormattedValueChange`; seeded on mount, so mount reports nothing.
   const reported = useRef('');
 
@@ -277,6 +281,7 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
   const emit = (el: NumoraHTMLInputElement, values?: NumoraValues) => {
     const text = el.value;
     lastValue.current = text;
+    seenText.current = text;
     const { onChange: cb, onValueChange: vcb, onFormattedValueChange: fcb } = stateRef.current;
     if (values) {
       cb?.(createSyntheticChangeEvent(el, values.value));
@@ -315,6 +320,7 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
   useIsomorphicLayoutEffect(() => {
     const input = internalInputRef.current as NumoraHTMLInputElement;
     reported.current = input.value;
+    seenText.current = input.value;
     Object.defineProperties(input, {
       formattedValue: { configurable: true, get: () => input.value },
       rawValue: {
@@ -372,8 +378,13 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
     // so comparing ITS output for the DOM value and the controlled value is a faithful "is
     // this the same number" check. Equal -> leave the DOM untouched. Different -> the parent
     // genuinely changed the value -> format and write it.
+    //
+    // The guard only holds for text Numora wrote. Text assigned from outside is repainted
+    // even when it is the same number: react-hook-form 8 hands `Controller` the real input
+    // and `setValue('amount', '1000')` assigns it '1000', which must show as '1,000'.
     if (
       changed ||
+      input.value !== seenText.current ||
       sanitizeNumoraInput(input.value, formattingOptions) !==
       sanitizeNumoraInput(controlledValueString, formattingOptions, 'canonical')
     ) {
@@ -430,7 +441,10 @@ const NumoraInputImpl = forwardRef<NumoraHTMLInputElement, NumoraInputProps>((pr
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const el = e.target as NumoraHTMLInputElement;
     // Mid-composition text is the IME's: the final non-composing `input` reconciles it.
-    if ((e.nativeEvent as InputEvent).isComposing) return;
+    if ((e.nativeEvent as InputEvent).isComposing) {
+      seenText.current = el.value;
+      return;
+    }
     const focused = isFocused(el);
     emit(el, applyInputFallback(el, focused, lastValue.current, formattingOptions));
   };

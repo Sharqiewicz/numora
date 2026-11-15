@@ -1,4 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { BackspaceSkipFigure } from '@/components/anatomy/BackspaceSkipFigure';
+import { CursorLanes } from '@/components/anatomy/CursorLanes';
+import { GroupingStylesDiagram } from '@/components/anatomy/diagrams';
 import { ExampleWithDemo } from '@/components/ExampleWithDemo';
 
 export const Route = createFileRoute('/docs/numora-react/features/formatting')({
@@ -90,9 +93,10 @@ function Formatting() {
       <p>
         By default, grouping is <code>'thousand'</code> with <code>,</code> as the thousand
         separator, in both the React component and the vanilla <code>numora</code> package. Pass{' '}
-        <code>groupingStyle="none"</code> to turn grouping off. Thousand (1,234,567) is the default,
-        so the demos below show the other two styles.
+        <code>groupingStyle="none"</code> to turn grouping off. <code>'thousand'</code> (1,234,567)
+        is the default, so the demos below show the other two styles.
       </p>
+      <GroupingStylesDiagram />
 
       <h2>Other grouping styles</h2>
       <div className="space-y-4">
@@ -122,13 +126,26 @@ function Formatting() {
         <code>formatOn="blur"</code>. See{' '}
         <Link to="/docs/numora-react/features/format-on">Change vs blur</Link> for both modes.
       </p>
+      <p>When the separators move, the caret stays between the same two digits:</p>
+      <CursorLanes />
 
       <h2>Separator skipping</h2>
       <ul>
         <li>
-          Backspace and delete skip over thousand separators, so you never delete them by hand.
+          Backspace and Delete jump over thousand separators, so you never delete one by hand.
+        </li>
+        <li>
+          This applies with <code>formatOn="change"</code>, a thousand separator set and no text
+          selected. In blur mode a focused field has no separators to skip.
+        </li>
+        <li>
+          Two handlers share the work. <code>keydown</code> moves the cursor over the separator, and{' '}
+          <code>beforeinput</code> deletes the digit. Mobile keyboards that send no usable{' '}
+          <code>keydown</code> still work, because <code>beforeinput</code> then deletes the digit
+          past the separator itself.
         </li>
       </ul>
+      <BackspaceSkipFigure />
     </div>
   );
 }

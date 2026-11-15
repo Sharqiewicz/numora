@@ -11,22 +11,26 @@ export function CursorPreservationSection() {
         cursor ends up several characters from where it should be.
       </p>
       <p>
-        Numora computes the caret from the edit itself. It runs the text left of the edit, plus the
-        inserted text, through the same sanitizer as the whole value: separators removed, leading
-        zeros dropped, <code>1k</code> expanded, decimals trimmed. The length of the result is the
-        caret's <em>rank</em>, the number of digits, decimal separators and leading minus signs
-        before it. <code>positionAfterMatchedPrefix</code> then walks the formatted string, skipping
-        injected thousand separators, until it has passed that many characters. It puts the cursor
-        there.
-      </p>
-      <p>
-        The caret stays between the same two digits however the separators move around it. A paste
-        whose tail was trimmed leaves the caret after the last pasted character that survived. The
-        grouping style only changes <em>where</em> the separators sit, so Thousand, Lakh and Wan
-        need no per-style code. A separator is always one character, so every comparison is a
-        single-character comparison.
+        Numora keeps the cursor between the same two digits however the separators move around it:
       </p>
       <CursorLanes />
+      <p>
+        Numora takes the text left of the edit, plus the inserted text, and runs it through the same
+        pipeline as the whole value: separators removed, leading zeros dropped, notation expanded,
+        decimals trimmed. The result is the text that belongs before the cursor. Numora then walks
+        the final display string and matches that text character by character, skipping the thousand
+        separators it added. It puts the cursor where the match ends.
+      </p>
+      <p>
+        Sometimes nothing matches, because the edit made Numora read the whole value again. Pasting{' '}
+        <code>e-</code> into <code>1|5</code> gives <code>0.00001</code>, and no character left of
+        the cursor survives. The cursor then goes to the end of the text.
+      </p>
+      <p>
+        A paste whose tail was trimmed leaves the cursor after the last pasted character that
+        survived. The grouping style only changes where the separators sit, so{' '}
+        <code>'thousand'</code>, <code>'lakh'</code> and <code>'wan'</code> need no per-style code.
+      </p>
     </section>
   );
 }

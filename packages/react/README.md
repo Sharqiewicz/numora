@@ -42,7 +42,7 @@ string. `onChange` is the event form of the same notification, for form librarie
 - [Compact notation](https://numeric-input.com/docs/numora-react/features/compact-notation) is opt-in and expands "1k" → "1000" when typed, pasted or passed in `value`. A suffix followed by a digit or a decimal separator is not expanded, so "1k5" does not scale the prefix
 - [Scientific notation](https://numeric-input.com/docs/numora-react/features/scientific-notation) expands "1.5e-7" → "0.00000015" by default; `allowScientificNotation={false}` rejects it
 - [Leading zeros](https://numeric-input.com/docs/numora-react/features/leading-zeros) are stripped by default, and `allowLeadingZeros` keeps them
-- [React Hook Form](https://numeric-input.com/docs/numora-react/integrations/react-hook-form) works through the `Controller` pattern
+- [React Hook Form](https://numeric-input.com/docs/numora-react/integrations/react-hook-form) works through `Controller`: `<NumoraInput {...field} />` stores the raw value
 - Ref forwarding, controlled and uncontrolled modes, all standard input props
 
 ## Props

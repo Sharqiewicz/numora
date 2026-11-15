@@ -238,9 +238,7 @@ const morph = new TextMorph({
 
 // onFormattedValueChange gives the display string, which is what Torph should show.
 const numora = new NumoraInput(host, {
-  formatOn: 'change',
   decimalMaxLength: 2,
-  groupingStyle: 'thousand',
   // The caret is the second argument: Torph then matches digits around the edit.
   onFormattedValueChange: (text) =>
     morph.update(text || '0', numora.element.selectionStart ?? undefined),
@@ -257,7 +255,7 @@ morph.update('0')`}
           <strong>
             <code>display.textContent = ''</code>
           </strong>{' '}
-          empties a placeholder (e.g. SSR <code>0</code>) before Torph takes over the span. The line
+          empties a placeholder, such as an SSR <code>0</code>, before Torph takes over the span. The line
           is optional, because Torph removes leftover text nodes itself when it renders.
         </li>
         <li>
@@ -273,11 +271,11 @@ morph.update('0')`}
           <strong>
             <code>formatOn: 'change'</code>
           </strong>{' '}
-          (used here) keeps the input's display as the formatted string at all times. With{' '}
-          <code>'blur'</code>, the focus strip and the blur regroup only add or remove separators.{' '}
-          <code>onValueChange</code> does not report them, because the raw value is unchanged, but{' '}
-          <code>onFormattedValueChange</code> does, so the same line covers both modes. Blur mode
-          also needs a few lines of CSS for the caret, shown in the next section.
+          (the default, used here) keeps the input's display as the formatted string at all times.
+          With <code>'blur'</code>, the focus strip and the blur regroup only add or remove
+          separators. <code>onValueChange</code> does not report them, because the raw value is
+          unchanged, but <code>onFormattedValueChange</code> does, so the same line covers both
+          modes. Blur mode also needs a few lines of CSS for the caret, shown in the next section.
         </li>
         <li>
           <strong>Match typography.</strong> Set <code>font: inherit</code> plus{' '}
@@ -327,12 +325,12 @@ morph.update('0')`}
       <h2>Reducing motion</h2>
       <p>
         Torph respects <code>prefers-reduced-motion</code> by default. If a user opts out of
-        animations at the OS level, the morph becomes an instant swap.
+        animations at the OS level, the morph becomes an instant swap. You need no extra code.
       </p>
 
       <h2>Cleanup</h2>
       <p>
-        On teardown call <code>morph.destroy()</code> to detach Torph's observers and{' '}
+        On teardown, call <code>morph.destroy()</code> to detach Torph's observers and{' '}
         <code>numora.destroy()</code> to detach Numora's listeners, then remove the input element.
         Calling <code>destroy()</code> twice is safe.
       </p>

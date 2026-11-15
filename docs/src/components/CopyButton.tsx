@@ -45,7 +45,7 @@ const getButtonClasses = (noBorder: boolean, className: string) => {
 };
 
 const getIconClasses = (iconPosition: 'left' | 'right', hasLabel: boolean) => {
-  if (!hasLabel) return 'h-4 w-4 mt-0.5';
+  if (!hasLabel) return 'h-4 w-4';
   return `h-4 w-4 mt-0.5 ${iconPosition === 'left' ? 'mr-1' : 'ml-1'}`;
 };
 

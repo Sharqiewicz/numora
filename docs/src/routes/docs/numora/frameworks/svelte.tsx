@@ -25,7 +25,7 @@ const FAQ = [
   {
     question: 'How do I add thousand separators to a Svelte number input?',
     answer:
-      'Nothing to configure: grouping on every keystroke is the default. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can store in a Svelte store or pass to a form library.',
+      'Nothing to configure. Grouping on every keystroke is the default. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can store in a Svelte store or pass to a form library.',
   },
   {
     question: 'Does it support i18n (decimal commas, locale grouping) in Svelte?',
@@ -141,7 +141,7 @@ function SvelteIntegration() {
     <div className="docs-prose max-w-[36rem]">
       <h1>Svelte numeric input</h1>
       <p>
-        <strong className="font-numora">Numora</strong> is a precision-first{' '}
+        <strong className="font-numora">Numora</strong> is a{' '}
         <strong>Svelte numeric input</strong> library. It handles thousand separators, decimal
         limits, paste sanitization, scientific-notation expansion and cursor preservation through a{' '}
         <code>use:numora</code> action. Svelte&apos;s <code>use:</code> actions suit libraries that
@@ -192,8 +192,6 @@ let value = $state('');`}
   Amount
   <input
     use:numora={{
-      formatOn: 'change',
-      groupingStyle: 'thousand',
       decimalMaxLength: 2,
       onValueChange: ({ value: v }) => (value = v),
     }}
@@ -207,15 +205,14 @@ let value = $state('');`}
         Numora adopts the <code>&lt;input&gt;</code> and sets the attributes it needs.{' '}
         <code>onValueChange</code> receives <code>{`{ value, formattedValue }`}</code>, where{' '}
         <code>value</code> is the raw string (see{' '}
-        <Link to="/docs/numora/features/value-types">value types</Link>). <code>'change'</code>{' '}
-        formats on every keystroke (see{' '}
-        <Link to="/docs/numora/features/formatting">formatting</Link>).
+        <Link to="/docs/numora/features/value-types">value types</Link>). By default, Numora formats
+        on every keystroke (see <Link to="/docs/numora/features/formatting">formatting</Link>).
       </p>
 
       <p>
-        Read the value from <code>onValueChange</code>, not from <code>bind:value</code>: the
-        element's own <code>value</code> is the display string (<code>"1,234.56"</code>), while{' '}
-        <code>onValueChange</code> gives you the raw value (<code>"1234.56"</code>).
+        Read the value from <code>onValueChange</code>, not from <code>bind:value</code>. The
+        element's own <code>value</code> is the display string (<code>"1,234.56"</code>). <code>onValueChange</code> gives you the raw
+        value (<code>"1234.56"</code>).
       </p>
 
       <h2>Animated example: Numora + Torph in Svelte</h2>
@@ -245,8 +242,6 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
   });
 
   const numora = new NumoraInput(host, {
-    formatOn: 'change',
-    groupingStyle: 'thousand',
     ...options,
     // onFormattedValueChange reports every rewrite of the field, in both formatOn modes.
     // The caret is the second argument: Torph then matches digits around the edit.
@@ -278,12 +273,14 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
 
       <p>Markup:</p>
       <CodeBlock language="html">
-        {`<label
+        {`<!-- The action creates the <input> inside this label at runtime. -->
+<!-- svelte-ignore a11y_label_has_associated_control -->
+<label
   class="numora-overlay"
   use:numoraTorph={{ decimalMaxLength: 2 }}
 >
   <span class="numora-overlay-display" aria-hidden="true">0</span>
-  <div class="numora-overlay-host" />
+  <div class="numora-overlay-host"></div>
 </label>`}
       </CodeBlock>
 

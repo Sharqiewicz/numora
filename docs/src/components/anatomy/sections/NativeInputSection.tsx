@@ -5,10 +5,9 @@ export function NativeInputSection(_props: SectionProps) {
     // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="native-input" className="space-y-4 scroll-mt-24">
       <h2>
-        What is an <code>&lt;input&gt;</code>, really?
+        Why not <code>&lt;input type="number"&gt;</code>
       </h2>
       <p>
-        The HTML <code>&lt;input&gt;</code> element shipped with HTML 2.0 in 1995.{' '}
         <code>&lt;input type="number"&gt;</code> arrived with HTML5 in 2014, and it does not suit
         money or token amounts:
       </p>
@@ -24,17 +23,26 @@ export function NativeInputSection(_props: SectionProps) {
         formatting. Numora fills that gap.
       </p>
       <p>
-        Every Numora input is therefore a real <code>&lt;input type="text"&gt;</code>, not{' '}
-        <code>type="number"</code>. There is no contenteditable div, no shadow DOM and no virtual
-        cursor. Numora listens to events on this element and writes back to it.
+        So every Numora input is a real <code>&lt;input type="text"&gt;</code>. There is no
+        contenteditable div, no shadow DOM and no virtual cursor. Numora listens to events on this
+        element and writes back to it, using the input's own <code>value</code>,{' '}
+        <code>selectionStart</code> / <code>selectionEnd</code>, <code>setRangeText</code> and{' '}
+        <code>inputMode</code>.
       </p>
+      <p>Numora sets four attributes on the input:</p>
+      <ul>
+        <li>
+          <code>type="text"</code> and <code>inputmode="decimal"</code>, always. An input you hand
+          to Numora with <code>type="number"</code> becomes <code>type="text"</code>.
+        </li>
+        <li>
+          <code>spellcheck="false"</code> and <code>autocomplete="off"</code>, only when you did not
+          set them. An input with <code>autocomplete="cc-number"</code> keeps it.
+        </li>
+      </ul>
       <p>
-        It uses the input's <code>value</code>, <code>selectionStart</code> /{' '}
-        <code>selectionEnd</code>, <code>setRangeText</code> and <code>inputMode</code>. See{' '}
-        <a href="#before-input">beforeinput</a> and{' '}
-        <a href="#cursor-preservation">cursor preservation</a> for how. Numora sets no{' '}
-        <code>pattern</code> attribute, so native constraint validation never rejects a value the
-        field itself produced. Add your own if you need one.
+        Numora sets no <code>pattern</code> attribute, so native constraint validation never rejects
+        a value the field itself produced. Add your own if you need one.
       </p>
     </section>
   );

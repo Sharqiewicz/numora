@@ -1,4 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { BackspaceSkipFigure } from '@/components/anatomy/BackspaceSkipFigure';
+import { CursorJumpRecording } from '@/components/anatomy/CursorJumpRecording';
+import { CursorLanes } from '@/components/anatomy/CursorLanes';
+import { GroupingStylesDiagram } from '@/components/anatomy/diagrams';
 import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora/features/formatting')({
@@ -82,12 +86,13 @@ function Formatting() {
       <h1>Formatting</h1>
       <p>
         Formatting groups the digits of the value with thousand separators.{' '}
-        <code>groupingStyle</code> defaults to <code>Thousand</code>, and <code>'none'</code> turns
-        grouping off. Formatting runs on every keystroke by default, or only on blur with{' '}
+        <code>groupingStyle</code> defaults to <code>'thousand'</code>, and <code>'none'</code>{' '}
+        turns grouping off. Formatting runs on every keystroke by default, or only on blur with{' '}
         <code>'blur'</code>. Numora keeps the cursor in place either way.
       </p>
 
       <h2>Grouping styles</h2>
+      <GroupingStylesDiagram />
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
@@ -119,12 +124,29 @@ const input4 = new NumoraInput(container, {
         <Link to="/docs/numora/features/format-on">Change vs blur</Link> for both modes.
       </p>
 
+      <h2>Caret position</h2>
+      <p>When the separators move, the caret stays between the same two digits:</p>
+      <CursorLanes />
+      <p>Without that, a production app looks like this:</p>
+      <CursorJumpRecording />
+
       <h2>Separator skipping</h2>
       <ul>
         <li>
           Backspace and Delete jump over thousand separators, so you never delete one by hand.
         </li>
+        <li>
+          This applies with <code>formatOn: 'change'</code>, a thousand separator set and no text
+          selected. In blur mode a focused field has no separators to skip.
+        </li>
+        <li>
+          Two handlers share the work. <code>keydown</code> moves the cursor over the separator, and{' '}
+          <code>beforeinput</code> deletes the digit. Mobile keyboards that send no usable{' '}
+          <code>keydown</code> still work, because <code>beforeinput</code> then deletes the digit
+          past the separator itself.
+        </li>
       </ul>
+      <BackspaceSkipFigure />
     </div>
   );
 }

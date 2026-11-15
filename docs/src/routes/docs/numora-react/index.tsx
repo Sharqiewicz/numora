@@ -72,6 +72,32 @@ function GetStarted() {
         <code>inputMode</code> itself, and <code>maxLength</code> counts the raw value.
       </p>
 
+      <h2>
+        Why <strong className="font-numora">numora</strong>?
+      </h2>
+      <p>
+        If you audit the codebases of the top 10 DeFi protocols - Uniswap, Aave, Curve, Balancer -
+        you'll notice a pattern. For the most critical UI component in finance, the numeric input,
+        every single one has built a custom implementation from scratch.
+      </p>
+      <ul>
+        <li>Uniswap maintains ~200 lines of custom regex and locale logic.</li>
+        <li>Aave wraps a formatting library with heavy custom validation.</li>
+        <li>Curve relies on a complex chain of hooks to handle state.</li>
+      </ul>
+      <p>
+        <strong>There is no standard.</strong> Every team wastes days reinventing the wheel:
+        comma/dot separator logic, parseFloat precision loss, mobile keyboard ghost characters.
+      </p>
+      <p>
+        <strong>numora is the new standard for numeric inputs</strong> - a precision-first library
+        you drop in once, configure with options, and forget about.
+      </p>
+      <p>
+        See <Link to="/docs/numora-react/installation">Installation</Link> for the component API
+        and props.
+      </p>
+
       <h2>Raw and formatted values</h2>
       <p>
         On every change, <code>e.target.value</code> is the raw numeric string, with no thousand
@@ -91,9 +117,7 @@ function GetStarted() {
 function Amount() {
   return (
     <NumoraInput
-      formatOn="change"
       decimalMaxLength={2}
-      thousandSeparator=","
       onValueChange={({ value, formattedValue }) => {
         console.log(value)          // "1234.56" (raw)
         console.log(formattedValue) // "1,234.56" (display)

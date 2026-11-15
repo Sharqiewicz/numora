@@ -59,7 +59,8 @@ export const SPRING = { type: 'spring', duration: 0.3, bounce: 0 } as const;
  * Text uses `-fg`, strokes `-line`, fills `-surface`. Never `/NN` opacity on text.
  *
  * - neutral  : structure (surface-3 fill, border / surface-7 stroke, foreground / muted-foreground text)
- * - amber    : the focal point: `beforeinput`, the cancellation point
+ * - amber    : the user's edit in flight: the key, digit or text just typed or pasted, before
+ *              Numora has handled it. Never a step name or a state.
  * - violet   : Numora's behaviour (e.g. Numora's caret)
  * - sky      : structural highlight (digit groups, counted digits)
  * - green    : ONLY the final clean result of a pipeline / the "right" outcome. Plain values are neutral.

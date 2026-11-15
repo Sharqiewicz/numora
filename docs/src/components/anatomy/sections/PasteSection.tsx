@@ -1,113 +1,164 @@
+import { ClipboardPaste } from 'lucide-react';
 import { NumoraInput } from 'numora-react';
 import { useEffect, useRef, useState } from 'react';
-import { DiagramFrame, demoInputClass } from '../kit';
+import { DiagramFrame, demoInputClass, FigureLabel } from '../kit';
 
 const samples = ['$1,234.56 USD', '1,234.560000', '1.234,56'];
 
-type CopyState = { value: string; status: 'copied' | 'failed' } | null;
+type Result =
+  | { sample: string; status: 'pasted'; shown: string }
+  | { sample: string; status: 'copied' | 'failed' }
+  | null;
+
+/**
+ * Runs a real paste event through the field, over whatever it holds, so Numora's own paste
+ * handler does the work. Returns false when the browser will not carry text in a scripted paste.
+ */
+function pasteOver(el: HTMLInputElement, text: string) {
+  try {
+    const data = new DataTransfer();
+    data.setData('text/plain', text);
+    const event = new ClipboardEvent('paste', {
+      clipboardData: data,
+      bubbles: true,
+      cancelable: true,
+    });
+    if (event.clipboardData?.getData('text/plain') !== text) return false;
+    el.focus({ preventScroll: true });
+    // A paste goes in at the selection. Selecting everything makes each sample start clean.
+    el.setSelectionRange(0, el.value.length);
+    el.dispatchEvent(event);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export function PasteSection() {
-  const [copyState, setCopyState] = useState<CopyState>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [result, setResult] = useState<Result>(null);
   const clearTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(clearTimer.current), []);
 
-  const copySample = async (value: string) => {
+  const pasteSample = async (sample: string) => {
+    clearTimeout(clearTimer.current);
+    const el = inputRef.current;
+    if (el && pasteOver(el, sample)) {
+      setResult({ sample, status: 'pasted', shown: el.value });
+      return;
+    }
+    // No scripted paste here: copy the sample, and the reader pastes it by hand.
     try {
       if (!navigator.clipboard) throw new Error('Clipboard unavailable');
-      await navigator.clipboard.writeText(value);
-      setCopyState({ value, status: 'copied' });
+      await navigator.clipboard.writeText(sample);
+      setResult({ sample, status: 'copied' });
+      el?.focus({ preventScroll: true });
+      el?.select();
     } catch {
-      setCopyState({ value, status: 'failed' });
+      setResult({ sample, status: 'failed' });
     }
-    clearTimeout(clearTimer.current);
-    clearTimer.current = setTimeout(() => setCopyState(null), 4000);
+    clearTimer.current = setTimeout(() => setResult(null), 6000);
   };
 
   return (
     // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="paste" className="space-y-4 scroll-mt-24">
       <h2>Paste messy text</h2>
-      <p>
-        When the user pastes, the <code>paste</code> event fires first, and it carries the full{' '}
-        <code>ClipboardData</code> object. Numora handles the paste there and cancels the event, so
-        the browser never sends a <code>beforeinput</code> with{' '}
-        <code>inputType: 'insertFromPaste'</code> for it.
-      </p>
-      <p>The paste handler:</p>
-      <ol>
-        <li>
-          Call <code>e.preventDefault()</code> to block the native paste. A read-only or disabled
-          field stops here and takes nothing.
-        </li>
-        <li>
-          Read the text with <code>e.clipboardData.getData('text/plain')</code>.
-        </li>
-        <li>Splice the clipboard text into the current value at the active selection.</li>
-        <li>
-          Run the combined value through the full pipeline with{' '}
-          <code>shouldRemoveThousandSeparators: true</code>. This is unconditional, because the
-          clipboard text and the current value (in blur mode) can both carry separators that must be
-          parsed together.
-        </li>
-        <li>
-          Stop if <code>isAllowed</code> refuses the result, or if the text holds scientific
-          notation and <code>allowScientificNotation</code> is off. Otherwise write the result with{' '}
-          <code>setRangeText</code> (via <code>writeValue</code>), then place the cursor.
-        </li>
-        <li>
-          Call the change callback directly. In React that is <code>onChange</code>, where{' '}
-          <code>e.target.value</code> is the raw value and <code>e.target.formattedValue</code> the
-          display string. In vanilla it is <code>onValueChange</code>, which receives{' '}
-          <code>{'{ value, formattedValue }'}</code>. No synthetic <code>input</code> event is
-          dispatched.
-        </li>
-      </ol>
-      <p>
-        Pasted text may come from another locale, so Numora does not assume the field's own
-        separators. Dropped and autofilled text is read the same way, except in a focused field that
-        formats on change, which reads it as its own display text. When both <code>.</code> and{' '}
-        <code>,</code> appear, the last one is the decimal mark and the rest is grouping, so a
-        German <code>1.234,56</code> pasted into a field with <code>thousandSeparator=","</code> is
-        read as <code>1234.56</code>. A mark that repeats is grouping. A single mark is the decimal
-        mark when it is the field's own decimal separator. Otherwise it is grouping when the digits
-        around it form valid groups (<code>1,234</code>), and the decimal mark when they do not.
-      </p>
-      <p>
-        Copy a string, then paste it into the Numora input. Clear the input before each one, because
-        a paste is inserted into the text already there:
-      </p>
-      <DiagramFrame variant="demo">
-        <div className="mb-2 flex flex-wrap gap-2">
+      <p>Pick a messy value. It is pasted into the field, over whatever the field holds:</p>
+      <DiagramFrame>
+        <FigureLabel className="mb-2">Paste into the field</FigureLabel>
+        <div className="mb-3 flex flex-wrap gap-2">
           {samples.map((s) => (
             <button
               key={s}
               type="button"
-              onClick={() => copySample(s)}
-              aria-label={`Copy ${s}`}
-              className="inline-flex min-h-9 items-center rounded-md border border-border bg-surface-1 px-2.5 font-mono text-caption text-foreground transition-[background-color,scale] duration-150 ease-out-expo hover:bg-surface-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.97] motion-reduce:transition-none [@media(pointer:coarse)]:min-h-11"
+              onClick={() => pasteSample(s)}
+              aria-label={`Paste ${s} into the field`}
+              className="inline-flex min-h-9 cursor-pointer touch-manipulation items-center gap-1.5 rounded-md border border-surface-5 bg-surface-3 pr-2.5 pl-2 font-mono text-caption text-foreground transition-[background-color,scale] duration-150 ease-out-expo focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.97] motion-reduce:transition-none [@media(hover:hover)]:hover:bg-surface-4 [@media(pointer:coarse)]:min-h-11"
             >
+              <ClipboardPaste className="size-3.5 flex-none text-muted-foreground" aria-hidden />
               {s}
             </button>
           ))}
         </div>
-        <output className="mb-2 block min-h-5 text-caption text-muted-foreground">
-          {copyState?.status === 'failed'
-            ? 'Copy failed. Select the text instead.'
-            : copyState?.status === 'copied'
-              ? `Copied ${copyState.value}`
-              : ''}
-        </output>
         <NumoraInput
+          ref={inputRef}
           formatOn="change"
           thousandSeparator=","
           groupingStyle="thousand"
           decimalMaxLength={2}
           allowCompactNotation
           aria-label="Paste test input"
-          placeholder="Paste here"
+          placeholder="Or paste your own text here"
           className={demoInputClass}
         />
+        <output className="mt-2 block min-h-5 text-caption text-muted-foreground">
+          {result?.status === 'pasted' && (
+            <>
+              Pasted <span className="font-mono text-foreground">{result.sample}</span>. The field
+              holds <span className="font-mono text-foreground">{result.shown}</span>
+            </>
+          )}
+          {result?.status === 'copied' &&
+            `Copied ${result.sample}. Paste it into the field with Ctrl/Cmd+V`}
+          {result?.status === 'failed' && 'Copy failed. Select the text and copy it yourself'}
+        </output>
       </DiagramFrame>
+      <p>
+        When the user pastes, the <code>paste</code> event fires first, and it carries the full{' '}
+        <code>ClipboardData</code> object. Numora handles the paste there and cancels the event, so
+        the browser never sends a <code>beforeinput</code> with{' '}
+        <code>inputType: 'insertFromPaste'</code> for it.
+      </p>
+      <p>The paste handler then does five things:</p>
+      <ol>
+        <li>
+          It reads the clipboard's plain text, works out what each separator in it means (the rules
+          are below) and rewrites the text with the field's own separators. A read-only or disabled
+          field takes nothing.
+        </li>
+        <li>It splices that text into the current value at the selection.</li>
+        <li>
+          It stops if the combined value holds scientific notation and{' '}
+          <code>allowScientificNotation</code> is off.
+        </li>
+        <li>
+          It runs the combined value through <a href="#sanitization">the full pipeline</a>. Thousand
+          separators are always removed, because the clipboard text and the current value can both
+          carry them.
+        </li>
+        <li>
+          It stops if <code>isAllowed</code> refuses the result, or if the result is what the field
+          already shows. Otherwise it writes the result with <code>setRangeText</code>, places the
+          cursor and calls your change callback with the raw value and the formatted value. No
+          synthetic <code>input</code> event is dispatched.
+        </li>
+      </ol>
+      <p>
+        Pasted text may come from another locale, so Numora does not assume the field's own
+        separators. It decides what each <code>.</code> and <code>,</code> means:
+      </p>
+      <ul>
+        <li>
+          Both appear. The last one is the decimal mark and the rest is grouping. A German{' '}
+          <code>1.234,56</code> pasted into a field with <code>thousandSeparator=","</code> is read
+          as <code>1234.56</code>.
+        </li>
+        <li>One mark repeats. It is grouping.</li>
+        <li>
+          One mark appears once. It is the decimal mark when it is the field's own decimal
+          separator. Otherwise it is grouping when the digits around it form valid groups (
+          <code>1,234</code>), and the decimal mark when they do not.
+        </li>
+      </ul>
+      <p>
+        Dropped and autofilled text is read the same way, except in a focused field that formats on
+        change, which reads it as text in its own format.
+      </p>
+      <p>
+        A paste is inserted into the text already there, at the selection. The demo selects the
+        whole field first, so each value starts clean.
+      </p>
     </section>
   );
 }

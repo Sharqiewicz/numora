@@ -1,7 +1,7 @@
 import { NumoraInput } from 'numora';
 import { useEffect, useId, useRef } from 'react';
 import { TextMorph } from 'torph';
-import { startTypingLoop } from '@/hooks/use-typing-loop';
+import { PAIRED_LOOP, startTypingLoop } from '@/hooks/use-typing-loop';
 import { DemoFrame, demoOverlayBox } from './DemoFrame';
 
 export function TorphVanillaBlurDemo() {
@@ -37,7 +37,7 @@ export function TorphVanillaBlurDemo() {
     // Creation fires no callback, so show the first text here.
     morph.update(numora.formattedValue || '0');
 
-    const stopTypingLoop = startTypingLoop(input, { mode: 'blur' });
+    const stopTypingLoop = startTypingLoop(input, PAIRED_LOOP);
 
     return () => {
       stopTypingLoop();
@@ -71,6 +71,8 @@ export function TorphVanillaBlurDemo() {
           <span ref={displayRef} className="pointer-events-none whitespace-pre" aria-hidden="true">
             0
           </span>
+          {/* Drawn caret for the typing loop's simulated focus. */}
+          <span className="demo-caret" data-hold="" aria-hidden="true" />
           <div ref={hostRef} className="torph-vanilla-input-host absolute inset-0" />
         </div>
       </DemoFrame>

@@ -38,9 +38,8 @@ export function ReactSyntheticBypassSection() {
         any character could be typed. So Numora React registers the native listener itself.
       </p>
       <p>
-        The listener is registered once at mount on the actual element. Mutable options are read
-        through a ref updated via <code>useLayoutEffect</code> so prop changes never need a listener
-        re-registration:
+        It registers the listener once, at mount, on the element itself. The listener reads options
+        through a ref that a layout effect keeps current, so a prop change never re-registers it:
       </p>
       <CodeBlock language="tsx">{code}</CodeBlock>
       <h3 className="text-base">

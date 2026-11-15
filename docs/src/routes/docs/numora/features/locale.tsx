@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
 import { LocalePlayground } from '@/components/LocalePlayground';
+import { LocaleSeparatorsDemo } from '@/components/LocaleSeparatorsDemo';
 
 export const Route = createFileRoute('/docs/numora/features/locale')({
   head: () => ({
@@ -9,20 +10,20 @@ export const Route = createFileRoute('/docs/numora/features/locale')({
       {
         name: 'description',
         content:
-          'Detect thousand and decimal separators from the browser locale using the locale option and getSeparatorsFromLocale.',
+          'Take the thousand and decimal separators from a locale tag or from the runtime locale, with the locale option and getSeparatorsFromLocale.',
       },
       { property: 'og:title', content: 'Locale | Numora' },
       {
         property: 'og:description',
         content:
-          'Detect thousand and decimal separators from the browser locale using the locale option and getSeparatorsFromLocale.',
+          'Take the thousand and decimal separators from a locale tag or from the runtime locale, with the locale option and getSeparatorsFromLocale.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/locale' },
       { name: 'twitter:title', content: 'Locale | Numora' },
       {
         name: 'twitter:description',
         content:
-          'Detect thousand and decimal separators from the browser locale using the locale option and getSeparatorsFromLocale.',
+          'Take the thousand and decimal separators from a locale tag or from the runtime locale, with the locale option and getSeparatorsFromLocale.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora/features/locale' }],
@@ -79,7 +80,13 @@ function Locale() {
         <code>groupingStyle</code> overrides the detected one.
       </p>
 
+      <LocaleSeparatorsDemo />
+
       <LocalePlayground />
+      <p>
+        The playground above is built with <code>numora-react</code>. A vanilla{' '}
+        <code>NumoraInput</code> with the same options shows the same text.
+      </p>
 
       <h2>Where the separators come from</h2>
       <p>
@@ -116,9 +123,8 @@ function Locale() {
 
       <h2>Browser locale</h2>
       <p>
-        Pass <code>locale: true</code> to detect both separators from the browser's current locale.
-        Explicit <code>thousandSeparator</code> or <code>decimalSeparator</code> values win over
-        locale-detected ones. <code>locale</code> only fills the options you did not set.
+        <code>locale: true</code> reads both separators from the browser's locale. A separator you
+        pass still wins.
       </p>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
@@ -126,21 +132,20 @@ function Locale() {
 // Both separators detected from the browser locale
 const input = new NumoraInput(container, {
   locale: true,
-  groupingStyle: 'thousand',
 })
 
 // Override the decimal separator, keep the locale thousand separator
 const input2 = new NumoraInput(container, {
   locale: 'fr-FR',
-  groupingStyle: 'thousand',
   decimalSeparator: '.',
 })`}
       </CodeBlock>
 
       <h2>Specific locale tag</h2>
       <p>
-        Pass a BCP 47 locale tag to pin separators to one locale. This helps with SSR and
-        server-driven locale handling.
+        Pass a BCP 47 tag to pin the separators to one locale. <code>locale: true</code> reads the
+        locale of whatever runtime the code runs in. On a server that is the server's locale and not
+        the visitor's, so pass the tag there.
       </p>
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
@@ -148,34 +153,37 @@ const input2 = new NumoraInput(container, {
 // Pinned to German locale
 const input = new NumoraInput(container, {
   locale: 'de-DE',
-  groupingStyle: 'thousand',
 })`}
       </CodeBlock>
 
       <h2>Grouping style detection</h2>
       <p>
-        Indic locales group as 3-2-2 (lakh/crore) rather than 3-3-3. When <code>groupingStyle</code>{' '}
-        is left unset, it is derived from the locale, so <code>hi-IN</code> and <code>en-IN</code>{' '}
-        get <code>'lakh'</code> automatically.
+        Indic locales group digits 3-2-2 (lakh and crore), not 3-3-3. Leave{' '}
+        <code>groupingStyle</code> unset and Numora takes it from the locale, so <code>hi-IN</code>{' '}
+        and <code>en-IN</code> get <code>'lakh'</code>.
       </p>
       <CodeBlock language="typescript">
-        {`// locale-derived grouping: 12345678 → "1,23,45,678"
+        {`// grouping from the locale: 12345678 → "1,23,45,678"
 const input = new NumoraInput(container, { locale: 'en-IN' })
 
-// an explicit groupingStyle always wins: 12345678 → "12,345,678"
+// an explicit groupingStyle wins: 12345678 → "12,345,678"
 const input2 = new NumoraInput(container, {
   locale: 'en-IN',
   groupingStyle: 'thousand',
 })`}
       </CodeBlock>
       <p>
-        Only <code>Thousand</code> and <code>Lakh</code> are inferrable. <code>'wan'</code> (4-4-4)
-        is not derivable from <code>Intl.NumberFormat</code> (<code>zh-CN</code> and{' '}
-        <code>ja-JP</code> both report Western 3-3-3 grouping), so pass Wan explicitly.
+        Numora can only detect <code>'thousand'</code> and <code>'lakh'</code>.{' '}
+        <code>Intl.NumberFormat</code> reports 3-3-3 grouping for <code>zh-CN</code> and{' '}
+        <code>ja-JP</code>, so 4-4-4 grouping never comes from a locale. Pass{' '}
+        <code>groupingStyle: 'wan'</code> yourself.
       </p>
 
       <h2>getSeparatorsFromLocale</h2>
-      <p>To compute the separators yourself and pass them in:</p>
+      <p>
+        <code>getSeparatorsFromLocale</code> returns the separators and grouping style for a tag, so
+        you can read them or pass them in yourself.
+      </p>
       <CodeBlock language="typescript">
         {`import { NumoraInput, getSeparatorsFromLocale } from 'numora'
 
@@ -198,8 +206,22 @@ const input = new NumoraInput(container, { thousandSeparator, decimalSeparator }
       </CodeBlock>
 
       <p>
-        For decimal separator configuration without locale detection, see{' '}
+        To set the decimal separator without a locale, see{' '}
         <Link to="/docs/numora/features/decimals">Decimals</Link>.
+      </p>
+
+      <h2>Typing and pasting under a locale</h2>
+      <p>
+        A typed <code>.</code> and a typed <code>,</code> are both the decimal key in every locale,
+        even when one of them is the field's thousand separator. In a <code>de-DE</code> field,
+        typing <code>1234.5</code> shows <code>1.234,5</code>. A native decimal mark such as the
+        Arabic <code>٫</code> is a decimal key too.
+      </p>
+      <p>
+        Pasted text is read by its own format, not the field's. Paste <code>1,234,567.89</code> into
+        a <code>de-DE</code> field and it shows <code>1.234.567,89</code>. The raw value is{' '}
+        <code>1234567.89</code>. See <Link to="/docs/numora/features/decimals">Decimals</Link> for
+        the rule on a single mark.
       </p>
 
       <h2>What the field displays</h2>
@@ -207,9 +229,9 @@ const input = new NumoraInput(container, { thousandSeparator, decimalSeparator }
         The field shows the locale's separators with ASCII digits and an ASCII <code>-</code>. In
         ar-EG it shows <code>1٬234٫5</code>, not the Arabic-Indic <code>١٬٢٣٤٫٥</code> that{' '}
         <code>Intl.NumberFormat</code> prints, and in sv-SE it shows <code>-</code>, not{' '}
-        <code>−</code> (U+2212). Typed and pasted native digits and minus signs are still accepted
-        and folded to ASCII. With thousand grouping, four-digit numbers are grouped too (
-        <code>1.234</code> in es-ES), even where <code>Intl</code> leaves them ungrouped.
+        <code>−</code> (U+2212). Numora still accepts typed and pasted native digits and minus signs
+        and converts them to ASCII. With thousand grouping, Numora groups four-digit numbers too, so
+        es-ES shows <code>1.234</code> where <code>Intl</code> prints <code>1234</code>.
       </p>
 
       <h2>Changing the locale later</h2>
@@ -218,9 +240,10 @@ const input = new NumoraInput(container, { thousandSeparator, decimalSeparator }
         <code>
           instance.update({'{'} locale: 'fr-FR' {'}'})
         </code>{' '}
-        on a live field. The raw value is kept and the display is rewritten with the new separators.
-        An invalid tag throws and changes nothing. <code>locale: false</code> turns locale handling
-        off and uses the <code>thousandSeparator</code> and <code>decimalSeparator</code> options.
+        on a live field. Numora keeps the raw value and rewrites the display with the new
+        separators. An invalid tag throws and changes nothing. <code>locale: false</code> turns the
+        locale off, and the field goes back to the <code>thousandSeparator</code> and{' '}
+        <code>decimalSeparator</code> options.
       </p>
 
       <h2>Value format under a locale</h2>
@@ -229,8 +252,7 @@ const input = new NumoraInput(container, { thousandSeparator, decimalSeparator }
         locale: ASCII digits, <code>.</code> as the decimal mark, no grouping. Under{' '}
         <code>locale: 'de-DE'</code>, <code>setValue('1234.5')</code> displays{' '}
         <code>"1.234,5"</code>, and <code>instance.rawValue</code> returns <code>"1234.5"</code>.
-        See <Link to="/docs/numora/features/value-types">Value types</Link> for the full value
-        contract.
+        See <Link to="/docs/numora/features/value-types">Value types</Link>.
       </p>
     </div>
   );

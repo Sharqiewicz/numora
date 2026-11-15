@@ -25,7 +25,7 @@ const FAQ = [
   {
     question: 'How do I add thousand separators to a Solid number input?',
     answer:
-      'Nothing to configure: grouping on every keystroke is the default. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can write straight into a `createSignal` setter.',
+      'Nothing to configure. Grouping on every keystroke is the default. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can write straight into a `createSignal` setter.',
   },
   {
     question: 'Does it support i18n (decimal commas, locale grouping) in Solid?',
@@ -141,7 +141,7 @@ function SolidIntegration() {
     <div className="docs-prose max-w-[36rem]">
       <h1>Solid numeric input</h1>
       <p>
-        <strong className="font-numora">Numora</strong> is a precision-first{' '}
+        <strong className="font-numora">Numora</strong> is a{' '}
         <strong>Solid numeric input</strong> library. It handles thousand separators, decimal
         limits, paste sanitization, scientific-notation expansion and cursor preservation through a{' '}
         <code>use:numora</code> directive that mounts directly on an <code>&lt;input&gt;</code>.
@@ -203,8 +203,6 @@ export function AmountInput() {
         Amount
         <input
           use:numora={{
-            formatOn: 'change',
-            groupingStyle: 'thousand',
             decimalMaxLength: 2,
             onValueChange: ({ value: v }) => setValue(v),
           }}
@@ -220,15 +218,14 @@ export function AmountInput() {
         The directive gets the <code>&lt;input&gt;</code> and an accessor for its options. Numora
         adopts the input and sets the attributes it needs. <code>onValueChange</code> receives{' '}
         <code>{`{ value, formattedValue }`}</code>, where <code>value</code> is the raw string (see{' '}
-        <Link to="/docs/numora/features/value-types">value types</Link>). <code>'change'</code>{' '}
-        formats on every keystroke (see{' '}
-        <Link to="/docs/numora/features/formatting">formatting</Link>).
+        <Link to="/docs/numora/features/value-types">value types</Link>). By default, Numora formats
+        on every keystroke (see <Link to="/docs/numora/features/formatting">formatting</Link>).
       </p>
 
       <p>
-        Read the value from <code>onValueChange</code>, not from the element's <code>value</code>:
-        the element's own <code>value</code> is the display string (<code>"1,234.56"</code>), while{' '}
-        <code>onValueChange</code> gives you the raw value (<code>"1234.56"</code>).
+        Read the value from <code>onValueChange</code>, not from the element's <code>value</code>.
+        That <code>value</code> is the display string (<code>"1,234.56"</code>). <code>onValueChange</code> gives you the raw
+        value (<code>"1234.56"</code>).
       </p>
 
       <h2>Animated example: Numora + Torph in Solid</h2>
@@ -257,8 +254,6 @@ export function AnimatedAmountInput() {
     });
 
     const numora = new NumoraInput(host, {
-      formatOn: 'change',
-      groupingStyle: 'thousand',
       decimalMaxLength: 2,
       // onFormattedValueChange reports every rewrite of the field, in both formatOn modes.
       // The caret is the second argument: Torph then matches digits around the edit.

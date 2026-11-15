@@ -91,10 +91,6 @@ const container = document.querySelector<HTMLElement>('#my-input-container')!
 
 const numoraInput = new NumoraInput(container, {
   decimalMaxLength: 2,
-  groupingStyle: 'thousand',
-  thousandSeparator: ',',
-  decimalSeparator: '.',
-  formatOn: 'change',
   // typing 1234.56 displays "1,234.56"
 })`}
       </CodeBlock>
@@ -163,9 +159,15 @@ const numoraInput = new NumoraInput(container, {
                 <code>','</code>
               </td>
               <td>
-                The character between digit groups. Exactly one character. It cannot be a digit, one
-                of <code>- + e E k K m M b B t T</code>, or the same as{' '}
-                <code>decimalSeparator</code>. An invalid value throws.
+                The character between digit groups. Exactly one character. It cannot be a digit or
+                one of <code>- + e E k K m M b B t T</code>. Pass it alone and, if it lands on the
+                decimal separator, the decimal separator switches to the other of <code>.</code> and{' '}
+                <code>,</code>. Pass both separators as the same character and Numora throws. Every
+                error is in the{' '}
+                <Link to="/docs/numora/features/validation" hash="invalid-options">
+                  invalid options
+                </Link>{' '}
+                table.
               </td>
             </tr>
             <tr>
@@ -332,7 +334,7 @@ const numoraInput = new NumoraInput(container, {
               <td>
                 Called with <code>{'{ value, formattedValue }'}</code> when the raw value changes.{' '}
                 <code>value</code> is the raw value: ASCII digits, a <code>.</code> decimal, no
-                grouping.
+                grouping. An <code>update()</code> that changes the raw value calls it too.
               </td>
             </tr>
             <tr>
@@ -342,8 +344,8 @@ const numoraInput = new NumoraInput(container, {
               <td>
                 Called with the field's text every time Numora rewrites it and the text is new. That
                 includes the rewrites <code>onValueChange</code> says nothing about: grouping on
-                blur, removing separators on focus, and <code>setValue()</code>. Not called on
-                creation.
+                blur, removing separators on focus, <code>setValue()</code>, and an{' '}
+                <code>update()</code> that changes only the format. Not called on creation.
               </td>
             </tr>
           </tbody>
@@ -378,24 +380,66 @@ numoraInput.element         // the <input> itself
 numoraInput.setValue('2500')
 
 // Change options. They merge over the current ones, so decimalMaxLength stays 2.
+// The field now shows '2.500'. rawValue is still '2500'.
 numoraInput.update({ locale: 'de-DE' })
 
 // Remove Numora's listeners. The <input> stays in the page.
 numoraInput.destroy()`}
       </CodeBlock>
+      <p>
+        <code>update()</code> follows four rules:
+      </p>
+      <ul>
+        <li>
+          A separator you passed yourself wins over a <code>locale</code> set later. A field created
+          with <code>thousandSeparator: ','</code> and <code>decimalSeparator: '.'</code> still
+          shows <code>2,500</code> after <code>{"update({ locale: 'de-DE' })"}</code>.
+        </li>
+        <li>
+          A key set to <code>undefined</code> goes back to its default:{' '}
+          <code>{'update({ locale: undefined })'}</code> removes the locale.
+        </li>
+        <li>
+          If the merged options are invalid, <code>update()</code> throws. The field keeps its old
+          options and its value.
+        </li>
+        <li>
+          Numora calls <code>onValueChange</code> only if the raw value changed, and{' '}
+          <code>onFormattedValueChange</code> only if the text changed. A new locale changes the
+          text and not the raw value. A lower <code>decimalMaxLength</code> can change both.
+        </li>
+      </ul>
+
+      <h2>Everything the package exports</h2>
+      <p>
+        <code>numora</code> has three entry points.
+      </p>
+      <ul>
+        <li>
+          <code>numora</code> exports the <code>NumoraInput</code> class and three functions that
+          need no input element: <code>formatValue</code>, <code>parseValue</code> and{' '}
+          <code>getSeparatorsFromLocale</code>. It exports two constants, <code>GroupingStyle</code>{' '}
+          and <code>FormatOn</code>, which hold the option values: <code>GroupingStyle.Lakh</code>{' '}
+          is <code>'lakh'</code>. It exports the types <code>NumoraOptions</code>,{' '}
+          <code>NumoraInputOptions</code>, <code>NumoraValues</code> and <code>LocaleTag</code>.
+        </li>
+        <li>
+          <code>numora/pipeline</code> exports each sanitization step as its own function. It has no
+          semver guarantee: a step can change or go in a minor release. See{' '}
+          <Link to="/docs/numora/features/sanitization">Sanitization</Link>.
+        </li>
+        <li>
+          <code>numora/internal</code> holds code shared with <code>numora-react</code>. It has no
+          semver guarantee either. Don't import from it.
+        </li>
+      </ul>
 
       <h2>TypeScript</h2>
       <p>Numora ships its own declarations. Import types directly:</p>
       <CodeBlock language="typescript">
-        {`import { NumoraInput } from 'numora'
-import type { NumoraOptions } from 'numora'
+        {`import type { NumoraOptions } from 'numora'
 
-const options: NumoraOptions = {
-  decimalMaxLength: 6,
-  formatOn: 'change',
-  groupingStyle: 'thousand',
-  thousandSeparator: ',',
-}`}
+const options: NumoraOptions = { decimalMaxLength: 6 }`}
       </CodeBlock>
     </div>
   );

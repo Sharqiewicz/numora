@@ -48,6 +48,8 @@ export interface DocsNavItem {
   href: string;
   icon: ComponentType;
   packages?: PackageTab[];
+  /** Marks the page with a star in the sidebar. */
+  featured?: boolean;
 }
 
 export interface DocsNavGroup {
@@ -68,12 +70,17 @@ export const docsNavigation: DocsNavGroup[] = [
   {
     title: 'Features',
     items: [
-      { title: 'Change vs blur', href: '/docs/features/format-on', icon: MousePointerClick },
+      {
+        title: 'Change vs blur',
+        href: '/docs/features/format-on',
+        icon: MousePointerClick,
+        featured: true,
+      },
       { title: 'Sanitization', href: '/docs/features/sanitization', icon: Shield },
       { title: 'Formatting', href: '/docs/features/formatting', icon: Type },
       { title: 'Value types', href: '/docs/features/value-types', icon: FileDigit },
       { title: 'Decimals', href: '/docs/features/decimals', icon: DecimalsArrowRight },
-      { title: 'Locale', href: '/docs/features/locale', icon: Globe },
+      { title: 'Locale', href: '/docs/features/locale', icon: Globe, featured: true },
       { title: 'Compact notation', href: '/docs/features/compact-notation', icon: Minimize2 },
       {
         title: 'Scientific notation',
@@ -94,8 +101,13 @@ export const docsNavigation: DocsNavGroup[] = [
         icon: ClipboardList,
         packages: ['react'],
       },
-      { title: 'Torph', href: '/docs/integrations/torph', icon: Wand2 },
-      { title: 'NumberFlow', href: '/docs/integrations/number-flow', icon: Binary },
+      { title: 'Torph', href: '/docs/integrations/torph', icon: Wand2, featured: true },
+      {
+        title: 'NumberFlow',
+        href: '/docs/integrations/number-flow',
+        icon: Binary,
+        packages: ['react'],
+      },
     ],
   },
   {

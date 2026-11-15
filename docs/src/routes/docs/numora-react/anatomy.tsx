@@ -5,6 +5,7 @@ import {
   DefaultVsValueSection,
   EventPipelineSection,
   FloatVsStringSection,
+  FocusBlurSection,
   GroupingStylesSection,
   Hero,
   KeydownSection,
@@ -87,21 +88,30 @@ function Anatomy() {
     <div className="docs-prose max-w-[36rem]">
       <Hero />
       <div className="space-y-16">
+        {/* Act 1: why this exists */}
         <NativeInputSection pkg={pkg} />
-        <EventPipelineSection />
-        <FloatVsStringSection />
+        <FloatVsStringSection pkg={pkg} />
         <UserInputSection />
-        <SanitizationSection />
         <PlainVsNumoraSection />
+
+        {/* Act 2: how Numora intercepts events */}
+        <EventPipelineSection />
         <KeydownSection />
         <BeforeInputSection />
-        <ReactSyntheticBypassSection />
-        <DefaultVsValueSection />
+        <FocusBlurSection />
+
+        {/* Act 3: what Numora does with the value */}
+        <SanitizationSection />
+        {/* After the pipeline: a paste is the pipeline's hardest input. */}
+        <PasteSection />
         <GroupingStylesSection />
         <CursorPreservationSection />
-        <PasteSection />
-        <ProxyTargetSection />
         <RawVsFormattedSection pkg={pkg} />
+
+        {/* Act 4: React only */}
+        <ProxyTargetSection />
+        <ReactSyntheticBypassSection />
+        <DefaultVsValueSection />
       </div>
     </div>
   );

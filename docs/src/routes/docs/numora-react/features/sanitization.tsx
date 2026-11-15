@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
+import { SanitizationJourney } from '@/components/anatomy/SanitizationJourney';
 import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora-react/features/sanitization')({
@@ -81,12 +82,17 @@ function Sanitization() {
     <div className="docs-prose max-w-[36rem]">
       <h1>Sanitization</h1>
       <p>
-        Numora React runs every value through a sequential sanitization pipeline before formatting.
-        For the full architecture and pipeline diagram, see the{' '}
+        Numora React runs every value through a sanitization pipeline before it formats.
+        Watch three messy values go through it. Each step marks what it is about to change. Steps
+        with nothing to do are skipped:
+      </p>
+      <SanitizationJourney />
+      <p>
+        The{' '}
         <Link to="/docs/numora-react/anatomy" hash="sanitization">
           Sanitization section of Anatomy
-        </Link>
-        . The sections below cover the configurable features.
+        </Link>{' '}
+        covers the pipeline in full. The sections below cover the configurable features.
       </p>
 
       <h2>Non-numeric character filtering</h2>
@@ -109,15 +115,52 @@ function Sanitization() {
 
       <p>
         While typing, <code>.</code> and <code>,</code> are both decimal keys, whatever the
-        configured separator. Pasted text is first checked for another locale's format, so{' '}
-        <code>1.234,56</code> pasted into an en-US field is read as <code>1234.56</code>. A single
-        mark is grouping when the digits around it form valid groups (<code>1,234</code>) and the
-        decimal mark when they do not (<code>1.5</code>); the field's own decimal separator is
-        always the decimal mark. Dropped and autofilled text is checked the same way, except in a
-        focused field that formats on change, which reads it as its own display text. Fullwidth and
-        other native digits and the Unicode minus (U+2212) are folded to ASCII before filtering, and
-        a native decimal mark becomes the field's decimal separator.
+        configured separator.
       </p>
+
+      <h2>What the figure leaves out</h2>
+      <p>
+        The figure has every optional step switched on. A default field skips three of the ten:
+        compact expansion runs only with <code>allowCompactNotation</code>, the leading{' '}
+        <code>0</code> is added only with <code>padLeadingZero</code>, and the cut at{' '}
+        <code>maxLength</code> runs only when <code>maxLength</code> is set. So a default field
+        turns <code>$.75</code> into <code>.75</code>, and <code>0.75</code> only with{' '}
+        <code>padLeadingZero</code>. Leading zeros are removed unless you set{' '}
+        <code>allowLeadingZeros</code>.
+      </p>
+      <p>The pipeline also does four things the ten steps don't name:</p>
+      <ul>
+        <li>
+          <strong>Length cap.</strong> Numora React reads the first 10,000 characters of any text
+          and drops the rest.
+        </li>
+        <li>
+          <strong>Whitespace and invisible characters.</strong> Step 1 removes every whitespace
+          character, zero-width characters (U+200B to U+200D, U+2060) and bidi marks (U+200E,
+          U+200F, U+061C, U+202A to U+202E, U+2066 to U+2069). <code>1 234</code> becomes{' '}
+          <code>1234</code>.
+        </li>
+        <li>
+          <strong>Paste format detection.</strong> Pasted, dropped and autofilled text is first
+          checked for another locale's format. The figure skips this and reads its text with the
+          field's own separators. Two different marks: the last one is the decimal mark, so{' '}
+          <code>1.234,56</code> pasted into an en-US field is read as <code>1234.56</code>. One
+          mark, repeated: it is grouping, so <code>1.234.567</code> is read as <code>1234567</code>.
+          One mark, once: it is grouping when the digits around it form valid groups (
+          <code>1,234</code>) and the decimal mark when they do not (<code>1.5</code>). The field's
+          own decimal separator is always the decimal mark. Dropped or autofilled text in a
+          focused field that formats on change is the exception: Numora React reads it as its own
+          display text.
+        </li>
+        <li>
+          <strong>Minus signs and decimal glyphs.</strong> Step 3 turns fullwidth and other native
+          digits into <code>0-9</code>. It turns three minus variants into <code>-</code>: U+2212,
+          U+FF0D and U+FE63. An en dash or em dash is not a minus sign and is removed, so{' '}
+          <code>–5</code> becomes <code>5</code> even with <code>allowNegative</code>. It turns a
+          native decimal mark (<code>٫</code>, <code>،</code>, <code>，</code>, <code>．</code>,{' '}
+          <code>。</code>) into the field's decimal separator.
+        </li>
+      </ul>
 
       <h2>removeThousandSeparators</h2>
       <p>

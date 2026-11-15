@@ -20,6 +20,11 @@ const SUCCESS_HOLD_MS = 1200;
 // overshoot and settles quickly.
 const MORPH_TRANSITION = { type: 'spring' as const, duration: 0.3, bounce: 0 };
 
+// Both icons fill the same box and sit centred in it, so they scale around one
+// point. It must not be `display: inline`: transforms don't apply to inline
+// boxes, so an inline wrapper fades without scaling.
+const ICON_BOX = 'flex size-full items-center justify-center';
+
 const animationProps = {
   animate: { filter: 'blur(0px)', opacity: 1, scale: 1 },
   transition: MORPH_TRANSITION,
@@ -95,15 +100,17 @@ export const AnimatedCopyIcon: FC<AnimatedCopyIconProps> = ({
     <span className={className} aria-hidden="true">
       <AnimatePresence initial={false} mode="wait" onExitComplete={handleExitComplete}>
         {!showSuccess ? (
-          <motion.div
+          <motion.span
             key="default"
+            className={ICON_BOX}
             {...(prefersReducedMotion ? reducedDefaultIconProps : defaultIconProps)}
           >
             {defaultIcon || <CopyIcon className="h-3.5 w-3.5" />}
-          </motion.div>
+          </motion.span>
         ) : (
           <motion.span
             key="success"
+            className={ICON_BOX}
             {...(prefersReducedMotion ? reducedSuccessIconProps : successIconProps)}
           >
             {successIcon || <CheckCircleIcon className="h-4 w-4" />}

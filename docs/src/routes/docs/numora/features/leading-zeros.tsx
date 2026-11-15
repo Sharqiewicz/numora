@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { CodeBlock } from '@/components/CodeBlock';
+import { LeadingZerosDemo } from '@/components/LeadingZerosDemo';
 
 export const Route = createFileRoute('/docs/numora/features/leading-zeros')({
   head: () => ({
@@ -82,14 +83,14 @@ function LeadingZeros() {
         <code>allowLeadingZeros: true</code> to keep them.
       </p>
 
+      <LeadingZerosDemo />
+
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
 // Default: leading zeros removed
 // "007" → "7", "0001" → "1"
-const input1 = new NumoraInput(container, {
-  allowLeadingZeros: false,
-})
+const input1 = new NumoraInput(container)
 
 // Leading zeros kept
 // "007" → "007", "0001" → raw "0001" (shown as "0,001" with the default grouping)

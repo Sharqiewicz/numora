@@ -71,16 +71,19 @@ export function SectionNav() {
     };
   }, []);
 
-  if (!isVisible) return null;
-
+  // Always mounted so the bar can slide in and out; `inert` keeps the hidden
+  // bar out of the tab order and the accessibility tree.
   return (
     <nav
       aria-label="Problems"
+      inert={!isVisible}
       className={cn(
         'fixed top-0 left-0 right-0 z-50',
         'bg-background/80 backdrop-blur-lg border-b border-border',
-        'transition-[opacity,transform,background-color] duration-300',
-        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+        'transition-[opacity,translate] duration-200 ease-out-expo',
+        isVisible
+          ? 'translate-y-0 opacity-100'
+          : 'pointer-events-none opacity-0 motion-safe:-translate-y-full'
       )}
     >
       <div className="container mx-auto px-4">

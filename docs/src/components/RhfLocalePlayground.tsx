@@ -1,6 +1,6 @@
 import { type FormatOn, NumoraInput } from 'numora-react';
 import { useId, useRef, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
   buttonClass,
   FORMAT_ON_OPTIONS,
@@ -25,10 +25,9 @@ export function RhfLocalePlayground() {
     handleSubmit,
     setValue,
     reset,
-    watch,
     formState: { errors, isDirty, touchedFields },
   } = useForm<Values>({ defaultValues: { amount: '1234567.89' }, mode: 'onChange' });
-  const amount = watch('amount');
+  const amount = useWatch({ control, name: 'amount' });
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const { text: shown, handlers } = useFieldText(inputRef);
@@ -127,7 +126,7 @@ export function RhfLocalePlayground() {
 
         <dl className="divide-y divide-surface-3 border-t border-surface-3 px-4 py-2">
           <Row label="Field shows" value={JSON.stringify(shown)} />
-          <Row label="Form state (watch)" value={JSON.stringify(amount)} />
+          <Row label="Form state (useWatch)" value={JSON.stringify(amount)} />
           <Row label="Submitted" value={submitted ?? '(not submitted)'} />
           <Row label="dirty / touched" value={`${isDirty} / ${Boolean(touchedFields.amount)}`} />
         </dl>

@@ -1,6 +1,6 @@
 [build]
   base    = "."
-  command = "pnpm --filter numora build && pnpm --filter numora-react build && pnpm --filter docs build"
+  command = "pnpm --filter docs build"
   publish = "docs/dist/client"
 
 [[redirects]]

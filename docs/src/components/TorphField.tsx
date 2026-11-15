@@ -15,6 +15,12 @@ type TorphFieldProps = NumoraInputProps & {
    * edit would match the wrong digits.
    */
   focusedCaretOnly?: boolean;
+  /**
+   * Draw a caret after the text while a typing loop's simulated focus is on the field
+   * (see `.demo-caret`). Pass `'hold'` for a Blur-mode field, where the caret waits for
+   * the focus strip to settle.
+   */
+  demoCaret?: boolean | 'hold';
 };
 
 /**
@@ -26,6 +32,7 @@ type TorphFieldProps = NumoraInputProps & {
 export function TorphField({
   ref,
   focusedCaretOnly,
+  demoCaret,
   className,
   onFormattedValueChange,
   ...props
@@ -41,11 +48,17 @@ export function TorphField({
 
   return (
     <>
-      <span aria-hidden="true" className="pointer-events-none whitespace-pre">
+      <span
+        aria-hidden="true"
+        className={cn('pointer-events-none whitespace-pre', demoCaret && 'flex items-center')}
+      >
         {/* The caret tells Torph where the edit was, so digits move instead of renumbering. */}
         <TextMorph cursorIndex={caret} ease={EASE} {...morphLocale}>
           {text || '0'}
         </TextMorph>
+        {demoCaret && (
+          <span className="demo-caret" data-hold={demoCaret === 'hold' ? '' : undefined} />
+        )}
       </span>
       <NumoraInput
         {...props}

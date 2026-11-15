@@ -28,7 +28,9 @@ const BUDGETS = [
 // for invalid options in React (ADR 0014, about 80 bytes). numora-react moved 1.72 -> 1.8.
 // Raised from 10.3: the development warning for an app value that is not a Raw value
 // (ADR 0015, about 140 bytes).
-const CONSUMER_TOTAL_BUDGET_KB = 10.45;
+// Raised from 10.45: React repaints text assigned to the input from outside (about 10 bytes
+// over), with a little headroom.
+const CONSUMER_TOTAL_BUDGET_KB = 10.5;
 
 // The files an entry loads: itself plus every sibling chunk it imports
 // (`from "./internal-XXXX.mjs"`), one level deep - Vite emits a flat chunk graph for

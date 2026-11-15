@@ -10,7 +10,7 @@ interface DemoFrameProps {
   /** Small muted line under the card, e.g. "Blur the field to format." */
   hint?: string;
   /**
-   * For demos whose typing loop runs in `blur` mode. Shows a pointer that clicks into the
+   * For demos whose typing loop plays the staged (`blur` mode) cycle. Shows a pointer that clicks into the
    * field and away again, tagged with the event it caused, and an animated focus ring that
    * follows the loop's simulated focus as well as real focus. Without it, the reader cannot
    * tell that the formatting changed because of focus.
@@ -78,7 +78,13 @@ export function DemoFrame({
   return (
     <figure
       ref={figureRef}
-      className={cn('not-prose relative mx-auto my-8 w-full max-w-lg', className)}
+      className={cn(
+        'not-prose relative mx-auto my-8 w-full max-w-lg',
+        // The pointer rests below the card. A hint already makes that room; without one
+        // the figure reserves the same room, so the pointer never lands on what follows.
+        focusPointer && !hint && 'mb-15',
+        className
+      )}
       // focusin/focusout bubble from real focus and from the typing loop's simulated focus;
       // only the simulated ones (untrusted) count as the pointer's clicks.
       onFocus={

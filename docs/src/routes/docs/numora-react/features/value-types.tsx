@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { ValueReadout } from '@/components/anatomy/ValueReadout';
 import { CodeBlock } from '@/components/CodeBlock';
 
 export const Route = createFileRoute('/docs/numora-react/features/value-types')({
@@ -161,7 +162,8 @@ function ValueTypes() {
         blur and when your app sets the value, and the padding is part of the raw value, so{' '}
         <code>5</code> becomes <code>"5.00"</code>. A blur that pads the value or strips a trailing
         separator changes the raw value, so it calls <code>onChange</code> and{' '}
-        <code>onValueChange</code>.
+        <code>onValueChange</code>. On blur <code>"-"</code>, <code>"."</code> and <code>"-."</code>{' '}
+        reset to <code>""</code>, and <code>"-0"</code> becomes <code>"0"</code>.
       </p>
       <p>
         The <code>value</code> and <code>defaultValue</code> props take this same format, so the
@@ -203,6 +205,8 @@ function ValueTypes() {
   }}
 />`}
       </CodeBlock>
+      <p>Type below. Both readouts update on every keystroke:</p>
+      <ValueReadout pkg="numora-react" />
 
       <h2>Reading values via ref</h2>
       <p>

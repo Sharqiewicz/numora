@@ -1,16 +1,6 @@
-import { Check, X } from 'lucide-react';
-import { formatValue, parseValue } from 'numora';
-import { DiagramFrame, demoInsetClass, useLoop } from './kit';
-
-// One worst case at a time: a typed decimal multiplied as a Number, then the string Numora returns.
-// Every result is computed here with real JavaScript and the real numora functions.
-const SAMPLES: [typed: string, times: number][] = [
-  ['0.1', 3],
-  ['19.99', 100],
-];
-const FRAMES = 2;
-const FRAME_MS = [2400, 0];
-const HOLD_MS = 2600;
+import { AnimatePresence, motion } from 'motion/react';
+import { cn } from '@/lib/utils';
+import { DUR, EASE, FigureLabel, LoopFigure, useLoop } from './kit';
 
 /** Exact decimal product of a typed string and a whole number, with BigInt (no floats). */
 function exactTimes(s: string, k: number): string {
@@ -21,69 +11,99 @@ function exactTimes(s: string, k: number): string {
   return out.replace(/0+$/, '').replace(/\.$/, '');
 }
 
-/** Marks where `got` stops matching `want`: red wavy underline, plus the words in the status. */
-function Marked({ want, got }: { want: string; got: string }) {
+/** Index where the float product stops matching the exact answer. */
+function diffAt(want: string, got: string) {
   let p = 0;
   while (p < got.length && got[p] === want[p]) p++;
-  if (p === got.length && got.length === want.length) return <>{got}</>;
-  return (
-    <>
-      {got.slice(0, p)}
-      <span className="text-signal-red-fg underline decoration-wavy decoration-signal-red-line underline-offset-4">
-        {got.slice(p)}
-      </span>
-    </>
-  );
+  return p;
 }
 
-function Status({ ok, yes, no }: { ok: boolean; yes: string; no: string }) {
-  const Icon = ok ? Check : X;
-  return (
-    <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-muted-foreground">
-      <Icon
-        className={`size-3.5 ${ok ? 'text-signal-green-fg' : 'text-signal-red-fg'}`}
-        aria-hidden
-      />
-      {ok ? yes : no}
-    </span>
-  );
-}
+// Two sums a financial UI really does: a ratio times three, a price turned into cents.
+// The field always holds what the user typed. The line below it is what the code computed.
+const ITEMS = [
+  { typed: '0.1', times: 3 },
+  { typed: '19.99', times: 100 },
+].map(({ typed, times }) => {
+  const product = String(Number(typed) * times);
+  const exact = exactTimes(typed, times);
+  return { typed, times, product, exact, wrongFrom: diffAt(exact, product) };
+});
 
-/** The 0.1 + 0.2 problem, shown on a value the user typed, then the string Numora keeps. */
+type Frame = {
+  item: (typeof ITEMS)[number];
+  /** What the field holds. */
+  value: string;
+  /** True once the product shows under the field. */
+  result: boolean;
+  ms: number;
+};
+
+const TIMELINE: Frame[] = ITEMS.flatMap((item) => {
+  const frames: Frame[] = [{ item, value: '', result: false, ms: 500 }];
+  for (let i = 1; i <= item.typed.length; i++) {
+    frames.push({
+      item,
+      value: item.typed.slice(0, i),
+      result: false,
+      ms: i === item.typed.length ? 650 : 170,
+    });
+  }
+  frames.push({ item, value: item.typed, result: true, ms: 2600 });
+  return frames;
+});
+
+/** Types a decimal, then shows what multiplying it as a Number gives. */
 export function NumberRoundTrip() {
-  const loop = useLoop({ frames: FRAMES, frameMs: (f) => FRAME_MS[f] ?? 1000, holdMs: HOLD_MS });
-  const [typed, k] = SAMPLES[loop.cycle % SAMPLES.length];
-  const value = parseValue(formatValue(typed));
-  const product = String(Number(value) * k);
-  const exact = exactTimes(value, k);
-  const showNumora = loop.frame >= 1;
+  const loop = useLoop({
+    frames: TIMELINE.length,
+    frameMs: (frame) => TIMELINE[frame].ms,
+    holdMs: 0,
+  });
+  const { item, value, result } = TIMELINE[loop.frame];
+  const idle = value === '' || result;
 
   return (
-    <DiagramFrame variant="demo">
-      <div ref={loop.ref} className={`${demoInsetClass} space-y-4`}>
-        <div>
-          <div className="mb-1 flex items-center justify-between gap-2 text-muted-foreground">
-            <span className="min-w-0 break-all">
-              Number("{value}") * {k}
-            </span>
-            <Status ok={product === exact} yes="exact" no="wrong" />
-          </div>
-          <div className="truncate tabular-nums">
-            <Marked want={exact} got={product} />
-          </div>
-          <div className="truncate tabular-nums text-muted-foreground">exact: {exact}</div>
-        </div>
-        <div
-          aria-hidden={!showNumora}
-          className={`transition-opacity duration-150 ease-out-expo motion-reduce:transition-none ${showNumora ? 'opacity-100' : 'opacity-0'}`}
+    <LoopFigure
+      loop={loop}
+      note={
+        <>
+          Gives{' '}
+          <span className="font-mono text-foreground">
+            {item.product.slice(0, item.wrongFrom)}
+            <span className="text-signal-red-fg">{item.product.slice(item.wrongFrom)}</span>
+          </span>
+          , not <span className="font-mono text-foreground">{item.exact}</span>
+        </>
+      }
+      noteShown={result}
+    >
+      <FigureLabel>
+        <code>
+          Number(value) <strong>* {item.times}</strong>
+        </code>
+      </FigureLabel>
+      {/* A new value fades in; keystrokes inside one scene just appear. */}
+      <AnimatePresence initial={false} mode="wait">
+        <motion.div
+          key={item.typed}
+          role="img"
+          aria-label={`Typing ${item.typed} and multiplying it as a Number by ${item.times} gives ${item.product}, not ${item.exact}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: DUR.fast, ease: EASE.outExpo }}
+          className="mt-2 flex h-10 items-center font-mono text-[1.75rem] leading-none font-medium text-foreground select-none sm:text-[2rem]"
         >
-          <div className="mb-1 flex items-center justify-between gap-2 text-muted-foreground">
-            <span>Numora: e.target.value</span>
-            <Status ok yes="as typed" no="" />
-          </div>
-          <div className="min-h-5 break-all tabular-nums">"{value}"</div>
-        </div>
-      </div>
-    </DiagramFrame>
+          <span>{value}</span>
+          <span
+            aria-hidden
+            className={cn(
+              'ml-px inline-block h-[1.15em] w-[1.5px] flex-none bg-foreground motion-reduce:hidden',
+              idle && 'animate-[demo-caret-blink_1.1s_steps(1)_infinite]'
+            )}
+          />
+        </motion.div>
+      </AnimatePresence>
+    </LoopFigure>
   );
 }

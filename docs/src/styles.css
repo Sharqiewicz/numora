@@ -233,16 +233,6 @@ body {
   }
 }
 
-/* Expand animation for progress bar (width-based, intentional for time visualization) */
-@keyframes expand {
-  0% {
-    width: 0;
-  }
-  100% {
-    width: 100%;
-  }
-}
-
 /* GPU-accelerated line expansion for hero underline */
 @keyframes expand-line {
   from { transform: scaleX(0); }
@@ -586,6 +576,15 @@ body {
     padding: 0.5rem 0.75rem 0.5rem 0;
     border-bottom: 1px solid var(--border);
   }
+  :where(.docs-prose) :where(th, td):not(:where(.not-prose, .not-prose *)) {
+    vertical-align: top;
+  }
+  /* An identifier in a table's first column never breaks in the middle: the cell grows to fit it, and a
+     table too wide for the column scrolls inside its `overflow-x-auto` wrapper. */
+  :where(.docs-prose) :where(td:first-child) :where(code):not(:where(.not-prose, .not-prose *)) {
+    overflow-wrap: normal;
+    white-space: nowrap;
+  }
 
   /* Page rhythm. Direct children of the article only, so nested sections (Anatomy) keep their own
      spacing utilities. Quiet, small headings; air above them, a short gap below (they belong to
@@ -646,6 +645,13 @@ body {
     scrollbar-width: thin;
     scrollbar-color: var(--surface-5) transparent;
   }
+  /* In the mobile sheet the list runs to the bottom of the screen: keep the last item
+     clear of the home indicator. */
+  @media (max-width: 767.98px) {
+    .docs-sidebar-scroll {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
   /* Fade the nav out above the socials footer instead of clipping it; padding keeps the
      last item fully readable at the end of the scroll. */
   @media (min-width: 768px) {
@@ -698,6 +704,8 @@ body {
     position: absolute;
     left: 68%;
     top: 44px;
+    /* Above whatever follows the figure: the pointer rests outside the card. */
+    z-index: 1;
     pointer-events: none;
     user-select: none;
     transform: translate(72px, 62px);
@@ -799,13 +807,53 @@ body {
       animation: caret-hold 400ms;
     }
   }
+  /*
+   * The typing loop never takes real focus, so there is no native caret while it types.
+   * Overlay demos draw one after the text for as long as the simulated focus lasts.
+   * `data-hold` (Blur mode) waits for the focus strip, like .caret-hold does.
+   */
+  .demo-caret {
+    flex: none;
+    width: 1.5px;
+    height: 1.15em;
+    margin-left: 1px;
+    background: var(--foreground);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .demo-focus-ring[data-focused] .demo-caret {
+    opacity: 1;
+    animation: demo-caret-blink 1.1s steps(1) infinite;
+  }
+  .demo-focus-ring[data-focused] .demo-caret[data-hold] {
+    animation:
+      demo-caret-hold 280ms,
+      demo-caret-blink 1.1s steps(1) 280ms infinite;
+  }
+  /* The reader's own focus shows the native caret instead. */
+  .demo-focus-ring:has(input:focus) .demo-caret {
+    opacity: 0;
+    animation: none;
+  }
+  @keyframes demo-caret-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes demo-caret-hold {
+    from,
+    to {
+      opacity: 0;
+    }
+  }
   /* The typing loop does not run under reduced motion, so there is nothing to point at. */
   @media (prefers-reduced-motion: reduce) {
     .demo-focus-ring,
     .demo-focus-ring[data-focused] {
       transition: none;
     }
-    .demo-pointer {
+    .demo-pointer,
+    .demo-caret {
       display: none;
     }
   }
@@ -817,3 +865,82 @@ body {
   font-family: var(--font-code);
 }
 
+
+/*
+ * Sidebar stars on featured pages. Each star turns in once when the page loads, one after
+ * another, then stays still: the sidebar sits beside the reading column, so nothing in it
+ * moves on a loop. Desktop only: the mobile sheet remounts the sidebar every time it opens,
+ * and the menu should not replay an entrance on each open. Reduced motion gets the still star.
+ */
+.nav-star {
+  --star-turn: 72deg;
+  --star-in: 600ms;
+  --star-stagger: 80ms;
+  /* The centre of the star's points, a little below the centre of its box. */
+  transform-origin: 50% 52%;
+}
+@keyframes nav-star-in {
+  from {
+    opacity: 0;
+    transform: rotate(calc(var(--star-turn) * -1)) scale(0.9);
+  }
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
+  .nav-star {
+    animation: nav-star-in var(--star-in) var(--ease-out-expo) backwards;
+    animation-delay: calc(200ms + var(--star-i, 0) * var(--star-stagger));
+  }
+}
+
+/*
+ * Sheet (the mobile docs menu). The panel and its overlay move with transitions, not
+ * keyframes, so closing halfway through opening turns around from where the panel is
+ * instead of jumping to fully open first. `@starting-style` gives the entrance its start.
+ * Radix only keeps a closing element mounted while a keyframe animation runs, so
+ * `sheet-hold` is an animation that changes nothing and lasts as long as the exit.
+ */
+@keyframes sheet-hold {
+  to {
+    visibility: visible;
+  }
+}
+.sheet-content,
+.sheet-overlay {
+  transition-duration: 300ms;
+  transition-timing-function: var(--ease-drawer);
+}
+.sheet-content {
+  transition-property: transform;
+}
+.sheet-overlay {
+  transition-property: opacity;
+}
+.sheet-content[data-state='closed'],
+.sheet-overlay[data-state='closed'] {
+  transition-duration: 250ms;
+  animation: sheet-hold 250ms;
+}
+.sheet-content[data-state='closed'] {
+  transform: var(--sheet-closed);
+}
+.sheet-overlay[data-state='closed'] {
+  opacity: 0;
+}
+@starting-style {
+  .sheet-content[data-state='open'] {
+    transform: var(--sheet-closed);
+  }
+  .sheet-overlay[data-state='open'] {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet-content,
+  .sheet-overlay {
+    transition: none;
+  }
+  .sheet-content[data-state='closed'],
+  .sheet-overlay[data-state='closed'] {
+    animation-duration: 1ms;
+  }
+}

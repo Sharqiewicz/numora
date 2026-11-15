@@ -202,7 +202,6 @@ function AnimatedInput() {
           setCaret(inputRef.current?.selectionStart ?? undefined)
           setFormatted(text)
         }}
-        formatOn="change"
         decimalMaxLength={2}
         aria-label="Amount"
         // m-0 p-0 border-0: same text origin as the overlay span
@@ -225,8 +224,8 @@ function AnimatedInput() {
               formatOn={'{'}'change'{'}'}
             </code>
           </strong>{' '}
-          (used here) keeps the input's display as the formatted string at all times.{' '}
-          <code>'blur'</code> needs no extra code here: <code>onFormattedValueChange</code> also
+          (the default, used here) keeps the input's display as the formatted string at all times.{' '}
+          <code>'blur'</code> needs no extra code here. <code>onFormattedValueChange</code> also
           fires for the focus strip and the blur regroup, which <code>onValueChange</code> does not
           report because the number itself didn&apos;t change. It does need a few lines of CSS for
           the caret, shown in the next section.
@@ -255,7 +254,7 @@ function AnimatedInput() {
           gives the input the label's font, size and line height. The browser computes the caret
           position from the input's invisible text layout, so any difference between the layers
           shows up as caret drift. Set the typography on the label only. <code>letter-spacing</code>{' '}
-          is not part of <code>font</code>: if the label has a <code>tracking-*</code> class, add{' '}
+          is not part of <code>font</code>, so if the label has a <code>tracking-*</code> class, add{' '}
           <code>tracking-[inherit]</code> to the input.
         </li>
       </ul>

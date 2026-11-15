@@ -70,7 +70,7 @@ const JSON_LD = [
         name: 'How do I use NumberFlow with React?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Import NumberFlow from @number-flow/react and render it as the visible layer of a transparent-text NumoraInput overlay. Convert the raw string via Number(rawValue) for the value prop, and mirror the number of typed decimals through minimumFractionDigits so trailing zeros stay aligned with the cursor.',
+          text: 'Import NumberFlow from @number-flow/react and render it as a readout next to a NumoraInput, fed from the same raw value. To animate the field itself, render NumberFlow under a transparent-text NumoraInput, pass it the raw string as the value prop, and mirror the number of typed decimals through minimumFractionDigits so trailing zeros stay aligned with the caret.',
         },
       },
       {
@@ -78,7 +78,7 @@ const JSON_LD = [
         name: 'Does NumberFlow respect prefers-reduced-motion?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. NumberFlow respects the OS-level prefers-reduced-motion setting by default. If the user opts out, the digit morph becomes an instant swap. You need no extra code.',
+          text: 'Yes. NumberFlow respects the OS-level prefers-reduced-motion setting by default. If the user opts out, the digits swap without animating. You need no extra code.',
         },
       },
       {
@@ -86,7 +86,7 @@ const JSON_LD = [
         name: 'Where can I install NumberFlow?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: `NumberFlow lives at ${LIB_URL} and is published on npm as @number-flow/react (React) and number-flow (vanilla web component). Install with npm install numora-react @number-flow/react.`,
+          text: `NumberFlow's docs are at ${LIB_URL}. It is published on npm as @number-flow/react (React) and number-flow (vanilla web component). Install with npm install numora-react @number-flow/react.`,
         },
       },
     ],
@@ -123,54 +123,17 @@ function NumberFlowIntegration() {
         <a href={LIB_URL} target="_blank" rel="noreferrer noopener">
           <strong>NumberFlow</strong> by Maxwell Barvian
         </a>{' '}
-        is an animated number transition library. This guide layers a{' '}
-        <code>&lt;NumberFlow&gt;</code> on top of a transparent-text Numora React{' '}
-        <code>NumoraInput</code>, so the editable surface itself appears animated. The real{' '}
-        <code>&lt;input&gt;</code> still handles every keystroke, and NumberFlow renders what the
-        user sees.
-      </p>
-      <p>
-        Not using React? See the{' '}
-        <Link to="/docs/numora/integrations/number-flow">
-          Numora (vanilla) NumberFlow integration
-        </Link>
-        .
+        is an animated number transition library. This guide pairs it with Numora React's{' '}
+        <code>NumoraInput</code> in two ways. The <a href="#readout">readout</a> animates a number
+        next to the field and is the recommended one. The <a href="#overlay">overlay</a> draws a{' '}
+        <code>&lt;NumberFlow&gt;</code> under a transparent-text input, so the field itself appears
+        animated. It is experimental.
       </p>
 
       <NumberFlowOverlayDemo />
       <p className="mx-auto -mt-6 mb-12 max-w-lg text-sm text-muted-foreground">
-        With <code>'change'</code>, digits animate on every keystroke.
+        The overlay. With <code>'change'</code>, digits animate on every keystroke.
       </p>
-
-      <OverlayExplainer
-        visibleLayer={
-          <>
-            a <code>&lt;NumberFlow&gt;</code> that animates the formatted display number.
-          </>
-        }
-        input={
-          <>
-            the real <code>NumoraInput</code>
-          </>
-        }
-      >
-        <p>
-          Both layers render the same formatted number. As the user types, Numora React's{' '}
-          <code>onValueChange</code> fires. Your handler converts the raw value to a{' '}
-          <code>Number</code> and passes it to <code>&lt;NumberFlow&gt;</code>, which tweens each
-          digit into place. The input itself never animates, and because its text is transparent,
-          you only see the NumberFlow layer.
-        </p>
-      </OverlayExplainer>
-
-      <div className="bg-signal-amber/10 border border-signal-amber/30 rounded-lg p-4 my-4">
-        <p className="m-0">
-          <strong>Caution:</strong> this pattern is experimental. Torph animates strings. NumberFlow
-          animates numbers. That crosses the string → number boundary at the display layer, which
-          causes precision caveats with trailing decimals, partial input states and very large
-          values. They are listed below.
-        </p>
-      </div>
 
       <h2>Installation</h2>
       <CodeBlock language="bash">
@@ -179,147 +142,12 @@ function NumberFlowIntegration() {
 npm install numora-react @number-flow/react`}
       </CodeBlock>
       {/* biome-ignore lint/correctness/useUniqueElementIds: explicit heading id keeps a stable, shareable URL anchor (ArticleHeadings would otherwise slugify the text) */}
-      <h2 id="overlay">Building the overlay</h2>
-
-      <CodeBlock language="tsx">
-        {`import NumberFlow from '@number-flow/react'
-import { NumoraInput } from 'numora-react'
-import { useEffect, useState } from 'react'
-
-function AnimatedInput() {
-  const [value, setValue] = useState('')
-  const [mounted, setMounted] = useState(false)
-
-  // Show a plain string until hydration, so server and first client render match.
-  useEffect(() => { setMounted(true) }, [])
-
-  const decimals = value.includes('.') ? value.split('.')[1].length : 0
-  const numericValue = Number(value) || 0
-
-  return (
-    <label className="relative inline-flex items-center text-4xl font-mono leading-none tabular-nums text-white">
-      {/* Visible layer: NumberFlow animates the digits. aria-hidden: screen readers announce the input. */}
-      <span aria-hidden="true" className="pointer-events-none whitespace-pre">
-        {mounted ? (
-          <NumberFlow
-            value={numericValue}
-            locales="en-US"
-            format={{
-              useGrouping: true,
-              minimumFractionDigits: decimals,
-              maximumFractionDigits: decimals,
-            }}
-          />
-        ) : '0'}
-      </span>
-
-      {/* Invisible layer: real input owns the keyboard */}
-      <NumoraInput
-        value={value}
-        onValueChange={({ value }) => setValue(value)}
-        formatOn="change"
-        decimalMaxLength={2}
-        aria-label="Amount"
-        // m-0 p-0 border-0: same text origin as the overlay
-        // text-transparent + caret-white: hide the text, keep the cursor
-        // placeholder-transparent: hide the input's own placeholder
-        // selection:bg-white/25: an opaque selection would cover NumberFlow
-        // [font:inherit]: the label's typography, so the cursor cannot drift
-        className="absolute inset-0 w-full h-full m-0 p-0 border-0 bg-transparent
-                   text-transparent placeholder-transparent caret-white
-                   outline-none focus:outline-none selection:bg-white/25 [font:inherit]"
-      />
-    </label>
-  )
-}`}
-      </CodeBlock>
-
-      <h3>Why each line matters</h3>
-      <ul>
-        <li>
-          <strong>
-            <code>
-              formatOn={'{'}'change'{'}'}
-            </code>
-          </strong>{' '}
-          keeps the input's display as the formatted string at all times, matching what NumberFlow
-          shows.
-        </li>
-        <li>
-          <strong>
-            <code>Number(value)</code> suits fiat-sized amounts only.
-          </strong>{' '}
-          The samples hand NumberFlow <code>Number(value)</code>, and a JavaScript number is exact
-          up to about 15 significant digits. Past that, for example an 18-decimal token amount, the
-          animated digits can differ from what the input holds. Keep the string from{' '}
-          <code>onValueChange</code> as the value you store and send. For long amounts use the{' '}
-          <a href="/docs/numora-react/integrations/torph">Torph</a> overlay, which animates the
-          display string and never converts it.
-        </li>
-        <li>
-          <strong>
-            Dynamic <code>minimumFractionDigits</code>
-          </strong>{' '}
-          matters because <code>Number("1.20") = 1.2</code>, so without it NumberFlow renders{' '}
-          <code>"1.2"</code> while the input contains <code>"1.20"</code>. Computing{' '}
-          <code>decimals</code> from the raw value and passing it to NumberFlow keeps the visible
-          width and the cursor aligned.
-        </li>
-        <li>
-          <strong>
-            <code>useGrouping: true</code>
-          </strong>{' '}
-          makes NumberFlow's grouping match the input's thousand separator. Without{' '}
-          <code>locales</code>, NumberFlow formats in the visitor's browser locale, so the code
-          passes <code>locales="en-US"</code> to get <code>","</code>, the same as Numora React's
-          default.
-        </li>
-        <li>
-          <strong>
-            <code>mounted</code> gate
-          </strong>{' '}
-          renders a plain string on the server and mounts NumberFlow after hydration, so the server
-          and the first client render show the same text. It is optional:{' '}
-          <code>@number-flow/react</code> is already marked <code>'use client'</code> and can render
-          on the server.
-        </li>
-        <li>
-          <strong>
-            <code>[font:inherit]</code>
-          </strong>{' '}
-          gives the input the label's font, size and line height. It matters because the browser
-          computes the cursor position from the input's text layout. If the fonts differ, the cursor
-          drifts.
-        </li>
-        <li>
-          <strong>
-            <code>tabular-nums</code> on the label
-          </strong>{' '}
-          keeps digit widths stable while NumberFlow animates, which reduces layout shift during
-          transitions. On the label it reaches both layers, so the input's digits are the same
-          width as the overlay's.
-        </li>
-      </ul>
-
-      <NumberFlowCaveats />
-
-      <h2>Try it with any locale</h2>
+      <h2 id="readout">Animate a readout next to the input</h2>
       <p>
-        Pass NumberFlow the same <code>locale</code> as the input (its <code>locales</code> prop).
-        Switch the locale below, then type or paste. The playground also passes{' '}
-        <code>useGrouping: 'always'</code>, so the two agree in every locale except Arabic and
-        Persian, where NumberFlow prints native digits.
-      </p>
-      <NumberFlowLocalePlayground />
-
-      {/* biome-ignore lint/correctness/useUniqueElementIds: explicit heading id keeps a stable, shareable URL anchor (ArticleHeadings would otherwise slugify the text) */}
-      <h2 id="readout">Display animation alongside the input</h2>
-      <p>
-        This is the conservative pattern. The user types into a plain <code>NumoraInput</code>, and
-        a separate <code>NumberFlow</code> elsewhere on the page (a converted amount or a running
-        total, say) animates as the value changes. Both views share the same raw value in state. The
-        input has no transparent text and no cursor drift, and the display layer doesn't affect the
-        raw value.
+        The user types into a plain <code>NumoraInput</code>. A separate <code>NumberFlow</code>{' '}
+        elsewhere on the page, such as a converted amount or a running total, animates as the value
+        changes. Both read the same raw value from state. The input has no transparent text and no
+        caret drift, and NumberFlow cannot change the raw value.
       </p>
 
       <CodeBlock language="tsx">
@@ -360,10 +188,195 @@ function SwapForm() {
       </CodeBlock>
 
       <p>
-        The input itself snaps with no animation, so typing latency is unchanged. Only the
-        converted-amount readout animates. This is the cheapest integration path, and the editable
-        string never round-trips through <code>Number</code>.
+        The input does not animate. Only the converted amount does. NumberFlow gets a real number
+        here, so none of the overlay's <a href="#caveats">caveats</a> apply, and the string the user
+        edits never passes through <code>Number</code>.
       </p>
+
+      <OverlayExplainer
+        visibleLayer={
+          <>
+            a <code>&lt;NumberFlow&gt;</code> that animates the formatted display number.
+          </>
+        }
+        input={
+          <>
+            the real <code>NumoraInput</code>
+          </>
+        }
+      >
+        <p>
+          Both layers render the same formatted number. As the user types, Numora React's{' '}
+          <code>onValueChange</code> fires. Your handler stores the raw value and passes it to{' '}
+          <code>&lt;NumberFlow&gt;</code>, which formats it again and tweens each digit into place.
+          The input never animates. Its text is transparent, so you only see the NumberFlow layer.
+        </p>
+      </OverlayExplainer>
+
+      <div className="bg-signal-amber/10 border border-signal-amber/30 rounded-lg p-4 my-4">
+        <p className="m-0">
+          <strong>The overlay is experimental.</strong> It suits short fields where users mostly add
+          digits at the end. NumberFlow formats the number a second time, so every option that
+          changes what the field shows needs a matching NumberFlow setting. Even then the two layers
+          differ in a few states, and the caret runs ahead of the animation. The{' '}
+          <a href="#caveats">caveats</a> list them.{' '}
+          <Link to="/docs/numora-react/integrations/torph">Torph</Link> animates the field's own
+          string, so it has no second formatter to keep in step.
+        </p>
+      </div>
+
+      {/* biome-ignore lint/correctness/useUniqueElementIds: explicit heading id keeps a stable, shareable URL anchor (ArticleHeadings would otherwise slugify the text) */}
+      <h2 id="overlay">Building the overlay</h2>
+
+      <CodeBlock language="tsx">
+        {`import NumberFlow from '@number-flow/react'
+import { NumoraInput } from 'numora-react'
+import { useState } from 'react'
+
+function AnimatedInput() {
+  const [value, setValue] = useState('')
+
+  const decimals = value.includes('.') ? value.split('.')[1].length : 0
+  // The raw value itself, not Number(value). A raw value with no digit ("" or "-") draws 0.
+  const number = (/\\d/.test(value) ? value : '0') as Intl.StringNumericLiteral
+
+  return (
+    <label className="relative inline-flex items-center text-4xl font-mono leading-none tabular-nums text-white">
+      {/* Visible layer: NumberFlow animates the digits. aria-hidden: screen readers announce the input. */}
+      <span aria-hidden="true" className="pointer-events-none whitespace-pre">
+        <NumberFlow
+          value={number}
+          suffix={value.endsWith('.') ? '.' : undefined}
+          locales="en-US"
+          format={{
+            useGrouping: true,
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
+          }}
+        />
+      </span>
+
+      {/* Invisible layer: real input owns the keyboard */}
+      <NumoraInput
+        value={value}
+        onValueChange={({ value }) => setValue(value)}
+        decimalMaxLength={2}
+        padLeadingZero
+        aria-label="Amount"
+        // m-0 p-0 border-0: same text origin as the overlay
+        // text-transparent + caret-white: hide the text, keep the caret
+        // placeholder-transparent: hide the input's own placeholder
+        // selection:bg-white/25: an opaque selection would cover NumberFlow
+        // [font:inherit]: the label's typography, so the caret cannot drift
+        className="absolute inset-0 w-full h-full m-0 p-0 border-0 bg-transparent
+                   text-transparent placeholder-transparent caret-white
+                   outline-none focus:outline-none selection:bg-white/25 [font:inherit]"
+      />
+    </label>
+  )
+}`}
+      </CodeBlock>
+
+      <h3>Why each line matters</h3>
+      <ul>
+        <li>
+          <strong>
+            <code>
+              formatOn={'{'}'change'{'}'}
+            </code>
+          </strong>{' '}
+          is the default, written out because the overlay depends on it. With <code>'blur'</code> a
+          focused field shows no grouping while NumberFlow does, and the caret drifts.
+        </li>
+        <li>
+          <strong>
+            The raw string as <code>value</code>
+          </strong>{' '}
+          keeps every digit. <code>Intl.NumberFormat</code> formats a numeric string digit for
+          digit, so an 18-decimal token amount stays exact and <code>"-0."</code> keeps its sign.{' '}
+          <code>Number(value) || 0</code> is exact only up to about 15 significant digits and turns{' '}
+          <code>"-0."</code> into <code>0.</code>. The cast needs TypeScript's <code>ES2023</code>{' '}
+          lib. With an older lib, write <code>as unknown as number</code>. Chrome 106, Safari 15.4,
+          Firefox 116 and later format the string exactly. Older browsers read it as a{' '}
+          <code>Number</code>. Either way, the string from <code>onValueChange</code> is the value
+          you store and send.
+        </li>
+        <li>
+          <strong>
+            <code>suffix</code>
+          </strong>{' '}
+          draws the dot the user just typed. <code>"1."</code> is the number <code>1</code>, so
+          without it NumberFlow shows <code>"1"</code> and the caret sits one character past the
+          visible text until a fraction digit arrives.
+        </li>
+        <li>
+          <strong>
+            <code>padLeadingZero</code>
+          </strong>{' '}
+          turns a typed <code>"."</code> into <code>"0."</code>. NumberFlow always prints the
+          leading zero (<code>"0.5"</code>), so the input has to hold it too.
+        </li>
+        <li>
+          <strong>
+            Dynamic <code>minimumFractionDigits</code>
+          </strong>{' '}
+          keeps trailing zeros. <code>Intl</code> drops them, so without it NumberFlow draws{' '}
+          <code>"1.2"</code> while the input holds <code>"1.20"</code>, and the caret sits one
+          character past the visible text. <code>decimals</code> counts the fraction digits in the
+          raw value.
+        </li>
+        <li>
+          <strong>
+            <code>useGrouping: true</code>
+          </strong>{' '}
+          and <code>locales="en-US"</code> make NumberFlow group the way the input does. Without{' '}
+          <code>locales</code>, NumberFlow formats in the visitor's browser locale, which may not
+          use <code>","</code> and <code>"."</code>, Numora React's defaults.
+        </li>
+        <li>
+          <strong>
+            <code>[font:inherit]</code>
+          </strong>{' '}
+          gives the input the label's font, size and line height. The browser computes the caret
+          position from the input's text layout, so if the fonts differ, the caret drifts.
+        </li>
+        <li>
+          <strong>
+            <code>tabular-nums</code> on the label
+          </strong>{' '}
+          keeps every digit the same width while NumberFlow animates. On the label it reaches both
+          layers, so the input's digits are as wide as the overlay's.
+        </li>
+      </ul>
+
+      <NumberFlowCaveats />
+
+      <h2>Try it with any locale</h2>
+      <p>
+        Give NumberFlow's <code>locales</code> prop the same tag as the input's <code>locale</code>.
+        The typed decimal mark is then the last character of <code>formattedValue</code>, so keep
+        both strings in state:
+      </p>
+      <CodeBlock language="tsx">
+        {`const [{ value, formattedValue }, setValues] = useState({ value: '', formattedValue: '' })
+
+<NumberFlow
+  value={number}
+  // The raw value always uses ".", the field shows the locale's mark ("1," in de-DE).
+  suffix={value.endsWith('.') ? formattedValue.slice(-1) : undefined}
+  locales="de-DE"
+  format={{ useGrouping: true, minimumFractionDigits: decimals, maximumFractionDigits: decimals }}
+/>
+
+<NumoraInput locale="de-DE" value={value} onValueChange={setValues} padLeadingZero />`}
+      </CodeBlock>
+      <p>
+        Switch the locale below, then type or paste. The two layers agree in every locale listed.{' '}
+        <code>ar-EG</code> and <code>fa-IR</code> are left out, because the overlay{' '}
+        <a href="#caveats">does not support</a> locales whose digits are not ASCII. This playground
+        allows eight decimals, and long amounts stay exact.
+      </p>
+      <NumberFlowLocalePlayground />
 
       <h2>Read-only animated totals</h2>
       <p>
@@ -378,7 +391,7 @@ function SwapForm() {
       <h2>Reducing motion</h2>
       <p>
         NumberFlow respects <code>prefers-reduced-motion</code> by default. If a user opts out of
-        animations at the OS level, the digit morph becomes an instant swap. You need no extra code.
+        animations at the OS level, the digits swap without animating. You need no extra code.
       </p>
 
       <h2>FAQ</h2>
@@ -396,20 +409,20 @@ function SwapForm() {
 
       <h3>How do I use NumberFlow with React?</h3>
       <p>
-        Import <code>NumberFlow</code> from <code>@number-flow/react</code> and render it as the
-        visible layer of a transparent-text <code>NumoraInput</code> overlay. Convert the raw string
-        via <code>Number(rawValue)</code> for the <code>value</code> prop, and mirror the number of
-        typed decimals through <code>minimumFractionDigits</code> so trailing zeros stay aligned
-        with the cursor.
+        Import <code>NumberFlow</code> from <code>@number-flow/react</code> and render it as a
+        readout next to a <code>NumoraInput</code>, fed from the same raw value. To animate the
+        field itself, render NumberFlow under a transparent-text <code>NumoraInput</code>, pass it
+        the raw string as the <code>value</code> prop, and mirror the number of typed decimals
+        through <code>minimumFractionDigits</code> so trailing zeros stay aligned with the caret.
       </p>
 
       <h3>Where can I install NumberFlow?</h3>
       <p>
-        NumberFlow lives at{' '}
+        NumberFlow's docs are at{' '}
         <a href={LIB_URL} target="_blank" rel="noreferrer noopener">
           number-flow.barvian.me
-        </a>{' '}
-        and is published on npm as <code>@number-flow/react</code> (React) and{' '}
+        </a>
+        . It is published on npm as <code>@number-flow/react</code> (React) and{' '}
         <code>number-flow</code> (vanilla web component). Install with{' '}
         <code>npm install numora-react @number-flow/react</code>.
       </p>
