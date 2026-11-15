@@ -17,7 +17,7 @@ import { LOCALES, RAW, RAW_2, decimalOf, display, native, paste, typeText } from
 
 type Values = { amount: string };
 
-function mount(props: Partial<NumoraInputProps>, defaultAmount = '') {
+function mount(props: Partial<NumoraInputProps>, defaultAmount = '', explicit = false) {
   let form!: UseFormReturn<Values>;
   let submitted: Values | undefined;
   let errors: FieldErrors<Values> = {};
@@ -35,16 +35,21 @@ function mount(props: Partial<NumoraInputProps>, defaultAmount = '') {
             // A canonical decimal string: what a backend or a bigint/decimal library accepts.
             validate: (v) => /^-?\d+(\.\d+)?$/.test(v) || 'not canonical',
           }}
-          render={({ field }) => (
-            <NumoraInput
-              data-testid="amount"
-              {...props}
-              ref={field.ref}
-              value={field.value}
-              onChange={(e) => field.onChange(e.target.value)}
-              onBlur={field.onBlur}
-            />
-          )}
+          // The form the docs show: `field` spread, so RHF reads `e.target.value` itself.
+          render={({ field }) =>
+            explicit ? (
+              <NumoraInput
+                data-testid="amount"
+                {...props}
+                ref={field.ref}
+                value={field.value}
+                onChange={(e) => field.onChange(e.target.value)}
+                onBlur={field.onBlur}
+              />
+            ) : (
+              <NumoraInput data-testid="amount" {...props} {...field} />
+            )
+          }
         />
       </form>
     );
@@ -152,6 +157,19 @@ describe.each(LOCALES)('react-hook-form with locale %s', (locale) => {
     typeText(el, `1234567${dec}89`);
     expect(await submit()).toEqual({ amount: RAW });
     expect(errors().amount).toBeUndefined();
+  });
+});
+
+describe('react-hook-form with a hand-written onChange', () => {
+  it('field.onChange(e.target.value) stores the same raw value as the spread', async () => {
+    const { el, form, state, submit } = mount({ locale: 'de-DE' }, '', true);
+    el.focus();
+    typeText(el, '1234567,89');
+    expect(el.value).toBe('1.234.567,89');
+    expect(state()).toBe(RAW);
+    act(() => form().setValue('amount', RAW_2));
+    expect(el.value).toBe('9.876.543,21');
+    expect(await submit()).toEqual({ amount: RAW_2 });
   });
 });
 
