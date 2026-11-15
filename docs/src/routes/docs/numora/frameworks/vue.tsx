@@ -25,7 +25,7 @@ const FAQ = [
   {
     question: 'How do I add thousand separators to a Vue number input?',
     answer:
-      'Nothing to configure: grouping on every keystroke is the default. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can store in a `ref`, Pinia, VeeValidate or FormKit.',
+      'Nothing to configure. Grouping on every keystroke is the default. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators, which you can store in a `ref`, Pinia, VeeValidate or FormKit.',
   },
   {
     question: 'Does it work with VeeValidate, FormKit or Pinia in Vue?',
@@ -142,7 +142,7 @@ function VueIntegration() {
     <div className="docs-prose max-w-[36rem]">
       <h1>Vue numeric input</h1>
       <p>
-        <strong className="font-numora">Numora</strong> is a precision-first{' '}
+        <strong className="font-numora">Numora</strong> is a{' '}
         <strong>Vue numeric input</strong> library. It handles thousand separators, decimal limits,
         paste sanitization, scientific-notation expansion and cursor preservation through a{' '}
         <code>v-numora</code> custom directive that mounts directly on an <code>&lt;input&gt;</code>
@@ -218,8 +218,6 @@ const value = ref('');`}
   Amount
   <input
     v-numora="{
-      formatOn: 'change',
-      groupingStyle: 'thousand',
       decimalMaxLength: 2,
       onValueChange: ({ value: v }) => (value = v),
     }"
@@ -233,15 +231,14 @@ const value = ref('');`}
         <code>type</code>, <code>inputmode</code>, <code>autocomplete</code> and others).{' '}
         <code>onValueChange</code> receives <code>{`{ value, formattedValue }`}</code>, where{' '}
         <code>value</code> is the raw string (see{' '}
-        <Link to="/docs/numora/features/value-types">value types</Link>). <code>'change'</code>{' '}
-        formats on every keystroke (see{' '}
-        <Link to="/docs/numora/features/formatting">formatting</Link>).
+        <Link to="/docs/numora/features/value-types">value types</Link>). By default, Numora formats
+        on every keystroke (see <Link to="/docs/numora/features/formatting">formatting</Link>).
       </p>
 
       <p>
-        Read the value from <code>onValueChange</code>, not from <code>v-model</code>: the element's
-        own <code>value</code> is the display string (<code>"1,234.56"</code>), while{' '}
-        <code>onValueChange</code> gives you the raw value (<code>"1234.56"</code>).
+        Read the value from <code>onValueChange</code>, not from <code>v-model</code>. The element's
+        own <code>value</code> is the display string (<code>"1,234.56"</code>). <code>onValueChange</code> gives you the raw
+        value (<code>"1234.56"</code>).
       </p>
 
       <h2>Animated example: Numora + Torph in Vue 3</h2>
@@ -276,8 +273,6 @@ onMounted(() => {
   });
 
   const numora = new NumoraInput(host.value, {
-    formatOn: 'change',
-    groupingStyle: 'thousand',
     decimalMaxLength: 2,
     // onFormattedValueChange reports every rewrite of the field, in both formatOn modes.
     // The caret is the second argument: Torph then matches digits around the edit.

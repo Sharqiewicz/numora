@@ -16,7 +16,7 @@ const FAQ = [
   {
     question: 'How do I add thousand separators to an Angular number input?',
     answer:
-      'Nothing to configure: grouping on every keystroke is the default. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators. You can write it straight into a signal or a `FormControl<string>`.',
+      'Nothing to configure. Grouping on every keystroke is the default. Numora formats as the user types and keeps the cursor between the same two digits when it inserts a comma. `onValueChange` receives `{ value, formattedValue }`, where `value` is the raw value without separators. You can write it straight into a signal or a `FormControl<string>`.',
   },
   {
     question: 'Is there a numora-angular package?',
@@ -141,7 +141,7 @@ function AngularIntegration() {
     <div className="docs-prose max-w-[36rem]">
       <h1>Angular numeric input</h1>
       <p>
-        <strong className="font-numora">Numora</strong> is a precision-first{' '}
+        <strong className="font-numora">Numora</strong> is an{' '}
         <strong>Angular numeric input</strong> library. It handles thousand separators, decimal
         limits, paste sanitization, scientific-notation expansion and cursor preservation in a
         standalone directive. Numora&apos;s value is a string end to end, so the directive works
@@ -282,8 +282,6 @@ import { NumoraDirective } from './numora.directive';
       Amount
       <input
         [numora]="{
-          formatOn: 'change',
-          groupingStyle: 'thousand',
           decimalMaxLength: 2,
           onValueChange: handleChange,
         }"
@@ -316,7 +314,7 @@ import { NumoraDirective } from './numora.directive';
       Amount
       <input
         [formControl]="amount"
-        [numora]="{ formatOn: 'change', groupingStyle: 'thousand', decimalMaxLength: 2 }"
+        [numora]="{ decimalMaxLength: 2 }"
       />
     </label>
     <p>Raw value: {{ amount.value }}</p>
@@ -365,11 +363,11 @@ export class AmountModelComponent {
 
       <p>
         Numora adopts the <code>&lt;input&gt;</code> and sets the attributes it needs. The{' '}
-        <code>ControlValueAccessor</code> bridge: <code>writeValue</code> calls{' '}
-        <code>setValue</code>, <code>registerOnChange</code> passes the raw <code>value</code> to
-        the form control (see <Link to="/docs/numora/features/value-types">value types</Link>), and{' '}
-        <code>setDisabledState</code> sets the element's <code>disabled</code> property.{' '}
-        <code>'change'</code> formats on every keystroke (see{' '}
+        <code>ControlValueAccessor</code> methods connect it to the form. <code>writeValue</code>{' '}
+        calls <code>setValue</code>, <code>registerOnChange</code> passes the raw{' '}
+        <code>value</code> to the form control (see <Link to="/docs/numora/features/value-types">value types</Link>), and{' '}
+        <code>setDisabledState</code> sets the element's <code>disabled</code> property. By default,
+        Numora formats on every keystroke (see{' '}
         <Link to="/docs/numora/features/formatting">formatting</Link>).
       </p>
 
@@ -427,8 +425,6 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
     this.morph = morph;
 
     const numora = new NumoraInput(this.host.nativeElement, {
-      formatOn: 'change',
-      groupingStyle: 'thousand',
       decimalMaxLength: 2,
       // onFormattedValueChange reports every rewrite of the field, in both formatOn modes.
       // The caret is the second argument: Torph then matches digits around the edit.

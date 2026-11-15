@@ -32,7 +32,6 @@ const FRAMEWORKS: Framework[] = [
     example: `import { NumoraInput } from 'numora-react'
 
 <NumoraInput
-  formatOn="change"
   decimalMaxLength={2}
   onValueChange={({ value }) => console.log(value)}
 />`,
@@ -46,7 +45,6 @@ const FRAMEWORKS: Framework[] = [
 
 new NumoraInput(document.querySelector<HTMLInputElement>('#amount')!, {
   decimalMaxLength: 2,
-  thousandSeparator: ',',
 })`,
   },
   {
@@ -57,8 +55,10 @@ new NumoraInput(document.querySelector<HTMLInputElement>('#amount')!, {
     example: `import { NumoraInput } from 'numora'
 
 // v-numora directive
+const instances = new WeakMap()
 export const vNumora = {
-  mounted: (el, { value }) => new NumoraInput(el, value ?? {}),
+  mounted: (el, { value }) => instances.set(el, new NumoraInput(el, value ?? {})),
+  unmounted: (el) => instances.get(el)?.destroy(),
 }
 
 <input v-numora="{ decimalMaxLength: 2 }" />`,
@@ -72,7 +72,8 @@ export const vNumora = {
 
 // use:numora action
 export function numora(node, options) {
-  new NumoraInput(node, options)
+  const instance = new NumoraInput(node, options)
+  return { destroy: () => instance.destroy() }
 }
 
 <input use:numora={{ decimalMaxLength: 2 }} />`,
@@ -85,9 +86,11 @@ export function numora(node, options) {
     example: `import { NumoraInput } from 'numora'
 
 @Directive({ selector: 'input[numora]', standalone: true })
-export class NumoraDirective implements OnInit {
+export class NumoraDirective implements OnInit, OnDestroy {
   private el = inject(ElementRef<HTMLInputElement>)
-  ngOnInit() { new NumoraInput(this.el.nativeElement, { decimalMaxLength: 2 }) }
+  private instance?: NumoraInput
+  ngOnInit() { this.instance = new NumoraInput(this.el.nativeElement, { decimalMaxLength: 2 }) }
+  ngOnDestroy() { this.instance?.destroy() }
 }
 
 <input numora />`,
@@ -98,10 +101,12 @@ export class NumoraDirective implements OnInit {
     logo: <SolidLogo />,
     href: '/docs/numora/frameworks/solid',
     example: `import { NumoraInput } from 'numora'
+import { onCleanup } from 'solid-js'
 
 // use:numora directive
 export function numora(el, options) {
-  new NumoraInput(el, options() ?? {})
+  const instance = new NumoraInput(el, options() ?? {})
+  onCleanup(() => instance.destroy())
 }
 
 <input use:numora={{ decimalMaxLength: 2 }} />`,
