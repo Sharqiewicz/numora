@@ -4,6 +4,12 @@ import { useId, useState } from 'react';
 import { DemoFrame } from './DemoFrame';
 import { LOCALE_OPTIONS, Select } from './locale-playground-parts';
 
+// NumberFlow draws no digits for a locale whose Intl digits are not ASCII (Arabic, Persian),
+// so the overlay playground leaves those out.
+const OPTIONS = LOCALE_OPTIONS.filter(
+  ([tag]) => new Intl.NumberFormat(tag).resolvedOptions().numberingSystem === 'latn'
+);
+
 /** The NumberFlow overlay field with the same locale passed to both, switchable live. */
 export function NumberFlowLocalePlayground() {
   const id = useId();
@@ -36,7 +42,7 @@ export function NumberFlowLocalePlayground() {
         label="Locale"
         value={locale}
         onChange={setLocale}
-        options={LOCALE_OPTIONS}
+        options={OPTIONS}
       />
       <DemoFrame inputId={`${id}-amount`} className="my-0">
         <div className="relative flex min-h-[44px] min-w-[6ch] items-center font-mono text-4xl text-white tabular-nums leading-none">

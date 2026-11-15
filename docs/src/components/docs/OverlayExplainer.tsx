@@ -24,7 +24,7 @@ export function OverlayExplainer({ visibleLayer, input, children }: OverlayExpla
         </li>
         <li>
           <strong>Keyboard layer:</strong> {input} positioned on top with{' '}
-          <code>color: transparent</code> and a visible cursor. It still owns focus, keystrokes,
+          <code>color: transparent</code> and a visible caret. It still owns focus, keystrokes,
           selection, IME and mobile <code>inputmode</code>, so paste and native form submission keep
           working too.
         </li>
