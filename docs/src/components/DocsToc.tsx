@@ -14,23 +14,35 @@ export function DocsToc({ headings }: { headings: TocHeading[] }) {
     const elements = headings
       .map((h) => document.getElementById(h.id))
       .filter((el): el is HTMLElement => el !== null);
-    if (elements.length === 0 || typeof IntersectionObserver === 'undefined') return;
+    if (elements.length === 0) return;
 
-    const visible = new Set<string>();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) visible.add(entry.target.id);
-          else visible.delete(entry.target.id);
-        }
-        // Headings in the top band of the viewport; the first in document order wins.
-        const current = elements.find((el) => visible.has(el.id));
-        if (current) setActiveId(current.id);
-      },
-      { rootMargin: '0px 0px -70% 0px' }
-    );
-    for (const el of elements) observer.observe(el);
-    return () => observer.disconnect();
+    // Stateless on purpose: the active heading is worked out from where the page is now, so a
+    // jump (Home, End, a hash link) cannot leave a stale one behind.
+    let frame = 0;
+    const pick = () => {
+      frame = 0;
+      const atBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      // The last heading above the top 30% of the viewport. At the very bottom the last section
+      // may be too short to ever reach that band, so it wins outright.
+      const band = window.innerHeight * 0.3;
+      let current = elements[0];
+      for (const el of elements) {
+        if (el.getBoundingClientRect().top <= band) current = el;
+      }
+      setActiveId((atBottom ? elements[elements.length - 1] : current).id);
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(pick);
+    };
+    pick();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', schedule);
+    };
   }, [headings]);
 
   if (headings.length < 2) return null;
