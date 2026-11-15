@@ -278,12 +278,14 @@ export function numoraTorph(node: HTMLElement, options: NumoraInputOptions) {
 
       <p>Markup:</p>
       <CodeBlock language="html">
-        {`<label
+        {`<!-- The action creates the <input> inside this label at runtime. -->
+<!-- svelte-ignore a11y_label_has_associated_control -->
+<label
   class="numora-overlay"
   use:numoraTorph={{ decimalMaxLength: 2 }}
 >
   <span class="numora-overlay-display" aria-hidden="true">0</span>
-  <div class="numora-overlay-host" />
+  <div class="numora-overlay-host"></div>
 </label>`}
       </CodeBlock>
 

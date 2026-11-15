@@ -20,7 +20,7 @@ const FAQ = [
   {
     question: 'Does Numora work with Nuxt 3 and SSR?',
     answer:
-      'Yes. `NumoraInput` touches the DOM, so the `v-numora` directive only initializes in the `mounted` hook, which only runs in the browser. Nuxt renders the empty `<input>` on the server and Numora adopts it on hydration. You need no Nuxt-specific configuration.',
+      "Yes. `NumoraInput` touches the DOM, so the `v-numora` directive only initializes in the `mounted` hook, which only runs in the browser. Nuxt renders the empty `<input>` on the server and Numora adopts it on hydration. Nuxt has no `main.ts`, so register the directive in a plugin with `nuxtApp.vueApp.directive('numora', vNumora)`, or import `vNumora` in the component.",
   },
   {
     question: 'How do I add thousand separators to a Vue number input?',
@@ -179,7 +179,14 @@ export const vNumora: Directive<HTMLInputElement, NumoraInputOptions> = {
     // Removes Numora's listeners from the adopted <input>.
     instances.get(el)?.destroy();
   },
-};`}
+};
+
+// Types v-numora in templates when the directive is registered globally (Vue 3.5+).
+declare module 'vue' {
+  interface GlobalDirectives {
+    vNumora: typeof vNumora;
+  }
+}`}
       </CodeBlock>
 
       <p>

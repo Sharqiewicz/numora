@@ -168,6 +168,7 @@ function AngularIntegration() {
       <CodeBlock language="ts">
         {`import { isPlatformBrowser } from '@angular/common';
 import {
+  ChangeDetectorRef,
   Directive,
   ElementRef,
   forwardRef,
@@ -180,6 +181,11 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NumoraInput, type NumoraInputOptions } from 'numora';
+
+// A bare numora attribute reaches the input as an empty string: read it as "default options".
+function toOptions(value: NumoraInputOptions | ''): NumoraInputOptions {
+  return value || {};
+}
 
 @Directive({
   selector: 'input[numora]',
@@ -195,13 +201,14 @@ import { NumoraInput, type NumoraInputOptions } from 'numora';
 export class NumoraDirective implements ControlValueAccessor, OnInit, OnDestroy {
   private readonly el = inject<ElementRef<HTMLInputElement>>(ElementRef);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly cdr = inject(ChangeDetectorRef);
   private instance!: NumoraInput;
   private pendingValue: string | null = null;
   private onChangeCb: (value: string) => void = () => {};
   private onTouchedCb: () => void = () => {};
 
   // Read once in ngOnInit. Later changes to the binding are not applied.
-  @Input('numora') options: NumoraInputOptions = {};
+  @Input({ alias: 'numora', transform: toOptions }) options: NumoraInputOptions = {};
 
   ngOnInit(): void {
     // NumoraInput touches the DOM, so skip it during server rendering.
@@ -212,6 +219,9 @@ export class NumoraDirective implements ControlValueAccessor, OnInit, OnDestroy 
       // The form control stores the raw string, so forward the raw \`value\`.
       onValueChange: (values) => {
         this.onChangeCb(values.value);
+        // Angular does not mark the view dirty for Numora's own listeners. Without this, an
+        // OnPush or zoneless view that reads the control would not re-render until blur.
+        this.cdr.markForCheck();
         this.options.onValueChange?.(values);
       },
     });
@@ -326,8 +336,9 @@ export class AmountFormComponent {
 
       <p>
         Template-driven forms work the same way with <code>[(ngModel)]</code>. The bare{' '}
-        <code>numora</code> attribute uses the default options. If strict templates reject it, write{' '}
-        <code>[numora]="{'{}'}"</code>:
+        <code>numora</code> attribute uses the default options: the input&apos;s{' '}
+        <code>transform</code> reads the empty string Angular passes for it as <code>{'{}'}</code>,
+        so it also compiles under <code>strictTemplates</code>:
       </p>
 
       <CodeBlock language="ts">
@@ -441,8 +452,9 @@ export class NumoraOverlayComponent implements OnInit, OnDestroy {
 
       <p>
         Add the overlay CSS from the Torph page to your global styles, or to the component's{' '}
-        <code>styles</code> array. <code>ViewEncapsulation.None</code> is required because Numora
-        creates the <code>&lt;input&gt;</code> at runtime, outside Angular&apos;s scoped styles.
+        <code>styles</code> array. In the <code>styles</code> array it needs{' '}
+        <code>ViewEncapsulation.None</code>, because Numora creates the <code>&lt;input&gt;</code>{' '}
+        at runtime, outside Angular&apos;s scoped styles. Global styles reach it either way.
       </p>
 
       <h2>FAQ</h2>

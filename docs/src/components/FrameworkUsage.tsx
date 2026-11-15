@@ -44,7 +44,7 @@ const FRAMEWORKS: Framework[] = [
     href: '/docs/numora',
     example: `import { NumoraInput } from 'numora'
 
-new NumoraInput(document.querySelector('#amount'), {
+new NumoraInput(document.querySelector<HTMLInputElement>('#amount')!, {
   decimalMaxLength: 2,
   thousandSeparator: ',',
 })`,
