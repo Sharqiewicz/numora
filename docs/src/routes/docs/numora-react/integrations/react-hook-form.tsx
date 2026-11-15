@@ -10,13 +10,13 @@ export const Route = createFileRoute('/docs/numora-react/integrations/react-hook
       {
         name: 'description',
         content:
-          'Use NumoraInput with React Hook Form. Validated, formatted numeric fields, typed in TypeScript.',
+          'Use NumoraInput with React Hook Form through Controller. The form stores the raw value in every locale.',
       },
       { property: 'og:title', content: 'React Hook Form integration | Numora React' },
       {
         property: 'og:description',
         content:
-          'Use NumoraInput with React Hook Form. Validated, formatted numeric fields, typed in TypeScript.',
+          'Use NumoraInput with React Hook Form through Controller. The form stores the raw value in every locale.',
       },
       {
         property: 'og:url',
@@ -26,7 +26,7 @@ export const Route = createFileRoute('/docs/numora-react/integrations/react-hook
       {
         name: 'twitter:description',
         content:
-          'Use NumoraInput with React Hook Form. Validated, formatted numeric fields, typed in TypeScript.',
+          'Use NumoraInput with React Hook Form through Controller. The form stores the raw value in every locale.',
       },
     ],
     links: [
@@ -44,7 +44,7 @@ export const Route = createFileRoute('/docs/numora-react/integrations/react-hook
             '@type': 'TechArticle',
             headline: 'React Hook Form integration for NumoraInput',
             description:
-              'Use NumoraInput with React Hook Form via Controller. Validate numeric inputs, keep them in form state, and read the raw value to pass to precision math libraries.',
+              'Use NumoraInput with React Hook Form through Controller. The form stores the raw value, a plain decimal string you can pass to a decimal library.',
             url: 'https://numeric-input.com/docs/numora-react/integrations/react-hook-form',
             author: {
               '@type': 'Person',
@@ -88,15 +88,25 @@ function ReactHookFormIntegration() {
       </p>
 
       <p>
-        <code>numora-react</code> does not require <code>react-hook-form</code> as a dependency. It
-        works with React Hook Form when it is present in your project.
+        <code>numora-react</code> does not depend on <code>react-hook-form</code>. Install it in
+        your project yourself.
       </p>
 
-      <h2>Controller pattern (recommended)</h2>
+      <h2>Controller pattern</h2>
       <p>
-        Forward all four field properties: <code>onChange</code>, <code>onBlur</code>,{' '}
-        <code>ref</code> and <code>disabled</code>. Omitting <code>onBlur</code> breaks
-        touched-state tracking. Omitting <code>ref</code> breaks auto-focus on validation errors.
+        Spread <code>field</code> onto <code>NumoraInput</code>. It forwards <code>name</code>,{' '}
+        <code>value</code>, <code>onChange</code>, <code>onBlur</code>, <code>ref</code> and{' '}
+        <code>disabled</code>.
+      </p>
+      <p>
+        In <code>onChange</code>, React Hook Form reads <code>e.target.value</code>. On{' '}
+        <code>NumoraInput</code> that is the raw value, so the form stores <code>"1234.5"</code> in
+        every locale. <code>onBlur</code> tracks the touched state. <code>ref</code> focuses the
+        field on a validation error.
+      </p>
+      <p>
+        Give the field a string in <code>defaultValues</code>, so it is controlled from the first
+        render.
       </p>
 
       <ExampleWithDemo
@@ -104,24 +114,16 @@ function ReactHookFormIntegration() {
 import { NumoraInput } from 'numora-react'
 
 function Form() {
-  const { control, handleSubmit, setValue } = useForm()
+  const { control, handleSubmit, setValue } = useForm({
+    defaultValues: { amount: '' },
+  })
 
   return (
     <form onSubmit={handleSubmit((data) => console.log(data))}>
       <Controller
         control={control}
         name="amount"
-        render={({ field: { onChange, onBlur, value, ref, disabled } }) => (
-          <NumoraInput
-            ref={ref}
-            name="amount"
-            value={value || ''}
-            onChange={onChange}
-            onBlur={onBlur}
-            disabled={disabled}
-            decimalMaxLength={2}
-          />
-        )}
+        render={({ field }) => <NumoraInput {...field} decimalMaxLength={2} />}
       />
       <button type="button" onClick={() => setValue('amount', '1000')}>
         Set to 1000
@@ -134,15 +136,14 @@ function Form() {
         config={{
           decimalMaxLength: 2,
         }}
-        description="Basic form with the Controller pattern. setValue() updates the input. The live field shows the input alone, without the form."
+        description="A form with one Controller field. setValue() updates the input. The live field shows the input alone, without the form."
       />
 
       <h3>Validation errors</h3>
       <p>
-        Use <code>fieldState.error</code> from the render prop to display validation messages.
-        Validate with a <code>validate</code> function that works on the string. React Hook Form's{' '}
-        <code>min</code> and <code>max</code> rules convert the value to a JavaScript number, which
-        loses precision on long amounts.
+        Show the message from <code>fieldState.error</code>. Validate with a <code>validate</code>{' '}
+        function that works on the string. React Hook Form's <code>min</code> and <code>max</code>{' '}
+        rules convert the value to a JavaScript number, which loses precision on long amounts.
       </p>
 
       <CodeBlock language="tsx">
@@ -155,43 +156,78 @@ function Form() {
     // \`min\` would convert it to a float.
     validate: (value) => /^[1-9]/.test(value) || 'Must be at least 1',
   }}
-  render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error } }) => (
+  render={({ field, fieldState: { error } }) => (
     <>
-      <NumoraInput
-        ref={ref}
-        value={value || ''}
-        onChange={onChange}
-        onBlur={onBlur}
-        disabled={disabled}
-        decimalMaxLength={2}
-      />
+      <NumoraInput {...field} decimalMaxLength={2} />
       {error && <span>{error.message}</span>}
     </>
   )}
 />`}
       </CodeBlock>
 
+      <p>
+        The same goes for a schema resolver. Keep the amount a string in the schema, such as Zod's{' '}
+        <code>z.string()</code>. <code>z.coerce.number()</code> converts it to a JavaScript number.
+      </p>
+
+      <h3>Reusable field</h3>
+      <p>
+        To use the field in several forms, wrap it once with <code>useController</code>. The wrapper
+        gives <code>name</code>, <code>control</code>, <code>rules</code> and <code>disabled</code>{' '}
+        to React Hook Form, and passes every other prop to <code>NumoraInput</code>. Set the initial
+        value in the form's <code>defaultValues</code>.
+      </p>
+
+      <CodeBlock language="tsx">
+        {`import { useController, type FieldValues, type UseControllerProps } from 'react-hook-form'
+import { NumoraInput, type NumoraInputProps } from 'numora-react'
+
+type AmountFieldProps<T extends FieldValues> = Pick<
+  UseControllerProps<T>,
+  'name' | 'control' | 'rules' | 'disabled'
+> &
+  Omit<NumoraInputProps, 'name' | 'disabled' | 'value' | 'defaultValue' | 'onChange' | 'onBlur'>
+
+function AmountField<T extends FieldValues>({
+  name,
+  control,
+  rules,
+  disabled,
+  ...props
+}: AmountFieldProps<T>) {
+  const { field, fieldState } = useController({ name, control, rules, disabled })
+
+  return (
+    <>
+      <NumoraInput {...props} {...field} aria-invalid={fieldState.invalid} />
+      {fieldState.error && <span role="alert">{fieldState.error.message}</span>}
+    </>
+  )
+}
+
+// <AmountField name="amount" control={control} rules={{ required: 'Amount is required' }} locale="de-DE" />`}
+      </CodeBlock>
+
       <div className="bg-muted/50 border border-border rounded-lg p-4 my-4">
         <p className="m-0">
-          <strong>Tip:</strong> <code>NumoraInput</code>'s <code>onChange</code> always exposes the
-          raw (unformatted) numeric string, so you need no post-processing:
+          The <code>onChange</code> event carries both strings. If you write the handler yourself,
+          pass the raw value: <code>{'onChange={(e) => field.onChange(e.target.value)}'}</code>.
         </p>
         <ul className="mt-2 mb-0">
           <li>
-            <code>e.target.value</code> is the canonical raw value (e.g. <code>"1000.50"</code>),
-            with no grouping in any locale
+            <code>e.target.value</code> is the raw value, <code>"1000.50"</code> in every locale
           </li>
           <li>
-            <code>e.target.formattedValue</code> is the formatted display string (e.g.{' '}
-            <code>"1,000.50"</code>), typed via <code>NumoraHTMLInputElement</code>
+            <code>e.target.formattedValue</code> is the display value, <code>"1,000.50"</code> in
+            en-US
           </li>
         </ul>
       </div>
 
       <h2>Complete example</h2>
       <p>
-        A form with programmatic updates (<code>Max</code> / <code>Half</code> buttons) using the
-        Controller pattern:
+        A swap form with <code>Max</code> and <code>Half</code> buttons. Both write the amount with{' '}
+        <code>setValue()</code>, as a string.
       </p>
 
       <CodeBlock language="tsx">
@@ -211,7 +247,7 @@ function halve(amount: string, decimals = 6): string {
 }
 
 function SwapForm() {
-  const { control, handleSubmit, setValue, watch } = useForm<FormValues>({
+  const { control, handleSubmit, setValue, getValues } = useForm<FormValues>({
     defaultValues: { amount: '' }
   })
 
@@ -222,7 +258,7 @@ function SwapForm() {
   // String-based halving: scale to integer units, halve with bigint, scale back.
   // Never route the amount through Number()/parseFloat().
   const handleHalfClick = () => {
-    setValue('amount', halve(watch('amount')))
+    setValue('amount', halve(getValues('amount')))
   }
 
   return (
@@ -231,18 +267,9 @@ function SwapForm() {
         control={control}
         name="amount"
         rules={{ required: 'Amount is required' }}
-        render={({ field: { onChange, onBlur, value, ref, disabled }, fieldState: { error } }) => (
+        render={({ field, fieldState: { error } }) => (
           <>
-            <NumoraInput
-              ref={ref}
-              name="amount"
-              value={value || ''}
-              onChange={onChange}
-              onBlur={onBlur}
-              disabled={disabled}
-              decimalMaxLength={6}
-              placeholder="0.0"
-            />
+            <NumoraInput {...field} decimalMaxLength={6} placeholder="0.0" />
             {error && <span>{error.message}</span>}
           </>
         )}
@@ -259,7 +286,7 @@ function SwapForm() {
 
       <h2>Try it with any locale</h2>
       <p>
-        A live React Hook Form form. Switch the locale and compare what the field shows with what
+        A live form built with React Hook Form. Switch the locale and compare what the field shows with what
         the form holds. The form state is the same raw value in every locale.
       </p>
       <RhfLocalePlayground />
@@ -267,11 +294,16 @@ function SwapForm() {
       <h2>Why not register?</h2>
       <p>
         Don't spread <code>register('amount')</code> onto <code>NumoraInput</code>.{' '}
-        <code>register</code> reads the value from the DOM node through its <code>ref</code>, and
-        the DOM node holds the display string, so the form stores <code>"1,234.5"</code> (or{' '}
-        <code>"1.234,5"</code> in de-DE) instead of the raw value <code>"1234.5"</code>.{' '}
-        <code>setValue()</code> and <code>reset()</code> then write that string straight into the
-        input, where a comma-decimal locale can misread it. Use <code>Controller</code>.
+        <code>register</code> reads the value from the DOM node, and the DOM node holds the display
+        value. The form stores <code>"1,234.5"</code>, or <code>"1.234,5"</code> in de-DE, where you
+        wanted <code>"1234.5"</code>.
+      </p>
+      <p>
+        Writing is worse. <code>setValue()</code> and <code>reset()</code> put their string straight
+        into the input, past Numora. In a de-DE field, <code>setValue('amount', '1234.5')</code>{' '}
+        shows <code>1234.5</code>. Type a <code>6</code> after it and the field reads{' '}
+        <code>123.456</code>, because the dot was taken for a thousand separator. Use{' '}
+        <code>Controller</code>.
       </p>
     </div>
   );
