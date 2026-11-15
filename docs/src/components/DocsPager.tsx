@@ -4,7 +4,7 @@ import { usePackage } from '@/contexts/PackageContext';
 import { getFlatNavigation } from './docs-nav';
 
 const linkClass =
-  'group flex min-h-11 flex-col gap-0.5 rounded-xl border border-border px-4 py-3 outline-hidden ring-ring transition-[background-color,color] duration-150 ease-out-expo focus-visible:ring-2 [@media(hover:hover)]:hover:bg-surface-3';
+  'group flex min-h-11 flex-col gap-0.5 rounded-xl border border-border px-4 py-3 outline-hidden ring-ring transition-[background-color,color,scale] duration-150 ease-out-expo active:scale-[0.96] focus-visible:ring-2 [@media(hover:hover)]:hover:bg-surface-3';
 
 export function DocsPager() {
   const { pathname } = useLocation();

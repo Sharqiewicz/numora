@@ -19,9 +19,9 @@ export const LOCALES = [
 ] as const;
 
 export const buttonClass =
-  'min-h-11 rounded-md border border-surface-5 bg-surface-3 px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-surface-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
+  'min-h-11 rounded-md border border-surface-5 bg-surface-3 px-3 py-1.5 text-sm text-foreground transition-[background-color,scale] duration-150 ease-out-expo active:scale-[0.96] [@media(hover:hover)]:hover:bg-surface-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 export const selectClass =
-  'min-h-11 rounded-md border border-surface-5 bg-surface-3 px-2 py-1.5 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
+  'min-h-11 w-full appearance-none rounded-md border border-surface-5 bg-surface-3 py-1.5 pr-10 pl-3 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand';
 export const fieldBoxClass =
   'rounded-md border border-surface-5 bg-surface-3 p-3 transition-colors [@media(hover:hover)]:hover:bg-surface-5 has-[input:focus-visible]:ring-2 has-[input:focus-visible]:ring-brand';
 export const fieldInputClass = `flex w-full min-w-0 border-none bg-transparent ${demoFieldText} placeholder:text-muted-foreground focus:outline-none`;
@@ -42,18 +42,33 @@ export function Select({
   return (
     <label className="flex flex-col gap-1 text-sm text-muted-foreground" htmlFor={id}>
       {label}
-      <select
-        id={id}
-        className={selectClass}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {options.map(([optionValue, optionLabel]) => (
-          <option key={optionValue} value={optionValue}>
-            {optionLabel}
-          </option>
-        ))}
-      </select>
+      <span className="relative flex">
+        <select
+          id={id}
+          className={selectClass}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        >
+          {options.map(([optionValue, optionLabel]) => (
+            <option key={optionValue} value={optionValue}>
+              {optionLabel}
+            </option>
+          ))}
+        </select>
+        {/* The native arrow sits flush against the border and ignores padding: draw our own. */}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2"
+        >
+          <path d="m4 6 4 4 4-4" />
+        </svg>
+      </span>
     </label>
   );
 }

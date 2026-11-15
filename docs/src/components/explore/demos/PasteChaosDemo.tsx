@@ -117,8 +117,9 @@ function ResultDisplay({ label, original, result, isBroken, intended }: ResultDi
   const isNotNumber = result === 'NaN' || Number.isNaN(Number(result));
   const hasError = isEmpty || isNotNumber;
 
+  // Enters once, on the first paste; later pastes update the text in place.
   return (
-    <div className="p-3 rounded-lg bg-muted/30 border border-border">
+    <div className="p-3 rounded-lg bg-muted/30 border border-border transition-[opacity,translate] duration-200 ease-out-expo starting:opacity-0 motion-safe:starting:translate-y-1">
       <p className="text-xs text-muted-foreground mb-1">{label}:</p>
       <div className="flex items-center gap-2 font-mono text-sm">
         <span className="text-muted-foreground">Pasted:</span>
