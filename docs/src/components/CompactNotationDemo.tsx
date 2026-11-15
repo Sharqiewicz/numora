@@ -1,7 +1,6 @@
-import { Pause, Play } from 'lucide-react';
 import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { formatValue } from 'numora';
-import { DUR, EASE, SPRING, STAGGER, useLoop } from '@/components/anatomy/kit';
+import { DUR, EASE, LoopToggle, SPRING, STAGGER, useLoop } from '@/components/anatomy/kit';
 import { cn } from '@/lib/utils';
 
 const ZEROS: Record<string, number> = { k: 3, m: 6, b: 9, t: 12 };
@@ -182,22 +181,7 @@ export function CompactNotationDemo() {
             </AnimatePresence>
           </div>
         </MotionConfig>
-        {/* Nothing autoplays under reduced motion, so there is nothing to pause. */}
-        {!loop.reduced && (
-          <button
-            type="button"
-            data-loop-control
-            onClick={loop.toggle}
-            aria-label={loop.held ? 'Play animation' : 'Pause animation'}
-            className="relative inline-flex size-8 flex-none cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-[color,background-color,scale] duration-150 ease-out-expo before:absolute before:-inset-1.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.96] motion-reduce:transition-none [@media(hover:hover)]:hover:bg-surface-4 [@media(hover:hover)]:hover:text-foreground"
-          >
-            {loop.held ? (
-              <Play className="size-4" aria-hidden />
-            ) : (
-              <Pause className="size-4" aria-hidden />
-            )}
-          </button>
-        )}
+        <LoopToggle loop={loop} />
       </div>
     </figure>
   );

@@ -78,7 +78,13 @@ export function DemoFrame({
   return (
     <figure
       ref={figureRef}
-      className={cn('not-prose relative mx-auto my-8 w-full max-w-lg', className)}
+      className={cn(
+        'not-prose relative mx-auto my-8 w-full max-w-lg',
+        // The pointer rests below the card. A hint already makes that room; without one
+        // the figure reserves the same room, so the pointer never lands on what follows.
+        focusPointer && !hint && 'mb-15',
+        className
+      )}
       // focusin/focusout bubble from real focus and from the typing loop's simulated focus;
       // only the simulated ones (untrusted) count as the pointer's clicks.
       onFocus={
