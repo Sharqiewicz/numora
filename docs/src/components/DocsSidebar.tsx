@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouter, useRouterState } from '@tanstack/react-router';
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
-import { useEffect } from 'react';
+import { type CSSProperties, useEffect, useRef } from 'react';
 import {
   SidebarContent,
   SidebarFooter,
@@ -32,11 +32,22 @@ export function DocsSidebar() {
   const { setOpenMobile } = useSidebar();
 
   // Close the mobile sheet once a link has navigated, so the new page isn't
-  // left hidden behind it.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: currentPath is the trigger, not an input
+  // left hidden behind it. The sheet mounts this component each time it opens,
+  // so only a real path change may close it — closing on mount would shut the
+  // sheet the moment it opened.
+  const previousPathRef = useRef(currentPath);
   useEffect(() => {
+    if (previousPathRef.current === currentPath) return;
+    previousPathRef.current = currentPath;
     setOpenMobile(false);
   }, [currentPath, setOpenMobile]);
+
+  const navigation = getVisibleNavigation(selectedPackage);
+  // Position of each starred page among the starred ones, so the stars arrive one after another.
+  const featuredOrder = navigation
+    .flatMap((group) => group.items)
+    .filter((item) => item.featured)
+    .map((item) => item.href);
 
   const handlePackageChange = (tab: string) => {
     const newPackage = tab as typeof selectedPackage;
@@ -75,14 +86,15 @@ export function DocsSidebar() {
       </SidebarHeader>
       <SidebarContent role="navigation" aria-label="Documentation" className="docs-sidebar-scroll">
         <LayoutGroup>
-          {getVisibleNavigation(selectedPackage).map((group) => {
+          {navigation.map((group) => {
             const visibleItems = group.items;
+            const labelId = `docs-nav-${group.title.toLowerCase().replace(/\s+/g, '-')}`;
 
             return (
               <SidebarGroup key={group.title}>
-                <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+                <SidebarGroupLabel id={labelId}>{group.title}</SidebarGroupLabel>
                 <SidebarGroupContent>
-                  <SidebarMenu>
+                  <SidebarMenu aria-labelledby={labelId}>
                     {visibleItems.map((item) => {
                       const packageHref = getPackageHref(item.href, packagePrefix);
                       const isActive =
@@ -117,7 +129,26 @@ export function DocsSidebar() {
                           >
                             <Link to={packageHref}>
                               <Icon />
-                              <span>{item.title}</span>
+                              <span className="truncate">
+                                {item.title}
+                                {item.featured && <span className="sr-only"> (featured)</span>}
+                              </span>
+                              {item.featured && (
+                                <svg
+                                  aria-hidden="true"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className="nav-star ml-auto size-[0.9rem]! text-secondary"
+                                  style={
+                                    {
+                                      '--star-i': featuredOrder.indexOf(item.href),
+                                    } as CSSProperties
+                                  }
+                                >
+                                  <title>Featured</title>
+                                  <path d="M12 2.5l2.94 5.96 6.56.95-4.75 4.63 1.12 6.54L12 17.5l-5.87 3.08 1.12-6.54L2.5 9.41l6.56-.95L12 2.5z" />
+                                </svg>
+                              )}
                             </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>

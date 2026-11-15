@@ -56,7 +56,7 @@ export function TabsClipPath({
                 className={`relative flex h-[28px] cursor-pointer items-center gap-2 rounded-xl px-2 font-semibold text-xs outline-hidden ring-ring ring-offset-surface-5 transition-[color,background-color,transform,scale] duration-150 ease-out-expo after:absolute after:-inset-x-1 after:-inset-y-2 after:content-[''] focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.96] ${
                   !measured && isActive
                     ? 'bg-secondary text-foreground'
-                    : 'text-white [@media(hover:hover)]:hover:bg-secondary/50'
+                    : 'text-sidebar-foreground [@media(hover:hover)]:hover:bg-secondary/50'
                 }`}
                 data-tab={tab}
                 onClick={() => onChange(tab)}
