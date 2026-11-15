@@ -85,11 +85,12 @@ function CompactNotation() {
         Compact notation is off by default. With <code>allowCompactNotation</code> set, typing or
         pasting shorthand like <code>"1k"</code> or <code>"2.5m"</code> expands it to the full
         number. A <code>value</code> or <code>defaultValue</code> you pass expands the same way.
-        Expansion uses string arithmetic, so there is no precision loss. A suffix followed by a
+        Expansion uses string arithmetic, so no precision is lost. A suffix followed by a
         digit is not expanded: a pasted <code>1k5</code> becomes <code>15</code>. Typed text expands
         as soon as the suffix is typed, so typing <code>1k</code> and then <code>5</code> gives{' '}
-        <code>10005</code>. Each suffixed number in a pasted text expands on its own, so{' '}
-        <code>1k 2m</code> becomes <code>12000000</code>.
+        <code>10005</code>. Numora removes whitespace before it expands anything, so a pasted{' '}
+        <code>1k 2m</code> is read as <code>1k2m</code>: the <code>k</code> is followed by a digit
+        and is dropped, and the <code>m</code> expands <code>12</code> to <code>12000000</code>.
       </p>
 
       <CompactNotationDemo />
@@ -131,8 +132,8 @@ function CompactNotation() {
       <ExampleWithDemo
         description={'Type or paste "1k", "1.5m", "2B", or "2.5T" to see expansion'}
         language="tsx"
-        code={`<NumoraInput allowCompactNotation decimalMaxLength={18} />`}
-        config={{ allowCompactNotation: true, decimalMaxLength: 18 }}
+        code={`<NumoraInput allowCompactNotation />`}
+        config={{ allowCompactNotation: true }}
       />
 
       <p>

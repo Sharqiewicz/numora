@@ -75,6 +75,7 @@ function FormatOn() {
 
 const input = new NumoraInput(container, {
   formatOn: 'change',
+  decimalMaxLength: 2,
 })`}
       </CodeBlock>
 
@@ -89,6 +90,7 @@ const input = new NumoraInput(container, {
 
 const input = new NumoraInput(container, {
   formatOn: 'blur',
+  decimalMaxLength: 2,
 })`}
       </CodeBlock>
       <p>
@@ -98,9 +100,27 @@ const input = new NumoraInput(container, {
         code while the input is unfocused.
       </p>
       <p>
-        <code>onValueChange</code> fires on blur only when blur also changes the raw value:{' '}
-        <code>1.</code> becomes <code>1</code>, or <code>decimalMinLength</code> pads it.
+        <code>onValueChange</code> fires on blur only when blur also changes the raw value. This
+        holds in both modes.
       </p>
+      <p>Blur changes the raw value in these cases, and no others:</p>
+      <ul>
+        <li>
+          A trailing decimal separator is dropped: <code>1.</code> becomes <code>1</code>.
+        </li>
+        <li>
+          <code>decimalMinLength</code> pads the decimals: with <code>2</code>, <code>1.5</code>{' '}
+          becomes <code>1.50</code>.
+        </li>
+        <li>
+          A negative zero loses its sign: <code>-0</code> becomes <code>0</code> and{' '}
+          <code>-0.00</code> becomes <code>0.00</code>.
+        </li>
+        <li>
+          A value with no digit is cleared: <code>-</code>, <code>.</code> and <code>-.</code>{' '}
+          become an empty string.
+        </li>
+      </ul>
 
       <p>
         The demos on this page animate the digits with Torph. See the{' '}

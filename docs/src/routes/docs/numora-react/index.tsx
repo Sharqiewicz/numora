@@ -117,9 +117,7 @@ function GetStarted() {
 function Amount() {
   return (
     <NumoraInput
-      formatOn="change"
       decimalMaxLength={2}
-      thousandSeparator=","
       onValueChange={({ value, formattedValue }) => {
         console.log(value)          // "1234.56" (raw)
         console.log(formattedValue) // "1,234.56" (display)

@@ -97,8 +97,8 @@ function Decimals() {
             'Type "1" and click away. The input shows "1.00" on blur. A value your app passes is padded too. decimalMinLength above decimalMaxLength is an invalid option'
           }
           language="tsx"
-          code={`<NumoraInput decimalMinLength={2} decimalMaxLength={18} />`}
-          config={{ decimalMinLength: 2, decimalMaxLength: 18 }}
+          code={`<NumoraInput decimalMinLength={2} />`}
+          config={{ decimalMinLength: 2 }}
         />
       </div>
 
@@ -108,8 +108,8 @@ function Decimals() {
           title="European format"
           description='Type a number and it displays as "1.234,56"'
           language="tsx"
-          code={`<NumoraInput decimalSeparator="," thousandSeparator="." formatOn="change" />`}
-          config={{ decimalSeparator: ',', thousandSeparator: '.', formatOn: 'change' }}
+          code={`<NumoraInput decimalSeparator="," thousandSeparator="." />`}
+          config={{ decimalSeparator: ',', thousandSeparator: '.' }}
         />
       </div>
 
@@ -129,6 +129,29 @@ function Decimals() {
           appear, the last one is the decimal, so <code>"1,234.56"</code> becomes{' '}
           <code>1234.56</code>. A mark that repeats is grouping, so <code>"12.34.56"</code> becomes{' '}
           <code>123456</code>.
+        </li>
+        <li>
+          <strong>A single mark.</strong> When pasted text has one <code>.</code> or one{' '}
+          <code>,</code>, Numora reads it as grouping only if it could be grouping: one to three
+          digits before it, exactly three after it, and no leading zero. In a default field a pasted{' '}
+          <code>12,345</code> becomes <code>12345</code>. A pasted <code>1,5</code>,{' '}
+          <code>1234,567</code> or <code>0,123</code> becomes <code>1.5</code>,{' '}
+          <code>1234.567</code> or <code>0.123</code>. The field's own decimal separator is always
+          the decimal: a pasted <code>1,234</code> is <code>1234</code> in a default field and{' '}
+          <code>1.234</code> in a <code>de-DE</code> field.
+        </li>
+        <li>
+          <strong>No decimals.</strong> With <code>decimalMaxLength={0}</code> Numora refuses a
+          typed decimal separator, so typing <code>12.5</code> gives <code>125</code>. A paste keeps
+          the integer part: <code>12.75</code> becomes <code>12</code>.
+        </li>
+        <li>
+          <strong>Invalid values.</strong> A negative or fractional limit, or{' '}
+          <code>decimalMinLength</code> above <code>decimalMaxLength</code>, is an error. See{' '}
+          <Link to="/docs/numora-react/features/validation" hash="invalid-options">
+            invalid options
+          </Link>
+          .
         </li>
       </ul>
     </div>

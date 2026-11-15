@@ -92,17 +92,17 @@ function ScientificNotation() {
       <ScientificNotationDemo />
       <p>
         To refuse scientific notation instead, set <code>allowScientificNotation: false</code>{' '}
-        (default <code>true</code>). Such a paste or keystroke then leaves the field unchanged.
-        Values your app passes in (<code>defaultValue</code>, <code>setValue()</code>) are expanded
-        either way, because <code>String(1e21)</code> is <code>"1e+21"</code> in JavaScript.
+        (default <code>true</code>). Numora then rejects a paste that holds a complete exponent,
+        such as <code>1.5e-7</code>, and an <code>e</code> typed between two digits. The field keeps
+        the value it had. Values your app passes in (<code>defaultValue</code>,{' '}
+        <code>setValue()</code>) are expanded either way, because <code>String(1e21)</code> is{' '}
+        <code>"1e+21"</code> in JavaScript.
       </p>
 
       <CodeBlock language="typescript">
         {`import { NumoraInput } from 'numora'
 
-const input = new NumoraInput(container, {
-  decimalMaxLength: 18,
-})
+const input = new NumoraInput(container)
 
 // Paste any of these and Numora expands it. The raw value becomes:
 // "1.5e-7"   → "0.00000015"
@@ -111,13 +111,31 @@ const input = new NumoraInput(container, {
 // "5e3"      → "5000"    (shown as "5,000")
 // "-1.5e-7"  → "-0.00000015"  (with allowNegative: true)
 // "1.5e-17"  → "0.000000000000000015"  (18 decimals, no precision lost)
-// Digits past decimalMaxLength are cut off after expansion:
+// Digits past decimalMaxLength (18 by default) are cut off after expansion:
 // "1.5e-19" → "0.000000000000000000"`}
       </CodeBlock>
 
       <p>
         Both <code>e</code> and <code>E</code> work.
       </p>
+
+      <h2>Limits</h2>
+      <ul>
+        <li>
+          The exponent can be at most 1000 in either direction. <code>1e1000</code> expands to a{' '}
+          <code>1</code> and 1000 zeros. <code>1e1001</code> and <code>1e-1001</code> are dropped,
+          and the field ends up empty.
+        </li>
+        <li>
+          The exponent must be a whole number. <code>1e3.5</code> is dropped. An <code>e</code> with
+          no digits after it is removed and the number stays: <code>1e</code> becomes <code>1</code>
+          .
+        </li>
+        <li>
+          Typing <code>1</code>, <code>e</code>, <code>5</code> in that order gives <code>15</code>,
+          because the <code>e</code> at the end of the field is ignored.
+        </li>
+      </ul>
     </div>
   );
 }

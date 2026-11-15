@@ -148,7 +148,10 @@ function ValueTypes() {
         or <code>".5"</code>. Check for these before you parse it. Numora keeps trailing zeros, so{' '}
         <code>0.50</code> stays <code>"0.50"</code>. With <code>decimalMinLength</code> it pads on
         blur and when your app sets the value, and the padding is part of the raw value, so{' '}
-        <code>5</code> becomes <code>"5.00"</code>.
+        <code>5</code> becomes <code>"5.00"</code>. A blur that pads the value or strips a trailing
+        separator changes the raw value, so it calls <code>onValueChange</code>. On blur{' '}
+        <code>"-"</code>, <code>"."</code> and <code>"-."</code> reset to <code>""</code>, and{' '}
+        <code>"-0"</code> becomes <code>"0"</code>.
       </p>
       <p>
         <code>defaultValue</code> and <code>setValue</code> take this same format, so the value you
@@ -167,7 +170,6 @@ function ValueTypes() {
         {`import { NumoraInput } from 'numora'
 
 const numoraInput = new NumoraInput(container, {
-  thousandSeparator: ',',
   onValueChange: ({ value, formattedValue }) => {
     console.log(value)          // "1234.56" ← no separators
     console.log(formattedValue) // "1,234.56" ← display value
@@ -176,7 +178,11 @@ const numoraInput = new NumoraInput(container, {
 numoraInput.rawValue       // "1234.56"
 numoraInput.formattedValue // "1,234.56"`}
       </CodeBlock>
-      <p>Type below. Both readouts update on every keystroke:</p>
+      <p>
+        Type below. Both readouts update on every keystroke. The field is built with{' '}
+        <code>numora-react</code>, and a vanilla <code>NumoraInput</code> reports the same two
+        values:
+      </p>
       <ValueReadout pkg="numora" />
 
       <h2>Native form submission</h2>

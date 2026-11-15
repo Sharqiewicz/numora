@@ -81,12 +81,13 @@ function CompactNotation() {
       <p>
         Compact notation expands shorthand values like <code>"1k"</code> or <code>"2.5m"</code> to
         full numbers when they are typed, pasted or passed in as <code>defaultValue</code> or to{' '}
-        <code>setValue()</code>, once <code>allowCompactNotation</code> is on. Expansion uses string
-        arithmetic, so no precision is lost. A suffix followed by a digit is not expanded: a pasted{' '}
-        <code>1k5</code> becomes <code>15</code>. Typed text expands as soon as the suffix is typed,
-        so typing <code>1k</code> and then <code>5</code> gives <code>10005</code>. Each suffixed
-        number in a pasted text expands on its own, so <code>1k 2m</code> becomes{' '}
-        <code>12000000</code>.
+        <code>setValue()</code>. It is off by default. Set <code>allowCompactNotation</code> to turn
+        it on. Expansion uses string arithmetic, so no precision is lost. A suffix followed by a
+        digit is not expanded: a pasted <code>1k5</code> becomes <code>15</code>. Typed text expands
+        as soon as the suffix is typed, so typing <code>1k</code> and then <code>5</code> gives{' '}
+        <code>10005</code>. Numora removes whitespace before it expands anything, so a pasted{' '}
+        <code>1k 2m</code> is read as <code>1k2m</code>: the <code>k</code> is followed by a digit
+        and is dropped, and the <code>m</code> expands <code>12</code> to <code>12000000</code>.
       </p>
 
       <CompactNotationDemo />

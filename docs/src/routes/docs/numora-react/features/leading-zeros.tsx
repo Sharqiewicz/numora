@@ -149,7 +149,7 @@ function LeadingZeros() {
           optional <code>maxLength</code> truncation runs later
         </li>
         <li>
-          Respects <code>decimalSeparator</code> (e.g. <code>","</code> for European format)
+          Uses your <code>decimalSeparator</code> (e.g. <code>","</code> for European format)
         </li>
       </ul>
     </div>

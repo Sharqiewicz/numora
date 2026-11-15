@@ -9,20 +9,20 @@ export const Route = createFileRoute('/docs/numora/features/max-length')({
       {
         name: 'description',
         content:
-          'Cap numeric input length by raw digits with Numora. Thousand separators are not counted, so the limit applies to the digits and not to the formatted character count.',
+          'Cap numeric input length by the raw value with Numora. Thousand separators are not counted. The decimal separator and a leading minus sign are.',
       },
       { property: 'og:title', content: 'Max length | Numora' },
       {
         property: 'og:description',
         content:
-          'Cap numeric input length by raw digits with Numora. Thousand separators are not counted, so the limit applies to the digits and not to the formatted character count.',
+          'Cap numeric input length by the raw value with Numora. Thousand separators are not counted. The decimal separator and a leading minus sign are.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/max-length' },
       { name: 'twitter:title', content: 'Max length | Numora' },
       {
         name: 'twitter:description',
         content:
-          'Cap numeric input length by raw digits with Numora. Thousand separators are not counted, so the limit applies to the digits and not to the formatted character count.',
+          'Cap numeric input length by the raw value with Numora. Thousand separators are not counted. The decimal separator and a leading minus sign are.',
       },
     ],
     links: [
@@ -37,7 +37,7 @@ export const Route = createFileRoute('/docs/numora/features/max-length')({
             '@type': 'TechArticle',
             headline: 'Max length in Numora: a raw-counted numeric input length limit',
             description:
-              'Cap numeric input length by raw digits with Numora. Thousand separators are excluded from the count, so the limit applies to the numeric value and not to the formatted display.',
+              'Cap numeric input length by the raw value with Numora. Thousand separators are excluded from the count. The decimal separator and a leading minus sign are counted.',
             url: 'https://numeric-input.com/docs/numora/features/max-length',
             author: {
               '@type': 'Person',
@@ -88,9 +88,6 @@ function MaxLength() {
 
 const input = new NumoraInput(container, {
   maxLength: 7,
-  groupingStyle: 'thousand',
-  thousandSeparator: ',',
-  formatOn: 'change',
 })
 
 // User types: 1, 2, 3, 4, 5, 6, 7  → "1,234,567"  (allowed)
@@ -116,6 +113,18 @@ const input = new NumoraInput(container, {
         <li>
           If truncation would leave a bare <code>"-"</code>, the result is <code>""</code>
         </li>
+        <li>
+          The cut comes before the decimals are trimmed to <code>decimalMaxLength</code>. With{' '}
+          <code>maxLength: 4</code>, a pasted <code>1.23456789</code> becomes <code>1.23</code>, a
+          pasted <code>123456</code> becomes <code>1234</code>, and a pasted <code>123.456</code>{' '}
+          becomes <code>123</code>
+        </li>
+        <li>
+          <code>maxLength</code> must be a whole number of 1 or more. See{' '}
+          <Link to="/docs/numora/features/validation" hash="invalid-options">
+            invalid options
+          </Link>
+        </li>
       </ul>
 
       <h2>Pasted values</h2>
@@ -124,7 +133,7 @@ const input = new NumoraInput(container, {
         with <code>maxLength: 4</code> commits <code>"9999"</code>.
       </p>
       <p>
-        Typing is different: a keystroke that would take the raw value past the limit is rejected,
+        Typing is different. A keystroke that would take the raw value past the limit is rejected,
         and nothing is cut. Values your code passes in are truncated like a paste.
       </p>
       <p>

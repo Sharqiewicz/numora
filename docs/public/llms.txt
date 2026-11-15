@@ -1,24 +1,24 @@
 # Numora
 
-Numora is a framework-agnostic numeric input and number input library for JavaScript and React. It solves the fundamental problems with `<input type="number">` - cursor jumping, scientific notation leaking, paste chaos, mobile keyboard issues, and locale-specific decimal/thousand separator conflicts.
+Numora is a framework-agnostic numeric input and number input library for JavaScript and React. It fixes what `<input type="number">` gets wrong: cursor jumping, scientific notation leaking, paste chaos, mobile keyboard issues, and clashing locale decimal and thousand separators.
 
 ## Packages
 
 - **numora** (vanilla JS / any framework): https://www.npmjs.com/package/numora
 - **numora-react** (React wrapper): https://www.npmjs.com/package/numora-react
 
-## Key Pages
+## Key pages
 
 - Homepage: https://numeric-input.com
 - Interactive demos (why number inputs break): https://numeric-input.com/explore
-- Numora JS - Get Started: https://numeric-input.com/docs/numora
-- Numora JS - Installation: https://numeric-input.com/docs/numora/installation
-- Numora JS - How It Works: https://numeric-input.com/docs/numora/how-it-works
-- Numora JS - Anatomy (each pipeline step, with demos): https://numeric-input.com/docs/numora/anatomy
-- Numora React - Get Started: https://numeric-input.com/docs/numora-react
-- Numora React - Installation: https://numeric-input.com/docs/numora-react/installation
-- Numora React - How It Works: https://numeric-input.com/docs/numora-react/how-it-works
-- Numora React - Anatomy: https://numeric-input.com/docs/numora-react/anatomy
+- Numora JS, get started: https://numeric-input.com/docs/numora
+- Numora JS, installation: https://numeric-input.com/docs/numora/installation
+- Numora JS, how it works: https://numeric-input.com/docs/numora/how-it-works
+- Numora JS, anatomy (each pipeline step, with demos): https://numeric-input.com/docs/numora/anatomy
+- Numora React, get started: https://numeric-input.com/docs/numora-react
+- Numora React, installation: https://numeric-input.com/docs/numora-react/installation
+- Numora React, how it works: https://numeric-input.com/docs/numora-react/how-it-works
+- Numora React, anatomy: https://numeric-input.com/docs/numora-react/anatomy
 
 ## Features
 
@@ -26,14 +26,14 @@ Each feature has a vanilla page and a React page.
 
 - Formatting: https://numeric-input.com/docs/numora/features/formatting and https://numeric-input.com/docs/numora-react/features/formatting
 - Change vs blur (formatOn): https://numeric-input.com/docs/numora/features/format-on and https://numeric-input.com/docs/numora-react/features/format-on
-- Value Types: https://numeric-input.com/docs/numora/features/value-types and https://numeric-input.com/docs/numora-react/features/value-types
+- Value types: https://numeric-input.com/docs/numora/features/value-types and https://numeric-input.com/docs/numora-react/features/value-types
 - Decimals: https://numeric-input.com/docs/numora/features/decimals and https://numeric-input.com/docs/numora-react/features/decimals
 - Sanitization: https://numeric-input.com/docs/numora/features/sanitization and https://numeric-input.com/docs/numora-react/features/sanitization
-- Compact Notation: https://numeric-input.com/docs/numora/features/compact-notation and https://numeric-input.com/docs/numora-react/features/compact-notation
-- Scientific Notation: https://numeric-input.com/docs/numora/features/scientific-notation and https://numeric-input.com/docs/numora-react/features/scientific-notation
-- Leading Zeros: https://numeric-input.com/docs/numora/features/leading-zeros and https://numeric-input.com/docs/numora-react/features/leading-zeros
+- Compact notation: https://numeric-input.com/docs/numora/features/compact-notation and https://numeric-input.com/docs/numora-react/features/compact-notation
+- Scientific notation: https://numeric-input.com/docs/numora/features/scientific-notation and https://numeric-input.com/docs/numora-react/features/scientific-notation
+- Leading zeros: https://numeric-input.com/docs/numora/features/leading-zeros and https://numeric-input.com/docs/numora-react/features/leading-zeros
 - Locale: https://numeric-input.com/docs/numora/features/locale and https://numeric-input.com/docs/numora-react/features/locale
-- Max Length: https://numeric-input.com/docs/numora/features/max-length and https://numeric-input.com/docs/numora-react/features/max-length
+- Max length: https://numeric-input.com/docs/numora/features/max-length and https://numeric-input.com/docs/numora-react/features/max-length
 - Validation: https://numeric-input.com/docs/numora/features/validation and https://numeric-input.com/docs/numora-react/features/validation
 
 ## Framework guides
@@ -49,7 +49,7 @@ Each feature has a vanilla page and a React page.
 - NumberFlow: https://numeric-input.com/docs/numora-react/integrations/number-flow
 - Torph: https://numeric-input.com/docs/numora/integrations/torph and https://numeric-input.com/docs/numora-react/integrations/torph
 
-## API Reference - numora (vanilla JS)
+## API reference: numora (vanilla JS)
 
 All values are strings; Numora never converts them to `Number`. The raw value is canonical in
 every locale: ASCII digits, `.` decimal, no grouping (a de-DE field showing `1.234,5` reports
@@ -110,7 +110,7 @@ The v4 names (`enableNegative`, `enableLeadingZeros`, `enableCompactNotation`,
 `numora/pipeline` exports the single sanitization steps, with no semver
 guarantee. `numora/internal` is for `numora-react` only; do not import it.
 
-## API Reference - numora-react
+## API reference: numora-react
 
 ```tsx
 import { NumoraInput, FormatOn, GroupingStyle } from 'numora-react'
@@ -134,11 +134,11 @@ import { NumoraInput, FormatOn, GroupingStyle } from 'numora-react'
 Use `defaultValue` instead of `value` for an uncontrolled field. A ref typed as
 `NumoraHTMLInputElement` has `rawValue`, `formattedValue` and `setValue(value)`.
 
-## Common Use Cases
+## Common use cases
 
 - **DeFi / financial inputs**: keep large and tiny values in decimal notation, enforce decimal precision, expose raw value for smart contract calls
 - **International forms**: locale-aware decimal and thousand separators (e.g. German `1.234,56`)
-- **React Hook Form integration**: use `Controller` and pass `e.target.value` (the raw value) to `field.onChange`; `register` is not supported
+- **React Hook Form integration**: use `Controller` and spread its `field`: `<NumoraInput {...field} />`. The form stores the raw value. A hand-written handler is `field.onChange(e.target.value)`. `register` is not supported
 - **Mobile-safe inputs**: normalises mobile keyboard quirks across iOS and Android
 - **Formatted display while typing**: thousand separators added live without breaking cursor position
 

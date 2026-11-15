@@ -10,20 +10,20 @@ export const Route = createFileRoute('/docs/numora/features/locale')({
       {
         name: 'description',
         content:
-          'Detect thousand and decimal separators from the browser locale using the locale option and getSeparatorsFromLocale.',
+          'Take the thousand and decimal separators from a locale tag or from the runtime locale, with the locale option and getSeparatorsFromLocale.',
       },
       { property: 'og:title', content: 'Locale | Numora' },
       {
         property: 'og:description',
         content:
-          'Detect thousand and decimal separators from the browser locale using the locale option and getSeparatorsFromLocale.',
+          'Take the thousand and decimal separators from a locale tag or from the runtime locale, with the locale option and getSeparatorsFromLocale.',
       },
       { property: 'og:url', content: 'https://numeric-input.com/docs/numora/features/locale' },
       { name: 'twitter:title', content: 'Locale | Numora' },
       {
         name: 'twitter:description',
         content:
-          'Detect thousand and decimal separators from the browser locale using the locale option and getSeparatorsFromLocale.',
+          'Take the thousand and decimal separators from a locale tag or from the runtime locale, with the locale option and getSeparatorsFromLocale.',
       },
     ],
     links: [{ rel: 'canonical', href: 'https://numeric-input.com/docs/numora/features/locale' }],
@@ -83,6 +83,10 @@ function Locale() {
       <LocaleSeparatorsDemo />
 
       <LocalePlayground />
+      <p>
+        The playground above is built with <code>numora-react</code>. A vanilla{' '}
+        <code>NumoraInput</code> with the same options shows the same text.
+      </p>
 
       <h2>Where the separators come from</h2>
       <p>
@@ -128,13 +132,11 @@ function Locale() {
 // Both separators detected from the browser locale
 const input = new NumoraInput(container, {
   locale: true,
-  groupingStyle: 'thousand',
 })
 
 // Override the decimal separator, keep the locale thousand separator
 const input2 = new NumoraInput(container, {
   locale: 'fr-FR',
-  groupingStyle: 'thousand',
   decimalSeparator: '.',
 })`}
       </CodeBlock>
@@ -151,7 +153,6 @@ const input2 = new NumoraInput(container, {
 // Pinned to German locale
 const input = new NumoraInput(container, {
   locale: 'de-DE',
-  groupingStyle: 'thousand',
 })`}
       </CodeBlock>
 
@@ -207,6 +208,20 @@ const input = new NumoraInput(container, { thousandSeparator, decimalSeparator }
       <p>
         To set the decimal separator without a locale, see{' '}
         <Link to="/docs/numora/features/decimals">Decimals</Link>.
+      </p>
+
+      <h2>Typing and pasting under a locale</h2>
+      <p>
+        A typed <code>.</code> and a typed <code>,</code> are both the decimal key in every locale,
+        even when one of them is the field's thousand separator. In a <code>de-DE</code> field,
+        typing <code>1234.5</code> shows <code>1.234,5</code>. A native decimal mark such as the
+        Arabic <code>٫</code> is a decimal key too.
+      </p>
+      <p>
+        Pasted text is read by its own format, not the field's. Paste <code>1,234,567.89</code> into
+        a <code>de-DE</code> field and it shows <code>1.234.567,89</code>. The raw value is{' '}
+        <code>1234567.89</code>. See <Link to="/docs/numora/features/decimals">Decimals</Link> for
+        the rule on a single mark.
       </p>
 
       <h2>What the field displays</h2>

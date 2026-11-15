@@ -10,13 +10,13 @@ export const Route = createFileRoute('/docs/numora-react/features/max-length')({
       {
         name: 'description',
         content:
-          'Cap numeric input length by raw digits in the NumoraInput React component. Thousand separators are not counted, so the limit applies to the digits and not to the formatted character count.',
+          'Cap numeric input length by the raw value in the NumoraInput React component. Thousand separators are not counted. The decimal separator and a leading minus sign are.',
       },
       { property: 'og:title', content: 'Max length | Numora React' },
       {
         property: 'og:description',
         content:
-          'Cap numeric input length by raw digits in the NumoraInput React component. Thousand separators are not counted, so the limit applies to the digits and not to the formatted character count.',
+          'Cap numeric input length by the raw value in the NumoraInput React component. Thousand separators are not counted. The decimal separator and a leading minus sign are.',
       },
       {
         property: 'og:url',
@@ -26,7 +26,7 @@ export const Route = createFileRoute('/docs/numora-react/features/max-length')({
       {
         name: 'twitter:description',
         content:
-          'Cap numeric input length by raw digits in the NumoraInput React component. Thousand separators are not counted, so the limit applies to the digits and not to the formatted character count.',
+          'Cap numeric input length by the raw value in the NumoraInput React component. Thousand separators are not counted. The decimal separator and a leading minus sign are.',
       },
     ],
     links: [
@@ -41,7 +41,7 @@ export const Route = createFileRoute('/docs/numora-react/features/max-length')({
             '@type': 'TechArticle',
             headline: 'Max length | Numora React',
             description:
-              'Cap React numeric input length by raw digits with Numora React. Thousand separators are not counted, so the limit applies to the digits and not to the formatted character count.',
+              'Cap React numeric input length by the raw value with Numora React. Thousand separators are not counted. The decimal separator and a leading minus sign are.',
             url: 'https://numeric-input.com/docs/numora-react/features/max-length',
             author: {
               '@type': 'Person',
@@ -92,11 +92,8 @@ function MaxLength() {
           title="7 raw digits, grouped by default"
           description={'Try typing more than 7 digits. The 8th keystroke is blocked'}
           language="tsx"
-          code={`<NumoraInput
-  maxLength={7}
-  formatOn="change"
-/>`}
-          config={{ maxLength: 7, formatOn: 'change' }}
+          code={`<NumoraInput maxLength={7} />`}
+          config={{ maxLength: 7 }}
         />
       </div>
 
@@ -119,6 +116,18 @@ function MaxLength() {
         <li>
           If truncation would leave a bare <code>"-"</code>, the result is <code>""</code>
         </li>
+        <li>
+          The cut comes before the decimals are trimmed to <code>decimalMaxLength</code>. With{' '}
+          <code>maxLength={'{4}'}</code>, a pasted <code>1.23456789</code> becomes <code>1.23</code>
+          , a pasted <code>123456</code> becomes <code>1234</code>, and a pasted{' '}
+          <code>123.456</code> becomes <code>123</code>
+        </li>
+        <li>
+          <code>maxLength</code> must be a whole number of 1 or more. See{' '}
+          <Link to="/docs/numora-react/features/validation" hash="invalid-options">
+            invalid options
+          </Link>
+        </li>
       </ul>
 
       <h2>Pasted values</h2>
@@ -127,7 +136,7 @@ function MaxLength() {
         input with <code>maxLength={'{4}'}</code> commits <code>"9999"</code>.
       </p>
       <p>
-        Typing is different: a keystroke that would take the raw value past the limit is rejected,
+        Typing is different. A keystroke that would take the raw value past the limit is rejected,
         and nothing is cut. Values your code passes in are truncated like a paste.
       </p>
       <p>

@@ -75,7 +75,8 @@ function Decimals() {
       <h1>Decimals</h1>
       <p>
         Decimal options limit how many decimal digits a value can have and set the separator between
-        the integer and decimal parts.
+        the integer and decimal parts. <code>decimalMaxLength</code> defaults to <code>18</code> and{' '}
+        <code>decimalMinLength</code> to <code>0</code>.
       </p>
 
       <DecimalsDemo />
@@ -94,7 +95,6 @@ const input1 = new NumoraInput(container, {
 // while typing. The constructor throws if decimalMinLength is above decimalMaxLength
 const input2 = new NumoraInput(container, {
   decimalMinLength: 2,
-  decimalMaxLength: 18,
   // "1" on blur → "1.00"
 })`}
       </CodeBlock>
@@ -107,8 +107,6 @@ const input2 = new NumoraInput(container, {
 const input = new NumoraInput(container, {
   decimalSeparator: ',',
   thousandSeparator: '.',
-  groupingStyle: 'thousand',
-  formatOn: 'change',
   // typing "1234,56" displays "1.234,56"
 })`}
       </CodeBlock>
@@ -125,10 +123,33 @@ const input = new NumoraInput(container, {
           configured decimal separator. Numora blocks it if the value already has one.
         </li>
         <li>
-          <strong>Paste cleanup.</strong> Numora works out the format of pasted text from the text,
-          not from the field's separators. When both <code>.</code> and <code>,</code> appear, the
-          last one is the decimal, so <code>"1,234.56"</code> becomes <code>1234.56</code>. A mark
-          that repeats is grouping, so <code>"12.34.56"</code> becomes <code>123456</code>.
+          <strong>Paste cleanup.</strong> Numora works out the format of pasted text from the text
+          first. When both <code>.</code> and <code>,</code> appear, the last one is the decimal, so{' '}
+          <code>"1,234.56"</code> becomes <code>1234.56</code>. A mark that repeats is grouping, so{' '}
+          <code>"12.34.56"</code> becomes <code>123456</code>.
+        </li>
+        <li>
+          <strong>A single mark.</strong> When pasted text has one <code>.</code> or one{' '}
+          <code>,</code>, Numora reads it as grouping only if it could be grouping: one to three
+          digits before it, exactly three after it, and no leading zero. In a default field a pasted{' '}
+          <code>12,345</code> becomes <code>12345</code>. A pasted <code>1,5</code>,{' '}
+          <code>1234,567</code> or <code>0,123</code> becomes <code>1.5</code>,{' '}
+          <code>1234.567</code> or <code>0.123</code>. The field's own decimal separator is always
+          the decimal: a pasted <code>1,234</code> is <code>1234</code> in a default field and{' '}
+          <code>1.234</code> in a <code>de-DE</code> field.
+        </li>
+        <li>
+          <strong>No decimals.</strong> With <code>decimalMaxLength: 0</code> Numora refuses a typed
+          decimal separator, so typing <code>12.5</code> gives <code>125</code>. A paste keeps the
+          integer part: <code>12.75</code> becomes <code>12</code>.
+        </li>
+        <li>
+          <strong>Invalid values.</strong> A negative or fractional limit, or{' '}
+          <code>decimalMinLength</code> above <code>decimalMaxLength</code>, is an error. See{' '}
+          <Link to="/docs/numora/features/validation" hash="invalid-options">
+            invalid options
+          </Link>
+          .
         </li>
       </ul>
     </div>

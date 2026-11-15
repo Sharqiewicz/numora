@@ -90,9 +90,7 @@ function LeadingZeros() {
 
 // Default: leading zeros removed
 // "007" → "7", "0001" → "1"
-const input1 = new NumoraInput(container, {
-  allowLeadingZeros: false,
-})
+const input1 = new NumoraInput(container)
 
 // Leading zeros kept
 // "007" → "007", "0001" → raw "0001" (shown as "0,001" with the default grouping)

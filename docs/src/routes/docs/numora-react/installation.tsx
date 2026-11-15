@@ -85,12 +85,12 @@ function Installation() {
       <h2>Install</h2>
       <p>
         Numora React has one peer dependency, <code>react</code> (17 or later). The core engine,{' '}
-        <code>numora</code>, is a regular dependency and installs with it. The command below also
-        adds <code>numora</code> to your own dependencies so you can import its helpers. Pick your
-        package manager:
+        <code>numora</code>, is a regular dependency and installs with it. You don't install{' '}
+        <code>numora</code> yourself. Numora React re-exports its helpers, listed under{' '}
+        <a href="#exports">Everything the package exports</a>. Pick your package manager:
       </p>
 
-      <InstallTabs packages="numora numora-react" />
+      <InstallTabs packages="numora-react" />
 
       <h2>Basic usage</h2>
       <ExampleWithDemo
@@ -100,15 +100,11 @@ function App() {
   return (
     <NumoraInput
       decimalMaxLength={2}
-      formatOn="change"
     />
   )
 }`}
         language="tsx"
-        config={{
-          formatOn: 'change',
-          decimalMaxLength: 2,
-        }}
+        config={{ decimalMaxLength: 2 }}
         description="Type a number to see it formatted"
       />
 
@@ -131,7 +127,6 @@ function AmountField() {
         value={amount}
         onValueChange={({ value }) => setAmount(value)}
         decimalMaxLength={6}
-        formatOn="change"
       />
       <p>Raw value: {amount}</p>
     </>
@@ -202,10 +197,16 @@ function AmountField() {
                 <code>','</code>
               </td>
               <td>
-                The character between digit groups. Exactly one character. It cannot be a digit, one
-                of <code>- + e E k K m M b B t T</code>, or the same as{' '}
-                <code>decimalSeparator</code>. In development Numora throws on an invalid value. In
-                production it logs the error and keeps the last valid options.
+                The character between digit groups. Exactly one character. It cannot be a digit or
+                one of <code>- + e E k K m M b B t T</code>. If you pass only one separator and it
+                equals the other one's default, the other one swaps:{' '}
+                <code>thousandSeparator="."</code> alone gives a <code>,</code> decimal. Passing
+                both with the same character is invalid. In development Numora throws on an invalid
+                value. In production it logs the error and keeps the last valid options. See{' '}
+                <Link to="/docs/numora-react/features/validation" hash="invalid-options">
+                  Invalid options
+                </Link>
+                .
               </td>
             </tr>
             <tr>
@@ -217,7 +218,8 @@ function AmountField() {
               </td>
               <td>
                 The character between the integer and decimal parts. Exactly one character, with the
-                same rules as <code>thousandSeparator</code>.
+                same rules as <code>thousandSeparator</code>. <code>decimalSeparator=","</code>{' '}
+                alone gives a <code>.</code> thousand separator.
               </td>
             </tr>
             <tr>
@@ -314,8 +316,9 @@ function AmountField() {
                 <code>true</code>
               </td>
               <td>
-                Expands a pasted or app-set <code>1.5e-7</code> to <code>0.00000015</code>. A typed{' '}
-                <code>e</code> is never accepted. <code>false</code> rejects such a paste. See{' '}
+                Expands a pasted or app-set <code>1.5e-7</code> to <code>0.00000015</code>. An{' '}
+                <code>e</code> typed at the end of the field is ignored. <code>false</code> rejects
+                such a paste. See{' '}
                 <Link to="/docs/numora-react/features/scientific-notation">
                   Scientific notation
                 </Link>
@@ -420,11 +423,14 @@ function AmountField() {
         <code>className</code>, <code>placeholder</code>, <code>disabled</code>, <code>aria-*</code>
         , <code>data-*</code> and the rest of the standard input attributes. Numora sets{' '}
         <code>type="text"</code> and <code>inputMode="decimal"</code> itself, so those two are not
-        props.
+        props. It also sets <code>spellCheck={'{false}'}</code> and <code>autoComplete="off"</code>{' '}
+        as defaults. Pass either prop to override it.
       </p>
       <p>
         Your <code>onKeyDown</code> and <code>onPaste</code> run before Numora's. Call{' '}
-        <code>e.preventDefault()</code> in one to turn Numora's handling of that event off.
+        <code>e.preventDefault()</code> in one to turn Numora's handling of that event off. Your{' '}
+        <code>onBlur</code> runs after Numora's blur settle. By then the field is padded and{' '}
+        <code>onChange</code> and <code>onValueChange</code> have fired if the raw value changed.
       </p>
 
       <h2>The ref</h2>
@@ -443,18 +449,37 @@ ref.current.formattedValue  // '1,234.5', the text in the field
 ref.current.setValue('2500')`}
       </CodeBlock>
 
-      <h2>TypeScript</h2>
+      {/* biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash */}
+      <h2 id="exports" className="scroll-mt-24">
+        Everything the package exports
+      </h2>
       <p>
-        Types ship with the package. Import them from <code>numora-react</code>:
+        <code>numora-react</code> has one entry point. It exports the component, the headless
+        helpers from <code>numora</code>, and the types:
       </p>
       <CodeBlock language="typescript">
-        {`import type {
-  NumoraOptions,
+        {`import {
+  NumoraInput,
+  formatValue,              // raw string -> display string, no DOM
+  parseValue,               // display string -> raw string, no DOM
+  getSeparatorsFromLocale,  // the separators a locale tag gives
+  FormatOn,                 // { Blur: 'blur', Change: 'change' }
+  GroupingStyle,            // { None, Thousand, Lakh, Wan }
+} from 'numora-react'
+
+import type {
   NumoraInputProps,
+  NumoraOptions,
+  NumoraValues,             // { value, formattedValue }
+  LocaleTag,
   NumoraInputChangeEvent,
   NumoraHTMLInputElement,
 } from 'numora-react'`}
       </CodeBlock>
+      <p>
+        Add <code>numora</code> to your own dependencies only to import the{' '}
+        <code>numora/pipeline</code> entry point, which Numora React does not re-export.
+      </p>
     </div>
   );
 }

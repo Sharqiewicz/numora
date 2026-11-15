@@ -1,6 +1,6 @@
 import type { NumoraHTMLInputElement, NumoraInputProps } from 'numora-react';
 import { NumoraInput } from 'numora-react';
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { CodeBlock } from './CodeBlock';
 import { demoFieldText } from './DemoFrame';
 
@@ -40,6 +40,12 @@ export function ExampleWithDemo({
   const syncReadout = ({ rawValue, formattedValue }: NumoraHTMLInputElement) => {
     setReadout(rawValue ? { raw: rawValue, formatted: formattedValue } : null);
   };
+  // A prefilled field has a readout before any event fires.
+  const inputRef = useRef<NumoraHTMLInputElement>(null);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: read once, on mount
+  useEffect(() => {
+    if (inputRef.current) syncReadout(inputRef.current);
+  }, []);
   return (
     <figure className="not-prose my-8">
       {title && <h3 className="mb-1 text-[15px] font-medium text-foreground">{title}</h3>}
@@ -70,6 +76,7 @@ export function ExampleWithDemo({
                   config.onBlur?.(e);
                   syncReadout(e.currentTarget as NumoraHTMLInputElement);
                 }}
+                ref={inputRef}
                 id={inputId}
                 placeholder={placeholder}
                 aria-describedby={description ? hintId : undefined}
@@ -84,7 +91,7 @@ export function ExampleWithDemo({
             aria-hidden="true"
             className="mt-2 truncate font-mono text-caption tabular-nums text-muted-foreground"
           >
-            {readout ? `raw ${readout.raw} → formatted ${readout.formatted}` : '\u00A0'}
+            {readout ? `raw ${readout.raw} → formatted ${readout.formatted}` : 'Type a number'}
           </p>
         </div>
         <div className="border-t border-surface-3">
