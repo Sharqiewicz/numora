@@ -37,12 +37,20 @@ const codeBlockStyle = {
   },
 };
 
+/** A wrapped line breaks at a space when it can, and inside a long token only when it must. */
+const WRAP = { whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' } as const;
+
 interface CodeBlockProps {
   children: React.ReactNode;
   className?: string;
   language?: string;
   /** Drop the outer margin, radius and border so the block can sit inside another card. */
   bare?: boolean;
+  /**
+   * Long lines wrap, so a trailing comment is never cut off in a narrow column. Off by default
+   * for `language="text"`, where the columns are lined up by hand and must scroll instead.
+   */
+  wrap?: boolean;
 }
 
 export function CodeBlock({
@@ -50,6 +58,7 @@ export function CodeBlock({
   className,
   language = 'typescript',
   bare = false,
+  wrap = language !== 'text',
 }: CodeBlockProps) {
   const codeString = typeof children === 'string' ? children : String(children);
 
@@ -70,7 +79,7 @@ export function CodeBlock({
         noBorder
         text={codeString.trim()}
       />
-      {/* Thin dark scrollbar scoped to this block: long comment lines scroll, never wrap. */}
+      {/* Thin dark scrollbar scoped to this block, for the blocks that scroll instead of wrapping. */}
       <div className="[&_pre]:[scrollbar-width:thin] [scrollbar-color:var(--surface-6)_transparent]">
         <SyntaxHighlighter
           language={language}
@@ -82,8 +91,10 @@ export function CodeBlock({
             background: 'var(--surface-1)',
             fontSize: '0.875rem',
             lineHeight: '1.5',
+            ...(wrap ? WRAP : null),
           }}
           codeTagProps={{
+            style: wrap ? WRAP : undefined,
             className: cn('bg-transparent! p-0! rounded-none! text-sm', className),
           }}
         >
