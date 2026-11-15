@@ -206,6 +206,41 @@ describe('NumoraInput', () => {
       expect(input.value).toBe('2,000');
     });
 
+    // react-hook-form 8 gives `Controller` the real input, and `setValue('amount', '1000')`
+    // assigns it '1000' before the new `value` prop arrives. Same number, wrong text.
+    it('repaints text assigned to the input from outside, even when it is the same number', () => {
+      const ui = (value: string, className?: string) => (
+        <NumoraInput data-testid="input" value={value} className={className} />
+      );
+      const { rerender } = render(ui(''));
+      const input = screen.getByTestId('input') as HTMLInputElement;
+      input.value = '1000';
+      rerender(ui('1000'));
+      expect(input.value).toBe('1,000');
+      // The value prop did not change this time: the assigned text is still repainted.
+      input.value = '1000';
+      rerender(ui('1000', 'x'));
+      expect(input.value).toBe('1,000');
+    });
+
+    it('leaves mid-composition text alone on a re-render', () => {
+      const ui = (className?: string) => (
+        <NumoraInput data-testid="input" value="12" className={className} />
+      );
+      const { rerender } = render(ui());
+      const input = screen.getByTestId('input') as HTMLInputElement;
+      act(() => input.focus());
+      // The browser's own write: past React's value tracker, so the `input` event is seen.
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, '012');
+      act(() => {
+        input.dispatchEvent(
+          new InputEvent('input', { bubbles: true, inputType: 'insertCompositionText', isComposing: true })
+        );
+      });
+      rerender(ui('x'));
+      expect(input.value).toBe('012');
+    });
+
     it('reformats when the value prop changes to include decimals', () => {
       function Wrapper() {
         const [val, setVal] = useState('100');

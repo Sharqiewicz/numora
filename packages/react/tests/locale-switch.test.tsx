@@ -1,6 +1,8 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { NumoraInput } from '../src/index';
+import { typeText } from './locale-matrix';
 
 /**
  * Changing `locale` (or a separator prop) on a mounted field must repaint it in the new
@@ -51,9 +53,23 @@ describe('switching locale on a mounted field', () => {
   });
 
   it('an unrelated re-render leaves a half-typed value alone', () => {
-    const { rerender } = render(<NumoraInput data-testid="amount" value="12." locale="en-US" />);
-    field().value = '12.';
-    rerender(<NumoraInput data-testid="amount" value="12." locale="en-US" className="x" />);
+    function Host({ className }: { className?: string }) {
+      const [value, setValue] = useState('');
+      return (
+        <NumoraInput
+          data-testid="amount"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          locale="en-US"
+          className={className}
+        />
+      );
+    }
+    const { rerender } = render(<Host />);
+    // Typed, not assigned: text assigned to the input from outside is repainted.
+    act(() => field().focus());
+    typeText(field(), '12.');
+    rerender(<Host className="x" />);
     expect(field().value).toBe('12.');
   });
 });
