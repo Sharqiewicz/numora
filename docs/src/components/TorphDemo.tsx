@@ -1,17 +1,21 @@
 import { useId, useRef, useState } from 'react';
-import { useTypingLoop } from '@/hooks/use-typing-loop';
+import { PAIRED_LOOP, useTypingLoop } from '@/hooks/use-typing-loop';
 import { DemoFrame, demoOverlayBox } from './DemoFrame';
 import { TorphField } from './TorphField';
 
-export function TorphDemo() {
+/**
+ * `solo`: the demo stands alone, with no Blur demo beside it, so it types on its own
+ * clock without the pointer.
+ */
+export function TorphDemo({ solo = false }: { solo?: boolean }) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState('1234567');
 
-  useTypingLoop(inputRef);
+  useTypingLoop(inputRef, solo ? undefined : PAIRED_LOOP);
 
   return (
-    <DemoFrame inputId={inputId}>
+    <DemoFrame inputId={inputId} focusPointer={!solo}>
       <div className={demoOverlayBox}>
         <TorphField
           id={inputId}
@@ -23,6 +27,7 @@ export function TorphDemo() {
           decimalMaxLength={2}
           thousandSeparator=","
           aria-label="Amount"
+          demoCaret={!solo}
           className="caret-foreground"
         />
       </div>

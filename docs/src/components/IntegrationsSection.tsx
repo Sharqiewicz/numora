@@ -57,7 +57,7 @@ export function IntegrationsSection({
         </div>
 
         <div className="max-w-xl mx-auto">
-          <TorphDemo />
+          <TorphDemo solo />
         </div>
       </div>
 

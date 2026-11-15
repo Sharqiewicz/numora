@@ -1,5 +1,5 @@
 import { useId, useRef } from 'react';
-import { useTypingLoop } from '@/hooks/use-typing-loop';
+import { PAIRED_LOOP, useTypingLoop } from '@/hooks/use-typing-loop';
 import { DemoFrame, demoOverlayBox } from './DemoFrame';
 import { TorphField } from './TorphField';
 
@@ -7,7 +7,7 @@ export function TorphBlurDemo() {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useTypingLoop(inputRef, { mode: 'blur' });
+  useTypingLoop(inputRef, PAIRED_LOOP);
 
   return (
     <DemoFrame inputId={inputId} hint="Blur the field to format." focusPointer>
@@ -21,6 +21,7 @@ export function TorphBlurDemo() {
           thousandSeparator=","
           groupingStyle="thousand"
           aria-label="Amount"
+          demoCaret="hold"
           // caret-hold: the caret appears once the focus-strip morph has settled.
           className="caret-foreground caret-hold"
         />

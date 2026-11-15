@@ -10,7 +10,7 @@ interface DemoFrameProps {
   /** Small muted line under the card, e.g. "Blur the field to format." */
   hint?: string;
   /**
-   * For demos whose typing loop runs in `blur` mode. Shows a pointer that clicks into the
+   * For demos whose typing loop plays the staged (`blur` mode) cycle. Shows a pointer that clicks into the
    * field and away again, tagged with the event it caused, and an animated focus ring that
    * follows the loop's simulated focus as well as real focus. Without it, the reader cannot
    * tell that the formatting changed because of focus.
