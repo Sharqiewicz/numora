@@ -22,8 +22,18 @@ export interface Loop<T extends Element = HTMLDivElement> {
   cycle: number;
   /** True while the loop is advancing on its own. */
   playing: boolean;
-  /** True while the reader has taken over (focus or pointer activity inside the scene). */
+  /** True while the reader has taken over (pointer or keyboard activity inside the scene). */
   interacting: boolean;
+  /** Frames in one cycle, as passed in. */
+  frames: number;
+  /** True while the reader holds the loop: paused with `toggle`, or still interacting. */
+  held: boolean;
+  /** Pause when playing, play when held. For the frame's pause button. */
+  toggle: () => void;
+  /** True on the last frame of a playing loop. Drives `LoopFade`, which softens the restart. */
+  leaving: boolean;
+  /** How long into the last frame the fade-out starts, in ms. */
+  leaveDelayMs: number;
   reduced: boolean;
   /** Jump to a frame. Counts as interaction: the loop pauses, then resumes after `resumeAfterMs`. */
   goTo: (frame: number) => void;
@@ -36,13 +46,57 @@ export interface Loop<T extends Element = HTMLDivElement> {
 /**
  * Autoplaying, looping scene clock.
  *
- * - Plays only while the scene is on screen and the tab is visible.
- * - Pauses the moment the reader interacts inside `ref` (pointer down, key down, focus), and resumes
- *   on its own `resumeAfterMs` after the last interaction, once focus has left the scene.
+ * - Plays only while the scene is on screen and the tab is visible. When several scenes are on
+ *   screen, only the one nearest the middle of the viewport plays.
+ * - Pauses the moment the reader interacts inside `ref` (pointer down, a key, tabbing in), and
+ *   resumes on its own `resumeAfterMs` after the last interaction, once focus has left the scene.
+ * - `toggle` pauses until the reader plays it again. Pass the loop to `DiagramFrame` for the button.
  * - Reduced motion: never autoplays. `frame` starts on the last frame (the result); `goTo` still works,
  *   so give the scene a manual step control.
  * - SSR and first paint render the last frame, so there is no flash of an empty scene.
  */
+/** The restart fade (see `LoopFade`) takes the last `LEAVE_MS` of the hold. */
+const LEAVE_MS = 200;
+
+// Scenes on screen. Only the one nearest the middle of the viewport plays, so two figures never
+// animate side by side on separate clocks.
+const onScreen = new Map<Element, (front: boolean) => void>();
+let pickFrame = 0;
+
+function pickFront() {
+  pickFrame = 0;
+  const mid = window.innerHeight / 2;
+  let front: Element | null = null;
+  let nearest = Number.POSITIVE_INFINITY;
+  for (const el of onScreen.keys()) {
+    const r = el.getBoundingClientRect();
+    const d = Math.abs(r.top + r.height / 2 - mid);
+    if (d < nearest) [front, nearest] = [el, d];
+  }
+  for (const [el, set] of onScreen) set(el === front);
+}
+
+function schedulePick() {
+  if (!pickFrame) pickFrame = requestAnimationFrame(pickFront);
+}
+
+function joinScreen(el: Element, set: (front: boolean) => void) {
+  if (onScreen.size === 0) {
+    document.addEventListener('scroll', schedulePick, { passive: true, capture: true });
+    window.addEventListener('resize', schedulePick);
+  }
+  onScreen.set(el, set);
+  schedulePick();
+  return () => {
+    onScreen.delete(el);
+    if (onScreen.size === 0) {
+      document.removeEventListener('scroll', schedulePick, { capture: true });
+      window.removeEventListener('resize', schedulePick);
+    }
+    schedulePick();
+  };
+}
+
 export function useLoop<T extends Element = HTMLDivElement>({
   frames,
   frameMs = 900,
@@ -56,6 +110,11 @@ export function useLoop<T extends Element = HTMLDivElement>({
   const [cycle, setCycle] = useState(0);
   const [started, setStarted] = useState(false);
   const [interacting, setInteracting] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [front, setFront] = useState(false);
+  const held = paused || interacting;
+  const heldRef = useRef(held);
+  heldRef.current = held;
   const [tabVisible, setTabVisible] = useState(true);
   const resumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const frameMsRef = useRef(frameMs);
@@ -74,6 +133,15 @@ export function useLoop<T extends Element = HTMLDivElement>({
     document.addEventListener('visibilitychange', onVis);
     return () => document.removeEventListener('visibilitychange', onVis);
   }, []);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!inView || !el) {
+      setFront(false);
+      return;
+    }
+    return joinScreen(el, setFront);
+  }, [inView]);
 
   const scheduleResume = useCallback(() => {
     if (resumeTimer.current) clearTimeout(resumeTimer.current);
@@ -97,21 +165,22 @@ export function useLoop<T extends Element = HTMLDivElement>({
     const el = ref.current;
     if (!el) return;
     // Only trusted events count, so a scene that drives its own inputs does not pause itself.
+    // The pause button is left out: it holds the loop through `toggle`, not as an interaction.
     const onUser = (e: Event) => {
-      if (e.isTrusted) touch();
+      if (!e.isTrusted) return;
+      if (e.target instanceof Element && e.target.closest('[data-loop-control]')) return;
+      touch();
     };
-    el.addEventListener('pointerdown', onUser);
-    el.addEventListener('keydown', onUser);
-    el.addEventListener('paste', onUser);
+    // `keyup` catches tabbing in: the Tab keydown fires on the element focus is leaving.
+    const events = ['pointerdown', 'keydown', 'keyup', 'paste'];
+    for (const type of events) el.addEventListener(type, onUser);
     return () => {
-      el.removeEventListener('pointerdown', onUser);
-      el.removeEventListener('keydown', onUser);
-      el.removeEventListener('paste', onUser);
+      for (const type of events) el.removeEventListener(type, onUser);
       if (resumeTimer.current) clearTimeout(resumeTimer.current);
     };
   }, [touch]);
 
-  const playing = started && !reduced && inView && tabVisible && !interacting;
+  const playing = started && !reduced && inView && front && tabVisible && !held;
 
   useEffect(() => {
     if (!playing) return;
@@ -146,5 +215,28 @@ export function useLoop<T extends Element = HTMLDivElement>({
     setFrame(0);
   }, []);
 
-  return { ref, frame, cycle, playing, interacting, reduced, goTo, touch, restart };
+  const toggle = useCallback(() => {
+    if (resumeTimer.current) clearTimeout(resumeTimer.current);
+    setInteracting(false);
+    setPaused(!heldRef.current);
+  }, []);
+
+  const lastMs = typeof frameMs === 'function' ? frameMs(frames - 1) : frameMs;
+
+  return {
+    ref,
+    frame,
+    cycle,
+    playing,
+    interacting,
+    reduced,
+    goTo,
+    touch,
+    restart,
+    frames,
+    held,
+    toggle,
+    leaving: playing && frame >= frames - 1,
+    leaveDelayMs: Math.max(0, lastMs + holdMs - LEAVE_MS),
+  };
 }

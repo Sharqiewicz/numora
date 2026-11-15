@@ -1,25 +1,39 @@
-import { RotateCcw } from 'lucide-react';
+import { Pause, Play } from 'lucide-react';
 import { MotionConfig, motion, useInView, useReducedMotion } from 'motion/react';
 import { type ReactNode, type Ref, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { DUR, EASE } from './tokens';
+import type { Loop } from './useLoop';
 
 interface DiagramFrameProps {
   /** Short figure title shown top-left (13px, muted). */
   title?: ReactNode;
   /** Caption under the figure. */
   caption?: ReactNode;
-  /** Shows an icon-only Replay button top-right when provided and `canReplay`. */
-  onReplay?: () => void;
-  canReplay?: boolean;
+  /**
+   * The scene's loop (from useLoop). Adds a pause / play button under the scene, so a reader can
+   * stop the motion. Not shown under reduced motion, where nothing autoplays.
+   */
+  loop?: Pick<Loop, 'frame' | 'frames' | 'held' | 'reduced' | 'toggle' | 'goTo'>;
+  /**
+   * With `loop`: one step button per frame, next to the pause button. They show progress and let
+   * the reader step through, which is the only way to see every frame under reduced motion.
+   * Leave off when the scene has its own step buttons.
+   */
+  steps?: boolean;
+  /**
+   * With `loop`: the scene's own step control, in the row next to the pause button. Replaces
+   * `steps` when the steps are not one per frame. Stays under reduced motion.
+   */
+  controls?: ReactNode;
   /**
    * Minimum canvas width in px. Fixed-width SVGs get horizontal scroll on narrow screens
    * instead of shrinking their text. Omit for fluid HTML content.
    */
   minWidth?: number;
-  /** Accessible name for the Replay button when `title` is not a string. */
-  replayLabel?: string;
-  /** Ref for the scene's in-view detection (from useScene). */
+  /** Accessible name for a scrollable canvas when `title` is not a string. */
+  label?: string;
+  /** Ref for the scene root (from useLoop), when the frame's own scene wrapper should carry it. */
   sceneRef?: Ref<HTMLDivElement>;
   /**
    * `diagram` (default): filled surface-2 slab for illustrations / scenes.
@@ -28,7 +42,7 @@ interface DiagramFrameProps {
   variant?: 'diagram' | 'demo';
   /**
    * Opt-in one-time opacity reveal as the frame scrolls in. Off by default: frames that hold
-   * a live input or run their own useScene beats must not also fade (one effect per trigger).
+   * a live input or run their own loop must not also fade (one effect per trigger).
    */
   reveal?: boolean;
   className?: string;
@@ -42,9 +56,10 @@ interface DiagramFrameProps {
 export function DiagramFrame({
   title,
   caption,
-  onReplay,
-  canReplay,
-  replayLabel,
+  loop,
+  steps = false,
+  controls,
+  label: labelProp,
   minWidth,
   sceneRef,
   variant = 'diagram',
@@ -52,7 +67,7 @@ export function DiagramFrame({
   className,
   children,
 }: DiagramFrameProps) {
-  const label = replayLabel ?? (typeof title === 'string' ? title : undefined);
+  const label = labelProp ?? (typeof title === 'string' ? title : undefined);
 
   // One-time frame reveal. SSR / reduced motion / already-on-screen-at-mount render the final state.
   const figureRef = useRef<HTMLElement>(null);
@@ -94,21 +109,9 @@ export function DiagramFrame({
         )}
       >
         {title && (
-          <div className="mb-4 flex min-h-8 items-center pr-10 text-caption font-medium text-muted-foreground">
+          <div className="mb-4 flex min-h-8 items-center text-caption font-medium text-muted-foreground">
             {title}
           </div>
-        )}
-        {onReplay && canReplay && (
-          // Absolutely placed so a title-less frame doesn't get an empty header row.
-          <button
-            type="button"
-            onClick={onReplay}
-            aria-label={label ? `Replay: ${label}` : 'Replay animation'}
-            title="Replay"
-            className="absolute top-3 right-3 inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-[color,background-color,transform] duration-150 ease-out-expo hover:bg-surface-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.96] motion-reduce:transition-none sm:top-5 sm:right-5"
-          >
-            <RotateCcw className="size-4" aria-hidden />
-          </button>
         )}
         <div
           ref={sceneRef}
@@ -121,6 +124,56 @@ export function DiagramFrame({
         >
           <div style={minWidth ? { minWidth } : undefined}>{children}</div>
         </div>
+        {loop && (steps || controls || !loop.reduced) && (
+          <div className="mt-3 flex items-center gap-3">
+            {steps ? (
+              <ol className="m-0 flex min-w-0 flex-1 list-none gap-1 p-0" aria-label="Steps">
+                {Array.from({ length: loop.frames }, (_, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: frames are positional
+                  <li key={i} className="m-0 min-w-0 flex-1 p-0">
+                    <button
+                      type="button"
+                      aria-label={`Step ${i + 1} of ${loop.frames}`}
+                      aria-current={loop.frame === i ? 'step' : undefined}
+                      onClick={() => loop.goTo(i)}
+                      // 44px tall hit area around a 4px bar; the row itself stays 32px.
+                      className="group -my-1.5 flex h-11 w-full cursor-pointer items-center focus-visible:outline-none"
+                    >
+                      <span
+                        className={cn(
+                          'h-1 w-full rounded-full transition-[background-color] duration-150 ease-out-expo group-hover:bg-foreground group-focus-visible:ring-2 group-focus-visible:ring-ring motion-reduce:transition-none',
+                          i === loop.frame
+                            ? 'bg-foreground'
+                            : i < loop.frame
+                              ? 'bg-muted-foreground'
+                              : 'bg-surface-7'
+                        )}
+                      />
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              (controls ?? <span className="flex-1" />)
+            )}
+            {!loop.reduced && (
+              <button
+                type="button"
+                data-loop-control
+                onClick={loop.toggle}
+                aria-label={loop.held ? 'Play animation' : 'Pause animation'}
+                // 32px button, 44px hit area.
+                className="relative inline-flex size-8 flex-none cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-[color,background-color,scale] duration-150 ease-out-expo before:absolute before:-inset-1.5 hover:bg-surface-4 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.96] motion-reduce:transition-none"
+              >
+                {loop.held ? (
+                  <Play className="size-4" aria-hidden />
+                ) : (
+                  <Pause className="size-4" aria-hidden />
+                )}
+              </button>
+            )}
+          </div>
+        )}
         {caption && (
           <figcaption className="mt-4 text-caption leading-relaxed text-muted-foreground">
             {caption}

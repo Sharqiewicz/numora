@@ -1,118 +1,156 @@
-import { Check, X } from 'lucide-react';
-import { type NumoraHTMLInputElement, NumoraInput } from 'numora-react';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { Pause, Play } from 'lucide-react';
+import { AnimatePresence, MotionConfig, motion } from 'motion/react';
+import { formatValue, parseValue } from 'numora';
 import { cn } from '@/lib/utils';
-import { DemoInput, DiagramFrame, demoInputClass, useLoop } from './kit';
+import { DUR, EASE, useLoop } from './kit';
 
-// Texts a naive parse gets wrong: a symbol and letters, a comma decimal.
-const SAMPLES = ['$1,234.56abc', '1.234,56'];
-const FRAMES = 2;
+type Scene = 'plain' | 'numora';
 
-/** Pastes `text` over the whole field through a real `paste` event, the path a human paste takes. */
-function pasteInto(el: HTMLInputElement, text: string) {
-  el.setSelectionRange(0, el.value.length);
-  let event: Event;
-  try {
-    const data = new DataTransfer();
-    data.setData('text/plain', text);
-    event = new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true });
-  } catch {
-    event = new Event('paste', { bubbles: true, cancelable: true });
-    Object.defineProperty(event, 'clipboardData', { value: { getData: () => text } });
-  }
-  el.dispatchEvent(event);
-}
+/** The options the real NumoraInput gets in the docs. */
+const OPTIONS = {
+  formatOn: 'change',
+  thousandSeparator: ',',
+  groupingStyle: 'thousand',
+  decimalMaxLength: 2,
+  allowCompactNotation: true,
+} as const;
 
-/** What the app gets from `Number(value)`: a real naive parse, never a hand-typed result. */
-function Parsed({ value, show: frameShows }: { value: string; show: boolean }) {
-  // Before the first paste lands the field is empty, and Number('') would read as a clean 0.
-  const show = frameShows && value !== '';
-  const n = Number(value);
-  const bad = Number.isNaN(n);
-  return (
-    <div
-      className={cn(
-        'min-h-10 font-mono text-caption',
-        // Fades in; hides instantly so a new sample's text never shows while the old result fades out.
-        show
-          ? 'opacity-100 transition-opacity duration-200 ease-out-expo motion-reduce:transition-none'
-          : 'opacity-0'
-      )}
-      aria-hidden={!show}
-    >
-      <div className="break-all text-muted-foreground">{`Number("${value}")`}</div>
-      <div
-        className={cn(
-          'inline-flex items-center gap-1 tabular-nums',
-          bad ? 'text-signal-red-fg' : 'text-foreground'
-        )}
-      >
-        {bad ? (
-          <X className="size-3.5" aria-hidden />
-        ) : (
-          <Check className="size-3.5 text-signal-green-fg" aria-hidden />
-        )}
-        {bad ? 'NaN' : String(n)}
-      </div>
-    </div>
-  );
-}
+const PASTED = '$1,234.56abc';
+// Measured from the library, never typed in. A real paste into NumoraInput gives the same two
+// strings: the field shows DISPLAY, and the change callback hands your code RAW.
+const RAW = parseValue(PASTED, OPTIONS);
+const DISPLAY = formatValue(RAW, OPTIONS);
 
-function Lane({ title, children }: { title: ReactNode; children: ReactNode }) {
-  return (
-    <div className="min-w-0 space-y-2">
-      <div className="text-caption font-medium text-foreground">{title}</div>
-      {children}
-    </div>
-  );
-}
+type Frame = {
+  scene: Scene;
+  /** What the field holds. */
+  value: string;
+  /** The text was just pasted and has not been cleaned yet. */
+  pasted?: boolean;
+  /** The string your code reads, shown under the field. Empty until the paste has landed. */
+  got?: string;
+  ms: number;
+};
 
-/**
- * One text pasted into a plain input and a NumoraInput, then what the app's `Number(value)`
- * makes of each. Loops by itself; the last frame is the readable result.
- */
+const TIMELINE: Frame[] = [
+  { scene: 'plain', value: '', ms: 500 },
+  { scene: 'plain', value: PASTED, pasted: true, ms: 1000 },
+  { scene: 'plain', value: PASTED, got: PASTED, ms: 2200 },
+  { scene: 'numora', value: '', ms: 500 },
+  { scene: 'numora', value: PASTED, pasted: true, ms: 1000 },
+  { scene: 'numora', value: DISPLAY, got: RAW, ms: 2200 },
+];
+
+/** Autoplays one paste into a plain input, then into Numora, and the string your code gets from each. */
 export function PlainVsNumoraFigure() {
-  const loop = useLoop({ frames: FRAMES, frameMs: 1400, holdMs: 2400 });
-  const sample = SAMPLES[loop.cycle % SAMPLES.length];
-  const [plain, setPlain] = useState('');
-  const [raw, setRaw] = useState('');
-  const numora = useRef<NumoraHTMLInputElement>(null);
-
-  // Each sample is pasted over whatever the fields held, so the restart never shows empty fields.
-  useEffect(() => {
-    const n = numora.current;
-    if (!n) return;
-    pasteInto(n, sample);
-    setPlain(sample);
-  }, [sample]);
+  const loop = useLoop({
+    frames: TIMELINE.length,
+    frameMs: (frame) => TIMELINE[frame].ms,
+    holdMs: 0,
+  });
+  const { scene, value, pasted, got } = TIMELINE[loop.frame];
+  const noted = pasted || got !== undefined;
 
   return (
-    <DiagramFrame variant="demo" sceneRef={loop.ref} title="Paste the same text into both">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Lane title="Plain <input>">
-          <DemoInput
-            type="text"
-            value={plain}
-            onChange={(e) => setPlain(e.target.value)}
-            aria-label="Plain text input"
-          />
-          <Parsed value={plain} show={loop.frame >= 1} />
-        </Lane>
-        <Lane title="NumoraInput">
-          <NumoraInput
-            ref={numora}
-            formatOn="change"
-            thousandSeparator=","
-            groupingStyle="thousand"
-            decimalMaxLength={2}
-            allowCompactNotation
-            onChange={(e) => setRaw(e.target.value)}
-            aria-label="Numora input"
-            className={demoInputClass}
-          />
-          <Parsed value={raw} show={loop.frame >= 1} />
-        </Lane>
+    <figure className="not-prose my-8">
+      <div ref={loop.ref} className="overflow-hidden rounded-xl bg-surface-1 shadow-border">
+        <MotionConfig reducedMotion="user">
+          <div className="flex items-center gap-2 py-4 pr-3 pl-4 sm:pl-6">
+            <div className="min-w-0 flex-1">
+              {/* The caption fades with its scene, so it never names Numora over the plain field. */}
+              <AnimatePresence initial={false} mode="wait">
+                <motion.div
+                  key={scene}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: DUR.fast, ease: EASE.outExpo }}
+                >
+                  <code className="font-mono text-caption text-muted-foreground">
+                    {scene === 'plain' ? (
+                      <>
+                        <strong className="font-bold text-foreground">Plain</strong> {'<input>'}
+                      </>
+                    ) : (
+                      <>
+                        <strong className="font-bold text-foreground">Numora</strong>Input
+                      </>
+                    )}
+                  </code>
+                  <div
+                    role="img"
+                    aria-label={
+                      scene === 'plain'
+                        ? `Pasting ${PASTED} into a plain input keeps it as it is, and your code gets ${PASTED}`
+                        : `Pasting ${PASTED} into NumoraInput shows ${DISPLAY}, and your code gets ${RAW}`
+                    }
+                    className="mt-2 flex h-10 items-center font-mono text-[1.75rem] leading-none font-medium text-foreground select-none sm:text-[2rem]"
+                  >
+                    {[...value].map((char, i) => (
+                      <span
+                        // biome-ignore lint/suspicious/noArrayIndexKey: fixed string
+                        key={i}
+                        className={cn(
+                          pasted && 'text-signal-amber-fg',
+                          !pasted && scene === 'numora' && char === ',' && 'text-muted-foreground'
+                        )}
+                      >
+                        {char}
+                      </span>
+                    ))}
+                    <span
+                      aria-hidden
+                      className="ml-px inline-block h-[1.15em] w-[1.5px] flex-none animate-[demo-caret-blink_1.1s_steps(1)_infinite] bg-foreground motion-reduce:hidden"
+                    />
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+            {/* Nothing autoplays under reduced motion, so there is nothing to pause. */}
+            {!loop.reduced && (
+              <button
+                type="button"
+                data-loop-control
+                onClick={loop.toggle}
+                aria-label={loop.held ? 'Play animation' : 'Pause animation'}
+                className="relative inline-flex size-8 flex-none cursor-pointer touch-manipulation items-center justify-center rounded-md text-muted-foreground transition-[color,background-color,scale] duration-150 ease-out-expo before:absolute before:-inset-1.5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:scale-[0.96] motion-reduce:transition-none [@media(hover:hover)]:hover:bg-surface-4 [@media(hover:hover)]:hover:text-foreground"
+              >
+                {loop.held ? (
+                  <Play className="size-4" aria-hidden />
+                ) : (
+                  <Pause className="size-4" aria-hidden />
+                )}
+              </button>
+            )}
+          </div>
+        </MotionConfig>
+        <p
+          className={cn(
+            'm-0 flex h-9 items-center border-t border-surface-3 px-4 text-sm text-muted-foreground sm:px-6',
+            'transition-opacity duration-150 ease-out-expo motion-reduce:transition-none',
+            noted ? 'opacity-100' : 'opacity-0'
+          )}
+        >
+          {/* One flex child, so the spaces between the note's parts survive. */}
+          <span>
+            {got === undefined ? (
+              'Pasted'
+            ) : (
+              <>
+                Your code gets{' '}
+                <span
+                  className={cn(
+                    'font-mono',
+                    scene === 'plain' ? 'text-signal-red-fg' : 'text-foreground'
+                  )}
+                >
+                  "{got}"
+                </span>
+              </>
+            )}
+          </span>
+        </p>
       </div>
-    </DiagramFrame>
+    </figure>
   );
 }

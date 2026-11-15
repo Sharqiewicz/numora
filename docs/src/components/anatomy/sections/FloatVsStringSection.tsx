@@ -1,6 +1,7 @@
 import { NumberRoundTrip } from '../NumberRoundTrip';
+import type { SectionProps } from './types';
 
-export function FloatVsStringSection() {
+export function FloatVsStringSection(_props: SectionProps) {
   return (
     // biome-ignore lint/correctness/useUniqueElementIds: stable anchor id, linked by hash
     <section id="float-vs-string" className="space-y-4 scroll-mt-24">
@@ -10,7 +11,7 @@ export function FloatVsStringSection() {
       <p>
         JavaScript stores every number as a 64-bit IEEE 754 float. Most decimals you use in a
         financial UI, such as prices, ratios and percentages, have no exact binary representation.
-        Add two of them and you get the result every developer eventually meets:
+        Do arithmetic on them and the error shows:
       </p>
       <NumberRoundTrip />
       <p>

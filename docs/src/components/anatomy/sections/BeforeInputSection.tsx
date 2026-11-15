@@ -8,8 +8,8 @@ export function BeforeInputSection() {
         Why <code>beforeinput</code>
       </h2>
       <p>
-        Formatting from <code>keydown</code> breaks IME input and accessibility tools. Numora's
-        primary path runs through <code>beforeinput</code> instead, for these reasons:
+        Formatting from <code>keydown</code> breaks IME input and accessibility tools. Numora
+        formats from <code>beforeinput</code> instead, for three reasons:
       </p>
       <ol>
         <li>
@@ -17,22 +17,20 @@ export function BeforeInputSection() {
           is ever shown. There is no flash of unformatted text.
         </li>
         <li>
-          It tells Numora what the edit is (<code>inputType</code> and <code>data</code>), so the
-          intended value and the caret can be computed.
-        </li>
-        <li>
-          Writing the result with <code>setRangeText</code> fires no <code>input</code> event, and
-          it does not go through React's tracked <code>value</code> setter.
+          It tells Numora what the edit is (<code>inputType</code> and <code>data</code>), so Numora
+          can compute the intended value and the cursor position.
         </li>
         <li>
           It fires for keyboard, voice dictation, virtual keyboards and autocorrect, including cases
-          where <code>keydown</code> never fires. It also fires for drag-and-drop and IME text, but
-          Numora lets the browser insert those and reformats the field on the <code>input</code>{' '}
-          event that follows.
+          where <code>keydown</code> never fires.
         </li>
       </ol>
       <p>
-        Numora branches on these <code>inputType</code> values:
+        It also fires for drag-and-drop and IME text. Numora lets the browser insert those and
+        reformats the field on the <code>input</code> event that follows.
+      </p>
+      <p>
+        What Numora does depends on the <code>inputType</code>:
       </p>
       <div className="overflow-x-auto">
         <table>
@@ -55,24 +53,20 @@ export function BeforeInputSection() {
             </tr>
             <tr>
               <td>
-                <code>deleteContentBackward</code>
+                <code>deleteContentBackward</code> / <code>deleteContentForward</code>
               </td>
-              <td>Backspace</td>
-              <td>Compute deletion, format, apply</td>
-            </tr>
-            <tr>
+              <td>Backspace / Delete</td>
               <td>
-                <code>deleteContentForward</code>
+                Remove the selection, or the character before or after the cursor, then format and
+                apply
               </td>
-              <td>Delete</td>
-              <td>Compute deletion, format, apply</td>
             </tr>
             <tr>
               <td>
                 <code>deleteByCut</code>
               </td>
               <td>Ctrl/Cmd+X</td>
-              <td>Remove selection, format, apply</td>
+              <td>Remove the selection, then format and apply</td>
             </tr>
             <tr>
               <td>
@@ -80,7 +74,7 @@ export function BeforeInputSection() {
               </td>
               <td>Dragging text out, Ctrl/Alt+Backspace, Cmd+Backspace</td>
               <td>
-                Remove the selection, or everything before or after the caret when nothing is
+                Remove the selection, or everything before or after the cursor when nothing is
                 selected, then format and apply
               </td>
             </tr>
@@ -90,7 +84,7 @@ export function BeforeInputSection() {
               </td>
               <td>Ctrl/Cmd+V</td>
               <td>
-                Does not arrive: the <code>paste</code> handler cancels the paste first
+                Never arrives. The <code>paste</code> handler cancels the paste first
               </td>
             </tr>
             <tr>
@@ -107,11 +101,32 @@ export function BeforeInputSection() {
         </table>
       </div>
       <p>
-        The handler (<code>handleOnBeforeInputNumoraInput</code>) reads the field and the event but
-        never writes to them. It returns a tagged result, and the caller applies it:
+        The handler reads the field and the event but never writes to them. It returns one of three
+        results, and the caller applies it:
       </p>
-      <CodeBlock language="text">
-        {`1. Read currentValue and selectionStart/End from the field,
+      <ul>
+        <li>
+          <code>skip</code>: the caller does nothing and the browser continues.
+        </li>
+        <li>
+          <code>reject</code>: the caller calls <code>preventDefault()</code> and leaves the value
+          alone.
+        </li>
+        <li>
+          <code>handled</code>: the caller calls <code>preventDefault()</code>, writes the formatted
+          value with <code>setRangeText</code>, places the cursor and reports the change.
+        </li>
+      </ul>
+      <p>
+        <code>setRangeText</code> fires no <code>input</code> event. Your change callback gets both
+        strings, as <a href="#raw-vs-formatted">Raw value vs formatted value</a> shows.
+      </p>
+      <details>
+        <summary className="cursor-pointer text-caption text-muted-foreground">
+          The handler's full decision order (<code>handleOnBeforeInputNumoraInput</code>)
+        </summary>
+        <CodeBlock language="text">
+          {`1. Read currentValue and selectionStart/End from the field,
    inputType and data from the event
 2. insertText of a decimal key ('.', ',' or another keyboard's decimal mark)
      the value outside the selection already
@@ -124,13 +139,13 @@ export function BeforeInputSection() {
    separator, past the decimal cap       → { type: 'reject' }
 4. Compute intendedValue per inputType:
      insertText            → splice data over the selection
-     deleteContentBackward → remove the selection, or the char before the caret
-     deleteContentForward  → remove the selection, or the char after the caret
+     deleteContentBackward → remove the selection, or the char before the cursor
+     deleteContentForward  → remove the selection, or the char after the cursor
                              (both: when that char is the thousand separator,
                              also remove the digit beyond it)
      deleteByCut/Drag      → remove the selection
-     word/line backward    → remove the selection, or everything before the caret
-     word/line forward     → remove the selection, or everything after the caret
+     word/line backward    → remove the selection, or everything before the cursor
+     word/line forward     → remove the selection, or everything after the cursor
      anything else (drop, IME composition,
      undo, redo)                         → { type: 'skip' } (the browser continues)
 5. insertText only: scientific notation in
@@ -140,21 +155,12 @@ export function BeforeInputSection() {
                                            group (Change mode only)
      result equals the current value     → { type: 'reject' } (nothing to report)
 8. isAllowed(raw) returns false          → { type: 'reject' }
-9. Caret: computeCaretFromEdit(...)      → rank of the sanitized text left of the
-                                           caret, found again in the formatted string
-     formatting changed nothing          → the caret the edit itself would leave
+9. Cursor: computeCaretFromEdit(...)     → rank of the sanitized text left of the
+                                           cursor, found again in the formatted string
+     formatting changed nothing          → the cursor the edit itself would leave
 10. { type: 'handled', formatted, raw, cursorPos }`}
-      </CodeBlock>
-      <p>
-        On <code>skip</code> the caller does nothing. On <code>reject</code> it calls{' '}
-        <code>preventDefault()</code> and leaves the value alone. On <code>handled</code> it calls{' '}
-        <code>preventDefault()</code>, writes <code>formatted</code> with{' '}
-        <code>setRangeText(formatted, 0, currentValue.length, 'end')</code>, sets the cursor to{' '}
-        <code>cursorPos</code>, and reports the change: <code>onValueChange</code> gets{' '}
-        <code>raw</code> as <code>value</code> and <code>formatted</code> as{' '}
-        <code>formattedValue</code>. React also calls <code>onChange</code> with an event whose{' '}
-        <code>target.value</code> is <code>raw</code>.
-      </p>
+        </CodeBlock>
+      </details>
     </section>
   );
 }

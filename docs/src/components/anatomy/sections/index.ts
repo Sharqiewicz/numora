@@ -5,6 +5,7 @@ export { CursorPreservationSection } from './CursorPreservationSection';
 export { DefaultVsValueSection } from './DefaultVsValueSection';
 export { EventPipelineSection } from './EventPipelineSection';
 export { FloatVsStringSection } from './FloatVsStringSection';
+export { FocusBlurSection } from './FocusBlurSection';
 export { GroupingStylesSection } from './GroupingStylesSection';
 export { Hero } from './Hero';
 export { KeydownSection } from './KeydownSection';

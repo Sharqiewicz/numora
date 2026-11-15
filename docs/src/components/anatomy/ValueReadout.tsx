@@ -63,7 +63,8 @@ const OPTIONS = {
 } as const;
 const START = '1234567.89';
 
-export function ValueReadout() {
+export function ValueReadout({ pkg = 'numora-react' }: { pkg?: 'numora' | 'numora-react' }) {
+  const prefix = pkg === 'numora-react' ? 'e.target.' : '';
   const [rawValue, setRawValue] = useState(START);
   const [formattedValue, setFormattedValue] = useState(() => formatValue(START, OPTIONS));
 
@@ -82,10 +83,10 @@ export function ValueReadout() {
         className={demoInputClass}
       />
       <div className={`${demoInsetClass} mt-4 space-y-3`}>
-        <ReadoutRow name="e.target.formattedValue">
+        <ReadoutRow name={`${prefix}formattedValue`}>
           <FlashValue value={formattedValue}>"{formattedValue}"</FlashValue>
         </ReadoutRow>
-        <ReadoutRow name="e.target.value">
+        <ReadoutRow name={`${prefix}value`}>
           <FlashValue value={rawValue}>"{rawValue}"</FlashValue>
         </ReadoutRow>
       </div>

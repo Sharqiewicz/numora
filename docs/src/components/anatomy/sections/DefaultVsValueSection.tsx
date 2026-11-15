@@ -19,14 +19,16 @@ export function DefaultVsValueSection() {
         <code>setRangeText</code> is the only thing that changes it while the user types.
       </p>
       <p>
-        When you pass a <code>value</code> prop, or change an option, a layout effect compares it
-        with the DOM as raw text: both are sanitized first, so grouping does not count and a
-        half-typed <code>1.</code> that the parent echoes back as <code>1.</code> is equal. A
-        different string for the same number, such as <code>1</code> for <code>1.</code> or{' '}
-        <code>1.50</code> for <code>1.5</code>, counts as a change. If they differ, or the options
-        changed, it formats the prop and writes it with <code>writeValue</code>. That write does not
-        call <code>onChange</code>, with one exception: new options that change the raw value, such
-        as a smaller <code>decimalMaxLength</code>.
+        When you pass a <code>value</code> prop, or change an option, a layout effect compares the
+        prop with the DOM as raw text. Both sides are sanitized first, so grouping does not count,
+        and a half-typed <code>1.</code> that the parent echoes back as <code>1.</code> is equal. A
+        different string for the same number counts as a change, such as <code>1</code> for{' '}
+        <code>1.</code> or <code>1.50</code> for <code>1.5</code>.
+      </p>
+      <p>
+        If the two differ, or the options changed, the effect formats the prop and writes it with{' '}
+        <code>writeValue</code>. That write does not call <code>onChange</code>, unless the new
+        options change the raw value, as a smaller <code>decimalMaxLength</code> can.
       </p>
     </section>
   );

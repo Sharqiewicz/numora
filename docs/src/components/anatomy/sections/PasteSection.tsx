@@ -33,44 +33,49 @@ export function PasteSection() {
         the browser never sends a <code>beforeinput</code> with{' '}
         <code>inputType: 'insertFromPaste'</code> for it.
       </p>
-      <p>The paste handler:</p>
+      <p>The paste handler then does five things:</p>
       <ol>
         <li>
-          Call <code>e.preventDefault()</code> to block the native paste. A read-only or disabled
-          field stops here and takes nothing.
+          It reads the clipboard's plain text, works out what each separator in it means (the rules
+          are below) and rewrites the text with the field's own separators. A read-only or disabled
+          field takes nothing.
+        </li>
+        <li>It splices that text into the current value at the selection.</li>
+        <li>
+          It stops if the combined value holds scientific notation and{' '}
+          <code>allowScientificNotation</code> is off.
         </li>
         <li>
-          Read the text with <code>e.clipboardData.getData('text/plain')</code>.
-        </li>
-        <li>Splice the clipboard text into the current value at the active selection.</li>
-        <li>
-          Run the combined value through the full pipeline with{' '}
-          <code>shouldRemoveThousandSeparators: true</code>. This is unconditional, because the
-          clipboard text and the current value (in blur mode) can both carry separators that must be
-          parsed together.
+          It runs the combined value through the full pipeline. Thousand separators are always
+          removed, because the clipboard text and the current value can both carry them.
         </li>
         <li>
-          Stop if <code>isAllowed</code> refuses the result, or if the text holds scientific
-          notation and <code>allowScientificNotation</code> is off. Otherwise write the result with{' '}
-          <code>setRangeText</code> (via <code>writeValue</code>), then place the cursor.
-        </li>
-        <li>
-          Call the change callback directly. In React that is <code>onChange</code>, where{' '}
-          <code>e.target.value</code> is the raw value and <code>e.target.formattedValue</code> the
-          display string. In vanilla it is <code>onValueChange</code>, which receives{' '}
-          <code>{'{ value, formattedValue }'}</code>. No synthetic <code>input</code> event is
-          dispatched.
+          It stops if <code>isAllowed</code> refuses the result, or if the result is what the field
+          already shows. Otherwise it writes the result with <code>setRangeText</code>, places the
+          cursor and calls your change callback with the raw value and the formatted value. No
+          synthetic <code>input</code> event is dispatched.
         </li>
       </ol>
       <p>
         Pasted text may come from another locale, so Numora does not assume the field's own
-        separators. Dropped and autofilled text is read the same way, except in a focused field that
-        formats on change, which reads it as its own display text. When both <code>.</code> and{' '}
-        <code>,</code> appear, the last one is the decimal mark and the rest is grouping, so a
-        German <code>1.234,56</code> pasted into a field with <code>thousandSeparator=","</code> is
-        read as <code>1234.56</code>. A mark that repeats is grouping. A single mark is the decimal
-        mark when it is the field's own decimal separator. Otherwise it is grouping when the digits
-        around it form valid groups (<code>1,234</code>), and the decimal mark when they do not.
+        separators. It decides what each <code>.</code> and <code>,</code> means:
+      </p>
+      <ul>
+        <li>
+          Both appear. The last one is the decimal mark and the rest is grouping. A German{' '}
+          <code>1.234,56</code> pasted into a field with <code>thousandSeparator=","</code> is read
+          as <code>1234.56</code>.
+        </li>
+        <li>One mark repeats. It is grouping.</li>
+        <li>
+          One mark appears once. It is the decimal mark when it is the field's own decimal
+          separator. Otherwise it is grouping when the digits around it form valid groups (
+          <code>1,234</code>), and the decimal mark when they do not.
+        </li>
+      </ul>
+      <p>
+        Dropped and autofilled text is read the same way, except in a focused field that formats on
+        change, which reads it as text in its own format.
       </p>
       <p>
         Copy a string, then paste it into the Numora input. Clear the input before each one, because
