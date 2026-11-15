@@ -104,15 +104,12 @@ importers:
       motion:
         specifier: ^12.23.26
         version: 12.35.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      number-flow:
-        specifier: ^0.6.0
-        version: 0.6.0
       numora:
-        specifier: workspace:^
-        version: link:../packages/core
+        specifier: ^5.0.0
+        version: 5.0.0
       numora-react:
-        specifier: workspace:^
-        version: link:../packages/react
+        specifier: ^5.0.0
+        version: 5.0.0(react@19.2.4)
       ogl:
         specifier: ^1.0.11
         version: 1.0.11
@@ -4542,6 +4539,14 @@ packages:
 
   number-flow@0.6.0:
     resolution: {integrity: sha512-K8flNq2Wqus53vjp/btVo3qXFkagF8dIdYavreBfE7hlvFFG/b1HMGEH6nZL+mlrJ+4lbLP9OmPv3t2rmRkpSQ==}
+
+  numora-react@5.0.0:
+    resolution: {integrity: sha512-4D8lLTV7i1Adxvyl1QEDtgSICZ4zQoYQYqtwtAARrcsmD04XaliqrTBarvJn6aoaMisl6Rd9j074rqPxu+VmTQ==}
+    peerDependencies:
+      react: '>=17.0.0'
+
+  numora@5.0.0:
+    resolution: {integrity: sha512-j5IFI9URD5iqFfy2BKEuy7YRgg5X5P7IzWsRN5LSifYJLQSdoF2Kc2qoyE2xUKnJK3TWAHRKg0cc92kWwog4YA==}
 
   nwsapi@2.2.23:
     resolution: {integrity: sha512-7wfH4sLbt4M0gCDzGE6vzQBo0bfTKjU7Sfpqy/7gs1qBfYz2vEJH6vXcBKpO3+6Yu1telwd0t9HpyOoLEQQbIQ==}
@@ -10240,6 +10245,13 @@ snapshots:
   number-flow@0.6.0:
     dependencies:
       esm-env: 1.2.2
+
+  numora-react@5.0.0(react@19.2.4):
+    dependencies:
+      numora: 5.0.0
+      react: 19.2.4
+
+  numora@5.0.0: {}
 
   nwsapi@2.2.23: {}
 
