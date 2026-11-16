@@ -5,6 +5,7 @@ import { HeroBadges } from '@/components/hero-badges';
 import { IntegrationsSection } from '@/components/IntegrationsSection';
 import LightRays from '@/components/LightRaysDeferred';
 import { NumoraDemo } from '@/components/NumoraDemo';
+import { Quickstart } from '@/components/Quickstart';
 import { Socials } from '@/components/socials';
 import { Button } from '@/components/ui/button';
 import { CORE_SIZE_GZIP } from '@/lib/constants/package';
@@ -132,37 +133,49 @@ function App() {
           <div className="animate-fade-in opacity-0 mb-4" style={d(500)}>
             <HeroBadges skipIntro={skipIntro} />
           </div>
-          <div className="animate-fade-in opacity-0 gap-4 flex" style={d(650)}>
-            <Link to="/docs/numora">
-              <Button
-                className="
-                min-w-[150px]
-                relative overflow-hidden
-                group
-                hover:shadow-[0_0_30px_oklch(1_0_0_/_0.2)]
-                transition-shadow duration-300
-              "
-              >
-                <span className="relative z-10">Get started</span>
-                <span
+          {/* Two filled buttons centred under the badge; the demo link sits below
+              them, because an unfilled third button pulls the pair off centre. */}
+          <div
+            className="animate-fade-in opacity-0 flex flex-col items-center gap-3"
+            style={d(650)}
+          >
+            <div className="flex flex-wrap justify-center gap-4">
+              <Quickstart>
+                <Button
                   className="
-                  absolute inset-0 -translate-x-full
-                  bg-gradient-to-r from-white/0 via-white/20 to-white/0
-                  group-hover:translate-x-full
-                  transition-transform duration-300
+                  min-w-[150px]
+                  relative overflow-hidden
+                  group
+                  hover:shadow-[0_0_30px_oklch(1_0_0_/_0.2)]
+                  transition-shadow duration-300
                 "
-                />
-              </Button>
-            </Link>
+                >
+                  <span className="relative z-10">Quickstart</span>
+                  <span
+                    className="
+                    absolute inset-0 -translate-x-full
+                    bg-gradient-to-r from-white/0 via-white/20 to-white/0
+                    group-hover:translate-x-full
+                    transition-transform duration-300
+                  "
+                  />
+                </Button>
+              </Quickstart>
+              <Link to="/docs/numora">
+                <Button
+                  variant="secondary"
+                  className="
+                  min-w-[150px]
+                  hover:shadow-[0_0_25px_oklch(0.694_0.131_276.5_/_0.3)]
+                  transition-shadow duration-300
+                "
+                >
+                  Read the docs
+                </Button>
+              </Link>
+            </div>
             <Link to="/swap">
-              <Button
-                variant="secondary"
-                className="
-                min-w-[150px]
-                hover:shadow-[0_0_25px_oklch(0.694_0.131_276.5_/_0.3)]
-                transition-shadow duration-300
-              "
-              >
+              <Button variant="ghost" className="min-w-[150px] text-muted-foreground">
                 Try the swap demo
               </Button>
             </Link>

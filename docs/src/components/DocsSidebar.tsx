@@ -1,4 +1,5 @@
 import { Link, useNavigate, useRouter, useRouterState } from '@tanstack/react-router';
+import { Sparkles } from 'lucide-react';
 import { LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import { type CSSProperties, useEffect, useRef } from 'react';
 import {
@@ -16,6 +17,7 @@ import {
 import { usePackage } from '@/contexts/PackageContext';
 import { buildPackagePath, extractPageFromPath, getPackageHref } from '@/utils/packageRoutes';
 import { getVisibleNavigation } from './docs-nav';
+import { Quickstart } from './Quickstart';
 import { Socials } from './socials';
 import { TabsClipPath } from './TabsClipPath';
 
@@ -83,6 +85,16 @@ export function DocsSidebar() {
           activeTab={selectedPackage}
           onChange={handlePackageChange}
         />
+        {/* The package is already chosen here, so the dialog opens on its prompt. */}
+        <Quickstart initialPackage={packagePrefix}>
+          <button
+            type="button"
+            className="flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-surface-3 font-medium text-sidebar-foreground text-sm shadow-border outline-none transition-[background-color,scale] duration-150 ease-out-expo focus-visible:ring-[3px] focus-visible:ring-ring active:scale-[0.98] max-md:h-11 [@media(hover:hover)]:hover:bg-surface-4"
+          >
+            <Sparkles aria-hidden className="size-4 text-secondary" />
+            Quickstart
+          </button>
+        </Quickstart>
       </SidebarHeader>
       <SidebarContent role="navigation" aria-label="Documentation" className="docs-sidebar-scroll">
         <LayoutGroup>

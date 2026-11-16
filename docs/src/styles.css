@@ -944,3 +944,60 @@ body {
     animation-duration: 1ms;
   }
 }
+
+/* Quickstart dialog. Centering lives in the keyframes because the entrance scales. */
+@keyframes quickstart-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@keyframes quickstart-dialog-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.98);
+  }
+}
+@keyframes quickstart-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes quickstart-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+.quickstart-dialog {
+  transform: translate(-50%, -50%);
+}
+.quickstart-dialog[data-state='open'] {
+  animation: quickstart-dialog-in 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.quickstart-dialog[data-state='closed'] {
+  animation: quickstart-dialog-out 130ms ease-in;
+}
+.quickstart-overlay[data-state='open'] {
+  animation: quickstart-fade-in 200ms ease-out;
+}
+.quickstart-overlay[data-state='closed'] {
+  animation: quickstart-fade-out 130ms ease-in;
+}
+.quickstart-step {
+  animation: quickstart-fade-in 150ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .quickstart-dialog[data-state],
+  .quickstart-overlay[data-state],
+  .quickstart-step {
+    animation-duration: 1ms;
+  }
+}
